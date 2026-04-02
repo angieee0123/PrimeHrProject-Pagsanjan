@@ -551,6 +551,44 @@ class AttendanceController extends Controller
         ]);
     }
 
+    /**
+     * Compute accredited hours in minutes using the same rules as the frontend.
+     * AM window: 08:00–12:00 (grace: if am_in <= 08:15, treat as 08:00)
+     * PM window: 13:00–17:00
+     * Returns null if am_in/am_out/pm_in/pm_out are all missing.
+     */
+    private function computeAccreditedHours(?string $amIn, ?string $amOut, ?string $pmIn, ?string $pmOut): ?int
+    {
+        if (!$amIn && !$amOut && !$pmIn && !$pmOut) {
+            return null;
+        }
+
+        $toMin = fn($t) => $t ? (int)(explode(':', $t)[0]) * 60 + (int)(explode(':', $t)[1]) : null;
+
+        $AM_START = 8 * 60;       // 480
+        $AM_END   = 12 * 60;      // 720
+        $GRACE    = $AM_START + 15; // 495
+        $PM_START = 13 * 60;      // 780
+        $PM_END   = 17 * 60;      // 1020
+
+        $amMins = 0;
+        if ($amIn && $amOut) {
+            $amInMin = $toMin($amIn);
+            $amFrom  = $amInMin <= $GRACE ? $AM_START : $amInMin;
+            $amTo    = min($toMin($amOut), $AM_END);
+            $amMins  = max(0, $amTo - $amFrom);
+        }
+
+        $pmMins = 0;
+        if ($pmIn && $pmOut) {
+            $pmFrom = max($toMin($pmIn), $PM_START);
+            $pmTo   = min($toMin($pmOut), $PM_END);
+            $pmMins = max(0, $pmTo - $pmFrom);
+        }
+
+        return $amMins + $pmMins;
+    }
+
     public function correctAttendance(Request $request)
     {
         $validated = $request->validate([
@@ -618,12 +656,18 @@ class AttendanceController extends Controller
         ]);
 
         $attendance->update([
-            'am_in' => $validated['am_in'],
+            'am_in'  => $validated['am_in'],
             'am_out' => $validated['am_out'],
-            'pm_in' => $validated['pm_in'],
+            'pm_in'  => $validated['pm_in'],
             'pm_out' => $validated['pm_out'],
-            'ot_in' => $validated['ot_in'],
+            'ot_in'  => $validated['ot_in'],
             'ot_out' => $validated['ot_out'],
+            'accredited_hours' => $this->computeAccreditedHours(
+                $validated['am_in'],
+                $validated['am_out'],
+                $validated['pm_in'],
+                $validated['pm_out']
+            ),
         ]);
 
         return response()->json([
