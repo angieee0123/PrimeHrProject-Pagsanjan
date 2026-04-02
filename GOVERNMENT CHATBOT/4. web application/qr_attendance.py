@@ -17,11 +17,42 @@ def get_db_connection():
     return mysql.connector.connect(
         host=os.getenv('DB_HOST', 'localhost'),
         user=os.getenv('DB_USER', 'root'),
-        password=os.getenv('DB_PASSWORD', 'admin'),
+        password=os.getenv('DB_PASSWORD', ''),
         database=os.getenv('DB_NAME', 'primehrismagdalena')
     )
 
-@qr_attendance.route('/attendance')
+def compute_accredited_hours(am_in, am_out, pm_in, pm_out):
+    """Compute accredited hours in minutes. Mirrors the MySQL trigger logic."""
+    if not am_in and not am_out and not pm_in and not pm_out:
+        return None
+
+    def to_min(t):
+        if t is None:
+            return None
+        if hasattr(t, 'seconds'):  # timedelta
+            total = int(t.total_seconds())
+        else:
+            total = t.hour * 3600 + t.minute * 60 + t.second
+        return total // 60
+
+    AM_START, AM_END, GRACE = 480, 720, 495
+    PM_START, PM_END       = 780, 1020
+
+    am_mins = 0
+    if am_in is not None and am_out is not None:
+        am_in_min = to_min(am_in)
+        am_from   = AM_START if am_in_min <= GRACE else am_in_min
+        am_to     = min(to_min(am_out), AM_END)
+        am_mins   = max(0, am_to - am_from)
+
+    pm_mins = 0
+    if pm_in is not None and pm_out is not None:
+        pm_from = max(to_min(pm_in), PM_START)
+        pm_to   = min(to_min(pm_out), PM_END)
+        pm_mins = max(0, pm_to - pm_from)
+
+    return am_mins + pm_mins
+
 def attendance_page():
     return render_template('attendance.html')
 
@@ -160,19 +191,37 @@ def record_manual_attendance():
                     'success': False,
                     'message': f'{field.replace("_", " ").title()} already recorded'
                 }), 400
-            
-            # Update existing record
+
+            # Merge new field and recompute accredited_hours
+            merged = {
+                'am_in':  attendance['am_in'],
+                'am_out': attendance['am_out'],
+                'pm_in':  attendance['pm_in'],
+                'pm_out': attendance['pm_out'],
+            }
+            merged[field] = current_time
+            accredited = compute_accredited_hours(
+                merged['am_in'], merged['am_out'],
+                merged['pm_in'], merged['pm_out']
+            )
+
             cursor.execute(f"""
                 UPDATE attendance
-                SET {field} = %s
+                SET {field} = %s, accredited_hours = %s
                 WHERE employee_id = %s AND date = %s
-            """, (current_time, employee_id, current_date))
+            """, (current_time, accredited, employee_id, current_date))
         else:
-            # Create new record
+            # New record — only one field known so far
+            merged = {'am_in': None, 'am_out': None, 'pm_in': None, 'pm_out': None}
+            merged[field] = current_time
+            accredited = compute_accredited_hours(
+                merged['am_in'], merged['am_out'],
+                merged['pm_in'], merged['pm_out']
+            )
             cursor.execute(f"""
-                INSERT INTO attendance (employee_id, date, {field})
-                VALUES (%s, %s, %s)
-            """, (employee_id, current_date, current_time))
+                INSERT INTO attendance (employee_id, date, {field}, accredited_hours)
+                VALUES (%s, %s, %s, %s)
+            """, (employee_id, current_date, current_time, accredited))
         
         conn.commit()
         cursor.close()
@@ -496,19 +545,33 @@ def scan_qr():
                 conn.close()
                 return jsonify({'success': False, 'message': 'OT attendance already completed'}), 400
         
+        # Build the full updated attendance fields for accredited_hours computation
+        merged = {
+            'am_in':  attendance['am_in']  if attendance else None,
+            'am_out': attendance['am_out'] if attendance else None,
+            'pm_in':  attendance['pm_in']  if attendance else None,
+            'pm_out': attendance['pm_out'] if attendance else None,
+        }
+        merged[field_to_update] = current_time  # apply the new scan
+
+        accredited = compute_accredited_hours(
+            merged['am_in'], merged['am_out'],
+            merged['pm_in'], merged['pm_out']
+        )
+
         # Update or insert attendance
         if not attendance:
             cursor.execute("""
-                INSERT INTO attendance (employee_id, date, {}) 
-                VALUES (%s, %s, %s)
-            """.format(field_to_update), (employee_id, current_date, current_time))
+                INSERT INTO attendance (employee_id, date, {}, accredited_hours)
+                VALUES (%s, %s, %s, %s)
+            """.format(field_to_update), (employee_id, current_date, current_time, accredited))
         else:
             cursor.execute("""
-                UPDATE attendance 
-                SET {} = %s 
+                UPDATE attendance
+                SET {} = %s, accredited_hours = %s
                 WHERE employee_id = %s AND date = %s
-            """.format(field_to_update), (current_time, employee_id, current_date))
-        
+            """.format(field_to_update), (current_time, accredited, employee_id, current_date))
+
         conn.commit()
         cursor.close()
         conn.close()

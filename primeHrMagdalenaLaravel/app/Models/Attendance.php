@@ -11,7 +11,7 @@ class Attendance extends Model
     protected $table = 'attendance';
 
     protected $fillable = [
-        'employee_id', 'date', 'am_in', 'am_out', 'pm_in', 'pm_out', 'ot_in', 'ot_out'
+        'employee_id', 'date', 'am_in', 'am_out', 'pm_in', 'pm_out', 'ot_in', 'ot_out', 'accredited_hours'
     ];
 
     protected $casts = [
@@ -22,6 +22,7 @@ class Attendance extends Model
         'pm_out' => 'string',
         'ot_in' => 'string',
         'ot_out' => 'string',
+        'accredited_hours' => 'integer',
     ];
 
     public function employee()
