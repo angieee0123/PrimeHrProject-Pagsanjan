@@ -1,0 +1,134 @@
+✅ RECOMMENDED DATABASE DESIGN
+👤 1. employees (MAIN TABLE)
+
+This is the center of everything
+
+employees
+- id (PK)
+- employee_id
+- first_name
+- middle_name
+- last_name
+- suffix
+- birth_date
+- place_of_birth
+- sex
+- civil_status
+- citizenship
+- height
+- weight
+- blood_type
+- mobile_number
+- email
+- created_at
+
+👉 💡 Keep core identity here
+
+🏠 2. addresses
+
+👉 Because address is complex (don’t store in one field)
+
+addresses
+- id (PK)
+- employee_id (FK)
+- type (residential / permanent)
+- house_no
+- street
+- barangay
+- city
+- province
+- zip_code
+🆔 3. government_ids
+government_ids
+- id (PK)
+- employee_id (FK)
+- gsis_no
+- philhealth_no
+- pagibig_no
+- tin_no
+- license_no
+🎓 4. educations
+
+👉 One employee can have MANY (elementary → college → grad)
+
+educations
+- id (PK)
+- employee_id (FK)
+- level
+- school_name
+- degree
+- year_graduated
+- honors
+🏆 5. eligibilities
+eligibilities
+- id (PK)
+- employee_id (FK)
+- type
+- rating
+- exam_date
+- exam_place
+- license_no
+- validity_date
+💼 6. work_experiences
+work_experiences
+- id (PK)
+- employee_id (FK)
+- company_name
+- position
+- from_date
+- to_date
+- salary
+- appointment_status
+- is_government (boolean)
+📚 7. trainings
+trainings
+- id (PK)
+- employee_id (FK)
+- title
+- date_from
+- date_to
+- hours
+- conducted_by
+👨‍👩‍👧 8. family_members
+
+👉 DO NOT store in one row ❌
+
+family_members
+- id (PK)
+- employee_id (FK)
+- name
+- relationship (spouse / father / mother / child)
+- birthdate
+- occupation
+📄 9. documents
+documents
+- id (PK)
+- employee_id (FK)
+- document_type (PDS, TOR, NBI, etc.)
+- file_path
+- status (pending / approved / rejected)
+- uploaded_at
+⚖️ 10. legal_requirements
+legal_requirements
+- id (PK)
+- employee_id (FK)
+- saln_submitted (boolean)
+- oath_of_office (boolean)
+- assumption_date
+💼 11. employment_details
+employment_details
+- id (PK)
+- employee_id (FK)
+- position
+- department
+- employment_status
+- appointment_date
+- salary_grade
+- step_increment
+🔐 12. users (ACCOUNT TABLE)
+users
+- id (PK)
+- employee_id (FK)
+- username
+- password
+- role (employee / hr / admin)
