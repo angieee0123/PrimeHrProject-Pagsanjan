@@ -1,0 +1,75 @@
+/* ── Overlay & Box ── */
+.adm-overlay { display: none; position: fixed; inset: 0; background: rgba(11,4,77,0.45); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 24px; }
+.adm-overlay.open { display: flex; }
+.adm-box { background: #fff; border-radius: 16px; width: 100%; max-width: 500px; box-shadow: 0 24px 64px rgba(11,4,77,0.2); overflow: hidden; animation: admSlideUp 0.25s ease; }
+@keyframes admSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Modal Header ── */
+.adm-header { background: linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%); padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; }
+.adm-header-left { display: flex; align-items: center; gap: 12px; }
+.adm-header-icon { width: 38px; height: 38px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.adm-eyebrow { display: block; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: rgba(255,255,255,0.5); margin-bottom: 2px; }
+.adm-title { font-size: 15px; font-weight: 700; color: #fff; margin: 0; }
+.adm-close { width: 28px; height: 28px; background: rgba(255,255,255,0.1); border: none; border-radius: 50%; color: rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
+.adm-close:hover { background: rgba(255,255,255,0.2); }
+
+/* ── Modal Body & Fields ── */
+.adm-body { padding: 22px; display: flex; flex-direction: column; gap: 14px; max-height: 60vh; overflow-y: auto; }
+.adm-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.adm-field { display: flex; flex-direction: column; gap: 5px; }
+.adm-field label { font-size: 11.5px; font-weight: 600; color: #0b044d; }
+.adm-req { color: #8e1e18; }
+.adm-opt { color: #9999bb; font-weight: 400; }
+.adm-field input, .adm-field select, .adm-field textarea { padding: 10px 13px; border: 1.5px solid #e4e3f0; border-radius: 9px; font-size: 13px; font-family: 'Poppins', sans-serif; color: #0b044d; background: #fafafe; outline: none; width: 100%; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; }
+.adm-field input:focus, .adm-field select:focus, .adm-field textarea:focus { border-color: #0b044d; background: #fff; box-shadow: 0 0 0 3px rgba(11,4,77,0.07); }
+.adm-field input::placeholder, .adm-field textarea::placeholder { color: #c0bedd; }
+.adm-field textarea { resize: vertical; }
+.adm-field-err { font-size: 11px; color: #8e1e18; }
+.adm-alert { display: flex; align-items: center; gap: 8px; padding: 10px 13px; border-radius: 9px; font-size: 12.5px; font-weight: 500; }
+.adm-alert-error { background: #fdf0ef; border: 1px solid #f5d0ce; color: #8e1e18; }
+
+/* ── Modal Footer & Buttons ── */
+.adm-footer { padding: 16px 22px; border-top: 1px solid #f0effe; display: flex; justify-content: flex-end; gap: 10px; }
+.adm-btn-ghost { padding: 9px 20px; background: #fff; border: 1.5px solid #e4e3f0; border-radius: 9px; font-size: 13px; font-weight: 600; color: #6b6a8a; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
+.adm-btn-ghost:hover { border-color: #0b044d; color: #0b044d; }
+.adm-btn-primary { padding: 9px 20px; background: #0b044d; border: none; border-radius: 9px; font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 7px; transition: background 0.2s; }
+.adm-btn-primary:hover { background: #1a0f6e; }
+
+/* ── View Department Modal ── */
+.vdm-avatar { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 800; flex-shrink: 0; }
+.vdm-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; padding: 18px 22px; border-bottom: 1px solid #f0effe; }
+.vdm-stat { background: #f7f6ff; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+.vdm-stat-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.vdm-stat-label { font-size: 10px; color: #9999bb; font-weight: 600; margin-bottom: 3px; }
+.vdm-stat-val { font-size: 14px; font-weight: 800; color: #0b044d; }
+.vdm-body { padding: 18px 22px; display: flex; flex-direction: column; gap: 0; }
+.vdm-section-label { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; color: #9999bb; margin-bottom: 12px; }
+.vdm-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid #f7f6ff; }
+.vdm-row:last-child { border-bottom: none; }
+.vdm-row-label { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: #9999bb; font-weight: 500; }
+.vdm-row strong { font-size: 13px; color: #0b044d; font-weight: 600; }
+
+/* ── Feedback Modals ── */
+.fb-overlay { display: none; position: fixed; inset: 0; background: rgba(11,4,77,0.5); backdrop-filter: blur(4px); z-index: 1100; align-items: center; justify-content: center; padding: 24px; }
+.fb-overlay.open { display: flex; }
+.fb-box { background: #fff; border-radius: 20px; width: 100%; max-width: 380px; padding: 36px 32px; text-align: center; box-shadow: 0 24px 64px rgba(11,4,77,0.2); animation: admSlideUp 0.25s ease; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.fb-icon-wrap { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
+.fb-icon-success { background: #e8f9ef; border: 2px solid #bbf7d0; }
+.fb-icon-failed  { background: #fdf0ef; border: 2px solid #f5d0ce; }
+.fb-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 2px; }
+.fb-eyebrow-success { color: #15803d; }
+.fb-eyebrow-failed  { color: #8e1e18; }
+.fb-title { font-size: 18px; font-weight: 800; color: #0b044d; margin: 0; }
+.fb-desc  { font-size: 13px; color: #6b6a8a; line-height: 1.6; margin: 0; }
+.fb-btn { margin-top: 8px; width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; font-family: 'Poppins', sans-serif; cursor: pointer; transition: opacity 0.2s; }
+.fb-btn:hover { opacity: 0.88; }
+.fb-btn-success { background: #15803d; color: #fff; }
+.fb-btn-failed  { background: #8e1e18; color: #fff; }
+
+/* ── Table Footer & Pagination ── */
+.table-footer { padding: 16px 24px; border-top: 1px solid #f0effe; display: flex; justify-content: space-between; align-items: center; }
+.table-footer p { font-size: 13px; color: #6b6a8a; }
+.pagination { display: flex; gap: 6px; }
+.page-btn { width: 32px; height: 32px; border: 1px solid #e8e7f5; border-radius: 6px; background: #fff; color: #6b6a8a; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
+.page-btn.active { background: #0b044d; color: #fff; border-color: #0b044d; }
+.page-btn:hover  { background: #f7f6ff; }

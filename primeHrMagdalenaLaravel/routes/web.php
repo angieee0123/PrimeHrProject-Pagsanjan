@@ -73,41 +73,57 @@ Route::post('/logout', function (\Illuminate\Http\Request $request) {
 
 // ── Admin Dashboard ──
 Route::get('/admin/dashboard', function () {
-    return view('admin.adminDashboard');
+    return view('admin.dashboard.adminDashboard');
 })->middleware('auth')->name('admin.dashboard');
 
 Route::get('/admin/recruitment', function () {
-    return view('admin.adminRecruitment');
+    return view('admin.recruitment.adminRecruitment');
 })->middleware('auth')->name('admin.recruitment');
 
 Route::get('/admin/personnel', function () {
-    return view('admin.adminPersonnel');
+    return view('admin.personnel.adminPersonnel');
 })->middleware('auth')->name('admin.personnel');
 
 Route::get('/admin/training', function () {
-    return view('admin.adminTraining');
+    return view('admin.training.adminTraining');
 })->middleware('auth')->name('admin.training');
 
 Route::get('/admin/performance', function () {
-    return view('admin.adminPerformance');
+    return view('admin.performance.adminPerformance');
 })->middleware('auth')->name('admin.performance');
 
 Route::get('/admin/attendance', function () {
-    return view('admin.adminAttendance');
+    return view('admin.attendance.adminAttendance');
 })->middleware('auth')->name('admin.attendance');
 
 Route::get('/admin/leave', function () {
-    return view('admin.adminLeaveAndBenefits');
+    return view('admin.leaveAndBenefits.adminLeaveAndBenefits');
 })->middleware('auth')->name('admin.leave');
 
 Route::get('/admin/payroll', function () {
-    return view('admin.adminPayroll');
+    return view('admin.payroll.adminPayroll');
 })->middleware('auth')->name('admin.payroll');
 
 Route::get('/admin/departments', function () {
-    return view('admin.adminDepartments');
+    $departments = \App\Models\Department::orderBy('name')->get();
+    return view('admin.departments.adminDepartments', compact('departments'));
 })->middleware('auth')->name('admin.departments');
 
+Route::post('/admin/departments', function (\Illuminate\Http\Request $request) {
+    $data = $request->validate([
+        'code'            => ['required', 'string', 'max:20', 'unique:departments,code'],
+        'name'            => ['required', 'string', 'max:255'],
+        'head'            => ['required', 'string', 'max:255'],
+        'personnel_count' => ['nullable', 'integer', 'min:0'],
+        'status'          => ['required', 'in:Active,Inactive'],
+        'description'     => ['nullable', 'string'],
+    ]);
+
+    \App\Models\Department::create($data);
+
+    return redirect()->route('admin.departments')->with('success', 'Department registered successfully.');
+})->middleware('auth')->name('admin.departments.store');
+
 Route::get('/admin/reports', function () {
-    return view('admin.adminReports');
+    return view('admin.reports.adminReports');
 })->middleware('auth')->name('admin.reports');
