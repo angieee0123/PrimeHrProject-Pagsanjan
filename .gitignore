@@ -1,0 +1,40 @@
+# Python virtual environment
+env/
+
+# Node modules
+node_modules/
+reactPrime/node_modules/
+primeHrMagdalenaLaravel/node_modules/
+
+# Laravel
+primeHrMagdalenaLaravel/vendor/
+primeHrMagdalenaLaravel/.env
+primeHrMagdalenaLaravel/storage/logs/*.log
+primeHrMagdalenaLaravel/bootstrap/cache/*.php
+primeHrMagdalenaLaravel/public/hot
+primeHrMagdalenaLaravel/public/build/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+
+# AI model files (large binaries)
+GOVERNMENT\ CHATBOT/3.\ training\ script/models/
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.onnx
+*.faiss
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

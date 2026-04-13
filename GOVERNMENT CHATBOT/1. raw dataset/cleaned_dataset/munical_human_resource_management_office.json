@@ -1,0 +1,392 @@
+{
+  "service_office": "Municipal Human Resource Management Office",
+  "service_category": "Internal & External",
+  "services": [
+    {
+      "service_id": "MHRMO-001",
+      "service_name": "Issuance of Service Records, Certificates/Certifications and Other Personnel Records",
+      "description": "Records which reflect the proof of employment of government workers from their entry to retirement, including status of employment, salary received, salary increase or adjustment, promotion, and other relevant employment history.",
+      "office_or_division": "Municipal Human Resource Management Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G"],
+      "who_may_avail": "Government officials and employees, and other authorized individuals or officers",
+      "requirements": [
+        {
+          "document": "Accomplished Personnel Records Request Form (PRRF)",
+          "copies": null,
+          "where_to_secure": "HRMO"
+        },
+        {
+          "document": "Authorization Letter (if through a representative)",
+          "copies": 1,
+          "where_to_secure": "Requesting Party or Person"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Accomplish the Personnel Records Request Form (PRRF).",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive and review the accomplished form.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "HRM Staff, MHRMO"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Review, encode/update personnel data on the requested documents. Print the requested record/document.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "HRM Staff, MHRMO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive the requested documents.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Issue requested documents/records to client.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "HRM Staff, MHRMO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Approximately 17 minutes",
+      "faqs": [
+        {
+          "question": "What types of personnel records can I request from the HRMO?",
+          "answer": "You can request service records, certificates or certifications, and other personnel records that reflect your employment history, status, salary, promotions, and related information."
+        },
+        {
+          "question": "Who can request personnel records?",
+          "answer": "Government officials and employees, as well as other duly authorized individuals or officers, may request personnel records."
+        },
+        {
+          "question": "Can I authorize someone to request the records on my behalf?",
+          "answer": "Yes. You need to provide an original Authorization Letter indicating that the representative is authorized to transact on your behalf."
+        },
+        {
+          "question": "Is there a fee for requesting personnel records?",
+          "answer": "No, this service is free of charge."
+        },
+        {
+          "question": "How long does it take to receive the requested records?",
+          "answer": "The process takes approximately 17 minutes from submission of the request form to release of the documents."
+        }
+      ]
+    },
+    {
+      "service_id": "MHRMO-002",
+      "service_name": "Issuance of Certified Copies of Documents (Appointments, Leave Card, SALN)",
+      "description": "Photocopies of permanent documents retained in the HRMO office, certified as true copies from the original. Includes appointment papers (reflecting the employee's appointment to a position signed by the appointing authority), leave cards (reflecting all leaves of absence filed during employment), and SALN (Statement of Assets, Liabilities and Net Worth filed annually).",
+      "office_or_division": "Municipal Human Resource Management Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G"],
+      "who_may_avail": "Any requesting party as it pertains to personal records; the Head of Agency/HRMO or Administrative Officer of the concerned agency; courts and administrative bodies exercising quasi-judicial or investigative functions via compulsory process of subpoena duces tecum; and other duly authorized officials or entities",
+      "requirements": [
+        {
+          "document": "Accomplished Request Form",
+          "copies": null,
+          "where_to_secure": "HRMO"
+        },
+        {
+          "document": "One (1) valid ID",
+          "copies": null,
+          "where_to_secure": "Requesting Party or Person"
+        },
+        {
+          "document": "Authorization Letter (if through a representative)",
+          "copies": 1,
+          "where_to_secure": "Requesting Party or Person"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Accomplish the Request Form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive and review the accomplished form.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "HRM Staff, MHRMO"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Retrieve the requested records. Photocopy/reproduce the requested documents. If records are not available, inform the client accordingly.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "HRM Staff, MHRMO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive the requested documents.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Release requested documents/records to client.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "HRM Staff, MHRMO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Approximately 22 minutes",
+      "faqs": [
+        {
+          "question": "What is a SALN?",
+          "answer": "SALN stands for Statement of Assets, Liabilities and Net Worth. It is a document filed annually by government employees with the HRMO, disclosing their assets, liabilities, and net worth."
+        },
+        {
+          "question": "Who can request certified copies of appointment papers, leave cards, or SALN?",
+          "answer": "The employee themselves may request their own records. Others who may request include the Head of Agency, HRMO, Administrative Officer of the concerned agency, courts and administrative bodies via subpoena duces tecum, and other duly authorized officials."
+        },
+        {
+          "question": "Do I need to bring a valid ID?",
+          "answer": "Yes, one (1) valid ID is required when requesting certified copies of documents."
+        },
+        {
+          "question": "Is there a fee for certified copies?",
+          "answer": "No, this service is free of charge."
+        },
+        {
+          "question": "What if the records I need are not available?",
+          "answer": "The HRM Staff will inform you that the requested records or documents are not available in the office."
+        },
+        {
+          "question": "How long does it take to get certified copies?",
+          "answer": "The process takes approximately 22 minutes from submission of the request form to release of the certified copies."
+        }
+      ]
+    },
+    {
+      "service_id": "MHRMO-003",
+      "service_name": "Processing of Application for Job Vacancy",
+      "description": "Applications for job vacancies published in the Bulletin of Vacant Positions and posted in three conspicuous places in the agency are processed. Applicants undergo preliminary assessment, written examination, and interview by the HRMO and the Human Resource Merit Promotion and Selection Board (HRMPSB). Qualified applicants proceed to appointment processing.",
+      "office_or_division": "Municipal Human Resource Management Office",
+      "classification": "Complex",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Anyone who wishes to apply for a vacant position in government",
+      "requirements": [
+        {
+          "document": "Application Letter",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Personal Data Sheet (PDS) with latest 2\" x 2\" picture",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Transcript of Records/Diploma",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Copy of Certificate of Eligibility",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Photocopy of Training Certificates (if applicable)",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Performance Rating (if applicable)",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit the complete set of application requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive application requirements.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "HRM Staff, MHRMO"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Check completeness of requirements and conduct preliminary assessment of the applicant.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MHRMO / HRM Staff, MHRMO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Wait for the notification from the Office of the HRMO.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Advise the applicant that he/she will be notified of the schedule of written examination and interview.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "HRM Staff / MHRMO, MHRMO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Return to the Office of the HRMO on the appointed date.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Send letter/notification for the schedule of written examination and interview.",
+              "fees": "None",
+              "processing_time": "2 days",
+              "person_responsible": "HRM Staff / MHRMO, MHRMO"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Take the written examination.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Conduct written examination.",
+              "fees": "None",
+              "processing_time": "1 hour",
+              "person_responsible": "HRM Staff / MHRMO, MHRMO"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Submit to interview.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "HRMO and HRMPSB conduct interview.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MHRMO / HRMPSB, MHRMO"
+            }
+          ]
+        },
+        {
+          "step_number": 6,
+          "client_action": "Wait for the notification.",
+          "agency_actions": [
+            {
+              "sub_step": "6.1",
+              "action": "Advise the applicant that a confirmation of whether they passed the exam and interview will be sent.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "HRM Staff / MHRMO, MHRMO"
+            },
+            {
+              "sub_step": "6.2",
+              "action": "Conduct assessment of applicants.",
+              "fees": "None",
+              "processing_time": "2 days",
+              "person_responsible": "MHRMO / HRMPSB, MHRMO"
+            }
+          ]
+        },
+        {
+          "step_number": 7,
+          "client_action": "If confirmed qualified, return to the Office of the HRMO.",
+          "agency_actions": [
+            {
+              "sub_step": "7.1",
+              "action": "Provide the checklist of requirements for appointment processing.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "HRM Staff / MHRMO, MHRMO"
+            }
+          ]
+        },
+        {
+          "step_number": 8,
+          "client_action": "Secure all the requirements and submit to the Office of the HRMO.",
+          "agency_actions": [
+            {
+              "sub_step": "8.1",
+              "action": "Check completeness of submitted requirements and prepare appointment papers.",
+              "fees": "None",
+              "processing_time": "2 days",
+              "person_responsible": "HRM Staff / MHRMO, MHRMO"
+            },
+            {
+              "sub_step": "8.2",
+              "action": "Submit appointment papers to the appointing authority for signature.",
+              "fees": "None",
+              "processing_time": "2 days",
+              "person_responsible": "HRM Staff / MHRMO, MHRMO"
+            }
+          ]
+        },
+        {
+          "step_number": 9,
+          "client_action": "Receive appointment papers and take Oath of Office.",
+          "agency_actions": [
+            {
+              "sub_step": "9.1",
+              "action": "Issue appointment papers and conduct oath taking.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "MHRMO, MHRMO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Complex – approximately 8 to 10 working days from application submission to oath taking",
+      "faqs": [
+        {
+          "question": "How do I know if there are vacant positions in the municipality?",
+          "answer": "Vacant positions are published in the Bulletin of Vacant Positions and posted in three conspicuous places within the agency. You may also inquire directly at the HRMO."
+        },
+        {
+          "question": "Who can apply for a government job vacancy?",
+          "answer": "Anyone who meets the qualifications for the vacant position may apply."
+        },
+        {
+          "question": "What documents do I need to submit when applying?",
+          "answer": "You need to submit an Application Letter, Personal Data Sheet (PDS) with a 2x2 photo, Transcript of Records or Diploma, Certificate of Eligibility, Training Certificates (if applicable), and Performance Rating (if applicable)."
+        },
+        {
+          "question": "Is there a written examination and interview?",
+          "answer": "Yes. Qualified applicants will be scheduled for a written examination (1 hour) and an interview conducted by the HRMO and the HRMPSB."
+        },
+        {
+          "question": "How will I know if I passed the examination and interview?",
+          "answer": "The HRMO will notify you regarding the result. Assessment of all applicants typically takes 2 days after the examination and interview."
+        },
+        {
+          "question": "What happens after I am confirmed as a qualified applicant?",
+          "answer": "You will be provided a checklist of requirements for appointment processing. Once all documents are submitted and the appointment papers are signed by the appointing authority, you will receive your appointment and take your Oath of Office."
+        },
+        {
+          "question": "Is there a fee for applying for a government job vacancy?",
+          "answer": "No, the entire application and appointment process is free of charge."
+        },
+        {
+          "question": "What is the HRMPSB?",
+          "answer": "The HRMPSB stands for Human Resource Merit Promotion and Selection Board. It is the body responsible for evaluating and screening applicants for government positions to ensure a merit-based selection process."
+        }
+      ]
+    }
+  ]
+}

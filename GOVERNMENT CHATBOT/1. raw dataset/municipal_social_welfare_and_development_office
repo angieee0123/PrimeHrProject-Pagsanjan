@@ -1,0 +1,2689 @@
+{
+  "service_office": "Municipal Social Welfare and Development Office",
+  "service_category": "Internal & External",
+  "services": [
+    {
+      "service_id": "MSWDO-001",
+      "service_name": "Processing of Documents for Provision of Financial Assistance or Aid to Individual in Crisis Situation (AICS) for Medical Needs",
+      "description": "A kind of assistance issued to a person or individual who is in need of financial support in crisis situation for medical needs.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any indigent or individual in need of financial assistance in crisis situation for medical needs",
+      "requirements": [
+        {
+          "document": "Certificate of Indigency with a purpose of seeking medical assistance",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        },
+        {
+          "document": "Medical certificate, abstract, or certificate of confinement with doctor's diagnosis or impression",
+          "copies": "2 copies",
+          "where_to_secure": "Hospital or Doctor"
+        },
+        {
+          "document": "Updated medicine prescription with price quotation (for medical assistance)",
+          "copies": "2 copies",
+          "where_to_secure": "Doctor"
+        },
+        {
+          "document": "Laboratory request from the doctor with price quotation (for laboratory assistance)",
+          "copies": "2 copies",
+          "where_to_secure": "Doctor"
+        },
+        {
+          "document": "Running bill or promissory note from the hospital (for unpaid hospital billing assistance)",
+          "copies": "2 copies",
+          "where_to_secure": "Hospital billing section"
+        },
+        {
+          "document": "Treatment protocol with price quotation (e.g., for chemotherapy treatments and others)",
+          "copies": "2 copies",
+          "where_to_secure": "Doctor"
+        },
+        {
+          "document": "Valid ID card of patient and client with address (UMID, PWD ID, Voter's ID, or Solo Parent ID)",
+          "copies": "2 copies",
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "Affidavit if same person (if the name on the presented ID is misspelled or does not have a name extension)",
+          "copies": null,
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "Certificate of cohabitation or birth certificate of children as proof of cohabitation",
+          "copies": null,
+          "where_to_secure": "Client"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Request for financial assistance.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide client the request form and checklist; explain how to fill it up.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit all medical requirements stated in the checklist.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Receive requirements and check for completeness.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Submit to interview and acquire Social Case Study Report from the MSWDO Office.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Interview the client and provide the client a copy of the Social Case Study Report (SCSR).",
+              "fees": "None",
+              "processing_time": "20 minutes",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Return all documents to the client and advise him/her to bring them to the Mayor's Office for assessment.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Mayor's Office Staff"
+            },
+            {
+              "sub_step": "3.3",
+              "action": "Process the voucher and record in the log book.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 1 day including voucher processing",
+      "faqs": [
+        {
+          "question": "What is AICS for Medical Needs?",
+          "answer": "AICS stands for Aid to Individual in Crisis Situation. It is financial assistance provided to indigent individuals who need support for medical expenses such as medicines, laboratory tests, hospital bills, or specialized treatments like chemotherapy."
+        },
+        {
+          "question": "Who can apply for AICS Medical Assistance?",
+          "answer": "Any indigent or individual in need of financial assistance due to a medical crisis situation may apply."
+        },
+        {
+          "question": "What documents do I need for AICS Medical Assistance?",
+          "answer": "You need a Certificate of Indigency from your Barangay, medical certificate or abstract, medicine prescription or laboratory request with price quotation (depending on the type of assistance needed), valid ID, and other documents depending on your specific situation."
+        },
+        {
+          "question": "Is there a fee for AICS Medical Assistance?",
+          "answer": "No, the service is free of charge."
+        },
+        {
+          "question": "How long does the AICS Medical Assistance process take?",
+          "answer": "The interview and initial processing takes about 45 minutes to 1 hour. Voucher processing takes approximately 1 day."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-002",
+      "service_name": "Processing of Documents for Provision of Financial Assistance or Aid to Individual in Crisis Situation (AICS) for Burial Needs",
+      "description": "A kind of assistance issued to a person or individual who is in need of financial support in crisis situation for burial needs.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any indigent or individual in need of financial assistance in crisis situation for burial needs",
+      "requirements": [
+        {
+          "document": "Funeral Contract",
+          "copies": null,
+          "where_to_secure": "Funeral Parlor"
+        },
+        {
+          "document": "Registered Death Certificate",
+          "copies": null,
+          "where_to_secure": "Municipal Civil Registrar (MCR)"
+        },
+        {
+          "document": "Barangay Certificate of Indigency",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        },
+        {
+          "document": "Valid ID card of patient, client, and representative claimants",
+          "copies": null,
+          "where_to_secure": "Client"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Request for financial assistance.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide client the request form and checklist; explain how to fill it up.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit all burial requirements stated in the checklist.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Receive requirements and check for completeness.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Submit to interview and acquire Social Case Study Report from the MSWDO Office.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Interview the client and provide the client a copy of the Social Case Study Report (SCSR).",
+              "fees": "None",
+              "processing_time": "20 minutes",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Return all documents to the client and advise him/her to bring them to the Mayor's Office for assessment.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Mayor's Office Staff"
+            },
+            {
+              "sub_step": "3.3",
+              "action": "Process the voucher and record in the log book.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 1 day including voucher processing",
+      "faqs": [
+        {
+          "question": "What is AICS for Burial Needs?",
+          "answer": "It is financial assistance provided to indigent individuals who need support for burial expenses of a deceased family member."
+        },
+        {
+          "question": "What documents are required for burial assistance?",
+          "answer": "You need a Funeral Contract, Registered Death Certificate from the Municipal Civil Registrar, Barangay Certificate of Indigency, and valid IDs of the client and representative claimants."
+        },
+        {
+          "question": "Is there a fee for burial assistance?",
+          "answer": "No, the service is free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-003",
+      "service_name": "Provision of Social Case Study Report (for submission to PCSO, PSWDO, E-AICS and other NGOs)",
+      "description": "A document issued to a person or individual to avail medical assistance from external agencies such as PCSO, PSWDO, E-AICS, and other NGOs.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any individual who is in need of medical assistance",
+      "requirements": [
+        {
+          "document": "Medical Abstract",
+          "copies": null,
+          "where_to_secure": "Hospital"
+        },
+        {
+          "document": "Laboratory Request Summary or Quotation of Bills",
+          "copies": null,
+          "where_to_secure": "Hospital"
+        },
+        {
+          "document": "Referral Letter from the Hospital",
+          "copies": null,
+          "where_to_secure": "Hospital"
+        },
+        {
+          "document": "Barangay Certificate of Indigency",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        },
+        {
+          "document": "Valid ID of the patient and the representative or claimant",
+          "copies": null,
+          "where_to_secure": "Client"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Check the request form and present requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the requirements and interview the client.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Prepare the Social Case Study Report.",
+              "fees": "None",
+              "processing_time": "30 to 40 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive the Social Case Study Report and sign in the log book.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Issue the Social Case Study Report to the client.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 45 to 55 minutes",
+      "faqs": [
+        {
+          "question": "What is a Social Case Study Report (SCSR)?",
+          "answer": "A Social Case Study Report is a document prepared by the MSWDO certifying an individual's situation, which can be submitted to agencies like PCSO, PSWDO, E-AICS, and other NGOs to avail medical or financial assistance."
+        },
+        {
+          "question": "Who can request a Social Case Study Report?",
+          "answer": "Any individual who needs medical assistance and intends to submit the SCSR to PCSO, PSWDO, E-AICS, or other non-government organizations."
+        },
+        {
+          "question": "How long does it take to get the SCSR?",
+          "answer": "The entire process takes approximately 45 to 55 minutes."
+        },
+        {
+          "question": "Is there a fee for the SCSR?",
+          "answer": "No, the service is free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-004",
+      "service_name": "Processing of Social Case Study Report for Legal Cases (Legal Adoption of a Child)",
+      "description": "A document issued to a person or individual in need of a social case study report used in the processing of adoption, cases committed by minors in conflict situations filed in court, and VAWC cases filed in court.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Highly Technical",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Any individual in need of a case study report for use in court for processing of adoption cases",
+      "requirements": [
+        {
+          "document": "Certificate of attendance for adoption from DSWD",
+          "copies": null,
+          "where_to_secure": "DSWD"
+        },
+        {
+          "document": "Police Clearance",
+          "copies": null,
+          "where_to_secure": "PNP"
+        },
+        {
+          "document": "Birth certificate of the child",
+          "copies": null,
+          "where_to_secure": "PSA"
+        },
+        {
+          "document": "Medical Certificate",
+          "copies": null,
+          "where_to_secure": "Doctor"
+        },
+        {
+          "document": "3 Character references (Relative, friends, co-workers)",
+          "copies": null,
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "Latest Income Tax Return",
+          "copies": null,
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "Result of psychological evaluation",
+          "copies": null,
+          "where_to_secure": "Psychometrician"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to MSWDO and inquire about the adoption process.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide checklist of requirements and advise client to return after completing all requirements.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit to interview and conduct collateral interviews for the preparation of the case study report.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Conduct the interview and collateral interview through home visitation.",
+              "fees": "None",
+              "processing_time": "2 days",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the Social Case Study Report and submit to DSWD and Court.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Prepare the Social Case Study Report.",
+              "fees": "None",
+              "processing_time": "2 days",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Highly Technical – approximately 4 days including interview, home visitation, and report preparation",
+      "faqs": [
+        {
+          "question": "What is the Social Case Study Report for Legal Adoption?",
+          "answer": "It is a document prepared by the MSWDO assessing the suitability of an individual or couple for legally adopting a child, which is submitted to DSWD and the court."
+        },
+        {
+          "question": "What documents are needed for legal adoption processing?",
+          "answer": "You need a DSWD certificate of attendance for adoption, Police Clearance, birth certificate of the child, Medical Certificate, 3 character references, latest Income Tax Return, and a psychological evaluation result."
+        },
+        {
+          "question": "How long does the SCSR for adoption take?",
+          "answer": "The process takes approximately 4 days, including interviews, home visitation, and report preparation."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-005",
+      "service_name": "Issuance of Social Case Study Report for Legal Cases (Children in Conflict with the Law – CICL)",
+      "description": "A document issued to a minor individual in need of a social case study report used as evidence for the level of discernment in the processing of a case committed by a minor, or as documents for referral to an institution.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Complex",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Any minor individual in need of a case study report for use in court as evidence for the level of discernment in processing the case committed by a minor, or for referral to an institution",
+      "requirements": [
+        {
+          "document": "Child's presence",
+          "copies": null,
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "Guardian's presence",
+          "copies": null,
+          "where_to_secure": "Client's guardian"
+        },
+        {
+          "document": "Referral letter",
+          "copies": null,
+          "where_to_secure": "PNP"
+        },
+        {
+          "document": "Barangay blotter or Police investigation report",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        },
+        {
+          "document": "Birth Certificate",
+          "copies": null,
+          "where_to_secure": "Client or Guardian"
+        },
+        {
+          "document": "Medical Certificate",
+          "copies": null,
+          "where_to_secure": "Doctor"
+        },
+        {
+          "document": "Intake Form, Child Functioning Assessment Tool, Family Functioning Assessment Tool, Index of Value Judgement Tool, Level of Moral Development Tool",
+          "copies": null,
+          "where_to_secure": "MSWDO"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to MSWDO office and sign in to the logbook.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Inform the client to fill up the intake sheet for CICL.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Accomplish the assessment form and submit to interview.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Interview and assess the client to determine the level of discernment using the Child Functioning Tool and Family Functioning Tool.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the Social Case Study Report.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Prepare the Social Case Study Report with the assessment of discernment and issue the report to court.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Complex – approximately 2 days",
+      "faqs": [
+        {
+          "question": "What is the SCSR for Children in Conflict with the Law (CICL)?",
+          "answer": "It is a social case study report that assesses the level of discernment of a minor who committed an offense. It is submitted to the court as evidence and may also serve as a referral document to a child-caring institution."
+        },
+        {
+          "question": "Who needs this document?",
+          "answer": "Any minor individual involved in a legal case who needs to demonstrate their level of discernment regarding the crime committed."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "Approximately 2 days, including assessment, interview, and report preparation."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-006",
+      "service_name": "Issuance of ID for Persons with Disability (PWD ID)",
+      "description": "An identification card issued to persons with disability to avail the privileges and benefits indicated in the Magna Carta for Persons with Disability. The card is renewable every three years.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any individual with disability — orthopedic, communication, visual, mental/intellectual, psychosocial, or disabilities resulting from chronic illness",
+      "requirements": [
+        {
+          "document": "Accomplished Application Form for PWD",
+          "copies": null,
+          "where_to_secure": "Client / MSWDO"
+        },
+        {
+          "document": "Barangay Certificate of Residency",
+          "copies": null,
+          "where_to_secure": "Respective Barangay"
+        },
+        {
+          "document": "Medical Abstract or Medical Certificate (updated)",
+          "copies": null,
+          "where_to_secure": "Doctor or Hospital"
+        },
+        {
+          "document": "Certificate of Disability from the Barangay",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        },
+        {
+          "document": "Two (2) pieces 1x1 ID picture",
+          "copies": "2 pieces",
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "One (1) piece 2x2 ID picture",
+          "copies": "1 piece",
+          "where_to_secure": "Client"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Fill out the request form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide client the request form and checklist of requirements.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit the requirements, fill up the application form, and submit to MSWDO Staff.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Receive the filled-up application form for PWD and requirements.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Encode the information to the masterlist of PWD and write the ID number in the application form.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the ID and sign in the log book.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Print and issue the PWD ID.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Advise the PWD to avail the Purchase Booklet for medicines and groceries at the PWD Overall President.",
+              "fees": "PHP 25.00",
+              "processing_time": "10 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 25.00 (for Purchase Booklet only)",
+      "total_processing_time": "Simple – ID issuance takes approximately 1 day",
+      "faqs": [
+        {
+          "question": "Who can apply for a PWD ID?",
+          "answer": "Any individual with a disability — including orthopedic, communication, visual, mental/intellectual, psychosocial, or disabilities resulting from chronic illness — may apply."
+        },
+        {
+          "question": "What documents do I need for a PWD ID?",
+          "answer": "You need an accomplished application form, Barangay Certificate of Residency, updated Medical Abstract or Medical Certificate, Certificate of Disability from the Barangay, two 1x1 ID pictures, and one 2x2 ID picture."
+        },
+        {
+          "question": "How long does it take to get a PWD ID?",
+          "answer": "The PWD ID is typically issued within 1 day."
+        },
+        {
+          "question": "How often do I need to renew my PWD ID?",
+          "answer": "The PWD ID is renewable every three years."
+        },
+        {
+          "question": "Is there a fee for the PWD ID?",
+          "answer": "The ID itself is free. However, there is a PHP 25.00 fee for the Purchase Booklet for medicines and groceries."
+        },
+        {
+          "question": "What benefits can I get with a PWD ID?",
+          "answer": "You can avail the privileges and benefits under the Magna Carta for Persons with Disability, including discounts on medicines and groceries through the Purchase Booklet."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-007",
+      "service_name": "Issuance of Identification Card for Solo Parent",
+      "description": "An identification card issued to solo parents to avail the benefits accorded to them under the Solo Parent Welfare Act.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Complex",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "A solo parent — single, separated, abandoned, or widowed — with child or children in his or her custody",
+      "requirements": [
+        {
+          "document": "Solo Parent Application Form",
+          "copies": null,
+          "where_to_secure": "Client / MSWDO"
+        },
+        {
+          "document": "Birth Certificate of children (below 18 years old, or above 18 years old but with disability)",
+          "copies": "1 photocopy",
+          "where_to_secure": "Municipal Civil Registrar"
+        },
+        {
+          "document": "Certificate of Solo Parent from the Barangay",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        },
+        {
+          "document": "Marriage Certificate (if married)",
+          "copies": null,
+          "where_to_secure": "Client or PSA"
+        },
+        {
+          "document": "Death Certificate (if spouse is deceased)",
+          "copies": null,
+          "where_to_secure": "Client or MCR"
+        },
+        {
+          "document": "Copy of filed or pending petition for annulment or legal separation (if applicable)",
+          "copies": null,
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "Two (2) pieces 1x1 ID picture",
+          "copies": "2 pieces",
+          "where_to_secure": "Client"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Accomplish the request form and submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive and check the completeness of requirements.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Fill up the application form.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Issue application form and explain how to fill it out.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Take note of the schedule of assessment and home visit and return to MSWDO to claim the ID.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Assess application and validate through home visit.",
+              "fees": "None",
+              "processing_time": "5 days",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Issue the Solo Parent ID.",
+              "fees": "None",
+              "processing_time": null,
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Complex – approximately 5 days including home visit validation",
+      "faqs": [
+        {
+          "question": "Who qualifies for a Solo Parent ID?",
+          "answer": "Any solo parent who is single, separated, abandoned, or widowed and has a child or children in his or her custody."
+        },
+        {
+          "question": "What documents are needed for a Solo Parent ID?",
+          "answer": "You need a Solo Parent Application Form, birth certificate of your children, Barangay Certificate as Solo Parent, and depending on your situation: Marriage Certificate, Death Certificate of spouse, or a copy of annulment or legal separation filing. Two 1x1 pictures are also required."
+        },
+        {
+          "question": "How long does it take to get a Solo Parent ID?",
+          "answer": "Approximately 5 days, as a home visit is conducted to validate the application."
+        },
+        {
+          "question": "Is there a fee for the Solo Parent ID?",
+          "answer": "No, the Solo Parent ID is issued free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-008",
+      "service_name": "Issuance of Certificate of Indigency",
+      "description": "A document issued to a person or individual in need of certification that can be used in medical, burial, and educational assistance applications due to their limited financial capacity.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any indigent individual in need of certification for use in medical, burial, and educational assistance",
+      "requirements": [
+        {
+          "document": "Barangay Certificate of Residency",
+          "copies": null,
+          "where_to_secure": "Respective Barangay"
+        },
+        {
+          "document": "Community Tax Certificate",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office or Barangay Treasurer"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Check the request form and submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide client with the request form and check for completeness of requirements.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Fill out the Intake Sheet.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Explain and assist in the filling out of the intake sheet.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Prepare the Certificate of Indigency.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the certificate and sign in the log book.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the certificate and record in the log book.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 35 minutes",
+      "faqs": [
+        {
+          "question": "What is a Certificate of Indigency?",
+          "answer": "It is a certification issued by the MSWDO confirming that a person has limited financial capacity. It can be used to apply for medical, burial, and educational assistance programs."
+        },
+        {
+          "question": "What do I need to get a Certificate of Indigency from MSWDO?",
+          "answer": "You need a Barangay Certificate of Residency and a Community Tax Certificate."
+        },
+        {
+          "question": "How long does it take?",
+          "answer": "Approximately 35 minutes."
+        },
+        {
+          "question": "Is there a fee?",
+          "answer": "No, the service is free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-009",
+      "service_name": "Application/Provision of Day Care Service",
+      "description": "A service rendered to Day Care children aged 3 to 4.11 years old, catered in Child Development Centers and provided with the objectives of Day Care Service under the supervision of Child Development Workers.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Highly Technical",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Children aged 3 to 4.11 years old and their parents",
+      "requirements": [
+        {
+          "document": "Photocopy of child's Birth Certificate (PSA copy)",
+          "copies": "1 photocopy",
+          "where_to_secure": "PSA"
+        },
+        {
+          "document": "Physical appearance of the child",
+          "copies": null,
+          "where_to_secure": "Child"
+        },
+        {
+          "document": "Interview with the parent or guardian",
+          "copies": null,
+          "where_to_secure": "MSWDO"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Register using the Registration Form for Day Care Service.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide client the registration form, advise parent to fill it up, and check completeness of requirements. Advise to comply if incomplete.",
+              "fees": "None",
+              "processing_time": "20 minutes",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Receive the requirements and record the information to the Enrollment Form for Day Care Service.",
+              "fees": "None",
+              "processing_time": "20 minutes",
+              "person_responsible": "MSWDO Staff / CDWs"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "Receive payment and issue receipt for the parent participation fee.",
+              "fees": "PHP 100.00",
+              "processing_time": null,
+              "person_responsible": "MSWDO Staff / CDWs"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Bring the child to the Day Care Center to attend session.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Provide parents with a copy of monthly activities.",
+              "fees": "None",
+              "processing_time": "4 hours per day, 5 days a week for 10 months",
+              "person_responsible": "Child Development Workers"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Conduct regular sessions and assist children in different activities.",
+              "fees": "None",
+              "processing_time": "10 months",
+              "person_responsible": "Child Development Workers"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Attend recognition day with the child after 10 months.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Conduct activities for recognition day and provide Certificate of Participation or Recognition.",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MSWDO Staff / CDWs"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 100.00 (parent participation fee)",
+      "total_processing_time": "Highly Technical – 10 months of regular sessions",
+      "faqs": [
+        {
+          "question": "Who can enroll in the Day Care Service?",
+          "answer": "Children aged 3 to 4.11 years old."
+        },
+        {
+          "question": "What documents are needed for Day Care enrollment?",
+          "answer": "A PSA copy of the child's birth certificate, physical appearance of the child, and an interview with the parent or guardian."
+        },
+        {
+          "question": "How much is the Day Care enrollment fee?",
+          "answer": "There is a PHP 100.00 parent participation fee."
+        },
+        {
+          "question": "How long is the Day Care program?",
+          "answer": "The program runs for 10 months, with sessions 4 hours per day, 5 days a week."
+        },
+        {
+          "question": "What do children receive after completing the program?",
+          "answer": "Children receive a Certificate of Participation or Recognition during the Recognition Day after completing 10 months."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-010",
+      "service_name": "Provision of Pre-Marriage Orientation and Pre-Marriage Counseling (PMC)",
+      "description": "A kind of assistance extended to couples who want to get married, endorsed by the Municipal Civil Registrar and the Population Office.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any couple who wants to get married",
+      "requirements": [
+        {
+          "document": "Accomplished PMC Application Form",
+          "copies": null,
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "Birth certificate of the couple",
+          "copies": null,
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "Valid Identification Card of client with address in the LGU",
+          "copies": null,
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "Marriage Expectation Inventory (MEI)",
+          "copies": null,
+          "where_to_secure": "Population Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to PMC Orientation/Counselling Room.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Explain the process of orientation and counselling.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "PMO Team"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Provide copy of intake sheet and Marriage Expectation Inventory (MEI) by the Population Officer.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit for orientation and counselling.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Conduct marriage orientation for all couples aged 18 and above.",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MSWDO"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Conduct marriage counseling for couples aged 18 to 25 years old.",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the Certificate of Compliance and Certificate of Counseling.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the Pre-Marriage Counseling certification.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 4 to 5 hours",
+      "faqs": [
+        {
+          "question": "Who needs to attend Pre-Marriage Counseling?",
+          "answer": "Any couple who wants to get married must attend Pre-Marriage Orientation. Couples aged 18 to 25 are also required to attend marriage counseling."
+        },
+        {
+          "question": "What will I receive after attending?",
+          "answer": "You will receive a Certificate of Compliance and a Certificate of Counseling issued by the MSWDO."
+        },
+        {
+          "question": "Is there a fee for Pre-Marriage Counseling?",
+          "answer": "No, the service is free of charge."
+        },
+        {
+          "question": "How long does the orientation and counseling take?",
+          "answer": "Approximately 4 to 5 hours in total."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-011",
+      "service_name": "Provision of Relief Assistance",
+      "description": "A kind of assistance given to individuals or families who are victims of or affected by calamities.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any individual or family who is a victim of or affected by a calamity and is in need of relief assistance",
+      "requirements": [
+        {
+          "document": "Disaster report and masterlist from the Barangay",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Office of MSWDO.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide information about the venue and schedule of distribution of relief assistance.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Assist client in filling up the intake sheet and Relief Distribution sheet.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive relief assistance.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Distribute relief goods at the barangay evacuation center or at the main evacuation center (Amphitheater).",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MSWDO Staff and other volunteers"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 2 hours for distribution",
+      "faqs": [
+        {
+          "question": "Who can receive relief assistance?",
+          "answer": "Any individual or family who is a victim of or affected by a calamity and is in need of relief goods."
+        },
+        {
+          "question": "Where is relief assistance distributed?",
+          "answer": "Relief goods are distributed at the barangay evacuation center or at the main evacuation center (Amphitheater)."
+        },
+        {
+          "question": "What document is needed?",
+          "answer": "A disaster report and masterlist from the Barangay are the main requirements."
+        },
+        {
+          "question": "Is there a fee for relief assistance?",
+          "answer": "No, relief assistance is provided free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-012",
+      "service_name": "Application for Foster Parenting",
+      "description": "A kind of assistance given to any qualified individual or family who wants to legally take care of a child under their own custody.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Highly Technical",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any qualified individual or family who wants to take care of a child or children under legal foster parenting",
+      "requirements": [
+        {
+          "document": "Police Clearance",
+          "copies": null,
+          "where_to_secure": "PNP"
+        },
+        {
+          "document": "Marriage Certificate (if married)",
+          "copies": null,
+          "where_to_secure": "PSA"
+        },
+        {
+          "document": "3 Character references (relatives, friends, or co-workers)",
+          "copies": null,
+          "where_to_secure": "Different individuals"
+        },
+        {
+          "document": "Latest Income Tax Return",
+          "copies": null,
+          "where_to_secure": "BIR"
+        },
+        {
+          "document": "Result of psychological evaluation",
+          "copies": null,
+          "where_to_secure": "Doctor or Psychologist"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Office of MSWDO to inquire about Foster Parenting.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide information and checklist of requirements for foster parenting.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit the complete set of requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Advise client to attend orientation at the DSWD office.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Wait for the approval and receive the Certificate of Foster Parenting.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Process the documents from DSWD and issue the Certificate of Foster Parenting.",
+              "fees": "None",
+              "processing_time": "2 months",
+              "person_responsible": "DSWD / MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Highly Technical – approximately 2 months for DSWD processing and certificate issuance",
+      "faqs": [
+        {
+          "question": "Who can apply for foster parenting?",
+          "answer": "Any qualified individual or family who wants to legally take care of a child under foster parenting arrangements."
+        },
+        {
+          "question": "How long does the foster parenting process take?",
+          "answer": "Approximately 2 months, as it involves DSWD processing and evaluation."
+        },
+        {
+          "question": "Is there a fee for foster parenting application?",
+          "answer": "No, the service is free of charge."
+        },
+        {
+          "question": "What is the role of DSWD in the process?",
+          "answer": "The DSWD processes the documents and ultimately approves or issues the Certificate of Foster Parenting. The applicant is also required to attend an orientation at the DSWD office."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-013",
+      "service_name": "Request for Livelihood Assistance",
+      "description": "A kind of assistance given to any qualified individual or family who wants additional capital for livelihood.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Complex",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any qualified individual or family who wants to get additional capital for livelihood",
+      "requirements": [
+        {
+          "document": "Certificate of Barangay Indigency with a specific purpose",
+          "copies": "2 copies",
+          "where_to_secure": "Barangay"
+        },
+        {
+          "document": "Valid Identification Card (UMID, PWD ID, Voter's ID, or Solo Parent ID)",
+          "copies": "2 copies",
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "Approved Project Proposal",
+          "copies": null,
+          "where_to_secure": "MSWDO"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Office of MSWDO.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide information about the availment of livelihood assistance and interview the client.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Provide the complete requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Receive the documents and requirements needed for processing of assistance.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive livelihood assistance.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Release the assistance to the client.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Complex – approximately 1 hour 15 minutes",
+      "faqs": [
+        {
+          "question": "Who can apply for livelihood assistance?",
+          "answer": "Any qualified individual or family who wants to get additional capital to start or grow a livelihood."
+        },
+        {
+          "question": "What documents are required?",
+          "answer": "You need two copies of a Barangay Certificate of Indigency with a stated purpose, two copies of a valid ID (UMID, PWD ID, Voter's ID, or Solo Parent ID), and an approved Project Proposal."
+        },
+        {
+          "question": "Is there a fee for livelihood assistance?",
+          "answer": "No, the service is free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-014",
+      "service_name": "Processing of Request for Balik Probinsya",
+      "description": "A kind of assistance given to any qualified family who wants to return to Sampaloc, or victims of disaster who want to live in Sampaloc.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Complex",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any qualified family who wants to return to Sampaloc or disaster victims who want to live in Sampaloc",
+      "requirements": [
+        {
+          "document": "Original Certificate of Barangay Indigency with a specific purpose",
+          "copies": "1 original",
+          "where_to_secure": "Barangay"
+        },
+        {
+          "document": "Photocopy of Valid Identification Card (UMID, PWD ID, Voter's ID, or Solo Parent ID)",
+          "copies": "1 photocopy",
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "Rapid test result (during pandemic, depending on IATF requirements)",
+          "copies": null,
+          "where_to_secure": "Client"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Office of MSWDO.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide information about the Balik Probinsya program and interview the client.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit the complete requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Receive the documents needed for processing of assistance.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the endorsement.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Inform the client of the approval of their request to transfer to Sampaloc and coordinate or endorse to the Barangay.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Complex – approximately 1 hour 15 minutes",
+      "faqs": [
+        {
+          "question": "What is the Balik Probinsya program?",
+          "answer": "It is an assistance program that helps qualified families return to Sampaloc or disaster victims who want to settle in Sampaloc."
+        },
+        {
+          "question": "What documents are required?",
+          "answer": "You need an original Barangay Certificate of Indigency with a specific purpose and a photocopy of a valid ID."
+        },
+        {
+          "question": "Is there a fee?",
+          "answer": "No, the service is free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-015",
+      "service_name": "Request for Emergency Shelter Assistance",
+      "description": "A kind of assistance given to any qualified family who are partial victims of a calamity or disaster, or who are displaced through a court order and need assistance for the repair of their house.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any qualified family who are partial victims of a calamity or disaster, or who are displaced through a court order and need assistance for house repair",
+      "requirements": [
+        {
+          "document": "Barangay Certificate of Indigency with a specific purpose",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        },
+        {
+          "document": "Valid Identification Card (UMID, PWD ID, Voter's ID, or Solo Parent ID)",
+          "copies": null,
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "Court order or notice of violation (if applicable)",
+          "copies": null,
+          "where_to_secure": "Court"
+        },
+        {
+          "document": "Certificate that they were affected by a calamity",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        },
+        {
+          "document": "Barangay Blotter Report (additional requirement for those who were evicted)",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Office of MSWDO.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide information and include client in the masterlist of affected families.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Assist and interview the client in filling up the intake sheet.",
+              "fees": "None",
+              "processing_time": null,
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit the requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Process the requirements for emergency shelter assistance.",
+              "fees": "None",
+              "processing_time": "2 days",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the assistance.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Release the assistance.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 2 days for processing, plus 30 minutes for release",
+      "faqs": [
+        {
+          "question": "Who qualifies for Emergency Shelter Assistance?",
+          "answer": "Families who are partial victims of a calamity or disaster, or who have been displaced through a court order and need help repairing their house."
+        },
+        {
+          "question": "What documents are required?",
+          "answer": "You need a Barangay Certificate of Indigency, valid ID, and a certificate that you were affected by a calamity. A court order may be required if displaced by a court ruling, and a Barangay Blotter Report if evicted."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "Approximately 2 days for processing, plus 30 minutes for the actual release of assistance."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-016",
+      "service_name": "Request for Elderly Medical Assistance",
+      "description": "A kind of assistance given to any member of the senior citizens federation who needs medical assistance.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any member of the senior citizens federation who needs medical assistance",
+      "requirements": [
+        {
+          "document": "Certificate of Barangay Indigency with a specific purpose",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        },
+        {
+          "document": "Photocopy of the latest medical certificate or abstract",
+          "copies": null,
+          "where_to_secure": "Doctor"
+        },
+        {
+          "document": "Photocopy of Senior Citizen ID",
+          "copies": null,
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "2 pieces 1x1 ID picture",
+          "copies": "2 pieces",
+          "where_to_secure": "Client"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Office of MSWDO.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide information about the medical assistance program and interview the client.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit the requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Receive the documents needed for processing of assistance.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MSWDO"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Process the documents for the assistance.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the medical assistance.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue and release the medical assistance.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 1 day for processing, plus 15 minutes for release",
+      "faqs": [
+        {
+          "question": "Who can avail of Elderly Medical Assistance?",
+          "answer": "Any member of the senior citizens federation who needs medical assistance."
+        },
+        {
+          "question": "What documents are needed?",
+          "answer": "You need a Barangay Certificate of Indigency, a photocopy of your latest medical certificate or abstract, a photocopy of your Senior Citizen ID, and two 1x1 ID pictures."
+        },
+        {
+          "question": "Is there a fee?",
+          "answer": "No, the service is free of charge."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "Processing takes approximately 1 day, and the assistance is released within 15 minutes after processing."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-017",
+      "service_name": "Request for Parenting Capability Assessment",
+      "description": "A kind of assistance given to any family who needs to assess their parenting capability for the reintegration of a minor into their family.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Highly Technical",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any family in need of a parenting capability assessment to take care of and reintegrate their child into the family",
+      "requirements": [
+        {
+          "document": "Referral letter",
+          "copies": null,
+          "where_to_secure": "Center or Child Caring Institution"
+        },
+        {
+          "document": "Social Case Study Report of the minor including services provided at the center and the child's progress",
+          "copies": null,
+          "where_to_secure": "Social Worker or MSWDO"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit letter of request for child caring in an institution to the MSWDO.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the letter and conduct home visitation and interview with the parent of the minor.",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MSWDO"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Prepare the social case study indicating the capability assessment of the parent and submit to the child caring institution or center.",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive the Parenting Capability Assessment Certificate.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Issue the Parenting Capability Assessment Certificate.",
+              "fees": "None",
+              "processing_time": "One month",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Highly Technical – approximately one month for certificate issuance",
+      "faqs": [
+        {
+          "question": "What is a Parenting Capability Assessment?",
+          "answer": "It is an assessment conducted by the MSWDO to evaluate a family's capability to care for and reintegrate a minor who is under the custody of a child-caring institution or center."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "Approximately one month for the issuance of the Parenting Capability Assessment Certificate."
+        },
+        {
+          "question": "Is there a fee?",
+          "answer": "No, the service is free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-018",
+      "service_name": "Processing of Referral for After Care Program of a Child",
+      "description": "A kind of assistance given to any child under the custody of a child-caring institution or center who needs to have his or her performance assessed.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any child or children at a center who need to have their performance assessed",
+      "requirements": [
+        {
+          "document": "Referral letter",
+          "copies": null,
+          "where_to_secure": "Center or Child Caring Institution"
+        },
+        {
+          "document": "Social Case Study Report of the minor including services provided at the center and the child's progress",
+          "copies": null,
+          "where_to_secure": "Social Worker or MSWDO"
+        },
+        {
+          "document": "Case Conference",
+          "copies": null,
+          "where_to_secure": "Social Worker of the Center and MSWDO"
+        },
+        {
+          "document": "After Care Contract",
+          "copies": null,
+          "where_to_secure": "Social Worker of the Center and MSWDO"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Request for referral letter.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Prepare the Social Case Study Report and other referral documents.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit to case conference and orientation; sign the agreed plan.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Submit complete requirements together with the child and guardian.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MSWDO"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Present the case to the institution.",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MSWDO"
+            },
+            {
+              "sub_step": "2.3",
+              "action": "Sign the agreed plan as witness.",
+              "fees": "None",
+              "processing_time": null,
+              "person_responsible": "MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 2 to 3 hours",
+      "faqs": [
+        {
+          "question": "What is the After Care Program?",
+          "answer": "It is a program that assesses the performance and progress of a child who has been under the custody of a child-caring institution or center."
+        },
+        {
+          "question": "Who can apply for this referral?",
+          "answer": "Any child or children currently at a child-caring center who need to have their performance evaluated."
+        },
+        {
+          "question": "Is there a fee?",
+          "answer": "No, the service is free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-019",
+      "service_name": "Request for Assistance to a Child Alleged Victim of Abuse, Neglect and Exploitation",
+      "description": "A kind of assistance given to any child or children who are victims of different circumstances (abuse, neglect, and exploitation) that need assistance.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple / Highly Technical",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any child or children who are victims of abuse, neglect, or exploitation",
+      "requirements": [
+        {
+          "document": "Report (written or oral), Referral letter, and/or Blotter report (if from Barangay or WCPD)",
+          "copies": null,
+          "where_to_secure": "Barangay or WCPD"
+        },
+        {
+          "document": "Multi-disciplinary team assessment report (doctor, psychometrician, social worker, police investigator) consolidated in the Social Case Study Report",
+          "copies": null,
+          "where_to_secure": "MSWDO, Doctor, Psychometrician, Police Investigator"
+        },
+        {
+          "document": "Signed Intervention Contract",
+          "copies": null,
+          "where_to_secure": "All multi-disciplinary team members, child, and parent"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Request for assistance and submit report if any.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Assess the case of the child.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit to assessment of the multi-disciplinary team for assistance.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Collect assessment report of the team and prepare a social case study report and intervention plan.",
+              "fees": "None",
+              "processing_time": "15 days",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Sign the agreed intervention plan.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Sign the intervention plan for implementation.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple/Highly Technical – approximately 15 days for multi-disciplinary assessment and report preparation",
+      "faqs": [
+        {
+          "question": "Who can report a child victim of abuse, neglect, or exploitation?",
+          "answer": "Anyone can report — the report may be written or oral, and may come from the Barangay, WCPD (Women and Children Protection Desk), or directly from the family."
+        },
+        {
+          "question": "What happens after reporting?",
+          "answer": "The MSWDO will assess the case and coordinate with a multi-disciplinary team (doctor, psychometrician, social worker, police investigator) to prepare a Social Case Study Report and intervention plan."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "Approximately 15 days for the full multi-disciplinary assessment and intervention plan preparation."
+        },
+        {
+          "question": "Is there a fee?",
+          "answer": "No, the service is free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-020",
+      "service_name": "Issuance of Social Case Study Report for Legal Cases (Legal Adoption)",
+      "description": "A document issued to a person or individual in need of a social case study report used in the processing of adoption cases in court.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Complex",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Any individual in need of a case study report for use in court for processing of adoption cases",
+      "requirements": [
+        {
+          "document": "Court Order (for relative adoption)",
+          "copies": null,
+          "where_to_secure": "Respective Regional Trial Court"
+        },
+        {
+          "document": "Request letter from DSWD (for non-relative adoption)",
+          "copies": null,
+          "where_to_secure": "DSWD"
+        },
+        {
+          "document": "Sketch of the house location",
+          "copies": null,
+          "where_to_secure": "Client"
+        },
+        {
+          "document": "Birth certificate of the child",
+          "copies": null,
+          "where_to_secure": "PSA"
+        },
+        {
+          "document": "Marriage contract of adoptive parent",
+          "copies": null,
+          "where_to_secure": "PSA"
+        },
+        {
+          "document": "Medical and psychological assessment of both child and adoptive parent",
+          "copies": null,
+          "where_to_secure": "Medical Doctor and Psychologist"
+        },
+        {
+          "document": "Under-five or medical record of the child",
+          "copies": null,
+          "where_to_secure": "Rural Health Unit (RHU)"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to MSWDO and inquire about the adoption process.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide checklist of requirements and advise client to return after completing all requirements.",
+              "fees": "None",
+              "processing_time": "1 hour",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Accomplish intake sheet.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Advise the client to accomplish the intake sheet.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Submit to interview.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Interview the client.",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MSWDO"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Advise client that the Case Study Report will be submitted to court or DSWD.",
+              "fees": "None",
+              "processing_time": "5 days",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Complex – approximately 5 days for SCSR preparation after interview",
+      "faqs": [
+        {
+          "question": "What is the difference between relative and non-relative adoption?",
+          "answer": "For relative adoption, a Court Order is required. For non-relative adoption, a request letter from DSWD is needed instead."
+        },
+        {
+          "question": "What documents are required for the adoption SCSR?",
+          "answer": "You need a Court Order or DSWD request letter, house sketch, birth certificate of the child, marriage contract of the adoptive parent, medical and psychological assessments of both child and adoptive parent, and the child's medical record from the RHU."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "Approximately 5 days for the SCSR preparation after the initial interview."
+        },
+        {
+          "question": "Is there a fee?",
+          "answer": "No, the service is free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-021",
+      "service_name": "Issuance of Social Case Study Report for Legal Cases (Children in Conflict with the Law – Court Order)",
+      "description": "A document issued to a minor individual in need of a social case study report used as evidence for the level of discernment in the processing of a case committed by a minor, or as referral documents for an institution, based on a Court Order.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Complex",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Any minor individual in need of a case study report for use in court as evidence for the level of discernment in processing the case committed by a minor, or for referral to an institution",
+      "requirements": [
+        {
+          "document": "Court Order",
+          "copies": null,
+          "where_to_secure": "Respective Regional Trial Court"
+        },
+        {
+          "document": "Police Report",
+          "copies": null,
+          "where_to_secure": "PNP Women's Desk"
+        },
+        {
+          "document": "Birth certificate of the child",
+          "copies": null,
+          "where_to_secure": "PSA"
+        },
+        {
+          "document": "Intake Form",
+          "copies": null,
+          "where_to_secure": "MSWDO"
+        },
+        {
+          "document": "Level of Moral Development Tool",
+          "copies": null,
+          "where_to_secure": "MSWDO"
+        },
+        {
+          "document": "Index of Value Judgment",
+          "copies": null,
+          "where_to_secure": "MSWDO"
+        },
+        {
+          "document": "Child Functioning and Family Functioning Checklist",
+          "copies": null,
+          "where_to_secure": "MSWDO"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to MSWDO office and sign in to the logbook.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Inform the client to fill up the intake sheet for CICL.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Inform the client that he or she will undergo an assessment process to determine the level of discernment regarding the crime committed.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Accomplish Assessment Form.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Advise the client to accomplish the assessment form for Level of Moral Development, Index of Value Judgment.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Submit to interview.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Interview the client using the Child Functioning Checklist and Family Functioning Checklist.",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MSWDO"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Advise client that the Case Study Report will be submitted to court or to an institution.",
+              "fees": "None",
+              "processing_time": "3 days",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Complex – approximately 3 days for SCSR preparation after assessment and interview",
+      "faqs": [
+        {
+          "question": "What assessment tools are used for CICL cases?",
+          "answer": "The MSWDO uses the Level of Moral Development Tool, Index of Value Judgment, and the Child Functioning and Family Functioning Checklists to assess the minor's level of discernment."
+        },
+        {
+          "question": "How long does the SCSR for CICL take?",
+          "answer": "Approximately 3 days after the assessment and interview process."
+        },
+        {
+          "question": "Is there a fee?",
+          "answer": "No, the service is free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-022",
+      "service_name": "Issuance of ID for Persons with Disability (PWD ID) – Version 2",
+      "description": "An identification card issued to persons with disability to avail the privileges and benefits indicated in the Magna Carta for Persons with Disability. The card is renewable every three years.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any individual with disability — orthopedic, communication, visual, mental/intellectual, psychosocial, or disabilities resulting from chronic illness",
+      "requirements": [
+        {
+          "document": "Medical Certificate",
+          "copies": null,
+          "where_to_secure": "Doctor or Hospital"
+        },
+        {
+          "document": "Barangay Certificate of Residency",
+          "copies": null,
+          "where_to_secure": "Respective Barangay"
+        },
+        {
+          "document": "Accomplished Application Form for PWD",
+          "copies": null,
+          "where_to_secure": "Municipal Social Welfare and Development Office"
+        },
+        {
+          "document": "1x1 picture",
+          "copies": "1 piece",
+          "where_to_secure": "Client"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Check the request form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide client the request form and checklist of requirements.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Acquire the requirements, fill up the application form, and submit to MSWDO Staff.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Receive the filled-up application form for PWD.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Encode the information to the masterlist of PWD and write the ID number in the application form.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the ID and sign in the log book.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Print and issue the PWD ID.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Advise the PWD to avail the Purchase Booklet for medicines and groceries at the PWD Overall President.",
+              "fees": "PHP 25.00",
+              "processing_time": "10 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 25.00 (for Purchase Booklet only)",
+      "total_processing_time": "Simple – approximately 40 minutes",
+      "faqs": [
+        {
+          "question": "What is the difference between MSWDO-006 and MSWDO-022 for PWD ID?",
+          "answer": "Both services issue a PWD ID. MSWDO-022 uses a Medical Certificate and 1x1 picture, while MSWDO-006 requires a Medical Abstract, Certificate of Disability from the Barangay, two 1x1 pictures, and one 2x2 picture. The requirements differ slightly; contact the MSWDO to confirm which applies to you."
+        },
+        {
+          "question": "How long is the PWD ID valid?",
+          "answer": "The PWD ID is renewable every three years."
+        },
+        {
+          "question": "Is there a fee?",
+          "answer": "The PWD ID is free. A PHP 25.00 fee applies for the Purchase Booklet for medicines and groceries."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-023",
+      "service_name": "Issuance of Identification Card for Solo Parent – Version 2",
+      "description": "An identification card issued to solo parents to avail the benefits accorded to them under the Solo Parent Welfare Act.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Complex",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "A solo parent — single, separated, abandoned, or widowed — with child or children in his or her custody",
+      "requirements": [
+        {
+          "document": "Birth Certificate of the applicant",
+          "copies": "1 photocopy",
+          "where_to_secure": "Municipal Civil Registrar"
+        },
+        {
+          "document": "Birth Certificate of minor children",
+          "copies": "1 photocopy",
+          "where_to_secure": "Municipal Civil Registrar"
+        },
+        {
+          "document": "Death Certificate of spouse (if widowed)",
+          "copies": "1 photocopy",
+          "where_to_secure": "Municipal Civil Registrar"
+        },
+        {
+          "document": "Barangay Certificate of Residency",
+          "copies": null,
+          "where_to_secure": "Respective Barangay"
+        },
+        {
+          "document": "Application Form for Solo Parent",
+          "copies": null,
+          "where_to_secure": "Municipal Social Welfare and Development Office"
+        },
+        {
+          "document": "1x1 picture",
+          "copies": "1 piece",
+          "where_to_secure": "Client"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Accomplish the request form and submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive and check the completeness of requirements.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Fill up the application form.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Issue application form and explain how to fill it out.",
+              "fees": "None",
+              "processing_time": "20 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Take note of the schedule of assessment and home visit.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Assess the application and validate through home visit.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Return to MSWDO and claim the ID.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Issue the Solo Parent ID.",
+              "fees": "PHP 10.00",
+              "processing_time": "1 week",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 10.00",
+      "total_processing_time": "Complex – approximately 1 week including home visit and ID production",
+      "faqs": [
+        {
+          "question": "How much does the Solo Parent ID cost?",
+          "answer": "There is a PHP 10.00 fee for the Solo Parent ID."
+        },
+        {
+          "question": "How long does it take to get the Solo Parent ID?",
+          "answer": "Approximately 1 week, including home visit validation and ID production."
+        },
+        {
+          "question": "What documents do I need?",
+          "answer": "You need your birth certificate, birth certificates of your minor children, death certificate of your spouse (if widowed), Barangay Certificate of Residency, an accomplished application form, and one 1x1 picture."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-024",
+      "service_name": "Issuance of Certificate of Indigency – Version 2",
+      "description": "A document issued to a person or individual in need of certification that can be used in medical, burial, and educational assistance applications due to their limited financial capacity.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any indigent individual in need of certification for use in medical, burial, and educational assistance",
+      "requirements": [
+        {
+          "document": "Barangay Certificate of Residency",
+          "copies": null,
+          "where_to_secure": "Respective Barangay"
+        },
+        {
+          "document": "Community Tax Certificate",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office or Barangay Treasurer"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Check the request form and submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide client with the request form and check for completeness of requirements.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Fill out the Intake Sheet.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Explain and assist in the filling out of the intake sheet.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Prepare the Certificate of Indigency.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the certificate and sign in the log book.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the certificate and record in the log book.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 35 minutes",
+      "faqs": [
+        {
+          "question": "What is a Certificate of Indigency?",
+          "answer": "It is a certification confirming that a person has limited financial capacity, used to apply for medical, burial, and educational assistance."
+        },
+        {
+          "question": "How long does it take?",
+          "answer": "Approximately 35 minutes."
+        },
+        {
+          "question": "Is there a fee?",
+          "answer": "No, the service is free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-025",
+      "service_name": "Provision of Day Care Service – Version 2",
+      "description": "A service rendered to Day Care children aged 3 to 4.11 years old, catered in Child Development Centers and provided with the objectives of Day Care Service under the supervision of Child Development Workers.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Highly Technical",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Children aged 3 to 4.11 years old and their parents",
+      "requirements": [
+        {
+          "document": "Birth Certificate of the child (PSA copy)",
+          "copies": null,
+          "where_to_secure": "PSA"
+        },
+        {
+          "document": "ECCD Growth Chart of the child",
+          "copies": null,
+          "where_to_secure": "Municipal Health Office"
+        },
+        {
+          "document": "Community Tax Certificate",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Enrollment/Registration Form",
+          "copies": null,
+          "where_to_secure": "Municipal Social Welfare and Development Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Register in the Registration Form for Day Care Service.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide client the registration form, advise parent to fill it up, and check completeness of requirements. Advise to comply if incomplete.",
+              "fees": "None",
+              "processing_time": "20 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Receive the requirements and record the information to the Enrollment Form for Day Care Service.",
+              "fees": "None",
+              "processing_time": "20 minutes",
+              "person_responsible": "MSWDO Staff / CDWs"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Pay parent participation fee and registration fee.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Receive payment and issue receipt.",
+              "fees": "To be determined (parent participation fee applies)",
+              "processing_time": null,
+              "person_responsible": "MSWDO Staff / CDWs"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Ensure the attendance of the child on the scheduled session dates.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Conduct regular sessions.",
+              "fees": "None",
+              "processing_time": "10 months",
+              "person_responsible": "Child Development Workers"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Ensure participation of children in different activities of the Day Care Service.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Assist children in different activities and provide parents a copy of monthly activities in the center.",
+              "fees": "None",
+              "processing_time": "10 months",
+              "person_responsible": "MSWDO Staff / CDWs"
+            }
+          ]
+        },
+        {
+          "step_number": 6,
+          "client_action": "Participate in the Recognition Rites and receive Certificate of Participation.",
+          "agency_actions": [
+            {
+              "sub_step": "6.1",
+              "action": "Recognize children's participation.",
+              "fees": "None",
+              "processing_time": "Half day",
+              "person_responsible": "MSWDO Staff / CDWs"
+            },
+            {
+              "sub_step": "6.2",
+              "action": "Issue Certificate of Participation.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff / CDWs"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Parent participation fee (amount to be confirmed at the office)",
+      "total_processing_time": "Highly Technical – 10 months of regular sessions",
+      "faqs": [
+        {
+          "question": "What additional documents are required in this version of Day Care enrollment?",
+          "answer": "In addition to the PSA birth certificate, you also need the ECCD Growth Chart from the Municipal Health Office and a Community Tax Certificate."
+        },
+        {
+          "question": "How long does the program run?",
+          "answer": "10 months."
+        },
+        {
+          "question": "What do children receive at the end?",
+          "answer": "Children receive a Certificate of Participation during the Recognition Rites."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-026",
+      "service_name": "Provision of Pre-Marriage Orientation and Pre-Marriage Counseling (PMC) – Version 2",
+      "description": "A kind of assistance extended to couples who want to get married, endorsed by the Municipal Civil Registrar and the Population Office.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any couple who wants to get married",
+      "requirements": [
+        {
+          "document": "Marriage Expectation Inventory (MEI)",
+          "copies": null,
+          "where_to_secure": "Population Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to PMC Orientation/Counselling Room.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Explain the process of orientation and counselling.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "PMO Team"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Fill out intake sheet.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Provide copy of intake sheet and MEI by the Population Officer.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Submit for orientation and counselling.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Conduct marriage orientation for all couples.",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MSWDO"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Conduct marriage counseling for couples aged 18 to 25 years old.",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Receive the Certificate of Compliance and Certificate of Counseling.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Issue the Pre-Marriage Counseling certification.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 4 to 5 hours",
+      "faqs": [
+        {
+          "question": "Is Pre-Marriage Orientation required for all couples?",
+          "answer": "Yes, all couples who want to get married are required to attend Pre-Marriage Orientation. Those aged 18 to 25 are also required to undergo marriage counseling."
+        },
+        {
+          "question": "What certificate will I receive?",
+          "answer": "You will receive a Certificate of Compliance and a Certificate of Counseling."
+        },
+        {
+          "question": "Is there a fee?",
+          "answer": "No, the service is free of charge."
+        }
+      ]
+    },
+    {
+      "service_id": "MSWDO-027",
+      "service_name": "Provision of Relief Assistance – Version 2",
+      "description": "A kind of assistance given to individuals or families who are victims of or affected by calamities.",
+      "office_or_division": "Municipal Social Welfare and Development Office (MSWDO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any individual or family who is a victim of or affected by a calamity and is in need of relief assistance",
+      "requirements": [
+        {
+          "document": "Disaster report and masterlist from the Barangay",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Office of MSWDO.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide information about the venue and schedule of distribution of relief assistance.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MSWDO Staff"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Assist client in filling up the intake sheet and Relief Distribution sheet.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MSWDO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive relief assistance.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Distribute relief goods at the barangay evacuation center or at the main evacuation center (Amphitheater).",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MSWDO Staff and other volunteers"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 2 hours for distribution",
+      "faqs": [
+        {
+          "question": "Who can receive relief assistance?",
+          "answer": "Any individual or family who is a victim of or affected by a calamity."
+        },
+        {
+          "question": "Where are relief goods distributed?",
+          "answer": "At the barangay evacuation center or at the main evacuation center (Amphitheater)."
+        },
+        {
+          "question": "Is there a fee?",
+          "answer": "No, relief assistance is provided free of charge."
+        }
+      ]
+    }
+  ]
+}

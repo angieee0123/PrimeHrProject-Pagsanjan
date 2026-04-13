@@ -1,0 +1,696 @@
+    {
+    "service_office": "Municipal Disaster Risk Reduction Management Office",
+    "service_category": "Internal & External",
+    "services": [
+        {
+        "service_id": "MDRRMO-001",
+        "service_name": "Response to Incidents Involving Persons",
+        "description": "A response mechanism to all incidents involving persons which endanger lives and properties such as vehicular, work-related, and personal accidents, where immediate attention by responders is needed to reduce the risk of loss of lives.",
+        "office_or_division": "Municipal Disaster Risk Reduction Management Office (MDRRMO)",
+        "classification": "Simple",
+        "type_of_transaction": ["G2C"],
+        "who_may_avail": "All persons",
+        "requirements": [
+            {
+            "document": "Incident Report either through cellphones or personal verbal report from witnesses",
+            "copies": null,
+            "where_to_secure": "Through hotline numbers of the MDRRMO, BDRRMC, BFP, and PNP"
+            }
+        ],
+        "process_flow": [
+            {
+            "step_number": 1,
+            "client_action": "Involved persons, witnesses, or persons at the incident area call the hotline numbers displayed in various places, or personally report to the office. Provide the exact nature of the incident and the exact location where it occurred.",
+            "agency_actions": [
+                {
+                "sub_step": "1.1",
+                "action": "MDRRMO immediately prepares all necessary mechanical and medical equipment including emergency vehicles such as rescue vehicle and ambulance.",
+                "fees": "None",
+                "processing_time": "5 to 10 minutes",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.2",
+                "action": "MDRRMO calls members of the Search and Rescue Team including BFP and PNP through cellphones and radios installed in all ECO vehicles, giving priority to members near the vicinity.",
+                "fees": "None",
+                "processing_time": "5 to 10 minutes",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.3",
+                "action": "MDRRMO boards all equipment and responders to the rescue vehicles and departs to the scene of the incident.",
+                "fees": "None",
+                "processing_time": "5 to 10 minutes",
+                "person_responsible": "MDRRMO / Search and Rescue Team / BFP / PNP"
+                },
+                {
+                "sub_step": "1.4",
+                "action": "PNP personnel (if present) investigate the scene and take pictures for reference.",
+                "fees": "None",
+                "processing_time": "3 to 5 minutes",
+                "person_responsible": "PNP"
+                },
+                {
+                "sub_step": "1.5",
+                "action": "Trained responders provide first aid to the victim if necessary and immediately transport the victim via ambulance to the nearest hospital for further treatment if needed.",
+                "fees": "None",
+                "processing_time": "3 to 5 minutes",
+                "person_responsible": "Search and Rescue Team / BFP"
+                },
+                {
+                "sub_step": "1.6",
+                "action": "Responders secure the victim's vehicles to ensure they do not obstruct the road and cause another accident.",
+                "fees": "None",
+                "processing_time": "10 minutes to 2 hours",
+                "person_responsible": "Search and Rescue Team / BFP"
+                },
+                {
+                "sub_step": "1.7",
+                "action": "Responders take the victim's personal information either at the scene or at the hospital for future reference.",
+                "fees": "None",
+                "processing_time": "2 to 3 minutes",
+                "person_responsible": "Search and Rescue Team / BFP"
+                }
+            ]
+            }
+        ],
+        "total_fees": "None",
+        "total_processing_time": "Simple – response begins within 5 to 10 minutes of report; total duration varies depending on the nature of the incident",
+        "faqs": [
+            {
+            "question": "What types of incidents does the MDRRMO respond to involving persons?",
+            "answer": "The MDRRMO responds to all incidents that endanger lives and properties, including vehicular accidents, work-related accidents, and personal accidents."
+            },
+            {
+            "question": "How do I report an incident?",
+            "answer": "You can call the hotline numbers of the MDRRMO, BDRRMC, BFP, or PNP displayed in various places, or personally report to the office and provide the exact nature and location of the incident."
+            },
+            {
+            "question": "Is there a fee for emergency response?",
+            "answer": "No, emergency response services are provided free of charge."
+            },
+            {
+            "question": "How fast will responders arrive?",
+            "answer": "The MDRRMO begins preparation and mobilization within 5 to 10 minutes of receiving the report. Actual arrival time depends on the distance to the incident location."
+            },
+            {
+            "question": "Will the victim be brought to a hospital?",
+            "answer": "Yes. If necessary, the trained responders will provide first aid on-site and transport the victim via ambulance to the nearest hospital for further treatment."
+            }
+        ]
+        },
+        {
+        "service_id": "MDRRMO-002",
+        "service_name": "Response to Incidents Not Involving Persons",
+        "description": "A response mechanism to all incidents endangering the normalcy and continuity of community life such as fallen trees, landslides, soil erosion, and collapsed structures on roads and highways. Removal of obstructions restores continuity and normalcy in the lives of all citizens in the affected community.",
+        "office_or_division": "Municipal Disaster Risk Reduction Management Office (MDRRMO)",
+        "classification": "Simple",
+        "type_of_transaction": ["G2C"],
+        "who_may_avail": "All persons",
+        "requirements": [
+            {
+            "document": "Incident Report either through cellphones or personal verbal report from witnesses",
+            "copies": null,
+            "where_to_secure": "Through hotline numbers of the MDRRMO, BDRRMC, BFP, and PNP"
+            }
+        ],
+        "process_flow": [
+            {
+            "step_number": 1,
+            "client_action": "Involved persons, witnesses, or persons at the incident area call the hotline numbers displayed in various places, or personally report to the office. Provide the exact nature of the incident and the exact location where it occurred.",
+            "agency_actions": [
+                {
+                "sub_step": "1.1",
+                "action": "MDRRMO immediately prepares all necessary mechanical equipment including emergency vehicles such as rescue vehicle, dump trucks, and excavators.",
+                "fees": "None",
+                "processing_time": "5 to 10 minutes",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.2",
+                "action": "MDRRMO calls members of the Search and Rescue Team including BFP and PNP through cellphones and radios installed in all ECO vehicles, giving priority to members near the vicinity.",
+                "fees": "None",
+                "processing_time": "5 to 10 minutes",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.3",
+                "action": "MDRRMO boards all equipment and responders to the rescue vehicles and departs to the scene of the incident.",
+                "fees": "None",
+                "processing_time": "5 to 10 minutes",
+                "person_responsible": "MDRRMO / Search and Rescue Team / BFP"
+                },
+                {
+                "sub_step": "1.4",
+                "action": "Trained responders assess the situation and immediately start the clearing operation.",
+                "fees": "None",
+                "processing_time": "1 to 8 hours",
+                "person_responsible": "Search and Rescue Team / BFP"
+                },
+                {
+                "sub_step": "1.5",
+                "action": "MDRRMO examines the incident area and if necessary, makes a recommendation to DPWH for further road clearing and restoration.",
+                "fees": "None",
+                "processing_time": "1 day",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.6",
+                "action": "MDRRMO reports all damaged utility lines and posts, and broken water pipes to the concerned utility agencies for immediate restoration.",
+                "fees": "None",
+                "processing_time": "15 to 30 minutes",
+                "person_responsible": "MDRRMO"
+                }
+            ]
+            }
+        ],
+        "total_fees": "None",
+        "total_processing_time": "Simple – response begins within 5 to 10 minutes; clearing operations may take 1 to 8 hours or longer depending on scope",
+        "faqs": [
+            {
+            "question": "What incidents not involving persons does the MDRRMO respond to?",
+            "answer": "The MDRRMO responds to fallen trees, landslides, soil erosion, and collapsed structures — particularly those obstructing roads and highways — to restore the normalcy of daily life in the community."
+            },
+            {
+            "question": "How do I report a fallen tree or road obstruction?",
+            "answer": "Call the hotline numbers of the MDRRMO, BDRRMC, BFP, or PNP, or personally report to the office. Provide the exact nature and location of the obstruction."
+            },
+            {
+            "question": "Is there a fee for this service?",
+            "answer": "No, this service is provided free of charge."
+            },
+            {
+            "question": "What happens if the damage requires more than what MDRRMO can address?",
+            "answer": "The MDRRMO will assess the situation and make a recommendation to the DPWH for further road clearing and restoration. Damaged utility lines and water pipes are also reported to the concerned utility agencies."
+            }
+        ]
+        },
+        {
+        "service_id": "MDRRMO-003",
+        "service_name": "Early Warning System to the Community for Anticipated Disaster Caused by Incoming Hazards",
+        "description": "A preparedness mechanism to provide immediate and wide early warning systems to the community during forecasted heavy rains, strong winds, and storm/typhoon landfalls. This informs citizens of the actual strength, path, and possible effects of the incoming hazard. This is a mandatory proactive service — no client request is needed.",
+        "office_or_division": "Municipal Disaster Risk Reduction Management Office (MDRRMO)",
+        "classification": "Simple",
+        "type_of_transaction": ["G2C"],
+        "who_may_avail": "All persons",
+        "requirements": [],
+        "process_flow": [
+            {
+            "step_number": 0,
+            "client_action": "No client action required. This is a proactive mandatory service initiated by the MDRRMO.",
+            "agency_actions": [
+                {
+                "sub_step": "1.1",
+                "action": "MDRRMO receives information from higher DRRMCs, PAGASA, DOST, and other authorized agencies about an incoming weather disturbance that might cause casualties and damage to properties.",
+                "fees": "None",
+                "processing_time": "5 to 10 minutes",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.2",
+                "action": "MDRRMO activates the Operation Center at the appropriate level in accordance with the severity of impact of the incoming weather disturbance.",
+                "fees": "None",
+                "processing_time": "5 to 10 minutes",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.3",
+                "action": "MDRRMO prepares its resources for the immediate dissemination of weather reports and expected weather conditions in the community.",
+                "fees": "None",
+                "processing_time": "10 to 30 minutes",
+                "person_responsible": "MDRRMO / BFP"
+                },
+                {
+                "sub_step": "1.4",
+                "action": "MDRRMO immediately instructs all Barangay Captains to activate their respective BDRRMCs.",
+                "fees": "None",
+                "processing_time": "To be determined",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.5",
+                "action": "MDRRMO conducts an information campaign to all barangays in preparation for the forecasted weather disturbance through Facebook posts, house-to-house information dissemination, and municipality-wide Bandillo.",
+                "fees": "None",
+                "processing_time": "1 to 8 hours",
+                "person_responsible": "MDRRMO / BFP"
+                },
+                {
+                "sub_step": "1.6",
+                "action": "MDRRMO continuously monitors the weather and conducts information campaigns until the weather disturbance subsides.",
+                "fees": "None",
+                "processing_time": "1 day (ongoing until disturbance passes)",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.7",
+                "action": "MDRRMO reports the weather situation in the area of responsibility to the Local Chief Executive (LCE) and other concerned agencies from time to time until the disturbance is over.",
+                "fees": "None",
+                "processing_time": "15 to 30 minutes (periodic updates)",
+                "person_responsible": "MDRRMO / MDRRMC / Other Agencies"
+                }
+            ]
+            }
+        ],
+        "total_fees": "None",
+        "total_processing_time": "Simple – activated upon receipt of weather disturbance information; continuous monitoring until disturbance subsides",
+        "faqs": [
+            {
+            "question": "Do I need to request for an early warning from the MDRRMO?",
+            "answer": "No. The Early Warning System is a mandatory proactive service. The MDRRMO automatically initiates it upon receiving information about an incoming weather disturbance — no request from the public is needed."
+            },
+            {
+            "question": "How will the community be informed about an incoming typhoon or storm?",
+            "answer": "The MDRRMO will disseminate weather information through Facebook posts, house-to-house information campaigns, and municipality-wide Bandillo (public announcement)."
+            },
+            {
+            "question": "Where does the MDRRMO get weather information?",
+            "answer": "The MDRRMO receives weather information from higher DRRMCs, PAGASA, DOST, and other authorized government agencies."
+            },
+            {
+            "question": "Is there a fee for the early warning service?",
+            "answer": "No, this service is completely free of charge."
+            },
+            {
+            "question": "What should I do when I receive an early warning?",
+            "answer": "Prepare your household, secure your belongings, monitor updates from the MDRRMO, and follow the instructions of your Barangay Captain and BDRRMC."
+            }
+        ]
+        },
+        {
+        "service_id": "MDRRMO-004",
+        "service_name": "Conduct of Earthquake and Fire Drills",
+        "description": "A preparedness mechanism to facilitate at least quarterly earthquake and fire drills for schools, agencies, public and private institutions, barangays, civil society organizations, and non-governmental organizations.",
+        "office_or_division": "Municipal Disaster Risk Reduction Management Office (MDRRMO)",
+        "classification": "Complex",
+        "type_of_transaction": ["G2C"],
+        "who_may_avail": "All persons — schools, agencies, institutions, barangays, civil society organizations, and NGOs",
+        "requirements": [
+            {
+            "document": "Request letter to conduct earthquake or fire drill (must indicate exact date and time; submitted at least 5 days prior to the scheduled drill)",
+            "copies": null,
+            "where_to_secure": "Personally prepared by the requesting agency, institution, or organization"
+            }
+        ],
+        "process_flow": [
+            {
+            "step_number": 1,
+            "client_action": "Concerned school, agency, institution, or organization submits a request letter to facilitate an earthquake or fire drill in their respective area, indicating the exact date and time. The request must be submitted at least 5 days prior to the scheduled drill.",
+            "agency_actions": [
+                {
+                "sub_step": "1.1",
+                "action": "MDRRMO receives the letter and assesses the requested date for conflicts with other requestors. MDRRMO approves and confirms the request.",
+                "fees": "None",
+                "processing_time": "5 to 10 minutes",
+                "person_responsible": "MDRRMO / BFP"
+                },
+                {
+                "sub_step": "1.2",
+                "action": "MDRRMO coordinates with the BFP (co-facilitators) regarding the schedule, venue, and needed manpower.",
+                "fees": "None",
+                "processing_time": "1 to 5 days",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.3",
+                "action": "On the drill date, MDRRMO and BFP prepare all materials and equipment for the conduct of the drill and proceed to the venue.",
+                "fees": "None",
+                "processing_time": "10 to 30 minutes",
+                "person_responsible": "MDRRMO / BFP"
+                }
+            ]
+            },
+            {
+            "step_number": 2,
+            "client_action": "The heads of the requesting agency assist the MDRRMO and BFP in facilitating the drill.",
+            "agency_actions": [
+                {
+                "sub_step": "2.1",
+                "action": "MDRRMO and BFP conduct the earthquake or fire drill.",
+                "fees": "None",
+                "processing_time": "2 to 3 hours",
+                "person_responsible": "MDRRMO / BFP"
+                },
+                {
+                "sub_step": "2.2",
+                "action": "After the drill, MDRRMO and BFP assess the conduct of the drill and provide pointers and recommendations for future drills.",
+                "fees": "None",
+                "processing_time": "30 to 45 minutes",
+                "person_responsible": "MDRRMO / BFP"
+                }
+            ]
+            }
+        ],
+        "total_fees": "None",
+        "total_processing_time": "Complex – request must be filed at least 5 days in advance; drill itself takes 2 to 3 hours plus 30 to 45 minutes for debriefing",
+        "faqs": [
+            {
+            "question": "Who can request an earthquake or fire drill?",
+            "answer": "Schools, government agencies, public and private institutions, barangays, civil society organizations, and non-governmental organizations may request earthquake and fire drills."
+            },
+            {
+            "question": "How do I request a drill?",
+            "answer": "Submit a request letter to the MDRRMO at least 5 days before the scheduled drill date, indicating the exact date and time of the drill."
+            },
+            {
+            "question": "Is there a fee for conducting earthquake or fire drills?",
+            "answer": "No, the service is provided free of charge."
+            },
+            {
+            "question": "Who facilitates the drills?",
+            "answer": "The MDRRMO and BFP jointly facilitate the earthquake and fire drills."
+            },
+            {
+            "question": "What happens after the drill?",
+            "answer": "After the drill, the MDRRMO and BFP assess how the drill was conducted and provide feedback and pointers to help improve future preparedness activities."
+            },
+            {
+            "question": "How often should drills be conducted?",
+            "answer": "The MDRRMO facilitates earthquake and fire drills at least quarterly."
+            }
+        ]
+        },
+        {
+        "service_id": "MDRRMO-005",
+        "service_name": "Issuance of a Declaration of State of Calamity in the Municipality",
+        "description": "A document issued through a resolution prepared by the MDRRMO upon recommendation of the Local Chief Executive (LCE) and endorsed to the Sangguniang Bayan for review and approval. This enables faster delivery of relief goods to the community through the use of the Quick Relief Fund.",
+        "office_or_division": "Municipal Disaster Risk Reduction Management Office (MDRRMO)",
+        "classification": "Complex",
+        "type_of_transaction": ["G2G"],
+        "who_may_avail": "Local Government Units",
+        "requirements": [
+            {
+            "document": "Recommendation of the MDRRMO or the Local Chief Executive for the immediate declaration of the State of Calamity",
+            "copies": null,
+            "where_to_secure": "Mayor's Office, MDRRMC, MDRRMO"
+            }
+        ],
+        "process_flow": [
+            {
+            "step_number": 1,
+            "client_action": "LCE requests or recommends the Declaration of State of Calamity due to the disaster caused by the hazard.",
+            "agency_actions": [
+                {
+                "sub_step": "1.1",
+                "action": "MDRRMO convenes the council and presents the extent of the damage caused by the disaster.",
+                "fees": "None",
+                "processing_time": "3 to 4 hours",
+                "person_responsible": "MDRRMO / MDRRMC members"
+                },
+                {
+                "sub_step": "1.2",
+                "action": "The LCE/MDRRMC Chairman decides on the Declaration of State of Calamity.",
+                "fees": "None",
+                "processing_time": "3 minutes",
+                "person_responsible": "MDRRMC"
+                },
+                {
+                "sub_step": "1.3",
+                "action": "MDRRMO prepares a resolution stating that the municipality is under the State of Calamity.",
+                "fees": "None",
+                "processing_time": "30 minutes",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.4",
+                "action": "The council chairman approves the resolution.",
+                "fees": "None",
+                "processing_time": "10 minutes",
+                "person_responsible": "LCE"
+                },
+                {
+                "sub_step": "1.5",
+                "action": "The MDRRMO through the LCE endorses the council resolution to the Sangguniang Bayan for review and approval.",
+                "fees": "None",
+                "processing_time": "1 hour",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.6",
+                "action": "Wait for the Sangguniang Bayan's approval of the resolution.",
+                "fees": "None",
+                "processing_time": "1 to 3 days",
+                "person_responsible": "Sangguniang Bayan (SB)"
+                }
+            ]
+            },
+            {
+            "step_number": 2,
+            "client_action": "Upon issuance of a resolution by the SB approving the Declaration of State of Calamity.",
+            "agency_actions": [
+                {
+                "sub_step": "2.1",
+                "action": "Prepare vouchers as payment for emergency expenses of the LGU in the immediate provision of relief goods during evacuations.",
+                "fees": "None",
+                "processing_time": "1 day",
+                "person_responsible": "MDRRMO / Finance Committee"
+                }
+            ]
+            },
+            {
+            "step_number": 3,
+            "client_action": "Decides on other monetary and material assistance to rehabilitate the victims of the disaster.",
+            "agency_actions": [
+                {
+                "sub_step": "3.1",
+                "action": "Purchase materials and provide financial assistance to the victims.",
+                "fees": "None",
+                "processing_time": "3 to 10 days",
+                "person_responsible": "LCE / MDRRMO / Finance Committee"
+                }
+            ]
+            }
+        ],
+        "total_fees": "None",
+        "total_processing_time": "Complex – approximately 1 to 3 days for SB approval; relief operations begin thereafter",
+        "faqs": [
+            {
+            "question": "What is a Declaration of State of Calamity?",
+            "answer": "It is an official resolution declaring that the municipality is under a State of Calamity due to a disaster. This allows the LGU to use the Quick Relief Fund for faster delivery of relief goods and other emergency assistance to affected residents."
+            },
+            {
+            "question": "Who can initiate the Declaration of State of Calamity?",
+            "answer": "The Local Chief Executive (LCE) or the MDRRMO can recommend the declaration."
+            },
+            {
+            "question": "How long does it take to declare a State of Calamity?",
+            "answer": "The process takes approximately 1 to 3 days, including council deliberation, resolution preparation, LCE approval, and Sangguniang Bayan approval."
+            },
+            {
+            "question": "Is there a fee for this service?",
+            "answer": "No, this is a government-to-government service provided free of charge."
+            },
+            {
+            "question": "What happens after the State of Calamity is declared?",
+            "answer": "The MDRRMO and Finance Committee prepare vouchers for emergency expenses, and relief goods and financial assistance are provided to the victims of the disaster."
+            }
+        ]
+        },
+        {
+        "service_id": "MDRRMO-006",
+        "service_name": "Preparation of the Annual Investment Program of the 5% LDRRM Fund for the Next Budget Year",
+        "description": "A document submitted through a council resolution prepared by the MDRRMO upon the approval of the LCE and endorsed to the Sangguniang Bayan for review and approval. It covers Programs, Projects, and Activities (PPAs) for DRRM Prevention and Mitigation, Preparedness, Response, and Rehabilitation for integration into the LGU Annual Budget.",
+        "office_or_division": "Municipal Disaster Risk Reduction Management Office (MDRRMO)",
+        "classification": "Complex",
+        "type_of_transaction": ["G2G"],
+        "who_may_avail": "Local Government Units",
+        "requirements": [
+            {
+            "document": "LGU current IRA and income figures",
+            "copies": null,
+            "where_to_secure": "Municipal Budget Office"
+            }
+        ],
+        "process_flow": [
+            {
+            "step_number": 1,
+            "client_action": "MBO requests the AIP of the 5% LDRRM Fund for the next budget year with the amount to be budgeted, computed from the IRA and income generated by the municipality.",
+            "agency_actions": [
+                {
+                "sub_step": "1.1",
+                "action": "MDRRMO prepares the Programs, Projects, and Activities (PPAs) for DRRM Prevention and Mitigation, Preparedness, Response, and Rehabilitation Plan based on figures provided by the MBO for inclusion in the Annual Investment Program (AIP).",
+                "fees": "None",
+                "processing_time": "5 to 10 days",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.2",
+                "action": "MDRRMO convenes the MDRRM Council for consultation, deliberation, and approval of the proposed DRRM PPAs.",
+                "fees": "None",
+                "processing_time": "2 to 3 hours",
+                "person_responsible": "MDRRMC"
+                },
+                {
+                "sub_step": "1.3",
+                "action": "After council deliberation, MDRRMO prepares a council resolution of the AIP.",
+                "fees": "None",
+                "processing_time": "30 minutes",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.4",
+                "action": "The council chairman approves the resolution.",
+                "fees": "None",
+                "processing_time": "10 minutes",
+                "person_responsible": "LCE"
+                },
+                {
+                "sub_step": "1.5",
+                "action": "MDRRMO through the LCE endorses the council resolution to the Sangguniang Bayan for review and approval.",
+                "fees": "None",
+                "processing_time": "1 hour",
+                "person_responsible": "MDRRMO / LCE"
+                },
+                {
+                "sub_step": "1.6",
+                "action": "Wait for the Sangguniang Bayan's approval of the resolution.",
+                "fees": "None",
+                "processing_time": "3 to 6 weeks",
+                "person_responsible": "Sangguniang Bayan (SB)"
+                }
+            ]
+            },
+            {
+            "step_number": 2,
+            "client_action": "Upon issuance of a resolution by the SB approving the AIP.",
+            "agency_actions": [
+                {
+                "sub_step": "2.1",
+                "action": "MDRRMO submits the approved council and SB Resolution along with the 5% LDRRM AIP to the MBO for LGU annual budget compilation.",
+                "fees": "None",
+                "processing_time": "5 to 10 minutes",
+                "person_responsible": "MDRRMO / MBO"
+                }
+            ]
+            }
+        ],
+        "total_fees": "None",
+        "total_processing_time": "Complex – approximately 3 to 6 weeks for SB approval, plus 5 to 10 days for AIP preparation",
+        "legal_basis": "Local Government Code; NDRRMC policies on 5% LDRRM Fund",
+        "faqs": [
+            {
+            "question": "What is the 5% LDRRM Fund?",
+            "answer": "The 5% Local Disaster Risk Reduction and Management (LDRRM) Fund is a mandatory allocation from the LGU's annual budget, earmarked for disaster prevention and mitigation, preparedness, response, and rehabilitation programs."
+            },
+            {
+            "question": "What is the Annual Investment Program (AIP) for the LDRRM Fund?",
+            "answer": "It is the annual plan listing all Programs, Projects, and Activities (PPAs) that will be funded by the 5% LDRRM Fund, reviewed and approved by the Sangguniang Bayan for integration into the LGU's annual budget."
+            },
+            {
+            "question": "Who prepares the AIP?",
+            "answer": "The MDRRMO prepares the AIP based on the IRA and income figures provided by the Municipal Budget Office."
+            },
+            {
+            "question": "How long does the approval process take?",
+            "answer": "The entire process takes approximately 3 to 6 weeks for Sangguniang Bayan approval, plus 5 to 10 days for MDRRMO AIP preparation."
+            },
+            {
+            "question": "Is there a fee for this service?",
+            "answer": "No, this is an internal government-to-government process with no associated fees."
+            }
+        ]
+        },
+        {
+        "service_id": "MDRRMO-007",
+        "service_name": "Preparation of the 5% LDRRM Fund Budget Reprogramming",
+        "description": "A document submitted through a council resolution prepared by the MDRRMO upon the approval of the LCE and endorsed to the Sangguniang Bayan for review and approval. It covers re-programmed PPAs needed to facilitate projects not included in the original AIP, to enhance the LGU's DRRM programs.",
+        "office_or_division": "Municipal Disaster Risk Reduction Management Office (MDRRMO)",
+        "classification": "Complex",
+        "type_of_transaction": ["G2G"],
+        "who_may_avail": "Other agencies and Local Chief Executive",
+        "requirements": [
+            {
+            "document": "Project Proposal on projects related to DRRM",
+            "copies": null,
+            "where_to_secure": "Requesting office or agency initiates the Project Proposal"
+            }
+        ],
+        "process_flow": [
+            {
+            "step_number": 1,
+            "client_action": "Other agency or office consults with the MDRRMO regarding projects to be funded but not included in the approved AIP in the Annual Budget.",
+            "agency_actions": [
+                {
+                "sub_step": "1.1",
+                "action": "MDRRMO assesses the requested project. If found related to DRRM Prevention and Mitigation, Preparedness, Response, and Rehabilitation activities and if unused budget is available, consult with the LCE for approval.",
+                "fees": "None",
+                "processing_time": "1 to 2 hours",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.2",
+                "action": "If approved by the LCE, MDRRMO prepares the Budget Reprogramming document.",
+                "fees": "None",
+                "processing_time": "2 to 3 hours",
+                "person_responsible": "MDRRMO"
+                },
+                {
+                "sub_step": "1.3",
+                "action": "MDRRMO seeks the approval and signatures of all members of the LGU Finance Committee.",
+                "fees": "None",
+                "processing_time": "1 to 2 hours",
+                "person_responsible": "MDRRMO / Finance Committee"
+                },
+                {
+                "sub_step": "1.4",
+                "action": "After approval and signatures by the Finance Committee, the LCE approves and signs the document.",
+                "fees": "None",
+                "processing_time": "30 minutes",
+                "person_responsible": "MDRRMO / Finance Committee / LCE"
+                },
+                {
+                "sub_step": "1.5",
+                "action": "MDRRMO through the LCE endorses the Budget Reprogramming document to the Sangguniang Bayan for review and approval.",
+                "fees": "None",
+                "processing_time": "1 hour",
+                "person_responsible": "MDRRMO / LCE"
+                },
+                {
+                "sub_step": "1.6",
+                "action": "Wait for the Sangguniang Bayan's approval of the resolution.",
+                "fees": "None",
+                "processing_time": "3 to 6 weeks",
+                "person_responsible": "Sangguniang Bayan (SB)"
+                }
+            ]
+            },
+            {
+            "step_number": 2,
+            "client_action": "Upon issuance of a resolution by the SB approving the Budget Reprogramming.",
+            "agency_actions": [
+                {
+                "sub_step": "2.1",
+                "action": "MDRRMO notifies the requestor to prepare an approved Project Proposal and start the preparation of vouchers.",
+                "fees": "None",
+                "processing_time": "5 to 10 minutes",
+                "person_responsible": "MDRRMO"
+                }
+            ]
+            }
+        ],
+        "total_fees": "None",
+        "total_processing_time": "Complex – approximately 3 to 6 weeks for SB approval, plus initial assessment and preparation time of several hours",
+        "faqs": [
+            {
+            "question": "What is a Budget Reprogramming of the LDRRM Fund?",
+            "answer": "It is the process of realigning unused 5% LDRRM Fund budget to cover DRRM-related projects that were not included in the original Annual Investment Plan, subject to LCE and Sangguniang Bayan approval."
+            },
+            {
+            "question": "Who can request a Budget Reprogramming?",
+            "answer": "Other government offices, agencies, or the Local Chief Executive may request a Budget Reprogramming for DRRM-related projects."
+            },
+            {
+            "question": "What is required to request a Budget Reprogramming?",
+            "answer": "The requesting office or agency must prepare a Project Proposal detailing the DRRM-related project to be funded."
+            },
+            {
+            "question": "How long does the process take?",
+            "answer": "The process takes approximately 3 to 6 weeks depending on the Sangguniang Bayan's schedule for approval, plus several hours for assessment, preparation, and Finance Committee approvals."
+            },
+            {
+            "question": "What happens after the SB approves the Budget Reprogramming?",
+            "answer": "The MDRRMO notifies the requesting office to prepare an approved Project Proposal and begin the preparation of vouchers for the project's implementation."
+            }
+        ]
+        }
+    ]
+    }

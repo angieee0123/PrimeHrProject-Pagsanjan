@@ -1,0 +1,752 @@
+{
+  "service_office": "Municipal Treasurer's Office",
+  "service_category": "Internal & External",
+  "services": [
+    {
+      "service_id": "MTO-001",
+      "service_name": "Collection of Real Property Tax",
+      "description": "Real Property Tax is a tax collected from individuals, groups, or corporations who are in possession of real properties registered in the Municipality of Sampaloc, Quezon.",
+      "office_or_division": "Municipal Treasurer's Office (MTO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any person or entity who owns or is in possession of real properties registered in the Municipality of Sampaloc, Quezon",
+      "requirements": [
+        {
+          "document": "Copy of Tax Declaration",
+          "copies": null,
+          "where_to_secure": "Taxpayer or Assessor's Office"
+        },
+        {
+          "document": "Copy of Official Receipt of last payment",
+          "copies": null,
+          "where_to_secure": "Taxpayer"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Fill out the request form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the request form.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "Revenue Collection Clerk – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Present the filled-out request form together with the documentary requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Verify and assess completeness of requirements.",
+              "fees": "None",
+              "processing_time": "4 minutes",
+              "person_responsible": "Revenue Collection Clerk – MTO"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Verify records from RPTAR or database to check if payments are updated.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Revenue Collection Clerk – MTO"
+            },
+            {
+              "sub_step": "2.3",
+              "action": "If payments are updated, proceed to step 3. If not, advise client to pay unpaid real property tax.",
+              "fees": "None",
+              "processing_time": null,
+              "person_responsible": "Revenue Collection Clerk – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Pay the Real Property Tax due and receive the Official Receipt.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Compute the tax due with reference to the table of penalty of realty tax.",
+              "fees": "Based on assessed value and applicable penalties",
+              "processing_time": "10 minutes",
+              "person_responsible": "Revenue Collection Clerk – MTO"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Issue official receipts.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "Revenue Collection Clerk – MTO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Based on assessed value of real property; penalties apply for late payment (refer to realty tax penalty table)",
+      "total_processing_time": "Simple – approximately 24 minutes",
+      "faqs": [
+        {
+          "question": "What is Real Property Tax?",
+          "answer": "Real Property Tax is a tax imposed on individuals, groups, or corporations who own or are in possession of real properties registered in the Municipality of Sampaloc, Quezon."
+        },
+        {
+          "question": "What documents do I need to pay Real Property Tax?",
+          "answer": "You need a copy of your Tax Declaration (from you or the Assessor's Office) and a copy of the Official Receipt of your last payment."
+        },
+        {
+          "question": "What happens if I have unpaid Real Property Tax?",
+          "answer": "The Revenue Collection Clerk will advise you to settle any unpaid real property tax. Penalties will be computed based on the table of realty tax penalties."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "Approximately 24 minutes from filling out the request form to receiving the official receipt."
+        },
+        {
+          "question": "Where can I get my Tax Declaration?",
+          "answer": "Your Tax Declaration can be obtained from the Assessor's Office or from your own records if you already have a copy."
+        }
+      ]
+    },
+    {
+      "service_id": "MTO-002",
+      "service_name": "Collection of Water Fees",
+      "description": "This service is issued to all consumers of the Sampaloc Local Waterworks System in the Municipality of Sampaloc, Quezon.",
+      "office_or_division": "Municipal Treasurer's Office (MTO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "All consumers of the Sampaloc Local Waterworks System in the Municipality of Sampaloc, Quezon",
+      "requirements": [
+        {
+          "document": "Water bill of water consumption",
+          "copies": null,
+          "where_to_secure": "Water meter reader"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Present the water bill to the collection clerk at the Sampaloc Local Waterworks Office.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Check the record of payments in the record book and compute the total fees.",
+              "fees": "Based on water consumption",
+              "processing_time": "4 minutes",
+              "person_responsible": "MTO Staff – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Pay the water fee and receive the official receipt.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Issue official receipt and record the payment.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "MTO Staff – MTO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Based on water consumption as indicated in the water bill",
+      "total_processing_time": "Simple – approximately 6 minutes",
+      "faqs": [
+        {
+          "question": "Where do I pay my water bill?",
+          "answer": "You pay your water bill at the Sampaloc Local Waterworks Office. Present your water bill to the collection clerk."
+        },
+        {
+          "question": "What do I need to bring to pay my water fee?",
+          "answer": "Bring your water bill, which is issued by the water meter reader."
+        },
+        {
+          "question": "How long does it take to pay the water fee?",
+          "answer": "Approximately 6 minutes from presenting your water bill to receiving the official receipt."
+        },
+        {
+          "question": "Will I receive proof of payment?",
+          "answer": "Yes, an official receipt will be issued after payment."
+        }
+      ]
+    },
+    {
+      "service_id": "MTO-003",
+      "service_name": "Issuance of Community Tax Certificate (CTC)",
+      "description": "A document issued to all residents and non-residents of the Municipality of Sampaloc, Quezon, used in transacting business with the government.",
+      "office_or_division": "Municipal Treasurer's Office (MTO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "All residents and non-residents of the Municipality of Sampaloc, Quezon, and corporations (domestic and foreign) engaged in or doing business in the municipality",
+      "requirements": [
+        {
+          "document": "No prior documents required — basic information is provided at the office",
+          "copies": null,
+          "where_to_secure": "None"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Fill out the blank sheet with basic personal information.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Copy the information given by the taxpayer onto the blank Community Tax Certificate.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MTO Staff – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Put specimen signature and thumb mark, and give the corresponding payment.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Receive payment.",
+              "fees": "Individual: Basic Community Tax PHP 5.00 + Additional Community Tax PHP 1.00 per PHP 1,000.00 gross income (not to exceed PHP 5,000.00). Corporation: Basic Community Tax PHP 500.00 + Additional Community Tax PHP 2.00 per PHP 5,000.00 gross receipts or earnings (not to exceed PHP 100,000.00).",
+              "processing_time": "2 minutes",
+              "person_responsible": "MTO Staff – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the Community Tax Certificate.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the Community Tax Certificate.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MTO Staff – MTO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Individual: PHP 5.00 basic + PHP 1.00 per PHP 1,000.00 gross income (max additional PHP 5,000.00). Corporation: PHP 500.00 basic + PHP 2.00 per PHP 5,000.00 gross receipts (max additional PHP 100,000.00).",
+      "total_processing_time": "Simple – approximately 12 minutes",
+      "faqs": [
+        {
+          "question": "What is a Community Tax Certificate (CTC)?",
+          "answer": "A Community Tax Certificate, commonly known as a Cedula, is a document issued by the Municipal Treasurer's Office used when transacting business with the government."
+        },
+        {
+          "question": "Who can get a Community Tax Certificate?",
+          "answer": "All residents, non-residents, and corporations (domestic and foreign) engaged in or doing business in the Municipality of Sampaloc, Quezon."
+        },
+        {
+          "question": "What documents do I need to bring?",
+          "answer": "No prior documents are needed. You simply provide your basic personal information at the office."
+        },
+        {
+          "question": "How much does a Community Tax Certificate cost for an individual?",
+          "answer": "The basic community tax is PHP 5.00, plus an additional PHP 1.00 for every PHP 1,000.00 of gross income, not to exceed PHP 5,000.00 in additional tax."
+        },
+        {
+          "question": "How much does a Community Tax Certificate cost for a corporation?",
+          "answer": "The basic community tax is PHP 500.00, plus an additional PHP 2.00 for every PHP 5,000.00 of gross receipts or earnings, not to exceed PHP 100,000.00 in additional tax."
+        },
+        {
+          "question": "How long does it take to get a Community Tax Certificate?",
+          "answer": "Approximately 12 minutes."
+        }
+      ]
+    },
+    {
+      "service_id": "MTO-004",
+      "service_name": "Issuance of Certification",
+      "description": "A document issued to any person requesting certifications regarding taxes and fees.",
+      "office_or_division": "Municipal Treasurer's Office (MTO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any person requesting certifications related to taxes and fees",
+      "requirements": [
+        {
+          "document": "Barangay Clearance or Certification",
+          "copies": null,
+          "where_to_secure": "Barangay where the client resides"
+        },
+        {
+          "document": "Community Tax Certificate",
+          "copies": null,
+          "where_to_secure": "Client's existing copy or Municipal Treasurer's Office"
+        },
+        {
+          "document": "Documentary Stamp Tax",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Fill out the request form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the request form.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "Revenue Collection Clerk – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Present the documentary requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Verify and assess completeness of requirements.",
+              "fees": "None",
+              "processing_time": "4 minutes",
+              "person_responsible": "Revenue Collection Clerk – MTO"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "If requirements are complete, proceed to step 3. If not, advise client to complete the requirements.",
+              "fees": "None",
+              "processing_time": null,
+              "person_responsible": "Revenue Collection Clerk – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Pay the certification fee and receive the Certification.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Prepare and issue the Certification.",
+              "fees": "PHP 60.00",
+              "processing_time": "5 minutes",
+              "person_responsible": "Revenue Collection Clerk – MTO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 60.00",
+      "total_processing_time": "Simple – approximately 12 minutes",
+      "faqs": [
+        {
+          "question": "What types of certifications does the MTO issue?",
+          "answer": "The MTO issues certifications related to taxes and fees for any person who needs official documentation of their transactions with the Municipal Treasurer's Office."
+        },
+        {
+          "question": "What documents are required to get a certification?",
+          "answer": "You need a Barangay Clearance or Certification from your barangay, a Community Tax Certificate, and a Documentary Stamp Tax from the MTO."
+        },
+        {
+          "question": "How much does a certification cost?",
+          "answer": "The certification fee is PHP 60.00."
+        },
+        {
+          "question": "How long does it take to get a certification?",
+          "answer": "Approximately 12 minutes, provided all requirements are complete."
+        }
+      ]
+    },
+    {
+      "service_id": "MTO-005",
+      "service_name": "Collection of Market Fees",
+      "description": "Market fees are collected from ambulant vendors, stall owners, fish vendors, and owners of delivery trucks, jeepneys, and tricycles operating in the public market.",
+      "office_or_division": "Municipal Treasurer's Office (MTO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Ambulant vendors, stall owners, fish vendors, owners of delivery trucks, jeepneys, and tricycles",
+      "requirements": [
+        {
+          "document": "No requirements needed",
+          "copies": null,
+          "where_to_secure": "None"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Pay the market fee.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Proceed to the market area and collect market fees based on vendor or vehicle type.",
+              "fees": "Ambulant Vendors: PHP 10.00 per square meter. Fish Vendors: PHP 20.00 per 50 kg of fish per day. Tricycle: PHP 5.00 per day. Jeepney: PHP 20.00 per day. Truck: PHP 30.00 per truck per day.",
+              "processing_time": "10 minutes",
+              "person_responsible": "Market Collector – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive cash ticket as proof of payment.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Issue cash ticket.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "Market Collector – MTO"
+            }
+          ]
+        }
+      ],
+      "fee_schedule": [
+        { "type": "Ambulant Vendors", "fee": "PHP 10.00 per square meter" },
+        { "type": "Fish Vendors", "fee": "PHP 20.00 per 50 kg of fish per day" },
+        { "type": "Tricycle", "fee": "PHP 5.00 per day" },
+        { "type": "Jeepney", "fee": "PHP 20.00 per day" },
+        { "type": "Truck (delivery)", "fee": "PHP 30.00 per truck per day" }
+      ],
+      "total_fees": "Varies by vendor or vehicle type (see fee schedule)",
+      "total_processing_time": "Simple – approximately 13 minutes",
+      "faqs": [
+        {
+          "question": "Who is required to pay market fees?",
+          "answer": "Ambulant vendors, stall owners, fish vendors, and owners of delivery trucks, jeepneys, and tricycles operating in the public market area."
+        },
+        {
+          "question": "How much is the market fee for a tricycle?",
+          "answer": "PHP 5.00 per day."
+        },
+        {
+          "question": "How much is the market fee for fish vendors?",
+          "answer": "PHP 20.00 per 50 kg of fish per day."
+        },
+        {
+          "question": "How much is the market fee for ambulant vendors?",
+          "answer": "PHP 10.00 per square meter."
+        },
+        {
+          "question": "How much is the market fee for jeepneys and trucks?",
+          "answer": "Jeepney: PHP 20.00 per day. Truck: PHP 30.00 per truck per day."
+        },
+        {
+          "question": "What proof of payment will I receive?",
+          "answer": "A cash ticket is issued as proof of payment for market fees."
+        },
+        {
+          "question": "Do I need to bring any documents to pay the market fee?",
+          "answer": "No documents are required. Simply pay the applicable market fee to the Market Collector."
+        }
+      ]
+    },
+    {
+      "service_id": "MTO-006",
+      "service_name": "Ante-Mortem Inspection of Livestock",
+      "description": "Inspection conducted before slaughter of livestock to ensure they are fit for public consumption. Issued to all meat vendors and persons with livestock to be slaughtered.",
+      "office_or_division": "Municipal Treasurer's Office (MTO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "All meat vendors and persons with livestock to be slaughtered",
+      "requirements": [
+        {
+          "document": "Barangay Clearance (for large cattle)",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        },
+        {
+          "document": "Certificate of Ownership or Transfer (for large cattle)",
+          "copies": null,
+          "where_to_secure": "Livestock Owner"
+        },
+        {
+          "document": "Deed of Sale with receipt from Barangay (for large cattle)",
+          "copies": null,
+          "where_to_secure": "Livestock Owner"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Fill out the request form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the request form.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Meat Inspector – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Present the necessary requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Verify and assess completeness of requirements and perform inspection of animals.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Meat Inspector – MTO"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "If requirements are complete, proceed to step 3. If not, advise client to complete requirements.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Meat Inspector – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Proceed to the PNP Municipal Office for final inspection of large cattle.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Perform final inspection.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Police on Duty – PNP-MPS"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Pay the corresponding fee.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Receive payment and issue official receipt.",
+              "fees": "Ante-mortem Fee: Hogs PHP 1.25 per head; Large Cattle PHP 70.00 per head. Corral Fee: Hogs PHP 10.00 per head; Large Cattle PHP 20.00 per head.",
+              "processing_time": "5 minutes",
+              "person_responsible": "Meat Inspector – MTO"
+            }
+          ]
+        }
+      ],
+      "fee_schedule": [
+        { "type": "Ante-mortem Fee – Hogs", "fee": "PHP 1.25 per head" },
+        { "type": "Ante-mortem Fee – Large Cattle", "fee": "PHP 70.00 per head" },
+        { "type": "Corral Fee – Hogs", "fee": "PHP 10.00 per head" },
+        { "type": "Corral Fee – Large Cattle", "fee": "PHP 20.00 per head" }
+      ],
+      "total_fees": "Varies by animal type (see fee schedule)",
+      "total_processing_time": "Simple – approximately 30 minutes",
+      "faqs": [
+        {
+          "question": "What is ante-mortem inspection?",
+          "answer": "Ante-mortem inspection is a check conducted on livestock before slaughter to ensure the animals are healthy and fit for public consumption."
+        },
+        {
+          "question": "Who needs to undergo ante-mortem inspection?",
+          "answer": "All meat vendors and persons with livestock (hogs, large cattle) intended for slaughter for public consumption."
+        },
+        {
+          "question": "What documents are required for large cattle?",
+          "answer": "You need a Barangay Clearance, Certificate of Ownership or Transfer, and a Deed of Sale with receipt from the Barangay."
+        },
+        {
+          "question": "Is there a separate PNP inspection for large cattle?",
+          "answer": "Yes. Large cattle must also undergo a final inspection at the PNP Municipal Office before slaughter."
+        },
+        {
+          "question": "How much is the ante-mortem fee for hogs?",
+          "answer": "PHP 1.25 per head, plus a corral fee of PHP 10.00 per head."
+        },
+        {
+          "question": "How much is the ante-mortem fee for large cattle?",
+          "answer": "PHP 70.00 per head, plus a corral fee of PHP 20.00 per head."
+        }
+      ]
+    },
+    {
+      "service_id": "MTO-007",
+      "service_name": "Post-Mortem Inspection of Livestock",
+      "description": "Inspection conducted after animals have been slaughtered to ensure the meat is safe and fit for public consumption.",
+      "office_or_division": "Municipal Treasurer's Office (MTO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "All meat vendors and persons with livestock that have been slaughtered",
+      "requirements": [
+        {
+          "document": "Barangay Clearance (for large cattle)",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        },
+        {
+          "document": "Certificate of Ownership or Transfer (for large cattle)",
+          "copies": null,
+          "where_to_secure": "Livestock Owner"
+        },
+        {
+          "document": "Deed of Sale with receipt from Barangay (for large cattle)",
+          "copies": null,
+          "where_to_secure": "Livestock Owner"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed with butchering of livestock after ante-mortem inspection.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Supervise the butchering.",
+              "fees": "None",
+              "processing_time": "Until butchering is completed",
+              "person_responsible": "Meat Inspector – MTO"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Inspect meat sample.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Meat Inspector – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Pay the corresponding fee and receive the official receipt.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Receive payment and issue official receipt.",
+              "fees": "Slaughter Fee: Hogs PHP 30.00 per head; Large Cattle PHP 70.00 per head. Slaughter Permit: Hogs PHP 30.00 per head; Large Cattle PHP 50.00 per head.",
+              "processing_time": "30 minutes",
+              "person_responsible": "Meat Inspector / Market Collector – MTO"
+            }
+          ]
+        }
+      ],
+      "fee_schedule": [
+        { "type": "Slaughter Fee – Hogs", "fee": "PHP 30.00 per head" },
+        { "type": "Slaughter Fee – Large Cattle", "fee": "PHP 70.00 per head" },
+        { "type": "Slaughter Permit – Hogs", "fee": "PHP 30.00 per head" },
+        { "type": "Slaughter Permit – Large Cattle", "fee": "PHP 50.00 per head" }
+      ],
+      "total_fees": "Varies by animal type (see fee schedule)",
+      "total_processing_time": "Simple – duration varies depending on butchering time, plus approximately 45 minutes for inspection and processing",
+      "faqs": [
+        {
+          "question": "What is post-mortem inspection?",
+          "answer": "Post-mortem inspection is a check conducted after livestock has been slaughtered to ensure the meat is safe and fit for public consumption."
+        },
+        {
+          "question": "Is post-mortem inspection required after ante-mortem?",
+          "answer": "Yes. Post-mortem inspection must follow the ante-mortem inspection and is conducted after butchering is completed."
+        },
+        {
+          "question": "How much is the slaughter fee for hogs?",
+          "answer": "The slaughter fee is PHP 30.00 per head, and the slaughter permit is PHP 30.00 per head."
+        },
+        {
+          "question": "How much is the slaughter fee for large cattle?",
+          "answer": "The slaughter fee is PHP 70.00 per head, and the slaughter permit is PHP 50.00 per head."
+        },
+        {
+          "question": "Who conducts the post-mortem inspection?",
+          "answer": "The Meat Inspector from the Municipal Treasurer's Office supervises the butchering and inspects meat samples."
+        }
+      ]
+    },
+    {
+      "service_id": "MTO-008",
+      "service_name": "Issuance of Ownership Certificate of Large Animals",
+      "description": "A document that proves ownership of large animals such as cattle, carabao, and horse.",
+      "office_or_division": "Municipal Treasurer's Office (MTO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Owners of large animals (carabao, cattle, horse)",
+      "requirements": [
+        {
+          "document": "Barangay Clearance",
+          "copies": null,
+          "where_to_secure": "Barangay"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Fill out the request form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the request form.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Meat Inspector – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Present the necessary requirements and apply for branding of animals.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Receive the requirements and perform the branding of animals.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "Meat Inspector – MTO"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Process the ownership certificate. If requirements are complete, proceed to step 3. If not, advise client to complete requirements.",
+              "fees": "None",
+              "processing_time": null,
+              "person_responsible": "Meat Inspector – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Proceed to the office of the Meat Inspector after 2 days.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the ownership certificate.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Meat Inspector – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Pay the corresponding fee and receive the ownership certificate.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Receive payment, issue official receipt, and release the ownership certificate.",
+              "fees": "To be confirmed at the MTO office",
+              "processing_time": null,
+              "person_responsible": "Meat Inspector – MTO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Fee to be confirmed at the MTO office",
+      "total_processing_time": "Simple – branding on day of application; ownership certificate released after 2 days",
+      "faqs": [
+        {
+          "question": "What large animals can be covered by an Ownership Certificate?",
+          "answer": "Carabao, cattle, and horses are the large animals covered by the Ownership Certificate issued by the MTO."
+        },
+        {
+          "question": "What document do I need to apply for an Ownership Certificate?",
+          "answer": "You need a Barangay Clearance from your barangay."
+        },
+        {
+          "question": "What is the branding process?",
+          "answer": "As part of the ownership certification process, the Meat Inspector performs official branding of the animal to mark it as registered under your ownership."
+        },
+        {
+          "question": "How long does it take to get the Ownership Certificate?",
+          "answer": "The branding is done on the day of application. The ownership certificate is ready for release after 2 days."
+        },
+        {
+          "question": "Where do I claim the Ownership Certificate?",
+          "answer": "Return to the office of the Meat Inspector at the MTO after 2 days to claim and pay for your ownership certificate."
+        }
+      ]
+    }
+  ]
+}

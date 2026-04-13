@@ -1,0 +1,325 @@
+{
+  "service_office": "Municipal Environment and Natural Resources Office",
+  "service_category": "External",
+  "services": [
+    {
+      "service_id": "MENRO-001",
+      "service_name": "Responding to Complaints Related to Pollution, Sanitation, and Violation of Environmental Laws",
+      "description": "Technical assistance on environment and health issues arising from the impacts of environmental degradation, unsafe water, poor sanitation, and improper solid waste management.",
+      "office_or_division": "Municipal Environment and Natural Resources Office (MENRO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Clients with complaints related to pollution, sanitation, and violation of environmental laws",
+      "requirements": [
+        {
+          "document": "Pictures of complaints related to pollution, sanitation, or environmental law violation",
+          "copies": null,
+          "where_to_secure": "Client (complainant)"
+        },
+        {
+          "document": "Letter of Request",
+          "copies": null,
+          "where_to_secure": "Client (complainant)"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Sign in the logbook and present the request letter and photos of evidence.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Get the client's information and conduct an interview.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Approach MENRO personnel to discuss the complaint.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Discuss the issue with the complainant.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Schedule the date of inspection and dialogue with concerned parties.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 40 minutes for initial intake; inspection and dialogue scheduled separately",
+      "faqs": [
+        {
+          "question": "What types of complaints does the MENRO handle?",
+          "answer": "The MENRO handles complaints related to pollution, sanitation violations, improper solid waste management, unsafe water, and violations of environmental laws."
+        },
+        {
+          "question": "What do I need to bring when filing an environmental complaint?",
+          "answer": "You need to bring a Letter of Request and photos or pictures of the pollution, sanitation issue, or environmental law violation you are reporting."
+        },
+        {
+          "question": "Is there a fee for filing an environmental complaint?",
+          "answer": "No, this service is free of charge."
+        },
+        {
+          "question": "What happens after I file a complaint?",
+          "answer": "The MENRO staff will interview you and discuss the issue. They will then schedule a date for inspection and dialogue with the concerned parties."
+        },
+        {
+          "question": "How long does the initial complaint process take?",
+          "answer": "The initial intake and discussion takes approximately 40 minutes. The actual inspection and dialogue will be scheduled on a separate date."
+        },
+        {
+          "question": "Can I file a complaint about a neighbor's improper waste disposal?",
+          "answer": "Yes. Complaints about improper solid waste management, sanitation issues, and pollution are all within the MENRO's jurisdiction. Bring photos and a request letter when you visit the office."
+        }
+      ]
+    },
+    {
+      "service_id": "MENRO-002",
+      "service_name": "Issuance of Certificate for Tree Cutting Permit",
+      "description": "Technical assistance indicating the number of trees, location, and volume to be cut, intended to be utilized by the landowner.",
+      "office_or_division": "Municipal Environment and Natural Resources Office (MENRO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Landowners applying for a tree cutting permit",
+      "requirements": [
+        {
+          "document": "Personal letter (request letter from the landowner)",
+          "copies": null,
+          "where_to_secure": "Landowner"
+        },
+        {
+          "document": "Barangay Certification",
+          "copies": null,
+          "where_to_secure": "Sangguniang Barangay"
+        },
+        {
+          "document": "Pictures of trees (from root to tip)",
+          "copies": null,
+          "where_to_secure": "Landowner"
+        },
+        {
+          "document": "Land Title Number (TCT – Transfer Certificate of Title)",
+          "copies": null,
+          "where_to_secure": "Landowner"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Sign in the logbook and present the documents.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Get the client's information and conduct an interview.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Verify the completeness of required documents.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "If the area is within 5 kilometers from the municipal building, inform the client that inspection will be conducted on the same day.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            },
+            {
+              "sub_step": "1.4",
+              "action": "If the area is more than 5 kilometers from the municipal building, advise the client that inspection will be conducted on the following day.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Assist MENRO in the conduct of inspection.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Prepare the certification if the request is found in order and issue Order of Payment.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Pay for the certification at the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Receive payment and issue Official Receipt.",
+              "fees": "PHP 60.00",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Treasurer's Office / MTO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Present Official Receipt and receive the certification.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Issue the certification (tree cutting permit).",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 60.00",
+      "total_processing_time": "Simple – same day if within 5 km from municipal building; next day if more than 5 km; approximately 30 minutes for processing on inspection day",
+      "faqs": [
+        {
+          "question": "What is a Tree Cutting Permit?",
+          "answer": "A Tree Cutting Permit is a certificate issued by the MENRO indicating the number of trees, their location, and volume to be cut, authorizing the landowner to legally cut trees on their property."
+        },
+        {
+          "question": "Who can apply for a Tree Cutting Permit?",
+          "answer": "Landowners who need to cut trees on their property may apply for a Tree Cutting Permit."
+        },
+        {
+          "question": "What documents do I need for a Tree Cutting Permit?",
+          "answer": "You need a personal request letter, a Barangay Certification, pictures of the trees from root to tip, and your Land Title (TCT)."
+        },
+        {
+          "question": "How much does the Tree Cutting Permit cost?",
+          "answer": "The certification fee is PHP 60.00, paid at the Municipal Treasurer's Office."
+        },
+        {
+          "question": "When will the inspection be conducted?",
+          "answer": "If your property is within 5 kilometers of the municipal building, inspection is conducted on the same day. If it is more than 5 kilometers away, inspection is scheduled for the following day."
+        },
+        {
+          "question": "Why do I need photos of the trees?",
+          "answer": "Photos of the trees from root to tip are required as part of the documentation to verify the trees to be cut during the inspection."
+        },
+        {
+          "question": "Where do I pay the tree cutting permit fee?",
+          "answer": "Payment is made at the Municipal Treasurer's Office. Bring the Official Receipt back to the MENRO to claim your certification."
+        }
+      ]
+    },
+    {
+      "service_id": "MENRO-003",
+      "service_name": "Issuance of Certificate of Inspection for New and Renewal of Business Permits (Poultry, Piggery, and Other Business Establishments)",
+      "description": "Technical assistance to protect public health and safety with particular focus on sanitation compliance for agri-businesses and other business establishments applying for new or renewal of business permits.",
+      "office_or_division": "Municipal Environment and Natural Resources Office (MENRO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Agri-business owners and other business establishment owners applying for new or renewal of business permits",
+      "requirements": [
+        {
+          "document": "Business Permit Tax Order of Payment",
+          "copies": null,
+          "where_to_secure": "Agri-business owner"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Sign in the logbook and inform the office of the request for inspection.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Interview the client regarding the location of the business.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Accompany MENRO during inspection and provide needed documents.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Conduct inspection of the business establishment and issue certificate of inspection if compliant.",
+              "fees": "None",
+              "processing_time": "1 hour",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "If the business violates sanitation or environmental standards, send a notice of violation and recommendation on the following day.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            },
+            {
+              "sub_step": "2.3",
+              "action": "Conduct a follow-up inspection 1 week after the issuance of the notice of violation.",
+              "fees": "None",
+              "processing_time": "1 hour",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            },
+            {
+              "sub_step": "2.4",
+              "action": "Issue the certificate of inspection after the follow-up inspection confirms compliance.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Environment and Natural Resources Officer / MENRO Staff"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 1 hour for compliant establishments; up to 1 week plus 1 hour additional for establishments with violations",
+      "faqs": [
+        {
+          "question": "Who needs a Certificate of Inspection from the MENRO?",
+          "answer": "Agri-business owners (such as poultry and piggery operators) and other business establishments applying for a new business permit or renewing an existing one are required to secure a Certificate of Inspection from the MENRO."
+        },
+        {
+          "question": "What document do I need to bring for the inspection request?",
+          "answer": "You need to bring your Business Permit Tax Order of Payment."
+        },
+        {
+          "question": "Is there a fee for the Certificate of Inspection?",
+          "answer": "No, the inspection and issuance of the certificate are free of charge."
+        },
+        {
+          "question": "How long does the inspection take?",
+          "answer": "The inspection takes approximately 1 hour. If your establishment is fully compliant, the certificate is issued on the same day."
+        },
+        {
+          "question": "What happens if my business fails the inspection?",
+          "answer": "If your business violates sanitation or environmental standards, MENRO will send a notice of violation with recommendations on the following day. A follow-up inspection will be conducted 1 week later. If found compliant, the certificate of inspection will then be issued."
+        },
+        {
+          "question": "Does the MENRO inspect poultry and piggery farms?",
+          "answer": "Yes. Poultry farms, piggery operations, and similar agri-businesses are specifically covered by the MENRO's inspection service for business permit applications."
+        },
+        {
+          "question": "Can I request an inspection for a business permit renewal?",
+          "answer": "Yes. The Certificate of Inspection is required for both new business permit applications and renewals."
+        }
+      ]
+    }
+  ]
+}

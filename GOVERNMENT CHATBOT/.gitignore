@@ -1,0 +1,76 @@
+# ── Python ──
+env/
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ── AI/ML model files (too large for GitHub) ──
+*.bin
+*.pt
+*.pth
+*.pkl
+*.faiss
+*.onnx
+*.h5
+*.safetensors
+*.gguf
+*.npy
+*.npz
+
+# ── Model folders ──
+3. training script/models/flan_t5_model/
+3. training script/models/flan_t5_tokenizer/
+3. training script/models/sentence_transformer/
+3. training script/models/sentiment_model/
+3. training script/models/sentiment_tokenizer/
+3. training script/models/
+
+# ── Jupyter Notebooks checkpoints ──
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ── Large data / CSV ──
+*.csv
+
+# ── Keep these JSON files ──
+!1. raw dataset/citizens_charter_2025_sampaloc_quezon.json
+!1. raw dataset/cleaned_dataset/*.json
+!services.json
+
+# ── Secrets & environment ──
+.env
+.env.*
+*.key
+secrets.py
+config_secret.py
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# ── OS ──
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ── Logs ──
+*.log
+logs/
+
+# ── Dist / build ──
+dist/
+build/
+*.egg-info/

@@ -1,0 +1,609 @@
+{
+  "service_office": "Municipal Agriculture Office",
+  "service_category": "Internal & External",
+  "services": [
+    {
+      "service_id": "MAO-AGR-001",
+      "service_name": "Provision of Technical Assistance on Crops, Livestock and Fisheries",
+      "description": "Technical assistance on crops, livestock and fisheries in the form of services, materials, or inputs provided to farmers.",
+      "office_or_division": "Municipal Agriculture Office",
+      "classification": "Simple",
+      "type_of_transaction": "G2C",
+      "who_may_avail": "Farmers",
+      "requirements": [
+        {
+          "document": "Sample or picture of damaged crop/livestock/fisheries",
+          "copies": null,
+          "where_to_secure": "Farmer"
+        },
+        {
+          "document": "Report of incidence",
+          "copies": null,
+          "where_to_secure": "Farmer"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Sign in the logbook, request for appropriate technical assistance, submit to interview and provide information requested by the Agriculturist.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Get the client's information and conduct interview.",
+              "fees": "None",
+              "processing_time": "20 minutes",
+              "person_responsible": "Municipal Agriculturist / Agricultural Technologist, MAO"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Analyze the problem and recommend solution or give IEC materials as reference.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "Municipal Agriculturist / Agricultural Technologist, MAO"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "If immediate action is needed, recommend an on-site visit and provide schedule of visit.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Agriculturist / Agricultural Technologist, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Take note of the schedule of farm visit and assist the Agriculturist during the on-site visitation. Take note of the diagnostic and advice.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Conduct farm visit.",
+              "fees": "None",
+              "processing_time": "4 hours to 1 day",
+              "person_responsible": "Municipal Agriculturist / Agricultural Technologist, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Implement recommended action.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Provide written diagnostic and recommendation.",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "Municipal Agriculturist / Agricultural Technologist, MAO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "faqs": [
+        {
+          "question": "Who can avail of the technical assistance on crops, livestock, and fisheries?",
+          "answer": "This service is available to farmers in the municipality."
+        },
+        {
+          "question": "What should I bring when requesting technical assistance?",
+          "answer": "Bring a sample or picture of the damaged crop, livestock, or fisheries, and a report of incidence."
+        },
+        {
+          "question": "Is there a fee for technical assistance?",
+          "answer": "No, technical assistance on crops, livestock, and fisheries is provided free of charge."
+        },
+        {
+          "question": "Will the agriculturist visit my farm?",
+          "answer": "Yes, if immediate action is needed, an on-site farm visit will be scheduled. The farm visit may take 4 hours to 1 full day."
+        },
+        {
+          "question": "Where do I go to request technical assistance?",
+          "answer": "Proceed to the Municipal Agriculture Office, sign in the logbook, and request for the appropriate technical assistance."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-AGR-002",
+      "service_name": "Provision of Artificial Insemination Services (Carabao)",
+      "description": "A service assistance to farmers raising a female carabao (caraheifer) aged 3 years and above.",
+      "office_or_division": "Municipal Agriculture Office",
+      "classification": "Simple",
+      "type_of_transaction": "G2C",
+      "who_may_avail": "Caraheifer owner",
+      "requirements": [
+        {
+          "document": "Female Carabao (aged 3 years and above)",
+          "copies": null,
+          "where_to_secure": "Farmer"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 0,
+          "client_action": "Wait for announcement.",
+          "agency_actions": [
+            {
+              "sub_step": "0.1",
+              "action": "Announce the date of palpitation and estrous determination of carabao through meetings, letters, CATV, or Bandillo.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "Municipal Agriculturist, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the site on the date for the determination if carabao is in heat or ready for insemination or breeding.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Determine if carabao is in heat (natural or for estrous synchronization).",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Livestock Technician, OPV"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "If in natural heat, perform artificial insemination.",
+              "fees": "None",
+              "processing_time": "20 minutes",
+              "person_responsible": "Livestock Technician, OPV"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "If to be estrous synchronized, inject hormone.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Livestock Technician, OPV"
+            },
+            {
+              "sub_step": "1.4",
+              "action": "Record the animal's condition in the estrous synchronization form.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Livestock Technician, OPV / Agricultural Technician, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "If carabao is inseminated, return the animal to the farm.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Advise farmer to take care of the carabao.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "Livestock Technician, OPV"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "If carabao is injected with hormone, follow the advice of the technician on the given schedule of follow-up AI and the proper care of the carabao.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Advise farmer to return after 3 days for artificial insemination.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Livestock Technician, OPV"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Determine if the carabao is ready for AI. Conduct AI.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "Livestock Technician, OPV"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Return on the schedule for final AI.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Advise farmer to return to the site the following day for follow-up AI.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "Livestock Technician, OPV"
+            },
+            {
+              "sub_step": "4.2",
+              "action": "Consolidation of data and terminal report for the entire activity.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "Agricultural Technologist, MAO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "faqs": [
+        {
+          "question": "Who can avail of the artificial insemination service for carabao?",
+          "answer": "Owners of a female carabao (caraheifer) aged 3 years and above can avail of this service."
+        },
+        {
+          "question": "Is there a fee for artificial insemination services?",
+          "answer": "No, the artificial insemination service for carabao is free of charge."
+        },
+        {
+          "question": "How will I know when the artificial insemination schedule is?",
+          "answer": "The Municipal Agriculture Office will announce the date through community meetings, letters, CATV, or Bandillo."
+        },
+        {
+          "question": "What happens if my carabao is not yet in heat?",
+          "answer": "The livestock technician will inject a hormone for estrous synchronization and advise you to return after 3 days for the artificial insemination."
+        },
+        {
+          "question": "How many visits are needed for the entire AI process?",
+          "answer": "It may take multiple visits depending on the carabao's condition — initial determination, follow-up after 3 days if hormone was given, and a final follow-up AI the next day."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-AGR-003",
+      "service_name": "Provision of Technical Assistance for the Availment of Vegetable Seeds",
+      "description": "An assistance in the form of vegetable seeds provided to farmers and individuals who engage in crop production and backyard farming.",
+      "office_or_division": "Municipal Agriculture Office",
+      "classification": "Simple",
+      "type_of_transaction": "G2C",
+      "who_may_avail": "Farmers",
+      "requirements": [
+        {
+          "document": "Picture of the area",
+          "copies": null,
+          "where_to_secure": "Farmer"
+        },
+        {
+          "document": "Size of the area",
+          "copies": null,
+          "where_to_secure": "Farmer"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Municipal Agriculture Office and inquire about the availability of vegetable seeds.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Conduct interview regarding the size and location of the area.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Agricultural Technologist, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive the vegetable seeds.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Release available seeds.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Agricultural Technologist, MAO"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Record in the logbook.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Agricultural Technologist, MAO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "faqs": [
+        {
+          "question": "Who can avail of vegetable seeds from the Municipal Agriculture Office?",
+          "answer": "Farmers and individuals engaged in crop production and backyard farming can avail of this service."
+        },
+        {
+          "question": "What do I need to bring when requesting vegetable seeds?",
+          "answer": "Bring a picture of your area and information about the size of the area where you plan to plant."
+        },
+        {
+          "question": "Is there a cost for the vegetable seeds?",
+          "answer": "No, the vegetable seeds are provided free of charge."
+        },
+        {
+          "question": "How long does it take to receive vegetable seeds?",
+          "answer": "The process takes approximately 20 minutes from interview to release of seeds, subject to availability."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-AGR-004",
+      "service_name": "Provision of Technical Assistance for the Availment of Fingerlings",
+      "description": "Assistance provided to fisher folk including fingerlings, management, and technical advisory.",
+      "office_or_division": "Municipal Agriculture Office",
+      "classification": "Simple",
+      "type_of_transaction": "G2C",
+      "who_may_avail": "Farmers and Fisher Folk",
+      "requirements": [
+        {
+          "document": "Size of the area",
+          "copies": null,
+          "where_to_secure": "Farmer"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 0,
+          "client_action": "Wait for announcement.",
+          "agency_actions": [
+            {
+              "sub_step": "0.1",
+              "action": "Announce the date of availability of fingerlings through meetings, CATV, or Bandillo.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "Municipal Agriculturist, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Municipal Agriculture Office and inquire about the program.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Conduct interview, get the information on area and location of fishpond, and include the client name in the list of farmers who will avail fingerlings.",
+              "fees": "None",
+              "processing_time": "20 minutes",
+              "person_responsible": "Agricultural Technologist, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Return to the Office of Municipal Agriculture on the specified date. Receive the fingerlings and sign in the recipients logbook.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Release fingerlings and record in the logbook.",
+              "fees": "None",
+              "processing_time": "20 minutes",
+              "person_responsible": "Agricultural Technologist, MAO"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Provide monthly report for the status of fingerlings.",
+              "fees": "None",
+              "processing_time": "Ongoing (monthly)",
+              "person_responsible": "Agricultural Technologist, MAO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "faqs": [
+        {
+          "question": "Who can avail of fingerlings from the Municipal Agriculture Office?",
+          "answer": "Farmers and fisher folk with fishponds can avail of this service."
+        },
+        {
+          "question": "What information do I need to provide to avail fingerlings?",
+          "answer": "You need to provide the size and location of your fishpond."
+        },
+        {
+          "question": "Is there a fee for the fingerlings?",
+          "answer": "No, fingerlings are provided free of charge."
+        },
+        {
+          "question": "How will I know when fingerlings are available?",
+          "answer": "The Municipal Agriculture Office will announce the availability date through community meetings, CATV, or Bandillo."
+        },
+        {
+          "question": "Do I need to return to the office to receive the fingerlings?",
+          "answer": "Yes, you need to register first during your initial visit, then return on the specified date to receive the fingerlings and sign in the recipients logbook."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-AGR-005",
+      "service_name": "Provision of Anti-Rabies Vaccination",
+      "description": "Services provided to pet owners where dogs and cats are subjected to anti-rabies vaccination.",
+      "office_or_division": "Municipal Agriculture Office",
+      "classification": "Simple",
+      "type_of_transaction": "G2C",
+      "who_may_avail": "Dog and Cat owners",
+      "requirements": [
+        {
+          "document": "Animal record (if available)",
+          "copies": null,
+          "where_to_secure": "Pet owner"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 0,
+          "client_action": "Wait for announcement.",
+          "agency_actions": [
+            {
+              "sub_step": "0.1",
+              "action": "Announce the date of vaccination through meetings, CATV, or Bandillo.",
+              "fees": "None",
+              "processing_time": "To be announced",
+              "person_responsible": "Municipal Agriculturist, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 1,
+          "client_action": "Bring the animal to the site of vaccination together with the animal record if available. Approach the vaccinator or Agricultural Technologist for interview and fill out the animal information form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Advise dog/cat owner to fill out animal information form.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Agricultural Technologist, MAO"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Conduct interview.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Agricultural Technologist, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Assist the vaccinator in holding the animal for vaccination.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Vaccinate the animal.",
+              "fees": "None",
+              "processing_time": "To be determined",
+              "person_responsible": "Livestock Technician, OPV / Agricultural Technologist, MAO"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Give advice on how to take care of newly vaccinated animal.",
+              "fees": "None",
+              "processing_time": "To be determined",
+              "person_responsible": "Livestock Technician, OPV / Agricultural Technologist, MAO"
+            },
+            {
+              "sub_step": "2.3",
+              "action": "Provide terminal report as to the number of animals that underwent vaccination.",
+              "fees": "None",
+              "processing_time": "To be determined",
+              "person_responsible": "Agricultural Technologist, MAO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "faqs": [
+        {
+          "question": "Who can avail of the anti-rabies vaccination service?",
+          "answer": "Dog and cat owners in the municipality can avail of this service."
+        },
+        {
+          "question": "What do I need to bring for the anti-rabies vaccination?",
+          "answer": "Bring your pet and its animal record if available. You will also be asked to fill out an animal information form on-site."
+        },
+        {
+          "question": "Is there a fee for anti-rabies vaccination?",
+          "answer": "No, anti-rabies vaccination is provided free of charge."
+        },
+        {
+          "question": "How will I know when the vaccination schedule is?",
+          "answer": "The Municipal Agriculture Office will announce the date through community meetings, CATV, or Bandillo."
+        },
+        {
+          "question": "What should I do after my pet is vaccinated?",
+          "answer": "The livestock technician or agricultural technologist will advise you on how to properly care for your newly vaccinated animal."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-AGR-006",
+      "service_name": "Provision of Technical Assistance for the Availment of Certified Seeds or Hybrid Palay Seeds",
+      "description": "Assistance provided to rice farmers who want to avail any of the certified and hybrid palay seeds.",
+      "office_or_division": "Municipal Agriculture Office",
+      "classification": "Simple",
+      "type_of_transaction": "G2C",
+      "who_may_avail": "Farmers",
+      "requirements": [
+        {
+          "document": "Size of the area and personal information of farmer/owner/tenant",
+          "copies": null,
+          "where_to_secure": "Farmer"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 0,
+          "client_action": "Wait for announcement.",
+          "agency_actions": [
+            {
+              "sub_step": "0.1",
+              "action": "Announce the date of availability, variety, and prices of seeds through meetings, CATV, or Bandillo.",
+              "fees": "None",
+              "processing_time": "To be announced",
+              "person_responsible": "Municipal Agriculturist, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Municipal Agriculture Office and inquire about the program. Submit to interview.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Conduct interview, get information regarding the rice field, and include the client name in the list of farmers who will avail of the palay seeds.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Agricultural Technologist, MAO"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Inform the farmers on the date of availability of certified seeds or hybrid seeds.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Agricultural Technologist, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Return to the Municipal Agriculture Office and pay for the seeds. Then get the palay seeds.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Release the palay seeds. Accept and record payment.",
+              "fees": "Inbred seeds: None. Hybrid seeds: PHP 950.00 per 3-kilo bag",
+              "processing_time": "5 minutes",
+              "person_responsible": "Agricultural Technologist, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Sign in the recipient logbook.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue acknowledgement receipt.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Agricultural Technologist, MAO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Inbred seeds: None. Hybrid seeds: PHP 950.00 per 3-kilo bag",
+      "faqs": [
+        {
+          "question": "Who can avail of certified or hybrid palay seeds?",
+          "answer": "Rice farmers — whether owner or tenant — can avail of this service."
+        },
+        {
+          "question": "Are the palay seeds free?",
+          "answer": "Inbred seeds are free of charge. Hybrid seeds cost PHP 950.00 per 3-kilo bag."
+        },
+        {
+          "question": "What information do I need to provide to avail of palay seeds?",
+          "answer": "You need to provide the size of your rice field and your personal information as farmer, owner, or tenant."
+        },
+        {
+          "question": "How will I know when the palay seeds are available?",
+          "answer": "The Municipal Agriculture Office will announce the availability date, variety, and prices through community meetings, CATV, or Bandillo."
+        },
+        {
+          "question": "Will I receive an official receipt after purchasing hybrid seeds?",
+          "answer": "Yes, an acknowledgement receipt will be issued after payment and release of seeds."
+        }
+      ]
+    }
+  ]
+}

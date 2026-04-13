@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Municipality of Sampaloc Quezon Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>🏛️ Municipality of Sampaloc Quezon</h1>
+                <p>Government Services Chatbot</p>
+            </div>
+            <button class="clear-btn" onclick="clearChat()" title="Clear conversation">🗑️</button>
+        </div>
+        
+        <div class="quick-actions">
+            <button class="quick-btn" onclick="quickAsk('What services do you offer?')">📋 Services</button>
+            <button class="quick-btn" onclick="quickAsk('What are your office hours?')">🕐 Hours</button>
+            <button class="quick-btn" onclick="quickAsk('How do I get a permit?')">📄 Permits</button>
+            <button class="quick-btn" onclick="quickAsk('Contact information')">📞 Contact</button>
+        </div>
+        
+        <div class="chat-container" id="chatContainer">
+            <div class="message-wrapper bot-wrapper">
+                <div class="avatar bot-avatar">
+                    <img src="{{ url_for('static', filename='LGU-Sampaloc-Quezon-Official-Logo-scaled.png') }}" alt="Bot Avatar">
+                </div>
+                <div class="message bot-message">
+                    <p>Hello! I'm here to help you with information about municipal services. How can I assist you today?</p>
+                    <span class="timestamp"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Ask about our services..." aria-label="Message input" />
+            <button onclick="sendMessage()" aria-label="Send message">
+                <span class="btn-text">Send</span>
+                <span class="btn-icon">📤</span>
+            </button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

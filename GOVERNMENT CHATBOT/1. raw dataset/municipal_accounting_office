@@ -1,0 +1,182 @@
+{
+  "service_office": "Municipal Accounting Office",
+  "service_category": "Internal",
+  "services": [
+    {
+      "service_id": "MAO-001",
+      "service_name": "Processing of Vouchers",
+      "description": "Processing of expenses that the LGU needs to pay to employees and various suppliers. Every voucher has its corresponding supporting documents to be attached as per COA Circular 2012-001 dated June 14, 2012. All disbursement vouchers with complete supporting documents and duly signed by authorized signatories will be processed.",
+      "office_or_division": "Municipal Accounting Office",
+      "classification": "Simple",
+      "type_of_transaction": "G2C",
+      "who_may_avail": "Officials and Employees of the Municipality",
+      "requirements": [
+        {
+          "document": "Obligation Request and Status (OBR)",
+          "copies": 3,
+          "where_to_secure": "Municipal Budget Office (MBO)"
+        },
+        {
+          "document": "BAC Documents",
+          "copies": 2,
+          "where_to_secure": "BAC Secretary"
+        },
+        {
+          "document": "Disbursement Voucher",
+          "copies": 2,
+          "where_to_secure": "Concerned Offices"
+        },
+        {
+          "document": "Purchase Order",
+          "copies": 2,
+          "where_to_secure": "Concerned Offices"
+        },
+        {
+          "document": "Purchase Request",
+          "copies": 2,
+          "where_to_secure": "Concerned Offices"
+        },
+        {
+          "document": "Abstract of Shopping",
+          "copies": 2,
+          "where_to_secure": "Concerned Offices"
+        },
+        {
+          "document": "Inspection Report",
+          "copies": 2,
+          "where_to_secure": "Concerned Offices"
+        },
+        {
+          "document": "Pictures",
+          "copies": 2,
+          "where_to_secure": "Concerned Offices"
+        },
+        {
+          "document": "Attendance Sheet",
+          "copies": 2,
+          "where_to_secure": "Concerned Offices"
+        },
+        {
+          "document": "Communication",
+          "copies": 2,
+          "where_to_secure": "Concerned Offices"
+        },
+        {
+          "document": "Menu",
+          "copies": 2,
+          "where_to_secure": "Concerned Offices"
+        },
+        {
+          "document": "Project Proposal",
+          "copies": 2,
+          "where_to_secure": "Concerned Offices"
+        },
+        {
+          "document": "Acknowledgement Receipt for Equipment (ARE) with Recipients Signature",
+          "copies": 2,
+          "where_to_secure": "Concerned Offices"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit vouchers to the Municipal Accounting Office.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive vouchers.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Accounting Office Staff, Municipal Accounting Office (MAO)"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Enter account name and code on the voucher and check the completeness of supporting documents attached.",
+              "fees": "None",
+              "processing_time": "Included in Step 1",
+              "person_responsible": "Accounting Office Staff, MAO"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "Enter Purchase Order (PO) number.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "Accounting Staff, MAO"
+            },
+            {
+              "sub_step": "1.4",
+              "action": "Sign the voucher to certify completeness of supporting documents.",
+              "fees": "None",
+              "processing_time": "Included in Step 1",
+              "person_responsible": "Accounting Office Staff, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive processed vouchers for completeness checking.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Enter Journal Entry Voucher (JEV) number to complete vouchers to be forwarded to the Municipal Treasurer's Office (MTO) for check preparation.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "Accounting Staff, MAO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Wait for recheck of supporting documents.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Recheck supporting documents and corresponding signatures.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "Accounting Staff, MAO"
+            }
+          ]
+        }
+      ],
+      "total_processing_time": "12 minutes",
+      "total_fees": "None",
+      "legal_basis": "COA Circular 2012-001 dated June 14, 2012",
+      "faqs": [
+        {
+          "question": "What is the purpose of the voucher processing service?",
+          "answer": "The voucher processing service handles the payment of expenses by the LGU to employees and various suppliers. All disbursement vouchers with complete supporting documents and duly signed by authorized signatories will be processed."
+        },
+        {
+          "question": "Who can avail of the voucher processing service?",
+          "answer": "Officials and employees of the Municipality may avail of this service."
+        },
+        {
+          "question": "What documents are required to process a voucher?",
+          "answer": "You need to submit the following: OBR (3 copies) from the MBO, BAC Documents (2 copies) from the BAC Secretary, and other supporting documents such as Disbursement Voucher, Purchase Order, Purchase Request, Abstract of Shopping, Inspection Report, Pictures, Attendance Sheet, Communication, Menu, Project Proposal, and Acknowledgement Receipt for Equipment (ARE) — all in 2 copies — from the concerned offices."
+        },
+        {
+          "question": "How long does it take to process a voucher?",
+          "answer": "The total processing time is approximately 12 minutes, provided all supporting documents are complete and properly signed."
+        },
+        {
+          "question": "Is there a fee for processing vouchers?",
+          "answer": "No, there are no fees for processing vouchers at the Municipal Accounting Office."
+        },
+        {
+          "question": "Where do I submit my voucher?",
+          "answer": "Submit your voucher directly to the Municipal Accounting Office (MAO)."
+        },
+        {
+          "question": "What happens after the voucher is processed?",
+          "answer": "After processing and assigning a JEV number, the complete voucher is forwarded to the Municipal Treasurer's Office (MTO) for check preparation."
+        },
+        {
+          "question": "What is COA Circular 2012-001?",
+          "answer": "COA Circular 2012-001 dated June 14, 2012 is the legal basis that prescribes the supporting documents required for each type of disbursement voucher to ensure proper auditing and accountability."
+        }
+      ]
+    }
+  ]
+}
+

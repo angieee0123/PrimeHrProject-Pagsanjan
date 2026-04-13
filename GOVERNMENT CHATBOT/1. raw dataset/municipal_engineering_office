@@ -1,0 +1,833 @@
+{
+  "service_office": "Municipal Engineering Office",
+  "service_category": "Internal & External",
+  "services": [
+    {
+      "service_id": "MEO-001",
+      "service_name": "Issuance of Building Permits Including Ancillary Permits",
+      "description": "A document issued to a person, firm, or corporation prior to the construction of their building. Covers: (1) Single dwelling residential of not more than 3 storeys, (2) Commercial buildings of not more than 2 storeys, (3) Renovation within a building, and (4) Warehouse not more than 2 storeys high storing non-hazardous substances. Includes inspection and review to comply with approved standard requirements on zoning and land use, lines and grades, structural design, sanitary and sewerage, environmental health, electrical and mechanical safety, and other rules under the National Building Code of the Philippines. Applicable for projects with total floor area not more than 1,500 sq.m.",
+      "office_or_division": "Municipal Engineering Office",
+      "classification": "Complex – 5 days",
+      "type_of_transaction": ["G2G", "G2B", "G2C"],
+      "who_may_avail": "Any person, firm or corporation including any agency of the government who is planning to erect, construct, alter, repair, move, or demolish any building or structure",
+      "requirements": [
+        {
+          "document": "Filled-up and Notarized Unified Application Form",
+          "copies": 4,
+          "where_to_secure": "Municipal Engineering Office"
+        },
+        {
+          "document": "Zoning and Locational Clearance and all its supporting documents: (1) Community Tax Certificate, (2) Certificate of Ownership/Tax Declaration/Deed of Sale/Land Title/Lease Contract, (3) Tax Clearance, (4) Barangay Clearance, (5) Design Plans and Specifications including 4 photocopies of valid licenses of all involved professionals, (6) Cost Estimate",
+          "copies": 4,
+          "where_to_secure": "MPDC Office / Applicant"
+        },
+        {
+          "document": "BFP Clearance (to be secured during the process)",
+          "copies": 1,
+          "where_to_secure": "BFP Office / Station"
+        },
+        {
+          "document": "Mayor's Permit (to be secured during the process)",
+          "copies": 1,
+          "where_to_secure": "Mayor's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit the filled-up Unified Application Forms and the Zoning and Locational Clearances with all supporting documents.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the application forms and supporting documents. Advise the applicant to return after receiving a notification/text message (usually after 1 to 2 days) regarding the result of technical evaluation and assessment of fees.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Evaluate the Building Plan and Specifications.",
+              "fees": "None",
+              "processing_time": "1 to 2 days",
+              "person_responsible": "Municipal Engineer, Municipal Engineering Office"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "If it passes the evaluation, proceed with the site inspection.",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            },
+            {
+              "sub_step": "1.4",
+              "action": "Prepare the Order of Payment.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "Municipal Engineer, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Return to the office after receiving the notification/text message.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Notify the applicant via text message regarding the evaluation result. If it passes, issue the Order of Payment.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.1",
+          "client_action": "Pay the fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1.1",
+              "action": "Issue the Order of Payment.",
+              "fees": "Building Permit Fees – as per the Schedule of Fees and Charges of the National Building Code of the Philippines",
+              "processing_time": "15 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.2",
+          "client_action": "Secure BFP Clearance.",
+          "agency_actions": [
+            {
+              "sub_step": "2.2.1",
+              "action": "Advise the applicant to secure BFP Clearance.",
+              "fees": "Fire Safety Inspection Fee – as per BFP's assessment",
+              "processing_time": "1 to 3 days",
+              "person_responsible": "BFP Personnel, BFP"
+            }
+          ]
+        },
+        {
+          "step_number": "2.3",
+          "client_action": "Secure Mayor's Permit.",
+          "agency_actions": [
+            {
+              "sub_step": "2.3.1",
+              "action": "Advise the applicant to secure Mayor's Permit.",
+              "fees": "Mayor's Permit Fee for Construction – as per lot size: 50 sq.m. and below = PHP 120.00; 51 sq.m. to 150 sq.m. = PHP 180.00; above 150 sq.m. = PHP 240.00",
+              "processing_time": "1 day",
+              "person_responsible": "Mayor's Office Staff, Office of the Mayor"
+            }
+          ]
+        },
+        {
+          "step_number": "2.4",
+          "client_action": "Submit the BFP Clearance, Mayor's Permit, and all corresponding Official Receipts.",
+          "agency_actions": [
+            {
+              "sub_step": "2.4.1",
+              "action": "If evaluation fails, explain to the applicant, provide written explanation, and advise to have the plan rectified before re-submitting.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "Municipal Engineer, Municipal Engineering Office"
+            },
+            {
+              "sub_step": "2.4.2",
+              "action": "Receive the BFP Clearance, Mayor's Permit, and all corresponding Official Receipts, then record and process.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the Permits.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Sign and issue the Permits.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Municipal Engineer, Municipal Engineering Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Building Permit Fees (per National Building Code), Fire Safety Inspection Fee (per BFP), Mayor's Permit Fee (PHP 120.00 / PHP 180.00 / PHP 240.00 depending on lot size)",
+      "total_processing_time": "Complex – approximately 5 days",
+      "legal_basis": "National Building Code of the Philippines",
+      "faqs": [
+        {
+          "question": "What is a Building Permit?",
+          "answer": "A Building Permit is a document issued before the construction, alteration, repair, or demolition of a building or structure. It ensures compliance with zoning, structural, sanitary, electrical, and mechanical safety standards under the National Building Code of the Philippines."
+        },
+        {
+          "question": "Who needs to secure a Building Permit?",
+          "answer": "Any person, firm, corporation, or government agency planning to erect, construct, alter, repair, move, or demolish any building or structure must secure a Building Permit."
+        },
+        {
+          "question": "What types of buildings are covered by this service?",
+          "answer": "This service covers single dwelling residential buildings of not more than 3 storeys, commercial buildings of not more than 2 storeys, renovations within a building, and warehouses of not more than 2 storeys storing non-hazardous substances — all with a total floor area not exceeding 1,500 sq.m."
+        },
+        {
+          "question": "How long does it take to get a Building Permit?",
+          "answer": "The process is classified as Complex and takes approximately 5 days, including plan evaluation, site inspection, BFP clearance, and Mayor's permit processing."
+        },
+        {
+          "question": "How much is the Building Permit fee?",
+          "answer": "Building Permit Fees are based on the Schedule of Fees and Charges of the National Building Code of the Philippines. Additionally, a Fire Safety Inspection Fee is assessed by the BFP, and a Mayor's Permit Fee of PHP 120.00 (50 sq.m. and below), PHP 180.00 (51 to 150 sq.m.), or PHP 240.00 (above 150 sq.m.) applies."
+        },
+        {
+          "question": "What happens if my building plan fails the evaluation?",
+          "answer": "The Municipal Engineer will explain the reasons in writing and advise you to have the plan rectified before re-submitting for evaluation."
+        },
+        {
+          "question": "Do I need to secure a BFP Clearance and Mayor's Permit separately?",
+          "answer": "Yes. Both the BFP Clearance and Mayor's Permit are required and must be secured separately during the process. The MEO will advise you accordingly."
+        }
+      ]
+    },
+    {
+      "service_id": "MEO-002",
+      "service_name": "Issuance of Certificate of Occupancy",
+      "description": "A document issued to a person, firm, or corporation prior to the occupancy of their building. Includes an inspection and review to comply with approved standard requirements under the National Building Code of the Philippines.",
+      "office_or_division": "Office of the Municipal Engineer",
+      "classification": "Simple to Complex – 2 to 5 days",
+      "type_of_transaction": ["G2G", "G2B", "G2C"],
+      "who_may_avail": "Any person, firm or corporation including any agency of the government who wants to occupy or use a newly constructed or old building or structure",
+      "requirements": [
+        {
+          "document": "Unified Application Form",
+          "copies": null,
+          "where_to_secure": "Municipal Engineering Office"
+        },
+        {
+          "document": "Certificate of Completion, duly notarized (forms available at this office)",
+          "copies": 1,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "As-Built Plans, duly signed and sealed by respective Engineers",
+          "copies": 1,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Construction Logbook",
+          "copies": 1,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Photocopy of valid licenses of all involved professionals",
+          "copies": 1,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Photograph of the completed structure",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Municipal Engineer's Office and inquire about the Occupancy Permit/Certificate of Occupancy.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide checklist of requirements.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": "1.1",
+          "client_action": "If all requirements are available, apply for the Certificate and submit all requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1.1",
+              "action": "Check the requirements, assess fees, and issue Order of Payment.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Pay to the cashier at the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Receive payment and issue Official Receipt.",
+              "fees": "As per the National Building Code of the Philippines",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "Revenue Collection Clerk, MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Return to the office and submit the Official Receipt.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Receive the Official Receipt, fill up the form, forward to the Municipal Engineer, and advise the applicant to wait for issuance.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Secure Fire Safety Inspection Certificate from BFP.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Process Fire Safety Inspection Certificate.",
+              "fees": "As per BFP's assessment",
+              "processing_time": "1 day",
+              "person_responsible": "BFP Personnel, BFP"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Submit the BFP Clearance.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Receive the BFP Clearance and all corresponding Official Receipts, then record and process.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": 6,
+          "client_action": "Receive the Certificate.",
+          "agency_actions": [
+            {
+              "sub_step": "6.1",
+              "action": "Issue the Certificate of Occupancy.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Engineer, Municipal Engineering Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "As per the National Building Code of the Philippines, plus Fire Safety Inspection Fee (per BFP's assessment)",
+      "total_processing_time": "Simple to Complex – 2 to 5 days",
+      "legal_basis": "National Building Code of the Philippines",
+      "faqs": [
+        {
+          "question": "What is a Certificate of Occupancy?",
+          "answer": "It is a document issued before a building is occupied or used, certifying that the construction complied with approved standards under the National Building Code of the Philippines."
+        },
+        {
+          "question": "Who needs to get a Certificate of Occupancy?",
+          "answer": "Any person, firm, corporation, or government agency that wants to occupy or use a newly constructed or old building or structure must secure this certificate."
+        },
+        {
+          "question": "Do I need a Fire Safety Inspection Certificate?",
+          "answer": "Yes. A Fire Safety Inspection Certificate from the BFP is required and must be submitted before the Certificate of Occupancy can be issued."
+        },
+        {
+          "question": "What is an As-Built Plan?",
+          "answer": "An As-Built Plan is the final engineering plan showing the actual construction as it was built, signed and sealed by the involved licensed engineers."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "The process ranges from 2 to 5 days depending on the complexity of the project."
+        }
+      ]
+    },
+    {
+      "service_id": "MEO-003",
+      "service_name": "Issuance of Electrical Wiring Permit",
+      "description": "A document issued to an applicant prior to the installation of electrical wiring and fixtures, including an electric meter, in a building or structure.",
+      "office_or_division": "Office of the Municipal Engineer",
+      "classification": "Simple to Complex – 3 to 5 days",
+      "type_of_transaction": ["G2G", "G2B", "G2C"],
+      "who_may_avail": "Any person, firm or corporation including any agency of the government who is planning to install electrical wiring and fixtures including an electric meter in a building or structure",
+      "requirements": [
+        {
+          "document": "Certificate of Occupancy, photocopy",
+          "copies": 1,
+          "where_to_secure": "Municipal Engineering Office"
+        },
+        {
+          "document": "Fire Safety Inspection Certificate (to be acquired during the process)",
+          "copies": 1,
+          "where_to_secure": "BFP Station, 2nd Floor, Public Market"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Municipal Engineering Office, apply for this Permit, and submit the requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Check requirements.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": "1.1",
+          "client_action": "Pay at the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1.1",
+              "action": "Issue Order of Payment.",
+              "fees": "Wiring Fee – PHP 200.00",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "Revenue Collection Clerk, MTO"
+            }
+          ]
+        },
+        {
+          "step_number": "1.2",
+          "client_action": "Return to the office and submit the Official Receipt.",
+          "agency_actions": [
+            {
+              "sub_step": "1.2.1",
+              "action": "Receive Official Receipt and fill up the permit form.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive the form and secure the required signatures from the following: (2.1) Registered Electrician, (2.2) BFP Fire Safety Inspection Certificate, (2.3) Municipal Engineer, (2.4) Municipal Mayor.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Provide the Electrical Wiring Permit form and advise the applicant to secure the signatures of needed personnel.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            },
+            {
+              "sub_step": "2.1.1",
+              "action": "Registered Electrician's signature (applicant's choice among the pool of private practitioners in the municipality).",
+              "fees": "As per the Registered Electrician's assessment",
+              "processing_time": "1 day",
+              "person_responsible": "Registered Electrician, Private Practitioner"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Fire Safety Inspection Certificate from BFP.",
+              "fees": "As per BFP's assessment",
+              "processing_time": "1 day",
+              "person_responsible": "BFP Personnel, BFP"
+            },
+            {
+              "sub_step": "2.3",
+              "action": "Municipal Engineer's signature.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Engineer, Municipal Engineering Office"
+            },
+            {
+              "sub_step": "2.4",
+              "action": "Municipal Mayor's signature.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "Municipal Mayor, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Return the signed form to the office and receive the permit.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Retain a copy of the permit for filing, then release a copy to the applicant.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Wiring Fee – PHP 200.00, plus Fire Safety Inspection Fee (per BFP's assessment) and Registered Electrician's fee (per their assessment)",
+      "total_processing_time": "Simple to Complex – 3 to 5 days",
+      "faqs": [
+        {
+          "question": "What is an Electrical Wiring Permit?",
+          "answer": "It is a permit required before installing electrical wiring, fixtures, or an electric meter in a building or structure."
+        },
+        {
+          "question": "How much is the Electrical Wiring Permit fee?",
+          "answer": "The wiring fee is PHP 200.00, payable at the Municipal Treasurer's Office. Additional fees for the Fire Safety Inspection and the Registered Electrician's service apply separately."
+        },
+        {
+          "question": "Do I need a Certificate of Occupancy to apply?",
+          "answer": "Yes, a photocopy of the Certificate of Occupancy is a requirement for the Electrical Wiring Permit."
+        },
+        {
+          "question": "Who signs the Electrical Wiring Permit form?",
+          "answer": "The form requires signatures from a Registered Electrician (of the applicant's choice), the BFP (Fire Safety Inspection Certificate), the Municipal Engineer, and the Municipal Mayor."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "The process takes 3 to 5 days, depending on the availability of the required signatories and the BFP inspection schedule."
+        }
+      ]
+    },
+    {
+      "service_id": "MEO-004",
+      "service_name": "Issuance of Certificate of Electrical Inspection (CEI)",
+      "description": "A document issued to an individual, firm, corporation, or government agency who wants to avail of electric service from an electric service provider.",
+      "office_or_division": "Office of the Municipal Engineer",
+      "classification": "Simple to Complex – 3 to 6 days",
+      "type_of_transaction": ["G2G", "G2B", "G2C"],
+      "who_may_avail": "Any person, firm or corporation including any agency of the government who wants to avail electric service from an electric service provider",
+      "requirements": [
+        {
+          "document": "Electrical Wiring Permit including the Fire Safety Inspection Certificate, photocopy",
+          "copies": 1,
+          "where_to_secure": "Municipal Engineering Office"
+        },
+        {
+          "document": "Approved Electrical Plan/Layout, photocopy",
+          "copies": 1,
+          "where_to_secure": "Applicant"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Municipal Engineer's Office, apply for this Certificate, and submit the requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Check the requirements and advise the client to return upon receiving a notification/text message, usually within 1 day.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Perform site inspection.",
+              "fees": "None",
+              "processing_time": "2 hours",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Return to the office to get the result of the inspection.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Notify the client regarding the result of the site inspection via text message.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.1",
+          "client_action": "If inspection fails: comply with the required on-site requirements and request for re-inspection.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1.1",
+              "action": "If it fails the inspection, explain and advise the client to comply with the on-site requirements and subject to re-inspection.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.2",
+          "client_action": "If inspection passes: return to the office and pay the fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.2.1",
+              "action": "Issue the Order of Payment.",
+              "fees": "PHP 200.00",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "Revenue Collection Clerk, MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Submit the Official Receipt to the office.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Receive Official Receipt and prepare the form, then give the form to the applicant to secure the signature of a Registered Electrician.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": "3.1",
+          "client_action": "Receive the form and have it signed by a Registered Electrician (applicant's choice among the pool of private practitioners in the municipality).",
+          "agency_actions": [
+            {
+              "sub_step": "3.1.1",
+              "action": "Registered Electrician reviews and signs the form.",
+              "fees": "As per the Registered Electrician's assessment",
+              "processing_time": "1 day",
+              "person_responsible": "Registered Electrician, Private Practitioner"
+            }
+          ]
+        },
+        {
+          "step_number": "3.2",
+          "client_action": "Return the signed form to the office and receive the Certificate.",
+          "agency_actions": [
+            {
+              "sub_step": "3.2.1",
+              "action": "Issue the Certificate of Electrical Inspection.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Engineer, Municipal Engineering Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 200.00 plus Registered Electrician's fee (per their assessment)",
+      "total_processing_time": "Simple to Complex – 3 to 6 days",
+      "faqs": [
+        {
+          "question": "What is a Certificate of Electrical Inspection (CEI)?",
+          "answer": "It is a certificate required before availing electric service from an electric service provider. It confirms that the electrical installation has passed inspection."
+        },
+        {
+          "question": "What are the requirements for a CEI?",
+          "answer": "You need a photocopy of the Electrical Wiring Permit (including the Fire Safety Inspection Certificate) and a photocopy of the Approved Electrical Plan/Layout."
+        },
+        {
+          "question": "How much is the fee?",
+          "answer": "The fee is PHP 200.00, payable at the Municipal Treasurer's Office after passing the site inspection. An additional fee from the Registered Electrician also applies."
+        },
+        {
+          "question": "What happens if my electrical installation fails the inspection?",
+          "answer": "The MEO Staff will explain the deficiencies and advise you to comply with the on-site requirements before requesting a re-inspection."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "The process takes 3 to 6 days, depending on the inspection result and the Registered Electrician's schedule."
+        }
+      ]
+    },
+    {
+      "service_id": "MEO-005",
+      "service_name": "Issuance of Program of Works",
+      "description": "An engineering document containing various information about an infrastructure project, such as the title of the project, cost, technical description, scope of works, quantity take-off, and other data required for the proposed project.",
+      "office_or_division": "Office of the Municipal Engineer",
+      "classification": "Simple to Complex",
+      "type_of_transaction": ["G2G"],
+      "who_may_avail": "Any government official, employee, or agency planning to implement a government infrastructure project",
+      "requirements": [
+        {
+          "document": "Kind or type of project",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Location of the proposed project",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Funding amount and source/s",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Municipal Engineer's Office, request for a Program of Works, and submit the needed data.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Get the data and discuss the project with the client. Advise the client to return upon receiving a notification/text message.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "Municipal Engineer, Municipal Engineering Office"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Conduct site investigation.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "MEO Staff / Municipal Engineer, Municipal Engineering Office"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "Prepare draft sketch plan or measurements needed for quantity estimate.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "Municipal Engineer, Municipal Engineering Office"
+            },
+            {
+              "sub_step": "1.4",
+              "action": "Prepare final Engineering Design/Plan (optional).",
+              "fees": "None",
+              "processing_time": "1 to 5 days (depending on the scope of the project)",
+              "person_responsible": "Municipal Engineer, Municipal Engineering Office"
+            },
+            {
+              "sub_step": "1.5",
+              "action": "Prepare the Quantity Take-Off of every item of works.",
+              "fees": "None",
+              "processing_time": "1 to 2 days",
+              "person_responsible": "Municipal Engineer, Municipal Engineering Office"
+            },
+            {
+              "sub_step": "1.6",
+              "action": "Canvas prices of materials.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            },
+            {
+              "sub_step": "1.7",
+              "action": "Finalize the Program of Works.",
+              "fees": "None",
+              "processing_time": "4 hours",
+              "person_responsible": "Municipal Engineer, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Return to the office upon receiving the notification.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Record and release the Program of Works.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple to Complex – varies depending on scope (approximately 5 to 10 days)",
+      "faqs": [
+        {
+          "question": "What is a Program of Works (POW)?",
+          "answer": "A Program of Works is an engineering document that details information about a government infrastructure project, including the project title, cost, scope of works, quantity take-off, and other technical data."
+        },
+        {
+          "question": "Who can request a Program of Works?",
+          "answer": "Any government official, employee, or agency planning to implement a government infrastructure project can request this service."
+        },
+        {
+          "question": "Is there a fee for the Program of Works?",
+          "answer": "No, this service is provided free of charge."
+        },
+        {
+          "question": "How long does it take to prepare a Program of Works?",
+          "answer": "The preparation time varies depending on the scope and complexity of the project. It can take from a few days to about 10 days, including site investigation, design preparation, quantity take-off, material canvassing, and finalization."
+        },
+        {
+          "question": "What information do I need to provide?",
+          "answer": "You need to provide the type of project, the location of the proposed project, and the funding amount and source."
+        }
+      ]
+    },
+    {
+      "service_id": "MEO-006",
+      "service_name": "Issuance of Certificate of Project Completion",
+      "description": "A document issued confirming or attesting the completion of a government infrastructure project.",
+      "office_or_division": "Office of the Municipal Engineer",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G"],
+      "who_may_avail": "Any government official, employee, or agency that has completed a government infrastructure project",
+      "requirements": [
+        {
+          "document": "Labor Payroll Voucher",
+          "copies": 1,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Program of Works, photocopy",
+          "copies": 1,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Pictures of the project – before it started, during implementation, and after completion",
+          "copies": 1,
+          "where_to_secure": "Applicant"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the office and request for a Certificate of Project Completion.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Check the requirements and prepare the Certificate.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MEO Staff, Municipal Engineering Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive the Certificate.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Sign and issue the Certificate.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Engineer, Municipal Engineering Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Approximately 15 minutes",
+      "faqs": [
+        {
+          "question": "What is a Certificate of Project Completion?",
+          "answer": "It is an official document that confirms and attests that a government infrastructure project has been completed."
+        },
+        {
+          "question": "Who can request a Certificate of Project Completion?",
+          "answer": "Any government official, employee, or agency that has completed a government infrastructure project may request this certificate."
+        },
+        {
+          "question": "What documents do I need to submit?",
+          "answer": "You need to submit a Labor Payroll Voucher, a photocopy of the Program of Works, and a set of pictures showing the project before it started, during implementation, and after completion."
+        },
+        {
+          "question": "Is there a fee for this service?",
+          "answer": "No, this service is free of charge."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "The Certificate is processed and issued in approximately 15 minutes."
+        }
+      ]
+    }
+  ]
+}

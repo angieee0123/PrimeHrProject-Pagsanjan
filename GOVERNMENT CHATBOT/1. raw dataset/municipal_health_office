@@ -1,0 +1,1039 @@
+{
+  "service_office": "Municipal Health Office",
+  "service_category": "Internal & External",
+  "services": [
+    {
+      "service_id": "MHO-001",
+      "service_name": "Issuance of Medical Certificate",
+      "description": "An official report issued to an individual applying for a job requiring medical clearance as part of appointment and promotion, to determine the mental and physical capability of a person. Also issued for those who have undergone medical/sickness/maternity/disability leave requiring clearance to return to work, and for students undergoing sports and academic competitions.",
+      "office_or_division": "Municipal Health Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Students, Employees, Athletes",
+      "requirements": [
+        {
+          "document": "DepEd Health Form (for students, athletes, and teachers only)",
+          "copies": null,
+          "where_to_secure": "School"
+        },
+        {
+          "document": "CSC Medical Certificate Form (for government employees)",
+          "copies": null,
+          "where_to_secure": "HR Office"
+        },
+        {
+          "document": "SSS/GSIS Disability Form (if applicable)",
+          "copies": null,
+          "where_to_secure": "SSS/GSIS Offices"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Fill out request form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the request form.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit the requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Review the submitted requirements.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "If complete, issue order of payment. If incomplete, advise to complete the requirements and re-submit.",
+              "fees": "None",
+              "processing_time": "Included in Step 2",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.1",
+          "client_action": "Receive the order of payment and pay the corresponding amount.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1.1",
+              "action": "Issue order of payment.",
+              "fees": "PHP 75.00",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Present Official Receipt.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Receive Official Receipt.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Take the client's vital signs.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            },
+            {
+              "sub_step": "3.3",
+              "action": "Conduct interview and perform complete physical examination.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            },
+            {
+              "sub_step": "3.4",
+              "action": "Prepare medical/physical examination report.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Receive the Medical Certificate.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Issue the Medical Certificate.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 75.00",
+      "total_processing_time": "Approximately 75 minutes",
+      "faqs": [
+        {
+          "question": "What is a Medical Certificate?",
+          "answer": "A Medical Certificate is an official document that attests to the physical and mental fitness of a person, required for employment, promotion, return to work after leave, or participation in sports and academic competitions."
+        },
+        {
+          "question": "Who can avail of a Medical Certificate?",
+          "answer": "Students, employees, and athletes may avail of this service."
+        },
+        {
+          "question": "What form do I need if I am a government employee?",
+          "answer": "Government employees need to bring the CSC Medical Certificate Form, which can be secured from the HR Office."
+        },
+        {
+          "question": "What form do I need if I am a student or athlete?",
+          "answer": "Students, athletes, and teachers need to bring the DepEd Health Form, which is available from your school."
+        },
+        {
+          "question": "How much is the Medical Certificate fee?",
+          "answer": "The fee is PHP 75.00."
+        },
+        {
+          "question": "How long does it take to receive a Medical Certificate?",
+          "answer": "The entire process takes approximately 75 minutes, which includes the interview, physical examination, and preparation of the report."
+        }
+      ]
+    },
+    {
+      "service_id": "MHO-002",
+      "service_name": "Issuance of Medico-Legal Certificate",
+      "description": "A certificate issued to an aggrieved party requesting an official medico-legal report for filing a complaint or case against an assailant or offender. The report contains a detailed description of injuries sustained, including approximate measurements and affected body parts based on anatomical position, to determine the severity and gravity of the injuries. An offender may also be examined if warranted by the PNP or a competent court.",
+      "office_or_division": "Municipal Health Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Aggrieved party, offender or assailant, person in authority, competent court",
+      "requirements": [
+        {
+          "document": "PNP, NBI, or Barangay medical examination request",
+          "copies": null,
+          "where_to_secure": "PNP Municipal Station, NBI Offices, or Barangay Offices"
+        },
+        {
+          "document": "Court order requesting for the medico-legal record/report (if applicable)",
+          "copies": null,
+          "where_to_secure": "Municipal Circuit Trial Court or Regional Trial Court"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Fill out request form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the request form.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit the requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Review the submitted requirements.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "If complete, issue order of payment. If incomplete, advise to complete the requirements and re-submit.",
+              "fees": "None",
+              "processing_time": "Included in Step 2",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.1",
+          "client_action": "Receive the order of payment and pay the corresponding amount.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1.1",
+              "action": "Issue order of payment.",
+              "fees": "PHP 75.00",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Present Official Receipt.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Receive Official Receipt.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Take the client's vital signs.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            },
+            {
+              "sub_step": "3.3",
+              "action": "Conduct interview and perform complete physical examination or conduct post-mortem examination (if applicable).",
+              "fees": "None",
+              "processing_time": "30 minutes (physical exam) or 1 hour (post-mortem exam)",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            },
+            {
+              "sub_step": "3.4",
+              "action": "Prepare medical/physical examination report or post-mortem examination report.",
+              "fees": "None",
+              "processing_time": "20 minutes",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Receive the Medico-Legal Certificate.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Issue the Medico-Legal Certificate.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 75.00",
+      "total_processing_time": "Approximately 1 to 2 hours depending on the type of examination",
+      "faqs": [
+        {
+          "question": "What is a Medico-Legal Certificate?",
+          "answer": "It is an official document that details injuries sustained by an aggrieved party, used for filing complaints or cases against an assailant. It describes the type, location, and severity of injuries based on anatomical position."
+        },
+        {
+          "question": "Who can request a Medico-Legal Certificate?",
+          "answer": "An aggrieved party, offender or assailant (if warranted by the PNP or court), a person in authority, or a competent court may request this certificate."
+        },
+        {
+          "question": "What documents do I need to bring?",
+          "answer": "You need a PNP, NBI, or Barangay medical examination request. If the request is from a court, bring the Court Order from the Municipal Circuit Trial Court or Regional Trial Court."
+        },
+        {
+          "question": "How much is the fee?",
+          "answer": "The fee is PHP 75.00."
+        },
+        {
+          "question": "Can a post-mortem examination be conducted?",
+          "answer": "Yes. A post-mortem examination can be conducted when warranted by the PNP or a competent court. This takes approximately 1 hour."
+        }
+      ]
+    },
+    {
+      "service_id": "MHO-003",
+      "service_name": "Issuance of Health and Sanitation Certificate",
+      "description": "An official report issued to food and business establishments that cater food services to ensure compliance with the Sanitation Code of the Philippines. Includes stool examination, chest X-ray or sputum examination for staff, and inspection of surroundings and equipment. For entertainment establishments involving GROs, tests for STDs (Gram Staining, VDRL, Hepatitis B surface Antigen) are required; HIV-AIDS testing is on a voluntary basis.",
+      "office_or_division": "Municipal Health Office",
+      "classification": "Complex",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Food and business establishment owners, food handlers, attendants, and entertainment establishment guest relation officers (GROs)",
+      "requirements": [
+        {
+          "document": "Health certificate requirements: Chest X-ray (CXR), Stool Examination, Gram Stain, VDRL, Hepatitis B surface Antigen (HBsAg), HIV-AIDS test (voluntary)",
+          "copies": null,
+          "where_to_secure": "Municipal Health Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Fill out request form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the request form and provide the checklist.",
+              "fees": "None",
+              "processing_time": "11 minutes",
+              "person_responsible": "RSI / MHO Staff, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Undergo CXR Examination.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Review the submitted CXR result.",
+              "fees": "None",
+              "processing_time": "3 days",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "If normal result, issue order of payment. If positive for PTB, undergo treatment for 6 months. If still positive, undergo retreatment until cured.",
+              "fees": "None",
+              "processing_time": "Varies (6 months if positive for PTB)",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Undergo stool examination.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Review the submitted stool exam result. If negative for parasites, issue order of payment. If positive, provide antihelminthic medication.",
+              "fees": "None",
+              "processing_time": "4 hours",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Undergo blood exam for Hepatitis B and VDRL.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Review the submitted blood exam result. If negative, issue order of payment. If positive, conduct confirmatory test; no sanitary certificate will be issued until cleared.",
+              "fees": "None",
+              "processing_time": "5 hours (or up to 7 days for confirmatory test)",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Undergo Gram Staining for gonococcal and non-gonococcal urethritis.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Review the submitted gram stain result. If negative, issue order of payment. If positive, prescribe appropriate antibiotic for 2 weeks then repeat gram stain until cured.",
+              "fees": "None",
+              "processing_time": "4 days (or longer if positive)",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 6,
+          "client_action": "Present Official Receipt.",
+          "agency_actions": [
+            {
+              "sub_step": "6.1",
+              "action": "Receive Official Receipt and prepare sanitary permit/certificate.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 7,
+          "client_action": "Receive the Sanitary Permit/Certificate.",
+          "agency_actions": [
+            {
+              "sub_step": "7.1",
+              "action": "Issue the sanitary permit/certificate.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "As assessed (fees apply for examinations and permits)",
+      "total_processing_time": "Complex – varies; minimum of several days depending on examination results",
+      "legal_basis": "Sanitation Code of the Philippines",
+      "faqs": [
+        {
+          "question": "What is a Health and Sanitation Certificate?",
+          "answer": "It is an official document issued to food and business establishments ensuring they comply with the Sanitation Code of the Philippines. It covers examination of food handlers for intestinal parasites, pulmonary diseases, and for entertainment establishments, sexually transmitted diseases."
+        },
+        {
+          "question": "Who needs to secure a Health and Sanitation Certificate?",
+          "answer": "Food and business establishment owners, food handlers, attendants, and guest relation officers (GROs) of entertainment establishments are required to secure this certificate."
+        },
+        {
+          "question": "What examinations are required?",
+          "answer": "Required examinations include Chest X-ray (CXR), Stool Examination, Gram Staining, VDRL, and Hepatitis B surface Antigen (HBsAg). HIV-AIDS testing is on a voluntary basis."
+        },
+        {
+          "question": "What happens if I test positive for pulmonary TB?",
+          "answer": "If you test positive for PTB, you must undergo treatment for 6 months before the sanitary certificate can be issued. If still positive, retreatment continues until cured."
+        },
+        {
+          "question": "Can I get a sanitary certificate if I test positive for Hepatitis B or VDRL?",
+          "answer": "No. A confirmatory test will be conducted and no sanitary certificate will be issued until the result is cleared."
+        },
+        {
+          "question": "Where can I undergo the required health examinations?",
+          "answer": "All required examinations are processed through the Municipal Health Office."
+        }
+      ]
+    },
+    {
+      "service_id": "MHO-004",
+      "service_name": "Provision of Family Planning Services",
+      "description": "One of the major functions of the Municipal Health Office, providing family planning counselling and provision of unmet needs for family planning commodities.",
+      "office_or_division": "Municipal Health Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "All men and women of child-bearing age",
+      "requirements": [],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Get queue number.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Get queue number and retrieve family planning record.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Take the vital signs and weigh the client.",
+              "fees": "None",
+              "processing_time": "Included in Step 1",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Proceed to the Family Planning room.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Conduct interview and extract OB/GYNE history. Refer to MHO if with significant medical condition.",
+              "fees": "None",
+              "processing_time": "45 minutes",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Provide checklist and start FP counselling.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            },
+            {
+              "sub_step": "2.3",
+              "action": "Allow the client to choose from among the safe and effective FP methods.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            },
+            {
+              "sub_step": "2.4",
+              "action": "Explain the advantages and disadvantages of the method chosen.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            },
+            {
+              "sub_step": "2.5",
+              "action": "Provide the FP commodity.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            },
+            {
+              "sub_step": "2.6",
+              "action": "Advise the client to seek/consult for any untoward incidents noted.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Provide FP card for next visit.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Schedule the next visit.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Approximately 90 minutes",
+      "faqs": [
+        {
+          "question": "Who can avail of Family Planning Services?",
+          "answer": "All men and women of child-bearing age can avail of family planning services at the Municipal Health Office."
+        },
+        {
+          "question": "Is there a fee for Family Planning Services?",
+          "answer": "No, family planning services and commodities are provided free of charge."
+        },
+        {
+          "question": "What family planning methods are available?",
+          "answer": "The health staff will present you with various safe and effective family planning methods and allow you to choose. They will explain the advantages and disadvantages of each method."
+        },
+        {
+          "question": "Do I need to bring any documents?",
+          "answer": "No specific documents are required. Just proceed to the Municipal Health Office and get a queue number."
+        },
+        {
+          "question": "Will I be seen by a doctor?",
+          "answer": "The Rural Health Midwife (RHM) primarily handles FP counselling. If you have a significant medical condition, you will be referred to the Municipal Health Officer."
+        }
+      ]
+    },
+    {
+      "service_id": "MHO-005",
+      "service_name": "Provision of Maternal Care Services",
+      "description": "One of the major functions of the Municipal Health Office, providing ante-natal care for pregnant women including birth planning, family planning advice, and health education.",
+      "office_or_division": "Municipal Health Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Primigravida and multigravida pregnant women",
+      "requirements": [],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Get queue number.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the queue number and retrieve the ante-natal care record of the facility.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Present the Mama Book.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Review the Mama Book, take vital signs, and weigh the client.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.1",
+          "client_action": "Submit to interview.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1.1",
+              "action": "Interview and extract medical/OB GYNE history.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.2",
+          "client_action": "Submit to physical examination.",
+          "agency_actions": [
+            {
+              "sub_step": "2.2.1",
+              "action": "Perform complete physical examination including Leopold's (fundal) maneuvers.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.3",
+          "client_action": "Get exam result.",
+          "agency_actions": [
+            {
+              "sub_step": "2.3.1",
+              "action": "Provide laboratory exam request; client submits result on next visit.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.4",
+          "client_action": "Prepare to take vaccination.",
+          "agency_actions": [
+            {
+              "sub_step": "2.4.1",
+              "action": "Inject the necessary vaccine and observe the client for Adverse Events Following Immunization (AEFI).",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.5",
+          "client_action": "Secure referral to MHO if pregnancy is high risk.",
+          "agency_actions": [
+            {
+              "sub_step": "2.5.1",
+              "action": "Refer to MHO if positive signs/symptoms of high-risk pregnancy.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.6",
+          "client_action": "Secure referral to Municipal Dentist.",
+          "agency_actions": [
+            {
+              "sub_step": "2.6.1",
+              "action": "Refer to dental services.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Proceed to the dental room and wait until name is called.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Perform oral examination.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Public Health Dentist, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Return to the consultation room.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Instruct client to take prescribed medicines as directed and impart health teaching.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Take note of the next scheduled visit.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Schedule the next visit.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Approximately 71 minutes per visit",
+      "faqs": [
+        {
+          "question": "Who can avail of Maternal Care Services?",
+          "answer": "All pregnant women — whether first-time mothers (primigravida) or those who have been pregnant before (multigravida) — can avail of this service."
+        },
+        {
+          "question": "Is there a fee for maternal care services?",
+          "answer": "No, maternal care services are provided free of charge."
+        },
+        {
+          "question": "What is the Mama Book?",
+          "answer": "The Mama Book is the health record of a pregnant woman used during ante-natal care visits. You should bring it every time you visit the Municipal Health Office for your check-up."
+        },
+        {
+          "question": "What services are provided during a maternal care visit?",
+          "answer": "Each visit includes a review of your health record, vital signs monitoring, physical examination, Leopold's maneuvers, laboratory exam requests, vaccination, and dental examination. Health teachings are also provided."
+        },
+        {
+          "question": "What happens if my pregnancy is considered high risk?",
+          "answer": "You will be referred to the Municipal Health Officer for further evaluation and management if signs or symptoms of a high-risk pregnancy are detected."
+        }
+      ]
+    },
+    {
+      "service_id": "MHO-006",
+      "service_name": "Provision of Immunization Services",
+      "description": "A preventive program of the National Government to control and eliminate vaccine-preventable diseases and provide immunity to infants, children, and adults.",
+      "office_or_division": "Municipal Health Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Infants, children, and adults",
+      "requirements": [
+        {
+          "document": "ECCD Card",
+          "copies": null,
+          "where_to_secure": "Patient/Guardian"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Get a queue number and present ECCD Card.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Retrieve the ECCD card copy of the facility.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Take the vital signs and weigh the client.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Proceed to the immunization room.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Review vital signs and perform physical examination to determine if client is fit to receive the vaccine. Refer to MHO if in doubt.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.1",
+          "client_action": "Prepare to be vaccinated.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1.1",
+              "action": "Administer the specific vaccine on the right route and at the right amount.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": "2.2",
+          "client_action": "Receive advice regarding the effects of the vaccine.",
+          "agency_actions": [
+            {
+              "sub_step": "2.2.1",
+              "action": "Ask the guardian/patient to remain for a few minutes to note for any Adverse Events Following Immunization (AEFI). Instruct on what to expect from the vaccine and how to manage minor reactions.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Take note of the next schedule of vaccination and receive the ECCD Card.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "If no AEFI noted, schedule the next visit and return the ECCD card.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "RHM, Municipal Health Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Approximately 33 minutes",
+      "faqs": [
+        {
+          "question": "Who can avail of immunization services?",
+          "answer": "Infants, children, and adults can avail of immunization services at the Municipal Health Office."
+        },
+        {
+          "question": "What document do I need to bring for immunization?",
+          "answer": "Bring the ECCD Card (Early Childhood Care and Development Card) of the patient."
+        },
+        {
+          "question": "Is there a fee for immunization services?",
+          "answer": "No, immunization services are provided free of charge."
+        },
+        {
+          "question": "What happens after my child is vaccinated?",
+          "answer": "You will be asked to wait for a few minutes to monitor for any Adverse Events Following Immunization (AEFI). The health staff will also explain what to expect and how to handle minor reactions."
+        },
+        {
+          "question": "How long does the immunization visit take?",
+          "answer": "The process takes approximately 33 minutes from registration to scheduling of the next visit."
+        }
+      ]
+    },
+    {
+      "service_id": "MHO-007",
+      "service_name": "Provision of Medicine as per the National Tuberculosis Control Program (NTP)",
+      "description": "Provision of diagnosis, treatment, and monitoring of tuberculosis (TB) patients under the National Tuberculosis Control Program, including drug-resistant TB referral management.",
+      "office_or_division": "Municipal Health Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Individuals suspected of or diagnosed with tuberculosis",
+      "requirements": [],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Municipal Health Office for consultation. Receive request for CXR.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "After consultation, instruct patient to undergo CXR examination.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit CXR result.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Review the result.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Advise patient to undergo Gene Xpert examination to determine if drug-resistant TB is present.",
+              "fees": "None",
+              "processing_time": "Included in Step 2",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Submit Gene Xpert result.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Review Gene Xpert result.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MHO Staff, Municipal Health Office"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "If positive (drug-resistant TB), refer to Mauban RHU for management of drug-resistant TB.",
+              "fees": "None",
+              "processing_time": "Included in Step 3",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            },
+            {
+              "sub_step": "3.3",
+              "action": "If negative, prescribe the appropriate category and classification of treatment regimen.",
+              "fees": "None",
+              "processing_time": "Included in Step 3",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Proceed to the TB DOTS room.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Fill up NTP Treatment Card and 2 NTP ID Cards.",
+              "fees": "None",
+              "processing_time": "45 minutes",
+              "person_responsible": "Public Health Nurse, Municipal Health Office"
+            },
+            {
+              "sub_step": "4.2",
+              "action": "Register on the TB Registry.",
+              "fees": "None",
+              "processing_time": "Included in Step 4",
+              "person_responsible": "Public Health Nurse, Municipal Health Office"
+            },
+            {
+              "sub_step": "4.3",
+              "action": "Provide health education on the nature of treatment.",
+              "fees": "None",
+              "processing_time": "Included in Step 4",
+              "person_responsible": "Public Health Nurse, Municipal Health Office"
+            },
+            {
+              "sub_step": "4.4",
+              "action": "Provide proper instruction on how to take medication and discuss side effects.",
+              "fees": "None",
+              "processing_time": "Included in Step 4",
+              "person_responsible": "Public Health Nurse, Municipal Health Office"
+            },
+            {
+              "sub_step": "4.5",
+              "action": "Provide the initial dose of treatment.",
+              "fees": "None",
+              "processing_time": "Included in Step 4",
+              "person_responsible": "Public Health Nurse, Municipal Health Office"
+            },
+            {
+              "sub_step": "4.6",
+              "action": "Instruct to submit quality sputum for DSSM on follow-up.",
+              "fees": "None",
+              "processing_time": "Included in Step 4",
+              "person_responsible": "Public Health Nurse, Municipal Health Office"
+            },
+            {
+              "sub_step": "4.7",
+              "action": "Provide health education on HIV counselling and testing.",
+              "fees": "None",
+              "processing_time": "Included in Step 4",
+              "person_responsible": "Public Health Nurse, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Return to the facility on the scheduled date.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Monitor and evaluate the status of the patient through progress notes.",
+              "fees": "None",
+              "processing_time": "20 minutes",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            },
+            {
+              "sub_step": "5.2",
+              "action": "Assess for co-morbidities/complications and provide treatment.",
+              "fees": "None",
+              "processing_time": "Included in Step 5",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            }
+          ]
+        },
+        {
+          "step_number": 6,
+          "client_action": "Patient is cured, has completed treatment, relapsed, defaulted, or died.",
+          "agency_actions": [
+            {
+              "sub_step": "6.1",
+              "action": "Determine the treatment outcome.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Municipal Health Officer, Municipal Health Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Long-term – TB treatment typically lasts 6 months or more depending on category and drug resistance",
+      "legal_basis": "National Tuberculosis Control Program (NTP)",
+      "faqs": [
+        {
+          "question": "What is the National Tuberculosis Control Program (NTP)?",
+          "answer": "It is a government program that provides free diagnosis, treatment, and monitoring of tuberculosis patients to control and eliminate TB in the Philippines."
+        },
+        {
+          "question": "Is the TB treatment free?",
+          "answer": "Yes, all medicines and services under the National TB Control Program are provided free of charge."
+        },
+        {
+          "question": "What is Gene Xpert and why is it needed?",
+          "answer": "Gene Xpert is a molecular test used to determine whether the TB bacteria is drug-resistant. It helps the health officer prescribe the correct treatment regimen."
+        },
+        {
+          "question": "What happens if I have drug-resistant TB?",
+          "answer": "If your Gene Xpert result is positive for drug-resistant TB, you will be referred to the Mauban Rural Health Unit (RHU) for specialized management."
+        },
+        {
+          "question": "How long is the TB treatment?",
+          "answer": "Standard TB treatment lasts at least 6 months. Drug-resistant TB treatment may take longer. The Municipal Health Officer will determine the appropriate treatment category and duration."
+        },
+        {
+          "question": "What is TB DOTS?",
+          "answer": "TB DOTS (Directly Observed Treatment, Short-course) is the internationally recommended strategy for TB treatment where a health worker observes the patient taking their medication to ensure compliance and prevent drug resistance."
+        }
+      ]
+    }
+  ]
+}   

@@ -1,0 +1,300 @@
+{
+  "service_office": "Municipal Planning and Development Office",
+  "service_category": "Internal & External",
+  "services": [
+    {
+      "service_id": "MPDO-001",
+      "service_name": "Issuance of Zoning Certificate",
+      "description": "A document stating that the location of the proposed use is conforming to the Land Use Plan of the Municipality of Sampaloc, Quezon.",
+      "office_or_division": "Office of Municipal Planning & Development Office / Zoning Administrator",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Applicants needing zoning certificate",
+      "requirements": [
+        {
+          "document": "Proof of Ownership over the Land (1 original, 1 xerox copy) — Tax Declaration, Land Title, Notarized Deed of Sale, or Notarized Lease Contract or Consent of Landowner",
+          "copies": "1 original, 1 xerox copy",
+          "where_to_secure": "Office of the Municipal Assessor (Tax Declaration) or Register of Deeds (Land Title); Client-applicant for others"
+        },
+        {
+          "document": "Endorsement from DENR (if for titling purposes)",
+          "copies": null,
+          "where_to_secure": "DENR"
+        },
+        {
+          "document": "Special Power of Attorney (if the applicant is not the owner of the land)",
+          "copies": null,
+          "where_to_secure": "Client-applicant"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Approach the staff and ask for the service.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Ask the applicant to sign the logbook and check the location vs. Land Use Map.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "Administrative Staff – MPDO/ZA"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Pay the prescribed fees at the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Issue Order of Payment.",
+              "fees": "PHP 200.00",
+              "processing_time": null,
+              "person_responsible": "Revenue Collection Clerk – MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Accept the Zoning Certification.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Prepare and issue the Zoning Certification.",
+              "fees": "None",
+              "processing_time": "8 minutes",
+              "person_responsible": "Administrative Staff – MPDO/ZA"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 200.00",
+      "total_processing_time": "Simple – approximately 10 minutes",
+      "faqs": [
+        {
+          "question": "What is a Zoning Certificate?",
+          "answer": "A Zoning Certificate is a document stating that the location of the proposed use is conforming to the Land Use Plan of the Municipality of Sampaloc, Quezon."
+        },
+        {
+          "question": "Who can apply for a Zoning Certificate?",
+          "answer": "Any applicant who needs a zoning certificate for their property or proposed use."
+        },
+        {
+          "question": "What are the requirements for a Zoning Certificate?",
+          "answer": "You need proof of ownership over the land (Tax Declaration, Land Title, Notarized Deed of Sale, or Notarized Lease Contract/Consent of Landowner). If applying for titling purposes, a DENR endorsement is also needed. If you are not the landowner, a Special Power of Attorney is required."
+        },
+        {
+          "question": "How much does a Zoning Certificate cost?",
+          "answer": "The fee is PHP 200.00, paid at the Municipal Treasurer's Office."
+        },
+        {
+          "question": "How long does it take to get a Zoning Certificate?",
+          "answer": "It takes approximately 10 minutes after payment, making it a simple transaction."
+        },
+        {
+          "question": "Where do I get a Zoning Certificate?",
+          "answer": "At the Office of the Municipal Planning and Development Office (MPDO) / Zoning Administrator."
+        }
+      ]
+    },
+    {
+      "service_id": "MPDO-002",
+      "service_name": "Issuance of Locational Clearance",
+      "description": "A document stating that the location of the proposed residential, institutional, and commercial building is conforming to the Land Use Plan of the Municipality of Sampaloc, Quezon. Required for building permit applications.",
+      "office_or_division": "Office of Municipal Planning & Development Office / Zoning Administrator",
+      "classification": "Complex",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Applicants needing locational clearance for building permit (residential, institutional, commercial uses)",
+      "requirements": [
+        {
+          "document": "Accomplished and notarized/sworn application form",
+          "copies": "3 copies",
+          "where_to_secure": "MPDO/ZA"
+        },
+        {
+          "document": "Barangay Clearance",
+          "copies": "1 original, 4 xerox copies",
+          "where_to_secure": "Barangay Captain where the lot is located"
+        },
+        {
+          "document": "Proof of Land Ownership — Tax Declaration, Land Title, Lease Contract or Consent of Landowner, Notarized Deed of Sale, MSWDO Certification (if under CORE Shelter Project), or Barangay Certification (if under Tulong-Pabahay Program)",
+          "copies": "1 original, 4 xerox copies",
+          "where_to_secure": "Office of the Municipal Assessor (Tax Declaration), Register of Deeds (Land Title), Client's copy (Lease Contract or Consent), MSWDO (CORE Shelter Project), Concerned Barangay (Tulong-Pabahay Program)"
+        },
+        {
+          "document": "Zoning Certificate",
+          "copies": "1 original, 4 xerox copies",
+          "where_to_secure": "MPDO/ZA"
+        },
+        {
+          "document": "Location Plan / Site Development Plan",
+          "copies": null,
+          "where_to_secure": "Registered Civil Engineer / Architect"
+        },
+        {
+          "document": "Set of Building Plan with Detailed Cost Estimate",
+          "copies": "1 original, 4 xerox and blueprinted copies",
+          "where_to_secure": "Licensed Civil Engineer / Architect"
+        },
+        {
+          "document": "Proof of Real Property Tax Payment / Tax Clearance",
+          "copies": "1 original, 4 xerox copies",
+          "where_to_secure": "Office of the Municipal Treasurer"
+        },
+        {
+          "document": "Current Residence Certificate",
+          "copies": "1 original copy",
+          "where_to_secure": "Office of the Municipal or Barangay Treasurer"
+        },
+        {
+          "document": "Special Power of Attorney (if the applicant is not the owner of the land)",
+          "copies": null,
+          "where_to_secure": "Client-applicant"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Approach the staff, ask for the service, and submit filled-up request form with attached requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Ask the applicant to sign the logbook and issue Request Form.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "Administrative Staff – MPDO/ZA"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Accept the documents presented and check for completeness.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Administrative Staff – MPDO/ZA"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "Issue Order of Payment and advise client to pay at the MTO.",
+              "fees": "PHP 200.00 + Locational Clearance Fee (see fee schedule)",
+              "processing_time": null,
+              "person_responsible": "Administrative Staff – MPDO/ZA"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Pay at the Municipal Treasurer's Office and submit the Official Receipt (O.R.).",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept the Official Receipt.",
+              "fees": "None",
+              "processing_time": null,
+              "person_responsible": "Administrative Staff – MPDO/ZA"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Prepare and forward the clearance and its attachments to MPDC/ZA designate for review and signing.",
+              "fees": "None",
+              "processing_time": "3 working days upon receipt of O.R.",
+              "person_responsible": "Administrative Staff – MPDO/ZA"
+            },
+            {
+              "sub_step": "2.3",
+              "action": "Review, sign, and return the clearance to Administrative Staff for release.",
+              "fees": "None",
+              "processing_time": "Within the day after receipt of prepared clearance",
+              "person_responsible": "MPDC/ZA Designate"
+            },
+            {
+              "sub_step": "2.4",
+              "action": "Inform the applicant via text message that the locational clearance is ready for pick-up.",
+              "fees": "None",
+              "processing_time": "Within the day after receipt of signed clearance",
+              "person_responsible": "Administrative Staff – MPDO/ZA"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Claim the Locational Clearance.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the locational clearance.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Administrative Staff – MPDO/ZA"
+            }
+          ]
+        }
+      ],
+      "fee_schedule": {
+        "residential_house": [
+          { "bracket": "PHP 100,000 and below", "fee": "PHP 288.00" },
+          { "bracket": "Over PHP 100,000 to 200,000", "fee": "PHP 570.00" },
+          { "bracket": "Over PHP 200,000", "fee": "PHP 720.00 + 1/10 of 1% in excess of PHP 200,000" }
+        ],
+        "apartment": [
+          { "bracket": "PHP 500,000 and below", "fee": "PHP 1,440.00" },
+          { "bracket": "Over PHP 500,000 to 2 million", "fee": "PHP 2,160.00" },
+          { "bracket": "Over PHP 2 million", "fee": "PHP 3,000.00 + 1/10 of 1% of cost in excess of 2 million, regardless of number of doors" }
+        ],
+        "dormitories": [
+          { "bracket": "PHP 2,000,000 and below", "fee": "PHP 3,000.00" },
+          { "bracket": "Over PHP 2 million", "fee": "PHP 3,000.00 + 1/10 of 1% of cost in excess of 2 million, regardless of number of doors" }
+        ],
+        "institutional": [
+          { "bracket": "Below PHP 2 million", "fee": "PHP 3,600.00" },
+          { "bracket": "Over PHP 2 million", "fee": "PHP 3,600.00 + 1/10 of 1% of cost in excess of 2 million" }
+        ],
+        "commercial": [
+          { "bracket": "Below PHP 100,000", "fee": "PHP 1,440.00" },
+          { "bracket": "Over PHP 100,000 to 500,000", "fee": "PHP 2,160.00" },
+          { "bracket": "Over PHP 500,000 to 1 million", "fee": "PHP 2,880.00" },
+          { "bracket": "Over PHP 1 million to 2 million", "fee": "PHP 4,320.00 + 1/10 of 1% of cost in excess of 1 million" },
+          { "bracket": "Over PHP 2 million", "fee": "PHP 7,200.00 + 1/10 of 1% of cost in excess of 2 million" }
+        ]
+      },
+      "total_fees": "PHP 200.00 + Locational Clearance Fee (varies by project type and cost)",
+      "total_processing_time": "Complex – approximately 3 working days for preparation and signing, plus 10 minutes for release",
+      "faqs": [
+        {
+          "question": "What is a Locational Clearance?",
+          "answer": "A Locational Clearance is a document stating that the location of the proposed residential, institutional, or commercial building conforms to the Land Use Plan of the Municipality of Sampaloc, Quezon. It is required for building permit applications."
+        },
+        {
+          "question": "Who needs a Locational Clearance?",
+          "answer": "Any applicant applying for a building permit for residential, institutional, or commercial construction needs a Locational Clearance."
+        },
+        {
+          "question": "What documents are required for a Locational Clearance?",
+          "answer": "You need a notarized application form, Barangay Clearance, proof of land ownership, Zoning Certificate, Location Plan or Site Development Plan, Building Plans with Detailed Cost Estimate, proof of Real Property Tax payment, and a current Residence Certificate. If you are not the owner, a Special Power of Attorney is also required."
+        },
+        {
+          "question": "How much does a Locational Clearance cost?",
+          "answer": "The fee is PHP 200.00 plus a Locational Clearance Fee that varies depending on the type and cost of the project. For example, a residential house costing PHP 100,000 or below is PHP 288.00, while a commercial project over PHP 2 million is PHP 7,200.00 plus 1/10 of 1% of cost in excess of PHP 2 million."
+        },
+        {
+          "question": "How long does it take to get a Locational Clearance?",
+          "answer": "The process takes approximately 3 working days after submission of the Official Receipt, plus processing and release time. The applicant is notified via text when the clearance is ready."
+        },
+        {
+          "question": "Where do I get the application form for Locational Clearance?",
+          "answer": "The application form is available at the MPDO/Zoning Administrator's office."
+        },
+        {
+          "question": "What is the fee for a commercial building costing PHP 1.5 million?",
+          "answer": "For a commercial project costing over PHP 1 million to 2 million, the Locational Clearance fee is PHP 4,320.00 plus 1/10 of 1% of the cost in excess of PHP 1 million, on top of the PHP 200.00 base fee."
+        },
+        {
+          "question": "Do I need a Zoning Certificate before applying for a Locational Clearance?",
+          "answer": "Yes. A Zoning Certificate is one of the required documents for a Locational Clearance application. You need to secure it from the MPDO/ZA first."
+        },
+        {
+          "question": "How will I know when my Locational Clearance is ready?",
+          "answer": "The Administrative Staff will send you a text message to inform you that your Locational Clearance is ready for pick-up."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,239 @@
+{
+  "service_office": "Municipal Budget Office",
+  "service_category": "Internal & External",
+  "services": [
+    {
+      "service_id": "MBO-001",
+      "service_name": "Issuance of Approved Barangay and Sangguniang Kabataan Budget",
+      "description": "A reviewed Barangay/Sangguniang Kabataan Budget submitted by the Barangay Treasurers/Officials for approval to the Sangguniang Bayan. This includes complete Barangay/SK Budgetary Requirements and shows apparent compliance with the provisions of RA 7160 as amended by Local Budget Circular No. 63.",
+      "office_or_division": "Municipal Budget Office",
+      "classification": "Highly Technical",
+      "type_of_transaction": ["G2G"],
+      "who_may_avail": "Barangay Treasurers and Officials",
+      "requirements": [
+        {
+          "document": "Draft Barangay Budget",
+          "copies": 1,
+          "where_to_secure": "Barangay"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit one (1) original copy of draft Barangay and Sangguniang Kabataan Budget.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review the draft barangay budget documents.",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "MBO Staff, Municipal Budget Office"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Check the appropriation ordinance and budgetary requirements.",
+              "fees": "None",
+              "processing_time": "Included in Step 1",
+              "person_responsible": "MBO Staff, Municipal Budget Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive the reviewed budget and prepare seven (7) original copies.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Notify if the budget has complied with all budgetary requirements and general limitations via text message.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MBO Staff, Municipal Budget Office"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "If requirements are lacking, notify and advise the client to comply with the requirements. Receive and comply with lacking requirements.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MBO Staff, Municipal Budget Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Submit seven (7) original copies of the Barangay/SK budget.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Receive the seven (7) original copies of barangay budget and indorse to the Sangguniang Bayan.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "MBO Staff, Municipal Budget Office"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Wait for the approval of the Sangguniang Bayan.",
+              "fees": "None",
+              "processing_time": "Three (3) weeks",
+              "person_responsible": "MBO Staff, Municipal Budget Office"
+            },
+            {
+              "sub_step": "3.3",
+              "action": "Receive from the Sangguniang Bayan the approval of the barangay budget.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MBO Staff, Municipal Budget Office"
+            },
+            {
+              "sub_step": "3.4",
+              "action": "Notify the barangay treasurer of the approval of the barangay budget.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MBO Staff, Municipal Budget Office"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Receive the approved Barangay/SK budget.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Issue the approved barangay budget.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Budget Officer, Municipal Budget Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Approximately 3 weeks (including Sangguniang Bayan approval)",
+      "legal_basis": "RA 7160 as amended by Local Budget Circular No. 63",
+      "faqs": [
+        {
+          "question": "What is the Approved Barangay and Sangguniang Kabataan Budget?",
+          "answer": "It is a reviewed and approved budget document submitted by the Barangay/SK for approval by the Sangguniang Bayan, ensuring compliance with RA 7160 and Local Budget Circular No. 63."
+        },
+        {
+          "question": "Who can avail of this service?",
+          "answer": "This service is available to Barangay Treasurers and Officials."
+        },
+        {
+          "question": "How many copies of the draft budget do I need to submit initially?",
+          "answer": "You need to submit one (1) original copy of the draft Barangay/SK Budget for initial review."
+        },
+        {
+          "question": "How many copies are required after the initial review?",
+          "answer": "After the initial review and upon notification of compliance, you must prepare and submit seven (7) original copies for endorsement to the Sangguniang Bayan."
+        },
+        {
+          "question": "How long does the entire process take?",
+          "answer": "The entire process takes approximately three (3) weeks, largely due to the waiting period for approval by the Sangguniang Bayan."
+        },
+        {
+          "question": "Is there a fee for this service?",
+          "answer": "No, this service is free of charge."
+        },
+        {
+          "question": "How will I be notified if my budget complied with the requirements?",
+          "answer": "The MBO Staff will notify you via text message once the budget has complied with all budgetary requirements and general limitations."
+        },
+        {
+          "question": "What happens if my budget does not comply with the requirements?",
+          "answer": "The MBO Staff will notify and advise you to comply with the lacking requirements before proceeding with the endorsement to the Sangguniang Bayan."
+        }
+      ]
+    },
+    {
+      "service_id": "MBO-002",
+      "service_name": "Processing of Obligation Request (OBR)",
+      "description": "An important document submitted by any employee, agency, or barangay for the verification of funds availability necessary for the processing of vouchers. This includes the Obligation Request, complete voucher requirements, and supporting documents.",
+      "office_or_division": "Municipal Budget Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Any employee, agency, Barangay Treasurers and Officials",
+      "requirements": [
+        {
+          "document": "Obligation Request (OBR) duly signed by the requesting agency/individual",
+          "copies": null,
+          "where_to_secure": "Agency or Barangay"
+        },
+        {
+          "document": "Approved Purchase Request (PR) / Purchase Order (PO) and other supporting documents",
+          "copies": null,
+          "where_to_secure": "Agency or Barangay"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit OBR and supporting documents.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive and record OBR.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MBO Staff, Municipal Budget Office"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Verify availability of funds and sign the OBR.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MBO Staff, Municipal Budget Office"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "Record the processed OBR in the control logbook.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MBO Staff, Municipal Budget Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive processed OBR.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Issue the processed OBR and retain a file copy.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MBO Staff, Municipal Budget Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "20 minutes",
+      "faqs": [
+        {
+          "question": "What is an Obligation Request (OBR)?",
+          "answer": "An Obligation Request (OBR) is a document submitted by an employee, agency, or barangay to verify the availability of funds before processing a disbursement voucher."
+        },
+        {
+          "question": "Who can submit an OBR?",
+          "answer": "Any employee, government agency, barangay treasurer, or barangay official may submit an OBR to the Municipal Budget Office."
+        },
+        {
+          "question": "What documents do I need to submit with the OBR?",
+          "answer": "You need to submit the duly signed Obligation Request (OBR) along with the Approved Purchase Request (PR) or Purchase Order (PO) and other supporting documents."
+        },
+        {
+          "question": "Is there a fee for processing an OBR?",
+          "answer": "No, processing of the OBR is free of charge."
+        },
+        {
+          "question": "How long does it take to process an OBR?",
+          "answer": "The entire process takes approximately 20 minutes, from receipt and recording to verification of funds and issuance of the processed OBR."
+        },
+        {
+          "question": "Why is the OBR important?",
+          "answer": "The OBR is essential because it verifies that funds are available for a specific obligation or expense before a disbursement voucher can be processed, ensuring proper budget management."
+        }
+      ]
+    }
+  ]
+}

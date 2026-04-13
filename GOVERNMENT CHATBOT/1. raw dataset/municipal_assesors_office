@@ -1,0 +1,1449 @@
+    {
+  "service_office": "Municipal Assessor's Office",
+  "service_category": "Internal & External",
+  "services": [
+    {
+      "service_id": "MAO-ASS-001",
+      "service_name": "Issuance of Printed Copy of Land Parcel of the Subject Property",
+      "description": "A computer-generated document which serves to identify the location of a property on the base map, showing boundaries and adjacent lots. This shall not be used as evidence for settling boundary disputes.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C", "G2G"],
+      "who_may_avail": "Any person, firm or corporation including any agency who acquired real property",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of owner (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter to transact with the Office of the Municipal Assessor (signature must match ID) (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Property Owner and Authorized Representative"
+        },
+        {
+          "document": "Official Receipt for a printed map of a property",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, and request for a printed copy of land parcel. Submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements. If complete, issue order of payment and advise the client to pay the corresponding fee.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive order of payment and pay the corresponding fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment.",
+              "fees": "PHP 75.00 (from the Revenue Code)",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "Revenue Collection Clerk, MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Present Official Receipt. Wait while the requested document is being processed, then receive the printed copy of land parcel of the subject property.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Process the requested document then issue the printed map.",
+              "fees": "None",
+              "processing_time": "11 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 75.00",
+      "faqs": [
+        {
+          "question": "What is a printed copy of land parcel?",
+          "answer": "It is a computer-generated document that identifies the location of a property on a base map, showing its boundaries and adjacent lots. It cannot be used as evidence for settling boundary disputes."
+        },
+        {
+          "question": "Who can request a printed copy of land parcel?",
+          "answer": "Any person, firm, corporation, or government agency who acquired real property may request this document."
+        },
+        {
+          "question": "Can a representative request on behalf of the property owner?",
+          "answer": "Yes. The representative must present a photocopy of their valid ID and a Special Power of Attorney or Authorization Letter signed by the property owner, with the signature matching the owner's ID."
+        },
+        {
+          "question": "How much does a printed copy of land parcel cost?",
+          "answer": "The fee is PHP 75.00, payable at the Municipal Treasurer's Office."
+        },
+        {
+          "question": "How long does it take to receive the printed map?",
+          "answer": "Processing takes approximately 10 minutes for document review and 11 minutes for printing, after payment is made."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-ASS-002",
+      "service_name": "Issuance of Certification for Real Property With Improvement / No Improvement",
+      "description": "A document that provides proof that the land is vacant or that the land has improvements constructed thereon, issued upon the request of the owner or authorized representative for the purpose of taxation and other legal purposes.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C", "G2G"],
+      "who_may_avail": "Any person, firm or corporation including any agency who have or acquire real property",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of owner (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Property Owner and Authorized Representative"
+        },
+        {
+          "document": "Official Receipt of Updated Real Property Tax payment or Tax Clearance (Photocopy)",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Official Receipt of Certification Fee",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, and request for a certification. Submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements. If complete, issue order of payment and advise the client to pay the corresponding fee.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive order of payment and pay the corresponding fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment.",
+              "fees": "PHP 150.00 (with improvement) or PHP 50.00 (no improvement) plus Documentary Stamp Fee (RA 7660 Sec. 188)",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "MTO Cashier, MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Present Official Receipt. Wait while the requested document is being processed, then receive the certification.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Process the requested document, attach documentary stamp, then issue certification.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 150.00 (with improvement) or PHP 50.00 (no improvement) plus Documentary Stamp Fee",
+      "faqs": [
+        {
+          "question": "What is a Certification for Real Property With or Without Improvement?",
+          "answer": "It is a document that proves whether a land is vacant or has improvements (such as buildings or structures) constructed on it, used for taxation and other legal purposes."
+        },
+        {
+          "question": "How much is the certification fee?",
+          "answer": "The fee is PHP 150.00 for property with improvement and PHP 50.00 for property with no improvement, plus a Documentary Stamp Fee as required by law."
+        },
+        {
+          "question": "Do I need to present proof of updated real property tax payment?",
+          "answer": "Yes, you need to present an Official Receipt of updated Real Property Tax payment or a Tax Clearance."
+        },
+        {
+          "question": "How long does it take to process the certification?",
+          "answer": "It takes approximately 15 minutes for document review and 30 minutes for processing and issuance of the certification after payment."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-ASS-003",
+      "service_name": "Issuance of Tax Declaration of Real Property for New or Undeclared Building and Machinery",
+      "description": "A document that provides appraisal and assessment of real property as a basis of permanent record of property-owned buildings and machineries, providing the name of the known owner and the assessed value of the property for real property taxation purposes.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any person, firm or corporation including any agency who acquire or lease real property",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of owner (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Property Owner and Authorized Representative"
+        },
+        {
+          "document": "Duly accomplished request form or written request",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Notarized Proof of Ownership/Authorization Letter or Lease Contract (if owner of the building is not the owner of the land)",
+          "copies": null,
+          "where_to_secure": "Property Owner or Notary Public"
+        },
+        {
+          "document": "For residential improvement only – in the absence of Approved Building Plan: Certification from the Barangay of the period the improvement or building was built, or request letter from the owner",
+          "copies": null,
+          "where_to_secure": "Concerned Barangay or Property Owner"
+        },
+        {
+          "document": "Duly accomplished Sworn Statement of True Value of Property",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "For machineries: Official Receipt or original acquisition cost (including freight, installation, etc.)",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Current colored photos of building/structure and/or machinery",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, and inquire for the issuance of tax declaration for new or undeclared building and machinery. Submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements and set schedule for ocular inspection.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Assist the personnel from the Assessor's Office during the ocular inspection.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Conduct ocular inspection and advise the client to return after two (2) working days. Process the requested document: Accomplish FAAS, prepare tax declaration, prepare Notice of Assessment, cancel previous Tax Declaration, and record data in Assessment Roll.",
+              "fees": "None",
+              "processing_time": "Within 2 working days",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Return to Assessor's Office after two days and receive the owner's copy of tax declaration and notice of assessment.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the owner's copy of tax declaration and notice of assessment.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Assessor, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "faqs": [
+        {
+          "question": "What is a Tax Declaration for a new or undeclared building or machinery?",
+          "answer": "It is a document that formally records and assesses the value of a newly constructed or previously undeclared building or machinery for real property tax purposes."
+        },
+        {
+          "question": "Is there a fee for this service?",
+          "answer": "No, the issuance of tax declaration for new or undeclared buildings and machineries is free of charge."
+        },
+        {
+          "question": "Will the Assessor's Office visit my property?",
+          "answer": "Yes, an ocular inspection will be scheduled. You are expected to assist the personnel during the visit."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "The tax declaration will be ready within two (2) working days after the ocular inspection."
+        },
+        {
+          "question": "What documents do I need if I am building on someone else's land?",
+          "answer": "You need a Notarized Proof of Ownership, Authorization Letter, or Lease Contract showing that the owner of the building is different from the owner of the land."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-ASS-004",
+      "service_name": "Issuance of Certified True Copy of Tax Declaration",
+      "description": "A photocopy of Tax Declaration duly certified by the Municipal Assessor, used as reference for payment of taxes and for other legal purposes.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C", "G2G"],
+      "who_may_avail": "Any person, firm or corporation including any agency who have real properties or are acquiring real property",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of owner (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Property Owner and Authorized Representative"
+        },
+        {
+          "document": "Proof of transfer – photocopy of notarized Deed of Sale, Deed of Donation, Extrajudicial Settlement, or any document indicating transfer of real property (if transacted by new owner)",
+          "copies": null,
+          "where_to_secure": "Notary Public"
+        },
+        {
+          "document": "Official Receipt of Updated Real Property Tax payment or Tax Clearance (Photocopy)",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Official Receipt of Certified Copy of Tax Declaration Fee",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, inquire for the issuance of certified copy of tax declaration, and submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements. If complete, issue order of payment and advise the client to pay the corresponding fee.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive order of payment and pay the corresponding fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment.",
+              "fees": "PHP 130.00 (Certified True Copy Fee) plus Documentary Stamp Fee (RA 7660 Sec. 188)",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "MTO Cashier, MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Present Official Receipt. Wait while the requested document is being processed, then receive the certified copy of tax declaration.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Process the requested document: retrieve, photocopy, and certify the tax declaration, attach documentary stamp, then issue the copy.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 130.00 plus Documentary Stamp Fee",
+      "faqs": [
+        {
+          "question": "What is a Certified True Copy of Tax Declaration?",
+          "answer": "It is a photocopy of a Tax Declaration that has been duly certified by the Municipal Assessor, used as official reference for tax payments and other legal transactions."
+        },
+        {
+          "question": "How much is the fee for a Certified True Copy of Tax Declaration?",
+          "answer": "The fee is PHP 130.00 plus a Documentary Stamp Fee as required under RA 7660 Sec. 188."
+        },
+        {
+          "question": "Can a new owner request a Certified True Copy?",
+          "answer": "Yes. The new owner must present proof of transfer such as a notarized Deed of Sale, Deed of Donation, Extrajudicial Settlement, or any equivalent document."
+        },
+        {
+          "question": "How long does it take to receive the certified copy?",
+          "answer": "Processing takes approximately 30 minutes after submission of requirements and payment."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-ASS-005",
+      "service_name": "Issuance of Certification for Aggregate Landholdings",
+      "description": "A certification that allows the property owner to obtain a listing of all real property units declared under their name, used as reference for payment of taxes and for other legal purposes.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any person, firm or corporation including any agency who have or acquire real property",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of owner (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Official Receipt of Updated Real Property Tax payment or Tax Clearance (Photocopy)",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Official Receipt of Certification Fee",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, inquire about the certification, and submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements. If complete, issue order of payment and advise the client to pay the corresponding fee.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive order of payment and pay the corresponding fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment.",
+              "fees": "PHP 150.00 (Certification Fee) plus Documentary Stamp Fee (RA 7660 Sec. 188)",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "Revenue Collection Clerk, MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Present Official Receipt. Wait while the requested document is being processed, then receive certification.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Process the requested document: check and retrieve the list of declared properties on Assessment Roll per barangay, trace from filed Real Property Units, encode necessary data to the prescribed form, attach documentary stamp, then issue certification.",
+              "fees": "None",
+              "processing_time": "60 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 150.00 plus Documentary Stamp Fee",
+      "faqs": [
+        {
+          "question": "What is a Certification for Aggregate Landholdings?",
+          "answer": "It is a document that lists all real properties declared under your name in the municipality, used for tax payment reference and other legal purposes."
+        },
+        {
+          "question": "How much is the fee for this certification?",
+          "answer": "The fee is PHP 150.00 plus a Documentary Stamp Fee as required by law."
+        },
+        {
+          "question": "How long does processing take?",
+          "answer": "Processing takes approximately 60 minutes after payment, as the office needs to retrieve and verify all declared properties per barangay."
+        },
+        {
+          "question": "Do I need to have updated real property tax payments?",
+          "answer": "Yes, you need to present an Official Receipt of updated Real Property Tax payment or a Tax Clearance."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-ASS-006",
+      "service_name": "Issuance of Tax Declaration of Real Property Transferred to New Owner",
+      "description": "A document providing appraisal and assessment of real property (whether land, building, improvement, or machinery) following transfer of ownership, for real property taxation purposes.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C", "G2G"],
+      "who_may_avail": "Any person, firm or corporation including any agency who acquires real property",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of owner (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Duly accomplished request form or written request",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Certified True Copy of Transfer Certificate of Title (TCT) or Original Certificate of Title (OCT) (2 photocopies)",
+          "copies": 2,
+          "where_to_secure": "Registry of Deeds"
+        },
+        {
+          "document": "Proof of transfer – photocopy of Duly Notarized Deed of Sale, Deed of Donation, Extrajudicial Settlement, or any document indicating the transfer of real property (2 photocopies)",
+          "copies": 2,
+          "where_to_secure": "Notary Public"
+        },
+        {
+          "document": "Certificate Authorizing Registration (CAR) (2 photocopies)",
+          "copies": 2,
+          "where_to_secure": "Bureau of Internal Revenue (BIR)"
+        },
+        {
+          "document": "Official Receipt of Updated Real Property Tax payment or Tax Clearance (currently paid, no delinquencies)",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Official Receipt of Transfer Fee",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Official Receipt of Transfer Tax payment",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Approved Subdivision Plan or Consolidation Plan (additional requirement for segregation/subdivision or consolidation of lots)",
+          "copies": null,
+          "where_to_secure": "DENR/PENRO Region IV-A CALABARZON"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, and inquire for the transfer of tax declaration. Submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements. If complete, issue order of payment and advise the client to pay the corresponding fee. If incomplete, explain and advise the client to comply with lacking requirements.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive order of payment and pay the corresponding fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment. Get the official receipt and advise the client to return after two (2) working days. Process the requested document: Accomplish FAAS, prepare tax declaration, prepare Notice of Assessment, cancel previous Tax Declaration, and record data in Assessment Roll.",
+              "fees": "PHP 180.00 per RPU (Transfer Fee, from the Revenue Code)",
+              "processing_time": "Within 2 working days",
+              "person_responsible": "Revenue Collection Clerk, MTO / Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Return to the Assessor's Office and receive the owner's copy of tax declaration and notice of assessment.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the owner's copy of tax declaration and notice of assessment.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Assessor, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 180.00 per RPU (Transfer Fee)",
+      "faqs": [
+        {
+          "question": "What is the Transfer of Tax Declaration?",
+          "answer": "It is the process of updating the tax declaration of a real property to reflect the name of the new owner following a transfer of ownership."
+        },
+        {
+          "question": "What is the transfer fee?",
+          "answer": "The transfer fee is PHP 180.00 per Real Property Unit (RPU), payable at the Municipal Treasurer's Office."
+        },
+        {
+          "question": "What happens if I fail to pay the transfer tax within the prescribed 90-day period?",
+          "answer": "A surcharge of 25% of the original tax due will be imposed, to be paid at the same time and in the same manner as the tax due, pursuant to Provincial Ordinance on surcharges for late payment."
+        },
+        {
+          "question": "Where do I get the Certificate Authorizing Registration (CAR)?",
+          "answer": "The CAR is obtained from the Bureau of Internal Revenue (BIR)."
+        },
+        {
+          "question": "How long does the processing take?",
+          "answer": "The tax declaration will be ready within two (2) working days after submission of complete requirements and payment of fees."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-ASS-007",
+      "service_name": "Issuance of Certification for Non-Ownership or No Property Holdings",
+      "description": "A certification issued to clients who do not possess real properties, issued upon request for taxation or other legal purposes.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any person, firm or corporation including any agency who do not possess real property",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of the requesting person (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Requesting Person"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Requesting Person or Authorized Representative"
+        },
+        {
+          "document": "Official Receipt of Certification Fee",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, inquire about the certification, and submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements. Check the list of declared properties on Assessment Roll per barangay. If none found, issue order of payment and advise the client to pay the corresponding fee.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive order of payment and pay the corresponding fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment.",
+              "fees": "PHP 50.00 (Certification Fee) plus Documentary Stamp Fee (RA 7660 Sec. 188)",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "Revenue Collection Clerk, MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Present Official Receipt. Wait while the requested document is being processed, then receive certification.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Process the requested document, attach documentary stamp, then issue certification.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 50.00 plus Documentary Stamp Fee",
+      "faqs": [
+        {
+          "question": "What is a Certification for Non-Ownership or No Property Holdings?",
+          "answer": "It is a certification confirming that a person, firm, or corporation does not have any real property declared under their name in the municipality."
+        },
+        {
+          "question": "How much is the certification fee?",
+          "answer": "The fee is PHP 50.00 plus a Documentary Stamp Fee as required by law."
+        },
+        {
+          "question": "How long does it take to receive this certification?",
+          "answer": "The process takes approximately 15 minutes for verification and 30 minutes for processing and issuance after payment."
+        },
+        {
+          "question": "What is this certification commonly used for?",
+          "answer": "It is commonly used for taxation purposes and for various legal transactions that require proof that a person has no real property holdings."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-ASS-008",
+      "service_name": "Issuance of Other Related Certifications",
+      "description": "Certifications issued to declared owners on tax declarations as per records of real property units filed for taxation or other legal purposes.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any person, firm or corporation including any agency who have real properties",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of the requesting person (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Duly accomplished request form or written request",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Official Receipt of Certification Fee",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, inquire about the certification, and submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements. If complete, issue order of payment and advise the client to pay the corresponding fee.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive order of payment and pay the corresponding fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment.",
+              "fees": "PHP 150.00 (Certification Fee) plus Documentary Stamp Fee (RA 7660 Sec. 188)",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "Revenue Collection Clerk, MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Present Official Receipt. Wait while the requested document is being processed, then receive certification.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Process the requested document, attach documentary stamp, then issue certification.",
+              "fees": "None",
+              "processing_time": "40 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 150.00 plus Documentary Stamp Fee",
+      "faqs": [
+        {
+          "question": "What are other related certifications from the Assessor's Office?",
+          "answer": "These are various certifications related to real property records that do not fall under the other specific certification categories, issued to declared property owners for taxation or other legal purposes."
+        },
+        {
+          "question": "How much is the fee?",
+          "answer": "The fee is PHP 150.00 plus a Documentary Stamp Fee as required by law."
+        },
+        {
+          "question": "How long does processing take?",
+          "answer": "Processing takes approximately 40 minutes after payment and submission of complete requirements."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-ASS-009",
+      "service_name": "Issuance of Certification of Adjoining Lots",
+      "description": "A certification identifying adjoining lots and declared owners as per cadastral map and records filed for real property taxation and other legal purposes.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any person, firm or corporation including any agency who have real properties",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of the requesting person (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Official Receipt of Certification Fee",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, inquire about the certification, and submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements. If complete, issue order of payment and advise the client to pay the corresponding fee.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive order of payment and pay the corresponding fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment.",
+              "fees": "PHP 150.00 (Certification Fee) plus Documentary Stamp Fee (RA 7660 Sec. 188)",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "Revenue Collection Clerk, MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Present Official Receipt. Wait while the requested document is being processed, then receive certification.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Process the requested document, attach documentary stamp, then issue certification.",
+              "fees": "None",
+              "processing_time": "40 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 150.00 plus Documentary Stamp Fee",
+      "faqs": [
+        {
+          "question": "What is a Certification of Adjoining Lots?",
+          "answer": "It is a certification that identifies the lots adjacent to a subject property and their declared owners, based on the cadastral map and records on file."
+        },
+        {
+          "question": "How much is the certification fee?",
+          "answer": "The fee is PHP 150.00 plus a Documentary Stamp Fee as required by law."
+        },
+        {
+          "question": "How long does it take to receive this certification?",
+          "answer": "Processing takes approximately 40 minutes after payment and submission of complete requirements."
+        },
+        {
+          "question": "Can this certification be used to settle boundary disputes?",
+          "answer": "This certification identifies adjoining lots based on records, but boundary dispute settlement may require additional legal processes. It is best to consult a lawyer or geodetic engineer for boundary disputes."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-ASS-010",
+      "service_name": "Annotation on Tax Declaration: Mortgages and Others Including OCT/TCT Related Annotations",
+      "description": "Annotation on tax declarations as per OCT/TCT encumbrances, mortgages, or cancellation of mortgage annotation on tax declarations for real property taxation and other legal purposes.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any person, firm or corporation including any agency who have real properties",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of the requesting person (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Notarized Certification of Mortgages or Cancellation of Mortgages (2 copies) OR Photocopy of latest Certified TCT/OCT (2 copies)",
+          "copies": 2,
+          "where_to_secure": "Notary Public or Register of Deeds"
+        },
+        {
+          "document": "Official Receipt for Annotation Fee",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, inquire about the annotation, and submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements. Issue order of payment and advise the client to pay the corresponding fee.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive order of payment and pay the corresponding fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment.",
+              "fees": "PHP 180.00 (Annotation Fee, from the Revenue Code)",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "Revenue Collection Clerk, MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Present Official Receipt. Wait while the requested document is being processed, then receive the annotated tax declaration.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Process the requested document then issue the annotated tax declaration.",
+              "fees": "None",
+              "processing_time": "40 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 180.00",
+      "faqs": [
+        {
+          "question": "What is an annotation on a tax declaration?",
+          "answer": "It is the process of officially recording encumbrances such as mortgages, cancellation of mortgages, or other OCT/TCT-related notations on the tax declaration of a real property."
+        },
+        {
+          "question": "How much is the annotation fee?",
+          "answer": "The annotation fee is PHP 180.00, payable at the Municipal Treasurer's Office."
+        },
+        {
+          "question": "What documents do I need for a mortgage annotation?",
+          "answer": "You need a Notarized Certification of Mortgages or Cancellation of Mortgages (2 copies), or a photocopy of the latest Certified TCT/OCT (2 copies), obtained from a Notary Public or the Register of Deeds."
+        },
+        {
+          "question": "How long does it take to process the annotation?",
+          "answer": "Processing takes approximately 40 minutes after payment and submission of complete requirements."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-ASS-011",
+      "service_name": "Cancellation of Tax Declaration for Improvement (Total Destruction/Demolition/Cessation of Machinery Operation)",
+      "description": "Cancellation of tax declaration that ceases the taxability of real properties due to total destruction or demolition of buildings and other improvements, including cessation of machinery operation, for taxation and other legal purposes.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any person, firm or corporation including any agency who have real properties",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of the requesting person (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Official Receipt of Updated Real Property Tax payment or Tax Clearance (Photocopy)",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Request letter of the owner and Barangay Certification",
+          "copies": null,
+          "where_to_secure": "Property Owner and Barangay Captain of the barangay where the property is located"
+        },
+        {
+          "document": "Colored picture of the subject property",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, inquire about the cancellation of tax declaration, and submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Set schedule for ocular inspection.",
+              "fees": "None",
+              "processing_time": "Included in Step 1",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Assist the personnel from the Assessor's Office during the ocular inspection.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Conduct ocular inspection and advise the client to return to the office after two (2) working days. Process the requested services.",
+              "fees": "None",
+              "processing_time": "2 working days",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Return to the Assessor's Office after two days and receive the notice of cancellation.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the notice of cancellation.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Assessor, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "faqs": [
+        {
+          "question": "When should I apply for cancellation of a tax declaration for improvement?",
+          "answer": "You should apply when a building or improvement has been totally destroyed or demolished, or when a machinery has ceased to operate, so that the property is no longer subject to real property tax for that improvement."
+        },
+        {
+          "question": "Is there a fee for this service?",
+          "answer": "No, the cancellation of tax declaration for improvement is free of charge."
+        },
+        {
+          "question": "Do I need a Barangay Certification?",
+          "answer": "Yes, you need a request letter from the owner and a Barangay Certification from the Barangay Captain where the property is located."
+        },
+        {
+          "question": "Will the Assessor's Office inspect my property?",
+          "answer": "Yes, an ocular inspection will be scheduled to verify the destruction, demolition, or cessation of machinery operation."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "The notice of cancellation will be ready within two (2) working days after the ocular inspection."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-ASS-012",
+      "service_name": "Issuance of Tax Declaration for Update, Correction of Entry (Boundaries, Area, TIN, Address, etc.) Conforming to Certificate of Title",
+      "description": "A service that provides update and correction of real property units and their assessment based on presented documents such as OCT, TCT, and other related documents, for real property taxation purposes.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C", "G2G"],
+      "who_may_avail": "Any person, firm or corporation including any agency who acquires real property",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of owner (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Duly accomplished request form or written request",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Certified True Copy of Transfer Certificate of Title (TCT) or Original Certificate of Title (OCT) (2 photocopies)",
+          "copies": 2,
+          "where_to_secure": "Registry of Deeds"
+        },
+        {
+          "document": "Photocopy of Duly Notarized Deed of Sale, Deed of Donation, Extrajudicial Settlement, or any related document (2 photocopies)",
+          "copies": 2,
+          "where_to_secure": "Notary Public or Property Owner"
+        },
+        {
+          "document": "Official Receipt of Updated Real Property Tax payment or Tax Clearance",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Official Receipt of Issuance Fee",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, and inquire for the correction of tax declaration. Submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements. If complete, issue order of payment and advise the client to pay the corresponding fee.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive order of payment and pay the corresponding fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment. Get the official receipt and advise client to return after two (2) working days. Process the requested document: Accomplish FAAS, prepare tax declaration, prepare Notice of Assessment, cancel previous Tax Declaration, and record data in Assessment Roll. If documents are incomplete, explain and advise the client to comply.",
+              "fees": "PHP 180.00 per RPU (Issuance of Tax Declaration, from the Revenue Code)",
+              "processing_time": "Within 2 working days",
+              "person_responsible": "Revenue Collection Clerk, MTO / Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Return to the Assessor's Office and receive the owner's copy of tax declaration and notice of assessment.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the owner's copy of tax declaration and notice of assessment.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Assessor, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 180.00 per RPU",
+      "faqs": [
+        {
+          "question": "What corrections can be made to a tax declaration?",
+          "answer": "Corrections can include updates to boundaries, area, TIN, address, and other entries to conform with the Certificate of Title (TCT or OCT)."
+        },
+        {
+          "question": "How much is the issuance fee for correction of tax declaration?",
+          "answer": "The fee is PHP 180.00 per Real Property Unit (RPU), payable at the Municipal Treasurer's Office."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "The corrected tax declaration will be ready within two (2) working days after submission of complete requirements and payment."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-ASS-013",
+      "service_name": "Issuance of Tax Declaration of Real Property for Subdivided Parcel of Land (Without Transfer of Ownership)",
+      "description": "A document providing segregation or subdivision of real property and the assessed value of the property for real property taxation purposes, without change of ownership.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C", "G2G"],
+      "who_may_avail": "Any person, firm or corporation including any agency who acquires real property",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of owner (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Duly accomplished request form or written request",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Certified True Copy of Transfer Certificate of Title (TCT) or Original Certificate of Title (OCT) (2 photocopies)",
+          "copies": 2,
+          "where_to_secure": "Registry of Deeds"
+        },
+        {
+          "document": "Approved Subdivision Plan (2 photocopies)",
+          "copies": 2,
+          "where_to_secure": "DENR Los Baños / Geodetic Engineer"
+        },
+        {
+          "document": "Official Receipt of Issuance Fee",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, and inquire for the subdivision or segregation of tax declaration. Submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements. If complete, issue order of payment and advise the client to pay the corresponding fee.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive order of payment and pay the corresponding fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment. Advise client to return after two (2) working days. Process the requested document: Accomplish FAAS, prepare tax declaration, prepare Notice of Assessment, cancel previous Tax Declaration, and record data in Assessment Roll. If incomplete, explain and advise the client to comply.",
+              "fees": "PHP 180.00 per RPU (Issuance Fee, from the Revenue Code)",
+              "processing_time": "Within 2 working days",
+              "person_responsible": "Revenue Collection Clerk, MTO / Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Return to the Assessor's Office and receive the owner's copy of tax declaration and notice of assessment.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the owner's copy of tax declaration and notice of assessment.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Assessor, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 180.00 per RPU",
+      "faqs": [
+        {
+          "question": "What is subdivision or segregation of a tax declaration?",
+          "answer": "It is the process of dividing a parcel of land into two or more separate lots and issuing individual tax declarations for each resulting lot, without transferring ownership to another person."
+        },
+        {
+          "question": "Where do I get the Approved Subdivision Plan?",
+          "answer": "The Approved Subdivision Plan can be obtained from the DENR Los Baños office or from a licensed Geodetic Engineer."
+        },
+        {
+          "question": "How much is the issuance fee?",
+          "answer": "The fee is PHP 180.00 per Real Property Unit (RPU), payable at the Municipal Treasurer's Office."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "The tax declaration for each subdivided lot will be ready within two (2) working days after submission of complete requirements and payment."
+        }
+      ]
+    },
+    {
+      "service_id": "MAO-ASS-014",
+      "service_name": "Issuance of Tax Declaration of Real Property for Consolidated Parcel of Land (Without Transfer of Ownership)",
+      "description": "A document providing consolidation of real property and the assessed value of the property for real property taxation purposes, without change of ownership.",
+      "office_or_division": "Municipal Assessor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C", "G2G"],
+      "who_may_avail": "Any person, firm or corporation including any agency who acquires real property",
+      "requirements": [
+        {
+          "document": "Photocopy of government-issued ID of owner (corporate secretary, in case of corporation)",
+          "copies": null,
+          "where_to_secure": "Property Owner"
+        },
+        {
+          "document": "Photocopy of valid ID of representative (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Authorized Representative"
+        },
+        {
+          "document": "Special Power of Attorney or Authorization Letter (if transacted by representative)",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Duly accomplished request form or written request",
+          "copies": null,
+          "where_to_secure": "Property Owner or Authorized Representative"
+        },
+        {
+          "document": "Certified True Copy of Transfer Certificate of Title (TCT) or Original Certificate of Title (OCT) (2 photocopies)",
+          "copies": 2,
+          "where_to_secure": "Registry of Deeds"
+        },
+        {
+          "document": "Approved Consolidation Plan (2 photocopies)",
+          "copies": 2,
+          "where_to_secure": "DENR Los Baños / Geodetic Engineer"
+        },
+        {
+          "document": "Official Receipt of Issuance Fee",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Assessor's Office, sign in the logbook, and inquire for the consolidation of tax declaration. Submit requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review and evaluate the completeness of the requirements. If complete, issue order of payment and advise the client to pay the corresponding fee.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive order of payment and pay the corresponding fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment. Advise client to return after two (2) working days. Process the requested document: Accomplish FAAS, prepare tax declaration, prepare Notice of Assessment, cancel previous Tax Declaration, and record data in Assessment Roll. If incomplete, explain and advise the client to comply.",
+              "fees": "PHP 180.00 per RPU (Issuance Fee, from the Revenue Code)",
+              "processing_time": "Within 2 working days",
+              "person_responsible": "Revenue Collection Clerk, MTO / Assessor's Office Staff, Office of the Municipal Assessor"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Return to the Assessor's Office and receive the owner's copy of tax declaration and notice of assessment.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the owner's copy of tax declaration and notice of assessment.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Assessor, Office of the Municipal Assessor"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 180.00 per RPU",
+      "faqs": [
+        {
+          "question": "What is consolidation of a tax declaration?",
+          "answer": "It is the process of combining two or more adjacent parcels of land into a single lot and issuing one consolidated tax declaration, without transferring ownership to another person."
+        },
+        {
+          "question": "Where do I get the Approved Consolidation Plan?",
+          "answer": "The Approved Consolidation Plan can be obtained from the DENR Los Baños office or from a licensed Geodetic Engineer."
+        },
+        {
+          "question": "How much is the issuance fee?",
+          "answer": "The fee is PHP 180.00 per Real Property Unit (RPU), payable at the Municipal Treasurer's Office."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "The consolidated tax declaration will be ready within two (2) working days after submission of complete requirements and payment."
+        },
+        {
+          "question": "What is the difference between subdivision and consolidation of lots?",
+          "answer": "Subdivision splits one parcel into multiple smaller lots, while consolidation merges two or more adjacent parcels into a single larger lot."
+        }
+      ]
+    }
+  ]
+}

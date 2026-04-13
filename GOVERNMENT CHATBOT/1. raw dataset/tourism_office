@@ -1,0 +1,157 @@
+{
+  "service_office": "Tourism Office",
+  "service_category": "External",
+  "services": [
+    {
+      "service_id": "TO-001",
+      "service_name": "Provision of Tourism Assistance",
+      "description": "A service given to domestic or foreign tourists. This includes registration, brief explanation about local attractions, providing brochures and other printed materials, audio-visual presentations, booking of tourists, issuance of order of payments, signing of waiver, assignment of tour guides, and acceptance of feedback.",
+      "office_or_division": "Tourism Culture and Arts Center",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "Domestic and Foreign Tourists",
+      "requirements": [
+        {
+          "document": "No prior documents required — tourists register at the office or inquire by phone or social media",
+          "copies": null,
+          "where_to_secure": "Tourism Culture and Arts Center"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 0,
+          "channel": "Walk-In",
+          "client_action": null,
+          "agency_actions": []
+        },
+        {
+          "step_number": 1,
+          "channel": "Walk-In",
+          "client_action": "Inquire about the services provided by the office.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Register the tourist in the log book.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "TOO1 / Tourism Office Staff"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Provide information about local attractions through brochures, oral explanation, or audio-visual presentations.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "TOO1 / Tourism Office Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "channel": "Walk-In",
+          "client_action": "Avail of services or tourism packages.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Book the tourist for the selected attraction or package.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "TOO1 / Tourism Office Staff"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Have the tourist sign the waiver.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "TOO1 / Tourism Office Staff"
+            },
+            {
+              "sub_step": "2.3",
+              "action": "Proceed to the Barangay for the tour.",
+              "fees": "None",
+              "processing_time": null,
+              "person_responsible": "TOO1 / Tourism Office Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 0,
+          "channel": "By Phone / Social Media",
+          "client_action": null,
+          "agency_actions": []
+        },
+        {
+          "step_number": 1,
+          "channel": "By Phone / Social Media",
+          "client_action": "Inquire about the services provided by the office.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide information about local attractions through social media or phone.",
+              "fees": "None",
+              "processing_time": "5 minutes for initial response; 30 minutes for full information",
+              "person_responsible": "TOO1 / Tourism Office Staff"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "channel": "By Phone / Social Media",
+          "client_action": "Avail of services or tourism packages.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Book the tourist for the selected attraction or package.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "TOO1 / Tourism Office Staff"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – Walk-in: approximately 55 minutes; By phone or social media: approximately 45 minutes",
+      "faqs": [
+        {
+          "question": "What services does the Tourism Office provide to tourists?",
+          "answer": "The Tourism Office provides registration, information about local attractions through brochures and audio-visual presentations, booking of tourism packages, waiver signing, assignment of tour guides, and acceptance of feedback."
+        },
+        {
+          "question": "Who can avail of tourism assistance?",
+          "answer": "Both domestic and foreign tourists can avail of tourism assistance from the Tourism Culture and Arts Center."
+        },
+        {
+          "question": "How can I inquire about tourism services?",
+          "answer": "You can visit the Tourism Culture and Arts Center as a walk-in client, or inquire by phone or through the office's social media channels."
+        },
+        {
+          "question": "Is there a fee for tourism assistance?",
+          "answer": "No, tourism assistance services are provided free of charge."
+        },
+        {
+          "question": "Do I need to sign a waiver before going on a tour?",
+          "answer": "Yes, tourists are required to sign a waiver before proceeding with the tour."
+        },
+        {
+          "question": "Can I book a tour by phone?",
+          "answer": "Yes. You can inquire and book a tourism package by phone or through the office's social media channels. The Tourism Office staff will assist you with the booking process."
+        },
+        {
+          "question": "Are tour guides provided?",
+          "answer": "Yes. The Tourism Office assigns tour guides as part of the tourism assistance service."
+        },
+        {
+          "question": "How long does the tourism assistance process take?",
+          "answer": "For walk-in tourists, the process takes approximately 55 minutes including registration, orientation, and booking. For phone or online inquiries, it takes approximately 45 minutes."
+        },
+        {
+          "question": "What printed materials can I get from the Tourism Office?",
+          "answer": "The Tourism Office provides brochures and other printed materials about the local tourist attractions in the Municipality of Sampaloc, Quezon."
+        },
+        {
+          "question": "Can I provide feedback after my tour?",
+          "answer": "Yes. The Tourism Office accepts feedback from tourists as part of the tourism assistance service."
+        }
+      ]
+    }
+  ]
+}

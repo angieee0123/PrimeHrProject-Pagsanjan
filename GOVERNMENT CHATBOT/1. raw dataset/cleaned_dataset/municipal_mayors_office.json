@@ -1,0 +1,1281 @@
+{
+  "service_office": "Municipal Mayor's Office",
+  "service_category": "Internal & External",
+  "services": [
+    {
+      "service_id": "MMO-001",
+      "service_name": "Provision of Scholarship Grant",
+      "description": "A program that provides free college education for indigent but qualified students.",
+      "office_or_division": "Office of the Municipal Mayor",
+      "classification": "Highly Technical",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "High school and college students who want to avail of the scholarship grant",
+      "requirements": [
+        {
+          "document": "Barangay Clearance or Certificate of Good Moral Character",
+          "copies": null,
+          "where_to_secure": "Barangay where the student is residing"
+        },
+        {
+          "document": "Resume",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Recommendation Letter from the Municipal Mayor",
+          "copies": null,
+          "where_to_secure": "Mayor's Office"
+        },
+        {
+          "document": "Photocopy of Form 137 or class cards of previous semester (for college students)",
+          "copies": null,
+          "where_to_secure": "Previous school of the student"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Mayor's Office, fill out the Application Form, and submit requirements for evaluation.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the Application Form and evaluate the submitted documents.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "If documents are complete, inform the student of the schedule and venue of the qualifying examination.",
+              "fees": "None",
+              "processing_time": "Included in Step 1",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "If documents are not complete, advise the student to complete the requirements.",
+              "fees": "None",
+              "processing_time": "Included in Step 1",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Take note of the schedule and venue of the qualifying exam.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Provide schedule and venue of the qualifying examination.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Return on the date of the examination and take the examination.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Give instructions and watch over the examinees.",
+              "fees": "None",
+              "processing_time": "1 hour",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "After the examination, advise the student to check the result after 2 working days.",
+              "fees": "None",
+              "processing_time": "Included in Step 3",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            },
+            {
+              "sub_step": "3.3",
+              "action": "Check the examination papers and record the results.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "After 2 working days, inquire about the result of the exam.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Inform the student of the result of the examination.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            },
+            {
+              "sub_step": "4.2",
+              "action": "If the student passed, record the name in the masterlist of qualified scholars and prepare scholarship certifications.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Return to the Mayor's Office 2 weeks before the date of enrollment to get the scholarship certification to be used for enrollment.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Issue certification. Brief the scholar on the requirements needed for school and the scholar's responsibilities as an LGU scholar.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Highly Technical – approximately 2 weeks (including exam, results, and certification)",
+      "faqs": [
+        {
+          "question": "What is the Scholarship Grant program?",
+          "answer": "It is a program of the Local Government Unit that provides free college education for indigent but qualified students."
+        },
+        {
+          "question": "Who can apply for the scholarship grant?",
+          "answer": "High school and college students who are indigent and want to avail of a scholarship grant may apply."
+        },
+        {
+          "question": "Is there a qualifying examination?",
+          "answer": "Yes. Applicants must take a qualifying examination. Results are released after 2 working days."
+        },
+        {
+          "question": "What documents do I need to submit?",
+          "answer": "You need a Barangay Clearance or Certificate of Good Moral Character, a resume, a Recommendation Letter from the Municipal Mayor, and a photocopy of Form 137 or class cards of the previous semester (for college students)."
+        },
+        {
+          "question": "Is there a fee for the scholarship grant application?",
+          "answer": "No, the scholarship application process is free of charge."
+        },
+        {
+          "question": "When do I get my scholarship certification?",
+          "answer": "If you pass the qualifying examination, return to the Mayor's Office 2 weeks before your enrollment date to receive your scholarship certification and be briefed on your responsibilities as an LGU scholar."
+        }
+      ]
+    },
+    {
+      "service_id": "MMO-002",
+      "service_name": "Issuance of Mayor's Clearance and Certifications",
+      "description": "A clearance or certification issued to any individual who needs it for various purposes such as employment, scholarship, and other legal transactions.",
+      "office_or_division": "Office of the Municipal Mayor",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Individuals who need clearance/s or certification/s for various purposes",
+      "requirements": [
+        {
+          "document": "Community Tax Certificate",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Valid ID",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Any one of the following: Barangay Clearance, Police Clearance, or NBI Clearance",
+          "copies": null,
+          "where_to_secure": "Respective issuing offices"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Mayor's Office. Give information and submit requirements for verification. Submit to interview.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Check completeness of the requirements. If complete, interview the client.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Private Secretary of the Mayor, Mayor's Office"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "If the requirements are not complete, advise the client to complete the requirements.",
+              "fees": "None",
+              "processing_time": "Included in Step 1",
+              "person_responsible": "Private Secretary of the Mayor, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Pay the corresponding fee at the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Prepare the clearance/certification.",
+              "fees": "PHP 200.00",
+              "processing_time": "As per MTO's schedule",
+              "person_responsible": "MTO Staff, Municipal Treasurer's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Return to the Mayor's Office, present the Official Receipt, and receive the clearance/certification.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the clearance/certification.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Private Secretary of the Mayor, Mayor's Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 200.00",
+      "total_processing_time": "Approximately 20 minutes (plus MTO payment processing)",
+      "faqs": [
+        {
+          "question": "What is a Mayor's Clearance?",
+          "answer": "It is an official document issued by the Municipal Mayor certifying that an individual is cleared or has good standing, typically required for employment, scholarship, and other legal transactions."
+        },
+        {
+          "question": "How much is the Mayor's Clearance fee?",
+          "answer": "The fee is PHP 200.00, payable at the Municipal Treasurer's Office."
+        },
+        {
+          "question": "What documents do I need to bring?",
+          "answer": "You need a Community Tax Certificate, a valid ID, and any one of the following: Barangay Clearance, Police Clearance, or NBI Clearance."
+        },
+        {
+          "question": "How long does it take to receive the Mayor's Clearance?",
+          "answer": "The process takes approximately 20 minutes from verification to issuance, excluding MTO payment processing time."
+        }
+      ]
+    },
+    {
+      "service_id": "MMO-003",
+      "service_name": "Issuance of Certificate of Good Moral Character",
+      "description": "A certificate issued to any individual who needs certification of good moral character for various purposes.",
+      "office_or_division": "Office of the Municipal Mayor",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Individuals who need a certificate of good moral character for various purposes",
+      "requirements": [
+        {
+          "document": "Community Tax Certificate",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Valid ID",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Any one of the following: Barangay Clearance, Police Clearance, or NBI Clearance",
+          "copies": null,
+          "where_to_secure": "Respective issuing offices"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Mayor's Office. Give information and submit requirements for verification. Submit to interview.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Check completeness of the requirements. If complete, interview the client. If not complete, advise the client to complete the requirements.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Private Secretary of the Mayor, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Pay the corresponding fee at the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Prepare the certificate.",
+              "fees": "PHP 200.00",
+              "processing_time": "As per MTO's schedule",
+              "person_responsible": "MTO Staff, Municipal Treasurer's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the certificate.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the certificate.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 200.00",
+      "total_processing_time": "Approximately 25 minutes (plus MTO payment processing)",
+      "faqs": [
+        {
+          "question": "What is a Certificate of Good Moral Character?",
+          "answer": "It is an official document certifying that an individual is of good moral character, commonly required for employment, academic applications, and other legal purposes."
+        },
+        {
+          "question": "How much is the fee?",
+          "answer": "The fee is PHP 200.00, payable at the Municipal Treasurer's Office."
+        },
+        {
+          "question": "What documents do I need to bring?",
+          "answer": "You need a Community Tax Certificate, a valid ID, and any one of the following: Barangay Clearance, Police Clearance, or NBI Clearance."
+        },
+        {
+          "question": "How long does it take?",
+          "answer": "The process takes approximately 25 minutes from verification to issuance, excluding MTO payment processing time."
+        }
+      ]
+    },
+    {
+      "service_id": "MMO-004",
+      "service_name": "Issuance of Affidavit",
+      "description": "A formally written document giving an account of a person's event in numbered paragraphs. Used for various legal and administrative purposes.",
+      "office_or_division": "Office of the Municipal Mayor",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Persons securing the document for various purposes",
+      "requirements": [
+        {
+          "document": "Community Tax Certificate of the affiant/s",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Valid ID",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Copy of any of the following: Birth/Baptismal/Marriage/Death Certificate (for Joint Affidavit of Two Disinterested Persons or Affidavit of Discrepancy)",
+          "copies": null,
+          "where_to_secure": "Municipal Civil Registry Office or Church"
+        },
+        {
+          "document": "Barangay/MTO/Municipal Assessor's Certification (for Joint Affidavit of Non-ITR Filer)",
+          "copies": null,
+          "where_to_secure": "Respective issuing offices"
+        },
+        {
+          "document": "Photocopy of lost ID/s or documents, if any (for Affidavit of Loss)",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Mayor's Office. Give information and submit documents for verification. Submit to interview.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Check completeness of the requirements.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Private Secretary of the Mayor, Mayor's Office"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "If the requirements are complete, interview the client and advise to pay the jurat fee at the MTO.",
+              "fees": "None",
+              "processing_time": "Included in Step 1",
+              "person_responsible": "Private Secretary of the Mayor, Mayor's Office"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "If the requirements are not complete, advise the client to complete the requirements.",
+              "fees": "None",
+              "processing_time": "Included in Step 1",
+              "person_responsible": "Private Secretary of the Mayor, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Pay the jurat fee at the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment and issue Official Receipt.",
+              "fees": "PHP 150.00 (Jurat Fee)",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "MTO Staff, Municipal Treasurer's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Return to the Mayor's Office, present the Official Receipt, and receive the affidavit.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Prepare and issue the affidavit.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Private Secretary of the Mayor, Mayor's Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "PHP 150.00 (Jurat Fee)",
+      "total_processing_time": "Approximately 30 minutes (plus MTO payment processing)",
+      "faqs": [
+        {
+          "question": "What is an affidavit?",
+          "answer": "An affidavit is a formally written document giving a sworn account of a person's statement or event, written in numbered paragraphs and used for various legal and administrative purposes."
+        },
+        {
+          "question": "What types of affidavits can be issued by the Mayor's Office?",
+          "answer": "The Mayor's Office can issue Joint Affidavits of Two Disinterested Persons, Affidavits of Discrepancy, Joint Affidavits of Non-ITR Filers, and Affidavits of Loss, among others."
+        },
+        {
+          "question": "How much is the fee for an affidavit?",
+          "answer": "The jurat fee is PHP 150.00, payable at the Municipal Treasurer's Office."
+        },
+        {
+          "question": "What do I need for an Affidavit of Loss?",
+          "answer": "You need a Community Tax Certificate, a valid ID, and a photocopy of the lost ID or document."
+        },
+        {
+          "question": "How long does it take to get an affidavit?",
+          "answer": "The process takes approximately 30 minutes from submission to issuance, excluding MTO payment processing time."
+        }
+      ]
+    },
+    {
+      "service_id": "MMO-005",
+      "service_name": "Provision of Marriage Administration / Solemnization",
+      "description": "A service for couples of legal age who want to get married, facilitated and solemnized by the Municipal Mayor.",
+      "office_or_division": "Office of the Municipal Mayor",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Couples of legal age who want to get married",
+      "requirements": [
+        {
+          "document": "Marriage License",
+          "copies": null,
+          "where_to_secure": "Municipal Civil Registrar's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Mayor's Office and present the required documents for marriage. Request to schedule a particular date of marriage to be solemnized by the Municipal Mayor.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Validate all submitted documents for marriage. Mark the date of marriage in the Mayor's calendar of activities.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Return to the Mayor's Office on the appointed date for the solemnization of marriage.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Assist in the wedding administration. Furnish the Municipal Mayor with the Marriage Contract to be signed by the parties.",
+              "fees": "None",
+              "processing_time": "1 hour",
+              "person_responsible": "Mayor's Office Staff / Municipal Mayor, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Sign the Marriage Contract.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "After all contracting parties have signed the Marriage Contract, secure the document for the Mayor's signature.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Forward the document to the MCRO for NSO registration.",
+              "fees": "None",
+              "processing_time": "Included in Step 3",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            },
+            {
+              "sub_step": "3.3",
+              "action": "Advise the couple to transact with the MCRO for the release of the Marriage Certificate.",
+              "fees": "None",
+              "processing_time": "Included in Step 3",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Approximately 1 hour and 15 minutes on the day of solemnization",
+      "faqs": [
+        {
+          "question": "Can the Municipal Mayor solemnize marriages?",
+          "answer": "Yes. The Municipal Mayor is authorized to solemnize marriages within the municipality."
+        },
+        {
+          "question": "What is required to have a marriage solemnized by the Mayor?",
+          "answer": "You need a valid Marriage License, which can be secured from the Municipal Civil Registrar's Office."
+        },
+        {
+          "question": "Is there a fee for marriage solemnization?",
+          "answer": "No, the service is provided free of charge."
+        },
+        {
+          "question": "What happens to the Marriage Contract after signing?",
+          "answer": "The signed Marriage Contract is forwarded to the Municipal Civil Registrar's Office (MCRO) for NSO registration. The couple is then advised to transact with the MCRO for the release of their Marriage Certificate."
+        },
+        {
+          "question": "How do I schedule a marriage solemnization?",
+          "answer": "Proceed to the Mayor's Office with your Marriage License and request a preferred date. The staff will check the Mayor's calendar and confirm the schedule."
+        }
+      ]
+    },
+    {
+      "service_id": "MMO-006",
+      "service_name": "Issuance of Mayor's Permit (for Water Service Connection)",
+      "description": "A permit issued to persons or households who want to avail of the water service connection of the Local Government of Sampaloc, Quezon.",
+      "office_or_division": "Office of the Municipal Mayor",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Persons or households who want to avail of the water service connection",
+      "requirements": [
+        {
+          "document": "Photocopy of ID card of the applicant and/or representative",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Current Residence Certificate of applicant or representative",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Barangay Clearance",
+          "copies": null,
+          "where_to_secure": "Barangay where water connection is being applied"
+        },
+        {
+          "document": "Proof of ownership (photocopy of land title/tax declaration/deed of sale)",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Lease contract for tenant and/or written authorization from the owner",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Proof of billing address (e.g., Meralco bill)",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Location Map",
+          "copies": null,
+          "where_to_secure": "Municipal Planning and Development Office"
+        },
+        {
+          "document": "Proof of full payment for outstanding balance of water fee (for delinquent consumers only)",
+          "copies": null,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Certificate of Occupancy",
+          "copies": null,
+          "where_to_secure": "Office of the Municipal Engineer"
+        },
+        {
+          "document": "Excavation Permit (after estimate)",
+          "copies": null,
+          "where_to_secure": "Relevant office"
+        },
+        {
+          "document": "Plumbing Layout",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Waterworks Office and inquire about water connection requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Provide information on requirements for water service connection.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Local Waterworks Office Staff, Local Waterworks Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Complete the requirements then proceed to the Office of the Municipal Mayor and submit the requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Evaluate the requirements.",
+              "fees": "None",
+              "processing_time": "1 hour",
+              "person_responsible": "Mayor's Office Staff / Municipal Mayor, Mayor's Office"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Advise client to get recommendation for available pipeline for connection.",
+              "fees": "None",
+              "processing_time": "Included in Step 2",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            },
+            {
+              "sub_step": "2.3",
+              "action": "Advise the client to purchase a water meter.",
+              "fees": "None",
+              "processing_time": "Included in Step 2",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            },
+            {
+              "sub_step": "2.4",
+              "action": "Advise the client to pay the water connection fee and Mayor's Permit at the Municipal Treasurer's Office.",
+              "fees": "None",
+              "processing_time": "Included in Step 2",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Proceed to the Sangguniang Bayan Office to get recommendation.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue recommendation for pipeline connection.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "SB Office Staff, Sangguniang Bayan Office"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Pay the corresponding fees to the Municipal Treasurer's Office.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Accept payment and issue Official Receipt.",
+              "fees": "Mayor's Permit Fee: PHP 60.00; Water Connection Fee: PHP 300.00",
+              "processing_time": "3 minutes",
+              "person_responsible": "MTO Staff, Municipal Treasurer's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Bring the water meter to the Local Waterworks Office.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Receive and record the water meter.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "Local Waterworks Office Staff, Local Waterworks Office"
+            }
+          ]
+        },
+        {
+          "step_number": 6,
+          "client_action": "Return to the Mayor's Office. Present the Official Receipt and wait while the permit is being processed.",
+          "agency_actions": [
+            {
+              "sub_step": "6.1",
+              "action": "Prepare Mayor's Permit.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 7,
+          "client_action": "Receive Mayor's Permit.",
+          "agency_actions": [
+            {
+              "sub_step": "7.1",
+              "action": "Issue Mayor's Permit. Advise the client to wait for site inspection and water connection.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "Mayor's Office Staff, Mayor's Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Mayor's Permit Fee: PHP 60.00; Water Connection Fee: PHP 300.00",
+      "total_processing_time": "Approximately 1 to 2 hours (across multiple offices)",
+      "faqs": [
+        {
+          "question": "Who can apply for a water service connection?",
+          "answer": "Any person or household who wants to avail of the water service connection of the Local Government of Sampaloc, Quezon may apply."
+        },
+        {
+          "question": "How much are the fees for water service connection?",
+          "answer": "The Mayor's Permit Fee is PHP 60.00 and the Water Connection Fee is PHP 300.00, both payable at the Municipal Treasurer's Office."
+        },
+        {
+          "question": "Do I need to buy my own water meter?",
+          "answer": "Yes. The Mayor's Office will advise you to purchase a water meter as part of the requirements."
+        },
+        {
+          "question": "What happens after I receive the Mayor's Permit?",
+          "answer": "After receiving the permit, you will be advised to wait for a site inspection and the actual water connection by the Local Waterworks Office."
+        },
+        {
+          "question": "I am a tenant. Can I still apply for water service connection?",
+          "answer": "Yes. Tenants need to submit a lease contract and/or written authorization from the property owner as additional requirements."
+        }
+      ]
+    },
+    {
+      "service_id": "MMO-007",
+      "service_name": "One-Stop Shop Business Registration (BOSS)",
+      "description": "A setup where persons who want to put up, register, or renew a business within the Municipality of Sampaloc, Quezon can secure their business permit through a one-stop shop.",
+      "office_or_division": "Business Permits and Licensing Office (BPLO), Mayor's Office",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any person who owns a business or wants to put up a business within the Municipality of Sampaloc, Quezon",
+      "requirements": [
+        {
+          "document": "Computerized Application Form",
+          "copies": null,
+          "where_to_secure": "BPLO (BOSS Area) – Walk-in"
+        },
+        {
+          "document": "Proof of Business Registration: DTI Business Registration, SEC Registration, or CDA Registration (1 photocopy)",
+          "copies": 1,
+          "where_to_secure": "Department of Trade and Industry (DTI) or relevant registering body"
+        },
+        {
+          "document": "Right of Applicant to use the Business Location (1 photocopy)",
+          "copies": 1,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Barangay Clearance (1 original copy)",
+          "copies": 1,
+          "where_to_secure": "Barangay where the business is located or BPLO"
+        },
+        {
+          "document": "Community Tax Certificate (1 original copy)",
+          "copies": 1,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit your complete set of requirements for evaluation and get your Application Form from the BOSS (Business One Stop Shop) at the Municipal Lobby.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Issue Computerized Application Form and evaluate the submitted documents. If complete, advise client to pay at the Municipal Treasurer's Office. If not complete, advise the client to complete the requirements.",
+              "fees": "None",
+              "processing_time": "25 minutes",
+              "person_responsible": "BPLO Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Proceed to the Treasurer's Office for the one-time assessment/payment and receive your Official Receipt, Business Plate, and Community Tax Certificate.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment and issue Official Receipt, Business Plate, and Community Tax Certificate.",
+              "fees": "Business Tax (based on type of business and capitalization or annual gross receipts); Mayor's Permit Fee (based on asset size or number of workers); Sanitary Inspection Fee (based on area of establishment); Health Certification Fee: PHP 100.00; Barangay Clearance Fee (based on Barangay Revenue Code); Building Inspection Fee: PHP 120.00; Garbage Fee (based on type and area); Occupational Fee: PHP 200.00; Zoning Fee (for new applicant): PHP 200.00; Business Plate: PHP 120.00; Sticker: PHP 20.00",
+              "processing_time": "20 minutes to 3 hours",
+              "person_responsible": "Collection Clerk, Municipal Treasurer's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Present the Official Receipt and receive the Mayor's Business Permit.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue Mayor's Business Permit.",
+              "fees": "None",
+              "processing_time": "7 minutes",
+              "person_responsible": "BPLO Staff, Mayor's Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Multiple fees apply: Business Tax, Mayor's Permit Fee, Sanitary Inspection Fee, Health Certification Fee (PHP 100.00), Building Inspection Fee (PHP 120.00), Garbage Fee, Occupational Fee (PHP 200.00), Zoning Fee for new applicant (PHP 200.00), Business Plate (PHP 120.00), Sticker (PHP 20.00)",
+      "total_processing_time": "Approximately 25 minutes to 3.5 hours",
+      "faqs": [
+        {
+          "question": "What is the One-Stop Shop Business Registration (BOSS)?",
+          "answer": "It is a streamlined business registration setup at the Municipal Lobby where you can apply for or renew your business permit in one location."
+        },
+        {
+          "question": "Where is the BOSS located?",
+          "answer": "The Business One Stop Shop (BOSS) is located at the Municipal Lobby of Sampaloc, Quezon."
+        },
+        {
+          "question": "What proof of business registration do I need?",
+          "answer": "You need to present your DTI Business Registration, SEC Registration, or CDA Registration — whichever is applicable to your type of business."
+        },
+        {
+          "question": "How much are the fees for business registration?",
+          "answer": "Fees vary depending on the type, size, and capitalization of the business. Fixed fees include: Health Certification Fee (PHP 100.00), Building Inspection Fee (PHP 120.00), Occupational Fee (PHP 200.00), Zoning Fee for new applicants (PHP 200.00), Business Plate (PHP 120.00), and Sticker (PHP 20.00). Other fees such as Business Tax and Mayor's Permit Fee are assessed based on your business profile."
+        },
+        {
+          "question": "Can I renew my business permit through BOSS?",
+          "answer": "Yes. BOSS accommodates both new business registration and renewal of existing business permits."
+        }
+      ]
+    },
+    {
+      "service_id": "MMO-008",
+      "service_name": "Business Permit New and Renewal Online Application",
+      "description": "An online application service for new and renewal business permits for persons who own a business or want to put up a business within the Municipality of Sampaloc, Quezon.",
+      "office_or_division": "Business Permits and Licensing Office (BPLO)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any person who owns a business or wants to put up a business within the Municipality of Sampaloc, Quezon",
+      "requirements": [
+        {
+          "document": "Computerized Application Form",
+          "copies": null,
+          "where_to_secure": "Business Permits and Licensing Office or online via iBPLS system"
+        },
+        {
+          "document": "Proof of Business Registration: DTI Business Registration, SEC Registration, or CDA Registration (1 photocopy)",
+          "copies": 1,
+          "where_to_secure": "Department of Trade and Industry (DTI) or relevant registering body"
+        },
+        {
+          "document": "Right of Applicant to use the Business Location",
+          "copies": null,
+          "where_to_secure": "Applicant"
+        },
+        {
+          "document": "Barangay Clearance (1 original copy)",
+          "copies": 1,
+          "where_to_secure": "Barangay where the business is located"
+        },
+        {
+          "document": "Community Tax Certificate (1 original copy)",
+          "copies": 1,
+          "where_to_secure": "Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Apply online via the BPBC iBPLS link: https://bpbc.ibpls.com/sampalocquezon/login — Register and log in, fill in the necessary business information, upload the documentary requirements, and click submit.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Check the completeness and validity of the documentary requirements submitted online.",
+              "fees": "None",
+              "processing_time": "25 minutes",
+              "person_responsible": "BPLO Staff, BPLO"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "If documents are complete, print the unified form.",
+              "fees": "None",
+              "processing_time": "Included in Step 1",
+              "person_responsible": "BPLO Staff, BPLO"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "If documents are not complete, advise the client to complete the requirements and decline the application.",
+              "fees": "None",
+              "processing_time": "Included in Step 1",
+              "person_responsible": "BPLO Staff, BPLO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Pay relevant business taxes and fees through online channels, or proceed to the Municipal Treasurer's Office for one-time assessment/payment. Receive Official Receipt, Business Plate, and Community Tax Certificate.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment and issue Official Receipt, Business Plate, and Community Tax Certificate.",
+              "fees": "Business Tax (based on type of business and capitalization or annual gross receipts); Mayor's Permit Fee (based on asset size or number of workers); Sanitary Inspection Fee (based on area); Health Certification Fee: PHP 100.00; Barangay Clearance Fee (based on Barangay Revenue Code); Building Inspection Fee: PHP 120.00; Garbage Fee (based on type and area); Occupational Permit Fee: PHP 200.00; Zoning Fee (for new applicant): PHP 200.00; Business Plate: PHP 120.00; Sticker: PHP 20.00",
+              "processing_time": "20 minutes to 3 hours",
+              "person_responsible": "Collection Clerk, Municipal Treasurer's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Print the Business Permit from the system or proceed to the BPLO Area and receive the Mayor's Business Permit.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue Mayor's Business Permit with plate to the taxpayer.",
+              "fees": "None",
+              "processing_time": "7 minutes",
+              "person_responsible": "BPLO Staff, BPLO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Same as walk-in BOSS: Business Tax, Mayor's Permit Fee, Sanitary Inspection Fee, Health Certification Fee (PHP 100.00), Building Inspection Fee (PHP 120.00), Garbage Fee, Occupational Permit Fee (PHP 200.00), Zoning Fee for new applicant (PHP 200.00), Business Plate (PHP 120.00), Sticker (PHP 20.00)",
+      "total_processing_time": "Approximately 25 minutes to 3.5 hours",
+      "online_portal": "https://bpbc.ibpls.com/sampalocquezon/login",
+      "faqs": [
+        {
+          "question": "How do I apply for a business permit online?",
+          "answer": "Go to https://bpbc.ibpls.com/sampalocquezon/login, register and log in, fill in the necessary business information, upload your documentary requirements, and click submit."
+        },
+        {
+          "question": "Can I pay online for my business permit?",
+          "answer": "Yes. You can pay through available online channels, or you may proceed to the Municipal Treasurer's Office for in-person payment."
+        },
+        {
+          "question": "Can I print the business permit from the system?",
+          "answer": "Yes. Once approved and paid, you may print the Business Permit directly from the iBPLS system, or you may pick it up at the BPLO office."
+        },
+        {
+          "question": "What happens if my uploaded documents are incomplete?",
+          "answer": "The BPLO will notify you to complete the requirements and your application will be declined until all documents are properly submitted."
+        },
+        {
+          "question": "Are the fees the same for online and walk-in applications?",
+          "answer": "Yes. The applicable fees are the same whether you apply online or walk in at the BOSS area."
+        }
+      ]
+    },
+    {
+      "service_id": "MMO-009",
+      "service_name": "Issuance of Mayor's Permit (for Tricycle Operation)",
+      "description": "A permit issued to tricycle operators or their representatives as a requirement to operate a tricycle within the Municipality of Sampaloc, Quezon.",
+      "office_or_division": "Office of the Municipal Mayor",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Tricycle Operators/Owners or their representatives",
+      "requirements": [
+        {
+          "document": "Barangay Clearance (1 original copy)",
+          "copies": 1,
+          "where_to_secure": "Barangay where the business is located"
+        },
+        {
+          "document": "Community Tax Certificate (1 original copy)",
+          "copies": 1,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Health Certificate (1 original copy)",
+          "copies": 1,
+          "where_to_secure": "Municipal Health Office"
+        },
+        {
+          "document": "OR/CR of Tricycle (1 photocopy)",
+          "copies": 1,
+          "where_to_secure": "Land Transportation Office (LTO)"
+        },
+        {
+          "document": "Driver's License (1 photocopy)",
+          "copies": 1,
+          "where_to_secure": "Land Transportation Office (LTO)"
+        },
+        {
+          "document": "Documentary Stamp (1 piece)",
+          "copies": 1,
+          "where_to_secure": "Municipal Treasurer's Office"
+        },
+        {
+          "document": "Membership Certificate from TODA (1 photocopy)",
+          "copies": 1,
+          "where_to_secure": "TODA (Tricycle Operators and Drivers Association) where the applicant is a member"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Proceed to the Mayor's Office and fill out the Application Form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Issue Application Form and evaluate the submitted documents. If complete, advise client to pay at the Municipal Treasurer's Office. If not complete, advise the client to complete the requirements.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "BPLO Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Proceed to the Treasurer's Office for payment of the corresponding fees.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment and issue Official Receipt.",
+              "fees": "Mayor's Permit Fee: PHP 250.00; Filing Fee (for new registration): PHP 300.00; Plate Number for Tricycle: PHP 120.00; Sticker: PHP 20.00; Health Certification Fee: PHP 100.00; Franchise Fee: PHP 500.00",
+              "processing_time": "10 minutes",
+              "person_responsible": "Collection Clerk, Municipal Treasurer's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Proceed to the Mayor's Office and present the Official Receipt. Receive the Mayor's Permit.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Prepare and issue the Mayor's Permit.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "BPLO Staff, Mayor's Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Mayor's Permit Fee: PHP 250.00; Filing Fee (new registration): PHP 300.00; Plate Number: PHP 120.00; Sticker: PHP 20.00; Health Certification Fee: PHP 100.00; Franchise Fee: PHP 500.00",
+      "total_processing_time": "Approximately 35 minutes",
+      "faqs": [
+        {
+          "question": "Who needs a Mayor's Permit for tricycle operation?",
+          "answer": "Tricycle operators or owners, or their authorized representatives, who want to legally operate a tricycle within the Municipality of Sampaloc, Quezon must secure this permit."
+        },
+        {
+          "question": "What are the fees for a tricycle Mayor's Permit?",
+          "answer": "The fees include: Mayor's Permit Fee (PHP 250.00), Filing Fee for new registration (PHP 300.00), Plate Number (PHP 120.00), Sticker (PHP 20.00), Health Certification Fee (PHP 100.00), and Franchise Fee (PHP 500.00)."
+        },
+        {
+          "question": "Do I need to be a member of a TODA?",
+          "answer": "Yes. You must present a Membership Certificate from your Tricycle Operators and Drivers Association (TODA) as one of the requirements."
+        },
+        {
+          "question": "Where do I get a Health Certificate?",
+          "answer": "Health Certificates can be secured from the Municipal Health Office (MHO)."
+        },
+        {
+          "question": "How long does it take to get the tricycle Mayor's Permit?",
+          "answer": "The process takes approximately 35 minutes from application to issuance."
+        }
+      ]
+    },
+    {
+      "service_id": "MMO-010",
+      "service_name": "Provision of Special Program for Employment of Students (SPES) and Out-of-School Youth (RA 9547)",
+      "description": "A program that caters to students and out-of-school youth qualified under the provisions of RA 7323 and RA 9547 (Expanded SPES), in partnership with the Department of Labor and Employment (DOLE) and the LGU.",
+      "office_or_division": "Public Employment Service Office (PESO), Office of the Municipal Mayor",
+      "classification": "Highly Technical",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Students and Out-of-School Youth from ages 15 to 25 years old",
+      "requirements": [
+        {
+          "document": "Accomplished Application Form with ID pictures",
+          "copies": null,
+          "where_to_secure": "Public Employment Service Office (PESO)"
+        },
+        {
+          "document": "Birth or Baptismal Certificate",
+          "copies": null,
+          "where_to_secure": "Municipal Civil Registry Office or Church"
+        },
+        {
+          "document": "Registration/Enrollment Form for enrolled students",
+          "copies": null,
+          "where_to_secure": "School where currently enrolled"
+        },
+        {
+          "document": "Certified True Copy of Student's Class Card or Form 138",
+          "copies": null,
+          "where_to_secure": "School where currently enrolled"
+        },
+        {
+          "document": "Parent's Income Tax Return or Certification of Tax Exemption (net income must not exceed PHP 36,000 per annum)",
+          "copies": null,
+          "where_to_secure": "Bureau of Internal Revenue (BIR)"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit Endorsement Letter from school and proceed to PESO as per schedule.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Register the SPES applicant and provide the application form with checklist of requirements.",
+              "fees": "None",
+              "processing_time": "5 to 10 minutes",
+              "person_responsible": "PESO Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit all requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Evaluate and authenticate the required documents submitted.",
+              "fees": "None",
+              "processing_time": "5 to 7 minutes",
+              "person_responsible": "PESO Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Prepare for the interview.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Interview the applicant and assess qualifications and requirements mandated by RA 7323 (SPES Program) and RA 9547 (Expanded SPES).",
+              "fees": "None",
+              "processing_time": "6 minutes",
+              "person_responsible": "PESO Staff, Mayor's Office"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Submit masterlist of candidates for SPES to DOLE Focal Person for final interview.",
+              "fees": "None",
+              "processing_time": "Included in Step 3",
+              "person_responsible": "PESO Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Prepare for the interview with the DOLE Focal Person.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Submit authenticated requirements of applicants to the DOLE Focal Person.",
+              "fees": "None",
+              "processing_time": "10 to 15 minutes",
+              "person_responsible": "PESO Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Affix signature at the Employment Contract.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Administer the signing of the beneficiary on the Employment Contract (SPES 5).",
+              "fees": "None",
+              "processing_time": "1 to 2 minutes",
+              "person_responsible": "PESO Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 6,
+          "client_action": "Prepare for the scheduled orientation.",
+          "agency_actions": [
+            {
+              "sub_step": "6.1",
+              "action": "Schedule and conduct orientation.",
+              "fees": "None",
+              "processing_time": "Half day",
+              "person_responsible": "PESO Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 7,
+          "client_action": "Secure work assignment and ID.",
+          "agency_actions": [
+            {
+              "sub_step": "7.1",
+              "action": "Prepare work assignment.",
+              "fees": "None",
+              "processing_time": "To be determined",
+              "person_responsible": "PESO Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 8,
+          "client_action": "Proceed to the workplace and present the Endorsement Letter from the HRMO and PESO.",
+          "agency_actions": [
+            {
+              "sub_step": "8.1",
+              "action": "Collect the duly received and signed endorsement letter from the respective Department Heads where each SPES beneficiary is assigned.",
+              "fees": "None",
+              "processing_time": "5 to 10 minutes",
+              "person_responsible": "PESO Staff, Mayor's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 9,
+          "client_action": "Report to the designated workplace and abide by the rules and regulations of the LGU or company where assigned.",
+          "agency_actions": [
+            {
+              "sub_step": "9.1",
+              "action": "Monitor activity and attendance of the beneficiary.",
+              "fees": "None",
+              "processing_time": "Minimum of 22 days to maximum of 52 days",
+              "person_responsible": "PESO Staff, Mayor's Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Highly Technical – minimum of 22 days to maximum of 52 days of actual work assignment",
+      "legal_basis": "RA 7323 (SPES Program) and RA 9547 (Expanded SPES)",
+      "faqs": [
+        {
+          "question": "What is the SPES program?",
+          "answer": "The Special Program for Employment of Students (SPES) is a government program under RA 7323 and RA 9547 that provides temporary employment to students and out-of-school youth from indigent families to help them continue their education."
+        },
+        {
+          "question": "Who can avail of the SPES program?",
+          "answer": "Students and out-of-school youth between 15 and 25 years old whose family income does not exceed PHP 36,000 per annum are eligible to apply."
+        },
+        {
+          "question": "Is there a fee to join the SPES program?",
+          "answer": "No, the SPES program is free of charge."
+        },
+        {
+          "question": "How long is the SPES work assignment?",
+          "answer": "The work assignment lasts a minimum of 22 days to a maximum of 52 days."
+        },
+        {
+          "question": "Where do I apply for SPES?",
+          "answer": "Proceed to the Public Employment Service Office (PESO) at the Municipal Mayor's Office and submit your Endorsement Letter from your school."
+        },
+        {
+          "question": "What income requirement must be met to qualify?",
+          "answer": "The applicant's parent/s must have a net income that does not exceed PHP 36,000 per annum. Proof is a Parent's Income Tax Return or a Certification of Tax Exemption from the BIR."
+        }
+      ]
+    }
+  ]
+}

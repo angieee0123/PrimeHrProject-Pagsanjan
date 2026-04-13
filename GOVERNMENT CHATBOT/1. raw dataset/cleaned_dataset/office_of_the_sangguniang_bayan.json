@@ -1,0 +1,192 @@
+{
+  "service_office": "Office of the Sangguniang Bayan",
+  "service_category": "Internal & External",
+  "services": [
+    {
+      "service_id": "SB-001",
+      "service_name": "Issuance of Certified True Copy of Resolutions and Ordinances",
+      "description": "Certified true copies of resolutions or ordinances needed by particular offices of the Local Government Unit as basis of appropriate action in relation to new policies to be implemented.",
+      "office_or_division": "Office of the Sangguniang Bayan",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G"],
+      "who_may_avail": "Any office of the LGU which requires a resolution or ordinance as basis of a new policy",
+      "requirements": [
+        {
+          "document": "No requirements needed — request form is filled out at the office",
+          "copies": null,
+          "where_to_secure": "Office of the Sangguniang Bayan"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Fill out the request form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the request.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "Local Legislative Assistant – SB Office"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Retrieve the document from file.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Local Legislative Assistant – SB Office"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "If there is only one remaining copy, photocopy the document.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "Local Legislative Assistant – SB Office"
+            },
+            {
+              "sub_step": "1.4",
+              "action": "Certify the copy of the document.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "SB Secretary – SB Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive the document.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Issue the requested document.",
+              "fees": "None",
+              "processing_time": "1 minute",
+              "person_responsible": "Local Legislative Assistant – SB Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 12 minutes",
+      "faqs": [
+        {
+          "question": "What is a Certified True Copy of a Resolution or Ordinance?",
+          "answer": "It is an officially certified copy of a legislative document (resolution or ordinance) issued by the Sangguniang Bayan, used by LGU offices as a legal basis for implementing new policies."
+        },
+        {
+          "question": "Who can request a Certified True Copy of a Resolution or Ordinance?",
+          "answer": "Any office of the Local Government Unit that requires a resolution or ordinance as the basis for a new policy."
+        },
+        {
+          "question": "What documents do I need to bring?",
+          "answer": "No prior documents are required. You simply fill out a request form at the Office of the Sangguniang Bayan."
+        },
+        {
+          "question": "Is there a fee for this service?",
+          "answer": "No, the service is free of charge."
+        },
+        {
+          "question": "How long does it take to get a Certified True Copy?",
+          "answer": "Approximately 12 minutes from filling out the request form to receiving the document."
+        },
+        {
+          "question": "Who certifies the copy of the resolution or ordinance?",
+          "answer": "The SB Secretary certifies the copy of the document."
+        }
+      ]
+    },
+    {
+      "service_id": "SB-002",
+      "service_name": "Issuance of Motorized Tricycle Operator's Permit (MTOP)",
+      "description": "A permit secured by tricycle operators for submission to the Land Transportation Office (LTO) as a requirement in their application for conversion of their tricycle units to public utility vehicles, in order to operate within the Municipality of Sampaloc, Quezon.",
+      "office_or_division": "Office of the Sangguniang Bayan",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Tricycle operators, tricycle drivers, or their authorized representatives",
+      "requirements": [
+        {
+          "document": "Application form for Mayor's permit",
+          "copies": null,
+          "where_to_secure": "Mayor's Office"
+        },
+        {
+          "document": "Official Receipt of payment",
+          "copies": null,
+          "where_to_secure": "Treasurer's Office"
+        },
+        {
+          "document": "Official Receipt and Certificate of Registration (OR/CR) of the motorcycle",
+          "copies": null,
+          "where_to_secure": "Owner or representative"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Fill out the request form, submit requirements, and present the official receipt of payment.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Receive the request form and check the completeness of requirements.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "Local Legislative Assistant – SB Office"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Prepare the MTOP and have the SB Chairman on Municipal Franchising sign the permit.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Local Legislative Assistant / SB Chairman on Municipal Franchising – SB Office"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive the permit.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Issue the Motorized Tricycle Operator's Permit (MTOP).",
+              "fees": "None",
+              "processing_time": "1 day",
+              "person_responsible": "Local Legislative Assistant – SB Office"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None (fees paid at Treasurer's Office prior to application)",
+      "total_processing_time": "Simple – approximately 1 day for permit release after submission of requirements",
+      "faqs": [
+        {
+          "question": "What is a Motorized Tricycle Operator's Permit (MTOP)?",
+          "answer": "An MTOP is a permit issued by the Sangguniang Bayan that authorizes a tricycle unit to operate as a public utility vehicle within the Municipality of Sampaloc, Quezon. It is submitted to the Land Transportation Office (LTO) as part of the conversion application."
+        },
+        {
+          "question": "Who can apply for an MTOP?",
+          "answer": "Tricycle operators, tricycle drivers, or their authorized representatives may apply for an MTOP."
+        },
+        {
+          "question": "What documents are required for an MTOP application?",
+          "answer": "You need a Mayor's permit application form from the Mayor's Office, an Official Receipt of payment from the Treasurer's Office, and the OR/CR (Official Receipt and Certificate of Registration) of the motorcycle."
+        },
+        {
+          "question": "Is there a fee for the MTOP?",
+          "answer": "The Sangguniang Bayan does not charge a fee for the permit itself, but payment must be made at the Treasurer's Office prior to application, and the Official Receipt must be submitted as a requirement."
+        },
+        {
+          "question": "How long does it take to receive the MTOP?",
+          "answer": "The permit is released approximately 1 day after submission of the complete requirements."
+        },
+        {
+          "question": "Where is the MTOP used?",
+          "answer": "The MTOP is submitted to the Land Transportation Office (LTO) as a requirement for converting a tricycle unit to a public utility vehicle authorized to operate within the Municipality of Sampaloc, Quezon."
+        },
+        {
+          "question": "Who signs the MTOP?",
+          "answer": "The SB Chairman on Municipal Franchising signs the Motorized Tricycle Operator's Permit."
+        }
+      ]
+    }
+  ]
+}

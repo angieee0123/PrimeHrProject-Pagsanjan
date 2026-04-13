@@ -1,0 +1,1246 @@
+{
+  "service_office": "Municipal Civil Registry Office",
+  "service_category": "Internal & External",
+  "services": [
+    {
+      "service_id": "MCRO-001",
+      "service_name": "Issuance of Certified True Copy (LCRO Copy) or PSA-Authenticated Copy (SECPA) of Certificate of Live Birth, Certificate of Marriage, Certificate of Death, or Certificate of No Marriage (CENOMAR)",
+      "description": "A Certified True Copy (LCRO Copy) or PSA-authenticated copy in security paper (SECPA) of civil registry documents is issued to the document-owner or authorized representative. This Office strictly follows the Data Privacy Act of 2012 (RA 10173) and the policies of the Philippine Statistics Authority.",
+      "office_or_division": "Office of the Municipal Civil Registrar",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": [
+        "The owner himself or through a duly authorized representative",
+        "His/her spouse, parent, direct descendants, guardian, or institution legally in-charge of him/her (if minor)",
+        "The court or proper public official whenever absolutely necessary in administrative, judicial, or other official proceedings",
+        "In case of the person's death, the nearest of kin"
+      ],
+      "requirements": [
+        {
+          "document": "Appropriate Authorization Letter (freshly written and signed; not machine-scanned) — required if requester is NOT the document-owner",
+          "copies": null,
+          "where_to_secure": "Document-owner, parent (if minor), spouse, direct descendant, or authorized guardian/institution-in-charge"
+        },
+        {
+          "document": "Any valid ID of the requester and the document-owner — required if requester is NOT the document-owner",
+          "copies": null,
+          "where_to_secure": "Government or private agencies concerned"
+        },
+        {
+          "document": "Legal document applicable for the purpose: Court Order, Affidavit of Kinship, Affidavit of Guardianship, or Special Power of Attorney — required if applicable (must indicate intent to secure a civil registry document)",
+          "copies": null,
+          "where_to_secure": "Public Attorney's Office (PAO) or Private Lawyer"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Provide needed information during the interview.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Conduct interview while the requested document is being processed in accordance with applicable rules in civil registration.",
+              "fees": "None",
+              "processing_time": "5 minutes for Local Copy; After 3 days for PSA Copy of Birth, Marriage & Death Certificate; After 1 week or more for CENOMAR",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Pay the required fees.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Issue an Official Receipt for payment received. For PSA-issued documents, Official Receipt from PSA is issued upon release.",
+              "fees": "LCRO Copy: PHP 70.00 (Certified True Copy) + PHP 35.00 (Documentary Stamp). PSA Copy of Birth/Marriage/Death Certificate: PHP 235.00. CENOMAR from PSA: PHP 290.00",
+              "processing_time": "3 minutes",
+              "person_responsible": "MCRO / Municipal Treasurer's Office (MTO)"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Claim the duly signed Certified True Copy (CTC) of the civil registry document. For PSA-authenticated documents, wait for issuance after 3 days from the date of filing. For CENOMAR, wait 2 weeks or more.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue the duly certified true copy of the civil registry document. Issue PSA-authenticated civil registry document after 3 days from date of filing. Issue CENOMAR after 2 weeks or more from date of filing.",
+              "fees": "None",
+              "processing_time": "3 minutes (LCRO Copy); After 3 days (PSA-authenticated CRD); 2 weeks or more (CENOMAR)",
+              "person_responsible": "MCRO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "LCRO Copy: PHP 105.00 (PHP 70.00 + PHP 35.00 Documentary Stamp). PSA Copy: PHP 235.00 (Birth/Marriage/Death) or PHP 290.00 (CENOMAR)",
+      "total_processing_time": "5 minutes (LCRO Copy); 3 days (PSA Birth/Marriage/Death); 2 weeks or more (CENOMAR)",
+      "legal_basis": "Republic Act No. 10173 (Data Privacy Act of 2012); PSA policies",
+      "faqs": [
+        {
+          "question": "What is the difference between an LCRO Copy and a PSA-authenticated copy?",
+          "answer": "An LCRO Copy is a Certified True Copy issued directly by the Local Civil Registry Office. A PSA-authenticated copy (SECPA) is issued by the Philippine Statistics Authority on security paper and is typically required for official transactions with government agencies."
+        },
+        {
+          "question": "Can someone else claim my civil registry document on my behalf?",
+          "answer": "Yes, but the representative must present a freshly written and signed Authorization Letter (not machine-scanned), a valid ID of both the representative and the document-owner, and other applicable legal documents such as a Special Power of Attorney or Affidavit of Kinship."
+        },
+        {
+          "question": "How much does an LCRO Certified True Copy cost?",
+          "answer": "An LCRO Certified True Copy costs PHP 70.00 plus a PHP 35.00 Documentary Stamp, totaling PHP 105.00."
+        },
+        {
+          "question": "How long does it take to get a PSA copy of a Birth, Marriage, or Death Certificate?",
+          "answer": "It takes approximately 3 days from the date of filing of the application."
+        },
+        {
+          "question": "How long does it take to get a CENOMAR?",
+          "answer": "A Certificate of No Marriage (CENOMAR) from the PSA takes 2 weeks or more from the date of filing."
+        },
+        {
+          "question": "Who can request a civil registry document?",
+          "answer": "The document-owner, spouse, parent, direct descendants, guardian, or authorized representative may request. In case of death, the nearest of kin may request. Courts and public officials may also request when absolutely necessary."
+        }
+      ]
+    },
+    {
+      "service_id": "MCRO-002",
+      "service_name": "Issuance of Marriage License",
+      "description": "A Marriage License is a pre-requisite for marriage issued to contracting parties upon compliance with all legal requirements. It is valid for 120 days from the date of issuance.",
+      "office_or_division": "Office of the Municipal Civil Registrar",
+      "classification": "Complex",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Single men and women who plan to get married",
+      "requirements": [
+        {
+          "document": "Accomplished Application Form",
+          "copies": null,
+          "where_to_secure": "Office of the MCR"
+        },
+        {
+          "document": "Birth Certificate (Local or PSA Copy) or Baptismal Certificate",
+          "copies": null,
+          "where_to_secure": "Office of the MCR, PSA, or Church"
+        },
+        {
+          "document": "Pre-Marriage Counselling Certificate",
+          "copies": null,
+          "where_to_secure": "MSWDO"
+        },
+        {
+          "document": "Parental Consent or Parental Advice (if needed)",
+          "copies": null,
+          "where_to_secure": "Parents to sign in front of the Municipal Civil Registrar"
+        },
+        {
+          "document": "CENOMAR (Certificate of No Marriage)",
+          "copies": null,
+          "where_to_secure": "Philippine Statistics Authority"
+        },
+        {
+          "document": "Certificate of Legal Capacity to Contract Marriage (if either or both contracting parties is a foreign national)",
+          "copies": null,
+          "where_to_secure": "Respective Diplomatic or Consular Officials of either of the contracting parties"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit the required documents, provide necessary information during the preliminary interview, and fill up the application form.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Check submitted documents.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MCRO"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Conduct the preliminary interview and issue the application form.",
+              "fees": "None",
+              "processing_time": "Included in Step 1",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Confirm the information given on the application and other documents during the final interview.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Conduct final interview. Examine and validate documents while conducting the final interview.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Civil Registrar"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Pay the required fees.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Accept corresponding payments and issue official receipts.",
+              "fees": "Application Fee: PHP 200.00; Marriage License Fee: PHP 422.00; Parental Advice/Consent: PHP 150.00; Solemnization Fee: PHP 500.00; Registration of Marriage Certificate: PHP 55.00",
+              "processing_time": "3 minutes",
+              "person_responsible": "MCRO / Municipal Treasurer's Office (MTO)"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Both parties sign the application form for marriage license and entrust required documents for the 10-day posting period.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Sign on all needed documents. Instruct clients to come back after the 10-day posting period (including Saturdays, Sundays, and holidays).",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "Municipal Civil Registrar"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Return to the MCR Office as instructed and claim the marriage license.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Issue the marriage license.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Application Fee: PHP 200.00; Marriage License Fee: PHP 422.00; Parental Advice/Consent (if applicable): PHP 150.00; Solemnization Fee: PHP 500.00; Registration of Marriage Certificate: PHP 55.00",
+      "total_processing_time": "Complex – approximately 10 days (including the mandatory 10-day posting period)",
+      "faqs": [
+        {
+          "question": "What is a Marriage License?",
+          "answer": "A Marriage License is a legal document required before a couple can get married. It is valid for 120 days from the date of issuance."
+        },
+        {
+          "question": "How long does it take to get a Marriage License?",
+          "answer": "The process takes approximately 10 days, as the law requires a mandatory 10-day posting period (including Saturdays, Sundays, and holidays) after the application."
+        },
+        {
+          "question": "What are the fees for a Marriage License?",
+          "answer": "The fees include: Application Fee (PHP 200.00), Marriage License Fee (PHP 422.00), Parental Advice/Consent if required (PHP 150.00), Solemnization Fee (PHP 500.00), and Registration of Marriage Certificate (PHP 55.00)."
+        },
+        {
+          "question": "Do foreign nationals need additional documents?",
+          "answer": "Yes. If either or both contracting parties is a foreign national, they must present a Certificate of Legal Capacity to Contract Marriage from their respective diplomatic or consular officials."
+        },
+        {
+          "question": "Where do I get a Pre-Marriage Counselling Certificate?",
+          "answer": "The Pre-Marriage Counselling Certificate can be obtained from the Municipal Social Welfare and Development Office (MSWDO)."
+        },
+        {
+          "question": "How long is a Marriage License valid?",
+          "answer": "A Marriage License is valid for 120 days from the date of issuance."
+        }
+      ]
+    },
+    {
+      "service_id": "MCRO-003",
+      "service_name": "Timely Registration of Birth of Children of Married Parents and Issuance of Certificate of Live Birth (COLB)",
+      "description": "Timely registration refers to registering the birth of a child born to married parents within the reglementary period of thirty (30) days from the time of birth. The Certificate of Live Birth is issued after compliance with requirements.",
+      "office_or_division": "Office of the Municipal Civil Registrar",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": [
+        "Hospital Administrator with the Attendant at Birth certifying the facts of birth",
+        "Physician, Nurse, or Midwife if born in a place other than the hospital",
+        "Either or both parents, guardian, relative, or other persons concerned",
+        "Persons 18 years of age may apply for registration of birth",
+        "Driver of a vehicle if birth occurs while travelling"
+      ],
+      "requirements": [
+        {
+          "document": "Registered Certificate of Marriage of Parents",
+          "copies": null,
+          "where_to_secure": "Local Civil Registry Office where the marriage was registered"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Verify with the Municipal Civil Registrar's Office if the hospital authorities have submitted the duly accomplished quadruplicate copies of the Certificate of Live Birth (COLB). If yes, review the documents. If no, coordinate with the concerned hospital, secure the documents, and submit to the Office of the Municipal Civil Registrar.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Review the documents as to the completeness and correctness of all information.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Pay the corresponding fees.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Accept payment and issue official receipt. Assign a Registry Number and sign the COLB.",
+              "fees": "Registration Fee: PHP 55.00; Documentary Stamp: PHP 35.00",
+              "processing_time": "3 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Claim the duly registered COLB on the appointed time.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Issue one (1) copy of the registered COLB.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Registration Fee: PHP 55.00; Documentary Stamp: PHP 35.00 (Total: PHP 90.00)",
+      "total_processing_time": "Approximately 15 minutes",
+      "faqs": [
+        {
+          "question": "What is timely registration of birth?",
+          "answer": "Timely registration means registering the birth of a child within 30 days from the date of birth."
+        },
+        {
+          "question": "What if the hospital has not yet submitted the COLB?",
+          "answer": "You should coordinate with the concerned hospital to secure the quadruplicate copies of the COLB and then submit them to the Municipal Civil Registrar's Office."
+        },
+        {
+          "question": "How much is the registration fee for birth?",
+          "answer": "The Registration Fee is PHP 55.00 plus a PHP 35.00 Documentary Stamp, totaling PHP 90.00."
+        },
+        {
+          "question": "What document must the parents present?",
+          "answer": "Parents must present the Registered Certificate of Marriage, obtained from the Local Civil Registry Office where the marriage was registered."
+        }
+      ]
+    },
+    {
+      "service_id": "MCRO-004",
+      "service_name": "Delayed Registration of Birth of Children Born to Married/Unmarried Parents and Issuance of Certificate of Live Birth (COLB)",
+      "description": "Delayed or late registration of birth refers to registering the birth of a child after the reglementary period of thirty (30) days from the time of birth. The Certificate of Live Birth is issued after compliance with requirements.",
+      "office_or_division": "Office of the Municipal Civil Registrar",
+      "classification": "Complex",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": [
+        "Hospital Administrator with the Attendant at Birth certifying the facts of birth",
+        "Physician, Nurse, or Midwife if born in a place other than the hospital",
+        "Either or both parents, guardian, relative, or other persons concerned",
+        "Persons 18 years of age may apply for registration of birth",
+        "Driver of a vehicle if birth occurs while travelling"
+      ],
+      "requirements": [
+        {
+          "document": "Certificate of Negative Verification (for those born in 1945 or onwards)",
+          "copies": null,
+          "where_to_secure": "Philippine Statistics Authority (PSA)"
+        },
+        {
+          "document": "Certificate of Negative Verification (for those born in 1944 or below)",
+          "copies": null,
+          "where_to_secure": "National Archives of the Philippines"
+        },
+        {
+          "document": "Affidavit of Late Registration of Birth of Two (2) Disinterested Persons (affiants not related to the child)",
+          "copies": null,
+          "where_to_secure": "Public or Private Lawyer"
+        },
+        {
+          "document": "Any two (2) of the following documentary evidences: Original/Certified True Copy of Baptismal Certificate; Form 137 or school record showing facts of birth; Income Tax Return of registrant's parents; Certificate of Marriage (if married); NBI/Police Clearances or Barangay Certification of facts of birth; Any public document or ID showing facts of birth (Driver's License, PRC ID, Passport, Postal ID, Employment ID, etc.)",
+          "copies": null,
+          "where_to_secure": "Concerned private or government agency"
+        },
+        {
+          "document": "For Legitimate Children: Registered Certificate of Marriage (COM) of parents",
+          "copies": null,
+          "where_to_secure": "LCRO where the marriage was registered"
+        },
+        {
+          "document": "For Illegitimate Children: Affidavit of Acknowledgment/Admission of Paternity (back of COLB, executed by both parents); Separate Affidavit of Admission of Paternity (Father, duly notarized); Separate Affidavit to Use the Surname of the Father (AUSF, executed by Mother, pursuant to RA 9255, duly notarized); Community Tax Certificates of both parents",
+          "copies": null,
+          "where_to_secure": "Private or Public Lawyer; Municipal Civil Registry Office; Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit duly accomplished COLB in four (4) copies prepared by hospital authorities and requirements for delayed registration of birth.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Check the information as to completeness and correctness of all entries. Check if registrant was previously registered to avoid double/multiple registration.",
+              "fees": "None",
+              "processing_time": "4 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Confirm the given information and affix signature at the space provided for the informant/registrant.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Review entries in the COLB. Validate submitted documents and conduct final interview.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Municipal Civil Registrar"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "For illegitimate children: Father executes Affidavit of Acknowledgment/Admission of Paternity. Mother executes Affidavit to Use the Surname of the Father (pursuant to RA 9255).",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Sign on the appropriate space in the affidavit after verifying all facts and data entered in MF 102.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "Municipal Civil Registrar"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Advise client that there will be a posting period of ten (10) days (including Saturdays, Sundays, and holidays) to comply with legal requirements.",
+              "fees": "None",
+              "processing_time": "Included in Step 3",
+              "person_responsible": "Municipal Civil Registrar"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Pay the required fees.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Accept payment and issue official receipt.",
+              "fees": "Late Registration Fee: PHP 450.00; Documentary Stamp: PHP 35.00",
+              "processing_time": "3 minutes",
+              "person_responsible": "MCRO / MTO"
+            },
+            {
+              "sub_step": "4.2",
+              "action": "Assign a registry number on the document. Register the legal instruments and sign on the specific portion for signatories.",
+              "fees": "None",
+              "processing_time": "10 days posting after the date of application",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Claim the duly registered Birth Certificate after the ten-day posting period.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Issue a copy of the Birth Certificate.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Late Registration Fee: PHP 450.00; Documentary Stamp: PHP 35.00 (Total: PHP 485.00)",
+      "total_processing_time": "Complex – approximately 10 days (mandatory 10-day posting period after application)",
+      "faqs": [
+        {
+          "question": "What is delayed registration of birth?",
+          "answer": "Delayed registration means registering the birth of a child more than 30 days after the date of birth."
+        },
+        {
+          "question": "How much does delayed registration cost?",
+          "answer": "The Late Registration Fee is PHP 450.00 plus a PHP 35.00 Documentary Stamp, totaling PHP 485.00."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "The process takes approximately 10 days due to the mandatory 10-day posting period required by law (including Saturdays, Sundays, and holidays)."
+        },
+        {
+          "question": "What documents are needed to prove the facts of birth?",
+          "answer": "Any two of the following: Baptismal Certificate, Form 137 or school records, Income Tax Return of parents, Certificate of Marriage (if married), NBI/Police Clearances or Barangay Certification, or any valid ID showing facts of birth (Driver's License, PRC ID, Passport, etc.)."
+        },
+        {
+          "question": "What additional documents are needed for illegitimate children?",
+          "answer": "For illegitimate children, an Affidavit of Acknowledgment/Admission of Paternity (executed by both parents on the back of the COLB), a separate notarized Affidavit of Admission of Paternity by the father, and an Affidavit to Use the Surname of the Father (AUSF) by the mother (pursuant to RA 9255) are required, along with Community Tax Certificates of both parents."
+        }
+      ]
+    },
+    {
+      "service_id": "MCRO-005",
+      "service_name": "Out-of-Town Delayed Registration of Birth",
+      "description": "A process of late or delayed registration whereby the Certificate of Live Birth and its supporting documents are reviewed and received by the Local Civil Registrar of the city or municipality other than the place of birth (usually where the registrant currently resides). Documents are then forwarded to the LCR of the place of birth where registration is officially recorded.",
+      "office_or_division": "Office of the Municipal Civil Registrar",
+      "classification": "Complex",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": [
+        "Either or both parents",
+        "Guardian",
+        "Relative",
+        "Other persons concerned (persons 18 years of age may apply for out-of-town delayed registration of their own birth)"
+      ],
+      "requirements": [
+        {
+          "document": "Certificate of Negative Verification (for those born in 1945 or onwards)",
+          "copies": null,
+          "where_to_secure": "Philippine Statistics Authority (PSA)"
+        },
+        {
+          "document": "Certificate of Negative Verification (for those born in 1944 or below)",
+          "copies": null,
+          "where_to_secure": "National Archives of the Philippines"
+        },
+        {
+          "document": "Affidavit of Late Registration of Birth of Two (2) Disinterested Persons (affiants not related to the child)",
+          "copies": null,
+          "where_to_secure": "Public or Private Lawyer"
+        },
+        {
+          "document": "Any two (2) of the following: Baptismal Certificate; Form 137 or school records; Income Tax Return of parents; Certificate of Marriage (if married); NBI/Police Clearances or Barangay Certification of facts of birth; Any valid ID showing facts of birth (Driver's License, PRC ID, Passport, Postal ID, Employment ID, etc.)",
+          "copies": null,
+          "where_to_secure": "Concerned private or government agency"
+        },
+        {
+          "document": "For Legitimate Children: Registered Certificate of Marriage (COM) of parents",
+          "copies": null,
+          "where_to_secure": "LCR Office where the marriage of parents was registered"
+        },
+        {
+          "document": "For Illegitimate Children: Affidavit of Acknowledgment/Admission of Paternity; Separate Affidavit of Admission of Paternity (Father, notarized); Affidavit to Use the Surname of the Father (AUSF, Mother, pursuant to RA 9255, notarized); Community Tax Certificates of both parents",
+          "copies": null,
+          "where_to_secure": "Municipal Civil Registry Office; Private or Public Lawyer; Municipal Treasurer's Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Provide needed information during the interview and submit requirements pursuant to applicable rules on civil registration.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Check the information as to completeness and correctness. Check if registrant was previously registered to avoid double/multiple registration.",
+              "fees": "None",
+              "processing_time": "4 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Confirm the given information.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Ascertain the facts of birth through final interview. Evaluate supporting documents showing facts of birth. Check certifications that applicant was not previously registered.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Municipal Civil Registrar"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Affix signature at the spaces provided.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Sign on the appropriate space. Advise client that there will be a 10-day posting period (including Saturdays, Sundays, and holidays) to comply with legal requirements.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Civil Registrar"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Pay the appropriate registration and other incidental expenses to be sent together with the documents to the LCRO where the birth of the registrant is to be registered.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Ensure that the applicant pays the appropriate registration and other incidental fees.",
+              "fees": "Registration and Other Incidental Expenses: PHP 1,000.00 (sent to the concerned LCRO where birth shall be registered); OTDR Registration Fee: PHP 500.00",
+              "processing_time": "3 minutes",
+              "person_responsible": "MCRO"
+            },
+            {
+              "sub_step": "4.2",
+              "action": "Forward the COLB to the LCRO of the city/municipality where the birth occurred.",
+              "fees": "None",
+              "processing_time": "Included in Step 4",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Wait for the notification of the MCR.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Notify the client immediately upon receipt of the approved document from the receiving LCRO.",
+              "fees": "None",
+              "processing_time": "Period begins upon receipt by the receiving LCRO where the birth shall be registered",
+              "person_responsible": "MCRO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Registration and Incidental Expenses: PHP 1,000.00; OTDR Registration Fee: PHP 500.00 (Total: PHP 1,500.00)",
+      "total_processing_time": "Complex – varies; depends on the processing period of the receiving LCRO at the place of birth",
+      "faqs": [
+        {
+          "question": "What is Out-of-Town Delayed Registration of Birth?",
+          "answer": "It is a process where the birth registration documents are filed at the LCRO of the city/municipality where the registrant currently resides (instead of the place of birth). The receiving LCRO then forwards the documents to the LCRO of the place of birth for official registration."
+        },
+        {
+          "question": "How much does out-of-town delayed registration cost?",
+          "answer": "The total cost is PHP 1,500.00: PHP 1,000.00 for registration and incidental expenses sent to the concerned LCRO, plus a PHP 500.00 OTDR Registration Fee."
+        },
+        {
+          "question": "How long does the process take?",
+          "answer": "The processing period begins upon receipt of the documents by the receiving LCRO at the place of birth. The timeline varies depending on that LCRO's processing time."
+        },
+        {
+          "question": "Can I register my own birth through this process?",
+          "answer": "Yes. Persons 18 years of age and above may apply for out-of-town delayed registration of their own birth."
+        }
+      ]
+    },
+    {
+      "service_id": "MCRO-006",
+      "service_name": "Registering Marriage Certificates",
+      "description": "The Certificate of Marriage must be registered where the marriage was solemnized — within 15 days for marriages with license and within 30 days for marriages of exceptional character — from the date of solemnization.",
+      "office_or_division": "Office of the Municipal Civil Registrar",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": [
+        "Newly married couple",
+        "Solemnizing Officer"
+      ],
+      "requirements": [
+        {
+          "document": "Marriage Certificate (accomplished in quadruplicate copies)",
+          "copies": 4,
+          "where_to_secure": "Municipal Civil Registry Office"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit duly accomplished Marriage Certificate in quadruplicate copies.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Examine and validate submitted documents. Conduct interview.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Pay required fees.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Assign registry number, accept payment, and issue receipt.",
+              "fees": "Registration Fee: PHP 55.00; Documentary Stamp: PHP 35.00",
+              "processing_time": "3 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Wait for the MCR's final validation and signing of the document.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Conduct final validation and sign the Marriage Certificate.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "Municipal Civil Registrar"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Get a copy of the Certificate of Marriage with Registry Number.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Issue Certificate of Marriage with registry number.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Registration Fee: PHP 55.00; Documentary Stamp: PHP 35.00 (Total: PHP 90.00)",
+      "total_processing_time": "Approximately 10 minutes",
+      "faqs": [
+        {
+          "question": "When must a Marriage Certificate be registered?",
+          "answer": "A Marriage Certificate must be registered within 15 days for marriages with license, or within 30 days for marriages of exceptional character, from the date of solemnization."
+        },
+        {
+          "question": "Who can register the Marriage Certificate?",
+          "answer": "The newly married couple or the Solemnizing Officer may register the Marriage Certificate."
+        },
+        {
+          "question": "How much is the registration fee?",
+          "answer": "The Registration Fee is PHP 55.00 plus a PHP 35.00 Documentary Stamp, totaling PHP 90.00."
+        },
+        {
+          "question": "How many copies of the Marriage Certificate are needed?",
+          "answer": "The Marriage Certificate must be submitted in quadruplicate (4 copies)."
+        }
+      ]
+    },
+    {
+      "service_id": "MCRO-007",
+      "service_name": "Delayed Registration of Marriage",
+      "description": "Delayed or late registration of marriage refers to registering the marriage of a couple outside the reglementary period of thirty (30) days from the time of marriage. The Certificate of Marriage is issued after compliance with all requirements.",
+      "office_or_division": "Office of the Municipal Civil Registrar",
+      "classification": "Complex",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": [
+        "Married couple",
+        "Solemnizing officer"
+      ],
+      "requirements": [
+        {
+          "document": "Marriage Certificate or Certification issued by the Church or Solemnizing Officer indicating date of marriage",
+          "copies": null,
+          "where_to_secure": "Municipal Civil Registry Office"
+        },
+        {
+          "document": "Affidavit of the Contracting Parties stating their name, date, and place of marriage",
+          "copies": null,
+          "where_to_secure": "Public or Private Lawyer"
+        },
+        {
+          "document": "Affidavit of the Solemnizing Officer (stating exact place, date of marriage, facts and circumstances, and reason for delay in registration)",
+          "copies": null,
+          "where_to_secure": "Public or Private Lawyer"
+        },
+        {
+          "document": "Affidavit of Two (2) Disinterested Persons (stating date and place of marriage, names of contracting parties, and name of solemnizing officer)",
+          "copies": null,
+          "where_to_secure": "Public or Private Lawyer"
+        },
+        {
+          "document": "Certificate of No Record of Marriage (CENOMAR)",
+          "copies": null,
+          "where_to_secure": "Philippine Statistics Authority"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit all required documents and provide all necessary information during the interview.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Accept the documents and conduct preliminary interview.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Confirm the information during the conduct of interview.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Validate submitted documents and verify the authenticity of the marriage certification.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Municipal Civil Registrar"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Pay the required fees.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Accept payment and issue official receipt.",
+              "fees": "Late Registration Fee: PHP 450.00",
+              "processing_time": "3 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Wait for the 10-day posting period and notification of the MCRO.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Adhere to the 10-day posting period policy in delayed registration of civil registry documents.",
+              "fees": "None",
+              "processing_time": "10 days after filing of application",
+              "person_responsible": "MCRO"
+            },
+            {
+              "sub_step": "4.2",
+              "action": "Assign a registry number on the document. Register the legal instruments and sign on the specific portion for signatories.",
+              "fees": "None",
+              "processing_time": "Included in Step 4",
+              "person_responsible": "MCRO"
+            },
+            {
+              "sub_step": "4.3",
+              "action": "Notify the applicant.",
+              "fees": "None",
+              "processing_time": "Included in Step 4",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Claim the registered document after the 10-day posting period.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Issue the document after the 10-day posting period.",
+              "fees": "None",
+              "processing_time": "Included in Step 5",
+              "person_responsible": "MCRO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Late Registration Fee: PHP 450.00",
+      "total_processing_time": "Complex – approximately 10 days (mandatory 10-day posting period after application)",
+      "faqs": [
+        {
+          "question": "What is delayed registration of marriage?",
+          "answer": "Delayed registration means registering the marriage more than 30 days after the date of solemnization."
+        },
+        {
+          "question": "How much is the late registration fee for marriage?",
+          "answer": "The Late Registration Fee is PHP 450.00."
+        },
+        {
+          "question": "Why is there a 10-day posting period?",
+          "answer": "The 10-day posting period is required by law to allow any objections to the marriage registration to be raised before the certificate is officially issued."
+        },
+        {
+          "question": "What affidavits are required for delayed registration of marriage?",
+          "answer": "Three affidavits are required: one from the contracting parties, one from the solemnizing officer, and one from two disinterested persons. All must be notarized."
+        }
+      ]
+    },
+    {
+      "service_id": "MCRO-008",
+      "service_name": "Registering / Issuance of Death Certificate",
+      "description": "The Certificate of Death must be registered within the 30-day reglementary period at the civil registry office of the place where the death occurred.",
+      "office_or_division": "Office of the Municipal Civil Registrar",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Nearest relative or person who has knowledge of the death of a person",
+      "requirements": [
+        {
+          "document": "Four (4) copies of the Death Certificate (Form 103) accomplished by the hospital authority or Rural Health Unit",
+          "copies": 4,
+          "where_to_secure": "Local Civil Registry Office where death occurred"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit duly accomplished Form 103 (Death Certificate) in quadruplicate copies signed by the hospital or rural health unit authorities.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Examine the documents and check all entries.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Have the form signed by an embalmer.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Check whether the embalmer's certification has been signed or not.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Pay the required fee.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Accept payment and issue official receipt.",
+              "fees": "Burial Fee: PHP 50.00; Registration Fee: PHP 55.00",
+              "processing_time": "As per MTO's process",
+              "person_responsible": "MCRO / Municipal Treasurer's Office"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Proceed to the MCR for signature of the document.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Validate documents submitted.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MCRO"
+            },
+            {
+              "sub_step": "4.2",
+              "action": "Assign Registry Number.",
+              "fees": "None",
+              "processing_time": "Included in Step 4",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Wait for the validation of the document by the Municipal Civil Registrar.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Conduct final validation of the Death Certificate and sign on the appropriate space provided.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "Municipal Civil Registrar"
+            }
+          ]
+        },
+        {
+          "step_number": 6,
+          "client_action": "Claim the duly registered Death Certificate.",
+          "agency_actions": [
+            {
+              "sub_step": "6.1",
+              "action": "Issue a copy of the certificate.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Burial Fee: PHP 50.00; Registration Fee: PHP 55.00 (Total: PHP 105.00)",
+      "total_processing_time": "Approximately 15 minutes",
+      "faqs": [
+        {
+          "question": "When must a Death Certificate be registered?",
+          "answer": "A Death Certificate must be registered within 30 days from the date of death at the civil registry office of the place where the death occurred."
+        },
+        {
+          "question": "Who can register a Death Certificate?",
+          "answer": "The nearest relative or any person who has knowledge of the death of a person may register the Death Certificate."
+        },
+        {
+          "question": "How much are the fees for registering a Death Certificate?",
+          "answer": "The fees are: Burial Fee (PHP 50.00) and Registration Fee (PHP 55.00), totaling PHP 105.00."
+        },
+        {
+          "question": "Does the Death Certificate need to be signed by an embalmer?",
+          "answer": "Yes. The Death Certificate must include the embalmer's certification duly signed before it can be processed."
+        }
+      ]
+    },
+    {
+      "service_id": "MCRO-009",
+      "service_name": "Registering Legal Instruments",
+      "description": "Legal instruments include Affidavit of Legitimation, Affidavit of Acknowledgment/Affidavit of Paternity, and Affidavit to Use the Surname of the Father, among others. Registration is done in the civil registry records.",
+      "office_or_division": "Office of the Municipal Civil Registrar",
+      "classification": "Simple",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Any individual whose registry record has been affected by a court decree/order",
+      "requirements": [
+        {
+          "document": "Court Decree",
+          "copies": null,
+          "where_to_secure": "Public or Private Lawyer"
+        },
+        {
+          "document": "Certificate of Finality and Entry of Judgment",
+          "copies": null,
+          "where_to_secure": "Public or Private Lawyer"
+        },
+        {
+          "document": "Court Decision",
+          "copies": null,
+          "where_to_secure": "Public or Private Lawyer"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Present required documents.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Accept and examine submitted documents as to authenticity and correctness of entries.",
+              "fees": "None",
+              "processing_time": "2 minutes",
+              "person_responsible": "Municipal Civil Registrar"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Pay the corresponding fees.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Issue official receipt.",
+              "fees": "Registration of Legal Instrument: PHP 500.00; Certification of Registration: PHP 150.00; Per Registration of Annulment of Marriage/Legal Separation/Divorce/Naturalization/Decree of Adoption: PHP 3,000.00",
+              "processing_time": "10 to 25 minutes",
+              "person_responsible": "MCRO / MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Wait for the annotation on the affected document.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Enter the court decree/order in the Registry Book.",
+              "fees": "None",
+              "processing_time": "To be determined",
+              "person_responsible": "MCRO"
+            },
+            {
+              "sub_step": "3.2",
+              "action": "Annotate the document.",
+              "fees": "None",
+              "processing_time": "Included in Step 3",
+              "person_responsible": "MCRO"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Proceed to the Municipal Civil Registrar for final validation of the legal instruments.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Conduct final validation and sign the affected civil registry record.",
+              "fees": "None",
+              "processing_time": "To be determined",
+              "person_responsible": "Municipal Civil Registrar"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Claim the documents (annotated record, certification of registration, endorsement) and sign in the logbook.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Release the complete set of documents to the client.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MCRO"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Registration of Legal Instrument: PHP 500.00; Certification of Registration: PHP 150.00; Annulment/Legal Separation/Divorce/Naturalization/Decree of Adoption: PHP 3,000.00",
+      "total_processing_time": "Approximately 30 to 45 minutes",
+      "faqs": [
+        {
+          "question": "What are legal instruments in civil registration?",
+          "answer": "Legal instruments include the Affidavit of Legitimation, Affidavit of Acknowledgment/Admission of Paternity, and Affidavit to Use the Surname of the Father, among others. These are documents that affect a person's civil registry records."
+        },
+        {
+          "question": "How much does it cost to register a legal instrument?",
+          "answer": "Registration of a Legal Instrument costs PHP 500.00. Certification of Registration is PHP 150.00. Registration of Annulment, Legal Separation, Divorce, Naturalization, or Decree of Adoption costs PHP 3,000.00."
+        },
+        {
+          "question": "What documents do I need to register a legal instrument?",
+          "answer": "You need the Court Decree, Certificate of Finality and Entry of Judgment, and the Court Decision, all obtainable from your public or private lawyer."
+        },
+        {
+          "question": "What do I receive after registration?",
+          "answer": "You will receive the annotated civil registry record, a Certification of Registration, and an endorsement copy."
+        }
+      ]
+    },
+    {
+      "service_id": "MCRO-010",
+      "service_name": "Processing Petitions Under Republic Act No. 9048 / RA 10172 (Correction of Clerical Errors or Change of First Name)",
+      "description": "Petitions filed pursuant to RA 9048 and RA 10172 for the correction of clerical or typographical errors in civil registry documents or for the change of first name.",
+      "office_or_division": "Office of the Municipal Civil Registrar",
+      "classification": "Highly Technical",
+      "type_of_transaction": ["G2C"],
+      "who_may_avail": "Petitioner/Document-Owner",
+      "requirements": [
+        {
+          "document": "Requirements vary depending on the type of petition. The MCRO will provide a checklist of specific requirements upon inquiry.",
+          "copies": null,
+          "where_to_secure": "As required — MCRO will advise"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Inform the MCR about problems in the registry record.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Advise remedies — whether to file for Petition for Correction of Clerical Error or Change of First Name.",
+              "fees": "None",
+              "processing_time": "15 minutes",
+              "person_responsible": "Municipal Civil Registrar (MCR)"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Submit all necessary requirements.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Give checklist of requirements. Examine and validate submitted documents.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "MCR"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Submit to an interview.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Conduct interview.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "MCR"
+            }
+          ]
+        },
+        {
+          "step_number": 4,
+          "client_action": "Pay the required fees and get official receipts.",
+          "agency_actions": [
+            {
+              "sub_step": "4.1",
+              "action": "Issue order of payment.",
+              "fees": "Filing Fee (RA 10172 / Change of First Name under RA 9048): PHP 3,000.00; Correction of Clerical Errors under RA 9048: PHP 1,000.00; Publication Fee (Change of First Name under RA 9048): PHP 1,500.00; Subscription Fee: PHP 150.00",
+              "processing_time": "3 minutes",
+              "person_responsible": "MCRO / MTO"
+            }
+          ]
+        },
+        {
+          "step_number": 5,
+          "client_action": "Wait for the preparation of the Petition Form.",
+          "agency_actions": [
+            {
+              "sub_step": "5.1",
+              "action": "Prepare Petition Form, Notice and Certificate of Posting for 10 days, and Notice of Publication for 2 weeks.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MCR"
+            }
+          ]
+        },
+        {
+          "step_number": 6,
+          "client_action": "Wait for the MCR's notification of the OCRG decision.",
+          "agency_actions": [
+            {
+              "sub_step": "6.1",
+              "action": "Decision period for the PSA-Office of the Civil Registrar-General (OCRG) after the 10-day posting at the LCR Office and 2-week publication at the Lucena Herald.",
+              "fees": "None",
+              "processing_time": "Varies – depends on OCRG decision period",
+              "person_responsible": "MCR"
+            }
+          ]
+        },
+        {
+          "step_number": 7,
+          "client_action": "Return to the MCRO after receiving notification of the affirmed petition. Receive Certificate of Finality, Affirmed Petition, and Annotated and Unannotated Documents.",
+          "agency_actions": [
+            {
+              "sub_step": "7.1",
+              "action": "Issue final certification, affirmed petition, and other documents for annotation in the respective civil registry document after receipt of affirmation from the OCRG.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "MCR"
+            },
+            {
+              "sub_step": "7.2",
+              "action": "Transmit to the PSA certified copies of the affirmed petition, Certificate of Finality, and annotated and unannotated civil registry documents. Wait approximately 2 months for the document to be encoded in the PSA Civil Registry System.",
+              "fees": "None",
+              "processing_time": "Approximately 2 months for PSA encoding",
+              "person_responsible": "MCR"
+            }
+          ]
+        }
+      ],
+      "total_fees": "Filing Fee: PHP 1,000.00 (clerical error) or PHP 3,000.00 (change of first name/RA 10172); Publication Fee: PHP 1,500.00 (for change of first name); Subscription Fee: PHP 150.00",
+      "total_processing_time": "Highly Technical – several months including 10-day posting, 2-week publication, OCRG decision period, and approximately 2 months for PSA encoding",
+      "legal_basis": "Republic Act No. 9048 and Republic Act No. 10172",
+      "faqs": [
+        {
+          "question": "What is RA 9048?",
+          "answer": "RA 9048 is a law that allows the correction of clerical or typographical errors in civil registry documents and the change of first name or nickname without filing a court petition."
+        },
+        {
+          "question": "What is RA 10172?",
+          "answer": "RA 10172 is an amendment to RA 9048 that also allows correction of errors in the day and month of birth, or in the sex/gender entry in the birth certificate, without going to court."
+        },
+        {
+          "question": "How much does it cost to correct a clerical error?",
+          "answer": "The filing fee for correction of clerical errors under RA 9048 is PHP 1,000.00 plus a Subscription Fee of PHP 150.00."
+        },
+        {
+          "question": "How much does it cost to change my first name?",
+          "answer": "The filing fee is PHP 3,000.00, with an additional Publication Fee of PHP 1,500.00 and a Subscription Fee of PHP 150.00."
+        },
+        {
+          "question": "How long does the entire process take?",
+          "answer": "The process is highly technical and may take several months — including 10 days of posting, 2 weeks of publication, the OCRG decision period, and approximately 2 months for the PSA to encode the corrected document in its Civil Registry System."
+        },
+        {
+          "question": "Do I need to go to court to correct errors in my civil registry documents?",
+          "answer": "Not always. Under RA 9048 and RA 10172, certain clerical errors, changes in first name, and corrections in birth date or sex/gender can be done administratively through the MCRO without a court order."
+        }
+      ]
+    }
+  ]
+}

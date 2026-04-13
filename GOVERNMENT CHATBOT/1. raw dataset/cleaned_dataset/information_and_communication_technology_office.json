@@ -1,0 +1,483 @@
+{
+  "service_office": "Information and Communications Technology Office",
+  "service_category": "Internal & External",
+  "services": [
+    {
+      "service_id": "ICTO-001",
+      "service_name": "Evaluation of Application Systems to be Developed or Outsourced",
+      "description": "A service to evaluate application systems to be developed in-house or outsourced that a particular agency needs.",
+      "office_or_division": "Office of the Municipal Mayor (ICT Unit)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G"],
+      "who_may_avail": "All offices under the Local Government of Sampaloc, Quezon",
+      "requirements": [
+        {
+          "document": "Request Letter",
+          "copies": null,
+          "where_to_secure": "Requesting office or department"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit the Request Letter.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Assist with inquiries on the needed system.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "IT Officer I – ICT"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Evaluate whether the system will be outsourced or developed in-house.",
+              "fees": "None",
+              "processing_time": "1 hour",
+              "person_responsible": "IT Officer I – ICT"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "Discuss and evaluate the system requirements in detail.",
+              "fees": "None",
+              "processing_time": "Included in evaluation period",
+              "person_responsible": "IT Officer I – ICT"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Receive the evaluation letter.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Send the evaluation letter to the requesting department.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "IT Officer I – ICT"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 1 hour 20 minutes",
+      "faqs": [
+        {
+          "question": "What is the purpose of the Application System Evaluation service?",
+          "answer": "This service helps LGU offices determine whether a needed application system should be developed in-house by the ICT unit or outsourced to an external provider."
+        },
+        {
+          "question": "Who can request an application system evaluation?",
+          "answer": "All offices under the Local Government of Sampaloc, Quezon may request this service."
+        },
+        {
+          "question": "What do I need to submit to request an evaluation?",
+          "answer": "Submit a Request Letter to the ICT Office detailing the system needed by your office."
+        },
+        {
+          "question": "Is there a fee for this service?",
+          "answer": "No, the service is free of charge."
+        },
+        {
+          "question": "What will I receive after the evaluation?",
+          "answer": "The ICT Office will send an evaluation letter to your department with their findings and recommendation on whether the system should be developed in-house or outsourced."
+        },
+        {
+          "question": "How long does the evaluation take?",
+          "answer": "Approximately 1 hour and 20 minutes in total."
+        }
+      ]
+    },
+    {
+      "service_id": "ICTO-002",
+      "service_name": "Technical Assistance for IT Hardware, Networking, and Systems Applications",
+      "description": "A service to provide technical assistance for IT hardware, networking, and systems applications needed by a particular agency or department.",
+      "office_or_division": "Office of the Municipal Mayor (ICT Unit)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G"],
+      "who_may_avail": "All offices under the Local Government of Sampaloc, Quezon",
+      "requirements": [
+        {
+          "document": "No prior documents required — request is made directly to the ICT Office",
+          "copies": null,
+          "where_to_secure": "None"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Request for technical assistance.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Accommodate the request.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "IT Officer I – ICT"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Provide information on the technical assistance needed.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Interview the client to understand the technical issue.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "IT Officer I – ICT"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Process the request and provide the necessary technical assistance.",
+              "fees": "None",
+              "processing_time": "30 minutes to 2 hours",
+              "person_responsible": "Technician / IT Officer I – ICT"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 1 hour 10 minutes to 2 hours 40 minutes depending on complexity",
+      "faqs": [
+        {
+          "question": "What types of technical issues can the ICT Office assist with?",
+          "answer": "The ICT Office provides technical assistance for IT hardware problems, networking issues, and systems application concerns of LGU offices."
+        },
+        {
+          "question": "Who can request technical assistance?",
+          "answer": "All offices under the Local Government of Sampaloc, Quezon."
+        },
+        {
+          "question": "Do I need to submit any documents to request technical assistance?",
+          "answer": "No documents are required. Simply contact or visit the ICT Office to request assistance."
+        },
+        {
+          "question": "Is there a fee for technical assistance?",
+          "answer": "No, this service is free of charge."
+        },
+        {
+          "question": "How long does it take to resolve a technical issue?",
+          "answer": "Depending on the complexity of the issue, resolution takes approximately 1 hour 10 minutes to 2 hours 40 minutes."
+        }
+      ]
+    },
+    {
+      "service_id": "ICTO-003",
+      "service_name": "Provision of Recommendation for Appropriate Specification of IT Equipment Purchase",
+      "description": "A service to provide recommendations for the appropriate specifications of IT equipment to be purchased by each office.",
+      "office_or_division": "Office of the Municipal Mayor (ICT Unit)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G"],
+      "who_may_avail": "All offices under the Local Government of Sampaloc, Quezon",
+      "requirements": [
+        {
+          "document": "No prior documents required",
+          "copies": null,
+          "where_to_secure": "None"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Request for assistance.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Accommodate the request.",
+              "fees": "None",
+              "processing_time": "10 minutes",
+              "person_responsible": "IT Officer I – ICT"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Provide information about the request.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Interview the client to understand the equipment needs.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "IT Officer I – ICT"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Inspect and evaluate the IT equipment needs.",
+              "fees": "None",
+              "processing_time": "30 minutes",
+              "person_responsible": "Technical Unit / IT Officer I – ICT"
+            },
+            {
+              "sub_step": "2.3",
+              "action": "Sign the recommendation form.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "IT Officer I – ICT"
+            }
+          ]
+        },
+        {
+          "step_number": 3,
+          "client_action": "Receive the recommendation form.",
+          "agency_actions": [
+            {
+              "sub_step": "3.1",
+              "action": "Send the recommendation form to the concerned department.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Technical Unit / IT Officer I – ICT"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 55 minutes",
+      "faqs": [
+        {
+          "question": "Why do I need the ICT Office's recommendation before purchasing IT equipment?",
+          "answer": "The ICT Office provides technical recommendations to ensure that the equipment purchased meets the actual needs of your office and conforms to appropriate technical specifications, preventing incompatible or unsuitable purchases."
+        },
+        {
+          "question": "Who can request an IT equipment recommendation?",
+          "answer": "All offices under the Local Government of Sampaloc, Quezon."
+        },
+        {
+          "question": "What will I receive from this service?",
+          "answer": "You will receive a signed recommendation form specifying the appropriate IT equipment specifications for your office's needs."
+        },
+        {
+          "question": "Is there a fee for this service?",
+          "answer": "No, this service is free of charge."
+        },
+        {
+          "question": "How long does the recommendation process take?",
+          "answer": "Approximately 55 minutes from request to receipt of the recommendation form."
+        }
+      ]
+    },
+    {
+      "service_id": "ICTO-004",
+      "service_name": "Request for IT Training for Different Community Sectors",
+      "description": "A service to provide IT training for different community sectors in the Municipality of Sampaloc, Quezon.",
+      "office_or_division": "Office of the Municipal Mayor (ICT Unit)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G", "G2C"],
+      "who_may_avail": "All offices under the Local Government of Sampaloc, Quezon and all civil society organizations in Sampaloc",
+      "requirements": [
+        {
+          "document": "Request letter addressed to the Tech4ED Center Manager",
+          "copies": null,
+          "where_to_secure": "Requesting office or organization"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit the request letter addressed to the Tech4ED Center Manager.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Accommodate the request.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "IT Officer I – ICT"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Schedule the IT training.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "IT Officer I – ICT"
+            },
+            {
+              "sub_step": "1.3",
+              "action": "Assign a trainer for the activity.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "IT Officer I – ICT"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 15 minutes for scheduling; training date to be confirmed separately",
+      "faqs": [
+        {
+          "question": "Who can request IT training from the ICT Office?",
+          "answer": "All LGU offices and civil society organizations in the Municipality of Sampaloc, Quezon may request IT training."
+        },
+        {
+          "question": "How do I request IT training?",
+          "answer": "Submit a request letter addressed to the Tech4ED Center Manager at the ICT Office."
+        },
+        {
+          "question": "Is there a fee for IT training?",
+          "answer": "No, IT training is provided free of charge."
+        },
+        {
+          "question": "Who conducts the IT training?",
+          "answer": "The ICT Office assigns a trainer for the scheduled activity."
+        },
+        {
+          "question": "What is the Tech4ED Center?",
+          "answer": "The Tech4ED Center is the ICT facility in the Municipality of Sampaloc, Quezon that facilitates IT training and digital literacy programs for government offices and community sectors."
+        },
+        {
+          "question": "How soon after submitting the request will training be scheduled?",
+          "answer": "The ICT Office accommodates and schedules the training request within approximately 15 minutes of submission. The actual training date will be confirmed and coordinated with the requesting office or organization."
+        }
+      ]
+    },
+    {
+      "service_id": "ICTO-005",
+      "service_name": "Technical Assistance for Special or Common Projects of Other Offices",
+      "description": "A service to provide technical assistance for special or common projects of other offices in the Local Government of Sampaloc, Quezon.",
+      "office_or_division": "Office of the Municipal Mayor (ICT Unit)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G"],
+      "who_may_avail": "All offices under the Local Government of Sampaloc, Quezon",
+      "requirements": [
+        {
+          "document": "Request Letter",
+          "copies": null,
+          "where_to_secure": "Requesting office or department"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit the request letter.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Accommodate the request.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "IT Officer I – ICT"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Assign a technician to the project.",
+              "fees": "None",
+              "processing_time": "3 minutes",
+              "person_responsible": "IT Officer I / IT Assistant – ICT"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 8 minutes for request processing; project duration varies",
+      "faqs": [
+        {
+          "question": "What kind of projects can the ICT Office assist with?",
+          "answer": "The ICT Office provides technical assistance for both special and common projects of other LGU offices, such as setting up equipment for events, providing technical support for programs, and other IT-related project needs."
+        },
+        {
+          "question": "Who can request technical assistance for projects?",
+          "answer": "All offices under the Local Government of Sampaloc, Quezon."
+        },
+        {
+          "question": "What do I need to submit?",
+          "answer": "Submit a Request Letter to the ICT Office describing the project and the technical assistance needed."
+        },
+        {
+          "question": "Is there a fee for this service?",
+          "answer": "No, this service is free of charge."
+        },
+        {
+          "question": "How quickly will a technician be assigned?",
+          "answer": "A technician is assigned within approximately 8 minutes of submitting the request."
+        }
+      ]
+    },
+    {
+      "service_id": "ICTO-006",
+      "service_name": "Request for Graphic Design and Layout",
+      "description": "A service to create graphic designs and layouts needed by a particular agency or department in the Local Government of Sampaloc, Quezon.",
+      "office_or_division": "Office of the Municipal Mayor (ICT Unit)",
+      "classification": "Simple",
+      "type_of_transaction": ["G2G"],
+      "who_may_avail": "All offices under the Local Government of Sampaloc, Quezon",
+      "requirements": [
+        {
+          "document": "Request Letter",
+          "copies": null,
+          "where_to_secure": "Requesting office or department"
+        }
+      ],
+      "process_flow": [
+        {
+          "step_number": 1,
+          "client_action": "Submit the request letter.",
+          "agency_actions": [
+            {
+              "sub_step": "1.1",
+              "action": "Accommodate the request.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "IT Officer I – ICT"
+            },
+            {
+              "sub_step": "1.2",
+              "action": "Interview the client to understand the design requirements and specifications.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "IT Officer I – ICT"
+            }
+          ]
+        },
+        {
+          "step_number": 2,
+          "client_action": "Provide details and input for the design.",
+          "agency_actions": [
+            {
+              "sub_step": "2.1",
+              "action": "Process and create the graphic design or layout.",
+              "fees": "None",
+              "processing_time": "1 to 3 days",
+              "person_responsible": "Graphic Designer – ICT"
+            },
+            {
+              "sub_step": "2.2",
+              "action": "Submit the completed design to the client.",
+              "fees": "None",
+              "processing_time": "5 minutes",
+              "person_responsible": "Graphic Designer – ICT"
+            }
+          ]
+        }
+      ],
+      "total_fees": "None",
+      "total_processing_time": "Simple – approximately 1 to 3 days for design creation, plus 10 minutes for intake and delivery",
+      "faqs": [
+        {
+          "question": "What graphic design services does the ICT Office provide?",
+          "answer": "The ICT Office creates graphic designs and layouts for LGU offices, such as posters, tarpaulins, infographics, and other visual materials needed for official activities and programs."
+        },
+        {
+          "question": "Who can request graphic design services?",
+          "answer": "All offices under the Local Government of Sampaloc, Quezon."
+        },
+        {
+          "question": "What do I need to submit to request a graphic design?",
+          "answer": "Submit a Request Letter to the ICT Office. The graphic designer will then interview you to gather the specific design requirements."
+        },
+        {
+          "question": "Is there a fee for graphic design services?",
+          "answer": "No, the service is free of charge."
+        },
+        {
+          "question": "How long does it take to complete a graphic design?",
+          "answer": "Graphic designs and layouts are typically completed within 1 to 3 days depending on the complexity of the request."
+        },
+        {
+          "question": "Who creates the graphic designs?",
+          "answer": "A dedicated Graphic Designer from the ICT Office handles all design and layout requests."
+        }
+      ]
+    }
+  ]
+}
