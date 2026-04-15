@@ -107,7 +107,7 @@
                 </svg>
                 Export
             </button>
-            <button class="modal-btn-primary" style="padding: 8px 18px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;">
+            <button class="modal-btn-primary" onclick="openEmployeeWizard()" style="padding: 8px 18px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="12" y1="5" x2="12" y2="19"/>
                     <line x1="5" y1="12" x2="19" y2="12"/>
@@ -201,6 +201,8 @@
     </div>
 </section>
 
+@include('admin.personnel.modals.employeeWizardComplete')
+
 <style>
 .badge-emptype {
     font-size: 11px; color: #0b044d; background: #f0effe;
@@ -229,6 +231,9 @@
 }
 .btn-activate:hover { background: #d1fae5; }
 .row-actions { display: flex; gap: 6px; }
+.modal-label { display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px; }
+.modal-input { width:100%; padding:8px 12px; border:1px solid #e8e7f5; border-radius:8px; font-size:13px; color:#0b044d; font-family:'Poppins',sans-serif; outline:none; box-sizing:border-box; }
+.modal-input:focus { border-color:#0b044d; }
 .table-footer {
     padding: 16px 24px; border-top: 1px solid #f0effe;
     display: flex; justify-content: space-between; align-items: center;

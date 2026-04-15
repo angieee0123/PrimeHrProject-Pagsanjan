@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\EmployeeRegistrationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -81,8 +82,11 @@ Route::get('/admin/recruitment', function () {
 })->middleware('auth')->name('admin.recruitment');
 
 Route::get('/admin/personnel', function () {
-    return view('admin.personnel.adminPersonnel');
+    $departments = \App\Models\Department::where('status', 'Active')->orderBy('name')->get();
+    return view('admin.personnel.adminPersonnel', ['departments' => $departments]);
 })->middleware('auth')->name('admin.personnel');
+
+Route::post('/admin/personnel', [EmployeeRegistrationController::class, 'store'])->middleware('auth')->name('admin.personnel.store');
 
 Route::get('/admin/training', function () {
     return view('admin.training.adminTraining');
