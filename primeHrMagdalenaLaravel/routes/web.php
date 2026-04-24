@@ -117,6 +117,13 @@ Route::post('/admin/personnel/{id}/status', function (\Illuminate\Http\Request $
     return redirect()->route('admin.personnel')->with('success', $message);
 })->middleware('auth')->name('admin.personnel.updateStatus');
 
+Route::get('/admin/personnel/{id}', function ($id) {
+    $employee = \App\Models\Employee::with(['employmentDetail', 'addresses', 'contacts', 'governmentIds'])
+        ->findOrFail($id);
+    
+    return response()->json($employee);
+})->middleware('auth')->name('admin.personnel.show');
+
 Route::get('/admin/training', function () {
     return view('admin.training.adminTraining');
 })->middleware('auth')->name('admin.training');
