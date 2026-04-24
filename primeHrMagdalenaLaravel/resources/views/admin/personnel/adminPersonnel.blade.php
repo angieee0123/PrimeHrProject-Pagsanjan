@@ -23,7 +23,7 @@
                 </svg>
             </div>
         </div>
-        <h2 class="stat-value">8</h2>
+        <h2 class="stat-value">{{ $stats['total'] }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #0b044d;"></span>
             <p class="stat-sub">All records</p>
@@ -40,7 +40,7 @@
                 </svg>
             </div>
         </div>
-        <h2 class="stat-value">7</h2>
+        <h2 class="stat-value">{{ $stats['active'] }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #15803d;"></span>
             <p class="stat-sub">Currently active</p>
@@ -58,7 +58,7 @@
                 </svg>
             </div>
         </div>
-        <h2 class="stat-value">1</h2>
+        <h2 class="stat-value">{{ $stats['inactive'] }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #8e1e18;"></span>
             <p class="stat-sub">Deactivated accounts</p>
@@ -75,7 +75,7 @@
                 </svg>
             </div>
         </div>
-        <h2 class="stat-value">6</h2>
+        <h2 class="stat-value">{{ $stats['permanent'] }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #d9bb00;"></span>
             <p class="stat-sub">Permanent employees</p>
@@ -88,7 +88,7 @@
     <div class="table-header">
         <div>
             <h3 class="table-title">Employee Records</h3>
-            <p class="table-sub">Municipal Government of Pagsanjan · 8 of 8 records</p>
+            <p class="table-sub">Municipal Government of Pagsanjan · {{ $employees->count() }} of {{ $employees->count() }} records</p>
         </div>
         <div class="table-actions">
             <select class="filter-select">
@@ -141,17 +141,6 @@
             <tbody>
                 @php
                 $avatarColors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
-                $personnel = [
-                    ['id' => 'PGS-0041', 'name' => 'Maria B. Santos', 'position' => 'Administrative Officer IV', 'dept' => 'Office of the Mayor', 'status' => 'Active', 'empType' => 'Permanent', 'dateHired' => 'Mar 12, 2015'],
-                    ['id' => 'PGS-0082', 'name' => 'Juan P. dela Cruz', 'position' => 'Municipal Engineer II', 'dept' => 'Office of the Mun. Engineer', 'status' => 'Active', 'empType' => 'Permanent', 'dateHired' => 'Jun 1, 2012'],
-                    ['id' => 'PGS-0115', 'name' => 'Ana R. Reyes', 'position' => 'Nurse II', 'dept' => 'Municipal Health Office', 'status' => 'Active', 'empType' => 'Permanent', 'dateHired' => 'Jan 15, 2018'],
-                    ['id' => 'PGS-0203', 'name' => 'Carlos M. Mendoza', 'position' => 'Municipal Treasurer III', 'dept' => 'Office of the Mun. Treasurer', 'status' => 'Active', 'empType' => 'Permanent', 'dateHired' => 'Aug 3, 2009'],
-                    ['id' => 'PGS-0267', 'name' => 'Liza G. Gomez', 'position' => 'Social Welfare Officer II', 'dept' => 'MSWD – Pagsanjan', 'status' => 'Inactive', 'empType' => 'Permanent', 'dateHired' => 'Nov 20, 2016'],
-                    ['id' => 'PGS-0310', 'name' => 'Roberto T. Flores', 'position' => 'Municipal Civil Registrar I', 'dept' => 'Municipal Civil Registrar', 'status' => 'Active', 'empType' => 'Permanent', 'dateHired' => 'Feb 7, 2020'],
-                    ['id' => 'PGS-0342', 'name' => 'Grace A. Villanueva', 'position' => 'Budget Officer II', 'dept' => 'Office of the Mun. Budget', 'status' => 'Active', 'empType' => 'Casual', 'dateHired' => 'Apr 1, 2022'],
-                    ['id' => 'PGS-0358', 'name' => 'Ramon D. Cruz', 'position' => 'Agriculturist I', 'dept' => 'Office of the Mun. Agriculturist', 'status' => 'Active', 'empType' => 'Casual', 'dateHired' => 'Jul 15, 2023'],
-                ];
-
                 function getInitials($name) {
                     $parts = explode(' ', $name);
                     $initials = '';
@@ -164,43 +153,59 @@
                 }
                 @endphp
 
-                @foreach($personnel as $index => $emp)
+                @forelse($employees as $index => $employee)
+                @php
+                    $fullName = trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name . ($employee->suffix ? ' ' . $employee->suffix : ''));
+                    $status = $employee->user ? $employee->user->status : 'Inactive';
+                    $empType = $employee->employmentDetail ? $employee->employmentDetail->employment_status : 'N/A';
+                    $position = $employee->employmentDetail ? $employee->employmentDetail->position : 'N/A';
+                    $department = $employee->employmentDetail ? $employee->employmentDetail->department : 'N/A';
+                    $dateHired = $employee->employmentDetail && $employee->employmentDetail->appointment_date
+                        ? \Carbon\Carbon::parse($employee->employmentDetail->appointment_date)->format('M d, Y')
+                        : 'N/A';
+                @endphp
                 <tr>
                     <td>
                         <div class="emp-cell">
                             <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
-                                {{ getInitials($emp['name']) }}
+                                {{ getInitials($fullName) }}
                             </div>
                             <div>
-                                <p class="emp-name">{{ $emp['name'] }}</p>
-                                <p class="emp-id">{{ $emp['id'] }}</p>
+                                <p class="emp-name">{{ $fullName }}</p>
+                                <p class="emp-id">{{ $employee->employee_id }}</p>
                             </div>
                         </div>
                     </td>
-                    <td class="position-cell">{{ $emp['position'] }}</td>
-                    <td><span class="dept-tag">{{ $emp['dept'] }}</span></td>
-                    <td><span class="badge-emptype">{{ $emp['empType'] }}</span></td>
-                    <td style="font-size: 12.5px; color: #6b6a8a; white-space: nowrap;">{{ $emp['dateHired'] }}</td>
-                    <td><span class="badge-status {{ $emp['status'] === 'Active' ? 'processed' : 'on-hold' }}">{{ $emp['status'] }}</span></td>
+                    <td class="position-cell">{{ $position }}</td>
+                    <td><span class="dept-tag">{{ $department }}</span></td>
+                    <td><span class="badge-emptype">{{ $empType }}</span></td>
+                    <td style="font-size: 12.5px; color: #6b6a8a; white-space: nowrap;">{{ $dateHired }}</td>
+                    <td><span class="badge-status {{ $status === 'Active' ? 'processed' : 'on-hold' }}">{{ $status }}</span></td>
                     <td>
                         <div class="row-actions">
                             <button class="btn-view">View</button>
                             <button class="btn-edit">Edit</button>
-                            @if($emp['status'] === 'Active')
-                            <button class="btn-deactivate">Deactivate</button>
+                            @if($status === 'Active')
+                            <button class="btn-deactivate" onclick="confirmStatusChange({{ $employee->id }}, 'Inactive')">Deactivate</button>
                             @else
-                            <button class="btn-activate">Activate</button>
+                            <button class="btn-activate" onclick="confirmStatusChange({{ $employee->id }}, 'Active')">Activate</button>
                             @endif
                         </div>
                     </td>
                 </tr>
-                @endforeach
+                @empty
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #6b6a8a;">
+                        No employees found. Click "Add Employee" to register new personnel.
+                    </td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
 
     <div class="table-footer">
-        <p>Showing <strong>8</strong> of <strong>8</strong> records</p>
+        <p>Showing <strong>{{ $employees->count() }}</strong> of <strong>{{ $employees->count() }}</strong> records</p>
         <div class="pagination">
             <button class="page-btn active">1</button>
             <button class="page-btn">2</button>
@@ -245,6 +250,34 @@
     </div>
 </div>
 
+<!-- Confirmation Modal -->
+<div id="confirmModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; width:100%; max-width:480px; padding:32px; box-shadow:0 8px 32px rgba(11,4,77,0.2);">
+        <div style="width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;" id="confirmIconWrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke-width="2.5" id="confirmIcon">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        </div>
+        <h3 style="margin:0 0 12px; font-size:20px; font-weight:700; color:#0b044d; text-align:center;" id="confirmTitle">Confirm Action</h3>
+        <p style="margin:0 0 24px; font-size:14px; color:#6b6a8a; line-height:1.6; text-align:center;" id="confirmMessage"></p>
+        <div style="margin-bottom:24px;">
+            <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:8px; text-align:left;">Type "Yes I confirm" to proceed:</label>
+            <input type="text" id="confirmInput" placeholder="Yes I confirm" style="width:100%; padding:12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:14px; font-family:'Poppins',sans-serif; box-sizing:border-box;" />
+            <p style="margin:8px 0 0; font-size:11px; color:#8e1e18; display:none;" id="confirmError">Please type exactly "Yes I confirm"</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button onclick="closeConfirmModal()" style="flex:1; padding:12px; background:#f7f6ff; color:#6b6a8a; border:1px solid #e8e7f5; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;">
+                Cancel
+            </button>
+            <button onclick="submitConfirmation()" style="flex:1; padding:12px; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;" id="confirmSubmitBtn">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
 function closeSuccessModal() {
     document.getElementById('successModal').style.display = 'none';
@@ -255,12 +288,89 @@ function closeErrorModal() {
     document.getElementById('errorModal').style.display = 'none';
 }
 
+let pendingStatusChange = null;
+
+function confirmStatusChange(employeeId, newStatus) {
+    pendingStatusChange = { employeeId, newStatus };
+    
+    const isActivating = newStatus === 'Active';
+    const modal = document.getElementById('confirmModal');
+    const iconWrap = document.getElementById('confirmIconWrap');
+    const icon = document.getElementById('confirmIcon');
+    const title = document.getElementById('confirmTitle');
+    const message = document.getElementById('confirmMessage');
+    const submitBtn = document.getElementById('confirmSubmitBtn');
+    const input = document.getElementById('confirmInput');
+    const error = document.getElementById('confirmError');
+    
+    if (isActivating) {
+        iconWrap.style.background = '#e8f9ef';
+        icon.style.stroke = '#15803d';
+        icon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+        title.textContent = 'Activate Employee Account';
+        message.textContent = 'Are you sure you want to activate this employee account? The employee will be able to access the system.';
+        submitBtn.style.background = '#15803d';
+    } else {
+        iconWrap.style.background = '#fee8e8';
+        icon.style.stroke = '#8e1e18';
+        icon.innerHTML = '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>';
+        title.textContent = 'Deactivate Employee Account';
+        message.textContent = 'Are you sure you want to deactivate this employee account? The employee will no longer be able to access the system.';
+        submitBtn.style.background = '#8e1e18';
+    }
+    
+    input.value = '';
+    error.style.display = 'none';
+    modal.style.display = 'flex';
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+    pendingStatusChange = null;
+}
+
+function submitConfirmation() {
+    const input = document.getElementById('confirmInput');
+    const error = document.getElementById('confirmError');
+    
+    if (input.value.trim() !== 'Yes I confirm') {
+        error.style.display = 'block';
+        input.style.borderColor = '#8e1e18';
+        return;
+    }
+    
+    if (!pendingStatusChange) return;
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/admin/personnel/${pendingStatusChange.employeeId}/status`;
+    
+    const csrfToken = document.createElement('input');
+    csrfToken.type = 'hidden';
+    csrfToken.name = '_token';
+    csrfToken.value = '{{ csrf_token() }}';
+    
+    const statusInput = document.createElement('input');
+    statusInput.type = 'hidden';
+    statusInput.name = 'status';
+    statusInput.value = pendingStatusChange.newStatus;
+    
+    form.appendChild(csrfToken);
+    form.appendChild(statusInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+document.getElementById('confirmInput')?.addEventListener('input', function() {
+    document.getElementById('confirmError').style.display = 'none';
+    this.style.borderColor = '#e8e7f5';
+});
+
 // Show modals based on session messages
 @if(session('success'))
     document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('successMessage').textContent = "{{ session('success') }}";
         document.getElementById('successModal').style.display = 'flex';
-        // Close wizard if it's open
         if (document.getElementById('employeeWizardModal')) {
             document.getElementById('employeeWizardModal').style.display = 'none';
         }
@@ -274,51 +384,4 @@ function closeErrorModal() {
     });
 @endif
 </script>
-
-<style>
-.badge-emptype {
-    font-size: 11px; color: #0b044d; background: #f0effe;
-    padding: 3px 10px; border-radius: 20px; font-weight: 600;
-    border: 1px solid #dddcf0;
-}
-.btn-edit {
-    padding: 6px 16px; background: #f7f6ff; color: #0b044d;
-    border: 1px solid #e8e7f5; border-radius: 6px;
-    font-size: 12px; font-weight: 600; cursor: pointer;
-    font-family: 'Poppins', sans-serif; transition: all 0.2s;
-}
-.btn-edit:hover { background: #e8e7f5; }
-.btn-deactivate {
-    padding: 6px 16px; background: #fee8e8; color: #8e1e18;
-    border: 1px solid #f5d0ce; border-radius: 6px;
-    font-size: 12px; font-weight: 600; cursor: pointer;
-    font-family: 'Poppins', sans-serif; transition: all 0.2s;
-}
-.btn-deactivate:hover { background: #fdd; }
-.btn-activate {
-    padding: 6px 16px; background: #e8f9ef; color: #15803d;
-    border: 1px solid #bbf7d0; border-radius: 6px;
-    font-size: 12px; font-weight: 600; cursor: pointer;
-    font-family: 'Poppins', sans-serif; transition: all 0.2s;
-}
-.btn-activate:hover { background: #d1fae5; }
-.row-actions { display: flex; gap: 6px; }
-.modal-label { display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px; }
-.modal-input { width:100%; padding:8px 12px; border:1px solid #e8e7f5; border-radius:8px; font-size:13px; color:#0b044d; font-family:'Poppins',sans-serif; outline:none; box-sizing:border-box; }
-.modal-input:focus { border-color:#0b044d; }
-.table-footer {
-    padding: 16px 24px; border-top: 1px solid #f0effe;
-    display: flex; justify-content: space-between; align-items: center;
-}
-.table-footer p { font-size: 13px; color: #6b6a8a; }
-.pagination { display: flex; gap: 6px; }
-.page-btn {
-    width: 32px; height: 32px; border: 1px solid #e8e7f5;
-    border-radius: 6px; background: #fff; color: #6b6a8a;
-    font-size: 13px; font-weight: 600; cursor: pointer;
-    font-family: 'Poppins', sans-serif; transition: all 0.2s;
-}
-.page-btn.active { background: #0b044d; color: #fff; border-color: #0b044d; }
-.page-btn:hover { background: #f7f6ff; }
-</style>
 @endsection

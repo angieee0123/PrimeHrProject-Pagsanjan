@@ -83,10 +83,39 @@ Route::get('/admin/recruitment', function () {
 
 Route::get('/admin/personnel', function () {
     $departments = \App\Models\Department::where('status', 'Active')->orderBy('name')->get();
-    return view('admin.personnel.adminPersonnel', ['departments' => $departments]);
+    $employees = \App\Models\Employee::with(['employmentDetail', 'user'])
+        ->orderBy('created_at', 'desc')
+        ->get();
+    
+    $stats = [
+        'total' => $employees->count(),
+        'active' => $employees->filter(fn($e) => $e->user && $e->user->status === 'Active')->count(),
+        'inactive' => $employees->filter(fn($e) => !$e->user || $e->user->status === 'Inactive')->count(),
+        'permanent' => $employees->filter(fn($e) => $e->employmentDetail && $e->employmentDetail->employment_status === 'Permanent')->count(),
+    ];
+    
+    return view('admin.personnel.adminPersonnel', compact('departments', 'employees', 'stats'));
 })->middleware('auth')->name('admin.personnel');
 
 Route::post('/admin/personnel', [EmployeeRegistrationController::class, 'store'])->middleware('auth')->name('admin.personnel.store');
+
+Route::post('/admin/personnel/{id}/status', function (\Illuminate\Http\Request $request, $id) {
+    $employee = \App\Models\Employee::findOrFail($id);
+    
+    if (!$employee->user) {
+        return redirect()->route('admin.personnel')->with('error', 'Employee does not have a user account.');
+    }
+    
+    $newStatus = $request->validate(['status' => 'required|in:Active,Inactive'])['status'];
+    
+    $employee->user->update(['status' => $newStatus]);
+    
+    $message = $newStatus === 'Active' 
+        ? 'Employee account activated successfully.'
+        : 'Employee account deactivated successfully.';
+    
+    return redirect()->route('admin.personnel')->with('success', $message);
+})->middleware('auth')->name('admin.personnel.updateStatus');
 
 Route::get('/admin/training', function () {
     return view('admin.training.adminTraining');

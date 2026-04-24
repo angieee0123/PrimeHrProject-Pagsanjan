@@ -730,6 +730,47 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .badge-status.on-hold { background: #fee8e8; color: #8e1e18; }
 .btn-view { padding: 6px 16px; background: #f0effe; color: #0b044d; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
 .btn-view:hover { background: #e8e7f5; }
+.btn-edit {
+    padding: 6px 16px; background: #f7f6ff; color: #0b044d;
+    border: 1px solid #e8e7f5; border-radius: 6px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+}
+.btn-edit:hover { background: #e8e7f5; }
+.btn-deactivate {
+    padding: 6px 16px; background: #fee8e8; color: #8e1e18;
+    border: 1px solid #f5d0ce; border-radius: 6px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+}
+.btn-deactivate:hover { background: #fdd; }
+.btn-activate {
+    padding: 6px 16px; background: #e8f9ef; color: #15803d;
+    border: 1px solid #bbf7d0; border-radius: 6px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+}
+.btn-activate:hover { background: #d1fae5; }
+.row-actions { display: flex; gap: 6px; }
+.badge-emptype {
+    font-size: 11px; color: #0b044d; background: #f0effe;
+    padding: 3px 10px; border-radius: 20px; font-weight: 600;
+    border: 1px solid #dddcf0;
+}
+.table-footer {
+    padding: 16px 24px; border-top: 1px solid #f0effe;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.table-footer p { font-size: 13px; color: #6b6a8a; }
+.pagination { display: flex; gap: 6px; }
+.page-btn {
+    width: 32px; height: 32px; border: 1px solid #e8e7f5;
+    border-radius: 6px; background: #fff; color: #6b6a8a;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+}
+.page-btn.active { background: #0b044d; color: #fff; border-color: #0b044d; }
+.page-btn:hover { background: #f7f6ff; }
 
 /* Sidebar Styles */
 .sidebar { width: 280px; border-right: none; height: 100vh; position: fixed; left: 0; top: 0; display: flex; flex-direction: column; transition: width 0.3s; z-index: 100; background: var(--sidebar-bg); box-shadow: 4px 0 24px rgba(11,4,77,0.15); }
