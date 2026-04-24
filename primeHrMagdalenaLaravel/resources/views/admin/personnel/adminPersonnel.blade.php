@@ -1,5 +1,13 @@
 @extends('layouts.app')
 
+@push('styles')
+    @vite('resources/css/employeeWizard.css')
+@endpush
+
+@push('scripts')
+    @vite('resources/js/employeeWizard.js')
+@endpush
+
 @section('content')
 <!-- Stats Grid -->
 <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">

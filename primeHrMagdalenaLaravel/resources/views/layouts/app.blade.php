@@ -18,5 +18,7 @@
         @include('admin.chatbot.adminChatbot')
         @include('admin.themeSettings.adminThemeSettings')
     </div>
+    @vite('resources/js/app.js')
+    @stack('scripts')
 </body>
 </html>
