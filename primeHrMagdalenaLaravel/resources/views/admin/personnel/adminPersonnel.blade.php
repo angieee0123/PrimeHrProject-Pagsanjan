@@ -203,6 +203,70 @@
 
 @include('admin.personnel.modals.employeeWizardComplete')
 
+<!-- Success Modal -->
+<div id="successModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; width:100%; max-width:450px; padding:32px; text-align:center; box-shadow:0 8px 32px rgba(11,4,77,0.2);">
+        <div style="width:64px; height:64px; background:#e8f9ef; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+        <h3 style="margin:0 0 12px; font-size:20px; font-weight:700; color:#0b044d;">Registration Successful!</h3>
+        <p id="successMessage" style="margin:0 0 24px; font-size:14px; color:#6b6a8a; line-height:1.6;"></p>
+        <button onclick="closeSuccessModal()" style="padding:12px 32px; background:#15803d; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;">
+            Done
+        </button>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div id="errorModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; width:100%; max-width:450px; padding:32px; text-align:center; box-shadow:0 8px 32px rgba(11,4,77,0.2);">
+        <div style="width:64px; height:64px; background:#fee8e8; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8e1e18" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+        </div>
+        <h3 style="margin:0 0 12px; font-size:20px; font-weight:700; color:#0b044d;">Registration Failed</h3>
+        <p id="errorMessage" style="margin:0 0 24px; font-size:14px; color:#6b6a8a; line-height:1.6;"></p>
+        <button onclick="closeErrorModal()" style="padding:12px 32px; background:#8e1e18; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;">
+            Close
+        </button>
+    </div>
+</div>
+
+<script>
+function closeSuccessModal() {
+    document.getElementById('successModal').style.display = 'none';
+    location.reload();
+}
+
+function closeErrorModal() {
+    document.getElementById('errorModal').style.display = 'none';
+}
+
+// Show modals based on session messages
+@if(session('success'))
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('successMessage').textContent = "{{ session('success') }}";
+        document.getElementById('successModal').style.display = 'flex';
+        // Close wizard if it's open
+        if (document.getElementById('employeeWizardModal')) {
+            document.getElementById('employeeWizardModal').style.display = 'none';
+        }
+    });
+@endif
+
+@if(session('error'))
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('errorMessage').textContent = "{{ session('error') }}";
+        document.getElementById('errorModal').style.display = 'flex';
+    });
+@endif
+</script>
+
 <style>
 .badge-emptype {
     font-size: 11px; color: #0b044d; background: #f0effe;

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Employee extends Model
 {
+    public $timestamps = false;
+
     protected $fillable = [
         'employee_id', 'first_name', 'middle_name', 'last_name', 'suffix',
         'photo', 'birth_date', 'place_of_birth', 'sex', 'civil_status',

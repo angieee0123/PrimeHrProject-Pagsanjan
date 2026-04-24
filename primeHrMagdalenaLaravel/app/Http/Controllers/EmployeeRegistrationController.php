@@ -8,12 +8,6 @@ use App\Models\EmploymentDetail;
 use App\Models\Address;
 use App\Models\Contact;
 use App\Models\GovernmentId;
-use App\Models\LegalRequirement;
-use App\Models\Education;
-use App\Models\Eligibility;
-use App\Models\WorkExperience;
-use App\Models\Training;
-use App\Models\FamilyMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -41,13 +35,12 @@ class EmployeeRegistrationController extends Controller
                 'weight' => $request->weight,
                 'blood_type' => $request->blood_type,
                 'citizenship' => $request->citizenship,
-                'email' => $request->email,
+                'email' => $request->user_email,
             ]);
 
             // Create User Account
-            $user = User::create([
+            User::create([
                 'employee_id' => $employee->id,
-                'name' => $request->first_name . ' ' . $request->last_name,
                 'email' => $request->user_email,
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
@@ -58,12 +51,11 @@ class EmployeeRegistrationController extends Controller
             EmploymentDetail::create([
                 'employee_id' => $employee->id,
                 'position' => $request->position,
-                'department_id' => $request->department,
+                'department' => $request->department,
                 'employment_status' => $request->employment_status,
                 'appointment_date' => $request->appointment_date,
                 'salary_grade' => $request->salary_grade,
                 'step_increment' => $request->step_increment,
-                'account_status' => $request->account_status,
             ]);
 
             // Create Residential Address
@@ -113,84 +105,6 @@ class EmployeeRegistrationController extends Controller
                 'tin_no' => $request->tin_no,
                 'license_no' => $request->license_no,
             ]);
-
-            // Create Legal Requirements
-            LegalRequirement::create([
-                'employee_id' => $employee->id,
-                'saln_submitted' => $request->has('saln_submitted') ? 1 : 0,
-                'oath_of_office' => $request->has('oath_of_office') ? 1 : 0,
-                'assumption_date' => $request->assumption_date,
-            ]);
-
-            // Create Education Records
-            if ($request->education_level) {
-                foreach ($request->education_level as $key => $level) {
-                    Education::create([
-                        'employee_id' => $employee->id,
-                        'level' => $level,
-                        'school_name' => $request->education_school[$key] ?? null,
-                        'degree' => $request->education_degree[$key] ?? null,
-                        'year_graduated' => $request->education_year[$key] ?? null,
-                        'honors' => $request->education_honors[$key] ?? null,
-                    ]);
-                }
-            }
-
-            // Create Eligibility Records
-            if ($request->eligibility_type) {
-                foreach ($request->eligibility_type as $key => $type) {
-                    Eligibility::create([
-                        'employee_id' => $employee->id,
-                        'type' => $type,
-                        'rating' => $request->eligibility_rating[$key] ?? null,
-                        'exam_date' => $request->eligibility_exam_date[$key] ?? null,
-                        'exam_place' => $request->eligibility_exam_place[$key] ?? null,
-                        'license_no' => $request->eligibility_license_no[$key] ?? null,
-                        'validity_date' => $request->eligibility_validity_date[$key] ?? null,
-                    ]);
-                }
-            }
-
-            // Create Work Experience Records
-            if ($request->work_company) {
-                foreach ($request->work_company as $key => $company) {
-                    WorkExperience::create([
-                        'employee_id' => $employee->id,
-                        'company_name' => $company,
-                        'position' => $request->work_position[$key] ?? null,
-                        'from_date' => $request->work_from_date[$key] ?? null,
-                        'to_date' => $request->work_to_date[$key] ?? null,
-                        'salary' => $request->work_salary[$key] ?? null,
-                    ]);
-                }
-            }
-
-            // Create Training Records
-            if ($request->training_title) {
-                foreach ($request->training_title as $key => $title) {
-                    Training::create([
-                        'employee_id' => $employee->id,
-                        'title' => $title,
-                        'conducted_by' => $request->training_conducted[$key] ?? null,
-                        'date_from' => $request->training_from[$key] ?? null,
-                        'date_to' => $request->training_to[$key] ?? null,
-                        'hours' => $request->training_hours[$key] ?? null,
-                    ]);
-                }
-            }
-
-            // Create Family Member Records
-            if ($request->family_name) {
-                foreach ($request->family_name as $key => $name) {
-                    FamilyMember::create([
-                        'employee_id' => $employee->id,
-                        'name' => $name,
-                        'relationship' => $request->family_relationship[$key] ?? null,
-                        'birthdate' => $request->family_birthdate[$key] ?? null,
-                        'occupation' => $request->family_occupation[$key] ?? null,
-                    ]);
-                }
-            }
 
             DB::commit();
 

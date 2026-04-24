@@ -1,4 +1,4 @@
-<!-- Comprehensive Employee Registration Wizard - 10 Steps -->
+<!-- Employee Registration Wizard - 6 Steps -->
 <div id="employeeWizardModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; align-items:center; justify-content:center; overflow-y:auto;">
     <div style="background:#fff; border-radius:12px; width:100%; max-width:800px; margin:20px auto; padding:0; position:relative; box-shadow:0 8px 32px rgba(11,4,77,0.15); max-height:90vh; display:flex; flex-direction:column;">
 
@@ -7,7 +7,7 @@
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
                 <div>
                     <h3 style="margin:0; font-size:18px; font-weight:700;">Employee Registration Wizard</h3>
-                    <p style="margin:4px 0 0; font-size:13px; opacity:0.9;"><span id="stepIndicator">Step 1 of 12</span> - Complete all steps to register</p>
+                    <p style="margin:4px 0 0; font-size:13px; opacity:0.9;"><span id="stepIndicator">Step 1 of 6</span> - Complete all steps to register</p>
                 </div>
                 <button onclick="closeEmployeeWizard()"
                     style="background:none; border:none; cursor:pointer; color:#fff; font-size:24px; line-height:1; padding:0; width:30px; height:30px; display:flex; align-items:center; justify-content:center;">&times;</button>
@@ -42,36 +42,6 @@
                 <div class="wizard-connector"></div>
                 <div class="wizard-step" data-step="6" style="min-width:60px;">
                     <div class="wizard-circle">6</div>
-                    <span class="wizard-label">Legal</span>
-                </div>
-                <div class="wizard-connector"></div>
-                <div class="wizard-step" data-step="7" style="min-width:60px;">
-                    <div class="wizard-circle">7</div>
-                    <span class="wizard-label">Eligibilities</span>
-                </div>
-                <div class="wizard-connector"></div>
-                <div class="wizard-step" data-step="8" style="min-width:60px;">
-                    <div class="wizard-circle">8</div>
-                    <span class="wizard-label">Education</span>
-                </div>
-                <div class="wizard-connector"></div>
-                <div class="wizard-step" data-step="9" style="min-width:60px;">
-                    <div class="wizard-circle">9</div>
-                    <span class="wizard-label">Work Exp</span>
-                </div>
-                <div class="wizard-connector"></div>
-                <div class="wizard-step" data-step="10" style="min-width:60px;">
-                    <div class="wizard-circle">10</div>
-                    <span class="wizard-label">Training</span>
-                </div>
-                <div class="wizard-connector"></div>
-                <div class="wizard-step" data-step="11" style="min-width:60px;">
-                    <div class="wizard-circle">11</div>
-                    <span class="wizard-label">Family</span>
-                </div>
-                <div class="wizard-connector"></div>
-                <div class="wizard-step" data-step="12" style="min-width:60px;">
-                    <div class="wizard-circle">12</div>
                     <span class="wizard-label">Review</span>
                 </div>
             </div>
@@ -123,7 +93,7 @@
                     </div>
                     <div>
                         <label class="wizard-label-text">Photo (Upload)</label>
-                        <input type="file" name="photo" accept="image/*" 
+                        <input type="file" name="photo" accept="image/*"
                             style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
                         <p style="margin:4px 0 0; font-size:11px; color:#6b6a8a;">Supported: JPG, PNG, GIF (Max 5MB)</p>
                     </div>
@@ -187,24 +157,17 @@
                         </select>
                     </div>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                    <div>
-                        <label class="wizard-label-text">Citizenship</label>
-                        <input type="text" name="citizenship" placeholder="Filipino" maxlength="255"
-                            style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-                    </div>
-                    <div>
-                        <label class="wizard-label-text">Email</label>
-                        <input type="email" name="email" placeholder="maria@example.com" maxlength="255"
-                            style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-                    </div>
+                <div>
+                    <label class="wizard-label-text">Citizenship</label>
+                    <input type="text" name="citizenship" placeholder="Filipino" maxlength="255"
+                        style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
                 </div>
             </div>
 
             <!-- STEP 2: Account Setup (users table) -->
             <div class="wizard-content" data-step="2" style="display:none;">
                 <h4 style="margin:0 0 20px; font-size:14px; font-weight:600; color:#0b044d;">🔐 Account Setup</h4>
-                
+
                 <div style="background:#e8f5ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-bottom:16px;">
                     <p style="margin:0; font-size:12px; color:#0369a1;"><strong>ℹ️ Create Login Credentials</strong></p>
                     <p style="margin:4px 0 0; font-size:11px; color:#0369a1;">Set up username, email, and password for system access</p>
@@ -314,19 +277,6 @@
                             style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
                     </div>
                 </div>
-                <div style="background:#f8f8fb; padding:12px; border-radius:8px;">
-                    <label class="wizard-label-text" style="margin-bottom:10px;">Account Status</label>
-                    <div style="display:flex; gap:20px;">
-                        <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
-                            <input type="radio" name="account_status" value="Active" checked style="cursor:pointer;">
-                            Active
-                        </label>
-                        <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
-                            <input type="radio" name="account_status" value="Inactive" style="cursor:pointer;">
-                            Inactive
-                        </label>
-                    </div>
-                </div>
             </div>
 
             <!-- STEP 4: Contact Information -->
@@ -431,73 +381,8 @@
                 </div>
             </div>
 
-            <!-- STEP 6: Legal Requirements -->
+            <!-- STEP 6: Review -->
             <div class="wizard-content" data-step="6" style="display:none;">
-                <h4 style="margin:0 0 20px; font-size:14px; font-weight:600; color:#0b044d;">⚖️ Legal Requirements</h4>
-                <div style="background:#f8f8fb; padding:12px; border-radius:8px; margin-bottom:16px;">
-                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                        <input type="checkbox" name="saln_submitted" value="1" id="saln_check"
-                            style="width:18px; height:18px; cursor:pointer;">
-                        <label for="saln_check" style="cursor:pointer; font-size:13px; margin:0;">
-                            <span style="font-weight:600; color:#0b044d;">SALN Submitted</span>
-                            <p style="margin:4px 0 0; color:#6b6a8a; font-size:12px;">Statement of Assets, Liabilities & Net Worth</p>
-                        </label>
-                    </div>
-                </div>
-                <div style="background:#f8f8fb; padding:12px; border-radius:8px; margin-bottom:16px;">
-                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                        <input type="checkbox" name="oath_of_office" value="1" id="oath_check"
-                            style="width:18px; height:18px; cursor:pointer;">
-                        <label for="oath_check" style="cursor:pointer; font-size:13px; margin:0;">
-                            <span style="font-weight:600; color:#0b044d;">Oath of Office Taken</span>
-                            <p style="margin:4px 0 0; color:#6b6a8a; font-size:12px;">Official oath ceremony completed</p>
-                        </label>
-                    </div>
-                </div>
-                <div>
-                    <label class="wizard-label-text">Assumption Date</label>
-                    <input type="date" name="assumption_date"
-                        style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-                </div>
-            </div>
-
-            <!-- STEP 7: Eligibilities / Certifications -->
-            <div class="wizard-content" data-step="7" style="display:none;">
-                <h4 style="margin:0 0 20px; font-size:14px; font-weight:600; color:#0b044d;">🎖️ Eligibilities & Certifications</h4>
-                <div id="eligibilitiesContainer" style="margin-bottom:16px;"></div>
-                <button type="button" onclick="addEligibility()" style="width:100%; padding:10px; background:#0b044d; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;">+ Add Eligibility</button>
-            </div>
-
-            <!-- STEP 8: Education -->
-            <div class="wizard-content" data-step="8" style="display:none;">
-                <h4 style="margin:0 0 20px; font-size:14px; font-weight:600; color:#0b044d;">📚 Education</h4>
-                <div id="educationsContainer" style="margin-bottom:16px;"></div>
-                <button type="button" onclick="addEducation()" style="width:100%; padding:10px; background:#0b044d; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;">+ Add Education</button>
-            </div>
-
-            <!-- STEP 9: Work Experience -->
-            <div class="wizard-content" data-step="9" style="display:none;">
-                <h4 style="margin:0 0 20px; font-size:14px; font-weight:600; color:#0b044d;">💼 Work Experience</h4>
-                <div id="workExperiencesContainer" style="margin-bottom:16px;"></div>
-                <button type="button" onclick="addWorkExperience()" style="width:100%; padding:10px; background:#0b044d; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;">+ Add Work Experience</button>
-            </div>
-
-            <!-- STEP 10: Trainings -->
-            <div class="wizard-content" data-step="10" style="display:none;">
-                <h4 style="margin:0 0 20px; font-size:14px; font-weight:600; color:#0b044d;">🎓 Professional Trainings</h4>
-                <div id="trainingsContainer" style="margin-bottom:16px;"></div>
-                <button type="button" onclick="addTraining()" style="width:100%; padding:10px; background:#0b044d; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;">+ Add Training</button>
-            </div>
-
-            <!-- STEP 11: Family Members -->
-            <div class="wizard-content" data-step="11" style="display:none;">
-                <h4 style="margin:0 0 20px; font-size:14px; font-weight:600; color:#0b044d;">👨‍👩‍👧 Family Members</h4>
-                <div id="familyMembersContainer" style="margin-bottom:16px;"></div>
-                <button type="button" onclick="addFamilyMember()" style="width:100%; padding:10px; background:#0b044d; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;">+ Add Family Member</button>
-            </div>
-
-            <!-- STEP 12: Review -->
-            <div class="wizard-content" data-step="12" style="display:none;">
                 <h4 style="margin:0 0 20px; font-size:14px; font-weight:600; color:#0b044d;">✅ Review All Information</h4>
                 <div id="wizardReviewContent" style="background:#f8f8fb; padding:20px; border-radius:8px; max-height:300px; overflow-y:auto;">
                     <p style="color:#6b6a8a; text-align:center; padding:40px 20px;">Loading review data...</p>
@@ -658,7 +543,7 @@ input:focus, select:focus, textarea:focus {
 
 <script>
 let currentStep = 1;
-const totalSteps = 12;
+const totalSteps = 6;
 
 function openEmployeeWizard() {
     document.getElementById('employeeWizardModal').style.display = 'flex';
@@ -710,164 +595,6 @@ function validateCurrentStep() {
     return true;
 }
 
-function addEducation() {
-    const container = document.getElementById('educationsContainer');
-    const count = container.querySelectorAll('.education-row').length + 1;
-    const row = document.createElement('div');
-    row.className = 'education-row';
-    row.style.cssText = 'background:#f8f8fb; padding:12px; border-radius:8px; margin-bottom:12px;';
-    row.innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-            <h6 style="margin:0; font-size:12px; font-weight:600; color:#0b044d;">Education ${count}</h6>
-            <button type="button" onclick="this.closest('.education-row').remove()" style="background:none; border:none; color:#ef4444; cursor:pointer;">×</button>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-            <div>
-                <label class="wizard-label-text">Level</label>
-                <select name="education_level[]" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif; background:#fff;">
-                    <option>Elementary</option>
-                    <option>High School</option>
-                    <option>Bachelor's</option>
-                    <option>Master's</option>
-                    <option>Doctorate</option>
-                </select>
-            </div>
-            <div>
-                <label class="wizard-label-text">School Name</label>
-                <input type="text" name="education_school[]" maxlength="255" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            </div>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
-            <input type="text" name="education_degree[]" placeholder="Degree" maxlength="255" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            <input type="number" name="education_year[]" placeholder="Year" min="1900" max="2100" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            <input type="text" name="education_honors[]" placeholder="Honors" maxlength="255" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-        </div>
-    `;
-    container.appendChild(row);
-}
-
-function addEligibility() {
-    const container = document.getElementById('eligibilitiesContainer');
-    const count = container.querySelectorAll('.eligibility-row').length + 1;
-    const row = document.createElement('div');
-    row.className = 'eligibility-row';
-    row.style.cssText = 'background:#f8f8fb; padding:12px; border-radius:8px; margin-bottom:12px;';
-    row.innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-            <h6 style="margin:0; font-size:12px; font-weight:600; color:#0b044d;">Eligibility ${count}</h6>
-            <button type="button" onclick="this.closest('.eligibility-row').remove()" style="background:none; border:none; color:#ef4444; cursor:pointer;">×</button>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-            <div>
-                <label class="wizard-label-text">Eligibility Type</label>
-                <select name="eligibility_type[]" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif; background:#fff;">
-                    <option value="">Select Type</option>
-                    <option>Civil Service Professional</option>
-                    <option>Civil Service SubProfessional</option>
-                    <option>Board/Licensure Exam</option>
-                    <option>Professional License</option>
-                    <option>Certification</option>
-                </select>
-            </div>
-            <div>
-                <label class="wizard-label-text">Rating/Score</label>
-                <input type="text" name="eligibility_rating[]" placeholder="e.g., 85.5%" maxlength="255" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            </div>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-            <div>
-                <label class="wizard-label-text">Exam/Certification Date</label>
-                <input type="date" name="eligibility_exam_date[]" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            </div>
-            <div>
-                <label class="wizard-label-text">Exam Place</label>
-                <input type="text" name="eligibility_exam_place[]" placeholder="Location" maxlength="255" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            </div>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-            <input type="text" name="eligibility_license_no[]" placeholder="License/Certificate No." maxlength="255" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            <input type="date" name="eligibility_validity_date[]" placeholder="Validity Date" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-        </div>
-    `;
-    container.appendChild(row);
-}
-
-function addWorkExperience() {
-    const container = document.getElementById('workExperiencesContainer');
-    const count = container.querySelectorAll('.work-experience-row').length + 1;
-    const row = document.createElement('div');
-    row.className = 'work-experience-row';
-    row.style.cssText = 'background:#f8f8fb; padding:12px; border-radius:8px; margin-bottom:12px;';
-    row.innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-            <h6 style="margin:0; font-size:12px; font-weight:600; color:#0b044d;">Experience ${count}</h6>
-            <button type="button" onclick="this.closest('.work-experience-row').remove()" style="background:none; border:none; color:#ef4444; cursor:pointer;">×</button>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-            <input type="text" name="work_company[]" placeholder="Company" maxlength="255" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            <input type="text" name="work_position[]" placeholder="Position" maxlength="255" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
-            <input type="date" name="work_from_date[]" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            <input type="date" name="work_to_date[]" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            <input type="number" name="work_salary[]" placeholder="Salary" step="0.01" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-        </div>
-    `;
-    container.appendChild(row);
-}
-
-function addTraining() {
-    const container = document.getElementById('trainingsContainer');
-    const count = container.querySelectorAll('.training-row').length + 1;
-    const row = document.createElement('div');
-    row.className = 'training-row';
-    row.style.cssText = 'background:#f8f8fb; padding:12px; border-radius:8px; margin-bottom:12px;';
-    row.innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-            <h6 style="margin:0; font-size:12px; font-weight:600; color:#0b044d;">Training ${count}</h6>
-            <button type="button" onclick="this.closest('.training-row').remove()" style="background:none; border:none; color:#ef4444; cursor:pointer;">×</button>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-            <input type="text" name="training_title[]" placeholder="Training Title" maxlength="255" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            <input type="text" name="training_conducted[]" placeholder="Conducted By" maxlength="255" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
-            <input type="date" name="training_from[]" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            <input type="date" name="training_to[]" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            <input type="number" name="training_hours[]" placeholder="Hours" min="0" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-        </div>
-    `;
-    container.appendChild(row);
-}
-
-function addFamilyMember() {
-    const container = document.getElementById('familyMembersContainer');
-    const count = container.querySelectorAll('.family-member-row').length + 1;
-    const row = document.createElement('div');
-    row.className = 'family-member-row';
-    row.style.cssText = 'background:#f8f8fb; padding:12px; border-radius:8px; margin-bottom:12px;';
-    row.innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-            <h6 style="margin:0; font-size:12px; font-weight:600; color:#0b044d;">Member ${count}</h6>
-            <button type="button" onclick="this.closest('.family-member-row').remove()" style="background:none; border:none; color:#ef4444; cursor:pointer;">×</button>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-            <input type="text" name="family_name[]" placeholder="Name" maxlength="255" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            <select name="family_relationship[]" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif; background:#fff;">
-                <option value="spouse">Spouse</option>
-                <option value="father">Father</option>
-                <option value="mother">Mother</option>
-                <option value="child">Child</option>
-            </select>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-            <input type="date" name="family_birthdate[]" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-            <input type="text" name="family_occupation[]" placeholder="Occupation" maxlength="255" style="width:100%; padding:10px 12px; border:1px solid #e5e5e8; border-radius:8px; font-size:13px; box-sizing:border-box; font-family:'Poppins',sans-serif;">
-        </div>
-    `;
-    container.appendChild(row);
-}
-
 function generateReview() {
     const formData = new FormData(document.getElementById('employeeWizardForm'));
     let html = '<div class="review-section"><div class="review-section-title">👤 Personal Info</div>';
@@ -883,7 +610,7 @@ function generateReview() {
 
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('employeeWizardForm');
-    
+
     if (form) {
         // Form submit event - only allow on final step
         form.addEventListener('submit', function(e) {
@@ -897,14 +624,14 @@ document.addEventListener('DOMContentLoaded', function() {
             return true;
         });
     }
-    
+
     // Submit button click handler
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
         submitBtn.addEventListener('click', function(e) {
             e.preventDefault();
             console.log('Submit button clicked, current step:', currentStep, 'total steps:', totalSteps);
-            
+
             if (currentStep === totalSteps) {
                 // Submit the form
                 console.log('Submitting form with data...');
@@ -916,3 +643,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+
+
