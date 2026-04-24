@@ -12,7 +12,8 @@ export default defineConfig({
                 'resources/css/departments.css',
                 'resources/css/employeeWizard.css',
                 'resources/js/app.js',
-                'resources/js/employeeWizard.js'
+                'resources/js/employeeWizard.js',
+                'resources/js/adminPersonnel.js'
             ],
             refresh: true,
         }),
