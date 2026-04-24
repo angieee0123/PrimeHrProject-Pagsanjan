@@ -43,7 +43,7 @@ CREATE TABLE `employees` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `employees_employee_id_unique` (`employee_id`),
   UNIQUE KEY `employees_email_unique` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -52,6 +52,7 @@ CREATE TABLE `employees` (
 
 LOCK TABLES `employees` WRITE;
 /*!40000 ALTER TABLE `employees` DISABLE KEYS */;
+INSERT INTO `employees` VALUES (1,'1000','John Randolf','Miranda','Peñaredondo','Jr.','1999-01-01','Tondo Hospital','Male','Single','Filipino',160.00,58.00,'AB+','rodolfotacords@gmail.com','/storage/employees/photos/1777049129_IMG20260422193013.jpg','2026-04-24 16:45:29'),(3,'123123123','John Raasdfdolfasdf','asdf','Pesdfañaredasdfondo','Jr.','0001-01-02','asdfasdf','Male','Married','asdfasdf',123.00,123.00,'A-','penaasdfasdfredondojohnrandolf@lspu.edu.phasdfasdf','/storage/employees/photos/1777050358_IMG20260422193013.jpg','2026-04-24 17:05:58'),(4,'2663','asdf','asdf','asdf','Jr.','2026-04-11','asdf','Male','Single','asdf',3.00,3.00,'AB-','pen123aredondojohnrandolf@lspu.edu.ph','/storage/employees/photos/1777051928_IMG20260422193013.jpg','2026-04-24 17:32:08'),(6,'EMP-2025-0001','System','Admin','Administrator',NULL,'1990-01-01','Pagsanjan, Laguna','Male','Single','Filipino',170.00,70.00,'O+','admin@gmail.com',NULL,'2026-04-24 18:00:05');
 /*!40000 ALTER TABLE `employees` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -64,4 +65,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-15 13:11:28
+-- Dump completed on 2026-04-25  2:57:30

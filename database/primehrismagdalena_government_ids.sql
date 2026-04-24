@@ -33,7 +33,7 @@ CREATE TABLE `government_ids` (
   PRIMARY KEY (`id`),
   KEY `government_ids_employee_id_foreign` (`employee_id`),
   CONSTRAINT `government_ids_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,6 +42,7 @@ CREATE TABLE `government_ids` (
 
 LOCK TABLES `government_ids` WRITE;
 /*!40000 ALTER TABLE `government_ids` DISABLE KEYS */;
+INSERT INTO `government_ids` VALUES (1,1,'1','1','1','1','1'),(2,3,'123','123','123','123','123'),(3,4,'343412','12323','534','1235rr34','231'),(4,6,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `government_ids` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +55,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-15 13:11:28
+-- Dump completed on 2026-04-25  2:57:30

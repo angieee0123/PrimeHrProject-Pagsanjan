@@ -167,3 +167,11 @@ Route::post('/admin/departments', function (\Illuminate\Http\Request $request) {
 Route::get('/admin/reports', function () {
     return view('admin.reports.adminReports');
 })->middleware('auth')->name('admin.reports');
+
+// Chatbot Test Page
+Route::get('/admin/test-chatbot', function () {
+    return view('admin.test-chatbot');
+})->middleware('auth')->name('admin.test-chatbot');
+
+// Chatbot API
+Route::post('/api/chatbot', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware('auth');

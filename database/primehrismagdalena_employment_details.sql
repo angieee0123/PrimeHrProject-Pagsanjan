@@ -34,7 +34,7 @@ CREATE TABLE `employment_details` (
   PRIMARY KEY (`id`),
   KEY `employment_details_employee_id_foreign` (`employee_id`),
   CONSTRAINT `employment_details_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,6 +43,7 @@ CREATE TABLE `employment_details` (
 
 LOCK TABLES `employment_details` WRITE;
 /*!40000 ALTER TABLE `employment_details` DISABLE KEYS */;
+INSERT INTO `employment_details` VALUES (1,1,'Administrative Officer I','1','Permanent','2026-04-25','SG-11','Step 3'),(2,3,'asdfasdfasdf','2','Permanent','0001-01-01','3','3'),(3,4,'3','1','Permanent','2006-02-02','21','2'),(5,6,'System Administrator','1','Permanent','2025-01-01','24','1');
 /*!40000 ALTER TABLE `employment_details` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -55,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-15 13:11:27
+-- Dump completed on 2026-04-25  2:57:28

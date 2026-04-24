@@ -39,15 +39,15 @@
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
             </div>
-            <div class="chat-msg-bubble">Hello! I'm the PRIME HRIS Assistant. How can I help you today? You can ask me about payroll, attendance, leave management, or any HR-related queries.</div>
+            <div class="chat-msg-bubble">Hello! I'm the PRIME HRIS Assistant. I can help you with employee information, departments, and HR data. I understand natural questions like "How many people work here?" or "Find John Doe" or "Who's in the Mayor's office?" Try asking me anything!</div>
         </div>
     </div>
 
     <div class="chatbot-faqs">
-        <button class="chatbot-faq-btn" onclick="sendPredefinedMessage('How do I process payroll?')">How do I process payroll?</button>
-        <button class="chatbot-faq-btn" onclick="sendPredefinedMessage('How to approve leave requests?')">How to approve leave requests?</button>
-        <button class="chatbot-faq-btn" onclick="sendPredefinedMessage('View employee attendance records')">View employee attendance records</button>
-        <button class="chatbot-faq-btn" onclick="sendPredefinedMessage('Generate payroll reports')">Generate payroll reports</button>
+        <button class="chatbot-faq-btn" onclick="sendPredefinedMessage('How many people work here?')">Total employees</button>
+        <button class="chatbot-faq-btn" onclick="sendPredefinedMessage('Show me active employees')">Active staff</button>
+        <button class="chatbot-faq-btn" onclick="sendPredefinedMessage('Who works in Mayor office?')">Mayor's Office</button>
+        <button class="chatbot-faq-btn" onclick="sendPredefinedMessage('Find administrator')">Find employee</button>
     </div>
 
     <div class="chatbot-input-row">
@@ -62,14 +62,6 @@
 </div>
 
 <script>
-// Chatbot responses
-const chatResponses = {
-    'How do I process payroll?': 'To process payroll: 1) Go to Payroll section, 2) Click "Process Payroll" button, 3) Review employee records, 4) Approve and generate payslips. The system automatically calculates deductions.',
-    'How to approve leave requests?': 'Navigate to Leave & Benefits section. You\'ll see pending requests with employee details. Click "View" to review, then "Approve" or "Reject" with optional comments.',
-    'View employee attendance records': 'Go to Attendance section. Use the search bar to find specific employees or filter by date range. You can export records for reporting purposes.',
-    'Generate payroll reports': 'Visit the Reports section. Select "Payroll Reports", choose the period, and click "Generate". You can export to PDF or Excel format.'
-};
-
 function toggleChatbot() {
     const window = document.getElementById('chatbotWindow');
     const fab = document.querySelector('.chat-fab');
@@ -98,18 +90,33 @@ function sendChatMessage() {
     
     if (!message) return;
     
-    // Add user message
     addChatMessage('user', message);
-    
-    // Get bot response
-    const response = chatResponses[message] || 'Thank you for your question. For detailed assistance, please refer to the user manual or contact the system administrator.';
-    
-    // Add bot response after a short delay
-    setTimeout(() => {
-        addChatMessage('bot', response);
-    }, 500);
-    
     input.value = '';
+    
+    addTypingIndicator();
+    
+    fetch('/api/chatbot', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        removeTypingIndicator();
+        if (data.status === 'success') {
+            addChatMessage('bot', data.response);
+        } else {
+            addChatMessage('bot', 'Sorry, I encountered an error. Please try again.');
+        }
+    })
+    .catch(error => {
+        removeTypingIndicator();
+        console.error('Error:', error);
+        addChatMessage('bot', 'Sorry, I couldn\'t process your request. Please try again.');
+    });
 }
 
 function sendPredefinedMessage(message) {
@@ -121,6 +128,10 @@ function addChatMessage(from, text) {
     const messagesContainer = document.getElementById('chatbotMessages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `chat-msg ${from}`;
+    
+    // Convert markdown-style formatting to HTML
+    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/\n/g, '<br>');
     
     if (from === 'bot') {
         messageDiv.innerHTML = `
@@ -137,6 +148,30 @@ function addChatMessage(from, text) {
     
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function addTypingIndicator() {
+    const messagesContainer = document.getElementById('chatbotMessages');
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'chat-msg bot typing-indicator';
+    typingDiv.id = 'typingIndicator';
+    typingDiv.innerHTML = `
+        <div class="chat-msg-avatar">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+        </div>
+        <div class="chat-msg-bubble">Typing...</div>
+    `;
+    messagesContainer.appendChild(typingDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const indicator = document.getElementById('typingIndicator');
+    if (indicator) {
+        indicator.remove();
+    }
 }
 
 function handleChatKeyPress(event) {
