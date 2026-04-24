@@ -160,7 +160,15 @@
                     $status = $employee->user ? $employee->user->status : 'Inactive';
                     $empType = $employee->employmentDetail ? $employee->employmentDetail->employment_status : 'N/A';
                     $position = $employee->employmentDetail ? $employee->employmentDetail->position : 'N/A';
-                    $department = $employee->employmentDetail ? $employee->employmentDetail->department : 'N/A';
+                    
+                    // Fetch department name from departments table
+                    $department = 'N/A';
+                    if ($employee->employmentDetail && $employee->employmentDetail->department) {
+                        $deptId = $employee->employmentDetail->department;
+                        $dept = \App\Models\Department::find($deptId);
+                        $department = $dept ? $dept->name : $deptId;
+                    }
+                    
                     $dateHired = $employee->employmentDetail && $employee->employmentDetail->appointment_date
                         ? \Carbon\Carbon::parse($employee->employmentDetail->appointment_date)->format('M d, Y')
                         : 'N/A';

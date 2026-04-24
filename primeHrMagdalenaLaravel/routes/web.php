@@ -83,7 +83,7 @@ Route::get('/admin/recruitment', function () {
 
 Route::get('/admin/personnel', function () {
     $departments = \App\Models\Department::where('status', 'Active')->orderBy('name')->get();
-    $employees = \App\Models\Employee::with(['employmentDetail', 'user'])
+    $employees = \App\Models\Employee::with(['employmentDetail.department', 'user'])
         ->orderBy('created_at', 'desc')
         ->get();
     
