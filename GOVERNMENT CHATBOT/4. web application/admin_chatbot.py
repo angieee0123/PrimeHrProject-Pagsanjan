@@ -683,7 +683,10 @@ Magbigay ng malinaw at propesyonal na sagot sa Filipino o Taglish (2-3 pangungus
         llm_response = chat_completion.choices[0].message.content
     except Exception as e:
         print(f"Groq Error: {e}")
-        llm_response = "Narito ang nakita ko:"
+        if "rate_limit" in str(e).lower() or "429" in str(e):
+            llm_response = "Pasensya na, naubos na ang aking daily token limit. Subukan ulit mamaya. Salamat!"
+        else:
+            llm_response = "Narito ang nakita ko:"
     
     # Build detailed response
     full_response = f"{llm_response}\n\n"
