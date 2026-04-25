@@ -1,5 +1,306 @@
 // Admin Personnel Page Scripts
 
+// Pagination and Sorting
+let currentPage = 1;
+let rowsPerPage = 10;
+let sortColumn = -1;
+let sortAscending = true;
+let allRows = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    const tbody = document.getElementById('personnelTableBody');
+    if (tbody) {
+        allRows = Array.from(tbody.querySelectorAll('tr'));
+        window.allRows = allRows; // Make it globally accessible for search
+        updatePagination();
+        displayPage(currentPage);
+    }
+});
+
+function sortTable(columnIndex) {
+    if (sortColumn === columnIndex) {
+        sortAscending = !sortAscending;
+    } else {
+        sortColumn = columnIndex;
+        sortAscending = true;
+    }
+
+    allRows.sort((a, b) => {
+        let aValue, bValue;
+
+        if (columnIndex === 0) {
+            aValue = a.querySelector('.emp-name').textContent.trim();
+            bValue = b.querySelector('.emp-name').textContent.trim();
+        } else if (columnIndex === 1) {
+            aValue = a.querySelector('.position-cell').textContent.trim();
+            bValue = b.querySelector('.position-cell').textContent.trim();
+        } else if (columnIndex === 2) {
+            aValue = a.querySelector('.dept-tag').textContent.trim();
+            bValue = b.querySelector('.dept-tag').textContent.trim();
+        } else if (columnIndex === 3) {
+            aValue = a.querySelector('.badge-emptype').textContent.trim();
+            bValue = b.querySelector('.badge-emptype').textContent.trim();
+        } else if (columnIndex === 4) {
+            aValue = a.cells[4].textContent.trim();
+            bValue = b.cells[4].textContent.trim();
+        } else if (columnIndex === 5) {
+            aValue = a.querySelector('.badge-status').textContent.trim();
+            bValue = b.querySelector('.badge-status').textContent.trim();
+        }
+
+        if (aValue < bValue) return sortAscending ? -1 : 1;
+        if (aValue > bValue) return sortAscending ? 1 : -1;
+        return 0;
+    });
+
+    const headers = document.querySelectorAll('#personnelTable th');
+    headers.forEach((header, index) => {
+        const svg = header.querySelector('svg');
+        if (svg) {
+            if (index === columnIndex) {
+                svg.style.transform = sortAscending ? 'rotate(0deg)' : 'rotate(180deg)';
+                svg.style.opacity = '1';
+            } else {
+                svg.style.transform = 'rotate(0deg)';
+                svg.style.opacity = '0.3';
+            }
+        }
+    });
+
+    currentPage = 1;
+    displayPage(currentPage);
+}
+
+function displayPage(page) {
+    const tbody = document.getElementById('personnelTableBody');
+    tbody.innerHTML = '';
+
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const pageRows = allRows.slice(start, end);
+
+    if (pageRows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #6b6a8a;">No employees found.</td></tr>';
+    } else {
+        pageRows.forEach(row => tbody.appendChild(row));
+    }
+
+    document.getElementById('showingStart').textContent = start + 1;
+    document.getElementById('showingEnd').textContent = Math.min(end, allRows.length);
+    document.getElementById('totalRecords').textContent = allRows.length;
+
+    updatePaginationButtons();
+}
+
+function updatePagination() {
+    updatePaginationButtons();
+}
+
+function updatePaginationButtons() {
+    const totalPages = Math.ceil(allRows.length / rowsPerPage);
+    const paginationControls = document.getElementById('paginationControls');
+    paginationControls.innerHTML = '';
+
+    if (currentPage > 1) {
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'page-btn';
+        prevBtn.textContent = '‹';
+        prevBtn.onclick = () => changePage(currentPage - 1);
+        paginationControls.appendChild(prevBtn);
+    }
+
+    const maxButtons = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+
+    if (endPage - startPage < maxButtons - 1) {
+        startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = 'page-btn' + (i === currentPage ? ' active' : '');
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => changePage(i);
+        paginationControls.appendChild(pageBtn);
+    }
+
+    if (currentPage < totalPages) {
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'page-btn';
+        nextBtn.textContent = '›';
+        nextBtn.onclick = () => changePage(currentPage + 1);
+        paginationControls.appendChild(nextBtn);
+    }
+}
+
+function changePage(page) {
+    currentPage = page;
+    displayPage(currentPage);
+}
+
+function changeRowsPerPage(value) {
+    if (value === 'all') {
+        rowsPerPage = allRows.length;
+    } else {
+        rowsPerPage = parseInt(value);
+    }
+    currentPage = 1;
+    displayPage(currentPage);
+}
+
+function applyFilters() {
+    const departmentFilter = document.getElementById('departmentFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+
+    allRows.forEach(row => {
+        let showRow = true;
+
+        if (departmentFilter) {
+            const deptTag = row.querySelector('.dept-tag');
+            const deptText = deptTag ? deptTag.textContent.trim() : '';
+            if (!deptText.includes(departmentFilter)) {
+                showRow = false;
+            }
+        }
+
+        if (statusFilter) {
+            const statusBadge = row.querySelector('.badge-status');
+            const statusText = statusBadge ? statusBadge.textContent.trim() : '';
+            if (statusText !== statusFilter) {
+                showRow = false;
+            }
+        }
+
+        row.style.display = showRow ? '' : 'none';
+    });
+
+    const visibleRows = allRows.filter(row => row.style.display !== 'none');
+    currentPage = 1;
+    displayFilteredPage(visibleRows);
+}
+
+function displayFilteredPage(visibleRows) {
+    const tbody = document.getElementById('personnelTableBody');
+    tbody.innerHTML = '';
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const pageRows = visibleRows.slice(start, end);
+
+    if (pageRows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #6b6a8a;">No employees found matching the filters.</td></tr>';
+    } else {
+        pageRows.forEach(row => tbody.appendChild(row));
+    }
+
+    document.getElementById('showingStart').textContent = visibleRows.length > 0 ? start + 1 : 0;
+    document.getElementById('showingEnd').textContent = Math.min(end, visibleRows.length);
+    document.getElementById('totalRecords').textContent = visibleRows.length;
+
+    updateFilteredPaginationButtons(visibleRows);
+}
+
+function updateFilteredPaginationButtons(visibleRows) {
+    const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+    const paginationControls = document.getElementById('paginationControls');
+    paginationControls.innerHTML = '';
+
+    if (totalPages <= 1) return;
+
+    if (currentPage > 1) {
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'page-btn';
+        prevBtn.textContent = '‹';
+        prevBtn.onclick = () => { currentPage--; displayFilteredPage(visibleRows); };
+        paginationControls.appendChild(prevBtn);
+    }
+
+    const maxButtons = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+
+    if (endPage - startPage < maxButtons - 1) {
+        startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = 'page-btn' + (i === currentPage ? ' active' : '');
+        pageBtn.textContent = i;
+        const pageNum = i;
+        pageBtn.onclick = () => { currentPage = pageNum; displayFilteredPage(visibleRows); };
+        paginationControls.appendChild(pageBtn);
+    }
+
+    if (currentPage < totalPages) {
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'page-btn';
+        nextBtn.textContent = '›';
+        nextBtn.onclick = () => { currentPage++; displayFilteredPage(visibleRows); };
+        paginationControls.appendChild(nextBtn);
+    }
+}
+
+function exportTableData() {
+    try {
+        if (allRows.length === 0) {
+            document.getElementById('exportErrorMessage').textContent = 'No employee records available to export.';
+            document.getElementById('exportErrorModal').style.display = 'flex';
+            return;
+        }
+
+        const data = [];
+        data.push(['Employee Name', 'Employee ID', 'Position', 'Department', 'Type', 'Date Hired', 'Status']);
+
+        allRows.forEach(row => {
+            const empName = row.querySelector('.emp-name')?.textContent.trim() || '';
+            const empId = row.querySelector('.emp-id')?.textContent.trim() || '';
+            const position = row.querySelector('.position-cell')?.textContent.trim() || '';
+            const department = row.querySelector('.dept-tag')?.textContent.trim() || '';
+            const type = row.querySelector('.badge-emptype')?.textContent.trim() || '';
+            const dateHired = row.cells[4]?.textContent.trim() || '';
+            const status = row.querySelector('.badge-status')?.textContent.trim() || '';
+
+            data.push([empName, empId, position, department, type, dateHired, status]);
+        });
+
+        const csv = data.map(row =>
+            row.map(cell => `"${cell}"`).join(',')
+        ).join('\n');
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        const timestamp = new Date().toISOString().slice(0, 10);
+        const filename = `Employee_Records_${timestamp}.csv`;
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        document.getElementById('exportSuccessMessage').textContent = `Successfully exported ${allRows.length} employee records to ${filename}`;
+        document.getElementById('exportSuccessModal').style.display = 'flex';
+
+    } catch (error) {
+        console.error('Export error:', error);
+        document.getElementById('exportErrorMessage').textContent = `An error occurred while exporting: ${error.message || 'Unknown error'}. Please try again.`;
+        document.getElementById('exportErrorModal').style.display = 'flex';
+    }
+}
+
+function closeExportSuccessModal() {
+    document.getElementById('exportSuccessModal').style.display = 'none';
+}
+
+function closeExportErrorModal() {
+    document.getElementById('exportErrorModal').style.display = 'none';
+}
+
 // Modal Functions
 function closeSuccessModal() {
     document.getElementById('successModal').style.display = 'none';
@@ -168,12 +469,28 @@ function generateEmployeeView(data) {
 }
 
 // Event Listeners
-document.getElementById('confirmInput')?.addEventListener('input', function() {
-    document.getElementById('confirmError').style.display = 'none';
-    this.style.borderColor = '#e8e7f5';
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmInput = document.getElementById('confirmInput');
+    if (confirmInput) {
+        confirmInput.addEventListener('input', function() {
+            const confirmError = document.getElementById('confirmError');
+            if (confirmError) {
+                confirmError.style.display = 'none';
+            }
+            this.style.borderColor = '#e8e7f5';
+        });
+    }
 });
 
 // Make functions globally accessible
+window.sortTable = sortTable;
+window.displayPage = displayPage;
+window.changePage = changePage;
+window.changeRowsPerPage = changeRowsPerPage;
+window.applyFilters = applyFilters;
+window.exportTableData = exportTableData;
+window.closeExportSuccessModal = closeExportSuccessModal;
+window.closeExportErrorModal = closeExportErrorModal;
 window.closeSuccessModal = closeSuccessModal;
 window.closeErrorModal = closeErrorModal;
 window.confirmStatusChange = confirmStatusChange;
