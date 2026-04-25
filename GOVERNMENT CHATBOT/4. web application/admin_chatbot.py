@@ -357,6 +357,166 @@ def calculate_total_fees(fees_string):
     total = sum(float(amt.replace(',', '')) for amt in amounts)
     return f"PHP {total:,.2f}"
 
+def detect_update_intent(query):
+    """Detect if user wants to update/modify data"""
+    update_keywords = [
+        'update', 'change', 'modify', 'edit', 'set', 'i-update', 'baguhin', 
+        'palitan', 'ayusin', 'correct', 'fix', 'itama'
+    ]
+    return any(keyword in query.lower() for keyword in update_keywords)
+
+def extract_update_info(query):
+    """Extract employee identifier and field to update from query"""
+    query_lower = query.lower()
+    
+    # Extract employee ID or name
+    employee_id = None
+    employee_name = None
+    
+    # Pattern: "employee id [number]"
+    id_match = re.search(r'(?:employee\s+id|emp\s+id|id)\s*[:#]?\s*(?:number\s+)?(\d+)', query_lower)
+    if id_match:
+        employee_id = id_match.group(1)
+    
+    # Pattern: name (first word after "of" or "for")
+    if not employee_id:
+        name_match = re.search(r'(?:of|for|ng)\s+([a-z]+)', query_lower)
+        if name_match:
+            employee_name = name_match.group(1)
+    
+    # Extract field and new value
+    field = None
+    new_value = None
+    
+    # Email patterns
+    if 'email' in query_lower:
+        field = 'email'
+        email_match = re.search(r'([\w\.-]+@[\w\.-]+\.\w+)', query)
+        if email_match:
+            new_value = email_match.group(1)
+        else:
+            value_match = re.search(r'(?:to|into|as)\s+["\']?([^"\',\.]+)', query_lower)
+            if value_match:
+                new_value = value_match.group(1).strip()
+    
+    # Status patterns
+    elif any(word in query_lower for word in ['status', 'employment status']):
+        field = 'employment_status'
+        # Look for "to [status]" pattern first (target value)
+        to_match = re.search(r'(?:to|into)\s+(inactive|active|permanent|contractual|probationary)', query_lower)
+        if to_match:
+            status_map = {
+                'inactive': 'Inactive',
+                'active': 'Active',
+                'permanent': 'Permanent',
+                'contractual': 'Contractual',
+                'probationary': 'Probationary'
+            }
+            new_value = status_map.get(to_match.group(1).lower())
+        elif 'inactive' in query_lower or 'not active' in query_lower:
+            new_value = 'Inactive'
+        elif 'active' in query_lower:
+            new_value = 'Active'
+        elif 'permanent' in query_lower:
+            new_value = 'Permanent'
+        elif 'contractual' in query_lower:
+            new_value = 'Contractual'
+    
+    # Position patterns
+    elif any(word in query_lower for word in ['position', 'job', 'role']):
+        field = 'position'
+        value_match = re.search(r'(?:to|into|as)\s+["\']?([^"\',\.]+)', query_lower)
+        if value_match:
+            new_value = value_match.group(1).strip()
+    
+    # Mobile patterns
+    elif any(word in query_lower for word in ['mobile', 'phone', 'contact']):
+        field = 'mobile_number'
+        value_match = re.search(r'(?:to|into|as)\s+["\']?([\d\s\-\+]+)', query)
+        if value_match:
+            new_value = value_match.group(1).strip()
+    
+    # Civil status patterns
+    elif 'civil status' in query_lower or 'marital' in query_lower:
+        field = 'civil_status'
+        if 'married' in query_lower:
+            new_value = 'Married'
+        elif 'single' in query_lower:
+            new_value = 'Single'
+        elif 'widowed' in query_lower:
+            new_value = 'Widowed'
+    
+    return employee_id, employee_name, field, new_value
+
+def update_employee_data(employee_id, employee_name, field, new_value):
+    """Update employee data in database with validation"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Find employee by name if ID not provided
+        if not employee_id and employee_name:
+            cursor.execute("SELECT id, employee_id, first_name, last_name FROM employees WHERE first_name LIKE %s OR last_name LIKE %s", (f"%{employee_name}%", f"%{employee_name}%"))
+            emp = cursor.fetchone()
+            if emp:
+                employee_id = emp['employee_id']
+                full_name = f"{emp['first_name']} {emp['last_name']}"
+            else:
+                return False, f"Employee '{employee_name}' not found", None
+        
+        if not employee_id:
+            return False, "Employee not found", None
+        
+        # Validate field values
+        if field == 'employment_status':
+            valid_statuses = ['Active', 'Inactive', 'Permanent', 'Contractual', 'Probationary']
+            if new_value not in valid_statuses:
+                return False, f"Invalid status. Use: {', '.join(valid_statuses)}", None
+        
+        elif field == 'civil_status':
+            valid_civil = ['Single', 'Married', 'Widowed', 'Divorced', 'Separated']
+            if new_value not in valid_civil:
+                return False, f"Invalid civil status. Use: {', '.join(valid_civil)}", None
+        
+        elif field == 'email':
+            if '@' not in new_value or '.' not in new_value:
+                return False, "Invalid email format", None
+        
+        elif field == 'mobile_number':
+            clean_mobile = re.sub(r'[^0-9+]', '', new_value)
+            if len(clean_mobile) < 10:
+                return False, "Invalid mobile number", None
+            new_value = clean_mobile
+        
+        # Get old value for confirmation
+        old_value = None
+        if field in ['email', 'civil_status']:
+            cursor.execute(f"SELECT {field} FROM employees WHERE employee_id = %s", (employee_id,))
+            result = cursor.fetchone()
+            old_value = result[field] if result else None
+            cursor.execute(f"UPDATE employees SET {field} = %s WHERE employee_id = %s", (new_value, employee_id))
+        elif field in ['position', 'employment_status']:
+            cursor.execute(f"SELECT {field} FROM employment_details WHERE employee_id = (SELECT id FROM employees WHERE employee_id = %s)", (employee_id,))
+            result = cursor.fetchone()
+            old_value = result[field] if result else None
+            cursor.execute(f"UPDATE employment_details SET {field} = %s WHERE employee_id = (SELECT id FROM employees WHERE employee_id = %s)", (new_value, employee_id))
+        elif field == 'mobile_number':
+            cursor.execute(f"SELECT {field} FROM contacts WHERE employee_id = (SELECT id FROM employees WHERE employee_id = %s)", (employee_id,))
+            result = cursor.fetchone()
+            old_value = result[field] if result else None
+            cursor.execute(f"UPDATE contacts SET {field} = %s WHERE employee_id = (SELECT id FROM employees WHERE employee_id = %s)", (new_value, employee_id))
+        else:
+            return False, "Field not supported for update", None
+        
+        conn.commit()
+        affected = cursor.rowcount
+        cursor.close()
+        conn.close()
+        
+        return affected > 0, None, old_value
+    except Exception as e:
+        return False, str(e), None
+
 def detect_multiple_questions(query):
     """Detect if the user is asking multiple questions in one message."""
     query_lower = query.lower()
@@ -504,14 +664,14 @@ def generate_hr_response(query, results):
             context += f"\n{i}. Work Experience for {data.get('first_name', '')} {data.get('last_name', '')}\n"
             context += f"   {data.get('position_title', '')} at {data.get('company_name', '')}\n"
     
-    prompt = f"""You are an HR assistant helping an HR manager query employee data.
+    prompt = f"""Ikaw ay isang HR assistant na tumutulong sa HR manager na mag-query ng employee data.
 
-The HR manager asked: "{query}"
+Ang HR manager ay nagtanong: "{query}"
 
-Here is the relevant data from the database:
+Narito ang relevant data mula sa database:
 {context[:1500]}
 
-Provide a clear, professional answer in 2-3 sentences. Format the response to be easy to read."""
+Magbigay ng malinaw at propesyonal na sagot sa Filipino o Taglish (2-3 pangungusap lang). I-format ang sagot para madaling basahin."""
     
     try:
         chat_completion = groq_client.chat.completions.create(
@@ -523,7 +683,7 @@ Provide a clear, professional answer in 2-3 sentences. Format the response to be
         llm_response = chat_completion.choices[0].message.content
     except Exception as e:
         print(f"Groq Error: {e}")
-        llm_response = "Here's what I found:"
+        llm_response = "Narito ang nakita ko:"
     
     # Build detailed response
     full_response = f"{llm_response}\n\n"
@@ -704,71 +864,77 @@ def chat():
         if not user_input:
             return jsonify({'error': 'No message provided'}), 400
         
-        # Initialize conversation history
         if 'conversation_history' not in session:
             session['conversation_history'] = []
         
-        # Add to conversation history
         session['conversation_history'].append({
             'user': user_input,
             'timestamp': datetime.now().isoformat()
         })
         
-        # Keep only last 5 exchanges
         if len(session['conversation_history']) > 5:
             session['conversation_history'] = session['conversation_history'][-5:]
         
         is_valid, error_msg = is_valid_query(user_input)
         if not is_valid:
-            follow_ups = [
-                "What are all the offices?",
-                "Show me all services",
-                "How do I get a birth certificate?"
-            ]
             return jsonify({
                 'response': error_msg,
-                'follow_up_questions': follow_ups,
+                'follow_up_questions': ["Show me all employees"],
                 'status': 'success'
             })
         
-        query_lower = user_input.lower()
+        # Check for update intent
+        if detect_update_intent(user_input):
+            print(f"[DEBUG] Update intent detected for: {user_input}")
+            employee_id, employee_name, field, new_value = extract_update_info(user_input)
+            print(f"[DEBUG] Extracted - ID: {employee_id}, Name: {employee_name}, Field: {field}, Value: {new_value}")
+            
+            if not (employee_id or employee_name) or not field or not new_value:
+                return jsonify({
+                    'response': "Para mag-update, sabihin mo:\n• 'Update status of Juan from active to inactive'\n• 'Update employee ID 1000 email to newemail@gmail.com'\n• 'Change position of Maria to Manager'",
+                    'status': 'success'
+                })
+            
+            success, error, old_value = update_employee_data(employee_id, employee_name, field, new_value)
+            print(f"[DEBUG] Update result - Success: {success}, Error: {error}, Old: {old_value}")
+            
+            if success:
+                identifier = employee_id or employee_name
+                response = f"✅ Successfully updated!\n\n"
+                response += f"Employee: {identifier}\n"
+                response += f"Field: {field}\n"
+                if old_value:
+                    response += f"Old value: {old_value}\n"
+                response += f"New value: {new_value}"
+            else:
+                response = f"❌ Update failed: {error or 'Employee not found.'}"
+            
+            return jsonify({
+                'response': response,
+                'status': 'success'
+            })
         
         # HR-specific queries
         results = search_knowledge(user_input, top_k=10)
         
         if not results:
-            response = "I couldn't find any employee data. The database might be empty or there's a connection issue.\n\n"
-            response += "Try asking:\n"
-            response += "• 'Show me all employees'\n"
-            response += "• 'List all departments'\n"
-            
-            follow_ups = [
-                "Show me all employees",
-                "Check database connection"
-            ]
             return jsonify({
-                'response': response,
-                'follow_up_questions': follow_ups,
+                'response': "I couldn't find any employee data. Try asking 'Show me all employees'",
+                'follow_up_questions': ["Show me all employees"],
                 'status': 'success'
             })
         
-        # Generate HR response
         response_data = generate_hr_response(user_input, results)
         
         if not response_data:
             return jsonify({
                 'response': "No data found for your query.",
-                'follow_up_questions': ["Show me all employees", "List departments"],
+                'follow_up_questions': ["Show me all employees"],
                 'status': 'success'
             })
         
-        follow_ups = [
-            "Show more details",
-            "What is their contact information?",
-            "Show their work history"
-        ]
+        follow_ups = ["Show more details", "What is their contact information?"]
         
-        # Add to conversation history
         session['conversation_history'][-1]['bot'] = response_data['full']
         session.modified = True
         

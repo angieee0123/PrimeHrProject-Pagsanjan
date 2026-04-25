@@ -843,6 +843,14 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .chatbot-input-row input { flex: 1; padding: 9px 13px; border: 1.5px solid #e4e3f0; border-radius: 9px; font-size: 13px; font-family: 'Poppins', sans-serif; color: #0b044d; outline: none; transition: border-color 0.2s; }
 .chatbot-input-row input:focus { border-color: #0b044d; }
 .chatbot-input-row input::placeholder { color: #c0bedd; }
+.chatbot-speaker { width: 36px; height: 36px; background: #f7f6ff; color: #0b044d; border: 1.5px solid #e4e3f0; border-radius: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.2s; }
+.chatbot-speaker:hover { background: #0b044d; color: #fff; border-color: #0b044d; }
+.chatbot-speaker.speaking { background: #22c55e; color: #fff; border-color: #22c55e; animation: pulse-speaker 1s infinite; }
+@keyframes pulse-speaker { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
+.chatbot-mic { width: 36px; height: 36px; background: #f7f6ff; color: #0b044d; border: 1.5px solid #e4e3f0; border-radius: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.2s; }
+.chatbot-mic:hover { background: #0b044d; color: #fff; border-color: #0b044d; }
+.chatbot-mic.listening { background: #ef4444; color: #fff; border-color: #ef4444; animation: pulse-mic 1.5s infinite; }
+@keyframes pulse-mic { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 .chatbot-send { width: 36px; height: 36px; background: #0b044d; color: #fff; border: none; border-radius: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: background 0.2s; }
 .chatbot-send:hover { background: #8e1e18; }
 
