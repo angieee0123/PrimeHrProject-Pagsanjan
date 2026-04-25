@@ -13,7 +13,8 @@ export default defineConfig({
                 'resources/css/employeeWizard.css',
                 'resources/js/app.js',
                 'resources/js/employeeWizard.js',
-                'resources/js/adminPersonnel.js'
+                'resources/js/adminPersonnel.js',
+                'resources/js/personnelTopbar.js'
             ],
             refresh: true,
         }),
