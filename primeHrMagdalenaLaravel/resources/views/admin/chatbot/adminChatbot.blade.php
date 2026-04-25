@@ -108,7 +108,7 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'fil-PH'; // Filipino language
-    
+
     recognition.onresult = function(event) {
         const transcript = event.results[0][0].transcript;
         document.getElementById('chatInput').value = transcript;
@@ -118,7 +118,7 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             sendChatMessage();
         }, 500); // Small delay to show the transcribed text
     };
-    
+
     recognition.onerror = function(event) {
         console.error('Speech recognition error:', event.error);
         stopVoiceInput();
@@ -130,7 +130,7 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             speakText('Microphone access denied. Please enable microphone permissions.');
         }
     };
-    
+
     recognition.onend = function() {
         stopVoiceInput();
     };
@@ -141,23 +141,23 @@ function speakText(text) {
     if (isSpeaking) {
         speechSynthesis.cancel();
     }
-    
+
     // Clean text from HTML tags and markdown
     let cleanText = text.replace(/<[^>]*>/g, '');
     cleanText = cleanText.replace(/\*\*(.+?)\*\*/g, '$1');
     cleanText = cleanText.replace(/[📍💼🏢📧📊📅🎂⚧💑👤💰⏱️📋🎓🏫📚💼🏠📞]/g, '');
-    
+
     // Create speech utterance
     currentUtterance = new SpeechSynthesisUtterance(cleanText);
-    
+
     // Use Filipino/Tagalog voice - prefer Google voices
     const voices = speechSynthesis.getVoices();
-    const filipinoVoice = voices.find(voice => 
+    const filipinoVoice = voices.find(voice =>
         (voice.lang.includes('fil') || voice.lang.includes('tl')) && voice.name.includes('Google')
-    ) || voices.find(voice => 
+    ) || voices.find(voice =>
         voice.lang.includes('fil') || voice.lang.includes('tl')
     );
-    
+
     if (filipinoVoice) {
         currentUtterance.voice = filipinoVoice;
         currentUtterance.lang = filipinoVoice.lang;
@@ -166,27 +166,27 @@ function speakText(text) {
         currentUtterance.lang = 'fil-PH';
         console.log('No Filipino voice found, using default fil-PH');
     }
-    
+
     currentUtterance.rate = 0.9; // Slightly slower for clarity
     currentUtterance.pitch = 1.0;
     currentUtterance.volume = 1.0;
-    
+
     currentUtterance.onstart = function() {
         isSpeaking = true;
         updateSpeakerIcon(true);
     };
-    
+
     currentUtterance.onend = function() {
         isSpeaking = false;
         updateSpeakerIcon(false);
     };
-    
+
     currentUtterance.onerror = function(event) {
         console.error('Speech synthesis error:', event);
         isSpeaking = false;
         updateSpeakerIcon(false);
     };
-    
+
     speechSynthesis.speak(currentUtterance);
 }
 
@@ -220,7 +220,7 @@ function toggleVoiceInput() {
         addChatMessage('bot', 'Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari.');
         return;
     }
-    
+
     if (isListening) {
         stopVoiceInput();
     } else {
@@ -231,18 +231,18 @@ function toggleVoiceInput() {
 function startVoiceInput() {
     // Stop speaking if currently speaking
     stopSpeaking();
-    
+
     isListening = true;
     const micButton = document.getElementById('micButton');
     const micIcon = document.getElementById('micIcon');
     const micActiveIcon = document.getElementById('micActiveIcon');
     const chatInput = document.getElementById('chatInput');
-    
+
     micButton.classList.add('listening');
     micIcon.style.display = 'none';
     micActiveIcon.style.display = 'block';
     chatInput.placeholder = 'Nakikinig...';
-    
+
     recognition.start();
 }
 
@@ -252,12 +252,12 @@ function stopVoiceInput() {
     const micIcon = document.getElementById('micIcon');
     const micActiveIcon = document.getElementById('micActiveIcon');
     const chatInput = document.getElementById('chatInput');
-    
+
     micButton.classList.remove('listening');
     micIcon.style.display = 'block';
     micActiveIcon.style.display = 'none';
     chatInput.placeholder = 'Type your question...';
-    
+
     if (recognition) {
         recognition.stop();
     }
@@ -281,9 +281,9 @@ function toggleFullscreen() {
     const chatWindow = document.getElementById('chatbotWindow');
     const fullscreenIcon = document.getElementById('fullscreenIcon');
     const fullscreenExitIcon = document.getElementById('fullscreenExitIcon');
-    
+
     isFullscreen = !isFullscreen;
-    
+
     if (isFullscreen) {
         chatWindow.classList.add('fullscreen-mode');
         fullscreenIcon.style.display = 'none';
@@ -301,7 +301,7 @@ function toggleChatbot() {
     const openIcon = document.querySelector('.chat-fab-icon-open');
     const closeIcon = document.querySelector('.chat-fab-icon-close');
     const badge = document.querySelector('.chat-fab-badge');
-    
+
     if (window.style.display === 'none') {
         window.style.display = 'flex';
         fab.classList.add('open');
@@ -320,14 +320,14 @@ function toggleChatbot() {
 function sendChatMessage() {
     const input = document.getElementById('chatInput');
     const message = input.value.trim();
-    
+
     if (!message) return;
-    
+
     addChatMessage('user', message);
     input.value = '';
-    
+
     addTypingIndicator();
-    
+
     fetch('http://127.0.0.1:5001/chat', {
         method: 'POST',
         headers: {
@@ -362,11 +362,11 @@ function addChatMessage(from, text) {
     const messagesContainer = document.getElementById('chatbotMessages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `chat-msg ${from}`;
-    
+
     // Convert markdown-style formatting to HTML
     text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     text = text.replace(/\n/g, '<br>');
-    
+
     if (from === 'bot') {
         messageDiv.innerHTML = `
             <div class="chat-msg-avatar">
@@ -379,7 +379,7 @@ function addChatMessage(from, text) {
     } else {
         messageDiv.innerHTML = `<div class="chat-msg-bubble">${text}</div>`;
     }
-    
+
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }

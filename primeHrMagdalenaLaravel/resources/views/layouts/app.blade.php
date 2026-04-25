@@ -13,7 +13,7 @@
     <div class="app-layout">
         @include('admin.sidebar.adminSidebar')
         <main class="main-content">
-            @include('admin.topbar.adminTopbar')
+
             @yield('content')
         </main>
         @include('admin.chatbot.adminChatbot')

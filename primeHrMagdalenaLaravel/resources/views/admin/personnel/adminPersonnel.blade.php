@@ -10,12 +10,14 @@
 @endpush
 
 @section('content')
+@include('admin.topbar.personnelTopbar')
+
 <!-- Stats Grid -->
 <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
-    <div class="stat-card">
+    <div class="stat-card" style="cursor: pointer; transition: all 0.3s ease; border-top: 3px solid transparent; border-radius: 12px;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 28px rgba(11,4,77,0.09)'; this.style.borderTopLeftRadius='12px'; this.style.borderTopRightRadius='12px'; this.style.borderTop='3px solid'; this.style.borderImage='linear-gradient(90deg, transparent, #0b044d 30%, #ffffff 70%, transparent) 1'; this.style.borderImageSlice='1 0 0 0'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow=''; this.style.borderTop='3px solid transparent'; this.style.borderImage='none'">
         <div class="stat-top">
             <p class="stat-label">Total Personnel</p>
-            <div class="stat-icon-wrap" style="background: rgba(11, 4, 77, 0.08);">
+            <div class="stat-icon-wrap" style="background: rgba(11, 4, 77, 0.08); box-shadow: 0 4px 12px rgba(11, 4, 77, 0.15);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0b044d" stroke-width="2">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                     <circle cx="9" cy="7" r="4"/>
@@ -31,10 +33,10 @@
         </div>
     </div>
 
-    <div class="stat-card">
+    <div class="stat-card" style="cursor: pointer; transition: all 0.3s ease; border-top: 3px solid transparent; border-radius: 12px;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 28px rgba(11,4,77,0.09)'; this.style.borderTopLeftRadius='12px'; this.style.borderTopRightRadius='12px'; this.style.borderTop='3px solid'; this.style.borderImage='linear-gradient(90deg, transparent, #0b044d 30%, #ffffff 70%, transparent) 1'; this.style.borderImageSlice='1 0 0 0'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow=''; this.style.borderTop='3px solid transparent'; this.style.borderImage='none'">
         <div class="stat-top">
             <p class="stat-label">Active</p>
-            <div class="stat-icon-wrap" style="background: rgba(21, 128, 61, 0.08);">
+            <div class="stat-icon-wrap" style="background: rgba(21, 128, 61, 0.08); box-shadow: 0 4px 12px rgba(21, 128, 61, 0.15);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                     <polyline points="22 4 12 14.01 9 11.01"/>
@@ -48,10 +50,10 @@
         </div>
     </div>
 
-    <div class="stat-card">
+    <div class="stat-card" style="cursor: pointer; transition: all 0.3s ease; border-top: 3px solid transparent; border-radius: 12px;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 28px rgba(11,4,77,0.09)'; this.style.borderTopLeftRadius='12px'; this.style.borderTopRightRadius='12px'; this.style.borderTop='3px solid'; this.style.borderImage='linear-gradient(90deg, transparent, #0b044d 30%, #ffffff 70%, transparent) 1'; this.style.borderImageSlice='1 0 0 0'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow=''; this.style.borderTop='3px solid transparent'; this.style.borderImage='none'">
         <div class="stat-top">
             <p class="stat-label">Inactive</p>
-            <div class="stat-icon-wrap" style="background: rgba(142, 30, 24, 0.08);">
+            <div class="stat-icon-wrap" style="background: rgba(142, 30, 24, 0.08); box-shadow: 0 4px 12px rgba(142, 30, 24, 0.15);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8e1e18" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
                     <line x1="15" y1="9" x2="9" y2="15"/>
@@ -66,10 +68,10 @@
         </div>
     </div>
 
-    <div class="stat-card">
+    <div class="stat-card" style="cursor: pointer; transition: all 0.3s ease; border-top: 3px solid transparent; border-radius: 12px;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 28px rgba(11,4,77,0.09)'; this.style.borderTopLeftRadius='12px'; this.style.borderTopRightRadius='12px'; this.style.borderTop='3px solid'; this.style.borderImage='linear-gradient(90deg, transparent, #0b044d 30%, #ffffff 70%, transparent) 1'; this.style.borderImageSlice='1 0 0 0'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow=''; this.style.borderTop='3px solid transparent'; this.style.borderImage='none'">
         <div class="stat-top">
             <p class="stat-label">Permanent</p>
-            <div class="stat-icon-wrap" style="background: rgba(217, 187, 0, 0.08);">
+            <div class="stat-icon-wrap" style="background: rgba(217, 187, 0, 0.08); box-shadow: 0 4px 12px rgba(217, 187, 0, 0.15);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d9bb00" stroke-width="2">
                     <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
                     <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
@@ -85,30 +87,25 @@
 </div>
 
 <!-- Employee Table -->
-<section class="table-section">
+<section class="table-section" style="box-shadow: 0 4px 16px rgba(11, 4, 77, 0.08);">
     <div class="table-header">
         <div>
             <h3 class="table-title">Employee Records</h3>
             <p class="table-sub">Municipal Government of Pagsanjan · {{ $employees->count() }} of {{ $employees->count() }} records</p>
         </div>
         <div class="table-actions">
-            <select class="filter-select">
-                <option>All Departments</option>
-                <option>Office of the Mayor</option>
-                <option>Office of the Mun. Engineer</option>
-                <option>Municipal Health Office</option>
-                <option>MSWD – Pagsanjan</option>
-                <option>Office of the Mun. Treasurer</option>
-                <option>Municipal Civil Registrar</option>
-                <option>Office of the Mun. Budget</option>
-                <option>Office of the Mun. Agriculturist</option>
+            <select class="filter-select" id="departmentFilter" onchange="applyFilters()">
+                <option value="">All Departments</option>
+                @foreach($departments as $department)
+                    <option value="{{ $department->name }}">{{ $department->name }}</option>
+                @endforeach
             </select>
-            <select class="filter-select">
-                <option>All Status</option>
-                <option>Active</option>
-                <option>Inactive</option>
+            <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+                <option value="">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
             </select>
-            <button class="btn-export">
+            <button class="btn-export" onclick="exportTableData()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="7 10 12 15 17 10"/>
@@ -126,20 +123,50 @@
         </div>
     </div>
 
-    <div class="table-wrapper">
-        <table class="payroll-table">
+    <div class="table-wrapper" style="overflow-x: auto;">
+        <table class="payroll-table" id="personnelTable" style="min-width: 1200px;">
             <thead>
                 <tr>
-                    <th>Employee</th>
-                    <th>Position</th>
-                    <th>Department / Office</th>
-                    <th>Type</th>
-                    <th>Date Hired</th>
-                    <th>Status</th>
+                    <th onclick="sortTable(0)" style="cursor: pointer;">
+                        Employee
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </th>
+                    <th onclick="sortTable(1)" style="cursor: pointer;">
+                        Position
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </th>
+                    <th onclick="sortTable(2)" style="cursor: pointer;">
+                        Department / Office
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </th>
+                    <th onclick="sortTable(3)" style="cursor: pointer;">
+                        Type
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </th>
+                    <th onclick="sortTable(4)" style="cursor: pointer;">
+                        Date Appointement
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </th>
+                    <th onclick="sortTable(5)" style="cursor: pointer;">
+                        Status
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="personnelTableBody">
                 @php
                 $avatarColors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
                 function getInitials($name) {
@@ -160,7 +187,7 @@
                     $status = $employee->user ? $employee->user->status : 'Inactive';
                     $empType = $employee->employmentDetail ? $employee->employmentDetail->employment_status : 'N/A';
                     $position = $employee->employmentDetail ? $employee->employmentDetail->position : 'N/A';
-                    
+
                     // Fetch department name from departments table
                     $department = 'N/A';
                     if ($employee->employmentDetail && $employee->employmentDetail->department) {
@@ -168,7 +195,7 @@
                         $dept = \App\Models\Department::find($deptId);
                         $department = $dept ? $dept->name : $deptId;
                     }
-                    
+
                     $dateHired = $employee->employmentDetail && $employee->employmentDetail->appointment_date
                         ? \Carbon\Carbon::parse($employee->employmentDetail->appointment_date)->format('M d, Y')
                         : 'N/A';
@@ -214,11 +241,18 @@
     </div>
 
     <div class="table-footer">
-        <p>Showing <strong>{{ $employees->count() }}</strong> of <strong>{{ $employees->count() }}</strong> records</p>
-        <div class="pagination">
-            <button class="page-btn active">1</button>
-            <button class="page-btn">2</button>
-            <button class="page-btn">›</button>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <p>Showing <strong id="showingStart">1</strong>-<strong id="showingEnd">10</strong> of <strong id="totalRecords">{{ $employees->count() }}</strong> records</p>
+            <select id="rowsPerPageSelect" onchange="changeRowsPerPage(this.value)" style="padding: 6px 12px; border: 1.5px solid #e8e7f5; border-radius: 6px; font-size: 12px; font-family: 'Poppins', sans-serif; color: #0b044d; background: #fff; cursor: pointer;">
+                <option value="10" selected>10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+                <option value="100">100 per page</option>
+                <option value="all">Show all</option>
+            </select>
+        </div>
+        <div class="pagination" id="paginationControls">
+            <!-- Pagination buttons will be generated by JavaScript -->
         </div>
     </div>
 </section>
@@ -303,23 +337,60 @@
     </div>
 </div>
 
-<script>
-// Show modals based on session messages
+<!-- Export Success Modal -->
+<div id="exportSuccessModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; width:100%; max-width:450px; padding:32px; text-align:center; box-shadow:0 8px 32px rgba(11,4,77,0.2);">
+        <div style="width:64px; height:64px; background:#e8f9ef; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+        </div>
+        <h3 style="margin:0 0 12px; font-size:20px; font-weight:700; color:#0b044d;">Export Successful!</h3>
+        <p id="exportSuccessMessage" style="margin:0 0 24px; font-size:14px; color:#6b6a8a; line-height:1.6;"></p>
+        <button onclick="closeExportSuccessModal()" style="padding:12px 32px; background:#15803d; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;">
+            Done
+        </button>
+    </div>
+</div>
+
+<!-- Export Error Modal -->
+<div id="exportErrorModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; width:100%; max-width:450px; padding:32px; text-align:center; box-shadow:0 8px 32px rgba(11,4,77,0.2);">
+        <div style="width:64px; height:64px; background:#fee8e8; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8e1e18" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+        </div>
+        <h3 style="margin:0 0 12px; font-size:20px; font-weight:700; color:#0b044d;">Export Failed</h3>
+        <p id="exportErrorMessage" style="margin:0 0 24px; font-size:14px; color:#6b6a8a; line-height:1.6;"></p>
+        <button onclick="closeExportErrorModal()" style="padding:12px 32px; background:#8e1e18; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;">
+            Close
+        </button>
+    </div>
+</div>
+
 @if(session('success'))
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('successMessage').textContent = "{{ session('success') }}";
-        document.getElementById('successModal').style.display = 'flex';
-        if (document.getElementById('employeeWizardModal')) {
-            document.getElementById('employeeWizardModal').style.display = 'none';
-        }
-    });
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('successMessage').textContent = "{{ session('success') }}";
+    document.getElementById('successModal').style.display = 'flex';
+    if (document.getElementById('employeeWizardModal')) {
+        document.getElementById('employeeWizardModal').style.display = 'none';
+    }
+});
+</script>
 @endif
 
 @if(session('error'))
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('errorMessage').textContent = "{{ session('error') }}";
-        document.getElementById('errorModal').style.display = 'flex';
-    });
-@endif
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('errorMessage').textContent = "{{ session('error') }}";
+    document.getElementById('errorModal').style.display = 'flex';
+});
 </script>
+@endif
 @endsection
