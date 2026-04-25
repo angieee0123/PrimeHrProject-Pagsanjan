@@ -231,6 +231,9 @@ class AttendanceController extends Controller
         $callback = function() use ($records, $employee, $startDate, $endDate) {
             $file = fopen('php://output', 'w');
             
+            // Add UTF-8 BOM for proper Excel encoding
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            
             // Add header info
             fputcsv($file, ['DETAILED DAILY TIME RECORD']);
             fputcsv($file, ['Municipal Government of Pagsanjan']);
@@ -254,10 +257,10 @@ class AttendanceController extends Controller
                     $record['am_out'] ?? 'Log Missing',
                     $record['pm_in'] ?? 'Log Missing',
                     $record['pm_out'] ?? 'Log Missing',
-                    $record['ot_in'] ?? '—',
-                    $record['ot_out'] ?? '—',
-                    $record['undertime'] > 0 ? $record['undertime'] : '—',
-                    $record['late_minutes'] > 0 ? $record['late_minutes'] : '—',
+                    $record['ot_in'] ?? '-',
+                    $record['ot_out'] ?? '-',
+                    $record['undertime'] > 0 ? $record['undertime'] : '-',
+                    $record['late_minutes'] > 0 ? $record['late_minutes'] : '-',
                     $record['total_hours'],
                 ]);
             }
