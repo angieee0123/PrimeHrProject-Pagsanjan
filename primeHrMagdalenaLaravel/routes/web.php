@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\EmployeeRegistrationController;
+use App\Http\Controllers\AttendanceController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -132,9 +133,11 @@ Route::get('/admin/performance', function () {
     return view('admin.performance.adminPerformance');
 })->middleware('auth')->name('admin.performance');
 
-Route::get('/admin/attendance', function () {
-    return view('admin.attendance.adminAttendance');
-})->middleware('auth')->name('admin.attendance');
+Route::get('/admin/attendance', [AttendanceController::class, 'index'])->middleware('auth')->name('admin.attendance');
+Route::get('/admin/attendance/detailed/{employeeId}', [AttendanceController::class, 'detailedDTR'])->middleware('auth')->name('admin.attendance.detailed');
+Route::get('/admin/attendance/detailed/{employeeId}/export', [AttendanceController::class, 'exportDetailedDTR'])->middleware('auth')->name('admin.attendance.detailed.export');
+Route::get('/admin/attendance/record/{attendanceId}', [AttendanceController::class, 'getAttendanceRecord'])->middleware('auth')->name('admin.attendance.record');
+Route::post('/admin/attendance/correct', [AttendanceController::class, 'correctAttendance'])->middleware('auth')->name('admin.attendance.correct');
 
 Route::get('/admin/leave', function () {
     return view('admin.leaveAndBenefits.adminLeaveAndBenefits');
