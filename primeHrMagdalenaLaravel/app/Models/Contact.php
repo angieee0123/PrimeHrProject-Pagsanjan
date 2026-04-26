@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Contact extends Model
 {
     public $timestamps = false;
-    
+
     protected $fillable = [
         'employee_id', 'type', 'number', 'contact_person'
     ];
