@@ -382,7 +382,7 @@
             <h3 style="margin:0; font-size:20px; font-weight:700; color:#0b044d;">Employee QR Code</h3>
             <button onclick="closeQRModal()" style="background:transparent; border:none; color:#6b6a8a; font-size:24px; cursor:pointer; width:32px; height:32px; display:flex; align-items:center; justify-content:center;">&times;</button>
         </div>
-        
+
         <div style="background:#f7f6ff; border:2px solid #e8e7f5; border-radius:12px; padding:24px; margin-bottom:20px;">
             <p style="margin:0 0 8px; font-size:14px; font-weight:600; color:#0b044d;" id="qrEmployeeName"></p>
             <p style="margin:0 0 16px; font-size:12px; color:#6b6a8a;" id="qrEmployeeId"></p>
@@ -390,7 +390,7 @@
                 <p style="color:#6b6a8a;">Generating QR Code...</p>
             </div>
         </div>
-        
+
         <div style="display:flex; gap:10px;">
             <button onclick="downloadQRCode()" style="flex:1; padding:12px; background:#0b044d; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
