@@ -255,7 +255,7 @@ window.calculateTotalHours = function() {
     if (amIn && pmOut) {
         const amInTime = new Date('1970-01-01 ' + amIn);
         const pmOutTime = new Date('1970-01-01 ' + pmOut);
-        
+
         // WorkHours = (PM Out - AM In) - 1 hour
         let totalMinutes = (pmOutTime - amInTime) / 1000 / 60;
         if (totalMinutes < 0) totalMinutes += 24 * 60;
@@ -283,12 +283,12 @@ window.calculateTotalHours = function() {
         let otInTime = new Date('1970-01-01 ' + otIn);
         const otOutTime = new Date('1970-01-01 ' + otOut);
         const expectedOtStart = new Date('1970-01-01 17:00:00');
-        
+
         // IF OT In < 5:00 PM, OT In = 5:00 PM
         if (otInTime < expectedOtStart) {
             otInTime = expectedOtStart;
         }
-        
+
         let otDiff = (otOutTime - otInTime) / 1000 / 60;
         if (otDiff < 0) otDiff += 24 * 60;
         otMinutes = Math.max(0, otDiff);
@@ -308,16 +308,16 @@ window.calculateTotalHours = function() {
     if (pmOut) {
         const pmOutTime = new Date('1970-01-01 ' + pmOut);
         const expectedOut = new Date('1970-01-01 17:00:00');
-        
+
         // UT_time = max(0, 5:00 PM - PM Out)
         let utTime = 0;
         if (pmOutTime < expectedOut) {
             utTime = Math.max(0, (expectedOut - pmOutTime) / 1000 / 60);
         }
-        
+
         // UT_hours = max(0, 8 hours - WorkHours)
         let utHours = Math.max(0, (8 * 60) - workMinutes);
-        
+
         // Undertime = max(UT_time, UT_hours)
         undertimeMinutes = Math.max(utTime, utHours);
     }
@@ -373,6 +373,21 @@ window.openCorrectModal = function(attendanceId, date) {
             document.getElementById('correctReason').value = '';
             document.getElementById('correctAttachments').value = '';
             document.getElementById('filePreview').innerHTML = '';
+
+            // Add validation warning
+            let validationMessage = '';
+            if (!data.am_out) {
+                validationMessage += '⚠️ Missing AM Out time\n';
+            }
+            if (!data.pm_in) {
+                validationMessage += '⚠️ Missing PM In time\n';
+            }
+            
+            if (validationMessage) {
+                const warningDiv = document.getElementById('correctReason');
+                warningDiv.placeholder = 'REQUIRED: ' + validationMessage + '\n\nExplain why this correction is needed...';
+                warningDiv.style.borderLeft = '3px solid #8e1e18';
+            }
 
             calculateTotalHours();
 
@@ -541,8 +556,21 @@ function renderDetailedDTR(data) {
             totalUndertimeMinutes += record.undertime;
         }
 
+        // Add class if needs review
+        if (record.needs_review) {
+            tr.className = 'day-needs-review';
+        }
+
+        // Build status badge
+        let statusBadge = '';
+        if (record.is_incomplete) {
+            statusBadge = ' <span class="badge-incomplete">Incomplete</span>';
+        } else if (record.needs_review) {
+            statusBadge = ' <span class="badge-needs-review">Needs Review</span>';
+        }
+
         tr.innerHTML = `
-            <td><strong>${record.date}</strong></td>
+            <td><strong>${record.date}</strong>${statusBadge}</td>
             <td>${record.day}</td>
             <td>${record.am_in || '<span class="log-missing">Log Missing</span>'}</td>
             <td>${record.am_out || '<span class="log-missing">Log Missing</span>'}</td>
@@ -552,7 +580,7 @@ function renderDetailedDTR(data) {
             <td>${record.ot_out || '—'}</td>
             <td>${record.undertime > 0 ? '<span class="log-late">' + record.undertime + ' min</span>' : (record.pm_out ? '0 min' : '—')}</td>
             <td>${record.late_minutes > 0 ? '<span class="log-late">' + record.late_minutes + ' min</span>' : (record.am_in ? '0 min' : '—')}</td>
-            <td><strong>${record.total_hours}</strong></td>
+            <td><strong>${record.actual_work_hours} hrs</strong><br><small>${record.total_hours}</small></td>
             <td><button class="btn-edit-time" onclick="openCorrectModal(${record.attendance_id ? record.attendance_id : "'new_" + currentDetailedEmployeeId + "_" + record.date_key + "'"}, '${record.date}')" title="${record.attendance_id ? 'Edit time records' : 'Add time records'}">Edit</button></td>
         `;
 
