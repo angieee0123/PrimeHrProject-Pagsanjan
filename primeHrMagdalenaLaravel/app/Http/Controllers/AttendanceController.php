@@ -466,6 +466,15 @@ class AttendanceController extends Controller
                     // Total = WorkHours + OT - Late - Undertime
                     $totalHours = max(0, $workHours + $otHours - $lateHours - $undertimeHours);
                     
+                    // Add grace period bonus (15 min = 0.25 hrs) if within grace period
+                    if ($attendance->am_in) {
+                        $amInTime = new \DateTime($attendance->am_in);
+                        $graceThreshold = new \DateTime('08:15:00');
+                        if ($amInTime <= $graceThreshold) {
+                            $totalHours += 0.25; // Add 15 minutes bonus
+                        }
+                    }
+                    
                     // Determine if needs review (has both late and undertime)
                     $needsReview = ($lateMinutes > 0 && $undertime > 0);
                 } catch (\Exception $e) {
