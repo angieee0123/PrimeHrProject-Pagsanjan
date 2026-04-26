@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "./admin.css";
+@import "./adminAttendance.css";
 
 /* ── Google Font fallback (loaded via <link> in blade) ── */
 body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }

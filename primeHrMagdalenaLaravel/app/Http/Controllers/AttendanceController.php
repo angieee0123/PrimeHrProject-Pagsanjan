@@ -41,15 +41,15 @@ class AttendanceController extends Controller
 
                 foreach ($attendances as $attendance) {
                     $hasAttendance = $attendance->am_in || $attendance->pm_in;
-                    
+
                     if ($hasAttendance) {
                         $present++;
 
-                        // Check if late (AM in after 8:10 AM)
+                        // Check if late (AM in after 8:15 AM with grace period)
                         if ($attendance->am_in) {
                             $amInTime = Carbon::parse($attendance->am_in);
-                            $lateThreshold = Carbon::parse('08:10:00');
-                            if ($amInTime->gt($lateThreshold)) {
+                            $graceThreshold = Carbon::parse('08:15:00');
+                            if ($amInTime->gt($graceThreshold)) {
                                 $late++;
                             }
                         }
@@ -61,10 +61,16 @@ class AttendanceController extends Controller
                             $halfday++;
                         }
 
-                        // Calculate overtime hours
+                        // Calculate overtime hours (ensure it starts at 5:00 PM)
                         if ($attendance->ot_in && $attendance->ot_out) {
                             $otIn = Carbon::parse($attendance->ot_in);
                             $otOut = Carbon::parse($attendance->ot_out);
+                            $expectedOtStart = Carbon::parse('17:00:00');
+                            
+                            if ($otIn->lt($expectedOtStart)) {
+                                $otIn = $expectedOtStart;
+                            }
+                            
                             $overtime += $otIn->diffInHours($otOut, false);
                         }
                     }
@@ -77,9 +83,10 @@ class AttendanceController extends Controller
                     }
                 }
 
-                $totalDays = $present + $absent;
+                $totalDays = $present + $absent + $halfday;
                 $rate = $totalDays > 0 ? round(($present / $totalDays) * 100) : 0;
-                $status = ($absent === 0 && $late <= 2) ? 'Complete' : 'Incomplete';
+                $workingDaysCount = $totalDays;
+                $status = ($absent === 0 && $late <= 2 && $workingDaysCount > 0) ? 'Complete' : 'Incomplete';
 
                 $deptName = 'N/A';
                 if ($employee->employmentDetail && $employee->employmentDetail->departmentRelation) {
@@ -161,22 +168,22 @@ class AttendanceController extends Controller
     {
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
-        
+
         // Validate dates
         if (!$startDate || !$endDate) {
             return response()->json(['error' => 'Start date and end date are required'], 400);
         }
-        
+
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
-        
+
         // Ensure start date is before end date
         if ($startDate->gt($endDate)) {
             return response()->json(['error' => 'Start date must be before end date'], 400);
         }
 
         $employee = Employee::findOrFail($employeeId);
-        
+
         // Fetch attendance records for the date range
         $attendances = Attendance::where('employee_id', $employeeId)
             ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
@@ -201,17 +208,17 @@ class AttendanceController extends Controller
     {
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
-        
+
         // Validate dates
         if (!$startDate || !$endDate) {
             return response()->json(['error' => 'Start date and end date are required'], 400);
         }
-        
+
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
 
         $employee = Employee::with('employmentDetail.department')->findOrFail($employeeId);
-        
+
         // Fetch attendance records for the date range
         $attendances = Attendance::where('employee_id', $employeeId)
             ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
@@ -233,10 +240,10 @@ class AttendanceController extends Controller
 
         $callback = function() use ($records, $employee, $startDate, $endDate) {
             $file = fopen('php://output', 'w');
-            
+
             // Add UTF-8 BOM for proper Excel encoding
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+
             // Add header info
             fputcsv($file, ['DETAILED DAILY TIME RECORD']);
             fputcsv($file, ['Municipal Government of Pagsanjan']);
@@ -247,10 +254,10 @@ class AttendanceController extends Controller
             fputcsv($file, ['Position:', $employee->employmentDetail->position ?? 'N/A']);
             fputcsv($file, ['Department:', $employee->employmentDetail->department->name ?? 'N/A']);
             fputcsv($file, []);
-            
+
             // Add column headers
             fputcsv($file, ['Date', 'Day', 'AM In', 'AM Out', 'PM In', 'PM Out', 'OT In', 'OT Out', 'Undertime (min)', 'Late (min)', 'Total Hours']);
-            
+
             // Add data rows
             foreach ($records as $record) {
                 fputcsv($file, [
@@ -267,7 +274,7 @@ class AttendanceController extends Controller
                     $record['total_hours'],
                 ]);
             }
-            
+
             fclose($file);
         };
 
@@ -292,97 +299,152 @@ class AttendanceController extends Controller
             $otOut = null;
 
             if ($attendance) {
-                // Handle time fields - they might be stored as TIME or DATETIME
+                // Handle time fields - stored as TIME (HH:MM:SS) or DATETIME
                 if ($attendance->am_in) {
                     try {
-                        $amIn = Carbon::parse($attendance->am_in)->format('h:i A');
+                        $amIn = Carbon::parse($attendance->am_in)->format('H:i');
                     } catch (\Exception $e) {
                         $amIn = null;
                     }
                 }
                 if ($attendance->am_out) {
                     try {
-                        $amOut = Carbon::parse($attendance->am_out)->format('h:i A');
+                        $amOut = Carbon::parse($attendance->am_out)->format('H:i');
                     } catch (\Exception $e) {
                         $amOut = null;
                     }
                 }
                 if ($attendance->pm_in) {
                     try {
-                        $pmIn = Carbon::parse($attendance->pm_in)->format('h:i A');
+                        $pmIn = Carbon::parse($attendance->pm_in)->format('H:i');
                     } catch (\Exception $e) {
                         $pmIn = null;
                     }
                 }
                 if ($attendance->pm_out) {
                     try {
-                        $pmOut = Carbon::parse($attendance->pm_out)->format('h:i A');
+                        $pmOut = Carbon::parse($attendance->pm_out)->format('H:i');
                     } catch (\Exception $e) {
                         $pmOut = null;
                     }
                 }
                 if ($attendance->ot_in) {
                     try {
-                        $otIn = Carbon::parse($attendance->ot_in)->format('h:i A');
+                        $otIn = Carbon::parse($attendance->ot_in)->format('H:i');
                     } catch (\Exception $e) {
                         $otIn = null;
                     }
                 }
                 if ($attendance->ot_out) {
                     try {
-                        $otOut = Carbon::parse($attendance->ot_out)->format('h:i A');
+                        $otOut = Carbon::parse($attendance->ot_out)->format('H:i');
                     } catch (\Exception $e) {
                         $otOut = null;
                     }
                 }
             }
 
-            // Calculate late minutes (if AM in is after 8:10 AM)
+            // Calculate late minutes with 15-min grace period
             $lateMinutes = 0;
             if ($attendance && $attendance->am_in) {
-                $amInTime = Carbon::parse($attendance->am_in);
-                $lateThreshold = Carbon::parse('08:10:00');
-                if ($amInTime->gt($lateThreshold)) {
-                    $lateMinutes = $amInTime->diffInMinutes($lateThreshold);
-                }
-            }
-
-            // Calculate undertime (if PM out is before 5:00 PM)
-            $undertime = 0;
-            if ($attendance && $attendance->pm_out) {
-                $pmOutTime = Carbon::parse($attendance->pm_out);
-                $expectedOut = Carbon::parse('17:00:00');
-                // Only calculate undertime on weekdays
-                if (!in_array($current->dayOfWeek, [0, 6]) && $pmOutTime->lt($expectedOut)) {
-                    $undertime = $pmOutTime->diffInMinutes($expectedOut);
-                }
-            }
-
-            // Calculate total hours: (Time_Out - Time_In) - Break_Deduction + Overtime - Late - Undertime
-            $totalHours = 0;
-            if ($attendance && $attendance->am_in && $attendance->pm_out) {
                 try {
-                    $timeIn = Carbon::parse($attendance->am_in);
-                    $timeOut = Carbon::parse($attendance->pm_out);
-                    $totalMinutes = $timeIn->diffInMinutes($timeOut);
-                    
-                    // Deduct 1-hour break (60 minutes)
-                    $totalMinutes -= 60;
-                    
-                    // Add overtime if exists
-                    if ($attendance->ot_in && $attendance->ot_out) {
-                        $otIn = Carbon::parse($attendance->ot_in);
-                        $otOut = Carbon::parse($attendance->ot_out);
-                        $totalMinutes += $otIn->diffInMinutes($otOut);
+                    $amInTime = new \DateTime($attendance->am_in);
+                    $graceThreshold = new \DateTime('08:15:00');
+                    $expectedIn = new \DateTime('08:00:00');
+
+                    if ($amInTime > $graceThreshold) {
+                        $lateInterval = $expectedIn->diff($amInTime);
+                        $lateMinutes = ($lateInterval->h * 60) + $lateInterval->i;
                     }
-                    
-                    // Deduct late minutes
-                    $totalMinutes -= $lateMinutes;
-                    
-                    // Deduct undertime
-                    $totalMinutes -= $undertime;
-                    
-                    $totalHours = max(0, $totalMinutes / 60);
+                } catch (\Exception $e) {
+                    $lateMinutes = 0;
+                }
+            }
+
+            // Calculate undertime
+            $undertime = 0;
+            if ($attendance && $attendance->pm_out && !in_array($current->dayOfWeek, [0, 6])) {
+                try {
+                    $pmOutTime = new \DateTime($attendance->pm_out);
+                    $expectedOut = new \DateTime('17:00:00');
+
+                    // Calculate work hours first
+                    $workHours = 0;
+                    if ($attendance->am_in) {
+                        $amInTime = new \DateTime($attendance->am_in);
+                        $workInterval = $amInTime->diff($pmOutTime);
+                        $workHours = ($workInterval->h + ($workInterval->i / 60)) - 1; // minus 1 hr break
+                    }
+
+                    // UT_time = max(0, 5:00 PM - PM Out)
+                    $ut_time = 0;
+                    if ($pmOutTime < $expectedOut) {
+                        $utInterval = $pmOutTime->diff($expectedOut);
+                        $ut_time = ($utInterval->h * 60) + $utInterval->i;
+                    }
+
+                    // UT_hours = max(0, 8 hours - WorkHours)
+                    $ut_hours = max(0, (8 - $workHours) * 60);
+
+                    // Undertime = max(UT_time, UT_hours)
+                    $undertime = max($ut_time, $ut_hours);
+                } catch (\Exception $e) {
+                    $undertime = 0;
+                }
+            }
+
+            // Calculate total hours
+            $totalHours = 0;
+            if ($attendance) {
+                try {
+                    $workHours = 0;
+                    $otHours = 0;
+
+                    // If we have AM In and PM Out
+                    if ($attendance->am_in && $attendance->pm_out) {
+                        $amInTime = new \DateTime($attendance->am_in);
+                        $pmOutTime = new \DateTime($attendance->pm_out);
+
+                        // WorkHours = (PM Out - AM In) - 1 hour
+                        $workInterval = $amInTime->diff($pmOutTime);
+                        $workHours = ($workInterval->h + ($workInterval->i / 60)) - 1;
+                    }
+                    // If only AM session
+                    elseif ($attendance->am_in && $attendance->am_out && !$attendance->pm_in && !$attendance->pm_out) {
+                        $amInTime = new \DateTime($attendance->am_in);
+                        $amOutTime = new \DateTime($attendance->am_out);
+                        $workInterval = $amInTime->diff($amOutTime);
+                        $workHours = $workInterval->h + ($workInterval->i / 60);
+                    }
+                    // If only PM session
+                    elseif ($attendance->pm_in && $attendance->pm_out && !$attendance->am_in && !$attendance->am_out) {
+                        $pmInTime = new \DateTime($attendance->pm_in);
+                        $pmOutTime = new \DateTime($attendance->pm_out);
+                        $workInterval = $pmInTime->diff($pmOutTime);
+                        $workHours = $workInterval->h + ($workInterval->i / 60);
+                    }
+
+                    // Calculate overtime
+                    if ($attendance->ot_in && $attendance->ot_out) {
+                        $otInTime = new \DateTime($attendance->ot_in);
+                        $otOutTime = new \DateTime($attendance->ot_out);
+                        $expectedOtStart = new \DateTime('17:00:00');
+
+                        // Ensure OT starts at 5:00 PM
+                        if ($otInTime < $expectedOtStart) {
+                            $otInTime = clone $expectedOtStart;
+                        }
+
+                        $otInterval = $otInTime->diff($otOutTime);
+                        $otHours = $otInterval->h + ($otInterval->i / 60);
+                    }
+
+                    // Convert late and undertime from minutes to hours
+                    $lateHours = $lateMinutes / 60;
+                    $undertimeHours = $undertime / 60;
+
+                    // Total = WorkHours + OT - Late - Undertime
+                    $totalHours = max(0, $workHours + $otHours - $lateHours - $undertimeHours);
                 } catch (\Exception $e) {
                     $totalHours = 0;
                 }
@@ -418,9 +480,9 @@ class AttendanceController extends Controller
             $parts = explode('_', $attendanceId);
             $employeeId = $parts[1];
             $date = $parts[2];
-            
+
             $employee = Employee::findOrFail($employeeId);
-            
+
             return response()->json([
                 'id' => null,
                 'employee_id' => $employeeId,
@@ -435,9 +497,9 @@ class AttendanceController extends Controller
                 'is_new' => true,
             ]);
         }
-        
+
         $attendance = Attendance::with('employee')->findOrFail($attendanceId);
-        
+
         // Helper to format time to HH:MM
         $formatTime = function($time) {
             if (!$time) return null;
@@ -447,7 +509,7 @@ class AttendanceController extends Controller
                 return null;
             }
         };
-        
+
         return response()->json([
             'id' => $attendance->id,
             'employee_id' => $attendance->employee_id,
