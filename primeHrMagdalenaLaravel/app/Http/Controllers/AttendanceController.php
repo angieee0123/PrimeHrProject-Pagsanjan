@@ -380,21 +380,31 @@ class AttendanceController extends Controller
             }
 
             // Calculate undertime (in minutes)
+            // If within grace period (08:15), no undertime penalty
             $undertime = 0;
-            $hasLate = $lateMinutes > 0;
             if ($attendance && $attendance->pm_out && !in_array($current->dayOfWeek, [0, 6])) {
                 try {
-                    // Calculate work hours first
-                    $workHours = 0;
+                    // Check if within grace period
+                    $isWithinGrace = false;
                     if ($attendance->am_in) {
                         $amInTime = new \DateTime($attendance->am_in);
-                        $pmOutTime = new \DateTime($attendance->pm_out);
-                        $workInterval = $amInTime->diff($pmOutTime);
-                        $workHours = ($workInterval->h + ($workInterval->i / 60)) - 1; // minus 1 hr break
+                        $graceThreshold = new \DateTime('08:15:00');
+                        $isWithinGrace = ($amInTime <= $graceThreshold);
                     }
 
-                    // Undertime = max(0, 8 hours - WorkHours) in minutes
-                    $undertime = max(0, (8 - $workHours) * 60);
+                    // Only calculate undertime if NOT within grace period
+                    if (!$isWithinGrace) {
+                        $workHours = 0;
+                        if ($attendance->am_in) {
+                            $amInTime = new \DateTime($attendance->am_in);
+                            $pmOutTime = new \DateTime($attendance->pm_out);
+                            $workInterval = $amInTime->diff($pmOutTime);
+                            $workHours = ($workInterval->h + ($workInterval->i / 60)) - 1; // minus 1 hr break
+                        }
+
+                        // Undertime = max(0, 8 hours - WorkHours) in minutes
+                        $undertime = max(0, (8 - $workHours) * 60);
+                    }
                 } catch (\Exception $e) {
                     $undertime = 0;
                 }
