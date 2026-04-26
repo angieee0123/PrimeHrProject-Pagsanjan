@@ -15,15 +15,15 @@ class AttendanceController extends Controller
 {
     public function index(Request $request)
     {
-        $month = $request->get('month', now()->month);
-        $year = $request->get('year', now()->year);
+        $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->get('end_date', now()->endOfMonth()->format('Y-m-d'));
         $department = $request->get('department');
         $status = $request->get('status');
 
-        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-        $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+        $startDate = Carbon::parse($startDate)->startOfDay();
+        $endDate = Carbon::parse($endDate)->endOfDay();
 
-        $employees = Employee::with(['employmentDetail.department'])
+        $employees = Employee::with(['employmentDetail.departmentRelation'])
             ->get()
             ->map(function ($employee) use ($startDate, $endDate) {
                 $attendances = Attendance::where('employee_id', $employee->id)
@@ -81,12 +81,17 @@ class AttendanceController extends Controller
                 $rate = $totalDays > 0 ? round(($present / $totalDays) * 100) : 0;
                 $status = ($absent === 0 && $late <= 2) ? 'Complete' : 'Incomplete';
 
+                $deptName = 'N/A';
+                if ($employee->employmentDetail && $employee->employmentDetail->departmentRelation) {
+                    $deptName = $employee->employmentDetail->departmentRelation->name;
+                }
+
                 return [
                     'id' => $employee->employee_id,
                     'employee_id' => $employee->id,
                     'name' => trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name),
                     'position' => $employee->employmentDetail->position ?? 'N/A',
-                    'dept' => $employee->employmentDetail->department->name ?? 'N/A',
+                    'dept' => $deptName,
                     'present' => $present,
                     'absent' => $absent,
                     'late' => $late,
@@ -116,9 +121,9 @@ class AttendanceController extends Controller
         $completeCount = count(array_filter($attendanceRecords, fn($r) => $r['status'] === 'Complete'));
         $incompleteCount = count(array_filter($attendanceRecords, fn($r) => $r['status'] === 'Incomplete'));
 
-        $departments = Employee::with('employmentDetail.department')
+        $departments = Employee::with('employmentDetail.departmentRelation')
             ->get()
-            ->pluck('employmentDetail.department.name')
+            ->pluck('employmentDetail.departmentRelation.name')
             ->filter()
             ->unique()
             ->sort()
@@ -132,9 +137,7 @@ class AttendanceController extends Controller
             'totalOT',
             'completeCount',
             'incompleteCount',
-            'departments',
-            'month',
-            'year'
+            'departments'
         ));
     }
 

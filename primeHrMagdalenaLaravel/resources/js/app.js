@@ -1,5 +1,5 @@
 import './bootstrap';
-document.getElementById('btn').addEventListener('click', () => {
+document.getElementById('btn')?.addEventListener('click', () => {
     alert('Vite is working!');
 });
 document.getElementById('startBtn')?.addEventListener('click', () => {

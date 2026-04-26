@@ -18,7 +18,7 @@ class EmploymentDetail extends Model
         return $this->belongsTo(Employee::class);
     }
 
-    public function department()
+    public function departmentRelation()
     {
         return $this->belongsTo(Department::class, 'department', 'id');
     }
