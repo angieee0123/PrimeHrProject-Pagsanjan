@@ -578,8 +578,8 @@ function renderDetailedDTR(data) {
             <td>${record.pm_out || '<span class="log-missing">Log Missing</span>'}</td>
             <td>${record.ot_in || '—'}</td>
             <td>${record.ot_out || '—'}</td>
-            <td>${record.undertime > 0 ? '<span class="log-late">' + record.undertime + ' min</span>' : (record.pm_out ? '0 min' : '—')}</td>
-            <td>${record.late_minutes > 0 ? '<span class="log-late">' + record.late_minutes + ' min</span>' : (record.am_in ? '0 min' : '—')}</td>
+            <td>${record.undertime_display ? '<span class="log-late">' + record.undertime_display + '</span>' : (record.pm_out ? '0 min' : '—')}</td>
+            <td>${record.late_display ? '<span class="log-late">' + record.late_display + '</span>' : (record.am_in ? '0 min' : '—')}</td>
             <td><strong>${record.actual_work_hours} hrs</strong><br><small>${record.total_hours}</small></td>
             <td><button class="btn-edit-time" onclick="openCorrectModal(${record.attendance_id ? record.attendance_id : "'new_" + currentDetailedEmployeeId + "_" + record.date_key + "'"}, '${record.date}')" title="${record.attendance_id ? 'Edit time records' : 'Add time records'}">Edit</button></td>
         `;
@@ -591,8 +591,23 @@ function renderDetailedDTR(data) {
     document.getElementById('detailedTotalPresent').textContent = totalPresent;
     document.getElementById('detailedTotalAbsent').textContent = totalAbsent;
     document.getElementById('detailedTotalLate').textContent = totalLate + ' times';
-    document.getElementById('detailedTotalLateMinutes').textContent = totalLateMinutes + ' min';
-    document.getElementById('detailedTotalUndertime').textContent = totalUndertimeMinutes + ' min';
+    
+    // Format total minutes to hrs and min
+    const formatTotalMinutes = (minutes) => {
+        if (minutes <= 0) return '0 min';
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        if (hours > 0 && mins > 0) {
+            return hours + ' hr' + (hours > 1 ? 's' : '') + ' ' + Math.round(mins) + ' min';
+        } else if (hours > 0) {
+            return hours + ' hr' + (hours > 1 ? 's' : '');
+        } else {
+            return Math.round(mins) + ' min';
+        }
+    };
+    
+    document.getElementById('detailedTotalLateMinutes').textContent = formatTotalMinutes(totalLateMinutes);
+    document.getElementById('detailedTotalUndertime').textContent = formatTotalMinutes(totalUndertimeMinutes);
 
     document.getElementById('detailedDTRLoading').style.display = 'none';
     document.getElementById('detailedDTRTable').style.display = 'table';

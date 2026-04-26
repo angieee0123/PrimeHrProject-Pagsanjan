@@ -281,6 +281,24 @@ class AttendanceController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
+    private function formatMinutes($minutes)
+    {
+        if ($minutes <= 0) {
+            return '0 min';
+        }
+        
+        $hours = floor($minutes / 60);
+        $mins = $minutes % 60;
+        
+        if ($hours > 0 && $mins > 0) {
+            return $hours . ' hr' . ($hours > 1 ? 's' : '') . ' ' . round($mins) . ' min';
+        } elseif ($hours > 0) {
+            return $hours . ' hr' . ($hours > 1 ? 's' : '');
+        } else {
+            return round($mins) . ' min';
+        }
+    }
+
     private function generateDetailedRecords($startDate, $endDate, $attendances)
     {
         $records = [];
@@ -457,7 +475,9 @@ class AttendanceController extends Controller
                 'ot_in' => $otIn,
                 'ot_out' => $otOut,
                 'late_minutes' => $lateMinutes,
+                'late_display' => $this->formatMinutes($lateMinutes),
                 'undertime' => $undertime,
+                'undertime_display' => $this->formatMinutes($undertime),
                 'total_hours' => round($totalHours, 1) . ' hrs',
                 'actual_work_hours' => isset($actualWorkHours) ? round($actualWorkHours, 1) : 0,
                 'needs_review' => isset($needsReview) ? $needsReview : false,
