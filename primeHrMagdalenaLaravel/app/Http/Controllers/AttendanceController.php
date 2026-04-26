@@ -361,33 +361,22 @@ class AttendanceController extends Controller
                 }
             }
 
-            // Calculate undertime
+            // Calculate undertime (in minutes)
             $undertime = 0;
+            $hasLate = $lateMinutes > 0;
             if ($attendance && $attendance->pm_out && !in_array($current->dayOfWeek, [0, 6])) {
                 try {
-                    $pmOutTime = new \DateTime($attendance->pm_out);
-                    $expectedOut = new \DateTime('17:00:00');
-
                     // Calculate work hours first
                     $workHours = 0;
                     if ($attendance->am_in) {
                         $amInTime = new \DateTime($attendance->am_in);
+                        $pmOutTime = new \DateTime($attendance->pm_out);
                         $workInterval = $amInTime->diff($pmOutTime);
                         $workHours = ($workInterval->h + ($workInterval->i / 60)) - 1; // minus 1 hr break
                     }
 
-                    // UT_time = max(0, 5:00 PM - PM Out)
-                    $ut_time = 0;
-                    if ($pmOutTime < $expectedOut) {
-                        $utInterval = $pmOutTime->diff($expectedOut);
-                        $ut_time = ($utInterval->h * 60) + $utInterval->i;
-                    }
-
-                    // UT_hours = max(0, 8 hours - WorkHours)
-                    $ut_hours = max(0, (8 - $workHours) * 60);
-
-                    // Undertime = max(UT_time, UT_hours)
-                    $undertime = max($ut_time, $ut_hours);
+                    // Undertime = max(0, 8 hours - WorkHours) in minutes
+                    $undertime = max(0, (8 - $workHours) * 60);
                 } catch (\Exception $e) {
                     $undertime = 0;
                 }
@@ -443,10 +432,18 @@ class AttendanceController extends Controller
                     $lateHours = $lateMinutes / 60;
                     $undertimeHours = $undertime / 60;
 
+                    // Store actual work hours for display
+                    $actualWorkHours = $workHours + $otHours;
+                    
                     // Total = WorkHours + OT - Late - Undertime
                     $totalHours = max(0, $workHours + $otHours - $lateHours - $undertimeHours);
+                    
+                    // Determine if needs review (has both late and undertime)
+                    $needsReview = ($lateMinutes > 0 && $undertime > 0);
                 } catch (\Exception $e) {
                     $totalHours = 0;
+                    $actualWorkHours = 0;
+                    $needsReview = false;
                 }
             }
 
@@ -462,6 +459,9 @@ class AttendanceController extends Controller
                 'late_minutes' => $lateMinutes,
                 'undertime' => $undertime,
                 'total_hours' => round($totalHours, 1) . ' hrs',
+                'actual_work_hours' => isset($actualWorkHours) ? round($actualWorkHours, 1) : 0,
+                'needs_review' => isset($needsReview) ? $needsReview : false,
+                'is_incomplete' => !$amOut || !$pmIn,
                 'attendance_id' => $attendance ? $attendance->id : null,
                 'date_key' => $current->format('Y-m-d'),
             ];
