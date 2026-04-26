@@ -18,8 +18,9 @@ function getInitials($name) {
     return strtoupper(substr($initials, 0, 2));
 }
 
-$monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-$currentMonthName = $monthNames[$month];
+$startDateDisplay = request('start_date', now()->startOfMonth()->format('Y-m-d'));
+$endDateDisplay = request('end_date', now()->endOfMonth()->format('Y-m-d'));
+$periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M d, Y', strtotime($endDateDisplay));
 @endphp
 
 <div class="stats-grid" style="margin-bottom: 20px;">
@@ -46,7 +47,7 @@ $currentMonthName = $monthNames[$month];
         <h2 class="stat-value">{{ $totalPresent }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #15803d;"></span>
-            <p class="stat-sub">{{ $currentMonthName }} {{ $year }}</p>
+            <p class="stat-sub">{{ $periodDisplay }}</p>
         </div>
     </div>
     <div class="stat-card">
@@ -80,32 +81,29 @@ $currentMonthName = $monthNames[$month];
 <section class="table-section">
     <div class="table-header">
         <div>
-            <h3 class="table-title">Daily Time Record — {{ $currentMonthName }} {{ $year }}</h3>
+            <h3 class="table-title">Daily Time Record — {{ $periodDisplay }}</h3>
             <p class="table-sub">Municipal Government of Pagsanjan · {{ count($attendanceRecords) }} records</p>
         </div>
         <div class="table-actions">
             <form method="GET" action="{{ route('admin.attendance') }}" id="filterForm" style="display: contents;">
-                <select class="filter-select" name="month" onchange="document.getElementById('filterForm').submit()">
-                    @for($m = 1; $m <= 12; $m++)
-                        <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>{{ $monthNames[$m] }}</option>
-                    @endfor
-                </select>
-                <select class="filter-select" name="year" onchange="document.getElementById('filterForm').submit()">
-                    @for($y = 2023; $y <= 2027; $y++)
-                        <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
-                    @endfor
-                </select>
-                <select class="filter-select" name="department" onchange="document.getElementById('filterForm').submit()">
+                <input type="date" class="filter-select" name="start_date" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}">
+                <span style="font-size: 12px; color: #9999bb;">to</span>
+                <input type="date" class="filter-select" name="end_date" value="{{ request('end_date', now()->endOfMonth()->format('Y-m-d')) }}">
+                <select class="filter-select" name="department">
                     <option value="">All Departments</option>
                     @foreach($departments as $dept)
                         <option value="{{ $dept }}" {{ request('department') == $dept ? 'selected' : '' }}>{{ $dept }}</option>
                     @endforeach
                 </select>
-                <select class="filter-select" name="status" onchange="document.getElementById('filterForm').submit()">
+                <select class="filter-select" name="status">
                     <option value="">All Status</option>
                     <option value="Complete" {{ request('status') == 'Complete' ? 'selected' : '' }}>Complete</option>
                     <option value="Incomplete" {{ request('status') == 'Incomplete' ? 'selected' : '' }}>Incomplete</option>
                 </select>
+                <button type="submit" class="btn-filter-main">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    Filter
+                </button>
             </form>
             <button class="btn-export">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -263,7 +261,7 @@ $currentMonthName = $monthNames[$month];
     <div class="modal-box modal-box-wide" onclick="event.stopPropagation()">
         <div class="modal-header">
             <div>
-                <span class="modal-eyebrow">DETAILED DTR · <span id="detailedPeriod">{{ $currentMonthName }} {{ $year }}</span></span>
+                <span class="modal-eyebrow">DETAILED DTR · <span id="detailedPeriod">{{ $periodDisplay }}</span></span>
                 <h3 class="modal-title" id="detailedName"></h3>
                 <p class="modal-sub" id="detailedEmpId"></p>
             </div>
@@ -402,7 +400,7 @@ $currentMonthName = $monthNames[$month];
                 <input type="hidden" id="correctAttendanceId" name="attendance_id">
                 <input type="hidden" id="correctEmployeeId" name="employee_id">
                 <input type="hidden" id="correctDateValue" name="date">
-                
+
                 <div class="form-grid">
                     <div class="form-field">
                         <label>AM In</label>
@@ -429,17 +427,17 @@ $currentMonthName = $monthNames[$month];
                         <input type="time" id="correctOtOut" name="ot_out" class="form-input" onchange="calculateTotalHours()">
                     </div>
                 </div>
-                
+
                 <div class="modal-net-row" style="margin-top: 16px;">
                     <span>CALCULATED TOTAL HOURS</span>
                     <strong id="calculatedTotalHours" style="color: #0b044d;">0.0 hrs</strong>
                 </div>
-                
+
                 <div class="form-field" style="margin-top: 16px;">
                     <label>Reason for Correction <span style="color: #8e1e18;">*</span></label>
                     <textarea id="correctReason" name="reason" class="form-input" rows="3" placeholder="Explain why this correction is needed..." required></textarea>
                 </div>
-                
+
                 <div class="form-field" style="margin-top: 16px;">
                     <label>Supporting Documents (PDF, JPG, PNG) <span style="color: #8e1e18;">*</span></label>
                     <input type="file" id="correctAttachments" name="attachments[]" class="form-input" accept=".pdf,.jpg,.jpeg,.png" multiple required style="padding: 8px;">
@@ -652,6 +650,14 @@ input[type="date"].filter-select-sm::-webkit-calendar-picker-indicator {
     display: flex; align-items: center; gap: 6px;
 }
 .btn-export-sm:hover { background: #1a0f6e; }
+.btn-filter-main {
+    padding: 8px 16px; background: #0b044d; color: #fff;
+    border: none; border-radius: 6px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+}
+.btn-filter-main:hover { background: #1a0f6e; }
 .detailed-dtr-table {
     width: 100%; border-collapse: collapse;
     font-size: 12px;
@@ -720,7 +726,7 @@ function openDTRModal(record, index) {
     const workingDays = record.present + record.absent + record.halfday;
     const rate = workingDays > 0 ? Math.round((record.present / workingDays) * 100) : 0;
 
-    document.getElementById('dtrPeriod').textContent = '{{ $currentMonthName }} {{ $year }}'.toUpperCase();
+    document.getElementById('dtrPeriod').textContent = '{{ $periodDisplay }}'.toUpperCase();
     document.getElementById('dtrName').textContent = record.name;
     document.getElementById('dtrPosition').textContent = record.position;
     document.getElementById('dtrDept').textContent = record.dept;
@@ -778,7 +784,7 @@ function downloadDTR() {
     doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
     doc.text('Municipal Government of Pagsanjan', 105, 23, { align: 'center' });
-    doc.text('{{ $currentMonthName }} {{ $year }}', 105, 30, { align: 'center' });
+    doc.text('{{ $periodDisplay }}', 105, 30, { align: 'center' });
 
     // Employee Info
     doc.setTextColor(0, 0, 0);
@@ -899,7 +905,7 @@ function downloadDTR() {
     doc.text('Municipal Government of Pagsanjan - Human Resource Management Office', 105, 285, { align: 'center' });
 
     // Save PDF
-    const fileName = `DTR_${currentDTRRecord.id}_${currentDTRRecord.name.replace(/\s+/g, '_')}_{{ $currentMonthName }}_{{ $year }}.pdf`;
+    const fileName = `DTR_${currentDTRRecord.id}_${currentDTRRecord.name.replace(/\s+/g, '_')}_{{ str_replace([' ', ',', '-'], '_', $periodDisplay) }}.pdf`;
     doc.save(fileName);
 
     // Reset button
@@ -967,40 +973,40 @@ function calculateTotalHours() {
     const pmOut = document.getElementById('correctPmOut').value;
     const otIn = document.getElementById('correctOtIn').value;
     const otOut = document.getElementById('correctOtOut').value;
-    
+
     let totalMinutes = 0;
-    
+
     // Calculate main work hours (AM In to PM Out)
     if (amIn && pmOut) {
         const timeIn = new Date('1970-01-01 ' + amIn);
         const timeOut = new Date('1970-01-01 ' + pmOut);
         let workMinutes = (timeOut - timeIn) / 1000 / 60;
-        
+
         // Handle overnight shift (if PM Out is before AM In)
         if (workMinutes < 0) {
             workMinutes += 24 * 60;
         }
-        
+
         // Deduct 1-hour break (60 minutes)
         workMinutes -= 60;
-        
+
         totalMinutes += Math.max(0, workMinutes);
     }
-    
+
     // Add overtime hours
     if (otIn && otOut) {
         const otTimeIn = new Date('1970-01-01 ' + otIn);
         const otTimeOut = new Date('1970-01-01 ' + otOut);
         let otMinutes = (otTimeOut - otTimeIn) / 1000 / 60;
-        
+
         // Handle overnight OT
         if (otMinutes < 0) {
             otMinutes += 24 * 60;
         }
-        
+
         totalMinutes += Math.max(0, otMinutes);
     }
-    
+
     // Calculate late minutes (if AM In is after 8:10 AM)
     if (amIn) {
         const amInTime = new Date('1970-01-01 ' + amIn);
@@ -1010,7 +1016,7 @@ function calculateTotalHours() {
             totalMinutes -= lateMinutes;
         }
     }
-    
+
     // Calculate undertime (if PM Out is before 5:00 PM)
     if (pmOut) {
         const pmOutTime = new Date('1970-01-01 ' + pmOut);
@@ -1020,10 +1026,10 @@ function calculateTotalHours() {
             totalMinutes -= undertimeMinutes;
         }
     }
-    
+
     const totalHours = Math.max(0, totalMinutes / 60);
     document.getElementById('calculatedTotalHours').textContent = totalHours.toFixed(1) + ' hrs';
-    
+
     // Color code based on expected hours
     const display = document.getElementById('calculatedTotalHours');
     if (totalHours >= 8) {
@@ -1039,7 +1045,7 @@ function calculateTotalHours() {
 
 function openCorrectModal(attendanceId, date) {
     currentCorrectAttendanceId = attendanceId;
-    
+
     fetch(`/admin/attendance/record/${attendanceId}`)
         .then(response => response.json())
         .then(data => {
@@ -1048,7 +1054,7 @@ function openCorrectModal(attendanceId, date) {
             document.getElementById('correctAttendanceId').value = data.is_new ? '' : data.id;
             document.getElementById('correctEmployeeId').value = data.employee_id;
             document.getElementById('correctDateValue').value = data.date;
-            
+
             // Convert time format from HH:MM:SS or H:MM AM/PM to HH:MM
             const convertTime = (time) => {
                 if (!time) return '';
@@ -1064,21 +1070,21 @@ function openCorrectModal(attendanceId, date) {
                     return '';
                 }
             };
-            
+
             document.getElementById('correctAmIn').value = convertTime(data.am_in);
             document.getElementById('correctAmOut').value = convertTime(data.am_out);
             document.getElementById('correctPmIn').value = convertTime(data.pm_in);
             document.getElementById('correctPmOut').value = convertTime(data.pm_out);
             document.getElementById('correctOtIn').value = convertTime(data.ot_in);
             document.getElementById('correctOtOut').value = convertTime(data.ot_out);
-            
+
             document.getElementById('correctReason').value = '';
             document.getElementById('correctAttachments').value = '';
             document.getElementById('filePreview').innerHTML = '';
-            
+
             // Calculate initial total hours
             calculateTotalHours();
-            
+
             document.getElementById('correctModal').style.display = 'flex';
         })
         .catch(error => {
@@ -1095,15 +1101,15 @@ function closeCorrectModal() {
 document.getElementById('correctAttachments').addEventListener('change', function(e) {
     const preview = document.getElementById('filePreview');
     preview.innerHTML = '';
-    
+
     Array.from(e.target.files).forEach(file => {
         const item = document.createElement('div');
         item.className = 'file-preview-item';
-        
-        const icon = file.type === 'application/pdf' 
+
+        const icon = file.type === 'application/pdf'
             ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
             : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
-        
+
         item.innerHTML = icon + '<span>' + file.name + '</span>';
         preview.appendChild(item);
     });
@@ -1111,14 +1117,14 @@ document.getElementById('correctAttachments').addEventListener('change', functio
 
 document.getElementById('correctForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
+
     const formData = new FormData(this);
     const btn = document.getElementById('correctSubmitBtn');
     const originalHTML = btn.innerHTML;
-    
+
     btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" opacity="0.75"/></svg> Saving...';
     btn.disabled = true;
-    
+
     fetch('/admin/attendance/correct', {
         method: 'POST',
         body: formData,
@@ -1154,15 +1160,15 @@ function openDetailedDTRModal(employeeId, name, empId) {
 
     document.getElementById('detailedName').textContent = name;
     document.getElementById('detailedEmpId').textContent = empId;
-    
+
     // Set default date range to current month
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
     const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    
+
     document.getElementById('detailedStartDate').value = firstDay.toISOString().split('T')[0];
     document.getElementById('detailedEndDate').value = lastDay.toISOString().split('T')[0];
-    
+
     document.getElementById('detailedDTRModal').style.display = 'flex';
 
     loadDetailedDTR();
@@ -1178,12 +1184,12 @@ function loadDetailedDTR() {
 
     const startDate = document.getElementById('detailedStartDate').value;
     const endDate = document.getElementById('detailedEndDate').value;
-    
+
     if (!startDate || !endDate) {
         alert('Please select both start and end dates');
         return;
     }
-    
+
     if (new Date(startDate) > new Date(endDate)) {
         alert('Start date must be before end date');
         return;
@@ -1210,7 +1216,7 @@ function renderDetailedDTR(data) {
     let totalPresent = 0;
     let totalAbsent = 0;
     let totalLate = 0;
-    
+
     // Update period display
     const startDate = document.getElementById('detailedStartDate').value;
     const endDate = document.getElementById('detailedEndDate').value;
