@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Attendance - Test Mode</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .info-box {
+            background: #e8f5ff;
+            border: 2px solid #3b82f6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .info-box h3 {
+            color: #1e40af;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .info-box p {
+            color: #1e40af;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .time-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .time-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        .time-card.active {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+        .time-card h4 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .time-card p {
+            color: #666;
+            font-size: 12px;
+        }
+        .test-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .test-section h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result.success {
+            background: #c6f6d5;
+            border: 2px solid #48bb78;
+        }
+        .result.error {
+            background: #fed7d7;
+            border: 2px solid #f56565;
+        }
+        .result h2 {
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        .result p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 QR Attendance - Test Mode</h1>
+        <p class="subtitle">Test different time periods and scenarios</p>
+        
+        <div class="info-box">
+            <h3>📍 Current Server Time</h3>
+            <p id="currentTime">Loading...</p>
+            <p id="currentPeriod">Determining period...</p>
+        </div>
+
+        <div class="time-info">
+            <div class="time-card" id="amCard">
+                <h4>🌅 AM Period</h4>
+                <p>8:00 AM - 12:00 PM</p>
+                <p>am_in / am_out</p>
+            </div>
+            <div class="time-card" id="pmCard">
+                <h4>☀️ PM Period</h4>
+                <p>1:00 PM - 5:00 PM</p>
+                <p>pm_in / pm_out</p>
+            </div>
+            <div class="time-card" id="otCard">
+                <h4>🌙 OT Period</h4>
+                <p>6:00 PM - 6:00 AM</p>
+                <p>ot_in / ot_out</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Manual Test</h3>
+            <div class="form-group">
+                <label>Employee ID:</label>
+                <input type="number" id="employeeId" placeholder="Enter employee ID (e.g., 1)" value="1">
+            </div>
+            <div class="form-group">
+                <label>Simulate Time Period:</label>
+                <select id="timePeriod">
+                    <option value="current">Use Current Time</option>
+                    <option value="am">AM Period (8:00 AM)</option>
+                    <option value="pm">PM Period (1:00 PM)</option>
+                    <option value="ot">OT Period (6:00 PM)</option>
+                </select>
+            </div>
+            <button class="btn btn-success" onclick="testAttendance()">🧪 Test Attendance</button>
+        </div>
+
+        <button class="btn btn-primary" onclick="window.location.href='/attendance'">
+            📷 Go to Live Scanner
+        </button>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: true 
+            });
+            
+            document.getElementById('currentTime').textContent = `⏰ ${timeStr}`;
+            
+            const hour = now.getHours();
+            let period = '';
+            
+            // Reset all cards
+            document.getElementById('amCard').classList.remove('active');
+            document.getElementById('pmCard').classList.remove('active');
+            document.getElementById('otCard').classList.remove('active');
+            
+            if (hour >= 8 && hour < 12) {
+                period = '🌅 AM Period - Morning Shift';
+                document.getElementById('amCard').classList.add('active');
+            } else if (hour >= 13 && hour < 17) {
+                period = '☀️ PM Period - Afternoon Shift';
+                document.getElementById('pmCard').classList.add('active');
+            } else {
+                period = '🌙 OT Period - Overtime/Night Shift';
+                document.getElementById('otCard').classList.add('active');
+            }
+            
+            document.getElementById('currentPeriod').textContent = period;
+        }
+
+        async function testAttendance() {
+            const employeeId = document.getElementById('employeeId').value;
+            const timePeriod = document.getElementById('timePeriod').value;
+            const result = document.getElementById('result');
+            
+            if (!employeeId) {
+                result.className = 'result error';
+                result.style.display = 'block';
+                result.innerHTML = '<h2>❌ Error</h2><p>Please enter an employee ID</p>';
+                return;
+            }
+
+            result.className = 'result';
+            result.style.display = 'block';
+            result.innerHTML = '<h2>⏳ Processing...</h2><p>Simulating attendance scan...</p>';
+
+            try {
+                // Create a simple test QR code image
+                const canvas = document.createElement('canvas');
+                canvas.width = 200;
+                canvas.height = 200;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, 200, 200);
+                ctx.fillStyle = 'black';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(employeeId, 100, 100);
+
+                const blob = await new Promise(resolve => canvas.toBlob(resolve));
+                const formData = new FormData();
+                formData.append('qr_image', blob, 'test_qr.png');
+
+                const response = await fetch('/scan_qr', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <h2>✅ ${data.action}</h2>
+                        <p><strong>${data.employee.name}</strong></p>
+                        <p>${data.employee.position || 'N/A'}</p>
+                        <p>Time: ${data.employee.time}</p>
+                        <p style="margin-top: 10px; font-size: 12px; color: #059669;">
+                            💡 Tip: Check the database to verify the record was saved
+                        </p>
+                    `;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `
+                        <h2>❌ Error</h2>
+                        <p>${data.message}</p>
+                        <p style="margin-top: 10px; font-size: 12px; color: #dc2626;">
+                            💡 This might be expected based on current time and existing records
+                        </p>
+                    `;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `<h2>❌ Error</h2><p>${error.message}</p>`;
+            }
+        }
+
+        // Update time every second
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+    </script>
+</body>
+</html>

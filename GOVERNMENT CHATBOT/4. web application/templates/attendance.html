@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Attendance Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        #video {
+            width: 100%;
+            border-radius: 10px;
+            background: #000;
+            display: none;
+        }
+        #canvas {
+            display: none;
+        }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+        .result.success {
+            background: #c6f6d5;
+            border: 2px solid #48bb78;
+        }
+        .result.error {
+            background: #fed7d7;
+            border: 2px solid #f56565;
+        }
+        .result h2 {
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .result p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+        .status {
+            text-align: center;
+            margin: 15px 0;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 QR Attendance Scanner</h1>
+        
+        <video id="video" autoplay></video>
+        <canvas id="canvas"></canvas>
+        
+        <button id="startBtn" class="btn btn-primary">Start Camera</button>
+        <button id="stopBtn" class="btn btn-primary" style="display:none; background:#f56565;">Stop Scanning</button>
+        
+        <div class="status" id="status"></div>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const result = document.getElementById('result');
+        const status = document.getElementById('status');
+        
+        let stream = null;
+        let scanning = false;
+        let processing = false;
+        let videoReady = false;
+        let lastScanTime = 0;
+        const COOLDOWN_MS = 5000; // 5 seconds cooldown
+
+        // Wait for video to be ready
+        video.addEventListener('loadedmetadata', () => {
+            videoReady = true;
+            console.log('Video ready:', video.videoWidth, 'x', video.videoHeight);
+        });
+
+        startBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                video.srcObject = stream;
+                
+                // Wait for video to actually start playing
+                await video.play();
+                
+                // Wait a bit more for video dimensions to be available
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                if (video.videoWidth === 0 || video.videoHeight === 0) {
+                    throw new Error('Video dimensions not available');
+                }
+                
+                video.style.display = 'block';
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'block';
+                scanning = true;
+                videoReady = true;
+                status.textContent = '📷 Scanning... Hold QR code in front of camera';
+                
+                // Start scanning after video is ready
+                requestAnimationFrame(scanQRCode);
+            } catch (err) {
+                console.error('Camera error:', err);
+                status.textContent = 'Error accessing camera: ' + err.message;
+                status.style.color = '#f56565';
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            scanning = false;
+            videoReady = false;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            video.style.display = 'none';
+            startBtn.style.display = 'block';
+            stopBtn.style.display = 'none';
+            status.textContent = 'Camera stopped.';
+            status.style.color = '#666';
+        });
+
+        function scanQRCode() {
+            if (!scanning || !videoReady) return;
+
+            // Check if video has valid dimensions
+            if (video.videoWidth === 0 || video.videoHeight === 0) {
+                requestAnimationFrame(scanQRCode);
+                return;
+            }
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            try {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+                
+                if (code && !processing) {
+                    // Check cooldown timer
+                    const now = Date.now();
+                    const timeSinceLastScan = now - lastScanTime;
+                    
+                    if (timeSinceLastScan < COOLDOWN_MS) {
+                        const remainingSeconds = Math.ceil((COOLDOWN_MS - timeSinceLastScan) / 1000);
+                        status.textContent = `⏳ Please wait ${remainingSeconds} seconds...`;
+                        status.style.color = '#f59e0b';
+                        requestAnimationFrame(scanQRCode);
+                        return;
+                    }
+                    
+                    processing = true;
+                    lastScanTime = now;
+                    processQRCode(code.data);
+                } else {
+                    requestAnimationFrame(scanQRCode);
+                }
+            } catch (err) {
+                console.error('Scan error:', err);
+                requestAnimationFrame(scanQRCode);
+            }
+        }
+
+        async function processQRCode(employeeId) {
+            status.textContent = '⏳ Processing...';
+            
+            try {
+                canvas.toBlob(async (blob) => {
+                    const formData = new FormData();
+                    formData.append('qr_image', blob, 'qr.png');
+                    
+                    const response = await fetch('/scan_qr', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Stop scanning after successful scan
+                        scanning = false;
+                        videoReady = false;
+                        
+                        result.className = 'result success';
+                        result.style.display = 'block';
+                        result.innerHTML = `
+                            <h2>✅ ${data.action}</h2>
+                            <p><strong>${data.employee.name}</strong></p>
+                            <p>${data.employee.position}</p>
+                            <p>Time: ${data.employee.time}</p>
+                        `;
+                        status.textContent = '✅ Success! Scan recorded.';
+                        status.style.color = '#48bb78';
+                        
+                        // Auto-restart after 3 seconds
+                        setTimeout(() => {
+                            result.style.display = 'none';
+                            processing = false;
+                            scanning = true;
+                            videoReady = true;
+                            status.textContent = '📷 Scanning... Hold QR code in front of camera';
+                            status.style.color = '#666';
+                            requestAnimationFrame(scanQRCode);
+                        }, 3000);
+                    } else {
+                        result.className = 'result error';
+                        result.style.display = 'block';
+                        result.innerHTML = `<h2>❌ Error</h2><p>${data.message}</p>`;
+                        status.textContent = '❌ ' + data.message;
+                        status.style.color = '#f56565';
+                        
+                        // Continue scanning after error
+                        setTimeout(() => {
+                            result.style.display = 'none';
+                            processing = false;
+                            status.style.color = '#666';
+                            if (scanning) {
+                                status.textContent = '📷 Scanning... Hold QR code in front of camera';
+                                requestAnimationFrame(scanQRCode);
+                            }
+                        }, 3000);
+                    }
+                });
+            } catch (err) {
+                console.error('Process error:', err);
+                result.className = 'result error';
+                result.style.display = 'block';
+                result.innerHTML = `<h2>❌ Error</h2><p>${err.message}</p>`;
+                status.textContent = '❌ Error: ' + err.message;
+                status.style.color = '#f56565';
+                setTimeout(() => {
+                    result.style.display = 'none';
+                    processing = false;
+                    if (scanning) {
+                        status.textContent = '📷 Scanning... Hold QR code in front of camera';
+                        status.style.color = '#666';
+                        requestAnimationFrame(scanQRCode);
+                    }
+                }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>

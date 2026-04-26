@@ -498,3 +498,163 @@ window.closeConfirmModal = closeConfirmModal;
 window.submitConfirmation = submitConfirmation;
 window.viewEmployee = viewEmployee;
 window.closeViewModal = closeViewModal;
+window.generateQRCode = generateQRCode;
+window.closeQRModal = closeQRModal;
+window.downloadQRCode = downloadQRCode;
+window.printQRCode = printQRCode;
+
+// QR Code Functions
+let currentQRData = null;
+
+function generateQRCode(employeeId, employeeName) {
+    currentQRData = { employeeId, employeeName };
+    
+    document.getElementById('qrEmployeeName').textContent = employeeName;
+    document.getElementById('qrEmployeeId').textContent = `Employee ID: ${employeeId}`;
+    document.getElementById('qrCodeModal').style.display = 'flex';
+    document.getElementById('qrCodeContainer').innerHTML = '<p style="color:#6b6a8a;">Generating QR Code...</p>';
+    
+    // Generate QR code using QRCode.js library
+    setTimeout(() => {
+        const qrContainer = document.getElementById('qrCodeContainer');
+        qrContainer.innerHTML = '';
+        
+        const qrWrapper = document.createElement('div');
+        qrWrapper.style.background = 'white';
+        qrWrapper.style.padding = '20px';
+        qrWrapper.style.borderRadius = '8px';
+        qrWrapper.style.display = 'inline-block';
+        
+        new QRCode(qrWrapper, {
+            text: String(employeeId),
+            width: 256,
+            height: 256,
+            colorDark: '#0b044d',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        
+        qrContainer.appendChild(qrWrapper);
+    }, 300);
+}
+
+function closeQRModal() {
+    document.getElementById('qrCodeModal').style.display = 'none';
+    currentQRData = null;
+}
+
+function downloadQRCode() {
+    if (!currentQRData) return;
+    
+    const canvas = document.querySelector('#qrCodeContainer canvas');
+    if (!canvas) return;
+    
+    // Create a new canvas with employee info
+    const finalCanvas = document.createElement('canvas');
+    const ctx = finalCanvas.getContext('2d');
+    
+    finalCanvas.width = 400;
+    finalCanvas.height = 550;
+    
+    // White background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+    
+    // Draw QR code
+    ctx.drawImage(canvas, 50, 50, 300, 300);
+    
+    // Add text
+    ctx.fillStyle = '#0b044d';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(currentQRData.employeeName, 200, 380);
+    
+    ctx.fillStyle = '#6b6a8a';
+    ctx.font = '18px Arial';
+    ctx.fillText(`ID: ${currentQRData.employeeId}`, 200, 420);
+    
+    ctx.font = '16px Arial';
+    ctx.fillText('Attendance QR Code', 200, 460);
+    
+    // Border
+    ctx.strokeStyle = '#0b044d';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(10, 10, 380, 530);
+    
+    // Download
+    finalCanvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `QR_${currentQRData.employeeId}_${currentQRData.employeeName.replace(/\s+/g, '_')}.png`;
+        link.click();
+        URL.revokeObjectURL(url);
+    });
+}
+
+function printQRCode() {
+    if (!currentQRData) return;
+    
+    const canvas = document.querySelector('#qrCodeContainer canvas');
+    if (!canvas) return;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>QR Code - ${currentQRData.employeeName}</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    margin: 0;
+                    background: #f5f5f5;
+                }
+                .qr-card {
+                    background: white;
+                    padding: 40px;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+                    text-align: center;
+                    border: 2px solid #0b044d;
+                }
+                .qr-card h2 {
+                    margin: 20px 0 10px;
+                    color: #0b044d;
+                    font-size: 24px;
+                }
+                .qr-card p {
+                    margin: 5px 0;
+                    color: #6b6a8a;
+                    font-size: 16px;
+                }
+                img {
+                    border: 4px solid #f0effe;
+                    border-radius: 8px;
+                }
+                @media print {
+                    body { background: white; }
+                    .qr-card { box-shadow: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="qr-card">
+                <img src="${canvas.toDataURL()}" width="300" height="300" />
+                <h2>${currentQRData.employeeName}</h2>
+                <p>Employee ID: ${currentQRData.employeeId}</p>
+                <p style="font-size: 14px; margin-top: 20px;">Attendance QR Code</p>
+            </div>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+    }, 250);
+}

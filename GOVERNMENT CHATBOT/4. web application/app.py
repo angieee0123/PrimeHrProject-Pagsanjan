@@ -9,9 +9,11 @@ from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 import os
+from qr_attendance import qr_attendance
 
 app = Flask(__name__)
 CORS(app, resources={r"/chat": {"origins": ["http://localhost:8000", "http://127.0.0.1:8000"]}})
+app.register_blueprint(qr_attendance)
 
 # Load models and data
 print("Loading models and data...")
