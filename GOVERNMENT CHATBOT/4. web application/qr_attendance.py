@@ -190,7 +190,7 @@ def record_manual_attendance():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@qr_attendance.route('/attendance/report', methods=['GET'])
+@qr_attendance.route('/attendance/report/data', methods=['GET'])
 def get_attendance_report():
     try:
         date_from = request.args.get('date_from')
@@ -200,14 +200,22 @@ def get_attendance_report():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
-        # Build query
+        # Build query - INNER JOIN ensures only registered employees are fetched
         query = """
             SELECT 
-                a.*,
+                a.id,
+                a.employee_id,
+                a.date,
+                a.am_in,
+                a.am_out,
+                a.pm_in,
+                a.pm_out,
+                a.ot_in,
+                a.ot_out,
                 CONCAT(e.first_name, ' ', e.last_name) as employee_name,
                 e.employee_id as emp_id
             FROM attendance a
-            JOIN employees e ON a.employee_id = e.id
+            INNER JOIN employees e ON a.employee_id = e.id
             WHERE 1=1
         """
         params = []
@@ -226,16 +234,28 @@ def get_attendance_report():
         
         query += " ORDER BY a.date DESC, e.first_name ASC"
         
-        cursor.execute(query, params)
+        print(f"Query: {query}")
+        print(f"Params: {params}")
+        
+        cursor.execute(query, tuple(params))
         records = cursor.fetchall()
         
-        # Convert time objects to strings
+        # Convert all fields to JSON-serializable format
         for record in records:
-            for key in ['am_in', 'am_out', 'pm_in', 'pm_out', 'ot_in', 'ot_out']:
-                if record[key]:
-                    record[key] = str(record[key])
-            if record['date']:
+            # Convert date to string
+            if record.get('date'):
                 record['date'] = str(record['date'])
+            
+            # Convert time fields (timedelta) to string
+            for key in ['am_in', 'am_out', 'pm_in', 'pm_out', 'ot_in', 'ot_out']:
+                if record.get(key) is not None:
+                    # timedelta to time string
+                    td = record[key]
+                    total_seconds = int(td.total_seconds())
+                    hours = total_seconds // 3600
+                    minutes = (total_seconds % 3600) // 60
+                    seconds = total_seconds % 60
+                    record[key] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
         
         # Calculate stats
         stats = calculate_stats(cursor, date_from, date_to)
@@ -250,10 +270,13 @@ def get_attendance_report():
         })
         
     except Exception as e:
+        import traceback
+        print(f"Error in get_attendance_report: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({'success': False, 'message': str(e)}), 500
 
 def calculate_stats(cursor, date_from, date_to):
-    """Calculate attendance statistics"""
+    """Calculate attendance statistics for registered employees only"""
     stats = {
         'total_records': 0,
         'present_today': 0,
@@ -262,41 +285,53 @@ def calculate_stats(cursor, date_from, date_to):
     }
     
     try:
-        # Total records
-        query = "SELECT COUNT(*) as count FROM attendance WHERE 1=1"
+        # Total records - only for registered employees
+        query = """
+            SELECT COUNT(*) as count 
+            FROM attendance a
+            INNER JOIN employees e ON a.employee_id = e.id
+            WHERE 1=1
+        """
         params = []
         
         if date_from:
-            query += " AND date >= %s"
+            query += " AND a.date >= %s"
             params.append(date_from)
         if date_to:
-            query += " AND date <= %s"
+            query += " AND a.date <= %s"
             params.append(date_to)
         
-        cursor.execute(query, params)
+        cursor.execute(query, tuple(params))
         result = cursor.fetchone()
         stats['total_records'] = result['count'] if result else 0
         
-        # Present today
+        # Present today - only registered employees
         cursor.execute("""
-            SELECT COUNT(DISTINCT employee_id) as count 
-            FROM attendance 
-            WHERE date = CURDATE() AND (am_in IS NOT NULL OR pm_in IS NOT NULL OR ot_in IS NOT NULL)
+            SELECT COUNT(DISTINCT a.employee_id) as count 
+            FROM attendance a
+            INNER JOIN employees e ON a.employee_id = e.id
+            WHERE a.date = CURDATE() 
+            AND (a.am_in IS NOT NULL OR a.pm_in IS NOT NULL OR a.ot_in IS NOT NULL)
         """)
         result = cursor.fetchone()
         stats['present_today'] = result['count'] if result else 0
         
-        # Calculate average hours and total OT
-        query = "SELECT * FROM attendance WHERE 1=1"
+        # Calculate average hours and total OT - only for registered employees
+        query = """
+            SELECT a.am_in, a.am_out, a.pm_in, a.pm_out, a.ot_in, a.ot_out
+            FROM attendance a
+            INNER JOIN employees e ON a.employee_id = e.id
+            WHERE 1=1
+        """
         params = []
         if date_from:
-            query += " AND date >= %s"
+            query += " AND a.date >= %s"
             params.append(date_from)
         if date_to:
-            query += " AND date <= %s"
+            query += " AND a.date <= %s"
             params.append(date_to)
         
-        cursor.execute(query, params)
+        cursor.execute(query, tuple(params))
         all_records = cursor.fetchall()
         
         total_minutes = 0
@@ -324,6 +359,8 @@ def calculate_stats(cursor, date_from, date_to):
         
     except Exception as e:
         print(f"Stats calculation error: {e}")
+        import traceback
+        print(traceback.format_exc())
     
     return stats
 

@@ -224,8 +224,10 @@
                     <input type="date" id="dateTo" value="">
                 </div>
                 <div class="filter-group">
-                    <label>Employee ID:</label>
-                    <input type="number" id="employeeId" placeholder="All employees">
+                    <label>Employee:</label>
+                    <select id="employeeId">
+                        <option value="">All employees</option>
+                    </select>
                 </div>
                 <div class="filter-group">
                     <label>&nbsp;</label>
@@ -294,10 +296,30 @@
         document.getElementById('dateFrom').value = today;
         document.getElementById('dateTo').value = today;
 
-        // Load attendance on page load
+        // Load employees and attendance on page load
         window.addEventListener('DOMContentLoaded', () => {
+            loadEmployees();
             loadAttendance();
         });
+
+        async function loadEmployees() {
+            try {
+                const response = await fetch('/attendance/employees');
+                const data = await response.json();
+
+                if (data.success) {
+                    const select = document.getElementById('employeeId');
+                    data.employees.forEach(emp => {
+                        const option = document.createElement('option');
+                        option.value = emp.id;
+                        option.textContent = `${emp.employee_id} - ${emp.first_name} ${emp.last_name}`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading employees:', error);
+            }
+        }
 
         async function loadAttendance() {
             const dateFrom = document.getElementById('dateFrom').value;
@@ -308,7 +330,7 @@
             tbody.innerHTML = '<tr><td colspan="10" class="loading">Loading...</td></tr>';
 
             try {
-                let url = `/attendance/report?date_from=${dateFrom}&date_to=${dateTo}`;
+                let url = `/attendance/report/data?date_from=${dateFrom}&date_to=${dateTo}`;
                 if (employeeId) {
                     url += `&employee_id=${employeeId}`;
                 }
@@ -320,11 +342,12 @@
                     displayAttendance(data.records);
                     updateStats(data.stats);
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="10" class="no-data">Error loading data</td></tr>';
+                    console.error('Error from server:', data.message);
+                    tbody.innerHTML = `<tr><td colspan="10" class="no-data">Error: ${data.message || 'Failed to load data'}</td></tr>`;
                 }
             } catch (error) {
                 console.error('Error:', error);
-                tbody.innerHTML = '<tr><td colspan="10" class="no-data">Error loading data</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="10" class="no-data">Error: ${error.message}</td></tr>`;
             }
         }
 
@@ -343,7 +366,7 @@
                 return `
                     <tr>
                         <td>${formatDate(record.date)}</td>
-                        <td><strong>${record.employee_name}</strong><br><small>${record.employee_id}</small></td>
+                        <td><strong>${record.employee_name}</strong><br><small>${record.emp_id}</small></td>
                         <td>${formatTime(record.am_in, 'in')}</td>
                         <td>${formatTime(record.am_out, 'out')}</td>
                         <td>${formatTime(record.pm_in, 'in')}</td>
@@ -370,8 +393,16 @@
             if (!timeStr) {
                 return '<span class="time-badge time-empty">--:--</span>';
             }
+            
+            // Convert 24-hour to 12-hour format
+            const [hours, minutes] = timeStr.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = hour % 12 || 12;
+            const formattedTime = `${hour12}:${minutes} ${ampm}`;
+            
             const className = type === 'in' ? 'time-in' : 'time-out';
-            return `<span class="time-badge ${className}">${timeStr}</span>`;
+            return `<span class="time-badge ${className}">${formattedTime}</span>`;
         }
 
         function calculateTotalHours(record) {
