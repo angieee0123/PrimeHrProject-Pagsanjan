@@ -148,9 +148,133 @@ Route::get('/admin/payroll', function () {
 })->middleware('auth')->name('admin.payroll');
 
 Route::get('/admin/departments', function () {
-    $departments = \App\Models\Department::orderBy('name')->get();
-    return view('admin.departments.adminDepartments', compact('departments'));
+    $departments  = \App\Models\Department::orderBy('name')->get();
+    $designations = \App\Models\Designation::with('department')->orderBy('title')->get();
+    return view('admin.departments.adminDepartments', compact('departments', 'designations'));
 })->middleware('auth')->name('admin.departments');
+
+Route::get('/admin/designations/template', function () {
+    $headers = [
+        'Content-Type'        => 'text/csv',
+        'Content-Disposition' => 'attachment; filename=designations_template.csv',
+    ];
+
+    $callback = function () {
+        $file = fopen('php://output', 'w');
+        fputcsv($file, ['title', 'department_code', 'salary_grade', 'monthly_rate', 'employment_type', 'description']);
+        fputcsv($file, ['Municipal Health Officer', 'MHO', 'SG-24', '35000', 'Permanent', 'Head of Municipal Health Office']);
+        fputcsv($file, ['Administrative Assistant', 'OM', 'SG-8', '18000', 'Casual', '']);
+        fclose($file);
+    };
+
+    return response()->stream($callback, 200, $headers);
+})->middleware('auth')->name('admin.designations.template');
+
+Route::post('/admin/designations/import', function (\Illuminate\Http\Request $request) {
+    $request->validate(['csv_file' => 'required|file|mimes:csv,txt']);
+
+    $file     = fopen($request->file('csv_file')->getRealPath(), 'r');
+    $header   = fgetcsv($file);
+    $imported = 0;
+    $skipped  = 0;
+
+    while (($row = fgetcsv($file)) !== false) {
+        if (count($row) < 2) { $skipped++; continue; }
+
+        [$title, $department_code, $salary_grade, $monthly_rate, $employment_type, $description] = array_pad($row, 6, null);
+
+        if (!$title || !$department_code) { $skipped++; continue; }
+
+        $department = \App\Models\Department::where('code', strtoupper(trim($department_code)))->first();
+        if (!$department) { $skipped++; continue; }
+
+        $validTypes = ['Permanent', 'Casual', 'Contractual', 'Job Order'];
+        if (!in_array($employment_type, $validTypes)) $employment_type = null;
+
+        \App\Models\Designation::create([
+            'title'           => trim($title),
+            'department_id'   => $department->id,
+            'salary_grade'    => $salary_grade ? trim($salary_grade) : null,
+            'monthly_rate'    => $monthly_rate ? (float) $monthly_rate : null,
+            'employment_type' => $employment_type,
+            'description'     => $description ? trim($description) : null,
+        ]);
+        $imported++;
+    }
+
+    fclose($file);
+
+    return redirect()->route('admin.departments')
+        ->with('success', "Import complete: {$imported} designations imported, {$skipped} rows skipped.");
+})->middleware('auth')->name('admin.designations.import');
+
+Route::post('/admin/designations', function (\Illuminate\Http\Request $request) {
+    $data = $request->validate([
+        'title'           => ['required', 'string', 'max:255'],
+        'department_id'   => ['required', 'exists:departments,id'],
+        'salary_grade'    => ['nullable', 'string', 'max:50'],
+        'monthly_rate'    => ['nullable', 'numeric', 'min:0'],
+        'employment_type' => ['nullable', 'in:Permanent,Casual,Contractual,Job Order'],
+        'description'     => ['nullable', 'string'],
+    ]);
+
+    \App\Models\Designation::create($data);
+
+    return redirect()->route('admin.departments')->with('success', 'Designation added successfully.');
+})->middleware('auth')->name('admin.designations.store');
+
+Route::get('/admin/departments/template', function () {
+    $headers = [
+        'Content-Type'        => 'text/csv',
+        'Content-Disposition' => 'attachment; filename=departments_template.csv',
+    ];
+
+    $callback = function () {
+        $file = fopen('php://output', 'w');
+        fputcsv($file, ['code', 'name', 'head', 'personnel_count', 'status', 'description']);
+        fputcsv($file, ['MHO', 'Municipal Health Office', 'Municipal Health Officer', '38', 'Active', 'Handles public health services']);
+        fputcsv($file, ['MEO', 'Office of the Mun. Engineer', 'Municipal Engineer', '22', 'Active', '']);
+        fclose($file);
+    };
+
+    return response()->stream($callback, 200, $headers);
+})->middleware('auth')->name('admin.departments.template');
+
+Route::post('/admin/departments/import', function (\Illuminate\Http\Request $request) {
+    $request->validate(['csv_file' => 'required|file|mimes:csv,txt']);
+
+    $file = fopen($request->file('csv_file')->getRealPath(), 'r');
+    $header = fgetcsv($file); // skip header row
+
+    $imported = 0;
+    $skipped  = 0;
+
+    while (($row = fgetcsv($file)) !== false) {
+        if (count($row) < 5) { $skipped++; continue; }
+
+        [$code, $name, $head, $personnel_count, $status, $description] = array_pad($row, 6, null);
+
+        if (!$code || !$name || !$head) { $skipped++; continue; }
+        if (!in_array($status, ['Active', 'Inactive'])) $status = 'Active';
+
+        \App\Models\Department::updateOrCreate(
+            ['code' => strtoupper(trim($code))],
+            [
+                'name'            => trim($name),
+                'head'            => trim($head),
+                'personnel_count' => (int) ($personnel_count ?? 0),
+                'status'          => $status,
+                'description'     => $description ? trim($description) : null,
+            ]
+        );
+        $imported++;
+    }
+
+    fclose($file);
+
+    return redirect()->route('admin.departments')
+        ->with('success', "Import complete: {$imported} departments imported, {$skipped} rows skipped.");
+})->middleware('auth')->name('admin.departments.import');
 
 Route::post('/admin/departments', function (\Illuminate\Http\Request $request) {
     $data = $request->validate([
