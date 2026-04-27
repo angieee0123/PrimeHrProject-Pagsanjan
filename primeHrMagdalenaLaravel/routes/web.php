@@ -84,7 +84,7 @@ Route::get('/admin/recruitment', function () {
 
 Route::get('/admin/personnel', function () {
     $departments = \App\Models\Department::where('status', 'Active')->orderBy('name')->get();
-    $employees = \App\Models\Employee::with(['employmentDetail.departmentRelation', 'user'])
+    $employees = \App\Models\Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'user'])
         ->orderBy('created_at', 'desc')
         ->get();
 
@@ -117,6 +117,75 @@ Route::post('/admin/personnel/{id}/status', function (\Illuminate\Http\Request $
 
     return redirect()->route('admin.personnel')->with('success', $message);
 })->middleware('auth')->name('admin.personnel.updateStatus');
+
+Route::get('/admin/personnel/{id}/edit', function ($id) {
+    $employee = \App\Models\Employee::with(['employmentDetail', 'addresses', 'contacts', 'governmentIds'])
+        ->findOrFail($id);
+    return response()->json($employee);
+})->middleware('auth')->name('admin.personnel.edit');
+
+Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $request, $id) {
+    $employee = \App\Models\Employee::with(['employmentDetail', 'addresses', 'contacts', 'governmentIds'])->findOrFail($id);
+
+    $employee->update([
+        'first_name'     => $request->first_name,
+        'middle_name'    => $request->middle_name,
+        'last_name'      => $request->last_name,
+        'suffix'         => $request->suffix,
+        'birth_date'     => $request->birth_date,
+        'place_of_birth' => $request->place_of_birth,
+        'sex'            => $request->sex,
+        'civil_status'   => $request->civil_status,
+        'height'         => $request->height,
+        'weight'         => $request->weight,
+        'blood_type'     => $request->blood_type,
+        'citizenship'    => $request->citizenship,
+    ]);
+
+    if ($employee->employmentDetail) {
+        $employee->employmentDetail->update([
+            'designation_id'    => $request->designation_id,
+            'department_id'     => $request->department,
+            'employment_status' => $request->employment_status,
+            'appointment_date'  => $request->appointment_date,
+            'salary_grade'      => $request->salary_grade,
+            'step_increment'    => $request->step_increment,
+        ]);
+    }
+
+    $mobile    = $employee->contacts->firstWhere('type', 'mobile');
+    $landline  = $employee->contacts->firstWhere('type', 'landline');
+    $emergency = $employee->contacts->firstWhere('type', 'emergency');
+
+    if ($mobile)    $mobile->update(['number' => $request->mobile_number]);
+    if ($landline)  $landline->update(['number' => $request->landline_number]);
+    if ($emergency) $emergency->update(['contact_person' => $request->emergency_contact_person, 'number' => $request->emergency_contact_number]);
+
+    $address = $employee->addresses->first();
+    if ($address) {
+        $address->update([
+            'house_no'  => $request->house_no,
+            'street'    => $request->street,
+            'barangay'  => $request->barangay,
+            'city'      => $request->city,
+            'province'  => $request->province,
+            'zip_code'  => $request->zip_code,
+        ]);
+    }
+
+    $govId = $employee->governmentIds->first();
+    if ($govId) {
+        $govId->update([
+            'gsis_no'       => $request->gsis_no,
+            'philhealth_no' => $request->philhealth_no,
+            'pagibig_no'    => $request->pagibig_no,
+            'tin_no'        => $request->tin_no,
+            'license_no'    => $request->license_no,
+        ]);
+    }
+
+    return redirect()->route('admin.personnel')->with('success', "Employee {$employee->first_name} {$employee->last_name} updated successfully!");
+})->middleware('auth')->name('admin.personnel.update');
 
 Route::get('/admin/personnel/{id}', function ($id) {
     $employee = \App\Models\Employee::with(['employmentDetail', 'addresses', 'contacts', 'governmentIds'])

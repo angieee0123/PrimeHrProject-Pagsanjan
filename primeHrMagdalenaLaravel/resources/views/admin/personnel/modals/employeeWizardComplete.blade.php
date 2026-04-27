@@ -5,8 +5,8 @@
         <div class="wizard-header">
             <div class="wizard-header-top">
                 <div>
-                    <h3 class="wizard-title">Employee Registration Wizard</h3>
-                    <p class="wizard-subtitle"><span id="stepIndicator">Step 1 of 6</span> - Complete all steps to register</p>
+                    <h3 class="wizard-title" id="wizardTitle">Employee Registration Wizard</h3>
+                    <p class="wizard-subtitle"><span id="stepIndicator">Step 1 of 6</span> - <span id="wizardSubtitle">Complete all steps to register</span></p>
                 </div>
                 <button onclick="closeEmployeeWizard()" class="wizard-close-btn">&times;</button>
             </div>
@@ -46,8 +46,9 @@
         </div>
 
         <!-- Form Content -->
-        <form id="employeeWizardForm" action="{{ route('admin.personnel.store') }}" method="POST" enctype="multipart/form-data" class="wizard-form">
+        <form id="employeeWizardForm" action="{{ route('admin.personnel.store') }}" data-store-action="{{ route('admin.personnel.store') }}" method="POST" enctype="multipart/form-data" class="wizard-form">
             @csrf
+            <input type="hidden" id="wizardEditId" name="_edit_id" value="">
 
             <!-- STEP 1: Personal Information -->
             <div class="wizard-content active" data-step="1" style="display:block;">
@@ -154,48 +155,57 @@
 
             <!-- STEP 2: Account Setup -->
             <div class="wizard-content" data-step="2" style="display:none;">
-                <h4 class="wizard-section-title">🔐 Account Setup</h4>
-                <div class="wizard-info-box">
-                    <p class="wizard-info-title"><strong>ℹ️ Create Login Credentials</strong></p>
-                    <p class="wizard-info-text">Set up username, email, and password for system access</p>
+                <div id="step2-register">
+                    <h4 class="wizard-section-title">🔐 Account Setup</h4>
+                    <div class="wizard-info-box">
+                        <p class="wizard-info-title"><strong>ℹ️ Create Login Credentials</strong></p>
+                        <p class="wizard-info-text">Set up username, email, and password for system access</p>
+                    </div>
+                    <div class="wizard-field">
+                        <label class="wizard-label-text">Username * <span style="color:#0b044d; font-size:11px;">(UNIQUE)</span></label>
+                        <input type="text" name="username" placeholder="e.g. maria.santos" maxlength="255" class="wizard-input">
+                        <p class="wizard-hint">No spaces. Use lowercase letters, numbers, dots, and underscores.</p>
+                    </div>
+                    <div class="wizard-field">
+                        <label class="wizard-label-text">Email * <span style="color:#0b044d; font-size:11px;">(UNIQUE)</span></label>
+                        <input type="email" name="user_email" placeholder="maria.santos@example.com" maxlength="255" class="wizard-input">
+                        <p class="wizard-hint">Must be a valid email address for account notifications.</p>
+                    </div>
+                    <div class="wizard-field">
+                        <label class="wizard-label-text">Password * <span style="color:#0b044d; font-size:11px;">(Min 8 characters)</span></label>
+                        <input type="password" name="password" placeholder="••••••••" maxlength="255" class="wizard-input">
+                        <p class="wizard-hint">Use uppercase, lowercase, numbers, and symbols for security.</p>
+                    </div>
+                    <div class="wizard-field">
+                        <label class="wizard-label-text">Confirm Password *</label>
+                        <input type="password" name="password_confirm" placeholder="••••••••" maxlength="255" class="wizard-input">
+                    </div>
+                    <div class="wizard-field">
+                        <label class="wizard-label-text">Role / Access Level *</label>
+                        <select name="role" class="wizard-select">
+                            <option value="">Select Role</option>
+                            <option value="employee">Employee - Limited access to own records</option>
+                            <option value="hr">HR - Full access to all employee records</option>
+                            <option value="admin">Admin - System administrator access</option>
+                        </select>
+                    </div>
+                    <div class="wizard-requirements-box">
+                        <p class="wizard-requirements-title">✓ Password Requirements:</p>
+                        <ul class="wizard-requirements-list">
+                            <li>At least 8 characters long</li>
+                            <li>Contains uppercase letter (A-Z)</li>
+                            <li>Contains lowercase letter (a-z)</li>
+                            <li>Contains number (0-9)</li>
+                            <li>Contains special character (!@#$%^&*)</li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="wizard-field">
-                    <label class="wizard-label-text">Username * <span style="color:#0b044d; font-size:11px;">(UNIQUE)</span></label>
-                    <input type="text" name="username" placeholder="e.g. maria.santos" maxlength="255" class="wizard-input">
-                    <p class="wizard-hint">No spaces. Use lowercase letters, numbers, dots, and underscores.</p>
-                </div>
-                <div class="wizard-field">
-                    <label class="wizard-label-text">Email * <span style="color:#0b044d; font-size:11px;">(UNIQUE)</span></label>
-                    <input type="email" name="user_email" placeholder="maria.santos@example.com" maxlength="255" class="wizard-input">
-                    <p class="wizard-hint">Must be a valid email address for account notifications.</p>
-                </div>
-                <div class="wizard-field">
-                    <label class="wizard-label-text">Password * <span style="color:#0b044d; font-size:11px;">(Min 8 characters)</span></label>
-                    <input type="password" name="password" placeholder="••••••••" maxlength="255" class="wizard-input">
-                    <p class="wizard-hint">Use uppercase, lowercase, numbers, and symbols for security.</p>
-                </div>
-                <div class="wizard-field">
-                    <label class="wizard-label-text">Confirm Password *</label>
-                    <input type="password" name="password_confirm" placeholder="••••••••" maxlength="255" class="wizard-input">
-                </div>
-                <div class="wizard-field">
-                    <label class="wizard-label-text">Role / Access Level *</label>
-                    <select name="role" class="wizard-select">
-                        <option value="">Select Role</option>
-                        <option value="employee">Employee - Limited access to own records</option>
-                        <option value="hr">HR - Full access to all employee records</option>
-                        <option value="admin">Admin - System administrator access</option>
-                    </select>
-                </div>
-                <div class="wizard-requirements-box">
-                    <p class="wizard-requirements-title">✓ Password Requirements:</p>
-                    <ul class="wizard-requirements-list">
-                        <li>At least 8 characters long</li>
-                        <li>Contains uppercase letter (A-Z)</li>
-                        <li>Contains lowercase letter (a-z)</li>
-                        <li>Contains number (0-9)</li>
-                        <li>Contains special character (!@#$%^&*)</li>
-                    </ul>
+                <div id="step2-edit" style="display:none;">
+                    <h4 class="wizard-section-title">🔐 Account Info</h4>
+                    <div class="wizard-info-box" style="background:#f0effe;border-color:#0b044d22;">
+                        <p class="wizard-info-title"><strong>ℹ️ Account credentials cannot be changed here.</strong></p>
+                        <p class="wizard-info-text">Username, email, password and role are managed separately. Click Next to continue editing other details.</p>
+                    </div>
                 </div>
             </div>
 
@@ -213,7 +223,7 @@
                 </div>
                 <div class="wizard-field">
                     <label class="wizard-label-text">Position / Designation *</label>
-                    <select name="position" id="wizard-position" class="wizard-select" onchange="fillFromDesignation(this)" disabled>
+                    <select name="designation_id" id="wizard-position" class="wizard-select" onchange="fillFromDesignation(this)" disabled>
                         <option value="">— Select a department first —</option>
                     </select>
                     <p class="wizard-hint" id="wizard-position-hint">Select a department to load available designations.</p>
@@ -360,12 +370,118 @@
                 <button type="submit" id="submitBtn" class="wizard-btn wizard-btn-submit" style="display:none;">
                     ✓ Submit
                 </button>
+                <button type="button" id="updateBtn" class="wizard-btn wizard-btn-submit" style="display:none;background:#1a0f6e;" onclick="submitWizardUpdate()">
+                    ✓ Save Changes
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+let wizardIsEditMode = false;
+
+function editEmployee(id) {
+    wizardIsEditMode = true;
+    const form = document.getElementById('employeeWizardForm');
+    form.action = `/admin/personnel/${id}/update`;
+    document.getElementById('wizardEditId').value    = id;
+    document.getElementById('wizardTitle').textContent    = 'Edit Employee';
+    document.getElementById('wizardSubtitle').textContent = 'Update employee information';
+    document.getElementById('step2-register').style.display = 'none';
+    document.getElementById('step2-edit').style.display     = 'block';
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('updateBtn').style.display = 'none';
+
+    // Reset to step 1 and open
+    if (typeof goToWizardStep === 'function') goToWizardStep(1);
+    document.getElementById('employeeWizardModal').style.display = 'flex';
+
+    fetch(`/admin/personnel/${id}/edit`)
+        .then(r => r.json())
+        .then(d => {
+            // Step 1 — Personal
+            setVal('employee_id', d.employee_id);
+            setVal('first_name',  d.first_name);
+            setVal('middle_name', d.middle_name);
+            setVal('last_name',   d.last_name);
+            setVal('suffix',      d.suffix);
+            setVal('birth_date',  d.birth_date);
+            setVal('place_of_birth', d.place_of_birth);
+            setVal('sex',         d.sex);
+            setVal('civil_status',d.civil_status);
+            setVal('height',      d.height);
+            setVal('weight',      d.weight);
+            setVal('blood_type',  d.blood_type);
+            setVal('citizenship', d.citizenship);
+
+            // Step 3 — Employment
+            const emp = d.employment_detail || {};
+            const deptSelect = document.getElementById('wizard-department');
+            deptSelect.value = emp.department || '';
+            // Load designations then set position
+            if (emp.department) {
+                fetch(`/admin/departments/${emp.department}/designations`)
+                    .then(r => r.json())
+                    .then(desigs => {
+                        const pos = document.getElementById('wizard-position');
+                        pos.innerHTML = '<option value="">Select Position</option>';
+                        desigs.forEach(dg => {
+                            const opt = document.createElement('option');
+                            opt.value = dg.title;
+                            opt.textContent = dg.title;
+                            opt.dataset.employmentType = dg.employment_type || '';
+                            opt.dataset.salaryGrade    = dg.salary_grade    || '';
+                            pos.appendChild(opt);
+                        });
+                        pos.disabled = false;
+                        pos.value = emp.designation_id || '';
+                    });
+            }
+            const empStatusEl = document.getElementById('wizard-employment-status');
+            const salaryEl    = document.getElementById('wizard-salary-grade');
+            empStatusEl.removeAttribute('readonly'); empStatusEl.style.cssText = '';
+            salaryEl.removeAttribute('readonly');    salaryEl.style.cssText = '';
+            setVal('employment_status', emp.employment_status);
+            setVal('appointment_date',  emp.appointment_date);
+            setVal('salary_grade',      emp.salary_grade);
+            setVal('step_increment',    emp.step_increment);
+
+            // Step 4 — Contact
+            const mobile    = (d.contacts || []).find(c => c.type === 'mobile');
+            const landline  = (d.contacts || []).find(c => c.type === 'landline');
+            const emergency = (d.contacts || []).find(c => c.type === 'emergency');
+            setVal('mobile_number',             mobile?.number);
+            setVal('landline_number',           landline?.number);
+            setVal('emergency_contact_person',  emergency?.contact_person);
+            setVal('emergency_contact_number',  emergency?.number);
+            const addr = (d.addresses || [])[0] || {};
+            setVal('house_no',  addr.house_no);
+            setVal('street',    addr.street);
+            setVal('barangay',  addr.barangay);
+            setVal('city',      addr.city);
+            setVal('province',  addr.province);
+            setVal('zip_code',  addr.zip_code);
+
+            // Step 5 — Gov IDs
+            const gov = (d.government_ids || [])[0] || {};
+            setVal('gsis_no',       gov.gsis_no);
+            setVal('philhealth_no', gov.philhealth_no);
+            setVal('pagibig_no',    gov.pagibig_no);
+            setVal('tin_no',        gov.tin_no);
+            setVal('license_no',    gov.license_no);
+        });
+}
+
+function setVal(name, value) {
+    const el = document.querySelector(`[name="${name}"]`);
+    if (el) el.value = value || '';
+}
+
+function submitWizardUpdate() {
+    document.getElementById('employeeWizardForm').submit();
+}
+
 function loadDesignations(deptId) {
     const posSelect  = document.getElementById('wizard-position');
     const statusInput = document.getElementById('wizard-employment-status');
@@ -394,7 +510,7 @@ function loadDesignations(deptId) {
             posSelect.innerHTML = '<option value="">Select Position</option>';
             data.forEach(d => {
                 const opt = document.createElement('option');
-                opt.value                   = d.title;
+                opt.value                   = d.id;
                 opt.textContent             = d.title;
                 opt.dataset.employmentType  = d.employment_type || '';
                 opt.dataset.salaryGrade     = d.salary_grade    || '';

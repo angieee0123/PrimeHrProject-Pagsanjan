@@ -54,6 +54,7 @@ Rules:
 - Only generate SELECT queries, never INSERT, UPDATE, DELETE, or DROP
 - Return ONLY the raw SQL query, no explanation, no markdown, no backticks
 - If the question cannot be answered from the schema, return: CANNOT_ANSWER
+- All monetary values are in Philippine Peso (PHP), never use dollar signs
 
 User Question: {user_question}
 
@@ -89,7 +90,8 @@ SQL Query Used: {sql}
 Query Results: {results_preview}
 Total Records Found: {len(results)}
 
-Answer in a friendly, concise tone (3-5 sentences max). If no results, say so politely."""
+Answer in a friendly, concise tone (3-5 sentences max). If no results, say so politely.
+IMPORTANT: All monetary amounts must be expressed in Philippine Peso (PHP). Never use dollar signs ($). Use the format "PHP X,XXX.XX" or "X,XXX.XX Philippine Pesos"."""
 
     response = groq_client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
