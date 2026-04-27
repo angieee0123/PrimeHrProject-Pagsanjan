@@ -12,6 +12,26 @@ window.closeEmployeeWizard = function() {
     document.getElementById('employeeWizardModal').style.display = 'none';
     currentStep = 1;
     document.getElementById('employeeWizardForm').reset();
+    // delegate to blade-defined closeEmployeeWizard for edit-mode reset if present
+    if (typeof wizardIsEditMode !== 'undefined' && wizardIsEditMode) {
+        wizardIsEditMode = false;
+        const form = document.getElementById('employeeWizardForm');
+        form.action = form.dataset.storeAction || form.action;
+        document.getElementById('wizardEditId').value = '';
+        document.getElementById('wizardTitle').textContent    = 'Employee Registration Wizard';
+        document.getElementById('wizardSubtitle').textContent = 'Complete all steps to register';
+        document.getElementById('step2-register').style.display = 'block';
+        document.getElementById('step2-edit').style.display     = 'none';
+        const empStatusEl = document.getElementById('wizard-employment-status');
+        const salaryEl    = document.getElementById('wizard-salary-grade');
+        empStatusEl.setAttribute('readonly',''); empStatusEl.style.cssText = 'background:#f7f6ff;color:#6b6a8a;cursor:not-allowed;';
+        salaryEl.setAttribute('readonly','');    salaryEl.style.cssText    = 'background:#f7f6ff;color:#6b6a8a;cursor:not-allowed;';
+    }
+}
+
+window.goToWizardStep = function(step) {
+    currentStep = step;
+    updateWizardUI();
 }
 
 window.nextStep = function() {
@@ -42,8 +62,10 @@ function updateWizardUI() {
 
     document.getElementById('stepIndicator').textContent = `Step ${currentStep} of ${totalSteps}`;
     document.getElementById('prevBtn').style.display = currentStep > 1 ? 'block' : 'none';
-    document.getElementById('nextBtn').style.display = currentStep < totalSteps ? 'block' : 'none';
-    document.getElementById('submitBtn').style.display = currentStep === totalSteps ? 'block' : 'none';
+    document.getElementById('nextBtn').style.display   = currentStep < totalSteps ? 'block' : 'none';
+    const isEdit = typeof wizardIsEditMode !== 'undefined' && wizardIsEditMode;
+    document.getElementById('submitBtn').style.display  = (!isEdit && currentStep === totalSteps) ? 'block' : 'none';
+    document.getElementById('updateBtn').style.display  = (isEdit  && currentStep === totalSteps) ? 'block' : 'none';
 }
 
 function validateCurrentStep() {

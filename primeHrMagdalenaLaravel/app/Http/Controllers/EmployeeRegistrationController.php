@@ -49,13 +49,13 @@ class EmployeeRegistrationController extends Controller
 
             // Create Employment Details
             EmploymentDetail::create([
-                'employee_id' => $employee->id,
-                'position' => $request->position,
-                'department' => $request->department,
+                'employee_id'       => $employee->id,
+                'designation_id'    => $request->designation_id,
+                'department_id'     => $request->department,
                 'employment_status' => $request->employment_status,
-                'appointment_date' => $request->appointment_date,
-                'salary_grade' => $request->salary_grade,
-                'step_increment' => $request->step_increment,
+                'appointment_date'  => $request->appointment_date,
+                'salary_grade'      => $request->salary_grade,
+                'step_increment'    => $request->step_increment,
             ]);
 
             // Create Residential Address

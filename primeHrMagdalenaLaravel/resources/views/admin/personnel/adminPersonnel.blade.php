@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @push('styles')
     @vite('resources/css/employeeWizard.css')
@@ -92,7 +92,7 @@
     <div class="table-header">
         <div>
             <h3 class="table-title">Employee Records</h3>
-            <p class="table-sub">Municipal Government of Pagsanjan · {{ $employees->count() }} of {{ $employees->count() }} records</p>
+            <p class="table-sub">Municipal Government of Pagsanjan Â· {{ $employees->count() }} of {{ $employees->count() }} records</p>
         </div>
         <div class="table-actions">
             <select class="filter-select" id="departmentFilter" onchange="applyFilters()">
@@ -186,17 +186,13 @@
                 @php
                     $fullName = trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name . ($employee->suffix ? ' ' . $employee->suffix : ''));
                     $status = $employee->user ? $employee->user->status : 'Inactive';
-                    $empType = $employee->employmentDetail ? $employee->employmentDetail->employment_status : 'N/A';
-                    $position = $employee->employmentDetail ? $employee->employmentDetail->position : 'N/A';
-
-                    // Fetch department name from departments table
-                    $department = 'N/A';
-                    if ($employee->employmentDetail && $employee->employmentDetail->department) {
-                        $deptId = $employee->employmentDetail->department;
-                        $dept = \App\Models\Department::find($deptId);
-                        $department = $dept ? $dept->name : $deptId;
-                    }
-
+                    $empType  = $employee->employmentDetail ? $employee->employmentDetail->employment_status : 'N/A';
+                    $position = $employee->employmentDetail && $employee->employmentDetail->designationRelation
+                        ? $employee->employmentDetail->designationRelation->title
+                        : 'N/A';
+                    $department = $employee->employmentDetail && $employee->employmentDetail->departmentRelation
+                        ? $employee->employmentDetail->departmentRelation->name
+                        : 'N/A';
                     $dateHired = $employee->employmentDetail && $employee->employmentDetail->appointment_date
                         ? \Carbon\Carbon::parse($employee->employmentDetail->appointment_date)->format('M d, Y')
                         : 'N/A';
@@ -221,7 +217,7 @@
                     <td>
                         <div class="row-actions">
                             <button class="btn-view" onclick="viewEmployee({{ $employee->id }})">View</button>
-                            <button class="btn-edit">Edit</button>
+                            <button class="btn-edit" onclick="editEmployee({{ $employee->id }})">Edit</button>
                             <button class="btn-qr" onclick="generateQRCode({{ $employee->id }}, '{{ $fullName }}')">QR Code</button>
                             @if($status === 'Active')
                             <button class="btn-deactivate" onclick="confirmStatusChange({{ $employee->id }}, 'Inactive')">Deactivate</button>
