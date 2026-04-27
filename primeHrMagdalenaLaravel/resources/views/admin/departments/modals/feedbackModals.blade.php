@@ -23,3 +23,32 @@
         <button class="fb-btn fb-btn-failed" onclick="closeFailedModal()">Try Again</button>
     </div>
 </div>
+
+<!-- Import Summary Modal -->
+<div id="import-summary-modal" class="fb-overlay">
+    <div class="fb-box" style="max-width:480px;" onclick="event.stopPropagation()">
+        <div class="fb-icon-wrap fb-icon-success">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <span class="fb-eyebrow fb-eyebrow-success">IMPORT COMPLETE</span>
+        <h3 class="fb-title" id="import-summary-title">Import Summary</h3>
+
+        <div style="display:flex;gap:12px;justify-content:center;margin:12px 0;">
+            <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 20px;text-align:center;">
+                <p style="font-size:22px;font-weight:800;color:#15803d;margin:0;" id="import-count">0</p>
+                <p style="font-size:11px;color:#6b6a8a;margin:2px 0 0;">Imported</p>
+            </div>
+            <div style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:10px;padding:12px 20px;text-align:center;">
+                <p style="font-size:22px;font-weight:800;color:#8e1e18;margin:0;" id="skipped-count">0</p>
+                <p style="font-size:11px;color:#6b6a8a;margin:2px 0 0;">Skipped</p>
+            </div>
+        </div>
+
+        <div id="skipped-list-wrap" style="display:none;width:100%;">
+            <p style="font-size:11px;font-weight:700;color:#8e1e18;margin-bottom:6px;letter-spacing:.4px;text-align:left;">SKIPPED RECORDS</p>
+            <div id="skipped-list" style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:8px;padding:10px 12px;max-height:160px;overflow-y:auto;text-align:left;"></div>
+        </div>
+
+        <button class="fb-btn fb-btn-success" style="margin-top:16px;" onclick="closeImportSummaryModal()">Done</button>
+    </div>
+</div>

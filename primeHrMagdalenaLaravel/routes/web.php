@@ -176,26 +176,34 @@ Route::post('/admin/designations/import', function (\Illuminate\Http\Request $re
     $file     = fopen($request->file('csv_file')->getRealPath(), 'r');
     $header   = fgetcsv($file);
     $imported = 0;
-    $skipped  = 0;
+    $skipped  = [];
 
     while (($row = fgetcsv($file)) !== false) {
-        if (count($row) < 2) { $skipped++; continue; }
+        if (count($row) < 2) { $skipped[] = '(invalid row — missing columns)'; continue; }
 
         [$title, $department_code, $salary_grade, $monthly_rate, $employment_type, $description] = array_pad($row, 6, null);
+        $title           = trim($title ?? '');
+        $department_code = strtoupper(trim($department_code ?? ''));
 
-        if (!$title || !$department_code) { $skipped++; continue; }
+        if (!$title || !$department_code) { $skipped[] = $title ?: '(empty title)'; continue; }
 
-        $department = \App\Models\Department::where('code', strtoupper(trim($department_code)))->first();
-        if (!$department) { $skipped++; continue; }
+        $department = \App\Models\Department::where('code', $department_code)->first();
+        if (!$department) { $skipped[] = "{$title} — department code '{$department_code}' not found"; continue; }
 
-        $validTypes = ['Permanent', 'Casual', 'Contractual', 'Job Order'];
-        if (!in_array($employment_type, $validTypes)) $employment_type = null;
+        $monthly_rate_clean = $monthly_rate ? (float) preg_replace('/[^0-9.]/', '', $monthly_rate) : null;
+
+        $exists = \App\Models\Designation::where('title', $title)
+            ->where('department_id', $department->id)
+            ->where('monthly_rate', $monthly_rate_clean)
+            ->exists();
+
+        if ($exists) { $skipped[] = "{$title} ({$department_code}) ₱" . number_format($monthly_rate_clean, 2) . ' — already exists'; continue; }
 
         \App\Models\Designation::create([
-            'title'           => trim($title),
+            'title'           => $title,
             'department_id'   => $department->id,
             'salary_grade'    => $salary_grade ? trim($salary_grade) : null,
-            'monthly_rate'    => $monthly_rate ? (float) $monthly_rate : null,
+            'monthly_rate'    => $monthly_rate_clean ?: null,
             'employment_type' => $employment_type,
             'description'     => $description ? trim($description) : null,
         ]);
@@ -205,7 +213,9 @@ Route::post('/admin/designations/import', function (\Illuminate\Http\Request $re
     fclose($file);
 
     return redirect()->route('admin.departments')
-        ->with('success', "Import complete: {$imported} designations imported, {$skipped} rows skipped.");
+        ->with('import_imported', $imported)
+        ->with('import_skipped', $skipped)
+        ->with('import_type', 'designation');
 })->middleware('auth')->name('admin.designations.import');
 
 Route::post('/admin/designations', function (\Illuminate\Http\Request $request) {
@@ -244,36 +254,42 @@ Route::post('/admin/departments/import', function (\Illuminate\Http\Request $req
     $request->validate(['csv_file' => 'required|file|mimes:csv,txt']);
 
     $file = fopen($request->file('csv_file')->getRealPath(), 'r');
-    $header = fgetcsv($file); // skip header row
+    $header = fgetcsv($file);
 
     $imported = 0;
-    $skipped  = 0;
+    $skipped  = [];
 
     while (($row = fgetcsv($file)) !== false) {
-        if (count($row) < 5) { $skipped++; continue; }
+        if (count($row) < 5) { $skipped[] = '(invalid row — missing columns)'; continue; }
 
         [$code, $name, $head, $personnel_count, $status, $description] = array_pad($row, 6, null);
+        $code = strtoupper(trim($code ?? ''));
 
-        if (!$code || !$name || !$head) { $skipped++; continue; }
+        if (!$code || !$name || !$head) { $skipped[] = $code ?: '(empty code)'; continue; }
         if (!in_array($status, ['Active', 'Inactive'])) $status = 'Active';
 
-        \App\Models\Department::updateOrCreate(
-            ['code' => strtoupper(trim($code))],
-            [
-                'name'            => trim($name),
-                'head'            => trim($head),
-                'personnel_count' => (int) ($personnel_count ?? 0),
-                'status'          => $status,
-                'description'     => $description ? trim($description) : null,
-            ]
-        );
+        if (\App\Models\Department::where('code', $code)->exists()) {
+            $skipped[] = "{$code} — " . trim($name) . ' (already exists)';
+            continue;
+        }
+
+        \App\Models\Department::create([
+            'code'            => $code,
+            'name'            => trim($name),
+            'head'            => trim($head),
+            'personnel_count' => (int) ($personnel_count ?? 0),
+            'status'          => $status,
+            'description'     => $description ? trim($description) : null,
+        ]);
         $imported++;
     }
 
     fclose($file);
 
     return redirect()->route('admin.departments')
-        ->with('success', "Import complete: {$imported} departments imported, {$skipped} rows skipped.");
+        ->with('import_imported', $imported)
+        ->with('import_skipped', $skipped)
+        ->with('import_type', 'department');
 })->middleware('auth')->name('admin.departments.import');
 
 Route::post('/admin/departments', function (\Illuminate\Http\Request $request) {
