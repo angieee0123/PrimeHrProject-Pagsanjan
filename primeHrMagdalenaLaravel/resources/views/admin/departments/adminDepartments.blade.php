@@ -273,6 +273,7 @@ function openSuccessModal()  { document.getElementById('success-modal').classLis
 function closeSuccessModal() { document.getElementById('success-modal').classList.remove('open');   document.body.style.overflow = ''; }
 function openFailedModal(msg){ if (msg) document.getElementById('failed-msg').textContent = msg; document.getElementById('failed-modal').classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeFailedModal()  { document.getElementById('failed-modal').classList.remove('open');    document.body.style.overflow = ''; openAddModal(); }
+function closeImportSummaryModal() { document.getElementById('import-summary-modal').classList.remove('open'); document.body.style.overflow = ''; }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', function () {
@@ -301,6 +302,31 @@ document.addEventListener('DOMContentLoaded', function () {
     renderTable();
     @if(session('success'))  openSuccessModal(); @endif
     @if($errors->any())      openFailedModal('{{ $errors->first() }}'); @endif
+
+    @if(session('import_imported') !== null)
+    (function() {
+        const imported = {{ session('import_imported') }};
+        const skipped  = @json(session('import_skipped', []));
+        const type     = '{{ session('import_type', 'record') }}';
+
+        document.getElementById('import-summary-title').textContent =
+            type === 'department' ? 'Department Import Summary' : 'Designation Import Summary';
+        document.getElementById('import-count').textContent  = imported;
+        document.getElementById('skipped-count').textContent = skipped.length;
+
+        if (skipped.length > 0) {
+            const wrap = document.getElementById('skipped-list-wrap');
+            const list = document.getElementById('skipped-list');
+            wrap.style.display = 'block';
+            list.innerHTML = skipped.map(r =>
+                `<p style="font-size:12px;color:#8e1e18;margin:0 0 4px;padding-bottom:4px;border-bottom:1px solid #fecaca;">⚠ ${r}</p>`
+            ).join('');
+        }
+
+        document.getElementById('import-summary-modal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    })();
+    @endif
 });
 </script>
 @endsection
