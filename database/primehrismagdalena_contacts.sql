@@ -31,7 +31,7 @@ CREATE TABLE `contacts` (
   PRIMARY KEY (`id`),
   KEY `contacts_employee_id_foreign` (`employee_id`),
   CONSTRAINT `contacts_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +40,7 @@ CREATE TABLE `contacts` (
 
 LOCK TABLES `contacts` WRITE;
 /*!40000 ALTER TABLE `contacts` DISABLE KEYS */;
-INSERT INTO `contacts` VALUES (1,1,'mobile','+639308089251',NULL),(2,1,'emergency','09308089251','Angelica Cuevas Test'),(3,3,'mobile','+23430808925132',NULL),(4,3,'landline','234',NULL),(5,3,'emergency','234','3gfJohn Randolf Peñaredondoasd'),(6,4,'mobile','+639308089251',NULL),(7,4,'landline','234',NULL),(8,4,'emergency','234','John Randolf Peñaredondo'),(9,6,'mobile','09123456789',NULL);
+INSERT INTO `contacts` VALUES (9,6,'mobile','09123456789',NULL),(10,8,'mobile','09175983896',NULL),(11,9,'mobile','09173873314',NULL),(12,10,'mobile','09171305449',NULL),(13,11,'mobile','09172827579',NULL),(14,12,'mobile','09171835146',NULL),(15,13,'mobile','09177190032',NULL),(16,14,'mobile','09173782811',NULL),(17,15,'mobile','09176942517',NULL),(18,16,'mobile','09178000877',NULL),(19,17,'mobile','09171154292',NULL);
 /*!40000 ALTER TABLE `contacts` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-25  2:57:29
+-- Dump completed on 2026-04-27 22:54:39

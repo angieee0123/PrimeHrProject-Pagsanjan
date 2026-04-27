@@ -26,15 +26,17 @@ CREATE TABLE `employment_details` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `employee_id` bigint unsigned NOT NULL,
   `position` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `department` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `department_id` bigint unsigned DEFAULT NULL,
   `employment_status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `appointment_date` date DEFAULT NULL,
   `salary_grade` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `step_increment` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `employment_details_employee_id_foreign` (`employee_id`),
+  KEY `employment_details_department_id_foreign` (`department_id`),
+  CONSTRAINT `employment_details_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL,
   CONSTRAINT `employment_details_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,7 +45,7 @@ CREATE TABLE `employment_details` (
 
 LOCK TABLES `employment_details` WRITE;
 /*!40000 ALTER TABLE `employment_details` DISABLE KEYS */;
-INSERT INTO `employment_details` VALUES (1,1,'Administrative Officer I','1','Permanent','2026-04-25','SG-11','Step 3'),(2,3,'asdfasdfasdf','2','Permanent','0001-01-01','3','3'),(3,4,'3','1','Permanent','2006-02-02','21','2'),(5,6,'System Administrator','1','Permanent','2025-01-01','24','1');
+INSERT INTO `employment_details` VALUES (5,6,'System Administrator',1,'Permanent','2025-01-01','24','1'),(6,8,'HR Officer',3,'Permanent','2024-01-15',NULL,NULL),(7,9,'HR Officer',3,'Permanent','2024-01-15',NULL,NULL),(8,10,'Manager',3,'Active','2024-01-15',NULL,NULL),(9,11,'Accountant',3,'Permanent','2024-01-15',NULL,NULL),(10,12,'Accountant',3,'Active','2024-01-15',NULL,NULL),(11,13,'Administrative Assistant',3,'Permanent','2024-01-15',NULL,NULL),(12,14,'IT Specialist',3,'Permanent','2024-01-15',NULL,NULL),(13,15,'HR Officer',3,'Active','2024-01-15',NULL,NULL),(14,16,'Manager',3,'Permanent','2024-01-15',NULL,NULL),(15,17,'Manager',3,'Permanent','2024-01-15',NULL,NULL);
 /*!40000 ALTER TABLE `employment_details` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -56,4 +58,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-25  2:57:28
+-- Dump completed on 2026-04-27 22:54:40

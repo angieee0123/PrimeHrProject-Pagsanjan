@@ -34,7 +34,7 @@ CREATE TABLE `eligibilities` (
   PRIMARY KEY (`id`),
   KEY `eligibilities_employee_id_foreign` (`employee_id`),
   CONSTRAINT `eligibilities_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,6 +43,7 @@ CREATE TABLE `eligibilities` (
 
 LOCK TABLES `eligibilities` WRITE;
 /*!40000 ALTER TABLE `eligibilities` DISABLE KEYS */;
+INSERT INTO `eligibilities` VALUES (1,8,'RA 1080','89.27','2020-03-15',NULL,NULL,NULL),(2,9,'RA 1080','88.11','2020-03-15',NULL,NULL,NULL),(3,10,'Career Service Sub-Professional','91.89','2020-03-15',NULL,NULL,NULL),(4,11,'RA 1080','82.93','2020-03-15',NULL,NULL,NULL),(5,12,'Career Service Professional','87.76','2020-03-15',NULL,NULL,NULL),(6,13,'Career Service Professional','86.16','2020-03-15',NULL,NULL,NULL),(7,14,'Career Service Sub-Professional','95.59','2020-03-15',NULL,NULL,NULL),(8,15,'RA 1080','76.39','2020-03-15',NULL,NULL,NULL),(9,16,'RA 1080','75.70','2020-03-15',NULL,NULL,NULL),(10,17,'Career Service Sub-Professional','86.23','2020-03-15',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `eligibilities` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -55,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-25  2:57:28
+-- Dump completed on 2026-04-27 22:54:40

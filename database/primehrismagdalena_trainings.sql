@@ -33,7 +33,7 @@ CREATE TABLE `trainings` (
   PRIMARY KEY (`id`),
   KEY `trainings_employee_id_foreign` (`employee_id`),
   CONSTRAINT `trainings_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,6 +42,7 @@ CREATE TABLE `trainings` (
 
 LOCK TABLES `trainings` WRITE;
 /*!40000 ALTER TABLE `trainings` DISABLE KEYS */;
+INSERT INTO `trainings` VALUES (1,8,'Leadership Training','2023-06-01','2023-06-03',24,'CSC'),(2,9,'Customer Service Excellence','2023-06-01','2023-06-03',24,'CSC'),(3,10,'Project Management','2023-06-01','2023-06-03',24,'CSC'),(4,11,'Data Privacy Seminar','2023-06-01','2023-06-03',24,'CSC'),(5,12,'Data Privacy Seminar','2023-06-01','2023-06-03',24,'CSC'),(6,13,'Customer Service Excellence','2023-06-01','2023-06-03',24,'CSC'),(7,14,'Data Privacy Seminar','2023-06-01','2023-06-03',24,'CSC'),(8,15,'Project Management','2023-06-01','2023-06-03',24,'CSC'),(9,16,'Data Privacy Seminar','2023-06-01','2023-06-03',24,'CSC'),(10,17,'Customer Service Excellence','2023-06-01','2023-06-03',24,'CSC');
 /*!40000 ALTER TABLE `trainings` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +55,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-25  2:57:30
+-- Dump completed on 2026-04-27 22:54:41

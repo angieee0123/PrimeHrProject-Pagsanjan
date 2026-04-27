@@ -153,9 +153,6 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
             </thead>
             <tbody>
                 @foreach($attendanceRecords as $index => $record)
-                @php
-                    $rate = $record['rate'];
-                @endphp
                 <tr>
                     <td>
                         <div class="emp-cell">
@@ -177,9 +174,9 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
                     <td>
                         <div style="display: flex; align-items: center; gap: 6px;">
                             <div style="flex: 1; height: 6px; background: #f0effe; border-radius: 3px; min-width: 50px;">
-                                <div style="width: {{ $rate }}%; height: 100%; background: {{ $rate >= 90 ? '#15803d' : ($rate >= 75 ? '#d9bb00' : '#8e1e18') }}; border-radius: 3px;"></div>
+                                <div style="width: {{ $record['rate'] }}%; height: 100%; background: {{ $record['rate'] >= 90 ? '#15803d' : ($record['rate'] >= 75 ? '#d9bb00' : '#8e1e18') }}; border-radius: 3px;"></div>
                             </div>
-                            <span style="font-size: 12px; font-weight: 600; color: #0b044d; white-space: nowrap;">{{ $rate }}%</span>
+                            <span style="font-size: 12px; font-weight: 600; color: #0b044d; white-space: nowrap;">{{ $record['rate'] }}%</span>
                         </div>
                     </td>
                     <td><span class="badge-status {{ $record['status'] === 'Complete' ? 'processed' : 'pending' }}">{{ $record['status'] }}</span></td>
@@ -196,12 +193,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     </div>
 
     <div class="table-footer">
-        <p>Showing <strong>{{ count($attendanceRecords) }}</strong> of <strong>{{ count($attendanceRecords) }}</strong> records</p>
-        <div class="pagination">
-            <button class="page-btn active">1</button>
-            <button class="page-btn">2</button>
-            <button class="page-btn">›</button>
-        </div>
+        <p>Showing <strong>{{ count($attendanceRecords) }}</strong> records</p>
     </div>
 </section>
 
@@ -220,3 +212,4 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 @vite('resources/js/adminAttendance.js')
 @endpush
 @endsection
+

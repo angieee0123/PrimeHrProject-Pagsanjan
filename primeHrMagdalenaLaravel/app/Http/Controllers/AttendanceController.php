@@ -217,7 +217,7 @@ class AttendanceController extends Controller
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
 
-        $employee = Employee::with('employmentDetail.department')->findOrFail($employeeId);
+        $employee = Employee::with('employmentDetail.departmentRelation')->findOrFail($employeeId);
 
         // Fetch attendance records for the date range
         $attendances = Attendance::where('employee_id', $employeeId)
@@ -252,7 +252,7 @@ class AttendanceController extends Controller
             fputcsv($file, ['Employee:', $employee->first_name . ' ' . $employee->last_name]);
             fputcsv($file, ['Employee ID:', $employee->employee_id]);
             fputcsv($file, ['Position:', $employee->employmentDetail->position ?? 'N/A']);
-            fputcsv($file, ['Department:', $employee->employmentDetail->department->name ?? 'N/A']);
+            fputcsv($file, ['Department:', $employee->employmentDetail->departmentRelation->name ?? 'N/A']);
             fputcsv($file, []);
 
             // Add column headers
