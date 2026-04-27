@@ -12,6 +12,8 @@ $activeDepts    = $departments->where('status','Active')->count();
 $largestDept    = $departments->sortByDesc('personnel_count')->first();
 @endphp
 
+@include('admin.topbar.departmentsTopbar')
+
 {{-- Stats --}}
 <div class="stats-grid" style="margin-bottom:20px;">
     <div class="stat-card">
@@ -68,8 +70,20 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     </div>
 </div>
 
-{{-- Table --}}
-<section class="table-section">
+{{-- Tabs --}}
+<div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid #f0effe;padding-bottom:0;">
+    <button class="tab-btn active" data-tab="departments">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Departments & Offices
+    </button>
+    <button class="tab-btn" data-tab="designations">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        Designations
+    </button>
+</div>
+
+{{-- Departments Tab --}}
+<section class="table-section tab-content active" id="departments">
     <div class="table-header">
         <div>
             <h3 class="table-title">Departments & Offices</h3>
@@ -80,13 +94,16 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
+            <button class="btn-export" style="color:#15803d;border-color:#15803d;" onclick="openBulkImportModal()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Bulk Import
+            </button>
             <button class="modal-btn-primary" style="padding:7px 16px;font-size:12.5px;" onclick="openAddModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Department
             </button>
         </div>
     </div>
-
     <div class="table-wrapper">
         <table class="payroll-table">
             <thead>
@@ -99,10 +116,9 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody id="dept-tbody"></tbody>
         </table>
     </div>
-
     <div class="table-footer">
         <p>Showing <strong><span id="showing-start">1</span>–<span id="showing-end">10</span></strong> of <strong>{{ $departments->count() }}</strong> offices</p>
         <div class="pagination">
@@ -114,8 +130,66 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     </div>
 </section>
 
+{{-- Designations Tab --}}
+<section class="table-section tab-content" id="designations">
+    <div class="table-header">
+        <div>
+            <h3 class="table-title">Designations</h3>
+            <p class="table-sub">Municipal Government of Pagsanjan · {{ $designations->count() }} designations</p>
+        </div>
+        <div class="table-actions">
+            <button class="btn-export">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export
+            </button>
+            <button class="btn-export" style="color:#15803d;border-color:#15803d;" onclick="openBulkImportDesignationModal()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Bulk Import
+            </button>
+            <button class="modal-btn-primary" style="padding:7px 16px;font-size:12.5px;background:#1a0f6e;" onclick="openAddDesignationModal()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Designation
+            </button>
+        </div>
+    </div>
+    <div class="table-wrapper">
+        <table class="payroll-table">
+            <thead>
+                <tr>
+                    <th>Designation Title</th>
+                    <th>Department</th>
+                    <th>Salary Grade</th>
+                    <th>Monthly Rate</th>
+                    <th>Employment Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($designations as $desig)
+                <tr>
+                    <td><p class="emp-name">{{ $desig->title }}</p></td>
+                    <td><span class="dept-tag">{{ $desig->department->name ?? 'N/A' }}</span></td>
+                    <td style="font-size:13px;color:#0b044d;">{{ $desig->salary_grade ?? '—' }}</td>
+                    <td style="font-size:13px;font-weight:600;color:#15803d;">{{ $desig->monthly_rate ? '₱' . number_format($desig->monthly_rate, 2) : '—' }}</td>
+                    <td><span class="badge-status {{ $desig->employment_type === 'Permanent' ? 'processed' : 'pending' }}">{{ $desig->employment_type ?? '—' }}</span></td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" style="text-align:center;color:#9999bb;padding:32px;font-size:13px;">No designations added yet.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    <div class="table-footer">
+        <p>Showing <strong>{{ $designations->count() }}</strong> designations</p>
+    </div>
+</section>
+
 {{-- Modals --}}
 @include('admin.departments.modals.addDepartment')
+@include('admin.departments.modals.addDesignation')
+@include('admin.departments.modals.bulkImportDepartment')
+@include('admin.departments.modals.bulkImportDesignation')
 @include('admin.departments.modals.viewDepartment')
 @include('admin.departments.modals.feedbackModals')
 
@@ -128,11 +202,11 @@ const totalPages   = Math.ceil(departments.length / itemsPerPage);
 
 function renderTable() {
     const start = (currentPage - 1) * itemsPerPage;
-    const end   = Math.min(start + itemsPerPage, departments.length);
-    const tbody = document.querySelector('.payroll-table tbody');
+    const end   = Math.min(start + itemsPerPage, filteredDepartments.length);
+    const tbody = document.getElementById('dept-tbody');
     tbody.innerHTML = '';
 
-    departments.slice(start, end).forEach((dept, i) => {
+    filteredDepartments.slice(start, end).forEach((dept, i) => {
         const idx = start + i;
         tbody.innerHTML += `
             <tr>
@@ -161,6 +235,7 @@ function updatePagination() {
     );
     const prev = document.getElementById('prev-btn');
     const next = document.getElementById('next-btn');
+    const totalPages = Math.ceil(filteredDepartments.length / itemsPerPage);
     prev.disabled = currentPage === 1;           prev.style.opacity = currentPage === 1 ? '0.5' : '1';
     next.disabled = currentPage === totalPages;  next.style.opacity = currentPage === totalPages ? '0.5' : '1';
 }
@@ -190,12 +265,37 @@ function showDeptModal(index) {
     document.body.style.overflow = 'hidden';
 }
 function closeDeptModal()    { document.getElementById('dept-modal').classList.remove('open');      document.body.style.overflow = ''; }
-function openAddModal()      { document.getElementById('add-dept-modal').classList.add('open');     document.body.style.overflow = 'hidden'; }
-function closeAddModal()     { document.getElementById('add-dept-modal').classList.remove('open');  document.body.style.overflow = ''; }
+function openAddModal()             { document.getElementById('add-dept-modal').classList.add('open');          document.body.style.overflow = 'hidden'; }
+function closeAddModal()            { document.getElementById('add-dept-modal').classList.remove('open');       document.body.style.overflow = ''; }
+function openAddDesignationModal()  { document.getElementById('add-designation-modal').classList.add('open');   document.body.style.overflow = 'hidden'; }
+function closeAddDesignationModal() { document.getElementById('add-designation-modal').classList.remove('open'); document.body.style.overflow = ''; }
 function openSuccessModal()  { document.getElementById('success-modal').classList.add('open');      document.body.style.overflow = 'hidden'; }
 function closeSuccessModal() { document.getElementById('success-modal').classList.remove('open');   document.body.style.overflow = ''; }
 function openFailedModal(msg){ if (msg) document.getElementById('failed-msg').textContent = msg; document.getElementById('failed-modal').classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeFailedModal()  { document.getElementById('failed-modal').classList.remove('open');    document.body.style.overflow = ''; openAddModal(); }
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById(this.dataset.tab).classList.add('active');
+    });
+});
+
+// Topbar search filter
+document.getElementById('dept-search').addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    filteredDepartments = departments.filter(d =>
+        d.name.toLowerCase().includes(q) ||
+        d.code.toLowerCase().includes(q) ||
+        d.head.toLowerCase().includes(q)
+    );
+    currentPage = 1;
+    renderTable();
+});
+
+let filteredDepartments = departments;
 
 document.addEventListener('DOMContentLoaded', function () {
     renderTable();
