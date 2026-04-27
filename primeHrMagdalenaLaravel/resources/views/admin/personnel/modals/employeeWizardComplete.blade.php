@@ -202,31 +202,26 @@
             <!-- STEP 3: Employment Details -->
             <div class="wizard-content" data-step="3" style="display:none;">
                 <h4 class="wizard-section-title">💼 Employment Details</h4>
-                <div class="wizard-grid-2">
-                    <div>
-                        <label class="wizard-label-text">Position *</label>
-                        <input type="text" name="position" placeholder="Administrative Officer IV" maxlength="255" class="wizard-input">
-                    </div>
-                    <div>
-                        <label class="wizard-label-text">Department / Office *</label>
-                        <select name="department" class="wizard-select">
-                            <option value="">Select Department</option>
-                            @foreach($departments as $dept)
-                                <option value="{{ $dept->id }}">{{ $dept->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                <div class="wizard-field">
+                    <label class="wizard-label-text">Department / Office *</label>
+                    <select name="department" id="wizard-department" class="wizard-select" onchange="loadDesignations(this.value)">
+                        <option value="">Select Department</option>
+                        @foreach($departments as $dept)
+                            <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="wizard-field">
+                    <label class="wizard-label-text">Position / Designation *</label>
+                    <select name="position" id="wizard-position" class="wizard-select" onchange="fillFromDesignation(this)" disabled>
+                        <option value="">— Select a department first —</option>
+                    </select>
+                    <p class="wizard-hint" id="wizard-position-hint">Select a department to load available designations.</p>
                 </div>
                 <div class="wizard-grid-2">
                     <div>
                         <label class="wizard-label-text">Employment Type / Status *</label>
-                        <select name="employment_status" class="wizard-select">
-                            <option value="">Select Type</option>
-                            <option value="Permanent">Permanent</option>
-                            <option value="Casual">Casual</option>
-                            <option value="Contractual">Contractual</option>
-                            <option value="Job Order">Job Order</option>
-                        </select>
+                        <input type="text" name="employment_status" id="wizard-employment-status" class="wizard-input" placeholder="Auto-filled from designation" readonly style="background:#f7f6ff;color:#6b6a8a;cursor:not-allowed;">
                     </div>
                     <div>
                         <label class="wizard-label-text">Appointment Date *</label>
@@ -236,7 +231,7 @@
                 <div class="wizard-grid-2">
                     <div>
                         <label class="wizard-label-text">Salary Grade</label>
-                        <input type="text" name="salary_grade" placeholder="SG-11" maxlength="255" class="wizard-input">
+                        <input type="text" name="salary_grade" id="wizard-salary-grade" class="wizard-input" placeholder="Auto-filled from designation" readonly style="background:#f7f6ff;color:#6b6a8a;cursor:not-allowed;">
                     </div>
                     <div>
                         <label class="wizard-label-text">Step Increment</label>
@@ -369,3 +364,54 @@
         </div>
     </div>
 </div>
+
+<script>
+function loadDesignations(deptId) {
+    const posSelect  = document.getElementById('wizard-position');
+    const statusInput = document.getElementById('wizard-employment-status');
+    const gradeInput  = document.getElementById('wizard-salary-grade');
+    const hint        = document.getElementById('wizard-position-hint');
+
+    posSelect.innerHTML = '<option value="">Loading...</option>';
+    posSelect.disabled  = true;
+    statusInput.value   = '';
+    gradeInput.value    = '';
+
+    if (!deptId) {
+        posSelect.innerHTML = '<option value="">— Select a department first —</option>';
+        hint.textContent    = 'Select a department to load available designations.';
+        return;
+    }
+
+    fetch(`/admin/departments/${deptId}/designations`)
+        .then(r => r.json())
+        .then(data => {
+            if (!data.length) {
+                posSelect.innerHTML = '<option value="">No designations found for this department</option>';
+                hint.textContent    = 'No designations are set up for this department yet.';
+                return;
+            }
+            posSelect.innerHTML = '<option value="">Select Position</option>';
+            data.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value                   = d.title;
+                opt.textContent             = d.title;
+                opt.dataset.employmentType  = d.employment_type || '';
+                opt.dataset.salaryGrade     = d.salary_grade    || '';
+                posSelect.appendChild(opt);
+            });
+            posSelect.disabled   = false;
+            hint.textContent     = `${data.length} designation(s) available. Select one to auto-fill employment details.`;
+        })
+        .catch(() => {
+            posSelect.innerHTML = '<option value="">Error loading designations</option>';
+            hint.textContent    = 'Could not load designations. Please try again.';
+        });
+}
+
+function fillFromDesignation(select) {
+    const opt = select.options[select.selectedIndex];
+    document.getElementById('wizard-employment-status').value = opt.dataset.employmentType || '';
+    document.getElementById('wizard-salary-grade').value      = opt.dataset.salaryGrade    || '';
+}
+</script>

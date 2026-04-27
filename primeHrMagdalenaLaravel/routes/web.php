@@ -233,6 +233,13 @@ Route::post('/admin/designations', function (\Illuminate\Http\Request $request) 
     return redirect()->route('admin.departments')->with('success', 'Designation added successfully.');
 })->middleware('auth')->name('admin.designations.store');
 
+Route::get('/admin/departments/{id}/designations', function ($id) {
+    $designations = \App\Models\Designation::where('department_id', $id)
+        ->orderBy('title')
+        ->get(['id', 'title', 'employment_type', 'salary_grade']);
+    return response()->json($designations);
+})->middleware('auth')->name('admin.departments.designations');
+
 Route::get('/admin/departments/template', function () {
     $headers = [
         'Content-Type'        => 'text/csv',

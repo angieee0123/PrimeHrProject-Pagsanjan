@@ -2,6 +2,18 @@
 
 @push('styles')
     @vite('resources/css/departments.css')
+    <style>
+        .sortable-th { cursor:pointer; user-select:none; white-space:nowrap; }
+        .sortable-th:hover { background:#f0effe; }
+        .sort-icon { font-size:11px; color:#bbb; margin-left:4px; transition:color .15s; }
+        .filter-bar { display:flex; align-items:center; gap:8px; padding:10px 0 14px; flex-wrap:wrap; }
+        .filter-bar select { font-size:12px; padding:5px 10px; border:1.5px solid #e0dff5; border-radius:6px; color:#0b044d; background:#fff; cursor:pointer; font-family:'Poppins',sans-serif; }
+        .filter-bar select:focus { outline:none; border-color:#0b044d; }
+        .filter-bar select.active-filter { border-color:#0b044d; background:#f0effe; font-weight:600; }
+        .filter-clear { font-size:11.5px; color:#8e1e18; background:#fee8e8; border:none; border-radius:6px; padding:5px 10px; cursor:pointer; font-family:'Poppins',sans-serif; display:none; }
+        .filter-clear.visible { display:inline-flex; align-items:center; gap:4px; }
+        .filter-label { font-size:11.5px; color:#9999bb; font-weight:500; }
+    </style>
 @endpush
 
 @section('content')
@@ -104,15 +116,27 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
             </button>
         </div>
     </div>
+    <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <select id="dept-filter-status" onchange="applyDeptFilters()">
+            <option value="">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+        </select>
+        <button class="filter-clear" id="dept-filter-clear" onclick="clearDeptFilters()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Clear filters
+        </button>
+    </div>
     <div class="table-wrapper">
         <table class="payroll-table">
             <thead>
                 <tr>
-                    <th>Department / Office</th>
-                    <th>Code</th>
-                    <th>Department Head</th>
-                    <th>Personnel</th>
-                    <th>Status</th>
+                    <th class="sortable-th" onclick="sortDept('name')" data-col="name">Department / Office <span class="sort-icon">⇅</span></th>
+                    <th class="sortable-th" onclick="sortDept('code')" data-col="code">Code <span class="sort-icon">⇅</span></th>
+                    <th class="sortable-th" onclick="sortDept('head')" data-col="head">Department Head <span class="sort-icon">⇅</span></th>
+                    <th class="sortable-th" onclick="sortDept('personnel_count')" data-col="personnel_count">Personnel <span class="sort-icon">⇅</span></th>
+                    <th class="sortable-th" onclick="sortDept('status')" data-col="status">Status <span class="sort-icon">⇅</span></th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -120,13 +144,16 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
         </table>
     </div>
     <div class="table-footer">
-        <p>Showing <strong><span id="showing-start">1</span>–<span id="showing-end">10</span></strong> of <strong>{{ $departments->count() }}</strong> offices</p>
-        <div class="pagination">
-            <button class="page-btn" id="prev-btn" onclick="changePage('prev')">‹</button>
-            <button class="page-btn active" data-page="1" onclick="goToPage(1)">1</button>
-            <button class="page-btn" data-page="2" onclick="goToPage(2)">2</button>
-            <button class="page-btn" id="next-btn" onclick="changePage('next')">›</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <p>Showing <strong><span id="showing-start">1</span>–<span id="showing-end">10</span></strong> of <strong><span id="showing-total">{{ $departments->count() }}</span></strong> offices</p>
+            <select id="dept-rows-select" onchange="changeRowsDept(this.value)" style="font-size:12px;padding:3px 6px;border:1px solid #e0dff5;border-radius:6px;color:#0b044d;">
+                <option value="10">10 rows</option>
+                <option value="25">25 rows</option>
+                <option value="50">50 rows</option>
+                <option value="100">100 rows</option>
+            </select>
         </div>
+        <div class="pagination" id="dept-pagination"></div>
     </div>
 </section>
 
@@ -152,36 +179,52 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
             </button>
         </div>
     </div>
+    <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <select id="desig-filter-dept" onchange="applyDesigFilters()">
+            <option value="">All Departments</option>
+            @foreach($departments->sortBy('name') as $dept)
+                <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+            @endforeach
+        </select>
+        <select id="desig-filter-type" onchange="applyDesigFilters()">
+            <option value="">All Employment Types</option>
+            <option value="Permanent">Permanent</option>
+            <option value="Casual">Casual</option>
+            <option value="Contractual">Contractual</option>
+            <option value="Job Order">Job Order</option>
+        </select>
+        <button class="filter-clear" id="desig-filter-clear" onclick="clearDesigFilters()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Clear filters
+        </button>
+    </div>
     <div class="table-wrapper">
         <table class="payroll-table">
             <thead>
                 <tr>
-                    <th>Designation Title</th>
-                    <th>Department</th>
-                    <th>Salary Grade</th>
-                    <th>Monthly Rate</th>
-                    <th>Employment Type</th>
+                    <th class="sortable-th" onclick="sortDesig('title')" data-col="title">Designation Title <span class="sort-icon">⇅</span></th>
+                    <th class="sortable-th" onclick="sortDesig('department')" data-col="department">Department <span class="sort-icon">⇅</span></th>
+                    <th class="sortable-th" onclick="sortDesig('dept_code')" data-col="dept_code">Code <span class="sort-icon">⇅</span></th>
+                    <th class="sortable-th" onclick="sortDesig('salary_grade')" data-col="salary_grade">Salary Grade <span class="sort-icon">⇅</span></th>
+                    <th class="sortable-th" onclick="sortDesig('monthly_rate')" data-col="monthly_rate">Monthly Rate <span class="sort-icon">⇅</span></th>
+                    <th class="sortable-th" onclick="sortDesig('employment_type')" data-col="employment_type">Employment Type <span class="sort-icon">⇅</span></th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($designations as $desig)
-                <tr>
-                    <td><p class="emp-name">{{ $desig->title }}</p></td>
-                    <td><span class="dept-tag">{{ $desig->department->name ?? 'N/A' }}</span></td>
-                    <td style="font-size:13px;color:#0b044d;">{{ $desig->salary_grade ?? '—' }}</td>
-                    <td style="font-size:13px;font-weight:600;color:#15803d;">{{ $desig->monthly_rate ? '₱' . number_format($desig->monthly_rate, 2) : '—' }}</td>
-                    <td><span class="badge-status {{ $desig->employment_type === 'Permanent' ? 'processed' : 'pending' }}">{{ $desig->employment_type ?? '—' }}</span></td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="5" style="text-align:center;color:#9999bb;padding:32px;font-size:13px;">No designations added yet.</td>
-                </tr>
-                @endforelse
-            </tbody>
+            <tbody id="desig-tbody"></tbody>
         </table>
     </div>
     <div class="table-footer">
-        <p>Showing <strong>{{ $designations->count() }}</strong> designations</p>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <p>Showing <strong><span id="desig-showing-start">1</span>–<span id="desig-showing-end">10</span></strong> of <strong><span id="desig-showing-total">{{ $designations->count() }}</span></strong> designations</p>
+            <select id="desig-rows-select" onchange="changeRowsDesig(this.value)" style="font-size:12px;padding:3px 6px;border:1px solid #e0dff5;border-radius:6px;color:#0b044d;">
+                <option value="10">10 rows</option>
+                <option value="25">25 rows</option>
+                <option value="50">50 rows</option>
+                <option value="100">100 rows</option>
+            </select>
+        </div>
+        <div class="pagination" id="desig-pagination"></div>
     </div>
 </section>
 
@@ -195,54 +238,228 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
 
 <script>
 const departments  = @json($departments->values());
+const designations = @json($designations->values());
 const avatarColors = @json($avatarColors);
-const itemsPerPage = 10;
-let currentPage    = 1;
-const totalPages   = Math.ceil(departments.length / itemsPerPage);
+
+// --- Sort state ---
+let deptSort  = { col: null, dir: 'asc' };
+let desigSort = { col: null, dir: 'asc' };
+
+function sortDept(col) {
+    deptSort.dir = deptSort.col === col && deptSort.dir === 'asc' ? 'desc' : 'asc';
+    deptSort.col = col;
+    applySortDept();
+    updateSortHeaders('#departments thead th', col, deptSort.dir);
+    deptPage = 1;
+    renderTable();
+}
+
+function applySortDept() {
+    const { col, dir } = deptSort;
+    filteredDepartments = [...filteredDepartments].sort((a, b) => {
+        const av = col === 'personnel_count' ? +a[col] : (a[col] || '').toString().toLowerCase();
+        const bv = col === 'personnel_count' ? +b[col] : (b[col] || '').toString().toLowerCase();
+        return av < bv ? (dir === 'asc' ? -1 : 1) : av > bv ? (dir === 'asc' ? 1 : -1) : 0;
+    });
+}
+
+function sortDesig(col) {
+    desigSort.dir = desigSort.col === col && desigSort.dir === 'asc' ? 'desc' : 'asc';
+    desigSort.col = col;
+    applyDesigSort();
+    updateSortHeaders('#designations thead th', col, desigSort.dir);
+    desigPage = 1;
+    renderDesigTable();
+}
+
+let sortedDesignations = [...designations];
+
+function applyDesigSort() {
+    const { col, dir } = desigSort;
+    sortedDesignations = [...filteredDesignations].sort((a, b) => {
+        let av, bv;
+        if (col === 'department')         { av = (a.department?.name || '').toLowerCase(); bv = (b.department?.name || '').toLowerCase(); }
+        else if (col === 'dept_code')      { av = (a.department?.code || '').toLowerCase(); bv = (b.department?.code || '').toLowerCase(); }
+        else if (col === 'monthly_rate' || col === 'salary_grade') { av = +(a[col] || 0); bv = +(b[col] || 0); }
+        else { av = (a[col] || '').toString().toLowerCase(); bv = (b[col] || '').toString().toLowerCase(); }
+        return av < bv ? (dir === 'asc' ? -1 : 1) : av > bv ? (dir === 'asc' ? 1 : -1) : 0;
+    });
+}
+
+function updateSortHeaders(selector, activeCol, dir) {
+    document.querySelectorAll(selector).forEach(th => {
+        const icon = th.querySelector('.sort-icon');
+        if (!icon) return;
+        const col = th.dataset.col;
+        icon.textContent = col === activeCol ? (dir === 'asc' ? '↑' : '↓') : '⇅';
+        icon.style.color = col === activeCol ? '#0b044d' : '#bbb';
+    });
+}
+
+// --- Filter state ---
+let deptFilters  = { status: '' };
+let desigFilters = { dept_id: '', type: '' };
+
+function applyDeptFilters() {
+    deptFilters.status = document.getElementById('dept-filter-status').value;
+    const q = document.getElementById('dept-search').value.toLowerCase();
+    filteredDepartments = departments.filter(d => {
+        const matchSearch = !q || d.name.toLowerCase().includes(q) || d.code.toLowerCase().includes(q) || d.head.toLowerCase().includes(q);
+        const matchStatus = !deptFilters.status || d.status === deptFilters.status;
+        return matchSearch && matchStatus;
+    });
+    if (deptSort.col) applySortDept();
+    deptPage = 1;
+    renderTable();
+    const hasFilter = !!deptFilters.status;
+    document.getElementById('dept-filter-clear').classList.toggle('visible', hasFilter);
+    document.getElementById('dept-filter-status').classList.toggle('active-filter', hasFilter);
+}
+
+function clearDeptFilters() {
+    deptFilters = { status: '' };
+    document.getElementById('dept-filter-status').value = '';
+    applyDeptFilters();
+}
+
+function applyDesigFilters() {
+    desigFilters.dept_id = document.getElementById('desig-filter-dept').value;
+    desigFilters.type    = document.getElementById('desig-filter-type').value;
+    const q = document.getElementById('dept-search').value.toLowerCase();
+    filteredDesignations = designations.filter(d => {
+        const matchSearch = !q ||
+            (d.title || '').toLowerCase().includes(q) ||
+            (d.department?.name || '').toLowerCase().includes(q) ||
+            (d.department?.code || '').toLowerCase().includes(q) ||
+            (d.employment_type || '').toLowerCase().includes(q) ||
+            (d.salary_grade || '').toString().includes(q);
+        const matchDept = !desigFilters.dept_id || String(d.department_id) === desigFilters.dept_id;
+        const matchType = !desigFilters.type    || d.employment_type === desigFilters.type;
+        return matchSearch && matchDept && matchType;
+    });
+    if (desigSort.col) applyDesigSort();
+    desigPage = 1;
+    renderDesigTable();
+    const hasFilter = !!(desigFilters.dept_id || desigFilters.type);
+    document.getElementById('desig-filter-clear').classList.toggle('visible', hasFilter);
+    document.getElementById('desig-filter-dept').classList.toggle('active-filter', !!desigFilters.dept_id);
+    document.getElementById('desig-filter-type').classList.toggle('active-filter', !!desigFilters.type);
+}
+
+function clearDesigFilters() {
+    desigFilters = { dept_id: '', type: '' };
+    document.getElementById('desig-filter-dept').value = '';
+    document.getElementById('desig-filter-type').value = '';
+    applyDesigFilters();
+}
+
+// --- Departments pagination ---
+let deptPage = 1, deptRowsPerPage = 10, filteredDepartments = [...departments];
 
 function renderTable() {
-    const start = (currentPage - 1) * itemsPerPage;
-    const end   = Math.min(start + itemsPerPage, filteredDepartments.length);
+    const total = filteredDepartments.length;
+    const totalPages = Math.ceil(total / deptRowsPerPage) || 1;
+    if (deptPage > totalPages) deptPage = totalPages;
+    const start = (deptPage - 1) * deptRowsPerPage;
+    const end   = Math.min(start + deptRowsPerPage, total);
     const tbody = document.getElementById('dept-tbody');
     tbody.innerHTML = '';
 
-    filteredDepartments.slice(start, end).forEach((dept, i) => {
-        const idx = start + i;
-        tbody.innerHTML += `
-            <tr>
-                <td>
-                    <div class="emp-cell">
-                        <div class="emp-avatar" style="background:${avatarColors[idx % avatarColors.length]};font-size:11px;">${dept.code.slice(0,2)}</div>
-                        <p class="emp-name">${dept.name}</p>
-                    </div>
-                </td>
-                <td><span class="dept-tag">${dept.code}</span></td>
-                <td class="position-cell">${dept.head}</td>
-                <td class="pay-cell">${dept.personnel_count}</td>
-                <td><span class="badge-status ${dept.status === 'Active' ? 'processed' : 'on-hold'}">${dept.status}</span></td>
-                <td><button class="btn-view" onclick="showDeptModal(${idx})">View</button></td>
-            </tr>`;
+    if (total === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#9999bb;padding:32px;font-size:13px;">No departments found.</td></tr>';
+    } else {
+        filteredDepartments.slice(start, end).forEach((dept, i) => {
+            const idx = start + i;
+            tbody.innerHTML += `
+                <tr>
+                    <td>
+                        <div class="emp-cell">
+                            <div class="emp-avatar" style="background:${avatarColors[idx % avatarColors.length]};font-size:11px;">${dept.code.slice(0,2)}</div>
+                            <p class="emp-name">${dept.name}</p>
+                        </div>
+                    </td>
+                    <td><span class="dept-tag">${dept.code}</span></td>
+                    <td class="position-cell">${dept.head}</td>
+                    <td class="pay-cell">${dept.personnel_count}</td>
+                    <td><span class="badge-status ${dept.status === 'Active' ? 'processed' : 'on-hold'}">${dept.status}</span></td>
+                    <td><button class="btn-view" onclick="showDeptModal(${departments.indexOf(dept)})">View</button></td>
+                </tr>`;
+        });
+    }
+
+    document.getElementById('showing-start').textContent  = total ? start + 1 : 0;
+    document.getElementById('showing-end').textContent    = end;
+    document.getElementById('showing-total').textContent  = total;
+    renderPagination('dept-pagination', deptPage, totalPages, (p) => { deptPage = p; renderTable(); });
+}
+
+function changeRowsDept(val) { deptRowsPerPage = parseInt(val); deptPage = 1; renderTable(); }
+
+// --- Designations pagination ---
+let desigPage = 1, desigRowsPerPage = 10;
+
+function renderDesigTable() {
+    const source = desigSort.col ? sortedDesignations : filteredDesignations;
+    const total = source.length;
+    const totalPages = Math.ceil(total / desigRowsPerPage) || 1;
+    if (desigPage > totalPages) desigPage = totalPages;
+    const start = (desigPage - 1) * desigRowsPerPage;
+    const end   = Math.min(start + desigRowsPerPage, total);
+    const tbody = document.getElementById('desig-tbody');
+    tbody.innerHTML = '';
+
+    if (total === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#9999bb;padding:32px;font-size:13px;">No designations added yet.</td></tr>';
+    } else {
+        source.slice(start, end).forEach(d => {
+            const rate = d.monthly_rate ? '₱' + parseFloat(d.monthly_rate).toLocaleString('en-PH', {minimumFractionDigits:2}) : '—';
+            const type = d.employment_type || '—';
+            const deptCode = d.department?.code || '—';
+            tbody.innerHTML += `
+                <tr>
+                    <td><p class="emp-name">${d.title}</p></td>
+                    <td><span class="dept-tag">${d.department ? d.department.name : 'N/A'}</span></td>
+                    <td><span class="dept-tag" style="background:#f0effe;color:#1a0f6e;">${deptCode}</span></td>
+                    <td style="font-size:13px;color:#0b044d;">${d.salary_grade || '—'}</td>
+                    <td style="font-size:13px;font-weight:600;color:#15803d;">${rate}</td>
+                    <td><span class="badge-status ${type === 'Permanent' ? 'processed' : 'pending'}">${type}</span></td>
+                </tr>`;
+        });
+    }
+
+    document.getElementById('desig-showing-start').textContent = total ? start + 1 : 0;
+    document.getElementById('desig-showing-end').textContent   = end;
+    document.getElementById('desig-showing-total').textContent = total;
+    renderPagination('desig-pagination', desigPage, totalPages, (p) => { desigPage = p; renderDesigTable(); });
+}
+
+function changeRowsDesig(val) { desigRowsPerPage = parseInt(val); desigPage = 1; renderDesigTable(); }
+
+// --- Shared pagination renderer ---
+function renderPagination(containerId, current, total, onPageClick) {
+    const container = document.getElementById(containerId);
+    let html = `<button class="page-btn" ${current===1?'disabled style="opacity:.5"':''} onclick="(${onPageClick.toString()})(${current-1})">‹</button>`;
+    const pages = [];
+    if (total <= 7) { for (let i=1;i<=total;i++) pages.push(i); }
+    else {
+        pages.push(1);
+        if (current > 3) pages.push('...');
+        for (let i=Math.max(2,current-1); i<=Math.min(total-1,current+1); i++) pages.push(i);
+        if (current < total-2) pages.push('...');
+        pages.push(total);
+    }
+    pages.forEach(p => {
+        if (p === '...') { html += `<span style="padding:0 4px;color:#9999bb;">…</span>`; }
+        else { html += `<button class="page-btn ${p===current?'active':''}" onclick="(${onPageClick.toString()})(${p})">${p}</button>`; }
     });
-
-    document.getElementById('showing-start').textContent = start + 1;
-    document.getElementById('showing-end').textContent   = end;
-    updatePagination();
+    html += `<button class="page-btn" ${current===total?'disabled style="opacity:.5"':''} onclick="(${onPageClick.toString()})(${current+1})">›</button>`;
+    container.innerHTML = html;
 }
 
-function updatePagination() {
-    document.querySelectorAll('.page-btn[data-page]').forEach(btn =>
-        btn.classList.toggle('active', parseInt(btn.dataset.page) === currentPage)
-    );
-    const prev = document.getElementById('prev-btn');
-    const next = document.getElementById('next-btn');
-    const totalPages = Math.ceil(filteredDepartments.length / itemsPerPage);
-    prev.disabled = currentPage === 1;           prev.style.opacity = currentPage === 1 ? '0.5' : '1';
-    next.disabled = currentPage === totalPages;  next.style.opacity = currentPage === totalPages ? '0.5' : '1';
-}
+function goToPage(page)  { deptPage = page; renderTable(); }
+function changePage(dir) { goToPage(dir === 'prev' ? deptPage - 1 : deptPage + 1); }
 
-function goToPage(page)  { if (page >= 1 && page <= totalPages) { currentPage = page; renderTable(); } }
-function changePage(dir) { goToPage(dir === 'prev' ? currentPage - 1 : currentPage + 1); }
-
+// --- Modal & UI helpers ---
 function showDeptModal(index) {
     const dept  = departments[index];
     const color = avatarColors[index % avatarColors.length];
@@ -275,31 +492,45 @@ function openFailedModal(msg){ if (msg) document.getElementById('failed-msg').te
 function closeFailedModal()  { document.getElementById('failed-modal').classList.remove('open');    document.body.style.overflow = ''; openAddModal(); }
 function closeImportSummaryModal() { document.getElementById('import-summary-modal').classList.remove('open'); document.body.style.overflow = ''; }
 
+const searchPlaceholders = {
+    departments:  'Search department, code, or head...',
+    designations: 'Search designation, department, or type...'
+};
+
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', function () {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         this.classList.add('active');
         document.getElementById(this.dataset.tab).classList.add('active');
+        const searchEl = document.getElementById('dept-search');
+        searchEl.value = '';
+        searchEl.placeholder = searchPlaceholders[this.dataset.tab] || 'Search...';
+        filteredDepartments  = [...departments];
+        filteredDesignations = [...designations];
+        clearDeptFilters();
+        clearDesigFilters();
     });
 });
 
 // Topbar search filter
+let filteredDesignations = [...designations];
+
 document.getElementById('dept-search').addEventListener('input', function () {
     const q = this.value.toLowerCase();
-    filteredDepartments = departments.filter(d =>
-        d.name.toLowerCase().includes(q) ||
-        d.code.toLowerCase().includes(q) ||
-        d.head.toLowerCase().includes(q)
-    );
-    currentPage = 1;
-    renderTable();
+    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+
+    if (activeTab === 'designations') {
+        applyDesigFilters();
+    } else {
+        applyDeptFilters();
+    }
 });
 
-let filteredDepartments = departments;
-
 document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('dept-search').placeholder = searchPlaceholders.departments;
     renderTable();
+    renderDesigTable();
     @if(session('success'))  openSuccessModal(); @endif
     @if($errors->any())      openFailedModal('{{ $errors->first() }}'); @endif
 
