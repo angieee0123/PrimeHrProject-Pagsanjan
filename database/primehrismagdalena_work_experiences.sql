@@ -35,7 +35,7 @@ CREATE TABLE `work_experiences` (
   PRIMARY KEY (`id`),
   KEY `work_experiences_employee_id_foreign` (`employee_id`),
   CONSTRAINT `work_experiences_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -44,6 +44,7 @@ CREATE TABLE `work_experiences` (
 
 LOCK TABLES `work_experiences` WRITE;
 /*!40000 ALTER TABLE `work_experiences` DISABLE KEYS */;
+INSERT INTO `work_experiences` VALUES (1,8,'XYZ Company','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(2,9,'XYZ Company','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(3,10,'Tech Solutions Inc','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(4,11,'XYZ Company','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(5,12,'Business Partners Ltd','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(6,13,'Business Partners Ltd','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(7,14,'Tech Solutions Inc','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(8,15,'Business Partners Ltd','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(9,16,'ABC Corporation','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(10,17,'XYZ Company','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0);
 /*!40000 ALTER TABLE `work_experiences` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -56,4 +57,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-25  2:57:29
+-- Dump completed on 2026-04-27 22:54:42

@@ -34,7 +34,7 @@ CREATE TABLE `departments` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `departments_code_unique` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,7 +43,7 @@ CREATE TABLE `departments` (
 
 LOCK TABLES `departments` WRITE;
 /*!40000 ALTER TABLE `departments` DISABLE KEYS */;
-INSERT INTO `departments` VALUES (1,'mo','Mayor\'s Office','n/a',0,'Active',NULL,'2026-04-13 08:28:33','2026-04-13 08:28:33'),(2,'mao','Municipal Assessor\'s Office','n/a',0,'Active',NULL,'2026-04-13 08:32:51','2026-04-13 08:32:51');
+INSERT INTO `departments` VALUES (1,'mo','Mayor\'s Office','n/a',0,'Active',NULL,'2026-04-13 08:28:33','2026-04-13 08:28:33'),(2,'mao','Municipal Assessor\'s Office','n/a',0,'Active',NULL,'2026-04-13 08:32:51','2026-04-13 08:32:51'),(3,'HRMO','Human Resources Management Office','HRMO Office Head',0,'Active',NULL,'2026-04-25 02:27:54','2026-04-25 02:27:54');
 /*!40000 ALTER TABLE `departments` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -56,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-25  2:57:28
+-- Dump completed on 2026-04-27 22:54:39

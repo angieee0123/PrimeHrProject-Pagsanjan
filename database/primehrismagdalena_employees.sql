@@ -43,7 +43,7 @@ CREATE TABLE `employees` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `employees_employee_id_unique` (`employee_id`),
   UNIQUE KEY `employees_email_unique` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -52,7 +52,7 @@ CREATE TABLE `employees` (
 
 LOCK TABLES `employees` WRITE;
 /*!40000 ALTER TABLE `employees` DISABLE KEYS */;
-INSERT INTO `employees` VALUES (1,'1000','John Randolf','Miranda','Peñaredondo','Jr.','1999-01-01','Tondo Hospital','Male','Single','Filipino',160.00,58.00,'AB+','rodolfotacords@gmail.com','/storage/employees/photos/1777049129_IMG20260422193013.jpg','2026-04-24 16:45:29'),(3,'123123123','John Raasdfdolfasdf','asdf','Pesdfañaredasdfondo','Jr.','0001-01-02','asdfasdf','Male','Married','asdfasdf',123.00,123.00,'A-','penaasdfasdfredondojohnrandolf@lspu.edu.phasdfasdf','/storage/employees/photos/1777050358_IMG20260422193013.jpg','2026-04-24 17:05:58'),(4,'2663','asdf','asdf','asdf','Jr.','2026-04-11','asdf','Male','Single','asdf',3.00,3.00,'AB-','pen123aredondojohnrandolf@lspu.edu.ph','/storage/employees/photos/1777051928_IMG20260422193013.jpg','2026-04-24 17:32:08'),(6,'EMP-2025-0001','System','Admin','Administrator',NULL,'1990-01-01','Pagsanjan, Laguna','Male','Single','Filipino',170.00,70.00,'O+','admin@gmail.com',NULL,'2026-04-24 18:00:05');
+INSERT INTO `employees` VALUES (6,'EMP-2025-0001','System','Admin','Administrator',NULL,'1990-01-01','Pagsanjan, Laguna','Male','Single','Filipino',170.00,70.00,'O+','admin@gmail.com',NULL,'2026-04-24 18:00:05'),(8,'2024001','Jeremy ','Reyes','Pogi',NULL,'1990-05-15','Manila','Female','Married','Filipino',160.00,55.00,'O+','maria.cruz@primehr.com',NULL,'2026-04-25 09:04:59'),(9,'2024002','Juan','Reyes','Dela Cruz',NULL,'1988-03-20','Quezon City','Male','Single','Filipino',170.00,70.00,'A+','juan.delacruz@primehr.com',NULL,'2026-04-25 09:04:59'),(10,'2024003','Ana','Garcia','Ramos',NULL,'1992-07-10','Caloocan','Female','Single','Filipino',158.00,52.00,'B+','ana.ramos@primehr.com',NULL,'2026-04-25 09:04:59'),(11,'2024004','Pedro','Mendoza','Santos','Jr.','1985-11-25','Pasig','Male','Married','Filipino',175.00,80.00,'O+','pedro.santos@primehr.com',NULL,'2026-04-25 09:04:59'),(12,'2024005','Rosa','Flores','Bautista',NULL,'1995-02-14','Makati','Female','Single','Filipino',162.00,58.00,'AB+','rosa.bautista@primehr.com',NULL,'2026-04-25 09:04:59'),(13,'2024006','Carlos','Torres','Gonzales',NULL,'1987-09-30','Taguig','Male','Married','Filipino',168.00,72.00,'A+','carlos.gonzales@primehr.com',NULL,'2026-04-25 09:04:59'),(14,'2024007','Luz','Aquino','Villanueva',NULL,'1993-06-18','Paranaque','Female','Single','Filipino',165.00,60.00,'O+','luz.villanueva@primehr.com',NULL,'2026-04-25 09:04:59'),(15,'2024008','Miguel','Castro','Rivera',NULL,'1991-12-05','Las Pinas','Male','Single','Filipino',172.00,75.00,'B+','miguel.rivera@primehr.com',NULL,'2026-04-25 09:04:59'),(16,'2024009','Elena','Morales','Fernandez',NULL,'1989-04-22','Muntinlupa','Female','Married','Filipino',160.00,56.00,'A+','elena.fernandez@primehr.com',NULL,'2026-04-25 09:04:59'),(17,'2024010','Roberto','Diaz','Mercado','Sr.','1986-08-12','Valenzuela','Male','Married','Filipino',178.00,82.00,'O+','roberto.mercado@primehr.com',NULL,'2026-04-25 09:04:59');
 /*!40000 ALTER TABLE `employees` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -65,4 +65,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-25  2:57:30
+-- Dump completed on 2026-04-27 22:54:40

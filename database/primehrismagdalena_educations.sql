@@ -33,7 +33,7 @@ CREATE TABLE `educations` (
   PRIMARY KEY (`id`),
   KEY `educations_employee_id_foreign` (`employee_id`),
   CONSTRAINT `educations_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,6 +42,7 @@ CREATE TABLE `educations` (
 
 LOCK TABLES `educations` WRITE;
 /*!40000 ALTER TABLE `educations` DISABLE KEYS */;
+INSERT INTO `educations` VALUES (1,8,'College','University of the Philippines','Bachelor of Arts in Psychology','2014',NULL),(2,9,'College','Ateneo de Manila','Bachelor of Arts in Psychology','2014',NULL),(3,10,'College','University of Santo Tomas','Bachelor of Science in Business Administration','2014',NULL),(4,11,'College','De La Salle University','Bachelor of Science in Computer Science','2014',NULL),(5,12,'College','University of Santo Tomas','Bachelor of Science in Business Administration','2014',NULL),(6,13,'College','University of the Philippines','Bachelor of Science in Business Administration','2014',NULL),(7,14,'College','Ateneo de Manila','Bachelor of Arts in Psychology','2014',NULL),(8,15,'College','University of Santo Tomas','Bachelor of Arts in Psychology','2014',NULL),(9,16,'College','University of the Philippines','Bachelor of Arts in Psychology','2014',NULL),(10,17,'College','University of Santo Tomas','Bachelor of Arts in Psychology','2014',NULL);
 /*!40000 ALTER TABLE `educations` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +55,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-25  2:57:29
+-- Dump completed on 2026-04-27 22:54:40

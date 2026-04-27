@@ -9,7 +9,7 @@ class EmploymentDetail extends Model
     public $timestamps = false;
     
     protected $fillable = [
-        'employee_id', 'position', 'department', 'employment_status',
+        'employee_id', 'position', 'department_id', 'employment_status',
         'appointment_date', 'salary_grade', 'step_increment'
     ];
 
@@ -20,6 +20,6 @@ class EmploymentDetail extends Model
 
     public function departmentRelation()
     {
-        return $this->belongsTo(Department::class, 'department', 'id');
+        return $this->belongsTo(Department::class, 'department_id');
     }
 }
