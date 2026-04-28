@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@include('admin.topbar.attendanceTopbar')
 @php
 $avatarColors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
 function getInitials($name) {
