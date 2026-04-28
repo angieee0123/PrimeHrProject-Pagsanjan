@@ -49,6 +49,7 @@
                             <th>Undertime</th>
                             <th>Late</th>
                             <th>Total Hours</th>
+                            <th>Accredited Hours</th>
                             <th>Action</th>
                         </tr>
                     </thead>

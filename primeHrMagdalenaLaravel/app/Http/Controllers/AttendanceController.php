@@ -379,31 +379,16 @@ class AttendanceController extends Controller
                 }
             }
 
-            // Calculate undertime (in minutes)
-            // If within grace period (08:15), no undertime penalty
+            // Calculate undertime (in minutes) — only if pm_out is before 17:00
             $undertime = 0;
             if ($attendance && $attendance->pm_out && !in_array($current->dayOfWeek, [0, 6])) {
                 try {
-                    // Check if within grace period
-                    $isWithinGrace = false;
-                    if ($attendance->am_in) {
-                        $amInTime = new \DateTime($attendance->am_in);
-                        $graceThreshold = new \DateTime('08:15:00');
-                        $isWithinGrace = ($amInTime <= $graceThreshold);
-                    }
+                    $pmOutTime = new \DateTime($attendance->pm_out);
+                    $expectedOut = new \DateTime('17:00:00');
 
-                    // Only calculate undertime if NOT within grace period
-                    if (!$isWithinGrace) {
-                        $workHours = 0;
-                        if ($attendance->am_in) {
-                            $amInTime = new \DateTime($attendance->am_in);
-                            $pmOutTime = new \DateTime($attendance->pm_out);
-                            $workInterval = $amInTime->diff($pmOutTime);
-                            $workHours = ($workInterval->h + ($workInterval->i / 60)) - 1; // minus 1 hr break
-                        }
-
-                        // Undertime = max(0, 8 hours - WorkHours) in minutes
-                        $undertime = max(0, (8 - $workHours) * 60);
+                    if ($pmOutTime < $expectedOut) {
+                        $diff = $pmOutTime->diff($expectedOut);
+                        $undertime = ($diff->h * 60) + $diff->i;
                     }
                 } catch (\Exception $e) {
                     $undertime = 0;
@@ -412,6 +397,8 @@ class AttendanceController extends Controller
 
             // Calculate total hours
             $totalHours = 0;
+            $actualWorkHours = 0;
+            $needsReview = false;
             if ($attendance) {
                 try {
                     $workHours = 0;
@@ -499,7 +486,7 @@ class AttendanceController extends Controller
                 'undertime_display' => $this->formatMinutes($undertime),
                 'total_hours' => round($totalHours, 1) . ' hrs',
                 'actual_work_hours' => isset($actualWorkHours) ? round($actualWorkHours, 1) : 0,
-                'needs_review' => isset($needsReview) ? $needsReview : false,
+                'needs_review' => $needsReview,
                 'is_incomplete' => !$amOut || !$pmIn,
                 'attendance_id' => $attendance ? $attendance->id : null,
                 'date_key' => $current->format('Y-m-d'),
