@@ -513,6 +513,49 @@ window.loadDetailedDTR = function() {
         });
 }
 
+function computeAccreditedHours(record) {
+    const amIn  = record.am_in;
+    const amOut = record.am_out;
+    const pmIn  = record.pm_in;
+    const pmOut = record.pm_out;
+
+    if (!amIn || !amOut || !pmIn || !pmOut) {
+        return { display: '<span class="badge-incomplete">Incomplete</span>', minutes: 0, incomplete: true };
+    }
+
+    const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+
+    // AM window: 08:00 – 12:00 (15-min grace: if amIn <= 08:15, treat as 08:00)
+    const AM_START   = 8 * 60;         // 08:00
+    const AM_END     = 12 * 60;        // 12:00
+    const GRACE      = AM_START + 15;  // 08:15
+    // PM window: 13:00 – 17:00
+    const PM_START = 13 * 60;  // 13:00
+    const PM_END   = 17 * 60;  // 17:00
+
+    // AM: if within grace period, count from 08:00; otherwise count from actual amIn
+    const amInMin  = toMin(amIn);
+    const amFrom   = amInMin <= GRACE ? AM_START : amInMin;
+    const amTo     = Math.min(toMin(amOut), AM_END);
+    const amMins   = Math.max(0, amTo - amFrom);
+
+    // PM: clamp both in and out within 13:00–17:00
+    const pmFrom = Math.max(toMin(pmIn),  PM_START);
+    const pmTo   = Math.min(toMin(pmOut), PM_END);
+    const pmMins = Math.max(0, pmTo - pmFrom);
+
+    const totalMins = amMins + pmMins;
+    const hrs  = Math.floor(totalMins / 60);
+    const mins = totalMins % 60;
+
+    let color = '#15803d';
+    if (totalMins < 480) color = '#a16207';
+    if (totalMins <= 0)  color = '#8e1e18';
+
+    const label = hrs > 0 && mins > 0 ? `${hrs}h ${mins}m` : hrs > 0 ? `${hrs} hrs` : `${mins} min`;
+    return { display: `<strong style="color:${color};">${label}</strong>`, minutes: totalMins, incomplete: false };
+}
+
 function renderDetailedDTR(data) {
     const tbody = document.getElementById('detailedDTRBody');
     tbody.innerHTML = '';
@@ -569,6 +612,8 @@ function renderDetailedDTR(data) {
             statusBadge = ' <span class="badge-needs-review">Needs Review</span>';
         }
 
+        const accredited = computeAccreditedHours(record);
+
         tr.innerHTML = `
             <td><strong>${record.date}</strong>${statusBadge}</td>
             <td>${record.day}</td>
@@ -581,6 +626,7 @@ function renderDetailedDTR(data) {
             <td>${record.undertime_display ? '<span class="log-late">' + record.undertime_display + '</span>' : (record.pm_out ? '0 min' : '—')}</td>
             <td>${record.late_display ? '<span class="log-late">' + record.late_display + '</span>' : (record.am_in ? '0 min' : '—')}</td>
             <td><strong>${record.actual_work_hours} hrs</strong><br><small>${record.total_hours}</small></td>
+            <td>${accredited.display}</td>
             <td><button class="btn-edit-time" onclick="openCorrectModal(${record.attendance_id ? record.attendance_id : "'new_" + currentDetailedEmployeeId + "_" + record.date_key + "'"}, '${record.date}')" title="${record.attendance_id ? 'Edit time records' : 'Add time records'}">Edit</button></td>
         `;
 

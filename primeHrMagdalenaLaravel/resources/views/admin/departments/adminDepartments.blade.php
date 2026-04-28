@@ -6,13 +6,15 @@
         .sortable-th { cursor:pointer; user-select:none; white-space:nowrap; }
         .sortable-th:hover { background:#f0effe; }
         .sort-icon { font-size:11px; color:#bbb; margin-left:4px; transition:color .15s; }
-        .filter-bar { display:flex; align-items:center; gap:8px; padding:10px 0 14px; flex-wrap:wrap; }
-        .filter-bar select { font-size:12px; padding:5px 10px; border:1.5px solid #e0dff5; border-radius:6px; color:#0b044d; background:#fff; cursor:pointer; font-family:'Poppins',sans-serif; }
-        .filter-bar select:focus { outline:none; border-color:#0b044d; }
-        .filter-bar select.active-filter { border-color:#0b044d; background:#f0effe; font-weight:600; }
-        .filter-clear { font-size:11.5px; color:#8e1e18; background:#fee8e8; border:none; border-radius:6px; padding:5px 10px; cursor:pointer; font-family:'Poppins',sans-serif; display:none; }
-        .filter-clear.visible { display:inline-flex; align-items:center; gap:4px; }
-        .filter-label { font-size:11.5px; color:#9999bb; font-weight:500; }
+        .filter-bar { display:flex; align-items:center; gap:10px; padding:12px 24px; border-top:1px solid #f0effe; flex-wrap:wrap; }
+        .filter-bar-left { display:flex; align-items:center; gap:10px; flex:1; flex-wrap:wrap; }
+        .filter-label { display:flex; align-items:center; gap:6px; font-size:12px; color:#9999bb; font-weight:600; letter-spacing:.3px; text-transform:uppercase; white-space:nowrap; }
+        .filter-bar select { font-size:13px; padding:9px 16px; border:none; border-radius:8px; color:#0b044d; background:#f7f6ff; cursor:pointer; font-family:'Poppins',sans-serif; outline:none; transition:box-shadow .2s; min-width:150px; }
+        .filter-bar select:focus { box-shadow:0 0 0 2px rgba(11,4,77,0.15); }
+        .filter-bar select.active-filter { background:#ebe9ff; font-weight:600; box-shadow:0 0 0 2px rgba(11,4,77,0.15); }
+        .filter-clear { font-size:12.5px; color:#8e1e18; background:#fee8e8; border:none; border-radius:8px; padding:9px 14px; cursor:pointer; font-family:'Poppins',sans-serif; display:none; transition:background .2s; white-space:nowrap; margin-left:auto; }
+        .filter-clear:hover { background:#fecaca; }
+        .filter-clear.visible { display:inline-flex; align-items:center; gap:5px; }
     </style>
 @endpush
 
@@ -31,7 +33,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Departments</p>
-            <div class="stat-icon-wrap" style="background:#0b044d15;color:#0b044d;">
+            <div class="stat-icon-wrap" style="background:#0b044d15;color:#0b044d;box-shadow:0 4px 12px rgba(11,4,77,0.18);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             </div>
         </div>
@@ -44,7 +46,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Personnel</p>
-            <div class="stat-icon-wrap" style="background:#15803d15;color:#15803d;">
+            <div class="stat-icon-wrap" style="background:#15803d15;color:#15803d;box-shadow:0 4px 12px rgba(21,128,61,0.18);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
         </div>
@@ -57,7 +59,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Active Offices</p>
-            <div class="stat-icon-wrap" style="background:#d9bb0015;color:#d9bb00;">
+            <div class="stat-icon-wrap" style="background:#d9bb0015;color:#d9bb00;box-shadow:0 4px 12px rgba(217,187,0,0.18);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
         </div>
@@ -70,7 +72,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Largest Office</p>
-            <div class="stat-icon-wrap" style="background:#8e1e1815;color:#8e1e18;">
+            <div class="stat-icon-wrap" style="background:#8e1e1815;color:#8e1e18;box-shadow:0 4px 12px rgba(142,30,24,0.18);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
             </div>
         </div>
@@ -117,12 +119,17 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
         </div>
     </div>
     <div class="filter-bar">
-        <span class="filter-label">Filter:</span>
-        <select id="dept-filter-status" onchange="applyDeptFilters()">
-            <option value="">All Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-        </select>
+        <div class="filter-bar-left">
+            <span class="filter-label">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Filter
+            </span>
+            <select id="dept-filter-status" onchange="applyDeptFilters()">
+                <option value="">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+        </div>
         <button class="filter-clear" id="dept-filter-clear" onclick="clearDeptFilters()">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             Clear filters
@@ -146,7 +153,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     <div class="table-footer">
         <div style="display:flex;align-items:center;gap:8px;">
             <p>Showing <strong><span id="showing-start">1</span>–<span id="showing-end">10</span></strong> of <strong><span id="showing-total">{{ $departments->count() }}</span></strong> offices</p>
-            <select id="dept-rows-select" onchange="changeRowsDept(this.value)" style="font-size:12px;padding:3px 6px;border:1px solid #e0dff5;border-radius:6px;color:#0b044d;">
+            <select id="dept-rows-select" onchange="changeRowsDept(this.value)" style="font-size:13px;padding:6px 12px;border:none;border-radius:8px;color:#0b044d;background:#f7f6ff;font-family:'Poppins',sans-serif;outline:none;cursor:pointer;">
                 <option value="10">10 rows</option>
                 <option value="25">25 rows</option>
                 <option value="50">50 rows</option>
@@ -180,20 +187,25 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
         </div>
     </div>
     <div class="filter-bar">
-        <span class="filter-label">Filter:</span>
-        <select id="desig-filter-dept" onchange="applyDesigFilters()">
-            <option value="">All Departments</option>
-            @foreach($departments->sortBy('name') as $dept)
-                <option value="{{ $dept->id }}">{{ $dept->name }}</option>
-            @endforeach
-        </select>
-        <select id="desig-filter-type" onchange="applyDesigFilters()">
-            <option value="">All Employment Types</option>
-            <option value="Permanent">Permanent</option>
-            <option value="Casual">Casual</option>
-            <option value="Contractual">Contractual</option>
-            <option value="Job Order">Job Order</option>
-        </select>
+        <div class="filter-bar-left">
+            <span class="filter-label">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Filter
+            </span>
+            <select id="desig-filter-dept" onchange="applyDesigFilters()">
+                <option value="">All Departments</option>
+                @foreach($departments->sortBy('name') as $dept)
+                    <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                @endforeach
+            </select>
+            <select id="desig-filter-type" onchange="applyDesigFilters()">
+                <option value="">All Employment Types</option>
+                <option value="Permanent">Permanent</option>
+                <option value="Casual">Casual</option>
+                <option value="Contractual">Contractual</option>
+                <option value="Job Order">Job Order</option>
+            </select>
+        </div>
         <button class="filter-clear" id="desig-filter-clear" onclick="clearDesigFilters()">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             Clear filters
@@ -217,7 +229,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     <div class="table-footer">
         <div style="display:flex;align-items:center;gap:8px;">
             <p>Showing <strong><span id="desig-showing-start">1</span>–<span id="desig-showing-end">10</span></strong> of <strong><span id="desig-showing-total">{{ $designations->count() }}</span></strong> designations</p>
-            <select id="desig-rows-select" onchange="changeRowsDesig(this.value)" style="font-size:12px;padding:3px 6px;border:1px solid #e0dff5;border-radius:6px;color:#0b044d;">
+            <select id="desig-rows-select" onchange="changeRowsDesig(this.value)" style="font-size:13px;padding:6px 12px;border:none;border-radius:8px;color:#0b044d;background:#f7f6ff;font-family:'Poppins',sans-serif;outline:none;cursor:pointer;">
                 <option value="10">10 rows</option>
                 <option value="25">25 rows</option>
                 <option value="50">50 rows</option>
