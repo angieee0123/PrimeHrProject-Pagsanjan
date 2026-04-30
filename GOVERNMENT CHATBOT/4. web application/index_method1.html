@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrimeHR Chatbot - User Tracking Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            gap: 20px;
+        }
+
+        /* User Selection Panel */
+        .user-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            width: 250px;
+        }
+
+        .user-panel h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .user-list {
+            list-style: none;
+        }
+
+        .user-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f9f9f9;
+        }
+
+        .user-item:hover {
+            background: #f0f0f0;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .user-item.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .user-item-id {
+            font-weight: bold;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .user-info {
+            background: #f0f7ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .user-info h3 {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .info-item {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .info-item strong {
+            color: #333;
+        }
+
+        /* Chat Panel */
+        .chat-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .chat-header h1 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+
+        .message.bot .message-content {
+            background: #e0e0e0;
+            color: #333;
+            border-bottom-left-radius: 0;
+        }
+
+        .message-meta {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+            padding: 0 5px;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+            30% {
+                opacity: 1;
+                transform: translateY(-10px);
+            }
+        }
+
+        .input-area {
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            background: white;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .user-panel {
+                width: 100%;
+            }
+
+            .message-content {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- User Selection -->
+        <div class="user-panel">
+            <h2>👤 Select User</h2>
+            <ul class="user-list" id="userList"></ul>
+            
+            <div class="user-info" id="userInfo">
+                <h3>No user selected</h3>
+                <p>Select a user to start chatting</p>
+            </div>
+        </div>
+
+        <!-- Chat -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <h1>🤖 PrimeHR Assistant</h1>
+                <p id="headerInfo">Select a user to begin</p>
+            </div>
+
+            <div class="messages" id="messages"></div>
+
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Ask me anything about the system..."
+                        disabled
+                    />
+                    <button id="sendBtn" disabled>Send</button>
+                </div>
+                <div class="status" id="status"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock user data
+        const users = [
+            { id: 1, name: 'Maria Cruz', email: 'maria.cruz@primehr.com', role: 'Employee' },
+            { id: 6, name: 'Juan Dela Cruz', email: 'juan.delacruz@primehr.com', role: 'Employee' },
+            { id: 8, name: 'Ana Ramos', email: 'ana.ramos@primehr.com', role: 'Employee' },
+            { id: 9, name: 'Pedro Santos', email: 'pedro.santos@primehr.com', role: 'Employee' }
+        ];
+
+        let currentUser = null;
+        const chatAPI = 'http://localhost:5001';
+
+        // Initialize
+        function init() {
+            renderUserList();
+            setupEventListeners();
+        }
+
+        // Render user list
+        function renderUserList() {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = users.map(user => `
+                <li class="user-item" onclick="selectUser(${user.id})">
+                    <strong>${user.name}</strong>
+                    <div class="user-item-id">ID: ${user.id} • ${user.role}</div>
+                </li>
+            `).join('');
+        }
+
+        // Select user
+        function selectUser(userId) {
+            currentUser = users.find(u => u.id === userId);
+            
+            // Update UI
+            document.querySelectorAll('.user-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.user-item').classList.add('active');
+
+            // Update info
+            const userInfo = document.getElementById('userInfo');
+            userInfo.innerHTML = `
+                <h3>${currentUser.name}</h3>
+                <div class="info-item"><strong>ID:</strong> ${currentUser.id}</div>
+                <div class="info-item"><strong>Email:</strong> ${currentUser.email}</div>
+                <div class="info-item"><strong>Role:</strong> ${currentUser.role}</div>
+                <div class="info-item" style="margin-top: 10px; font-size: 12px; background: #fff; padding: 8px; border-radius: 3px;">
+                    <strong>✅ User ID will be sent with every message</strong>
+                </div>
+            `;
+
+            // Update header
+            document.getElementById('headerInfo').textContent = `Chatting as ${currentUser.name}`;
+
+            // Clear messages
+            document.getElementById('messages').innerHTML = '';
+
+            // Enable input
+            document.getElementById('messageInput').disabled = false;
+            document.getElementById('sendBtn').disabled = false;
+            document.getElementById('messageInput').focus();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('sendBtn').onclick = sendMessage;
+            document.getElementById('messageInput').onkeypress = (e) => {
+                if (e.key === 'Enter') sendMessage();
+            };
+        }
+
+        // Send message
+        async function sendMessage() {
+            if (!currentUser) {
+                showStatus('Please select a user first', 'error');
+                return;
+            }
+
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message to chat
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Show typing indicator
+            const messagesDiv = document.getElementById('messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+            messagesDiv.appendChild(typingDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            try {
+                // ✅ METHOD 1: SEND USER_ID IN JSON
+                const response = await fetch(`${chatAPI}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        user_id: currentUser.id  // ✅ USER ID IS SENT HERE
+                    })
+                });
+
+                const data = await response.json();
+
+                // Remove typing indicator
+                typingDiv.remove();
+
+                if (data.status === 'success') {
+                    addMessage(data.response, 'bot', data.question_type);
+                    showStatus(`✅ Message saved with user_id: ${currentUser.id}`, 'success');
+                } else {
+                    addMessage('Sorry, an error occurred: ' + (data.error || 'Unknown error'), 'bot');
+                    showStatus('❌ Error: ' + (data.error || 'Failed to get response'), 'error');
+                }
+            } catch (error) {
+                typingDiv.remove();
+                addMessage('Error: Cannot connect to chatbot. Make sure it\'s running on port 5001.', 'bot');
+                showStatus('❌ Connection error', 'error');
+                console.error(error);
+            }
+        }
+
+        // Add message to chat
+        function addMessage(text, sender, type = null) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = text;
+
+            const metaDiv = document.createElement('div');
+            metaDiv.className = 'message-meta';
+            metaDiv.textContent = sender === 'user' ? 'You' : `Bot • ${type || 'system'}`;
+
+            messageDiv.appendChild(contentDiv);
+            messageDiv.appendChild(metaDiv);
+            messagesDiv.appendChild(messageDiv);
+
+            // Auto scroll
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Show status
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status show ${type}`;
+            setTimeout(() => status.classList.remove('show'), 4000);
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>

@@ -392,5 +392,30 @@ Route::get('/admin/test-chatbot', function () {
     return view('admin.test-chatbot');
 })->middleware('auth')->name('admin.test-chatbot');
 
+// ✅ NEW: Chatbot with Laravel Session Integration
+Route::get('/admin/chatbot', function () {
+    return view('admin.chatbot');
+})->middleware('auth')->name('admin.chatbot');
+
 // Chatbot API
 Route::post('/api/chatbot', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware('auth');
+
+// ✅ NEW: Get current authenticated user's ID for chatbot
+Route::get('/api/auth/user-id', function (\Illuminate\Http\Request $request) {
+    if (Auth::check()) {
+        return response()->json([
+            'status' => 'success',
+            'user_id' => Auth::id(),
+            'email' => Auth::user()->email,
+            'name' => Auth::user()->employee ?
+                Auth::user()->employee->first_name . ' ' . Auth::user()->employee->last_name :
+                'User ' . Auth::id()
+        ]);
+    }
+
+    return response()->json([
+        'status' => 'unauthenticated',
+        'user_id' => null,
+        'message' => 'User not authenticated'
+    ], 401);
+})->name('api.auth.user-id');
