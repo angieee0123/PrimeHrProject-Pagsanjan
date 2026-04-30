@@ -56,6 +56,13 @@ def get_db_schema():
 
 def generate_sql_query(user_question, schema):
     """Use Groq to convert natural language question to SQL"""
+    
+    # Translate Filipino to English if needed
+    question_to_process = user_question
+    if _is_tagalog_question(user_question):
+        question_to_process = translate_tagalog_to_english(user_question)
+        print(f"🌐 Translated: '{user_question}' → '{question_to_process}'")
+    
     prompt = f"""You are a MySQL expert. Given the database schema below, generate a valid MySQL SELECT query to answer the user's question.
 
 Database Schema:
@@ -67,7 +74,7 @@ Rules:
 - If the question cannot be answered from the schema, return: CANNOT_ANSWER
 - All monetary values are in Philippine Peso (PHP), never use dollar signs
 
-User Question: {user_question}
+User Question: {question_to_process}
 
 SQL Query:"""
 
@@ -76,6 +83,29 @@ SQL Query:"""
         model="llama-3.3-70b-versatile",
         temperature=0.1,
         max_tokens=300
+    )
+    return response.choices[0].message.content.strip()
+
+def _is_tagalog_question(question):
+    """Check if question contains Tagalog/Filipino keywords"""
+    tagalog_words = ['ang', 'ilan', 'paano', 'ano', 'ilang', 'sa', 'ng', 'ay', 'para', 'mula']
+    question_lower = question.lower()
+    return any(word in question_lower for word in tagalog_words)
+
+def translate_tagalog_to_english(tagalog_text):
+    """Translate Tagalog question to English using Groq"""
+    prompt = f"""Translate this Tagalog/Filipino question to English. 
+Return ONLY the English translation, nothing else.
+
+Tagalog: {tagalog_text}
+
+English translation:"""
+    
+    response = groq_client.chat.completions.create(
+        messages=[{"role": "user", "content": prompt}],
+        model="llama-3.3-70b-versatile",
+        temperature=0.3,
+        max_tokens=100
     )
     return response.choices[0].message.content.strip()
 
@@ -111,6 +141,43 @@ IMPORTANT: All monetary amounts must be expressed in Philippine Peso (PHP). Neve
         max_tokens=300
     )
     return response.choices[0].message.content.strip()
+
+def save_chat_history(user_id, session_id, question, response, question_type, follow_up_questions=None, codebase_files=None):
+    """Save chat message to database"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        sql = """
+        INSERT INTO chat_history 
+        (user_id, session_id, question, response, question_type, follow_up_questions, codebase_files_used)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """
+        
+        values = (
+            user_id,
+            session_id,
+            question,
+            response,
+            question_type,
+            json.dumps(follow_up_questions) if follow_up_questions else None,
+            json.dumps(codebase_files) if codebase_files else None
+        )
+        
+        cursor.execute(sql, values)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        # Debug logging
+        print(f"✅ Chat saved: user_id={user_id}, session_id={session_id}, type={question_type}")
+        
+        return True
+    except Exception as e:
+        print(f"❌ Error saving chat history: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
 
 # ==================== CODEBASE INDEXING FUNCTIONS ====================
 
@@ -223,20 +290,56 @@ def classify_question(user_question):
     - 'database': Data queries (user counts, records, reports)
     - 'system': How-to, process flows, features
     - 'both': Could be either
-    """
-    db_keywords = ['how many', 'count', 'list', 'show', 'find', 'search', 'where', 'filter', 'report', 'total']
-    process_keywords = ['how', 'how do', 'how to', 'process', 'flow', 'step', 'register', 'create', 'add', 'submit', 'upload', 'scan', 'work', 'use']
     
+    Supports English and Filipino (Tagalog)
+    """
     question_lower = user_question.lower()
     
+    # English database keywords
+    db_keywords = [
+        'how many', 'count', 'list', 'show', 'find', 'search', 'where', 
+        'filter', 'report', 'total', 'number', 'many', 'all', 'view'
+    ]
+    
+    # Filipino/Tagalog database keywords
+    # ilan = how many, ilang = how many, total, lahat = all, dami = amount
+    db_keywords_tagalog = [
+        'ilan', 'ilang', 'dami', 'total', 'lahat', 'list', 'view', 'show', 'magpakita'
+    ]
+    
+    # English process keywords
+    process_keywords = [
+        'how', 'how do', 'how to', 'process', 'flow', 'step', 'register', 
+        'create', 'add', 'submit', 'upload', 'scan', 'work', 'use', 'make'
+    ]
+    
+    # Filipino/Tagalog process keywords
+    # paano = how, proseso = process, hakbang = steps, magparehistro = register
+    process_keywords_tagalog = [
+        'paano', 'proseso', 'hakbang', 'magparehistro', 'lumikha', 'magdagdag', 
+        'magpadala', 'magskana', 'gamitin', 'trabaho'
+    ]
+    
+    # Count database keywords found
     db_score = sum(1 for kw in db_keywords if kw in question_lower)
+    db_score += sum(1 for kw in db_keywords_tagalog if kw in question_lower) * 1.5
+    
+    # Count process keywords found
     process_score = sum(1 for kw in process_keywords if kw in question_lower)
+    process_score += sum(1 for kw in process_keywords_tagalog if kw in question_lower) * 1.5
+    
+    # Boost database score if question ends with "?" and contains count/number words
+    if '?' in question_lower and any(word in question_lower for word in ['ilan', 'how many', 'count', 'total']):
+        db_score += 5
     
     if process_score > db_score:
         return 'system'
     elif db_score > process_score:
         return 'database'
     else:
+        # Default: if question starts with common DB pattern, use database
+        if any(question_lower.startswith(kw) for kw in ['what', 'ano', 'show', 'magpakita']):
+            return 'database'
         return 'both'
 
 # ==================== SYSTEM PROCESS RESPONSE ====================
@@ -284,15 +387,88 @@ def home():
     session['conversation_history'] = []
     return render_template('index.html')
 
+@app.route('/set-user', methods=['POST'])
+def set_user():
+    """Set the current user for chat history tracking"""
+    try:
+        user_id = request.json.get('user_id', None)
+        
+        if not user_id:
+            return jsonify({'error': 'user_id is required'}), 400
+        
+        try:
+            user_id = int(user_id)
+        except (ValueError, TypeError):
+            return jsonify({'error': 'user_id must be an integer'}), 400
+        
+        # Verify user exists in database
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT id, email FROM users WHERE id = %s", (user_id,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        # Set in session
+        session['user_id'] = user_id
+        session.modified = True
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'User set: {user["email"]}',
+            'user_id': user_id
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/clear-user', methods=['POST'])
+def clear_user():
+    """Clear the current user (go anonymous)"""
+    try:
+        if 'user_id' in session:
+            del session['user_id']
+        session.modified = True
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'User cleared, now anonymous'
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
         user_input = request.json.get('message', '').strip()
+        
+        # Try to get user_id from multiple sources
+        user_id = request.json.get('user_id', None)  # From request JSON
+        if not user_id:
+            user_id = request.headers.get('X-User-ID', None)  # From header
+        if not user_id:
+            user_id = request.cookies.get('user_id', None)  # From cookie
+        if not user_id and 'user_id' in session:
+            user_id = session.get('user_id', None)  # From session
+        
+        # Convert to int if provided
+        if user_id:
+            try:
+                user_id = int(user_id)
+            except (ValueError, TypeError):
+                user_id = None
+        
         if not user_input:
             return jsonify({'error': 'No message provided'}), 400
 
         if 'conversation_history' not in session:
             session['conversation_history'] = []
+
+        # Create or get session ID
+        if 'session_id' not in session:
+            session['session_id'] = str(datetime.now().timestamp())
 
         session['conversation_history'].append({
             'user': user_input,
@@ -304,19 +480,25 @@ def chat():
         # Greeting handler
         greetings = ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening']
         if any(g in user_input.lower() for g in greetings) and len(user_input.split()) <= 6:
+            response_text = "Hello! I'm your system assistant. I can help you with:\n• System usage: How to register users, submit attendance, scan QR codes, upload documents, etc.\n• Database queries: Find user records, view attendance reports, search employees, etc.\n\nWhat would you like help with?"
+            follow_ups = [
+                "How do I register a new user?",
+                "How many users are in the system?",
+                "How do I scan QR code attendance?"
+            ]
+            
+            save_chat_history(user_id, session['session_id'], user_input, response_text, 'greeting', follow_ups)
+            
             return jsonify({
-                'response': "Hello! I'm your system assistant. I can help you with:\n• System usage: How to register users, submit attendance, scan QR codes, upload documents, etc.\n• Database queries: Find user records, view attendance reports, search employees, etc.\n\nWhat would you like help with?",
+                'response': response_text,
                 'question_type': 'greeting',
-                'follow_up_questions': [
-                    "How do I register a new user?",
-                    "How many users are in the system?",
-                    "How do I scan QR code attendance?"
-                ],
+                'follow_up_questions': follow_ups,
                 'status': 'success'
             })
 
         # Classify question
         question_type = classify_question(user_input)
+        codebase_files_used = []
 
         if question_type == 'database' or question_type == 'both':
             # Try database route first
@@ -326,6 +508,13 @@ def chat():
             if sql != "CANNOT_ANSWER" and sql.lower().startswith("select"):
                 results = execute_query(sql)
                 response_text = generate_natural_response(user_input, sql, results)
+                follow_ups = [
+                    "Show me more details",
+                    "Filter by a different criteria",
+                    "How many total records are there?"
+                ]
+                
+                save_chat_history(user_id, session['session_id'], user_input, response_text, 'database', follow_ups, None)
                 
                 session['conversation_history'][-1]['bot'] = response_text
                 session['conversation_history'][-1]['type'] = 'database'
@@ -334,22 +523,27 @@ def chat():
                 return jsonify({
                     'response': response_text,
                     'question_type': 'database',
-                    'follow_up_questions': [
-                        "Show me more details",
-                        "Filter by a different criteria",
-                        "How many total records are there?"
-                    ],
+                    'follow_up_questions': follow_ups,
                     'status': 'success'
                 })
 
         # Use system/codebase route
         codebase = index_codebase()
         codebase_results = search_codebase(codebase, user_input)
+        codebase_files_used = [result['path'] for result in codebase_results]
 
         if codebase_results:
             response_text = generate_process_response(user_input, codebase_results)
         else:
             response_text = "I couldn't find relevant information in the codebase about this topic. Could you rephrase your question?"
+
+        follow_ups = [
+            "What happens after that?",
+            "Where do I find that option?",
+            "What if I need to...?"
+        ]
+        
+        save_chat_history(user_id, session['session_id'], user_input, response_text, 'system', follow_ups, codebase_files_used)
 
         session['conversation_history'][-1]['bot'] = response_text
         session['conversation_history'][-1]['type'] = 'system'
@@ -358,25 +552,31 @@ def chat():
         return jsonify({
             'response': response_text,
             'question_type': 'system',
-            'follow_up_questions': [
-                "What happens after that?",
-                "Where do I find that option?",
-                "What if I need to...?"
-            ],
+            'follow_up_questions': follow_ups,
             'status': 'success'
         })
 
     except mysql.connector.Error as db_err:
+        error_msg = f"Database error: {str(db_err)}"
+        save_chat_history(user_id if 'user_id' in locals() else None, 
+                         session.get('session_id', 'unknown'), 
+                         user_input if 'user_input' in locals() else 'error', 
+                         error_msg, 'error', None, None)
         return jsonify({
-            'response': f"Database error: {str(db_err)}",
+            'response': error_msg,
             'status': 'error'
         }), 500
     except Exception as e:
         print(f"Error: {str(e)}")
         import traceback
         traceback.print_exc()
+        error_msg = 'Sorry, an error occurred. Please try again.'
+        save_chat_history(user_id if 'user_id' in locals() else None, 
+                         session.get('session_id', 'unknown'), 
+                         user_input if 'user_input' in locals() else 'error', 
+                         error_msg, 'error', None, None)
         return jsonify({
-            'response': 'Sorry, an error occurred. Please try again.',
+            'response': error_msg,
             'error': str(e),
             'status': 'error'
         }), 500
@@ -413,6 +613,156 @@ def cache_status():
             'cached': False,
             'message': 'No cache exists. Will be created on first use.'
         })
+
+@app.route('/admin/chat-history', methods=['GET'])
+def get_chat_history():
+    """Admin endpoint to view chat history"""
+    try:
+        user_id = request.args.get('user_id', None)
+        limit = int(request.args.get('limit', 50))
+        offset = int(request.args.get('offset', 0))
+        
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        if user_id:
+            query = "SELECT * FROM chat_history WHERE user_id = %s ORDER BY created_at DESC LIMIT %s OFFSET %s"
+            cursor.execute(query, (user_id, limit, offset))
+        else:
+            query = "SELECT * FROM chat_history ORDER BY created_at DESC LIMIT %s OFFSET %s"
+            cursor.execute(query, (limit, offset))
+        
+        results = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'status': 'success',
+            'count': len(results),
+            'data': results
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/admin/chat-stats', methods=['GET'])
+def get_chat_stats():
+    """Admin endpoint to view chat statistics"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Total chats
+        cursor.execute("SELECT COUNT(*) as total FROM chat_history")
+        total = cursor.fetchone()['total']
+        
+        # By question type
+        cursor.execute("""
+            SELECT question_type, COUNT(*) as count 
+            FROM chat_history 
+            GROUP BY question_type
+        """)
+        by_type = cursor.fetchall()
+        
+        # By user
+        cursor.execute("""
+            SELECT user_id, COUNT(*) as count 
+            FROM chat_history 
+            WHERE user_id IS NOT NULL
+            GROUP BY user_id 
+            ORDER BY count DESC
+            LIMIT 10
+        """)
+        by_user = cursor.fetchall()
+        
+        # Today's chats
+        cursor.execute("""
+            SELECT COUNT(*) as today_count 
+            FROM chat_history 
+            WHERE DATE(created_at) = CURDATE()
+        """)
+        today = cursor.fetchone()['today_count']
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'status': 'success',
+            'total': total,
+            'today': today,
+            'by_question_type': by_type,
+            'top_users': by_user
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/admin/user-conversations/<int:user_id>', methods=['GET'])
+def get_user_conversations(user_id):
+    """Admin endpoint to view all conversations for a specific user"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+            SELECT id, question, response, question_type, created_at 
+            FROM chat_history 
+            WHERE user_id = %s 
+            ORDER BY created_at DESC
+            LIMIT 100
+        """
+        cursor.execute(query, (user_id,))
+        conversations = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'status': 'success',
+            'user_id': user_id,
+            'conversations': conversations,
+            'total': len(conversations)
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/debug/chat-history', methods=['GET'])
+def debug_chat_history():
+    """Debug endpoint to view latest chat history entries"""
+    try:
+        limit = int(request.args.get('limit', 10))
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+            SELECT id, user_id, session_id, question, response, question_type, created_at
+            FROM chat_history 
+            ORDER BY created_at DESC
+            LIMIT %s
+        """
+        cursor.execute(query, (limit,))
+        results = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'status': 'success',
+            'count': len(results),
+            'data': results
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
