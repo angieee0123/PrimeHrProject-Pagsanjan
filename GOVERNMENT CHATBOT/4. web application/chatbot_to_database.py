@@ -13,7 +13,7 @@ CORS(app, resources={r"/chat": {"origins": ["http://localhost:8000", "http://127
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'admin',
+    'password': '',
     'database': 'primehrismagdalena',
     'auth_plugin': 'mysql_native_password'
 }

@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 print("Rebuilding FAISS index...")
 
 # Load documents
-with open(r'C:\Users\eyouth\Desktop\PrimeHrProjectMagdalena\GOVERNMENT CHATBOT\3. training script\models\documents.json', 'r', encoding='utf-8') as f:
+with open('models/documents.json', 'r', encoding='utf-8') as f:
     documents = json.load(f)
 
 print(f"Loaded {len(documents)} documents")
