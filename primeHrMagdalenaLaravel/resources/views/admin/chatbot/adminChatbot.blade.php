@@ -333,7 +333,7 @@ function sendChatMessage() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message: message })
+        body: JSON.stringify({ message: message, user_id: {{ auth()->id() ?? 'null' }} })
     })
     .then(response => response.json())
     .then(data => {
