@@ -284,63 +284,121 @@ def search_codebase(codebase, query, top_k=5):
 
 # ==================== QUESTION CLASSIFICATION ====================
 
+# Hard rules checked BEFORE calling the LLM — saves API calls for obvious cases
+_PROCESS_PATTERNS = [
+    r'\bhow (do|to|can|should)\b',
+    r'\bpaano\b',
+    r'\bsteps?\b',
+    r'\bprocess\b',
+    r'\bprocedure\b',
+    r'\bguide\b',
+    r'\btutorial\b',
+    r'\bregister\b',
+    r'\bmagparehistro\b',
+    r'\bsubmit\b',
+    r'\bupload\b',
+    r'\bchange\b',
+    r'\bedit\b',
+    r'\bupdate\b',
+    r'\bcorrect\b',
+    r'\bapply\b',
+    r'\brequest\b',
+    r'\bfile\b.*\bleave\b',
+    r'\blogin\b',
+    r'\blogout\b',
+    r'\bscan\b',
+    r'\bqr\b',
+    r'\bwhat (is|are|does)\b',
+    r'\bano\b.*(ito|yan|yun|ba)\b',
+    r'\bpaliwanag\b',
+    r'\bexplain\b',
+    r'\bwhere (is|can|do)\b',
+    r'\bsaan\b',
+]
+
+_DATA_PATTERNS = [
+    r'\bhow many\b',
+    r'\bilan\b',
+    r'\bilang\b',
+    r'\bcount\b',
+    r'\btotal (number|count|ng|of)\b',
+    r'\blist (all|of|the)\b',
+    r'\bshow (all|me all|the list)\b',
+    r'\blahat ng\b',
+    r'\bsinong\b',
+    r'\bwho (is|are|has|have)\b.*\b(employee|staff|worker|empleyado)\b',
+    r'\bfind (the|all|employee|user)\b',
+    r'\bsearch (for|employee|user)\b',
+    r'\breport\b',
+    r'\battendance (of|for|record)\b',
+    r'\brecords? of\b',
+    r'\bsalary (of|ng|ni)\b',
+    r'\bdepartment (of|ng|ni)\b.*\b(employee|empleyado)\b',
+]
+
+def _fast_classify(question_lower):
+    """Rule-based pre-check. Returns 'system', 'database', or None (needs LLM)."""
+    process_hits = sum(1 for p in _PROCESS_PATTERNS if re.search(p, question_lower))
+    data_hits = sum(1 for p in _DATA_PATTERNS if re.search(p, question_lower))
+
+    if process_hits > data_hits:
+        return 'system'
+    if data_hits > process_hits:
+        return 'database'
+    return None  # tie — let LLM decide
+
 def classify_question(user_question):
     """
-    Classify if question is about:
-    - 'database': Data queries (user counts, records, reports)
-    - 'system': How-to, process flows, features
-    - 'both': Could be either
-    
-    Supports English and Filipino (Tagalog)
+    Two-stage classifier:
+    1. Fast regex rules for clear-cut cases
+    2. Groq LLM for ambiguous questions
+    Returns: 'database' | 'system'
     """
-    question_lower = user_question.lower()
-    
-    # English database keywords
-    db_keywords = [
-        'how many', 'count', 'list', 'show', 'find', 'search', 'where', 
-        'filter', 'report', 'total', 'number', 'many', 'all', 'view'
-    ]
-    
-    # Filipino/Tagalog database keywords
-    # ilan = how many, ilang = how many, total, lahat = all, dami = amount
-    db_keywords_tagalog = [
-        'ilan', 'ilang', 'dami', 'total', 'lahat', 'list', 'view', 'show', 'magpakita'
-    ]
-    
-    # English process keywords
-    process_keywords = [
-        'how', 'how do', 'how to', 'process', 'flow', 'step', 'register', 
-        'create', 'add', 'submit', 'upload', 'scan', 'work', 'use', 'make'
-    ]
-    
-    # Filipino/Tagalog process keywords
-    # paano = how, proseso = process, hakbang = steps, magparehistro = register
-    process_keywords_tagalog = [
-        'paano', 'proseso', 'hakbang', 'magparehistro', 'lumikha', 'magdagdag', 
-        'magpadala', 'magskana', 'gamitin', 'trabaho'
-    ]
-    
-    # Count database keywords found
-    db_score = sum(1 for kw in db_keywords if kw in question_lower)
-    db_score += sum(1 for kw in db_keywords_tagalog if kw in question_lower) * 1.5
-    
-    # Count process keywords found
-    process_score = sum(1 for kw in process_keywords if kw in question_lower)
-    process_score += sum(1 for kw in process_keywords_tagalog if kw in question_lower) * 1.5
-    
-    # Boost database score if question ends with "?" and contains count/number words
-    if '?' in question_lower and any(word in question_lower for word in ['ilan', 'how many', 'count', 'total']):
-        db_score += 5
-    
-    if process_score > db_score:
-        return 'system'
-    elif db_score > process_score:
-        return 'database'
-    else:
-        # Default: if question starts with common DB pattern, use database
-        if any(question_lower.startswith(kw) for kw in ['what', 'ano', 'show', 'magpakita']):
-            return 'database'
-        return 'both'
+    question_lower = user_question.lower().strip()
+
+    # Stage 1: fast rules
+    fast_result = _fast_classify(question_lower)
+    if fast_result:
+        print(f"🏷️  Fast classify → {fast_result}: '{user_question}'")
+        return fast_result
+
+    # Stage 2: LLM classification for ambiguous questions
+    prompt = f"""You are a question classifier for an HR system chatbot.
+
+Classify the user's question into exactly ONE category:
+- "database" → The user wants FACTS/DATA from the database (counts, lists, records, who/what/when about specific data)
+- "system" → The user wants to know HOW TO DO something, what a feature does, or needs a process explained
+
+Examples of "database":
+- How many employees are there?
+- Ilan ang empleyado?
+- Show me the attendance of Juan
+- Who works in the Mayor's office?
+- What is the salary of Pedro?
+
+Examples of "system":
+- How do I register a new employee?
+- Paano mag-submit ng leave?
+- How to correct attendance?
+- What is the attendance correction process?
+- How do I change my password?
+- Paano mag-logout?
+- What does the QR scanner do?
+
+User question: "{user_question}"
+
+Respond with ONLY one word: database OR system"""
+
+    response = groq_client.chat.completions.create(
+        messages=[{"role": "user", "content": prompt}],
+        model="llama-3.3-70b-versatile",
+        temperature=0.0,
+        max_tokens=5
+    )
+    result = response.choices[0].message.content.strip().lower()
+    classification = 'database' if 'database' in result else 'system'
+    print(f"🤖 LLM classify → {classification}: '{user_question}'")
+    return classification
 
 # ==================== SYSTEM PROCESS RESPONSE ====================
 
@@ -500,8 +558,7 @@ def chat():
         question_type = classify_question(user_input)
         codebase_files_used = []
 
-        if question_type == 'database' or question_type == 'both':
-            # Try database route first
+        if question_type == 'database':
             schema = get_db_schema()
             sql = generate_sql_query(user_input, schema)
 
@@ -526,6 +583,7 @@ def chat():
                     'follow_up_questions': follow_ups,
                     'status': 'success'
                 })
+            # SQL generation failed — fall through to system route
 
         # Use system/codebase route
         codebase = index_codebase()
