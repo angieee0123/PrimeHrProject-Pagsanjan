@@ -284,108 +284,57 @@ def search_codebase(codebase, query, top_k=5):
 
 # ==================== QUESTION CLASSIFICATION ====================
 
-# Hard rules checked BEFORE calling the LLM — saves API calls for obvious cases
-_PROCESS_PATTERNS = [
-    r'\bhow (do|to|can|should)\b',
-    r'\bpaano\b',
-    r'\bsteps?\b',
-    r'\bprocess\b',
-    r'\bprocedure\b',
-    r'\bguide\b',
-    r'\btutorial\b',
-    r'\bregister\b',
-    r'\bmagparehistro\b',
-    r'\bsubmit\b',
-    r'\bupload\b',
-    r'\bchange\b',
-    r'\bedit\b',
-    r'\bupdate\b',
-    r'\bcorrect\b',
-    r'\bapply\b',
-    r'\brequest\b',
-    r'\bfile\b.*\bleave\b',
-    r'\blogin\b',
-    r'\blogout\b',
-    r'\bscan\b',
-    r'\bqr\b',
-    r'\bwhat (is|are|does)\b',
-    r'\bano\b.*(ito|yan|yun|ba)\b',
-    r'\bpaliwanag\b',
-    r'\bexplain\b',
-    r'\bwhere (is|can|do)\b',
-    r'\bsaan\b',
-]
-
-_DATA_PATTERNS = [
-    r'\bhow many\b',
-    r'\bilan\b',
-    r'\bilang\b',
-    r'\bcount\b',
-    r'\btotal (number|count|ng|of)\b',
-    r'\blist (all|of|the)\b',
-    r'\bshow (all|me all|the list)\b',
-    r'\blahat ng\b',
-    r'\bsinong\b',
-    r'\bwho (is|are|has|have)\b.*\b(employee|staff|worker|empleyado)\b',
-    r'\bfind (the|all|employee|user)\b',
-    r'\bsearch (for|employee|user)\b',
-    r'\breport\b',
-    r'\battendance (of|for|record)\b',
-    r'\brecords? of\b',
-    r'\bsalary (of|ng|ni)\b',
-    r'\bdepartment (of|ng|ni)\b.*\b(employee|empleyado)\b',
-]
-
-def _fast_classify(question_lower):
-    """Rule-based pre-check. Returns 'system', 'database', or None (needs LLM)."""
-    process_hits = sum(1 for p in _PROCESS_PATTERNS if re.search(p, question_lower))
-    data_hits = sum(1 for p in _DATA_PATTERNS if re.search(p, question_lower))
-
-    if process_hits > data_hits:
-        return 'system'
-    if data_hits > process_hits:
-        return 'database'
-    return None  # tie — let LLM decide
-
 def classify_question(user_question):
     """
-    Two-stage classifier:
-    1. Fast regex rules for clear-cut cases
-    2. Groq LLM for ambiguous questions
+    Pure LLM intent classifier.
+    Understands English + Filipino/Tagalog naturally.
     Returns: 'database' | 'system'
     """
-    question_lower = user_question.lower().strip()
+    prompt = f"""You are an intent classifier for a Philippine government HR system (HRIS) chatbot.
 
-    # Stage 1: fast rules
-    fast_result = _fast_classify(question_lower)
-    if fast_result:
-        print(f"🏷️  Fast classify → {fast_result}: '{user_question}'")
-        return fast_result
+Your job is to decide: does the user want DATA from the database, or do they want to know HOW TO USE the system?
 
-    # Stage 2: LLM classification for ambiguous questions
-    prompt = f"""You are a question classifier for an HR system chatbot.
+=== SYSTEM CONTEXT ===
+This is an HR Information System for a local government unit.
+The database contains:
+- employees (names, birthdate, sex, civil status, department, designation, salary)
+- attendance records (time-in, time-out, dates, late/absent)
+- attendance corrections
+- users and their roles
+- departments and designations
+- government IDs, education, work experience, eligibilities
 
-Classify the user's question into exactly ONE category:
-- "database" → The user wants FACTS/DATA from the database (counts, lists, records, who/what/when about specific data)
-- "system" → The user wants to know HOW TO DO something, what a feature does, or needs a process explained
+The system has features like:
+- Employee registration wizard
+- Attendance monitoring and QR scanning
+- Attendance correction requests
+- Leave filing
+- Document uploads
+- Admin dashboard
+- Login/logout
 
-Examples of "database":
-- How many employees are there?
-- Ilan ang empleyado?
-- Show me the attendance of Juan
-- Who works in the Mayor's office?
-- What is the salary of Pedro?
+=== CLASSIFICATION RULES ===
+Answer "database" when the user is asking for INFORMATION THAT EXISTS IN THE DATABASE:
+- Asking about a specific person (who, whose, which employee)
+- Asking for dates, times, records, counts, lists
+- Asking about attendance of someone (late, absent, time-in, time-out)
+- Asking for names, salaries, departments of employees
+- Any question that can be answered by running a SQL query
+- Filipino/Tagalog questions asking about data (kelan, sino, ilan, ano ang record, pumasok, nag-late, nag-absent, mga pangalan, etc.)
 
-Examples of "system":
-- How do I register a new employee?
-- Paano mag-submit ng leave?
-- How to correct attendance?
-- What is the attendance correction process?
-- How do I change my password?
-- Paano mag-logout?
-- What does the QR scanner do?
+Answer "system" when the user wants to know HOW TO DO SOMETHING in the system:
+- Step-by-step instructions (how to register, how to submit, how to correct)
+- What a feature or button does
+- How a process works
+- Paano, how do I, how to, what is the process
 
-User question: "{user_question}"
+=== IMPORTANT ===
+Even if the question is in Filipino/Tagalog, classify by INTENT not by language.
+A question like "ano ang mga date na pumasok si Jeremy ng late" is asking for DATA (dates from attendance records) — answer "database".
+A question like "paano mag-correct ng attendance" is asking HOW TO USE the system — answer "system".
+
+=== USER QUESTION ===
+"{user_question}"
 
 Respond with ONLY one word: database OR system"""
 
@@ -397,7 +346,7 @@ Respond with ONLY one word: database OR system"""
     )
     result = response.choices[0].message.content.strip().lower()
     classification = 'database' if 'database' in result else 'system'
-    print(f"🤖 LLM classify → {classification}: '{user_question}'")
+    print(f"🤖 Intent → {classification}: '{user_question}'")
     return classification
 
 # ==================== SYSTEM PROCESS RESPONSE ====================
