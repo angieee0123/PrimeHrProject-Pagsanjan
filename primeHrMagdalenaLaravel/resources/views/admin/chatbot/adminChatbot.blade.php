@@ -308,14 +308,65 @@ function toggleChatbot() {
         openIcon.style.display = 'none';
         closeIcon.style.display = 'block';
         badge.style.display = 'none';
+        sessionStorage.setItem(CHAT_OPEN_KEY, '1');
     } else {
         window.style.display = 'none';
         fab.classList.remove('open');
         openIcon.style.display = 'block';
         closeIcon.style.display = 'none';
         badge.style.display = 'block';
+        sessionStorage.setItem(CHAT_OPEN_KEY, '0');
     }
 }
+
+// ==================== SESSION PERSISTENCE ====================
+
+const CHAT_STORAGE_KEY = 'primehris_chat_messages';
+const CHAT_OPEN_KEY    = 'primehris_chat_open';
+
+function saveChatToSession() {
+    const bubbles = document.querySelectorAll('#chatbotMessages .chat-msg');
+    const messages = [];
+    bubbles.forEach(el => {
+        const isBot  = el.classList.contains('bot');
+        const bubble = el.querySelector('.chat-msg-bubble');
+        if (bubble) messages.push({ from: isBot ? 'bot' : 'user', html: bubble.innerHTML });
+    });
+    sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+}
+
+function restoreChatFromSession() {
+    const raw = sessionStorage.getItem(CHAT_STORAGE_KEY);
+    if (!raw) return;
+    try {
+        const messages = JSON.parse(raw);
+        const container = document.getElementById('chatbotMessages');
+        container.innerHTML = '';
+        messages.forEach(msg => addChatMessage(msg.from, msg.html, true));
+    } catch(e) { sessionStorage.removeItem(CHAT_STORAGE_KEY); }
+}
+
+function restoreChatOpenState() {
+    if (sessionStorage.getItem(CHAT_OPEN_KEY) === '1') {
+        const chatWindow = document.getElementById('chatbotWindow');
+        const fab        = document.querySelector('.chat-fab');
+        const openIcon   = document.querySelector('.chat-fab-icon-open');
+        const closeIcon  = document.querySelector('.chat-fab-icon-close');
+        const badge      = document.querySelector('.chat-fab-badge');
+        chatWindow.style.display = 'flex';
+        fab.classList.add('open');
+        openIcon.style.display  = 'none';
+        closeIcon.style.display = 'block';
+        badge.style.display     = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    restoreChatFromSession();
+    restoreChatOpenState();
+});
+
+// ==================== CHAT FUNCTIONS ====================
 
 function sendChatMessage() {
     const input = document.getElementById('chatInput');
@@ -358,16 +409,17 @@ function sendPredefinedMessage(message) {
     sendChatMessage();
 }
 
-function addChatMessage(from, text) {
+function addChatMessage(from, text, restored = false) {
     const messagesContainer = document.getElementById('chatbotMessages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `chat-msg ${from}`;
 
-    // Convert markdown-style formatting to HTML
-    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    text = text.replace(/\n/g, '<br>');
-
     if (from === 'bot') {
+        const isHtml = /<[a-z][\s\S]*>/i.test(text);
+        if (!isHtml) {
+            text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/\n/g, '<br>');
+        }
         messageDiv.innerHTML = `
             <div class="chat-msg-avatar">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
@@ -382,6 +434,8 @@ function addChatMessage(from, text) {
 
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    if (!restored) saveChatToSession();
 }
 
 function addTypingIndicator() {
