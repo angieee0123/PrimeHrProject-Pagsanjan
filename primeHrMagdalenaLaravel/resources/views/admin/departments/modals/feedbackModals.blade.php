@@ -1,3 +1,29 @@
+<!-- Export Success Modal -->
+<div id="export-success-modal" class="fb-overlay">
+    <div class="fb-box" onclick="event.stopPropagation()">
+        <div class="fb-icon-wrap fb-icon-success">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <span class="fb-eyebrow fb-eyebrow-success">EXPORT COMPLETE</span>
+        <h3 class="fb-title">File Downloaded!</h3>
+        <p class="fb-desc"><span id="export-success-type">Data</span> has been successfully exported as a CSV file.</p>
+        <button class="fb-btn fb-btn-success" onclick="closeExportSuccessModal()">Done</button>
+    </div>
+</div>
+
+<!-- Export Error Modal -->
+<div id="export-error-modal" class="fb-overlay">
+    <div class="fb-box" onclick="event.stopPropagation()">
+        <div class="fb-icon-wrap fb-icon-failed">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8e1e18" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+        <span class="fb-eyebrow fb-eyebrow-failed">EXPORT FAILED</span>
+        <h3 class="fb-title">Export Error</h3>
+        <p class="fb-desc" id="export-error-msg">Something went wrong during the export. Please try again.</p>
+        <button class="fb-btn fb-btn-failed" onclick="closeExportErrorModal()">Close</button>
+    </div>
+</div>
+
 <!-- Success Modal -->
 <div id="success-modal" class="fb-overlay">
     <div class="fb-box" onclick="event.stopPropagation()">

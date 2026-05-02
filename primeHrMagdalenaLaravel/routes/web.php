@@ -309,6 +309,71 @@ Route::get('/admin/departments/{id}/designations', function ($id) {
     return response()->json($designations);
 })->middleware('auth')->name('admin.departments.designations');
 
+Route::get('/admin/departments/export', function () {
+    try {
+        $departments = \App\Models\Department::orderBy('name')->get();
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename=departments_' . now()->format('Y-m-d') . '.csv',
+        ];
+
+        $callback = function () use ($departments) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
+            fputcsv($file, ['Code', 'Department / Office', 'Department Head', 'Personnel Count', 'Status', 'Description']);
+            foreach ($departments as $dept) {
+                fputcsv($file, [
+                    $dept->code,
+                    $dept->name,
+                    $dept->head,
+                    $dept->personnel_count,
+                    $dept->status,
+                    $dept->description ?? '',
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    } catch (\Exception $e) {
+        return redirect()->route('admin.departments')->with('export_error', $e->getMessage());
+    }
+})->middleware('auth')->name('admin.departments.export');
+
+Route::get('/admin/designations/export', function () {
+    try {
+        $designations = \App\Models\Designation::with('department')->orderBy('title')->get();
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename=designations_' . now()->format('Y-m-d') . '.csv',
+        ];
+
+        $callback = function () use ($designations) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
+            fputcsv($file, ['Title', 'Department', 'Department Code', 'Salary Grade', 'Monthly Rate', 'Employment Type', 'Description']);
+            foreach ($designations as $d) {
+                fputcsv($file, [
+                    $d->title,
+                    $d->department->name ?? 'N/A',
+                    $d->department->code ?? 'N/A',
+                    $d->salary_grade ?? '',
+                    $d->monthly_rate ?? '',
+                    $d->employment_type ?? '',
+                    $d->description ?? '',
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    } catch (\Exception $e) {
+        return redirect()->route('admin.departments')->with('export_error', $e->getMessage());
+    }
+})->middleware('auth')->name('admin.designations.export');
+
 Route::get('/admin/departments/template', function () {
     $headers = [
         'Content-Type'        => 'text/csv',
