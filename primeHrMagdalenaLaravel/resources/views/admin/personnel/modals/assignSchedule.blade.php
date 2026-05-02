@@ -19,11 +19,27 @@
             <button onclick="closeAssignScheduleModal()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:20px;">&times;</button>
         </div>
 
-        <form action="{{ route('admin.schedules.assign') }}" method="POST">
+        <form action="{{ route('admin.schedules.assign') }}" method="POST" id="assignScheduleForm" onsubmit="return validateScheduleDates()">
             @csrf
+            <input type="hidden" name="schedule_id" id="scheduleId">
             <input type="hidden" name="employee_id" id="scheduleEmployeeId">
             
             <div style="padding:24px; display:flex; flex-direction:column; gap:18px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:8px;">
+                    <div>
+                        <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
+                            Start Date <span style="color:#8e1e18;">*</span>
+                        </label>
+                        <input type="date" name="start_date" id="scheduleStartDate" required onchange="validateScheduleDates()" style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
+                            End Date <span style="color:#8e1e18;">*</span>
+                        </label>
+                        <input type="date" name="end_date" id="scheduleEndDate" required onchange="validateScheduleDates()" style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                    </div>
+                </div>
+
                 <div style="background:#f7f6ff; border:1.5px solid #e8e7f5; border-radius:10px; padding:16px;">
                     <p style="margin:0 0 12px; font-size:11px; font-weight:700; letter-spacing:1px; color:#9999bb;">MORNING SHIFT</p>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
@@ -67,8 +83,22 @@
                         <line x1="12" y1="16" x2="12.01" y2="16"/>
                     </svg>
                     <p style="margin:0; font-size:12px; color:#8b7500; line-height:1.5;">
-                        Set the employee's daily work schedule. This will be used for attendance tracking and reporting.
+                        Set the effectivity period for this schedule. The employee will follow this schedule only within the specified date range. You can create multiple schedules for different periods.
                     </p>
+                </div>
+
+                <div id="scheduleOverlapWarning" style="display:none; background:#fee8e8; border:1.5px solid #f5d0ce; border-radius:10px; padding:12px;">
+                    <div style="display:flex; align-items:start; gap:10px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8e1e18" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <div>
+                            <p style="margin:0 0 4px; font-size:12px; font-weight:700; color:#8e1e18;">Schedule Overlap Detected</p>
+                            <p style="margin:0; font-size:12px; color:#8e1e18; line-height:1.5;" id="overlapDetails"></p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -91,5 +121,43 @@
 function closeAssignScheduleModal() {
     document.getElementById('assignScheduleModal').style.display = 'none';
     document.body.style.overflow = '';
+    document.getElementById('scheduleOverlapWarning').style.display = 'none';
+}
+
+function validateScheduleDates() {
+    const employeeId = document.getElementById('scheduleEmployeeId').value;
+    const scheduleId = document.getElementById('scheduleId').value;
+    const startDate = document.getElementById('scheduleStartDate').value;
+    const endDate = document.getElementById('scheduleEndDate').value;
+    
+    if (!startDate || !endDate) {
+        return true;
+    }
+    
+    // Check for overlaps via AJAX
+    const formData = new FormData();
+    formData.append('employee_id', employeeId);
+    formData.append('schedule_id', scheduleId);
+    formData.append('start_date', startDate);
+    formData.append('end_date', endDate);
+    
+    fetch('/admin/schedules/check-overlap', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.has_overlap) {
+            document.getElementById('scheduleOverlapWarning').style.display = 'block';
+            document.getElementById('overlapDetails').textContent = data.overlap_details;
+        } else {
+            document.getElementById('scheduleOverlapWarning').style.display = 'none';
+        }
+    });
+    
+    return true;
 }
 </script>

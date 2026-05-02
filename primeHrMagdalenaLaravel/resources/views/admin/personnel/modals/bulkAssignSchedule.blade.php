@@ -23,6 +23,41 @@
             @csrf
             
             <div style="padding:24px; display:flex; flex-direction:column; gap:20px;">
+                <!-- Filter Options -->
+                <div style="background:#f7f6ff; border:1.5px solid #e8e7f5; border-radius:10px; padding:16px;">
+                    <p style="margin:0 0 12px; font-size:11px; font-weight:700; letter-spacing:1px; color:#9999bb;">QUICK FILTERS</p>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
+                                Filter by Department
+                            </label>
+                            <select id="bulkFilterDepartment" onchange="filterBulkEmployees()" style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box; cursor:pointer;">
+                                <option value="">All Departments</option>
+                                @foreach($departments as $department)
+                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
+                                Filter by Designation
+                            </label>
+                            <select id="bulkFilterDesignation" onchange="filterBulkEmployees()" style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box; cursor:pointer;">
+                                <option value="">All Designations</option>
+                                <!-- Will be populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:12px;">
+                        <button type="button" onclick="selectFilteredEmployees()" style="flex:1; padding:8px 16px; background:#0b044d; color:#fff; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;">
+                            Select Filtered
+                        </button>
+                        <button type="button" onclick="clearBulkFilters()" style="flex:1; padding:8px 16px; background:#fff; color:#6b6a8a; border:1.5px solid #e8e7f5; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;">
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Employee Selection -->
                 <div>
                     <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:8px;">
@@ -42,12 +77,21 @@
                                 $department = $employee->employmentDetail && $employee->employmentDetail->departmentRelation
                                     ? $employee->employmentDetail->departmentRelation->name
                                     : 'N/A';
+                                $departmentId = $employee->employmentDetail && $employee->employmentDetail->departmentRelation
+                                    ? $employee->employmentDetail->departmentRelation->id
+                                    : '';
+                                $designationId = $employee->employmentDetail && $employee->employmentDetail->designationRelation
+                                    ? $employee->employmentDetail->designationRelation->id
+                                    : '';
+                                $designation = $employee->employmentDetail && $employee->employmentDetail->designationRelation
+                                    ? $employee->employmentDetail->designationRelation->title
+                                    : 'N/A';
                             @endphp
-                            <label style="display:flex; align-items:center; gap:8px; padding:8px; background:#fff; border-radius:6px; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#f0effe'" onmouseout="this.style.background='#fff'">
+                            <label class="employee-item" data-department-id="{{ $departmentId }}" data-designation-id="{{ $designationId }}" style="display:flex; align-items:center; gap:8px; padding:8px; background:#fff; border-radius:6px; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#f0effe'" onmouseout="this.style.background='#fff'">
                                 <input type="checkbox" name="employee_ids[]" value="{{ $employee->id }}" class="employee-checkbox" style="width:16px; height:16px; cursor:pointer;">
                                 <div style="flex:1;">
                                     <p style="margin:0; font-size:13px; font-weight:600; color:#0b044d;">{{ $fullName }}</p>
-                                    <p style="margin:0; font-size:11px; color:#9999bb;">{{ $employee->employee_id }} · {{ $department }}</p>
+                                    <p style="margin:0; font-size:11px; color:#9999bb;">{{ $employee->employee_id }} · {{ $department }} · {{ $designation }}</p>
                                 </div>
                             </label>
                             @endforeach
@@ -56,6 +100,22 @@
                     <p style="margin:8px 0 0; font-size:11px; color:#6b6a8a;">
                         <span id="selectedCount">0</span> employee(s) selected
                     </p>
+                </div>
+
+                <!-- Date Range -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                    <div>
+                        <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
+                            Start Date <span style="color:#8e1e18;">*</span>
+                        </label>
+                        <input type="date" name="start_date" required style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
+                            End Date <span style="color:#8e1e18;">*</span>
+                        </label>
+                        <input type="date" name="end_date" required style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                    </div>
                 </div>
 
                 <!-- Schedule Times -->
@@ -100,7 +160,7 @@
                         <line x1="12" y1="8" x2="12.01" y2="8"/>
                     </svg>
                     <p style="margin:0; font-size:12px; color:#15803d; line-height:1.5;">
-                        This schedule will be applied to all selected employees. Existing schedules will be overwritten.
+                        This schedule will be applied to all selected employees for the specified date range. You can assign different schedules for different periods.
                     </p>
                 </div>
             </div>
@@ -124,27 +184,121 @@
 function closeBulkScheduleModal() {
     document.getElementById('bulkScheduleModal').style.display = 'none';
     document.body.style.overflow = '';
+    clearBulkFilters();
 }
 
 function toggleAllEmployees(checkbox) {
-    const checkboxes = document.querySelectorAll('.employee-checkbox');
-    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+    const checkboxes = document.querySelectorAll('.employee-checkbox:not([style*="display: none"])');
+    checkboxes.forEach(cb => {
+        if (cb.closest('.employee-item').style.display !== 'none') {
+            cb.checked = checkbox.checked;
+        }
+    });
     updateSelectedCount();
+}
+
+function filterBulkEmployees() {
+    const departmentFilter = document.getElementById('bulkFilterDepartment').value;
+    const designationFilter = document.getElementById('bulkFilterDesignation').value;
+    const items = document.querySelectorAll('.employee-item');
+    
+    items.forEach(item => {
+        const itemDept = item.dataset.departmentId;
+        const itemDesig = item.dataset.designationId;
+        
+        const deptMatch = !departmentFilter || itemDept === departmentFilter;
+        const desigMatch = !designationFilter || itemDesig === designationFilter;
+        
+        if (deptMatch && desigMatch) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+            item.querySelector('.employee-checkbox').checked = false;
+        }
+    });
+    
+    updateSelectedCount();
+    updateSelectAllCheckbox();
+}
+
+function selectFilteredEmployees() {
+    const items = document.querySelectorAll('.employee-item');
+    items.forEach(item => {
+        if (item.style.display !== 'none') {
+            item.querySelector('.employee-checkbox').checked = true;
+        }
+    });
+    updateSelectedCount();
+    updateSelectAllCheckbox();
+}
+
+function clearBulkFilters() {
+    document.getElementById('bulkFilterDepartment').value = '';
+    document.getElementById('bulkFilterDesignation').value = '';
+    
+    const items = document.querySelectorAll('.employee-item');
+    items.forEach(item => {
+        item.style.display = 'flex';
+    });
+    
+    updateSelectAllCheckbox();
+}
+
+function updateSelectAllCheckbox() {
+    const visibleCheckboxes = Array.from(document.querySelectorAll('.employee-checkbox')).filter(cb => {
+        return cb.closest('.employee-item').style.display !== 'none';
+    });
+    const checkedVisible = visibleCheckboxes.filter(cb => cb.checked);
+    const selectAll = document.getElementById('selectAllEmployees');
+    
+    if (visibleCheckboxes.length === 0) {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+    } else if (checkedVisible.length === visibleCheckboxes.length) {
+        selectAll.checked = true;
+        selectAll.indeterminate = false;
+    } else if (checkedVisible.length > 0) {
+        selectAll.checked = false;
+        selectAll.indeterminate = true;
+    } else {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     const checkboxes = document.querySelectorAll('.employee-checkbox');
     checkboxes.forEach(cb => {
-        cb.addEventListener('change', updateSelectedCount);
+        cb.addEventListener('change', function() {
+            updateSelectedCount();
+            updateSelectAllCheckbox();
+        });
+    });
+    
+    // Populate designations based on department filter
+    document.getElementById('bulkFilterDepartment').addEventListener('change', function() {
+        const deptId = this.value;
+        const designationSelect = document.getElementById('bulkFilterDesignation');
+        
+        if (!deptId) {
+            designationSelect.innerHTML = '<option value="">All Designations</option>';
+            return;
+        }
+        
+        fetch(`/admin/departments/${deptId}/designations`)
+            .then(response => response.json())
+            .then(designations => {
+                let options = '<option value="">All Designations</option>';
+                designations.forEach(d => {
+                    options += `<option value="${d.id}">${d.title}</option>`;
+                });
+                designationSelect.innerHTML = options;
+            });
     });
 });
 
 function updateSelectedCount() {
     const checked = document.querySelectorAll('.employee-checkbox:checked').length;
     document.getElementById('selectedCount').textContent = checked;
-    
-    const total = document.querySelectorAll('.employee-checkbox').length;
-    const selectAll = document.getElementById('selectAllEmployees');
-    selectAll.checked = checked === total;
 }
 </script>

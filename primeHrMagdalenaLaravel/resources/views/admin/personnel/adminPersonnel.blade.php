@@ -369,7 +369,10 @@
                     $department = $employee->employmentDetail && $employee->employmentDetail->departmentRelation
                         ? $employee->employmentDetail->departmentRelation->name
                         : 'N/A';
-                    $schedule = $employee->schedule ?? null;
+                    // Get current active schedule
+                    $currentSchedule = $employee->schedule->where('start_date', '<=', now()->format('Y-m-d'))
+                        ->where('end_date', '>=', now()->format('Y-m-d'))
+                        ->first();
                 @endphp
                 <tr>
                     <td>
@@ -384,25 +387,23 @@
                         </div>
                     </td>
                     <td><span class="dept-tag">{{ $department }}</span></td>
-                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $schedule->am_in ?? '--:--' }}</td>
-                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $schedule->am_out ?? '--:--' }}</td>
-                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $schedule->pm_in ?? '--:--' }}</td>
-                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $schedule->pm_out ?? '--:--' }}</td>
+                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule->am_in ?? '--:--' }}</td>
+                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule->am_out ?? '--:--' }}</td>
+                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule->pm_in ?? '--:--' }}</td>
+                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule->pm_out ?? '--:--' }}</td>
                     <td>
-                        @if($schedule)
-                            <span class="badge-status processed">Assigned</span>
+                        @if($currentSchedule)
+                            <span class="badge-status processed">Active</span>
+                        @elseif($employee->schedule->count() > 0)
+                            <span class="badge-status pending">Scheduled</span>
                         @else
                             <span class="badge-status on-hold">Not Set</span>
                         @endif
                     </td>
                     <td>
                         <div class="row-actions">
-                            <button class="btn-edit" onclick="openAssignScheduleModal({{ $employee->id }}, '{{ $fullName }}', {{ $schedule ? json_encode($schedule) : 'null' }})">
-                                {{ $schedule ? 'Edit' : 'Assign' }}
-                            </button>
-                            @if($schedule)
-                            <button class="btn-deactivate" onclick="confirmRemoveSchedule({{ $employee->id }}, '{{ $fullName }}')">Remove</button>
-                            @endif
+                            <button class="btn-view" onclick="viewEmployeeSchedules({{ $employee->id }}, '{{ $fullName }}')">View All</button>
+                            <button class="btn-edit" onclick="openAssignScheduleModal({{ $employee->id }}, '{{ $fullName }}', null)">Add New</button>
                         </div>
                     </td>
                 </tr>
@@ -437,6 +438,7 @@
 @include('admin.personnel.modals.employeeWizardComplete')
 @include('admin.personnel.modals.assignSchedule')
 @include('admin.personnel.modals.bulkAssignSchedule')
+@include('admin.personnel.modals.viewSchedules')
 
 <!-- Success Modal -->
 <div id="successModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
@@ -621,6 +623,23 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     });
 });
 
+// Check if we should activate schedules tab on page load
+document.addEventListener('DOMContentLoaded', function() {
+    @if(session('active_tab') === 'schedules')
+        // Activate schedules tab
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        const schedulesTabBtn = document.querySelector('.tab-btn[data-tab="schedules"]');
+        const schedulesTabContent = document.getElementById('schedules');
+        
+        if (schedulesTabBtn && schedulesTabContent) {
+            schedulesTabBtn.classList.add('active');
+            schedulesTabContent.classList.add('active');
+        }
+    @endif
+});
+
 // Schedule filters
 function applyScheduleFilters() {
     const deptFilter = document.getElementById('schedDepartmentFilter').value;
@@ -654,11 +673,17 @@ function openAssignScheduleModal(employeeId, employeeName, schedule) {
     document.getElementById('scheduleEmployeeName').textContent = employeeName;
     
     if (schedule) {
+        document.getElementById('scheduleId').value = schedule.id || '';
+        document.getElementById('scheduleStartDate').value = schedule.start_date || '';
+        document.getElementById('scheduleEndDate').value = schedule.end_date || '';
         document.getElementById('scheduleAmIn').value = schedule.am_in || '';
         document.getElementById('scheduleAmOut').value = schedule.am_out || '';
         document.getElementById('schedulePmIn').value = schedule.pm_in || '';
         document.getElementById('schedulePmOut').value = schedule.pm_out || '';
     } else {
+        document.getElementById('scheduleId').value = '';
+        document.getElementById('scheduleStartDate').value = '';
+        document.getElementById('scheduleEndDate').value = '';
         document.getElementById('scheduleAmIn').value = '';
         document.getElementById('scheduleAmOut').value = '';
         document.getElementById('schedulePmIn').value = '';
