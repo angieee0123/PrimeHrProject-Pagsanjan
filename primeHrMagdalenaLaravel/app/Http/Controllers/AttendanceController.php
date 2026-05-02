@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\Attendance;
 use App\Models\AttendanceCorrection;
+use App\Models\AccreditedHoursLog;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -562,44 +563,192 @@ class AttendanceController extends Controller
         ]);
     }
 
+    public function getAccreditedHoursLog($attendanceId)
+    {
+        $attendance = Attendance::with(['employee', 'accreditedHoursLogs.schedule'])->findOrFail($attendanceId);
+        
+        $logs = $attendance->accreditedHoursLogs->map(function($log) {
+            return [
+                'id' => $log->id,
+                'date' => $log->attendance_date->format('M d, Y'),
+                'schedule' => [
+                    'am_in' => $log->scheduled_am_in,
+                    'am_out' => $log->scheduled_am_out,
+                    'pm_in' => $log->scheduled_pm_in,
+                    'pm_out' => $log->scheduled_pm_out,
+                ],
+                'actual' => [
+                    'am_in' => $log->actual_am_in,
+                    'am_out' => $log->actual_am_out,
+                    'pm_in' => $log->actual_pm_in,
+                    'pm_out' => $log->actual_pm_out,
+                    'ot_in' => $log->actual_ot_in,
+                    'ot_out' => $log->actual_ot_out,
+                ],
+                'computation' => [
+                    'am_minutes' => $log->am_accredited_minutes,
+                    'pm_minutes' => $log->pm_accredited_minutes,
+                    'ot_minutes' => $log->ot_minutes,
+                    'late_minutes' => $log->late_minutes,
+                    'undertime_minutes' => $log->undertime_minutes,
+                    'total_accredited' => $log->total_accredited_minutes,
+                    'total_actual' => $log->total_actual_minutes,
+                ],
+                'grace' => [
+                    'am_applied' => $log->am_grace_applied,
+                    'pm_applied' => $log->pm_grace_applied,
+                ],
+                'notes' => $log->computation_notes,
+                'created_at' => $log->created_at->format('M d, Y h:i A'),
+            ];
+        });
+
+        return response()->json([
+            'employee' => [
+                'name' => $attendance->employee->first_name . ' ' . $attendance->employee->last_name,
+                'employee_id' => $attendance->employee->employee_id,
+            ],
+            'attendance_date' => Carbon::parse($attendance->date)->format('M d, Y'),
+            'logs' => $logs,
+        ]);
+    }
+
     /**
-     * Compute accredited hours in minutes using the same rules as the frontend.
-     * AM window: 08:00–12:00 (grace: if am_in <= 08:15, treat as 08:00)
-     * PM window: 13:00–17:00 (grace: if pm_in <= 13:15, treat as 13:00)
-     * Returns null if all four time fields are missing.
+     * Compute accredited hours and create detailed log.
+     * Returns array with accredited minutes and log data.
      */
-    private function computeAccreditedHours(?string $amIn, ?string $amOut, ?string $pmIn, ?string $pmOut): ?int
+    private function computeAccreditedHours($employeeId, $date, ?string $amIn, ?string $amOut, ?string $pmIn, ?string $pmOut, ?string $otIn = null, ?string $otOut = null): array
     {
         if (!$amIn && !$amOut && !$pmIn && !$pmOut) {
+            return ['accredited_minutes' => null, 'log_data' => null];
+        }
+
+        $employee = Employee::find($employeeId);
+        $schedule = $employee ? $employee->getScheduleForDate($date) : null;
+
+        $toMin = fn($t) => $t ? (int)(explode(':', $t)[0]) * 60 + (int)(explode(':', $t)[1]) : null;
+
+        // Use employee's schedule or defaults
+        $AM_START   = $schedule ? $toMin($schedule->am_in) : 480;  // Default 08:00
+        $AM_END     = $schedule ? $toMin($schedule->am_out) : 720;  // Default 12:00
+        $AM_GRACE   = $AM_START + 15;  // 15 minutes grace
+        $PM_START   = $schedule ? $toMin($schedule->pm_in) : 780;  // Default 13:00
+        $PM_END     = $schedule ? $toMin($schedule->pm_out) : 1020; // Default 17:00
+        $PM_GRACE   = $PM_START + 15;  // 15 minutes grace
+
+        $amMins = 0;
+        $amGraceApplied = false;
+        if ($amIn && $amOut) {
+            $amInMin = $toMin($amIn);
+            if ($amInMin <= $AM_GRACE) {
+                $amFrom = $AM_START;
+                $amGraceApplied = true;
+            } else {
+                $amFrom = $amInMin;
+            }
+            $amTo = min($toMin($amOut), $AM_END);
+            $amMins = max(0, $amTo - $amFrom);
+        }
+
+        $pmMins = 0;
+        $pmGraceApplied = false;
+        if ($pmIn && $pmOut) {
+            $pmInMin = $toMin($pmIn);
+            if ($pmInMin <= $PM_GRACE) {
+                $pmFrom = $PM_START;
+                $pmGraceApplied = true;
+            } else {
+                $pmFrom = $pmInMin;
+            }
+            $pmTo = min($toMin($pmOut), $PM_END);
+            $pmMins = max(0, $pmTo - $pmFrom);
+        }
+
+        // Calculate OT
+        $otMins = 0;
+        if ($otIn && $otOut) {
+            $otMins = max(0, $toMin($otOut) - $toMin($otIn));
+        }
+
+        // Calculate late and undertime
+        $lateMins = 0;
+        if ($amIn) {
+            $amInMin = $toMin($amIn);
+            if ($amInMin > $AM_GRACE) {
+                $lateMins = $amInMin - $AM_START;
+            }
+        }
+
+        $undertimeMins = 0;
+        if ($pmOut) {
+            $pmOutMin = $toMin($pmOut);
+            if ($pmOutMin < $PM_END) {
+                $undertimeMins = $PM_END - $pmOutMin;
+            }
+        }
+
+        $totalAccredited = $amMins + $pmMins;
+        $totalActual = 0;
+        if ($amIn && $amOut) $totalActual += $toMin($amOut) - $toMin($amIn);
+        if ($pmIn && $pmOut) $totalActual += $toMin($pmOut) - $toMin($pmIn);
+        if ($otIn && $otOut) $totalActual += $otMins;
+
+        return [
+            'accredited_minutes' => $totalAccredited,
+            'log_data' => [
+                'schedule_id' => $schedule ? $schedule->id : null,
+                'scheduled_am_in' => $schedule ? $schedule->am_in : '08:00:00',
+                'scheduled_am_out' => $schedule ? $schedule->am_out : '12:00:00',
+                'scheduled_pm_in' => $schedule ? $schedule->pm_in : '13:00:00',
+                'scheduled_pm_out' => $schedule ? $schedule->pm_out : '17:00:00',
+                'actual_am_in' => $amIn,
+                'actual_am_out' => $amOut,
+                'actual_pm_in' => $pmIn,
+                'actual_pm_out' => $pmOut,
+                'actual_ot_in' => $otIn,
+                'actual_ot_out' => $otOut,
+                'am_accredited_minutes' => $amMins,
+                'pm_accredited_minutes' => $pmMins,
+                'ot_minutes' => $otMins,
+                'late_minutes' => $lateMins,
+                'undertime_minutes' => $undertimeMins,
+                'total_accredited_minutes' => $totalAccredited,
+                'total_actual_minutes' => $totalActual,
+                'am_grace_applied' => $amGraceApplied,
+                'pm_grace_applied' => $pmGraceApplied,
+            ]
+        ];
+    }
+
+    /**
+     * Compute total hours worked in minutes (actual time logged).
+     */
+    private function computeTotalHours(?string $amIn, ?string $amOut, ?string $pmIn, ?string $pmOut, ?string $otIn, ?string $otOut): ?int
+    {
+        if (!$amIn && !$amOut && !$pmIn && !$pmOut && !$otIn && !$otOut) {
             return null;
         }
 
         $toMin = fn($t) => $t ? (int)(explode(':', $t)[0]) * 60 + (int)(explode(':', $t)[1]) : null;
 
-        $AM_START   = 480;  // 08:00
-        $AM_END     = 720;  // 12:00
-        $AM_GRACE   = 495;  // 08:15
-        $PM_START   = 780;  // 13:00
-        $PM_END     = 1020; // 17:00
-        $PM_GRACE   = 795;  // 13:15
+        $totalMins = 0;
 
-        $amMins = 0;
+        // Calculate AM hours
         if ($amIn && $amOut) {
-            $amInMin = $toMin($amIn);
-            $amFrom  = $amInMin <= $AM_GRACE ? $AM_START : $amInMin;
-            $amTo    = min($toMin($amOut), $AM_END);
-            $amMins  = max(0, $amTo - $amFrom);
+            $totalMins += max(0, $toMin($amOut) - $toMin($amIn));
         }
 
-        $pmMins = 0;
+        // Calculate PM hours
         if ($pmIn && $pmOut) {
-            $pmInMin = $toMin($pmIn);
-            $pmFrom  = $pmInMin <= $PM_GRACE ? $PM_START : $pmInMin;
-            $pmTo    = min($toMin($pmOut), $PM_END);
-            $pmMins  = max(0, $pmTo - $pmFrom);
+            $totalMins += max(0, $toMin($pmOut) - $toMin($pmIn));
         }
 
-        return $amMins + $pmMins;
+        // Calculate OT hours
+        if ($otIn && $otOut) {
+            $totalMins += max(0, $toMin($otOut) - $toMin($otIn));
+        }
+
+        return $totalMins;
     }
 
     public function correctAttendance(Request $request)
@@ -668,6 +817,17 @@ class AttendanceController extends Controller
             'corrected_by' => Auth::id(),
         ]);
 
+        $computationResult = $this->computeAccreditedHours(
+            $validated['employee_id'],
+            $validated['date'],
+            $validated['am_in'],
+            $validated['am_out'],
+            $validated['pm_in'],
+            $validated['pm_out'],
+            $validated['ot_in'],
+            $validated['ot_out']
+        );
+
         $attendance->update([
             'am_in'  => $validated['am_in'],
             'am_out' => $validated['am_out'],
@@ -675,13 +835,29 @@ class AttendanceController extends Controller
             'pm_out' => $validated['pm_out'],
             'ot_in'  => $validated['ot_in'],
             'ot_out' => $validated['ot_out'],
-            'accredited_hours' => $this->computeAccreditedHours(
+            'accredited_hours' => $computationResult['accredited_minutes'],
+            'total_hours' => $this->computeTotalHours(
                 $validated['am_in'],
                 $validated['am_out'],
                 $validated['pm_in'],
-                $validated['pm_out']
+                $validated['pm_out'],
+                $validated['ot_in'],
+                $validated['ot_out']
             ),
         ]);
+
+        // Create accredited hours log
+        if ($computationResult['log_data']) {
+            AccreditedHoursLog::create(array_merge(
+                $computationResult['log_data'],
+                [
+                    'attendance_id' => $attendance->id,
+                    'employee_id' => $validated['employee_id'],
+                    'attendance_date' => $validated['date'],
+                    'computation_notes' => 'Attendance correction applied by ' . Auth::user()->name,
+                ]
+            ));
+        }
 
         return response()->json([
             'success' => true,
