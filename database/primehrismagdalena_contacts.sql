@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
 --
--- Host: localhost    Database: primehrismagdalena
+-- Host: 127.0.0.1    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.45
+-- Server version	8.0.41
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -25,9 +25,9 @@ DROP TABLE IF EXISTS `contacts`;
 CREATE TABLE `contacts` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `employee_id` bigint unsigned NOT NULL,
-  `type` enum('mobile','landline','emergency') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `number` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `contact_person` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` enum('mobile','landline','emergency') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contact_person` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `contacts_employee_id_foreign` (`employee_id`),
   CONSTRAINT `contacts_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-29 21:32:46
+-- Dump completed on 2026-05-03  2:38:44

@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
 --
--- Host: localhost    Database: primehrismagdalena
+-- Host: 127.0.0.1    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.45
+-- Server version	8.0.41
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -27,10 +27,10 @@ CREATE TABLE `employment_details` (
   `employee_id` bigint unsigned NOT NULL,
   `designation_id` bigint unsigned DEFAULT NULL,
   `department_id` bigint unsigned DEFAULT NULL,
-  `employment_status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `employment_status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `appointment_date` date DEFAULT NULL,
-  `salary_grade` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `step_increment` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `salary_grade` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `step_increment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `employment_details_employee_id_foreign` (`employee_id`),
   KEY `employment_details_department_id_foreign` (`department_id`),
@@ -60,4 +60,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-29 21:32:47
+-- Dump completed on 2026-05-03  2:38:52

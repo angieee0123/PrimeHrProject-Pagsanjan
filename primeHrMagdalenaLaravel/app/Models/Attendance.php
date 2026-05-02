@@ -11,7 +11,7 @@ class Attendance extends Model
     protected $table = 'attendance';
 
     protected $fillable = [
-        'employee_id', 'date', 'am_in', 'am_out', 'pm_in', 'pm_out', 'ot_in', 'ot_out', 'accredited_hours'
+        'employee_id', 'date', 'am_in', 'am_out', 'pm_in', 'pm_out', 'ot_in', 'ot_out', 'accredited_hours', 'total_hours'
     ];
 
     protected $casts = [
@@ -23,10 +23,16 @@ class Attendance extends Model
         'ot_in' => 'string',
         'ot_out' => 'string',
         'accredited_hours' => 'integer',
+        'total_hours' => 'integer',
     ];
 
     public function employee()
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function accreditedHoursLogs()
+    {
+        return $this->hasMany(AccreditedHoursLog::class);
     }
 }

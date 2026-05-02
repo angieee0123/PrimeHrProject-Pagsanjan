@@ -629,10 +629,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Activate schedules tab
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        
+
         const schedulesTabBtn = document.querySelector('.tab-btn[data-tab="schedules"]');
         const schedulesTabContent = document.getElementById('schedules');
-        
+
         if (schedulesTabBtn && schedulesTabContent) {
             schedulesTabBtn.classList.add('active');
             schedulesTabContent.classList.add('active');
@@ -644,11 +644,11 @@ document.addEventListener('DOMContentLoaded', function() {
 function applyScheduleFilters() {
     const deptFilter = document.getElementById('schedDepartmentFilter').value;
     const rows = document.querySelectorAll('#scheduleTableBody tr');
-    
+
     rows.forEach(row => {
         const deptCell = row.querySelector('.dept-tag');
         if (!deptCell) return;
-        
+
         const deptMatch = !deptFilter || deptCell.textContent.trim() === deptFilter;
         row.style.display = deptMatch ? '' : 'none';
     });
@@ -671,7 +671,7 @@ function openBulkScheduleModal() {
 function openAssignScheduleModal(employeeId, employeeName, schedule) {
     document.getElementById('scheduleEmployeeId').value = employeeId;
     document.getElementById('scheduleEmployeeName').textContent = employeeName;
-    
+
     if (schedule) {
         document.getElementById('scheduleId').value = schedule.id || '';
         document.getElementById('scheduleStartDate').value = schedule.start_date || '';
@@ -689,7 +689,7 @@ function openAssignScheduleModal(employeeId, employeeName, schedule) {
         document.getElementById('schedulePmIn').value = '';
         document.getElementById('schedulePmOut').value = '';
     }
-    
+
     document.getElementById('assignScheduleModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
@@ -700,17 +700,17 @@ function confirmRemoveSchedule(employeeId, employeeName) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/admin/schedules/${employeeId}/remove`;
-        
+
         const csrfToken = document.createElement('input');
         csrfToken.type = 'hidden';
         csrfToken.name = '_token';
         csrfToken.value = '{{ csrf_token() }}';
-        
+
         const methodField = document.createElement('input');
         methodField.type = 'hidden';
         methodField.name = '_method';
         methodField.value = 'DELETE';
-        
+
         form.appendChild(csrfToken);
         form.appendChild(methodField);
         document.body.appendChild(form);

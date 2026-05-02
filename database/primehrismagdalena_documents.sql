@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
 --
--- Host: localhost    Database: primehrismagdalena
+-- Host: 127.0.0.1    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.45
+-- Server version	8.0.41
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -25,9 +25,9 @@ DROP TABLE IF EXISTS `documents`;
 CREATE TABLE `documents` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `employee_id` bigint unsigned NOT NULL,
-  `document_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `file_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` enum('pending','approved','rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `document_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `uploaded_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `documents_employee_id_foreign` (`employee_id`),
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-29 21:32:44
+-- Dump completed on 2026-05-03  2:38:43
