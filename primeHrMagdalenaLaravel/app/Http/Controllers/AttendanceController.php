@@ -754,6 +754,67 @@ class AttendanceController extends Controller
         return $totalMins;
     }
 
+    /**
+     * Recalculate attendance records for an employee within a date range.
+     * Used when schedules are updated to ensure accredited hours reflect new schedule.
+     */
+    public function recalculateAttendanceForSchedule($employeeId, $startDate, $endDate)
+    {
+        $attendances = Attendance::where('employee_id', $employeeId)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get();
+
+        $recalculatedCount = 0;
+
+        foreach ($attendances as $attendance) {
+            // Skip if no time records
+            if (!$attendance->am_in && !$attendance->pm_in) {
+                continue;
+            }
+
+            $computationResult = $this->computeAccreditedHours(
+                $employeeId,
+                Carbon::parse($attendance->date)->format('Y-m-d'),
+                $attendance->am_in ? Carbon::parse($attendance->am_in)->format('H:i') : null,
+                $attendance->am_out ? Carbon::parse($attendance->am_out)->format('H:i') : null,
+                $attendance->pm_in ? Carbon::parse($attendance->pm_in)->format('H:i') : null,
+                $attendance->pm_out ? Carbon::parse($attendance->pm_out)->format('H:i') : null,
+                $attendance->ot_in ? Carbon::parse($attendance->ot_in)->format('H:i') : null,
+                $attendance->ot_out ? Carbon::parse($attendance->ot_out)->format('H:i') : null
+            );
+
+            // Update attendance accredited hours
+            $attendance->update([
+                'accredited_hours' => $computationResult['accredited_minutes'],
+            ]);
+
+            // Update or create log
+            if ($computationResult['log_data']) {
+                AccreditedHoursLog::updateOrCreate(
+                    ['attendance_id' => $attendance->id],
+                    [
+                        'employee_id' => $employeeId,
+                        'schedule_id' => $computationResult['log_data']['schedule_id'],
+                        'am_accredited_minutes' => $computationResult['log_data']['am_accredited_minutes'],
+                        'pm_accredited_minutes' => $computationResult['log_data']['pm_accredited_minutes'],
+                        'ot_minutes' => $computationResult['log_data']['ot_minutes'],
+                        'late_minutes' => $computationResult['log_data']['late_minutes'],
+                        'undertime_minutes' => $computationResult['log_data']['undertime_minutes'],
+                        'total_accredited_minutes' => $computationResult['log_data']['total_accredited_minutes'],
+                        'total_actual_minutes' => $computationResult['log_data']['total_actual_minutes'],
+                        'am_grace_applied' => $computationResult['log_data']['am_grace_applied'],
+                        'pm_grace_applied' => $computationResult['log_data']['pm_grace_applied'],
+                        'computation_notes' => 'Recalculated due to schedule update at ' . now()->format('Y-m-d H:i:s'),
+                    ]
+                );
+            }
+
+            $recalculatedCount++;
+        }
+
+        return $recalculatedCount;
+    }
+
     public function correctAttendance(Request $request)
     {
         $validated = $request->validate([

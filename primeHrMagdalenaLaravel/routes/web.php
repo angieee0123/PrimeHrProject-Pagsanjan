@@ -153,6 +153,18 @@ Route::post('/admin/schedules/assign', function (\Illuminate\Http\Request $reque
             'pm_out'      => $data['pm_out'],
         ]);
         $message = 'Schedule updated successfully.';
+        
+        // Recalculate attendance for this schedule period
+        $attendanceController = app(\App\Http\Controllers\AttendanceController::class);
+        $recalculatedCount = $attendanceController->recalculateAttendanceForSchedule(
+            $data['employee_id'],
+            $data['start_date'],
+            $data['end_date']
+        );
+        
+        if ($recalculatedCount > 0) {
+            $message .= " Recalculated {$recalculatedCount} attendance record(s).";
+        }
     } else {
         // Create new schedule
         \App\Models\Schedule::create([
@@ -165,6 +177,18 @@ Route::post('/admin/schedules/assign', function (\Illuminate\Http\Request $reque
             'pm_out'      => $data['pm_out'],
         ]);
         $message = 'Schedule assigned successfully.';
+        
+        // Recalculate attendance for this schedule period
+        $attendanceController = app(\App\Http\Controllers\AttendanceController::class);
+        $recalculatedCount = $attendanceController->recalculateAttendanceForSchedule(
+            $data['employee_id'],
+            $data['start_date'],
+            $data['end_date']
+        );
+        
+        if ($recalculatedCount > 0) {
+            $message .= " Recalculated {$recalculatedCount} attendance record(s).";
+        }
     }
 
     return redirect()->route('admin.personnel')->with('success', $message)->with('active_tab', 'schedules');
