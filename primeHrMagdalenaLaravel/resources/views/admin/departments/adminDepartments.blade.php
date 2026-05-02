@@ -104,7 +104,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
             <p class="table-sub">Municipal Government of Pagsanjan · Province of Laguna · {{ $departments->count() }} offices</p>
         </div>
         <div class="table-actions">
-            <button class="btn-export">
+            <button class="btn-export" onclick="exportDepartments()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
@@ -172,7 +172,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
             <p class="table-sub">Municipal Government of Pagsanjan · {{ $designations->count() }} designations</p>
         </div>
         <div class="table-actions">
-            <button class="btn-export">
+            <button class="btn-export" onclick="exportDesignations()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
@@ -545,6 +545,7 @@ document.addEventListener('DOMContentLoaded', function () {
     renderDesigTable();
     @if(session('success'))  openSuccessModal(); @endif
     @if($errors->any())      openFailedModal('{{ $errors->first() }}'); @endif
+    @if(session('export_error')) openExportErrorModal('{{ session('export_error') }}'); @endif
 
     @if(session('import_imported') !== null)
     (function() {
@@ -571,5 +572,41 @@ document.addEventListener('DOMContentLoaded', function () {
     })();
     @endif
 });
+function openExportSuccessModal(type) {
+    document.getElementById('export-success-type').textContent = type;
+    document.getElementById('export-success-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeExportSuccessModal() {
+    document.getElementById('export-success-modal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+function openExportErrorModal(msg) {
+    document.getElementById('export-error-msg').textContent = msg || 'An unexpected error occurred during export.';
+    document.getElementById('export-error-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeExportErrorModal() {
+    document.getElementById('export-error-modal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function exportDepartments() {
+    try {
+        window.location.href = '{{ route('admin.departments.export') }}';
+        setTimeout(() => openExportSuccessModal('Departments'), 1000);
+    } catch (e) {
+        openExportErrorModal(e.message);
+    }
+}
+
+function exportDesignations() {
+    try {
+        window.location.href = '{{ route('admin.designations.export') }}';
+        setTimeout(() => openExportSuccessModal('Designations'), 1000);
+    } catch (e) {
+        openExportErrorModal(e.message);
+    }
+}
 </script>
 @endsection
