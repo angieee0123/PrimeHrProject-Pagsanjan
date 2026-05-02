@@ -78,4 +78,9 @@ class Employee extends Model
     {
         return $this->hasMany(Attendance::class);
     }
+
+    public function schedule()
+    {
+        return $this->hasOne(Schedule::class);
+    }
 }
