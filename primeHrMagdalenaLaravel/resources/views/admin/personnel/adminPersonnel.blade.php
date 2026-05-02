@@ -2,6 +2,43 @@
 
 @push('styles')
     @vite('resources/css/employeeWizard.css')
+    <style>
+        .tab-btn {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 13px;
+            font-weight: 600;
+            color: #9999bb;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover {
+            color: #0b044d;
+            background: #f7f6ff;
+        }
+        .tab-btn.active {
+            color: #0b044d;
+            border-bottom-color: #0b044d;
+        }
+        .tab-btn svg {
+            opacity: 0.7;
+        }
+        .tab-btn.active svg {
+            opacity: 1;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
 @endpush
 
 @push('scripts')
@@ -87,8 +124,30 @@
     </div>
 </div>
 
-<!-- Employee Table -->
-<section class="table-section" style="box-shadow: 0 4px 16px rgba(11, 4, 77, 0.08);">
+{{-- Tabs --}}
+<div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid #f0effe;padding-bottom:0;">
+    <button class="tab-btn active" data-tab="employees">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Employee Records
+    </button>
+    <button class="tab-btn" data-tab="schedules">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        Work Schedules
+    </button>
+</div>
+
+<!-- Employee Records Tab -->
+<section class="table-section tab-content active" id="employees" style="box-shadow: 0 4px 16px rgba(11, 4, 77, 0.08);">
     <div class="table-header">
         <div>
             <h3 class="table-title">Employee Records</h3>
@@ -255,7 +314,129 @@
     </div>
 </section>
 
+<!-- Work Schedules Tab -->
+<section class="table-section tab-content" id="schedules" style="box-shadow: 0 4px 16px rgba(11, 4, 77, 0.08);">
+    <div class="table-header">
+        <div>
+            <h3 class="table-title">Work Schedules</h3>
+            <p class="table-sub">Manage employee work schedules · {{ $employees->count() }} employees</p>
+        </div>
+        <div class="table-actions">
+            <select class="filter-select" id="schedDepartmentFilter" onchange="applyScheduleFilters()">
+                <option value="">All Departments</option>
+                @foreach($departments as $department)
+                    <option value="{{ $department->name }}">{{ $department->name }}</option>
+                @endforeach
+            </select>
+            <button class="btn-export" onclick="exportSchedules()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export
+            </button>
+            <button class="modal-btn-primary" onclick="openBulkScheduleModal()" style="padding: 8px 18px; font-size: 12.5px; display: flex; align-items: center; gap: 6px; background: #1a0f6e;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                Bulk Assign
+            </button>
+        </div>
+    </div>
+
+    <div class="table-wrapper" style="overflow-x: auto;">
+        <table class="payroll-table" id="scheduleTable" style="min-width: 1400px;">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>AM In</th>
+                    <th>AM Out</th>
+                    <th>PM In</th>
+                    <th>PM Out</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="scheduleTableBody">
+                @forelse($employees as $index => $employee)
+                @php
+                    $fullName = trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name . ($employee->suffix ? ' ' . $employee->suffix : ''));
+                    $department = $employee->employmentDetail && $employee->employmentDetail->departmentRelation
+                        ? $employee->employmentDetail->departmentRelation->name
+                        : 'N/A';
+                    $schedule = $employee->schedule ?? null;
+                @endphp
+                <tr>
+                    <td>
+                        <div class="emp-cell">
+                            <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
+                                {{ getInitials($fullName) }}
+                            </div>
+                            <div>
+                                <p class="emp-name">{{ $fullName }}</p>
+                                <p class="emp-id">{{ $employee->employee_id }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="dept-tag">{{ $department }}</span></td>
+                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $schedule->am_in ?? '--:--' }}</td>
+                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $schedule->am_out ?? '--:--' }}</td>
+                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $schedule->pm_in ?? '--:--' }}</td>
+                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $schedule->pm_out ?? '--:--' }}</td>
+                    <td>
+                        @if($schedule)
+                            <span class="badge-status processed">Assigned</span>
+                        @else
+                            <span class="badge-status on-hold">Not Set</span>
+                        @endif
+                    </td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="btn-edit" onclick="openAssignScheduleModal({{ $employee->id }}, '{{ $fullName }}', {{ $schedule ? json_encode($schedule) : 'null' }})">
+                                {{ $schedule ? 'Edit' : 'Assign' }}
+                            </button>
+                            @if($schedule)
+                            <button class="btn-deactivate" onclick="confirmRemoveSchedule({{ $employee->id }}, '{{ $fullName }}')">Remove</button>
+                            @endif
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 40px; color: #6b6a8a;">
+                        No employees found.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-footer">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <p>Showing <strong id="schedShowingStart">1</strong>-<strong id="schedShowingEnd">10</strong> of <strong id="schedTotalRecords">{{ $employees->count() }}</strong> records</p>
+            <select id="schedRowsPerPageSelect" onchange="changeScheduleRowsPerPage(this.value)" style="padding: 6px 12px; border: 1.5px solid #e8e7f5; border-radius: 6px; font-size: 12px; font-family: 'Poppins', sans-serif; color: #0b044d; background: #fff; cursor: pointer;">
+                <option value="10" selected>10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+                <option value="100">100 per page</option>
+                <option value="all">Show all</option>
+            </select>
+        </div>
+        <div class="pagination" id="schedulePaginationControls">
+            <!-- Pagination buttons will be generated by JavaScript -->
+        </div>
+    </div>
+</section>
+
 @include('admin.personnel.modals.employeeWizardComplete')
+@include('admin.personnel.modals.assignSchedule')
+@include('admin.personnel.modals.bulkAssignSchedule')
 
 <!-- Success Modal -->
 <div id="successModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
@@ -428,4 +609,88 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endif
+
+<script>
+// Tab switching functionality
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById(this.dataset.tab).classList.add('active');
+    });
+});
+
+// Schedule filters
+function applyScheduleFilters() {
+    const deptFilter = document.getElementById('schedDepartmentFilter').value;
+    const rows = document.querySelectorAll('#scheduleTableBody tr');
+    
+    rows.forEach(row => {
+        const deptCell = row.querySelector('.dept-tag');
+        if (!deptCell) return;
+        
+        const deptMatch = !deptFilter || deptCell.textContent.trim() === deptFilter;
+        row.style.display = deptMatch ? '' : 'none';
+    });
+}
+
+function changeScheduleRowsPerPage(value) {
+    // Implement pagination logic similar to main table
+    console.log('Change schedule rows per page:', value);
+}
+
+function exportSchedules() {
+    window.location.href = '{{ route("admin.schedules.export") }}';
+}
+
+function openBulkScheduleModal() {
+    document.getElementById('bulkScheduleModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function openAssignScheduleModal(employeeId, employeeName, schedule) {
+    document.getElementById('scheduleEmployeeId').value = employeeId;
+    document.getElementById('scheduleEmployeeName').textContent = employeeName;
+    
+    if (schedule) {
+        document.getElementById('scheduleAmIn').value = schedule.am_in || '';
+        document.getElementById('scheduleAmOut').value = schedule.am_out || '';
+        document.getElementById('schedulePmIn').value = schedule.pm_in || '';
+        document.getElementById('schedulePmOut').value = schedule.pm_out || '';
+    } else {
+        document.getElementById('scheduleAmIn').value = '';
+        document.getElementById('scheduleAmOut').value = '';
+        document.getElementById('schedulePmIn').value = '';
+        document.getElementById('schedulePmOut').value = '';
+    }
+    
+    document.getElementById('assignScheduleModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function confirmRemoveSchedule(employeeId, employeeName) {
+    if (confirm(`Are you sure you want to remove the schedule for ${employeeName}?`)) {
+        // Submit form to remove schedule
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/schedules/${employeeId}/remove`;
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        
+        const methodField = document.createElement('input');
+        methodField.type = 'hidden';
+        methodField.name = '_method';
+        methodField.value = 'DELETE';
+        
+        form.appendChild(csrfToken);
+        form.appendChild(methodField);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 @endsection

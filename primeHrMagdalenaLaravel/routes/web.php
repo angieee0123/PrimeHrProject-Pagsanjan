@@ -84,7 +84,7 @@ Route::get('/admin/recruitment', function () {
 
 Route::get('/admin/personnel', function () {
     $departments = \App\Models\Department::where('status', 'Active')->orderBy('name')->get();
-    $employees = \App\Models\Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'user'])
+    $employees = \App\Models\Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'user', 'schedule'])
         ->orderBy('created_at', 'desc')
         ->get();
 
@@ -99,6 +99,109 @@ Route::get('/admin/personnel', function () {
 })->middleware('auth')->name('admin.personnel');
 
 Route::post('/admin/personnel', [EmployeeRegistrationController::class, 'store'])->middleware('auth')->name('admin.personnel.store');
+
+// Schedule Routes
+Route::post('/admin/schedules/assign', function (\Illuminate\Http\Request $request) {
+    $data = $request->validate([
+        'employee_id' => 'required|exists:employees,id',
+        'am_in'       => 'required',
+        'am_out'      => 'required',
+        'pm_in'       => 'required',
+        'pm_out'      => 'required',
+    ]);
+
+    \App\Models\Schedule::updateOrCreate(
+        ['employee_id' => $data['employee_id']],
+        [
+            'am_in'  => $data['am_in'],
+            'am_out' => $data['am_out'],
+            'pm_in'  => $data['pm_in'],
+            'pm_out' => $data['pm_out'],
+        ]
+    );
+
+    return redirect()->route('admin.personnel')->with('success', 'Schedule assigned successfully.');
+})->middleware('auth')->name('admin.schedules.assign');
+
+Route::post('/admin/schedules/bulk-assign', function (\Illuminate\Http\Request $request) {
+    $data = $request->validate([
+        'employee_ids'   => 'required|array',
+        'employee_ids.*' => 'exists:employees,id',
+        'am_in'          => 'required',
+        'am_out'         => 'required',
+        'pm_in'          => 'required',
+        'pm_out'         => 'required',
+    ]);
+
+    foreach ($data['employee_ids'] as $employeeId) {
+        \App\Models\Schedule::updateOrCreate(
+            ['employee_id' => $employeeId],
+            [
+                'am_in'  => $data['am_in'],
+                'am_out' => $data['am_out'],
+                'pm_in'  => $data['pm_in'],
+                'pm_out' => $data['pm_out'],
+            ]
+        );
+    }
+
+    $count = count($data['employee_ids']);
+    return redirect()->route('admin.personnel')->with('success', "Schedule assigned to {$count} employee(s) successfully.");
+})->middleware('auth')->name('admin.schedules.bulk-assign');
+
+Route::delete('/admin/schedules/{id}/remove', function ($id) {
+    $schedule = \App\Models\Schedule::where('employee_id', $id)->first();
+    
+    if ($schedule) {
+        $schedule->delete();
+        return redirect()->route('admin.personnel')->with('success', 'Schedule removed successfully.');
+    }
+    
+    return redirect()->route('admin.personnel')->with('error', 'Schedule not found.');
+})->middleware('auth')->name('admin.schedules.remove');
+
+Route::get('/admin/schedules/export', function () {
+    try {
+        $employees = \App\Models\Employee::with(['schedule', 'employmentDetail.departmentRelation'])
+            ->orderBy('last_name')
+            ->get();
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename=schedules_' . now()->format('Y-m-d') . '.csv',
+        ];
+
+        $callback = function () use ($employees) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($file, ['Employee ID', 'Employee Name', 'Department', 'AM In', 'AM Out', 'PM In', 'PM Out', 'Status']);
+            
+            foreach ($employees as $emp) {
+                $fullName = trim($emp->first_name . ' ' . ($emp->middle_name ? substr($emp->middle_name, 0, 1) . '. ' : '') . $emp->last_name . ($emp->suffix ? ' ' . $emp->suffix : ''));
+                $department = $emp->employmentDetail && $emp->employmentDetail->departmentRelation
+                    ? $emp->employmentDetail->departmentRelation->name
+                    : 'N/A';
+                $schedule = $emp->schedule;
+                
+                fputcsv($file, [
+                    $emp->employee_id,
+                    $fullName,
+                    $department,
+                    $schedule->am_in ?? '--:--',
+                    $schedule->am_out ?? '--:--',
+                    $schedule->pm_in ?? '--:--',
+                    $schedule->pm_out ?? '--:--',
+                    $schedule ? 'Assigned' : 'Not Set',
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    } catch (\Exception $e) {
+        return redirect()->route('admin.personnel')->with('error', 'Export failed: ' . $e->getMessage());
+    }
+})->middleware('auth')->name('admin.schedules.export');
 
 Route::post('/admin/personnel/{id}/status', function (\Illuminate\Http\Request $request, $id) {
     $employee = \App\Models\Employee::findOrFail($id);
