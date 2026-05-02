@@ -410,79 +410,10 @@ class AttendanceController extends Controller
                 }
             }
 
-            // Calculate total hours
-            $totalHours = 0;
-            $actualWorkHours = 0;
-            $needsReview = false;
-            if ($attendance) {
-                try {
-                    $workHours = 0;
-                    $otHours = 0;
-
-                    // If we have AM In and PM Out
-                    if ($attendance->am_in && $attendance->pm_out) {
-                        $amInTime = new \DateTime($attendance->am_in);
-                        $pmOutTime = new \DateTime($attendance->pm_out);
-
-                        // WorkHours = (PM Out - AM In) - 1 hour
-                        $workInterval = $amInTime->diff($pmOutTime);
-                        $workHours = ($workInterval->h + ($workInterval->i / 60)) - 1;
-                    }
-                    // If only AM session
-                    elseif ($attendance->am_in && $attendance->am_out && !$attendance->pm_in && !$attendance->pm_out) {
-                        $amInTime = new \DateTime($attendance->am_in);
-                        $amOutTime = new \DateTime($attendance->am_out);
-                        $workInterval = $amInTime->diff($amOutTime);
-                        $workHours = $workInterval->h + ($workInterval->i / 60);
-                    }
-                    // If only PM session
-                    elseif ($attendance->pm_in && $attendance->pm_out && !$attendance->am_in && !$attendance->am_out) {
-                        $pmInTime = new \DateTime($attendance->pm_in);
-                        $pmOutTime = new \DateTime($attendance->pm_out);
-                        $workInterval = $pmInTime->diff($pmOutTime);
-                        $workHours = $workInterval->h + ($workInterval->i / 60);
-                    }
-
-                    // Calculate overtime
-                    if ($attendance->ot_in && $attendance->ot_out) {
-                        $otInTime = Carbon::parse($attendance->ot_in);
-                        $otOutTime = Carbon::parse($attendance->ot_out);
-
-                        // Ensure OT starts after scheduled PM out
-                        if ($otInTime->lt($expectedPmOut)) {
-                            $otInTime = $expectedPmOut->copy();
-                        }
-
-                        $otInterval = $otInTime->diff($otOutTime);
-                        $otHours = $otInterval->h + ($otInterval->i / 60);
-                    }
-
-                    // Convert late and undertime from minutes to hours
-                    $lateHours = $lateMinutes / 60;
-                    $undertimeHours = $undertime / 60;
-
-                    // Store actual work hours for display
-                    $actualWorkHours = $workHours + $otHours;
-                    
-                    // Total = WorkHours + OT - Late - Undertime
-                    $totalHours = max(0, $workHours + $otHours - $lateHours - $undertimeHours);
-                    
-                    // Add grace period bonus if within grace period
-                    if ($attendance->am_in) {
-                        $amInTime = Carbon::parse($attendance->am_in);
-                        if ($amInTime->lte($graceThresholdAm)) {
-                            $totalHours += 0.25; // Add 15 minutes bonus
-                        }
-                    }
-                    
-                    // Determine if needs review (has both late and undertime)
-                    $needsReview = ($lateMinutes > 0 && $undertime > 0);
-                } catch (\Exception $e) {
-                    $totalHours = 0;
-                    $actualWorkHours = 0;
-                    $needsReview = false;
-                }
-            }
+            // Use stored total_hours from database (actual time worked in minutes)
+            $totalHoursMinutes = $attendance ? $attendance->total_hours : 0;
+            $totalHours = $totalHoursMinutes ? round($totalHoursMinutes / 60, 1) : 0;
+            $needsReview = ($lateMinutes > 0 && $undertime > 0);
 
             // Get accredited hours from log if exists, otherwise calculate
             $accreditedMinutes = 0;
@@ -567,8 +498,7 @@ class AttendanceController extends Controller
                 'late_display' => $this->formatMinutes($lateMinutes),
                 'undertime' => $undertime,
                 'undertime_display' => $this->formatMinutes($undertime),
-                'total_hours' => round($totalHours, 1) . ' hrs',
-                'actual_work_hours' => isset($actualWorkHours) ? round($actualWorkHours, 1) : 0,
+                'total_hours' => $totalHours . ' hrs',
                 'accredited_minutes' => $accreditedMinutes,
                 'am_accredited_minutes' => $amAccreditedMins,
                 'pm_accredited_minutes' => $pmAccreditedMins,
