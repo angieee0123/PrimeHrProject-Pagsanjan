@@ -286,68 +286,61 @@ def search_codebase(codebase, query, top_k=5):
 
 def classify_question(user_question):
     """
-    Pure LLM intent classifier.
-    Understands English + Filipino/Tagalog naturally.
-    Returns: 'database' | 'system'
+    Classify if question is about:
+    - 'database': Data queries (user counts, records, reports)
+    - 'system': How-to, process flows, features
+    - 'both': Could be either
+    
+    Supports English and Filipino (Tagalog)
     """
-    prompt = f"""You are an intent classifier for a Philippine government HR system (HRIS) chatbot.
-
-Your job is to decide: does the user want DATA from the database, or do they want to know HOW TO USE the system?
-
-=== SYSTEM CONTEXT ===
-This is an HR Information System for a local government unit.
-The database contains:
-- employees (names, birthdate, sex, civil status, department, designation, salary)
-- attendance records (time-in, time-out, dates, late/absent)
-- attendance corrections
-- users and their roles
-- departments and designations
-- government IDs, education, work experience, eligibilities
-
-The system has features like:
-- Employee registration wizard
-- Attendance monitoring and QR scanning
-- Attendance correction requests
-- Leave filing
-- Document uploads
-- Admin dashboard
-- Login/logout
-
-=== CLASSIFICATION RULES ===
-Answer "database" when the user is asking for INFORMATION THAT EXISTS IN THE DATABASE:
-- Asking about a specific person (who, whose, which employee)
-- Asking for dates, times, records, counts, lists
-- Asking about attendance of someone (late, absent, time-in, time-out)
-- Asking for names, salaries, departments of employees
-- Any question that can be answered by running a SQL query
-- Filipino/Tagalog questions asking about data (kelan, sino, ilan, ano ang record, pumasok, nag-late, nag-absent, mga pangalan, etc.)
-
-Answer "system" when the user wants to know HOW TO DO SOMETHING in the system:
-- Step-by-step instructions (how to register, how to submit, how to correct)
-- What a feature or button does
-- How a process works
-- Paano, how do I, how to, what is the process
-
-=== IMPORTANT ===
-Even if the question is in Filipino/Tagalog, classify by INTENT not by language.
-A question like "ano ang mga date na pumasok si Jeremy ng late" is asking for DATA (dates from attendance records) — answer "database".
-A question like "paano mag-correct ng attendance" is asking HOW TO USE the system — answer "system".
-
-=== USER QUESTION ===
-"{user_question}"
-
-Respond with ONLY one word: database OR system"""
-
-    response = groq_client.chat.completions.create(
-        messages=[{"role": "user", "content": prompt}],
-        model="llama-3.3-70b-versatile",
-        temperature=0.0,
-        max_tokens=5
-    )
-    result = response.choices[0].message.content.strip().lower()
-    classification = 'database' if 'database' in result else 'system'
-    print(f"🤖 Intent → {classification}: '{user_question}'")
-    return classification
+    question_lower = user_question.lower()
+    
+    # English database keywords
+    db_keywords = [
+        'how many', 'count', 'list', 'show', 'find', 'search', 'where', 
+        'filter', 'report', 'total', 'number', 'many', 'all', 'view'
+    ]
+    
+    # Filipino/Tagalog database keywords
+    # ilan = how many, ilang = how many, total, lahat = all, dami = amount
+    db_keywords_tagalog = [
+        'ilan', 'ilang', 'dami', 'total', 'lahat', 'list', 'view', 'show', 'magpakita'
+    ]
+    
+    # English process keywords
+    process_keywords = [
+        'how', 'how do', 'how to', 'process', 'flow', 'step', 'register', 
+        'create', 'add', 'submit', 'upload', 'scan', 'work', 'use', 'make'
+    ]
+    
+    # Filipino/Tagalog process keywords
+    # paano = how, proseso = process, hakbang = steps, magparehistro = register
+    process_keywords_tagalog = [
+        'paano', 'proseso', 'hakbang', 'magparehistro', 'lumikha', 'magdagdag', 
+        'magpadala', 'magskana', 'gamitin', 'trabaho'
+    ]
+    
+    # Count database keywords found
+    db_score = sum(1 for kw in db_keywords if kw in question_lower)
+    db_score += sum(1 for kw in db_keywords_tagalog if kw in question_lower) * 1.5
+    
+    # Count process keywords found
+    process_score = sum(1 for kw in process_keywords if kw in question_lower)
+    process_score += sum(1 for kw in process_keywords_tagalog if kw in question_lower) * 1.5
+    
+    # Boost database score if question ends with "?" and contains count/number words
+    if '?' in question_lower and any(word in question_lower for word in ['ilan', 'how many', 'count', 'total']):
+        db_score += 5
+    
+    if process_score > db_score:
+        return 'system'
+    elif db_score > process_score:
+        return 'database'
+    else:
+        # Default: if question starts with common DB pattern, use database
+        if any(question_lower.startswith(kw) for kw in ['what', 'ano', 'show', 'magpakita']):
+            return 'database'
+        return 'both'
 
 # ==================== SYSTEM PROCESS RESPONSE ====================
 
@@ -507,7 +500,8 @@ def chat():
         question_type = classify_question(user_input)
         codebase_files_used = []
 
-        if question_type == 'database':
+        if question_type == 'database' or question_type == 'both':
+            # Try database route first
             schema = get_db_schema()
             sql = generate_sql_query(user_input, schema)
 
@@ -532,7 +526,6 @@ def chat():
                     'follow_up_questions': follow_ups,
                     'status': 'success'
                 })
-            # SQL generation failed — fall through to system route
 
         # Use system/codebase route
         codebase = index_codebase()
