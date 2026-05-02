@@ -652,7 +652,7 @@ function renderDetailedDTR(data) {
             <td>${record.ot_out || '—'}</td>
             <td>${record.undertime_display ? '<span class="log-late">' + record.undertime_display + '</span>' : (record.pm_out ? '0 min' : '—')}</td>
             <td>${record.late_display ? '<span class="log-late">' + record.late_display + '</span>' : (record.am_in ? '0 min' : '—')}</td>
-            <td><strong>${record.actual_work_hours} hrs</strong><br><small>${record.total_hours}</small></td>
+            <td><strong>${record.total_hours}</strong></td>
             <td>${accreditedDisplay}</td>
             <td><button class="btn-edit-time" onclick="openCorrectModal(${record.attendance_id ? record.attendance_id : "'new_" + currentDetailedEmployeeId + "_" + record.date_key + "'"}, '${record.date}')" title="${record.attendance_id ? 'Edit time records' : 'Add time records'}">Edit</button></td>
         `;
