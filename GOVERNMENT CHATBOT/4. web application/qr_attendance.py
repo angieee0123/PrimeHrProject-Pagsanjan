@@ -35,8 +35,8 @@ def compute_accredited_hours(am_in, am_out, pm_in, pm_out):
             total = t.hour * 3600 + t.minute * 60 + t.second
         return total // 60
 
-    AM_START, AM_END, GRACE = 480, 720, 495
-    PM_START, PM_END       = 780, 1020
+    AM_START, AM_END, GRACE       = 480, 720, 495   # 08:00, 12:00, 08:15
+    PM_START, PM_END, PM_GRACE     = 780, 1020, 795  # 13:00, 17:00, 13:15
 
     am_mins = 0
     if am_in is not None and am_out is not None:
@@ -47,9 +47,10 @@ def compute_accredited_hours(am_in, am_out, pm_in, pm_out):
 
     pm_mins = 0
     if pm_in is not None and pm_out is not None:
-        pm_from = max(to_min(pm_in), PM_START)
-        pm_to   = min(to_min(pm_out), PM_END)
-        pm_mins = max(0, pm_to - pm_from)
+        pm_in_min = to_min(pm_in)
+        pm_from   = PM_START if pm_in_min <= PM_GRACE else pm_in_min
+        pm_to     = min(to_min(pm_out), PM_END)
+        pm_mins   = max(0, pm_to - pm_from)
 
     return am_mins + pm_mins
 
