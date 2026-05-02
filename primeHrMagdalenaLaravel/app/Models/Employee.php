@@ -81,6 +81,14 @@ class Employee extends Model
 
     public function schedule()
     {
-        return $this->hasOne(Schedule::class);
+        return $this->hasMany(Schedule::class);
+    }
+
+    public function getScheduleForDate($date)
+    {
+        return $this->schedule()
+            ->where('start_date', '<=', $date)
+            ->where('end_date', '>=', $date)
+            ->first();
     }
 }

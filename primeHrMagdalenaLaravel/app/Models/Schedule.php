@@ -8,6 +8,8 @@ class Schedule extends Model
 {
     protected $fillable = [
         'employee_id',
+        'start_date',
+        'end_date',
         'am_in',
         'am_out',
         'pm_in',

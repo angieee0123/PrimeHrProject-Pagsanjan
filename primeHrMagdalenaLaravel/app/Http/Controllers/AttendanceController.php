@@ -23,7 +23,7 @@ class AttendanceController extends Controller
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
 
-        $employees = Employee::with(['employmentDetail.departmentRelation'])
+        $employees = Employee::with(['employmentDetail.departmentRelation', 'schedule'])
             ->get()
             ->map(function ($employee) use ($startDate, $endDate) {
                 $attendances = Attendance::where('employee_id', $employee->id)
@@ -36,6 +36,9 @@ class AttendanceController extends Controller
                 $halfday = 0;
                 $overtime = 0;
 
+                // Get employee's schedule or use defaults
+                $graceMinutes = 15;
+
                 $workingDays = $this->getWorkingDays($startDate, $endDate);
                 $attendedDates = $attendances->pluck('date')->map(fn($d) => $d->format('Y-m-d'))->toArray();
 
@@ -45,10 +48,15 @@ class AttendanceController extends Controller
                     if ($hasAttendance) {
                         $present++;
 
-                        // Check if late (AM in after 8:15 AM with grace period)
+                        // Get schedule for this specific date
+                        $attendanceDate = Carbon::parse($attendance->date)->format('Y-m-d');
+                        $scheduleForDate = $employee->getScheduleForDate($attendanceDate);
+                        $expectedAmIn = $scheduleForDate ? Carbon::parse($scheduleForDate->am_in) : Carbon::parse('08:00:00');
+                        $graceThreshold = $expectedAmIn->copy()->addMinutes($graceMinutes);
+
+                        // Check if late using employee's schedule
                         if ($attendance->am_in) {
                             $amInTime = Carbon::parse($attendance->am_in);
-                            $graceThreshold = Carbon::parse('08:15:00');
                             if ($amInTime->gt($graceThreshold)) {
                                 $late++;
                             }
@@ -61,14 +69,14 @@ class AttendanceController extends Controller
                             $halfday++;
                         }
 
-                        // Calculate overtime hours (ensure it starts at 5:00 PM)
+                        // Calculate overtime using employee's schedule
                         if ($attendance->ot_in && $attendance->ot_out) {
                             $otIn = Carbon::parse($attendance->ot_in);
                             $otOut = Carbon::parse($attendance->ot_out);
-                            $expectedOtStart = Carbon::parse('17:00:00');
+                            $expectedPmOut = $scheduleForDate ? Carbon::parse($scheduleForDate->pm_out) : Carbon::parse('17:00:00');
                             
-                            if ($otIn->lt($expectedOtStart)) {
-                                $otIn = $expectedOtStart;
+                            if ($otIn->lt($expectedPmOut)) {
+                                $otIn = $expectedPmOut;
                             }
                             
                             $overtime += $otIn->diffInHours($otOut, false);
@@ -182,7 +190,7 @@ class AttendanceController extends Controller
             return response()->json(['error' => 'Start date must be before end date'], 400);
         }
 
-        $employee = Employee::findOrFail($employeeId);
+        $employee = Employee::with('schedule')->findOrFail($employeeId);
 
         // Fetch attendance records for the date range
         $attendances = Attendance::where('employee_id', $employeeId)
@@ -193,7 +201,7 @@ class AttendanceController extends Controller
                 return Carbon::parse($a->date)->format('Y-m-d');
             });
 
-        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances);
+        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee);
 
         return response()->json([
             'records' => $records,
@@ -217,7 +225,7 @@ class AttendanceController extends Controller
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
 
-        $employee = Employee::with('employmentDetail.departmentRelation')->findOrFail($employeeId);
+        $employee = Employee::with(['employmentDetail.departmentRelation', 'schedule'])->findOrFail($employeeId);
 
         // Fetch attendance records for the date range
         $attendances = Attendance::where('employee_id', $employeeId)
@@ -228,7 +236,7 @@ class AttendanceController extends Controller
                 return Carbon::parse($a->date)->format('Y-m-d');
             });
 
-        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances);
+        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee);
 
         $dateRange = $startDate->format('M_d_Y') . '_to_' . $endDate->format('M_d_Y');
         $fileName = "Detailed_DTR_{$employee->employee_id}_{$dateRange}.csv";
@@ -299,14 +307,26 @@ class AttendanceController extends Controller
         }
     }
 
-    private function generateDetailedRecords($startDate, $endDate, $attendances)
+    private function generateDetailedRecords($startDate, $endDate, $attendances, $employee = null)
     {
+        $graceMinutes = 15;
+
         $records = [];
         $current = $startDate->copy();
 
         while ($current->lte($endDate)) {
             $dateKey = $current->format('Y-m-d');
             $attendance = $attendances->get($dateKey);
+
+            // Get schedule for this specific date
+            $schedule = $employee ? $employee->getScheduleForDate($dateKey) : null;
+            $expectedAmIn = $schedule ? Carbon::parse($schedule->am_in) : Carbon::parse('08:00:00');
+            $expectedAmOut = $schedule ? Carbon::parse($schedule->am_out) : Carbon::parse('12:00:00');
+            $expectedPmIn = $schedule ? Carbon::parse($schedule->pm_in) : Carbon::parse('13:00:00');
+            $expectedPmOut = $schedule ? Carbon::parse($schedule->pm_out) : Carbon::parse('17:00:00');
+            
+            $graceThresholdAm = $expectedAmIn->copy()->addMinutes($graceMinutes);
+            $graceThresholdPm = $expectedPmIn->copy()->addMinutes($graceMinutes);
 
             // Parse time fields safely
             $amIn = null;
@@ -362,33 +382,26 @@ class AttendanceController extends Controller
                 }
             }
 
-            // Calculate late minutes with 15-min grace period
+            // Calculate late minutes with grace period
             $lateMinutes = 0;
             if ($attendance && $attendance->am_in) {
                 try {
-                    $amInTime = new \DateTime($attendance->am_in);
-                    $graceThreshold = new \DateTime('08:15:00');
-                    $expectedIn = new \DateTime('08:00:00');
-
-                    if ($amInTime > $graceThreshold) {
-                        $lateInterval = $expectedIn->diff($amInTime);
-                        $lateMinutes = ($lateInterval->h * 60) + $lateInterval->i;
+                    $amInTime = Carbon::parse($attendance->am_in);
+                    if ($amInTime->gt($graceThresholdAm)) {
+                        $lateMinutes = $expectedAmIn->diffInMinutes($amInTime);
                     }
                 } catch (\Exception $e) {
                     $lateMinutes = 0;
                 }
             }
 
-            // Calculate undertime (in minutes) — only if pm_out is before 17:00
+            // Calculate undertime (in minutes)
             $undertime = 0;
             if ($attendance && $attendance->pm_out && !in_array($current->dayOfWeek, [0, 6])) {
                 try {
-                    $pmOutTime = new \DateTime($attendance->pm_out);
-                    $expectedOut = new \DateTime('17:00:00');
-
-                    if ($pmOutTime < $expectedOut) {
-                        $diff = $pmOutTime->diff($expectedOut);
-                        $undertime = ($diff->h * 60) + $diff->i;
+                    $pmOutTime = Carbon::parse($attendance->pm_out);
+                    if ($pmOutTime->lt($expectedPmOut)) {
+                        $undertime = $pmOutTime->diffInMinutes($expectedPmOut);
                     }
                 } catch (\Exception $e) {
                     $undertime = 0;
@@ -430,13 +443,12 @@ class AttendanceController extends Controller
 
                     // Calculate overtime
                     if ($attendance->ot_in && $attendance->ot_out) {
-                        $otInTime = new \DateTime($attendance->ot_in);
-                        $otOutTime = new \DateTime($attendance->ot_out);
-                        $expectedOtStart = new \DateTime('17:00:00');
+                        $otInTime = Carbon::parse($attendance->ot_in);
+                        $otOutTime = Carbon::parse($attendance->ot_out);
 
-                        // Ensure OT starts at 5:00 PM
-                        if ($otInTime < $expectedOtStart) {
-                            $otInTime = clone $expectedOtStart;
+                        // Ensure OT starts after scheduled PM out
+                        if ($otInTime->lt($expectedPmOut)) {
+                            $otInTime = $expectedPmOut->copy();
                         }
 
                         $otInterval = $otInTime->diff($otOutTime);
@@ -453,11 +465,10 @@ class AttendanceController extends Controller
                     // Total = WorkHours + OT - Late - Undertime
                     $totalHours = max(0, $workHours + $otHours - $lateHours - $undertimeHours);
                     
-                    // Add grace period bonus (15 min = 0.25 hrs) if within grace period
+                    // Add grace period bonus if within grace period
                     if ($attendance->am_in) {
-                        $amInTime = new \DateTime($attendance->am_in);
-                        $graceThreshold = new \DateTime('08:15:00');
-                        if ($amInTime <= $graceThreshold) {
+                        $amInTime = Carbon::parse($attendance->am_in);
+                        if ($amInTime->lte($graceThresholdAm)) {
                             $totalHours += 0.25; // Add 15 minutes bonus
                         }
                     }
