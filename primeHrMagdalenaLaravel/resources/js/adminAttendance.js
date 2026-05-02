@@ -528,21 +528,23 @@ function computeAccreditedHours(record) {
     // AM window: 08:00 – 12:00 (15-min grace: if amIn <= 08:15, treat as 08:00)
     const AM_START   = 8 * 60;         // 08:00
     const AM_END     = 12 * 60;        // 12:00
-    const GRACE      = AM_START + 15;  // 08:15
-    // PM window: 13:00 – 17:00
-    const PM_START = 13 * 60;  // 13:00
-    const PM_END   = 17 * 60;  // 17:00
+    const AM_GRACE   = AM_START + 15;  // 08:15
+    // PM window: 13:00 – 17:00 (15-min grace: if pmIn <= 13:15, treat as 13:00)
+    const PM_START   = 13 * 60;        // 13:00
+    const PM_END     = 17 * 60;        // 17:00
+    const PM_GRACE   = PM_START + 15;  // 13:15
 
     // AM: if within grace period, count from 08:00; otherwise count from actual amIn
     const amInMin  = toMin(amIn);
-    const amFrom   = amInMin <= GRACE ? AM_START : amInMin;
+    const amFrom   = amInMin <= AM_GRACE ? AM_START : amInMin;
     const amTo     = Math.min(toMin(amOut), AM_END);
     const amMins   = Math.max(0, amTo - amFrom);
 
-    // PM: clamp both in and out within 13:00–17:00
-    const pmFrom = Math.max(toMin(pmIn),  PM_START);
-    const pmTo   = Math.min(toMin(pmOut), PM_END);
-    const pmMins = Math.max(0, pmTo - pmFrom);
+    // PM: if within grace period, count from 13:00; otherwise count from actual pmIn
+    const pmInMin  = toMin(pmIn);
+    const pmFrom   = pmInMin <= PM_GRACE ? PM_START : pmInMin;
+    const pmTo     = Math.min(toMin(pmOut), PM_END);
+    const pmMins   = Math.max(0, pmTo - pmFrom);
 
     const totalMins = amMins + pmMins;
     const hrs  = Math.floor(totalMins / 60);

@@ -554,8 +554,8 @@ class AttendanceController extends Controller
     /**
      * Compute accredited hours in minutes using the same rules as the frontend.
      * AM window: 08:00–12:00 (grace: if am_in <= 08:15, treat as 08:00)
-     * PM window: 13:00–17:00
-     * Returns null if am_in/am_out/pm_in/pm_out are all missing.
+     * PM window: 13:00–17:00 (grace: if pm_in <= 13:15, treat as 13:00)
+     * Returns null if all four time fields are missing.
      */
     private function computeAccreditedHours(?string $amIn, ?string $amOut, ?string $pmIn, ?string $pmOut): ?int
     {
@@ -565,25 +565,27 @@ class AttendanceController extends Controller
 
         $toMin = fn($t) => $t ? (int)(explode(':', $t)[0]) * 60 + (int)(explode(':', $t)[1]) : null;
 
-        $AM_START = 8 * 60;       // 480
-        $AM_END   = 12 * 60;      // 720
-        $GRACE    = $AM_START + 15; // 495
-        $PM_START = 13 * 60;      // 780
-        $PM_END   = 17 * 60;      // 1020
+        $AM_START   = 480;  // 08:00
+        $AM_END     = 720;  // 12:00
+        $AM_GRACE   = 495;  // 08:15
+        $PM_START   = 780;  // 13:00
+        $PM_END     = 1020; // 17:00
+        $PM_GRACE   = 795;  // 13:15
 
         $amMins = 0;
         if ($amIn && $amOut) {
             $amInMin = $toMin($amIn);
-            $amFrom  = $amInMin <= $GRACE ? $AM_START : $amInMin;
+            $amFrom  = $amInMin <= $AM_GRACE ? $AM_START : $amInMin;
             $amTo    = min($toMin($amOut), $AM_END);
             $amMins  = max(0, $amTo - $amFrom);
         }
 
         $pmMins = 0;
         if ($pmIn && $pmOut) {
-            $pmFrom = max($toMin($pmIn), $PM_START);
-            $pmTo   = min($toMin($pmOut), $PM_END);
-            $pmMins = max(0, $pmTo - $pmFrom);
+            $pmInMin = $toMin($pmIn);
+            $pmFrom  = $pmInMin <= $PM_GRACE ? $PM_START : $pmInMin;
+            $pmTo    = min($toMin($pmOut), $PM_END);
+            $pmMins  = max(0, $pmTo - $pmFrom);
         }
 
         return $amMins + $pmMins;
