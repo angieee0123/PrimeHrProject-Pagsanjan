@@ -614,7 +614,32 @@ function renderDetailedDTR(data) {
             statusBadge = ' <span class="badge-needs-review">Needs Review</span>';
         }
 
-        const accredited = computeAccreditedHours(record);
+        // Format accredited hours from backend calculation
+        let accreditedDisplay = '<span class="badge-incomplete">Incomplete</span>';
+        if (record.accredited_minutes > 0) {
+            const hrs = Math.floor(record.accredited_minutes / 60);
+            const mins = record.accredited_minutes % 60;
+            const label = hrs > 0 && mins > 0 ? `${hrs}h ${mins}m` : hrs > 0 ? `${hrs} hrs` : `${mins} min`;
+            
+            let color = '#15803d';
+            if (record.accredited_minutes < 480) color = '#a16207';
+            if (record.accredited_minutes <= 0) color = '#8e1e18';
+            
+            accreditedDisplay = `<strong style="color:${color};">${label}</strong>`;
+            
+            // Add grace indicator if applied
+            if (record.am_grace_applied || record.pm_grace_applied) {
+                const graceText = [];
+                if (record.am_grace_applied) graceText.push('AM');
+                if (record.pm_grace_applied) graceText.push('PM');
+                accreditedDisplay += `<br><small style="color: #15803d; font-size: 10px;">✓ Grace: ${graceText.join(', ')}</small>`;
+            }
+            
+            // Add indicator if from log
+            if (record.has_log) {
+                accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">📋 From Log</small>`;
+            }
+        }
 
         tr.innerHTML = `
             <td><strong>${record.date}</strong>${statusBadge}</td>
@@ -628,7 +653,7 @@ function renderDetailedDTR(data) {
             <td>${record.undertime_display ? '<span class="log-late">' + record.undertime_display + '</span>' : (record.pm_out ? '0 min' : '—')}</td>
             <td>${record.late_display ? '<span class="log-late">' + record.late_display + '</span>' : (record.am_in ? '0 min' : '—')}</td>
             <td><strong>${record.actual_work_hours} hrs</strong><br><small>${record.total_hours}</small></td>
-            <td>${accredited.display}</td>
+            <td>${accreditedDisplay}</td>
             <td><button class="btn-edit-time" onclick="openCorrectModal(${record.attendance_id ? record.attendance_id : "'new_" + currentDetailedEmployeeId + "_" + record.date_key + "'"}, '${record.date}')" title="${record.attendance_id ? 'Edit time records' : 'Add time records'}">Edit</button></td>
         `;
 
