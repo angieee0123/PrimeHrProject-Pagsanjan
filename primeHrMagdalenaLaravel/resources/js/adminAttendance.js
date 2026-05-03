@@ -342,7 +342,12 @@ window.calculateTotalHours = function() {
 window.openCorrectModal = function(attendanceId, date) {
     currentCorrectAttendanceId = attendanceId;
 
-    fetch(`/admin/attendance/record/${attendanceId}`)
+    // Handle both numeric IDs and string-based new record IDs
+    const endpoint = typeof attendanceId === 'string' && attendanceId.startsWith('new_')
+        ? `/admin/attendance/record/${attendanceId}`
+        : `/admin/attendance/record/${attendanceId}`;
+
+    fetch(endpoint)
         .then(response => response.json())
         .then(data => {
             document.getElementById('correctEmployeeName').textContent = data.employee_name;
@@ -382,7 +387,7 @@ window.openCorrectModal = function(attendanceId, date) {
             if (!data.pm_in) {
                 validationMessage += '⚠️ Missing PM In time\n';
             }
-            
+
             if (validationMessage) {
                 const warningDiv = document.getElementById('correctReason');
                 warningDiv.placeholder = 'REQUIRED: ' + validationMessage + '\n\nExplain why this correction is needed...';
@@ -620,13 +625,13 @@ function renderDetailedDTR(data) {
             const hrs = Math.floor(record.accredited_minutes / 60);
             const mins = record.accredited_minutes % 60;
             const label = hrs > 0 && mins > 0 ? `${hrs}h ${mins}m` : hrs > 0 ? `${hrs} hrs` : `${mins} min`;
-            
+
             let color = '#15803d';
             if (record.accredited_minutes < 480) color = '#a16207';
             if (record.accredited_minutes <= 0) color = '#8e1e18';
-            
+
             accreditedDisplay = `<strong style="color:${color};">${label}</strong>`;
-            
+
             // Add grace indicator if applied
             if (record.am_grace_applied || record.pm_grace_applied) {
                 const graceText = [];
@@ -634,7 +639,7 @@ function renderDetailedDTR(data) {
                 if (record.pm_grace_applied) graceText.push('PM');
                 accreditedDisplay += `<br><small style="color: #15803d; font-size: 10px;">✓ Grace: ${graceText.join(', ')}</small>`;
             }
-            
+
             // Add indicator if from log
             if (record.has_log) {
                 accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">📋 From Log</small>`;
@@ -664,7 +669,7 @@ function renderDetailedDTR(data) {
     document.getElementById('detailedTotalPresent').textContent = totalPresent;
     document.getElementById('detailedTotalAbsent').textContent = totalAbsent;
     document.getElementById('detailedTotalLate').textContent = totalLate + ' times';
-    
+
     // Format total minutes to hrs and min
     const formatTotalMinutes = (minutes) => {
         if (minutes <= 0) return '0 min';
@@ -678,7 +683,7 @@ function renderDetailedDTR(data) {
             return Math.round(mins) + ' min';
         }
     };
-    
+
     document.getElementById('detailedTotalLateMinutes').textContent = formatTotalMinutes(totalLateMinutes);
     document.getElementById('detailedTotalUndertime').textContent = formatTotalMinutes(totalUndertimeMinutes);
 

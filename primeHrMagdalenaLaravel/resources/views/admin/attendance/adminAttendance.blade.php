@@ -20,7 +20,7 @@ $endDateDisplay = request('end_date', now()->endOfMonth()->format('Y-m-d'));
 $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M d, Y', strtotime($endDateDisplay));
 @endphp
 
-<div class="stats-grid" style="margin-bottom: 20px;">
+<div class="stats-grid stats-grid-4" style="margin-bottom: 20px;">
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">DTR Submitted</p>
@@ -204,11 +204,40 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 @include('admin.attendance.modals.correctAttendanceModal')
 @include('admin.attendance.modals.successModal')
 
+@push('styles')
+@vite('resources/css/adminAttendance.css')
+@endpush
+
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
     window.periodDisplay = '{{ $periodDisplay }}';
     window.periodDisplayFile = '{{ str_replace([' ', ',', '-'], '_', $periodDisplay) }}';
+
+    // Search functionality
+    function searchAttendance(query) {
+        const searchTerm = query.toLowerCase().trim();
+        const tbody = document.querySelector('.payroll-table tbody');
+        if (!tbody) return;
+
+        if (!window.allAttendanceRows || window.allAttendanceRows.length === 0) {
+            window.allAttendanceRows = Array.from(tbody.querySelectorAll('tr'));
+        }
+
+        const filtered = window.allAttendanceRows.filter(row => {
+            const name = row.querySelector('.emp-name')?.textContent.toLowerCase() || '';
+            const id = row.querySelector('.emp-id')?.textContent.toLowerCase() || '';
+            const dept = row.querySelector('.dept-tag')?.textContent.toLowerCase() || '';
+            return searchTerm === '' || name.includes(searchTerm) || id.includes(searchTerm) || dept.includes(searchTerm);
+        });
+
+        tbody.innerHTML = '';
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 40px; color: #6b6a8a;">No records found matching your search.</td></tr>';
+        } else {
+            filtered.forEach(row => tbody.appendChild(row.cloneNode(true)));
+        }
+    }
 </script>
 @vite('resources/js/adminAttendance.js')
 @endpush
