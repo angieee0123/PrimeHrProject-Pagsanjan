@@ -78,3 +78,61 @@ input[type="date"].filter-select-sm::-webkit-calendar-picker-indicator { cursor:
 textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
 .file-preview-item { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #f7f6ff; border: 1px solid #e8e7f5; border-radius: 6px; font-size: 11px; color: #0b044d; }
 .file-preview-item svg { flex-shrink: 0; }
+
+/* ══════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS FOR ATTENDANCE
+══════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+    .payroll-summary-bar { flex-wrap: wrap; gap: 12px; }
+    .psummary-item { min-width: calc(50% - 6px); }
+    .psummary-divider { display: none; }
+}
+
+@media (max-width: 768px) {
+    .payroll-summary-bar { flex-direction: column; padding: 12px 16px; }
+    .psummary-item { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; }
+    
+    .modal-box { width: 95%; max-width: 95vw; }
+    .modal-box-wide { width: 95%; max-width: 95vw; }
+    
+    .modal-header { padding: 20px 16px 16px; }
+    .modal-body { padding: 16px; max-height: 50vh; }
+    .modal-footer { padding: 12px 16px; flex-wrap: wrap; }
+    
+    .form-grid { grid-template-columns: 1fr; gap: 12px; }
+    
+    .detailed-dtr-table { font-size: 11px; }
+    .detailed-dtr-table thead th { padding: 8px 10px; font-size: 10px; }
+    .detailed-dtr-table tbody td { padding: 8px 10px; }
+    
+    .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+@media (max-width: 640px) {
+    .modal-emp-row { flex-direction: column; align-items: flex-start; padding: 12px; }
+    .emp-avatar.lg { width: 48px; height: 48px; font-size: 16px; }
+    
+    .modal-title { font-size: 16px; }
+    .modal-sub { font-size: 12px; }
+    
+    .modal-btn-ghost, .modal-btn-primary { width: 100%; justify-content: center; }
+    
+    .btn-filter-main, .btn-export-sm, .btn-filter { width: 100%; justify-content: center; }
+    .filter-select-sm { width: 100%; }
+}
+
+@media (max-width: 480px) {
+    .payroll-summary-bar { padding: 10px 12px; }
+    .psummary-item span { font-size: 10px; }
+    .psummary-item strong { font-size: 12px; }
+    
+    .modal-header { padding: 16px 12px 12px; }
+    .modal-body { padding: 12px; }
+    .modal-footer { padding: 10px 12px; }
+    
+    .modal-title { font-size: 14px; }
+    .modal-eyebrow { font-size: 10px; }
+    
+    .btn-edit-time, .btn-edit, .btn-detailed { font-size: 11px; padding: 5px 10px; }
+}

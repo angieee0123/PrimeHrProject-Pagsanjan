@@ -9,6 +9,8 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
+                'resources/css/admin.css',
+                'resources/css/adminAttendance.css',
                 'resources/css/departments.css',
                 'resources/css/employeeWizard.css',
                 'resources/css/joborder.css',
