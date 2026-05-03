@@ -115,6 +115,25 @@ function toggleSidebar() {
     }
 }
 
+// Mobile menu functionality
+const mobileBtn = document.getElementById('mobile-menu-btn');
+const overlay = document.getElementById('mobile-overlay');
+const sidebar = document.querySelector('.sidebar');
+
+if (mobileBtn) {
+    mobileBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('active');
+    });
+}
+
+if (overlay) {
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('active');
+    });
+}
+
 // Restore sidebar state on page load
 document.addEventListener('DOMContentLoaded', function() {
     const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';

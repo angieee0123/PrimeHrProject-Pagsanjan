@@ -57,3 +57,148 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .badge-status.on-hold { background: #fee8e8; color: #8e1e18; }
 .btn-view { padding: 6px 16px; background: #f0effe; color: #0b044d; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
 .btn-view:hover { background: #e8e7f5; }
+
+/* ══════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS
+══════════════════════════════════════════════════════ */
+
+/* Mobile Menu Button */
+.mobile-menu-btn {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    width: 44px;
+    height: 44px;
+    background: #0b044d;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(11,4,77,0.2);
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.mobile-menu-btn:hover { background: #1a0f6e; transform: scale(1.05); }
+
+/* Mobile Overlay */
+.mobile-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(11,4,77,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 99;
+}
+.mobile-overlay.active { display: block; }
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+    .mobile-menu-btn { display: flex; }
+
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+        z-index: 100;
+    }
+    .sidebar.mobile-open { transform: translateX(0); }
+
+    .main-content { margin-left: 0 !important; }
+
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+
+    .welcome-banner { flex-wrap: wrap; }
+    .banner-right { width: 100%; justify-content: flex-start; }
+
+    .table-header { flex-wrap: wrap; gap: 12px; }
+    .table-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+
+    .filter-select, .btn-export, .modal-btn-primary { min-width: auto; }
+}
+
+@media (max-width: 768px) {
+    .stats-grid { grid-template-columns: 1fr; }
+
+    .welcome-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+    }
+
+    .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .payroll-table { min-width: 800px; }
+
+    .table-header { padding: 16px 18px; }
+    .table-title { font-size: 14px; }
+    .table-actions { flex-direction: column; gap: 8px; }
+
+    .main-content { padding: 16px; }
+
+    .row-actions { flex-direction: column; gap: 4px; }
+    .row-actions button { width: 100%; justify-content: center; }
+
+    .chat-fab { bottom: 20px; right: 20px; width: 52px; height: 52px; }
+    .theme-fab { bottom: 88px; right: 20px; width: 52px; height: 52px; }
+
+    .chatbot-window {
+        width: calc(100vw - 32px);
+        right: 16px;
+        bottom: 88px;
+        height: calc(100vh - 120px);
+    }
+
+    .theme-settings-panel {
+        width: calc(100vw - 32px);
+        right: 16px;
+        bottom: 156px;
+    }
+}
+
+@media (max-width: 640px) {
+    .mobile-menu-btn { top: 16px; left: 16px; width: 40px; height: 40px; }
+
+    .banner-left { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .banner-icon { width: 44px; height: 44px; }
+
+    .stat-card { padding: 16px; }
+    .stat-value { font-size: 24px; }
+
+    .table-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .table-actions { flex-direction: column; width: 100%; }
+    .filter-select, .btn-export, .modal-btn-primary { width: 100%; justify-content: center; }
+
+    .tab-btn { padding: 8px 14px; font-size: 12px; gap: 6px; }
+
+    .table-footer { flex-direction: column; gap: 12px; align-items: flex-start; }
+    .pagination { width: 100%; justify-content: center; }
+
+    .main-content { padding: 12px; }
+}
+
+@media (max-width: 480px) {
+    .welcome-banner { padding: 16px; }
+    .welcome-banner h2 { font-size: 16px; }
+    .welcome-banner p { font-size: 12px; }
+
+    .banner-badge { font-size: 11px; padding: 4px 10px; }
+
+    .stat-card { padding: 14px; }
+    .stat-label { font-size: 11px; }
+    .stat-value { font-size: 20px; }
+    .stat-icon-wrap { width: 32px; height: 32px; }
+
+    .table-title { font-size: 13px; }
+    .table-sub { font-size: 11px; }
+
+    .payroll-table th { font-size: 10px; padding: 10px 12px; }
+    .payroll-table td { font-size: 12px; padding: 12px; }
+
+    .emp-avatar { width: 32px; height: 32px; font-size: 11px; }
+    .emp-name { font-size: 12px; }
+    .emp-id { font-size: 10px; }
+}
