@@ -51,7 +51,7 @@ CREATE TABLE `attendance_corrections` (
   CONSTRAINT `attendance_corrections_attendance_id_foreign` FOREIGN KEY (`attendance_id`) REFERENCES `attendance` (`id`) ON DELETE CASCADE,
   CONSTRAINT `attendance_corrections_corrected_by_foreign` FOREIGN KEY (`corrected_by`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `attendance_corrections_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -60,7 +60,7 @@ CREATE TABLE `attendance_corrections` (
 
 LOCK TABLES `attendance_corrections` WRITE;
 /*!40000 ALTER TABLE `attendance_corrections` DISABLE KEYS */;
-INSERT INTO `attendance_corrections` VALUES (28,73,8,'2026-04-04','07:12:07','12:12:31','13:13:26','17:13:42',NULL,NULL,'07:12:00','12:12:00','13:00:00','17:13:00',NULL,NULL,'HAHA','[\"attendance_corrections/mEnYlxCqh9RuKg5PJP8EYSOBmSDmFVkwgfDIBhTS.pdf\"]',1,'2026-04-04 01:15:10','2026-04-04 01:15:10');
+INSERT INTO `attendance_corrections` VALUES (30,76,8,'2026-04-30',NULL,NULL,NULL,NULL,NULL,NULL,'07:00:00','12:00:00','12:00:00','17:00:00',NULL,NULL,'HAHAHA','[\"attendance_corrections/8YEVeMcQUk2roD0zhZYVSk9bz3PkuunR81BYHjTB.pdf\"]',1,'2026-05-02 11:31:57','2026-05-02 11:31:57'),(31,77,8,'2026-05-01',NULL,NULL,NULL,NULL,NULL,NULL,'08:00:00','12:00:00','12:57:00','17:43:00',NULL,NULL,'HAHA','[\"attendance_corrections/GUrEPiSY6gkpw7q9MCqUjuJTqnnxShkqwfLsKGb5.png\"]',1,'2026-05-02 11:33:51','2026-05-02 11:33:51'),(32,78,8,'2026-05-02',NULL,NULL,NULL,NULL,NULL,NULL,'05:00:00','12:06:00','13:12:00','17:06:00',NULL,NULL,'HAHA','[\"attendance_corrections/epd89D3yJ9qBTeNBkSayI4ybTgHyC6NkahDPakzs.jpg\"]',1,'2026-05-02 11:43:17','2026-05-02 11:43:17'),(33,79,8,'2026-04-29',NULL,NULL,NULL,NULL,NULL,NULL,'07:16:00','12:21:00','13:01:00','16:21:00',NULL,NULL,'HAHA','[\"attendance_corrections/9dL9wcW7DvgEb0WRDUlZYPnvWB4fPKN1BYdX63N8.jpg\"]',1,'2026-05-02 11:44:00','2026-05-02 11:44:00'),(34,79,8,'2026-04-29','07:16:00','12:21:00','13:01:00','16:21:00',NULL,NULL,'07:16:00','23:21:00','12:01:00','16:21:00',NULL,NULL,'HAHA','[\"attendance_corrections/mDsrV7uQntgBrn3OGrFqsy8fy8QA8w05ABhWvB0S.png\"]',1,'2026-05-02 11:44:45','2026-05-02 11:44:45'),(35,79,8,'2026-04-29','07:16:00','23:21:00','12:01:00','16:21:00',NULL,NULL,'07:16:00','11:21:00','12:01:00','16:21:00',NULL,NULL,'ahahha','[\"attendance_corrections/lo8AKinGygm2SEzCZRFY2E8libt0XffBbH7iQWN9.png\"]',1,'2026-05-02 11:47:57','2026-05-02 11:47:57');
 /*!40000 ALTER TABLE `attendance_corrections` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -73,4 +73,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-03  2:38:51
+-- Dump completed on 2026-05-03 12:20:09
