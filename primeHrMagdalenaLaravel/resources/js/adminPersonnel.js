@@ -658,3 +658,279 @@ function printQRCode() {
         printWindow.print();
     }, 250);
 }
+
+
+// ══════════════════════════════════════════════════════
+// RESPONSIVE ENHANCEMENTS FOR PERSONNEL PAGE
+// ══════════════════════════════════════════════════════
+
+// Mobile Table Scroll Indicator
+document.addEventListener('DOMContentLoaded', function() {
+    const tableWrappers = document.querySelectorAll('.table-wrapper');
+    
+    tableWrappers.forEach(wrapper => {
+        // Check if table is wider than wrapper
+        const table = wrapper.querySelector('table');
+        if (!table) return;
+        
+        const checkScroll = () => {
+            const hasScroll = table.offsetWidth > wrapper.clientWidth;
+            
+            if (hasScroll && window.innerWidth < 1024) {
+                wrapper.classList.add('has-scroll');
+                
+                // Add scroll indicator if not exists
+                if (!wrapper.querySelector('.scroll-indicator')) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'scroll-indicator';
+                    indicator.innerHTML = '← Scroll to see more →';
+                    indicator.style.cssText = `
+                        position: absolute;
+                        bottom: 10px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background: rgba(11,4,77,0.9);
+                        color: #fff;
+                        padding: 6px 16px;
+                        border-radius: 20px;
+                        font-size: 11px;
+                        font-weight: 600;
+                        pointer-events: none;
+                        z-index: 10;
+                        white-space: nowrap;
+                        transition: opacity 0.3s ease;
+                        box-shadow: 0 4px 12px rgba(11,4,77,0.3);
+                    `;
+                    wrapper.appendChild(indicator);
+                    
+                    // Hide indicator on scroll
+                    wrapper.addEventListener('scroll', function() {
+                        const scrollLeft = this.scrollLeft;
+                        const maxScroll = this.scrollWidth - this.clientWidth;
+                        
+                        // Hide indicator when scrolled
+                        if (scrollLeft > 50) {
+                            indicator.style.opacity = '0';
+                        } else {
+                            indicator.style.opacity = '1';
+                        }
+                        
+                        // Toggle fade effect
+                        if (scrollLeft >= maxScroll - 10) {
+                            wrapper.classList.add('scrolled-right');
+                        } else {
+                            wrapper.classList.remove('scrolled-right');
+                        }
+                    });
+                    
+                    // Auto-hide after 3 seconds
+                    setTimeout(() => {
+                        indicator.style.opacity = '0';
+                    }, 3000);
+                }
+            } else {
+                wrapper.classList.remove('has-scroll');
+                const indicator = wrapper.querySelector('.scroll-indicator');
+                if (indicator) indicator.remove();
+            }
+        };
+        
+        checkScroll();
+        window.addEventListener('resize', debounce(checkScroll, 250));
+    });
+});
+
+// Touch-friendly Modal Close
+document.addEventListener('DOMContentLoaded', function() {
+    const modals = [
+        'assignScheduleModal',
+        'bulkScheduleModal',
+        'viewSchedulesModal',
+        'viewEmployeeModal',
+        'qrCodeModal',
+        'confirmModal',
+        'successModal',
+        'errorModal',
+        'exportSuccessModal',
+        'exportErrorModal'
+    ];
+    
+    modals.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            // Close on backdrop click
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    const closeBtn = this.querySelector('[onclick*="close"]');
+                    if (closeBtn) closeBtn.click();
+                }
+            });
+            
+            // Prevent body scroll when modal is open
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'style') {
+                        const display = window.getComputedStyle(modal).display;
+                        if (display === 'flex') {
+                            document.body.style.overflow = 'hidden';
+                        } else {
+                            document.body.style.overflow = '';
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(modal, { attributes: true });
+        }
+    });
+});
+
+// 3-Dot Action Menu Toggle
+function toggleActionMenu(event, menuId) {
+    event.stopPropagation();
+    
+    const menu = document.getElementById('actionMenu' + menuId);
+    const allMenus = document.querySelectorAll('.action-menu-dropdown');
+    
+    // Close all other menus
+    allMenus.forEach(m => {
+        if (m !== menu) {
+            m.classList.remove('active');
+        }
+    });
+    
+    // Toggle current menu
+    menu.classList.toggle('active');
+}
+
+// Close menus when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.action-menu-wrapper')) {
+        document.querySelectorAll('.action-menu-dropdown').forEach(menu => {
+            menu.classList.remove('active');
+        });
+    }
+});
+
+// Close menus when clicking menu items
+document.addEventListener('click', function(event) {
+    if (event.target.closest('.action-menu-item')) {
+        document.querySelectorAll('.action-menu-dropdown').forEach(menu => {
+            menu.classList.remove('active');
+        });
+    }
+});
+
+// Close menus on escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        document.querySelectorAll('.action-menu-dropdown').forEach(menu => {
+            menu.classList.remove('active');
+        });
+    }
+});
+
+// Debounce utility
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Mobile-friendly Filter Dropdowns
+document.addEventListener('DOMContentLoaded', function() {
+    const filters = document.querySelectorAll('.filter-select');
+    
+    filters.forEach(filter => {
+        // Add touch-friendly styling
+        filter.style.minHeight = '44px'; // iOS recommended touch target
+        
+        // Add clear button for mobile
+        if (window.innerWidth < 768) {
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'position:relative;display:inline-block;';
+            filter.parentNode.insertBefore(wrapper, filter);
+            wrapper.appendChild(filter);
+            
+            if (filter.value) {
+                const clearBtn = document.createElement('button');
+                clearBtn.innerHTML = '×';
+                clearBtn.style.cssText = 'position:absolute;right:30px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:20px;color:#6b6a8a;cursor:pointer;padding:0;width:24px;height:24px;';
+                clearBtn.onclick = (e) => {
+                    e.preventDefault();
+                    filter.value = '';
+                    filter.dispatchEvent(new Event('change'));
+                    clearBtn.remove();
+                };
+                wrapper.appendChild(clearBtn);
+            }
+        }
+    });
+});
+
+// Swipe to Close Modals (Mobile)
+document.addEventListener('DOMContentLoaded', function() {
+    const modals = document.querySelectorAll('[id$="Modal"]');
+    
+    modals.forEach(modal => {
+        let startY = 0;
+        let currentY = 0;
+        
+        const modalContent = modal.querySelector('div:first-child');
+        if (!modalContent) return;
+        
+        modalContent.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        modalContent.addEventListener('touchmove', (e) => {
+            currentY = e.touches[0].clientY;
+            const diff = currentY - startY;
+            
+            if (diff > 0) {
+                modalContent.style.transform = `translateY(${diff}px)`;
+                modalContent.style.transition = 'none';
+            }
+        }, { passive: true });
+        
+        modalContent.addEventListener('touchend', () => {
+            const diff = currentY - startY;
+            
+            if (diff > 100) {
+                // Close modal
+                const closeBtn = modal.querySelector('[onclick*="close"]');
+                if (closeBtn) closeBtn.click();
+            }
+            
+            modalContent.style.transform = '';
+            modalContent.style.transition = 'transform 0.3s ease';
+        });
+    });
+});
+
+// Responsive Pagination
+function updateResponsivePagination() {
+    const pagination = document.getElementById('paginationControls');
+    if (!pagination) return;
+    
+    const isMobile = window.innerWidth < 640;
+    const maxButtons = isMobile ? 3 : 5;
+    
+    // Re-render pagination with appropriate button count
+    if (typeof updatePaginationButtons === 'function') {
+        updatePaginationButtons();
+    }
+}
+
+window.addEventListener('resize', debounce(updateResponsivePagination, 250));
+
+// Export to global scope
+window.toggleActionMenu = toggleActionMenu;
+window.initResponsiveTableActions = initResponsiveTableActions;
+window.updateResponsivePagination = updateResponsivePagination;

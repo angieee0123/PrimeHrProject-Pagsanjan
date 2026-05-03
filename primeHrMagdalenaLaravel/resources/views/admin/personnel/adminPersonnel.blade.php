@@ -183,8 +183,8 @@
         </div>
     </div>
 
-    <div class="table-wrapper" style="overflow-x: auto;">
-        <table class="payroll-table" id="personnelTable" style="min-width: 1200px;">
+    <div class="table-wrapper">
+        <table class="payroll-table" id="personnelTable">
             <thead>
                 <tr>
                     <th onclick="sortTable(0)" style="cursor: pointer;">
@@ -275,14 +275,105 @@
                     <td><span class="badge-status {{ $status === 'Active' ? 'processed' : 'on-hold' }}">{{ $status }}</span></td>
                     <td>
                         <div class="row-actions">
-                            <button class="btn-view" onclick="viewEmployee({{ $employee->id }})">View</button>
-                            <button class="btn-edit" onclick="editEmployee({{ $employee->id }})">Edit</button>
-                            <button class="btn-qr" onclick="generateQRCode({{ $employee->id }}, '{{ $fullName }}')">QR Code</button>
-                            @if($status === 'Active')
-                            <button class="btn-deactivate" onclick="confirmStatusChange({{ $employee->id }}, 'Inactive')">Deactivate</button>
-                            @else
-                            <button class="btn-activate" onclick="confirmStatusChange({{ $employee->id }}, 'Active')">Activate</button>
-                            @endif
+                            <!-- Desktop: Individual Buttons -->
+                            <div class="action-buttons-desktop">
+                                <button class="btn-view" onclick="viewEmployee({{ $employee->id }})" title="View">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    <span>View</span>
+                                </button>
+                                <button class="btn-edit" onclick="editEmployee({{ $employee->id }})" title="Edit">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                    <span>Edit</span>
+                                </button>
+                                <button class="btn-qr" onclick="generateQRCode({{ $employee->id }}, '{{ $fullName }}')" title="QR Code">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="7" height="7"/>
+                                        <rect x="14" y="3" width="7" height="7"/>
+                                        <rect x="14" y="14" width="7" height="7"/>
+                                        <rect x="3" y="14" width="7" height="7"/>
+                                    </svg>
+                                    <span>QR</span>
+                                </button>
+                                @if($status === 'Active')
+                                <button class="btn-deactivate" onclick="confirmStatusChange({{ $employee->id }}, 'Inactive')" title="Deactivate">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="15" y1="9" x2="9" y2="15"/>
+                                        <line x1="9" y1="9" x2="15" y2="15"/>
+                                    </svg>
+                                    <span>Deactivate</span>
+                                </button>
+                                @else
+                                <button class="btn-activate" onclick="confirmStatusChange({{ $employee->id }}, 'Active')" title="Activate">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                        <polyline points="22 4 12 14.01 9 11.01"/>
+                                    </svg>
+                                    <span>Activate</span>
+                                </button>
+                                @endif
+                            </div>
+                            
+                            <!-- Mobile/Tablet: 3-Dot Menu -->
+                            <div class="action-menu-wrapper">
+                                <button class="action-menu-btn" onclick="toggleActionMenu(event, {{ $employee->id }})" title="Actions">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="1"/>
+                                        <circle cx="12" cy="5" r="1"/>
+                                        <circle cx="12" cy="19" r="1"/>
+                                    </svg>
+                                </button>
+                                <div class="action-menu-dropdown" id="actionMenu{{ $employee->id }}">
+                                    <button class="action-menu-item" onclick="viewEmployee({{ $employee->id }})">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                        <span>View Details</span>
+                                    </button>
+                                    <button class="action-menu-item" onclick="editEmployee({{ $employee->id }})">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                        </svg>
+                                        <span>Edit Record</span>
+                                    </button>
+                                    <button class="action-menu-item" onclick="generateQRCode({{ $employee->id }}, '{{ $fullName }}')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="7" height="7"/>
+                                            <rect x="14" y="3" width="7" height="7"/>
+                                            <rect x="14" y="14" width="7" height="7"/>
+                                            <rect x="3" y="14" width="7" height="7"/>
+                                        </svg>
+                                        <span>Generate QR Code</span>
+                                    </button>
+                                    <div class="action-menu-divider"></div>
+                                    @if($status === 'Active')
+                                    <button class="action-menu-item danger" onclick="confirmStatusChange({{ $employee->id }}, 'Inactive')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <line x1="15" y1="9" x2="9" y2="15"/>
+                                            <line x1="9" y1="9" x2="15" y2="15"/>
+                                        </svg>
+                                        <span>Deactivate Account</span>
+                                    </button>
+                                    @else
+                                    <button class="action-menu-item success" onclick="confirmStatusChange({{ $employee->id }}, 'Active')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                            <polyline points="22 4 12 14.01 9 11.01"/>
+                                        </svg>
+                                        <span>Activate Account</span>
+                                    </button>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -348,8 +439,8 @@
         </div>
     </div>
 
-    <div class="table-wrapper" style="overflow-x: auto;">
-        <table class="payroll-table" id="scheduleTable" style="min-width: 1400px;">
+    <div class="table-wrapper">
+        <table class="payroll-table" id="scheduleTable">
             <thead>
                 <tr>
                     <th>Employee</th>
@@ -402,8 +493,54 @@
                     </td>
                     <td>
                         <div class="row-actions">
-                            <button class="btn-view" onclick="viewEmployeeSchedules({{ $employee->id }}, '{{ $fullName }}')">View All</button>
-                            <button class="btn-edit" onclick="openAssignScheduleModal({{ $employee->id }}, '{{ $fullName }}', null)">Add New</button>
+                            <!-- Desktop: Individual Buttons -->
+                            <div class="action-buttons-desktop">
+                                <button class="btn-view" onclick="viewEmployeeSchedules({{ $employee->id }}, '{{ $fullName }}')" title="View All">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                        <line x1="16" y1="2" x2="16" y2="6"/>
+                                        <line x1="8" y1="2" x2="8" y2="6"/>
+                                        <line x1="3" y1="10" x2="21" y2="10"/>
+                                    </svg>
+                                    <span>View All</span>
+                                </button>
+                                <button class="btn-edit" onclick="openAssignScheduleModal({{ $employee->id }}, '{{ $fullName }}', null)" title="Add New">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                    </svg>
+                                    <span>Add New</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Mobile/Tablet: 3-Dot Menu -->
+                            <div class="action-menu-wrapper">
+                                <button class="action-menu-btn" onclick="toggleActionMenu(event, 'schedule{{ $employee->id }}')" title="Actions">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="1"/>
+                                        <circle cx="12" cy="5" r="1"/>
+                                        <circle cx="12" cy="19" r="1"/>
+                                    </svg>
+                                </button>
+                                <div class="action-menu-dropdown" id="actionMenuschedule{{ $employee->id }}">
+                                    <button class="action-menu-item" onclick="viewEmployeeSchedules({{ $employee->id }}, '{{ $fullName }}')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                            <line x1="16" y1="2" x2="16" y2="6"/>
+                                            <line x1="8" y1="2" x2="8" y2="6"/>
+                                            <line x1="3" y1="10" x2="21" y2="10"/>
+                                        </svg>
+                                        <span>View All Schedules</span>
+                                    </button>
+                                    <button class="action-menu-item" onclick="openAssignScheduleModal({{ $employee->id }}, '{{ $fullName }}', null)">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="12" y1="5" x2="12" y2="19"/>
+                                            <line x1="5" y1="12" x2="19" y2="12"/>
+                                        </svg>
+                                        <span>Add New Schedule</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </td>
                 </tr>
