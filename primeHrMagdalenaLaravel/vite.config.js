@@ -11,6 +11,8 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/departments.css',
                 'resources/css/employeeWizard.css',
+                'resources/css/joborder.css',
+                'resources/css/permanent.css',
                 'resources/js/app.js',
                 'resources/js/employeeWizard.js',
                 'resources/js/adminPersonnel.js',
