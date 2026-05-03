@@ -27,12 +27,21 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
     if (Auth::attempt($credentials, $request->boolean('remember'))) {
         $request->session()->regenerate();
 
-        // Redirect admin to dashboard
-        if (Auth::user()->email === 'admin@gmail.com') {
+        $user = Auth::user();
+
+        if ($user->email === 'admin@gmail.com' || $user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 
-        return redirect()->intended('/');
+        if ($user->role === 'hr') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($user->role === 'permanent' || $user->email === 'permanent@gmail.com') {
+            return redirect()->route('permanent.dashboard');
+        }
+
+        return redirect()->route('joborder.dashboard');
     }
 
     return back()->withInput($request->only('email'))
@@ -77,6 +86,84 @@ Route::post('/logout', function (\Illuminate\Http\Request $request) {
 Route::get('/admin/dashboard', function () {
     return view('admin.dashboard.adminDashboard');
 })->middleware('auth')->name('admin.dashboard');
+
+// ── Permanent Employee Dashboard ──
+Route::get('/permanent/dashboard', function () {
+    return view('permanent.dashboard.permanentDashboard');
+})->middleware('auth')->name('permanent.dashboard');
+
+Route::get('/permanent/attendance', function () {
+    return view('permanent.attendance.permanentAttendance');
+})->middleware('auth')->name('permanent.attendance');
+
+Route::get('/permanent/payslip', function () {
+    return view('permanent.payslip.permanentPayslip');
+})->middleware('auth')->name('permanent.payslip');
+
+Route::get('/permanent/leave', function () {
+    return view('permanent.leaveandbenefits.permanentLeaveandbenefits');
+})->middleware('auth')->name('permanent.leave');
+
+Route::get('/permanent/performance', function () {
+    return view('permanent.performance.permanentPerformance');
+})->middleware('auth')->name('permanent.performance');
+
+Route::get('/permanent/training', function () {
+    return view('permanent.training.permanentTraining');
+})->middleware('auth')->name('permanent.training');
+
+Route::get('/permanent/profile', function () {
+    return view('permanent.profile.permanentProfile');
+})->middleware('auth')->name('permanent.profile');
+
+Route::get('/permanent/settings', function () {
+    return view('permanent.settings.permanentSettings');
+})->middleware('auth')->name('permanent.settings');
+
+Route::get('/permanent/notification', function () {
+    return view('permanent.notification.permanentNotification');
+})->middleware('auth')->name('permanent.notification');
+
+Route::get('/permanent/chatbot', function () {
+    return view('permanent.chatbot.permanentChatbot');
+})->middleware('auth')->name('permanent.chatbot');
+
+// ── Job Order Employee Dashboard ──
+Route::get('/joborder/dashboard', function () {
+    return view('joborder.dashboard.joborderDashboard');
+})->middleware('auth')->name('joborder.dashboard');
+
+Route::get('/joborder/attendance', function () {
+    return view('joborder.attendance.joborderAttendance');
+})->middleware('auth')->name('joborder.attendance');
+
+Route::get('/joborder/payslip', function () {
+    return view('joborder.payslip.joborderPayslip');
+})->middleware('auth')->name('joborder.payslip');
+
+Route::get('/joborder/performance', function () {
+    return view('joborder.performance.joborderPerformance');
+})->middleware('auth')->name('joborder.performance');
+
+Route::get('/joborder/training', function () {
+    return view('joborder.training.joborderTraining');
+})->middleware('auth')->name('joborder.training');
+
+Route::get('/joborder/profile', function () {
+    return view('joborder.profile.joborderProfile');
+})->middleware('auth')->name('joborder.profile');
+
+Route::get('/joborder/settings', function () {
+    return view('joborder.settings.joborderSettings');
+})->middleware('auth')->name('joborder.settings');
+
+Route::get('/joborder/notification', function () {
+    return view('joborder.notification.joborderNotification');
+})->middleware('auth')->name('joborder.notification');
+
+Route::get('/joborder/chatbot', function () {
+    return view('joborder.chatbot.joborderChatbot');
+})->middleware('auth')->name('joborder.chatbot');
 
 Route::get('/admin/recruitment', function () {
     return view('admin.recruitment.adminRecruitment');
@@ -123,19 +210,19 @@ Route::post('/admin/schedules/assign', function (\Illuminate\Http\Request $reque
                         ->where('end_date', '>=', $data['end_date']);
                   });
         });
-    
+
     // Exclude current schedule if editing
     if ($data['schedule_id']) {
         $overlapQuery->where('id', '!=', $data['schedule_id']);
     }
-    
+
     $overlappingSchedules = $overlapQuery->get();
-    
+
     if ($overlappingSchedules->count() > 0) {
         $overlapDetails = $overlappingSchedules->map(function($s) {
             return \Carbon\Carbon::parse($s->start_date)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($s->end_date)->format('M d, Y');
         })->join(', ');
-        
+
         return redirect()->route('admin.personnel')
             ->with('error', "Schedule overlaps with existing schedule(s): {$overlapDetails}. Please adjust the dates.")
             ->with('active_tab', 'schedules');
@@ -153,7 +240,7 @@ Route::post('/admin/schedules/assign', function (\Illuminate\Http\Request $reque
             'pm_out'      => $data['pm_out'],
         ]);
         $message = 'Schedule updated successfully.';
-        
+
         // Recalculate attendance for this schedule period
         $attendanceController = app(\App\Http\Controllers\AttendanceController::class);
         $recalculatedCount = $attendanceController->recalculateAttendanceForSchedule(
@@ -161,7 +248,7 @@ Route::post('/admin/schedules/assign', function (\Illuminate\Http\Request $reque
             $data['start_date'],
             $data['end_date']
         );
-        
+
         if ($recalculatedCount > 0) {
             $message .= " Recalculated {$recalculatedCount} attendance record(s).";
         }
@@ -177,7 +264,7 @@ Route::post('/admin/schedules/assign', function (\Illuminate\Http\Request $reque
             'pm_out'      => $data['pm_out'],
         ]);
         $message = 'Schedule assigned successfully.';
-        
+
         // Recalculate attendance for this schedule period
         $attendanceController = app(\App\Http\Controllers\AttendanceController::class);
         $recalculatedCount = $attendanceController->recalculateAttendanceForSchedule(
@@ -185,7 +272,7 @@ Route::post('/admin/schedules/assign', function (\Illuminate\Http\Request $reque
             $data['start_date'],
             $data['end_date']
         );
-        
+
         if ($recalculatedCount > 0) {
             $message .= " Recalculated {$recalculatedCount} attendance record(s).";
         }
@@ -221,14 +308,14 @@ Route::post('/admin/schedules/bulk-assign', function (\Illuminate\Http\Request $
                       });
             })
             ->exists();
-        
+
         if ($hasOverlap) {
             $employee = \App\Models\Employee::find($employeeId);
             $fullName = trim($employee->first_name . ' ' . $employee->last_name);
             $skippedEmployees[] = $fullName;
             continue;
         }
-        
+
         \App\Models\Schedule::create([
             'employee_id' => $employeeId,
             'start_date'  => $data['start_date'],
@@ -263,7 +350,7 @@ Route::post('/admin/schedules/check-overlap', function (\Illuminate\Http\Request
     $scheduleId = $request->schedule_id;
     $startDate = $request->start_date;
     $endDate = $request->end_date;
-    
+
     $overlapQuery = \App\Models\Schedule::where('employee_id', $employeeId)
         ->where(function($query) use ($startDate, $endDate) {
             $query->whereBetween('start_date', [$startDate, $endDate])
@@ -273,24 +360,24 @@ Route::post('/admin/schedules/check-overlap', function (\Illuminate\Http\Request
                         ->where('end_date', '>=', $endDate);
                   });
         });
-    
+
     if ($scheduleId) {
         $overlapQuery->where('id', '!=', $scheduleId);
     }
-    
+
     $overlappingSchedules = $overlapQuery->get();
-    
+
     if ($overlappingSchedules->count() > 0) {
         $overlapDetails = $overlappingSchedules->map(function($s) {
             return \Carbon\Carbon::parse($s->start_date)->format('M d, Y') . ' - ' . \Carbon\Carbon::parse($s->end_date)->format('M d, Y');
         })->join(', ');
-        
+
         return response()->json([
             'has_overlap' => true,
             'overlap_details' => "This schedule overlaps with: {$overlapDetails}"
         ]);
     }
-    
+
     return response()->json(['has_overlap' => false]);
 })->middleware('auth')->name('admin.schedules.check-overlap');
 
@@ -298,7 +385,7 @@ Route::get('/admin/schedules/employee/{employeeId}', function ($employeeId) {
     $schedules = \App\Models\Schedule::where('employee_id', $employeeId)
         ->orderBy('start_date', 'desc')
         ->get();
-    
+
     return response()->json(['schedules' => $schedules]);
 })->middleware('auth')->name('admin.schedules.employee');
 
@@ -310,18 +397,18 @@ Route::get('/admin/schedules/{id}', function ($id) {
 Route::delete('/admin/schedules/{id}/delete', function ($id) {
     $schedule = \App\Models\Schedule::findOrFail($id);
     $schedule->delete();
-    
+
     return redirect()->route('admin.personnel')->with('success', 'Schedule deleted successfully.')->with('active_tab', 'schedules');
 })->middleware('auth')->name('admin.schedules.delete');
 
 Route::delete('/admin/schedules/{id}/remove', function ($id) {
     $schedule = \App\Models\Schedule::where('employee_id', $id)->first();
-    
+
     if ($schedule) {
         $schedule->delete();
         return redirect()->route('admin.personnel')->with('success', 'Schedule removed successfully.');
     }
-    
+
     return redirect()->route('admin.personnel')->with('error', 'Schedule not found.');
 })->middleware('auth')->name('admin.schedules.remove');
 
@@ -340,14 +427,14 @@ Route::get('/admin/schedules/export', function () {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
             fputcsv($file, ['Employee ID', 'Employee Name', 'Department', 'AM In', 'AM Out', 'PM In', 'PM Out', 'Status']);
-            
+
             foreach ($employees as $emp) {
                 $fullName = trim($emp->first_name . ' ' . ($emp->middle_name ? substr($emp->middle_name, 0, 1) . '. ' : '') . $emp->last_name . ($emp->suffix ? ' ' . $emp->suffix : ''));
                 $department = $emp->employmentDetail && $emp->employmentDetail->departmentRelation
                     ? $emp->employmentDetail->departmentRelation->name
                     : 'N/A';
                 $schedule = $emp->schedule;
-                
+
                 fputcsv($file, [
                     $emp->employee_id,
                     $fullName,
