@@ -36,7 +36,7 @@ CREATE TABLE `schedules` (
   PRIMARY KEY (`id`),
   KEY `schedules_employee_id_foreign` (`employee_id`),
   CONSTRAINT `schedules_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,7 +45,7 @@ CREATE TABLE `schedules` (
 
 LOCK TABLES `schedules` WRITE;
 /*!40000 ALTER TABLE `schedules` DISABLE KEYS */;
-INSERT INTO `schedules` VALUES (4,8,'2026-04-01','2026-04-30','05:00:00','09:00:00','12:00:00','16:00:00','2026-05-02 10:00:35','2026-05-02 12:00:17'),(5,8,'2026-05-01','2026-05-31','08:00:00','12:00:00','13:00:00','17:00:00','2026-05-02 10:01:37','2026-05-02 11:58:05');
+INSERT INTO `schedules` VALUES (4,8,'2026-04-01','2026-04-30','05:00:00','09:00:00','12:00:00','16:00:00','2026-05-02 10:00:35','2026-05-02 12:00:17'),(5,8,'2026-05-01','2026-05-31','08:00:00','12:00:00','13:00:00','17:00:00','2026-05-02 10:01:37','2026-05-02 11:58:05'),(6,8,'2026-08-03','2026-08-03','09:00:00','12:00:00','13:00:00','18:00:00','2026-05-03 04:25:59','2026-05-03 04:25:59');
 /*!40000 ALTER TABLE `schedules` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -58,4 +58,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-03 12:20:05
+-- Dump completed on 2026-05-04 14:01:26
