@@ -46,7 +46,7 @@ CREATE TABLE `accredited_hours_log` (
   CONSTRAINT `accredited_hours_log_attendance_id_foreign` FOREIGN KEY (`attendance_id`) REFERENCES `attendance` (`id`) ON DELETE CASCADE,
   CONSTRAINT `accredited_hours_log_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE,
   CONSTRAINT `accredited_hours_log_schedule_id_foreign` FOREIGN KEY (`schedule_id`) REFERENCES `schedules` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -55,7 +55,7 @@ CREATE TABLE `accredited_hours_log` (
 
 LOCK TABLES `accredited_hours_log` WRITE;
 /*!40000 ALTER TABLE `accredited_hours_log` DISABLE KEYS */;
-INSERT INTO `accredited_hours_log` VALUES (5,76,8,4,120,240,0,120,0,360,600,0,1,'Recalculated due to schedule update at 2026-05-02 20:00:17','2026-05-02 11:31:57','2026-05-02 12:00:17'),(6,77,8,5,240,240,0,0,0,480,526,1,1,'Recalculated due to schedule update at 2026-05-02 19:58:15','2026-05-02 11:33:51','2026-05-02 11:58:15'),(7,78,8,5,240,240,0,0,0,480,660,1,1,'Recalculated due to schedule update at 2026-05-02 19:58:15','2026-05-02 11:43:17','2026-05-02 11:58:15'),(8,79,8,4,104,240,0,136,0,344,505,0,1,'Recalculated due to schedule update at 2026-05-02 20:00:17','2026-05-02 11:44:00','2026-05-02 12:00:17');
+INSERT INTO `accredited_hours_log` VALUES (5,76,8,4,120,240,0,120,0,360,600,0,1,'Recalculated due to schedule update at 2026-05-02 20:00:17','2026-05-02 11:31:57','2026-05-02 12:00:17'),(6,77,8,5,240,240,0,0,0,480,526,1,1,'Recalculated due to schedule update at 2026-05-02 19:58:15','2026-05-02 11:33:51','2026-05-02 11:58:15'),(7,78,8,5,240,240,0,0,0,480,660,1,1,'Recalculated due to schedule update at 2026-05-02 19:58:15','2026-05-02 11:43:17','2026-05-02 11:58:15'),(8,79,8,4,104,240,0,136,0,344,505,0,1,'Recalculated due to schedule update at 2026-05-02 20:00:17','2026-05-02 11:44:00','2026-05-02 12:00:17'),(9,80,8,6,180,300,0,0,0,480,548,1,1,'Attendance correction by  at 2026-05-03 12:28:02','2026-05-03 04:28:02','2026-05-03 04:28:02');
 /*!40000 ALTER TABLE `accredited_hours_log` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -68,4 +68,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-03 12:20:06
+-- Dump completed on 2026-05-04 14:01:24
