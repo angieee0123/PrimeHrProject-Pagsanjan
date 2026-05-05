@@ -15,7 +15,7 @@ DB_CONFIG = {
     'host': '127.0.0.1',
     'port': 3306,
     'user': 'root',
-    'password': '',  # Empty password as per .env
+    'password': 'admin',  # Empty password as per .env
 }
 
 DATABASE_NAME = 'primehrismagdalena'
@@ -39,8 +39,11 @@ SQL_FILES_ORDER = [
     'primehrismagdalena_trainings.sql',
     'primehrismagdalena_work_experiences.sql',
     'primehrismagdalena_eligibilities.sql',
+    'primehrismagdalena_schedules.sql',
     'primehrismagdalena_attendance.sql',
     'primehrismagdalena_attendance_corrections.sql',
+    'primehrismagdalena_accredited_hours_log.sql',
+    'primehrismagdalena_chat_history.sql',
     'primehrismagdalena_sessions.sql',
 ]
 
