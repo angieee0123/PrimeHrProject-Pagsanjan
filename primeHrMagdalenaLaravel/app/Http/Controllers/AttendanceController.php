@@ -6,6 +6,7 @@ use App\Models\Employee;
 use App\Models\Attendance;
 use App\Models\AttendanceCorrection;
 use App\Models\AccreditedHoursLog;
+use App\Models\DailySalaryComputation;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -790,7 +791,7 @@ class AttendanceController extends Controller
 
             // Update or create log
             if ($computationResult['log_data']) {
-                AccreditedHoursLog::updateOrCreate(
+                $accreditedLog = AccreditedHoursLog::updateOrCreate(
                     ['attendance_id' => $attendance->id],
                     [
                         'employee_id' => $employeeId,
@@ -807,6 +808,9 @@ class AttendanceController extends Controller
                         'computation_notes' => 'Recalculated due to schedule update at ' . now()->format('Y-m-d H:i:s'),
                     ]
                 );
+                
+                // Trigger daily salary computation
+                DailySalaryComputation::computeFromAccreditedLog($accreditedLog);
             }
 
             $recalculatedCount++;
@@ -912,7 +916,7 @@ class AttendanceController extends Controller
 
         // Update or create accredited hours log (one log per attendance)
         if ($computationResult['log_data']) {
-            AccreditedHoursLog::updateOrCreate(
+            $accreditedLog = AccreditedHoursLog::updateOrCreate(
                 [
                     'attendance_id' => $attendance->id,
                 ],
@@ -931,6 +935,9 @@ class AttendanceController extends Controller
                     'computation_notes' => 'Attendance correction by ' . Auth::user()->name . ' at ' . now()->format('Y-m-d H:i:s'),
                 ]
             );
+            
+            // Trigger daily salary computation
+            \App\Models\DailySalaryComputation::computeFromAccreditedLog($accreditedLog);
         }
 
         return response()->json([

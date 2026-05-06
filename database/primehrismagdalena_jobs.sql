@@ -16,31 +16,32 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `legal_requirements`
+-- Table structure for table `jobs`
 --
 
-DROP TABLE IF EXISTS `legal_requirements`;
+DROP TABLE IF EXISTS `jobs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `legal_requirements` (
+CREATE TABLE `jobs` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `employee_id` bigint unsigned NOT NULL,
-  `saln_submitted` tinyint(1) NOT NULL DEFAULT '0',
-  `oath_of_office` tinyint(1) NOT NULL DEFAULT '0',
-  `assumption_date` date DEFAULT NULL,
+  `queue` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `attempts` tinyint unsigned NOT NULL,
+  `reserved_at` int unsigned DEFAULT NULL,
+  `available_at` int unsigned NOT NULL,
+  `created_at` int unsigned NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `legal_requirements_employee_id_foreign` (`employee_id`),
-  CONSTRAINT `legal_requirements_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
+  KEY `jobs_queue_index` (`queue`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `legal_requirements`
+-- Dumping data for table `jobs`
 --
 
-LOCK TABLES `legal_requirements` WRITE;
-/*!40000 ALTER TABLE `legal_requirements` DISABLE KEYS */;
-/*!40000 ALTER TABLE `legal_requirements` ENABLE KEYS */;
+LOCK TABLES `jobs` WRITE;
+/*!40000 ALTER TABLE `jobs` DISABLE KEYS */;
+/*!40000 ALTER TABLE `jobs` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -52,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-07  7:41:54
+-- Dump completed on 2026-05-07  7:41:57
