@@ -18,28 +18,24 @@ function peso($amount) {
     return '₱' . number_format($amount, 2);
 }
 
-// Semi-monthly amounts (monthly basic ÷ 2, deductions ÷ 2)
-$payrollRecords = [
-    ['id' => 'PGS-0041', 'name' => 'Maria B. Santos', 'position' => 'Administrative Officer IV', 'dept' => 'Office of the Mayor', 'basic' => 21079.50, 'gsis' => 1897, 'philhealth' => 525, 'pagibig' => 50, 'tax' => 1743.50, 'status' => 'Processed'],
-    ['id' => 'PGS-0082', 'name' => 'Juan P. dela Cruz', 'position' => 'Municipal Engineer II', 'dept' => 'Office of the Mun. Engineer', 'basic' => 19042.50, 'gsis' => 1714, 'philhealth' => 475, 'pagibig' => 50, 'tax' => 1569.50, 'status' => 'Processed'],
-    ['id' => 'PGS-0115', 'name' => 'Ana R. Reyes', 'position' => 'Nurse II', 'dept' => 'Municipal Health Office', 'basic' => 16921.50, 'gsis' => 1523, 'philhealth' => 425, 'pagibig' => 50, 'tax' => 1386, 'status' => 'Pending'],
-    ['id' => 'PGS-0203', 'name' => 'Carlos M. Mendoza', 'position' => 'Municipal Treasurer III', 'dept' => 'Office of the Mun. Treasurer', 'basic' => 23627.50, 'gsis' => 2126.50, 'philhealth' => 575, 'pagibig' => 50, 'tax' => 1974, 'status' => 'Processed'],
-    ['id' => 'PGS-0267', 'name' => 'Liza G. Gomez', 'position' => 'Social Welfare Officer II', 'dept' => 'MSWD – Pagsanjan', 'basic' => 17548.50, 'gsis' => 1579.50, 'philhealth' => 437.50, 'pagibig' => 50, 'tax' => 1442.50, 'status' => 'On Hold'],
-    ['id' => 'PGS-0310', 'name' => 'Roberto T. Flores', 'position' => 'Municipal Civil Registrar I', 'dept' => 'Municipal Civil Registrar', 'basic' => 15265.50, 'gsis' => 1374, 'philhealth' => 387.50, 'pagibig' => 50, 'tax' => 1241.50, 'status' => 'Processed'],
-    ['id' => 'PGS-0342', 'name' => 'Grace A. Villanueva', 'position' => 'Budget Officer II', 'dept' => 'Office of the Mun. Budget', 'basic' => 14500, 'gsis' => 1305, 'philhealth' => 362.50, 'pagibig' => 50, 'tax' => 1100, 'status' => 'Pending'],
-    ['id' => 'PGS-0358', 'name' => 'Ramon D. Cruz', 'position' => 'Agriculturist I', 'dept' => 'Office of the Mun. Agriculturist', 'basic' => 13500, 'gsis' => 1215, 'philhealth' => 337.50, 'pagibig' => 50, 'tax' => 990, 'status' => 'Processed'],
-];
+$startDateDisplay = request('start_date', now()->startOfMonth()->format('Y-m-d'));
+$endDateDisplay = request('end_date', now()->endOfMonth()->format('Y-m-d'));
+$periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' — ' . date('M d, Y', strtotime($endDateDisplay));
 
-$grossPayroll = array_sum(array_column($payrollRecords, 'basic'));
+// Semi-monthly amounts (monthly basic ÷ 2, deductions ÷ 2)
+$payrollRecords = $payrollRecords ?? [];
+
+$grossPayroll = $payrollRecords->sum('basic');
+$totalOtPay = $payrollRecords->sum('ot_pay');
 $totalDeductions = 0;
 $totalNet = 0;
 foreach ($payrollRecords as $record) {
-    $deductions = $record['gsis'] + $record['philhealth'] + $record['pagibig'] + $record['tax'];
+    $deductions = $record['late_deduction'] + $record['undertime_deduction'];
     $totalDeductions += $deductions;
-    $totalNet += ($record['basic'] - $deductions);
+    $totalNet += ($record['basic'] + $record['ot_pay'] - $deductions);
 }
-$processedCount = count(array_filter($payrollRecords, fn($r) => $r['status'] === 'Processed'));
-$pendingCount = count(array_filter($payrollRecords, fn($r) => $r['status'] === 'Pending'));
+$processedCount = $payrollRecords->where('status', 'Processed')->count();
+$pendingCount = $payrollRecords->where('status', 'Pending')->count();
 @endphp
 
 <div class="stats-grid" style="margin-bottom: 20px;">
@@ -53,7 +49,7 @@ $pendingCount = count(array_filter($payrollRecords, fn($r) => $r['status'] === '
         <h2 class="stat-value" style="font-size: 18px;">{{ peso($grossPayroll) }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #0b044d;"></span>
-            <p class="stat-sub">June 16–30, 2025</p>
+            <p class="stat-sub">{{ $periodDisplay }}</p>
         </div>
     </div>
     <div class="stat-card">
@@ -79,7 +75,7 @@ $pendingCount = count(array_filter($payrollRecords, fn($r) => $r['status'] === '
         <h2 class="stat-value" style="font-size: 18px;">{{ peso($totalDeductions) }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #8e1e18;"></span>
-            <p class="stat-sub">GSIS, PhilHealth etc</p>
+            <p class="stat-sub">Late & Undertime</p>
         </div>
     </div>
     <div class="stat-card">
@@ -100,47 +96,31 @@ $pendingCount = count(array_filter($payrollRecords, fn($r) => $r['status'] === '
 <section class="table-section">
     <div class="table-header">
         <div>
-            <h3 class="table-title">Payroll Register — June 16–30, 2025</h3>
-            <p class="table-sub">Municipal Government of Pagsanjan · Pay Date: Jun 30, 2025 · {{ count($payrollRecords) }} records</p>
+            <h3 class="table-title">Payroll Register — {{ $periodDisplay }}</h3>
+            <p class="table-sub">Municipal Government of Pagsanjan · Pay Date: {{ date('M d, Y', strtotime($endDateDisplay)) }} · {{ $payrollRecords->count() }} records</p>
         </div>
         <div class="table-actions">
-            <select class="filter-select">
-                <option>1st (1–15)</option>
-                <option selected>2nd (16–30)</option>
-            </select>
-            <select class="filter-select">
-                <option>January</option>
-                <option>February</option>
-                <option>March</option>
-                <option>April</option>
-                <option>May</option>
-                <option selected>June</option>
-                <option>July</option>
-                <option>August</option>
-                <option>September</option>
-                <option>October</option>
-                <option>November</option>
-                <option>December</option>
-            </select>
-            <select class="filter-select">
-                <option selected>2025</option>
-                <option>2024</option>
-                <option>2023</option>
-            </select>
-            <select class="filter-select">
-                <option>All Departments</option>
-                <option>Office of the Mayor</option>
-                <option>Office of the Mun. Engineer</option>
-                <option>Municipal Health Office</option>
-                <option>MSWD – Pagsanjan</option>
-                <option>Office of the Mun. Treasurer</option>
-            </select>
-            <select class="filter-select">
-                <option>All Status</option>
-                <option>Processed</option>
-                <option>Pending</option>
-                <option>On Hold</option>
-            </select>
+            <form method="GET" action="{{ route('admin.payroll') }}" id="filterForm" style="display: contents;">
+                <input type="date" class="filter-select" name="start_date" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}">
+                <span style="font-size: 12px; color: #9999bb;">to</span>
+                <input type="date" class="filter-select" name="end_date" value="{{ request('end_date', now()->endOfMonth()->format('Y-m-d')) }}">
+                <select class="filter-select" name="department">
+                    <option value="">All Departments</option>
+                    @foreach($departments as $dept)
+                        <option value="{{ $dept }}" {{ request('department') == $dept ? 'selected' : '' }}>{{ $dept }}</option>
+                    @endforeach
+                </select>
+                <select class="filter-select" name="status">
+                    <option value="">All Status</option>
+                    <option value="Processed" {{ request('status') == 'Processed' ? 'selected' : '' }}>Processed</option>
+                    <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="On Hold" {{ request('status') == 'On Hold' ? 'selected' : '' }}>On Hold</option>
+                </select>
+                <button type="submit" class="btn-filter-main">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    Filter
+                </button>
+            </form>
             <button class="btn-export">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
@@ -170,12 +150,12 @@ $pendingCount = count(array_filter($payrollRecords, fn($r) => $r['status'] === '
         <div class="psummary-divider"></div>
         <div class="psummary-item">
             <span>Pay Date</span>
-            <strong>Jun 30, 2025</strong>
+            <strong>{{ date('M d, Y', strtotime($endDateDisplay)) }}</strong>
         </div>
         <div class="psummary-divider"></div>
         <div class="psummary-item">
             <span>Records</span>
-            <strong>{{ count($payrollRecords) }}</strong>
+            <strong>{{ $payrollRecords->count() }}</strong>
         </div>
     </div>
 
@@ -186,10 +166,9 @@ $pendingCount = count(array_filter($payrollRecords, fn($r) => $r['status'] === '
                     <th>Employee</th>
                     <th>Department</th>
                     <th>Basic Pay</th>
-                    <th>GSIS</th>
-                    <th>PhilHealth</th>
-                    <th>Pag-IBIG</th>
-                    <th>Tax</th>
+                    <th>OT Pay</th>
+                    <th>Late Deduction</th>
+                    <th>Undertime Deduction</th>
                     <th>Net Pay</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -198,8 +177,8 @@ $pendingCount = count(array_filter($payrollRecords, fn($r) => $r['status'] === '
             <tbody>
                 @foreach($payrollRecords as $index => $record)
                 @php
-                    $deductions = $record['gsis'] + $record['philhealth'] + $record['pagibig'] + $record['tax'];
-                    $net = $record['basic'] - $deductions;
+                    $deductions = $record['late_deduction'] + $record['undertime_deduction'];
+                    $net = $record['basic'] + $record['ot_pay'] - $deductions;
                 @endphp
                 <tr>
                     <td>
@@ -215,10 +194,9 @@ $pendingCount = count(array_filter($payrollRecords, fn($r) => $r['status'] === '
                     </td>
                     <td><span class="dept-tag">{{ $record['dept'] }}</span></td>
                     <td class="pay-cell">{{ peso($record['basic']) }}</td>
-                    <td class="deduction">{{ peso($record['gsis']) }}</td>
-                    <td class="deduction">{{ peso($record['philhealth']) }}</td>
-                    <td class="deduction">{{ peso($record['pagibig']) }}</td>
-                    <td class="deduction">{{ peso($record['tax']) }}</td>
+                    <td class="ot-pay">{{ peso($record['ot_pay']) }}</td>
+                    <td class="deduction">{{ peso($record['late_deduction']) }}</td>
+                    <td class="deduction">{{ peso($record['undertime_deduction']) }}</td>
                     <td class="net-pay">{{ peso($net) }}</td>
                     <td><span class="badge-status {{ $record['status'] === 'Processed' ? 'processed' : ($record['status'] === 'Pending' ? 'pending' : 'on-hold') }}">{{ $record['status'] }}</span></td>
                     <td>
@@ -234,7 +212,7 @@ $pendingCount = count(array_filter($payrollRecords, fn($r) => $r['status'] === '
     </div>
 
     <div class="table-footer">
-        <p>Showing <strong>{{ count($payrollRecords) }}</strong> of <strong>{{ count($payrollRecords) }}</strong> records</p>
+        <p>Showing <strong>{{ $payrollRecords->count() }}</strong> of <strong>{{ $payrollRecords->count() }}</strong> records</p>
         <div class="pagination">
             <button class="page-btn active">1</button>
             <button class="page-btn">2</button>
@@ -283,11 +261,22 @@ $pendingCount = count(array_filter($payrollRecords, fn($r) => $r['status'] === '
 .pay-cell {
     font-size: 13px; color: #0b044d; font-weight: 600;
 }
+.ot-pay {
+    font-size: 13px; color: #15803d; font-weight: 600;
+}
 .deduction {
     font-size: 13px; color: #8e1e18; font-weight: 600;
 }
 .net-pay {
     font-size: 13px; color: #15803d; font-weight: 700;
 }
+.btn-filter-main {
+    padding: 7px 16px; background: #0b044d; color: #fff;
+    border: none; border-radius: 6px; font-size: 12.5px;
+    font-weight: 600; cursor: pointer; display: flex;
+    align-items: center; gap: 6px; font-family: 'Poppins', sans-serif;
+    transition: all 0.2s;
+}
+.btn-filter-main:hover { background: #1a0f6e; }
 </style>
 @endsection

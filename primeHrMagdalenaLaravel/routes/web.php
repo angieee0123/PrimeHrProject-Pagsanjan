@@ -568,8 +568,60 @@ Route::get('/admin/leave', function () {
     return view('admin.leaveAndBenefits.adminLeaveAndBenefits');
 })->middleware('auth')->name('admin.leave');
 
-Route::get('/admin/payroll', function () {
-    return view('admin.payroll.adminPayroll');
+Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
+    $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+    $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+    $department = $request->input('department');
+    $status = $request->input('status');
+
+    // Get daily salary computations for the period
+    $query = \App\Models\DailySalaryComputation::with([
+        'employee.employmentDetail.departmentRelation',
+        'employee.employmentDetail.designationRelation',
+        'accreditedHoursLog'
+    ])
+    ->whereBetween('work_date', [$startDate, $endDate]);
+
+    if ($department) {
+        $query->whereHas('employee.employmentDetail.departmentRelation', function($q) use ($department) {
+            $q->where('name', $department);
+        });
+    }
+
+    $dailyComputations = $query->get();
+
+    // Group by employee and aggregate
+    $payrollRecords = $dailyComputations->groupBy('employee_id')->map(function($records, $employeeId) use ($status) {
+        $employee = $records->first()->employee;
+        $totalBasicPay = $records->sum('daily_basic_pay');
+        $totalOtPay = $records->sum('ot_pay');
+        $totalLateDeduction = $records->sum('late_deduction');
+        $totalUndertimeDeduction = $records->sum('undertime_deduction');
+        
+        $recordStatus = $records->every(fn($r) => $r->daily_gross_pay > 0) ? 'Processed' : 'Pending';
+        
+        return [
+            'id' => $employee->employee_id ?? 'N/A',
+            'name' => trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name),
+            'position' => $employee->employmentDetail?->designationRelation?->title ?? 'N/A',
+            'dept' => $employee->employmentDetail?->departmentRelation?->name ?? 'N/A',
+            'basic' => $totalBasicPay,
+            'ot_pay' => $totalOtPay,
+            'late_deduction' => $totalLateDeduction,
+            'undertime_deduction' => $totalUndertimeDeduction,
+            'status' => $recordStatus,
+        ];
+    })->values();
+
+    // Filter by status if provided
+    if ($status) {
+        $payrollRecords = $payrollRecords->filter(fn($r) => $r['status'] === $status)->values();
+    }
+
+    // Get unique departments for filter
+    $departments = \App\Models\Department::where('status', 'Active')->pluck('name');
+
+    return view('admin.payroll.adminPayroll', compact('payrollRecords', 'departments'));
 })->middleware('auth')->name('admin.payroll');
 
 Route::get('/admin/departments', function () {

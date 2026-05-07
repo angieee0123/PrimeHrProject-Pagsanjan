@@ -63,16 +63,38 @@ def generate_sql_query(user_question, schema):
         question_to_process = translate_tagalog_to_english(user_question)
         print(f"🌐 Translated: '{user_question}' → '{question_to_process}'")
     
+    # Load salary computation guide
+    guide_path = os.path.join(LARAVEL_PATH, 'SALARY_COMPUTATION_GUIDE.md')
+    salary_guide = ""
+    if os.path.exists(guide_path):
+        with open(guide_path, 'r', encoding='utf-8') as f:
+            salary_guide = f.read()
+    
     prompt = f"""You are a MySQL expert. Given the database schema below, generate a valid MySQL SELECT query to answer the user's question.
 
 Database Schema:
 {schema}
+
+SALARY COMPUTATION SYSTEM GUIDE:
+{salary_guide}
+
+IMPORTANT TABLE RELATIONSHIPS:
+- employees.id → daily_salary_computations.employee_id
+- employees.id → accredited_hours_log.employee_id
+- accredited_hours_log.id → daily_salary_computations.accredited_hours_log_id
+- daily_salary_computations contains: late_deduction, undertime_deduction, ot_pay, daily_basic_pay, daily_gross_pay
+- accredited_hours_log contains: late_minutes, undertime_minutes, ot_minutes, total_accredited_minutes
+- To find employee by name, search in employees table (first_name, middle_name, last_name)
 
 Rules:
 - Only generate SELECT queries, never INSERT, UPDATE, DELETE, or DROP
 - Return ONLY the raw SQL query, no explanation, no markdown, no backticks
 - If the question cannot be answered from the schema, return: CANNOT_ANSWER
 - All monetary values are in Philippine Peso (PHP), never use dollar signs
+- When searching for employee names, use CONCAT(first_name, ' ', IFNULL(middle_name, ''), ' ', last_name) LIKE '%name%'
+- For salary/deduction questions, JOIN employees with daily_salary_computations
+- For attendance time questions, JOIN employees with accredited_hours_log
+- For "why" questions about deductions, also JOIN with accredited_hours_log to show the minutes
 
 User Question: {question_to_process}
 
@@ -82,7 +104,7 @@ SQL Query:"""
         messages=[{"role": "user", "content": prompt}],
         model="llama-3.3-70b-versatile",
         temperature=0.1,
-        max_tokens=300
+        max_tokens=400
     )
     return response.choices[0].message.content.strip()
 
@@ -131,14 +153,28 @@ SQL Query Used: {sql}
 Query Results: {results_preview}
 Total Records Found: {len(results)}
 
+IMPORTANT CONTEXT:
+- late_deduction comes from late_minutes in attendance (late arrival time)
+- undertime_deduction comes from undertime_minutes (leaving early)
+- ot_pay comes from ot_minutes (overtime work)
+- These are calculated from accredited_hours_log based on attendance records
+- Deductions are computed as: (minutes / 60) × hourly_rate
+- OT pay is computed as: (ot_minutes / 60) × hourly_rate × 1.25
+- Example: 120 undertime_minutes × PHP 689/hour = PHP 1,378 undertime deduction
+
 Answer in a friendly, concise tone (3-5 sentences max). If no results, say so politely.
-IMPORTANT: All monetary amounts must be expressed in Philippine Peso (PHP). Never use dollar signs ($). Use the format "PHP X,XXX.XX" or "X,XXX.XX Philippine Pesos"."""
+IMPORTANT: All monetary amounts must be expressed in Philippine Peso (PHP). Never use dollar signs ($). Use the format "PHP X,XXX.XX" or "X,XXX.XX Philippine Pesos".
+If explaining deductions, mention:
+1. The amount deducted
+2. How many minutes caused it (if available in results)
+3. That it comes from attendance records (late arrival or leaving early)
+4. Show the calculation if minutes are available"""
 
     response = groq_client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
         model="llama-3.3-70b-versatile",
         temperature=0.7,
-        max_tokens=300
+        max_tokens=400
     )
     return response.choices[0].message.content.strip()
 
