@@ -22,8 +22,8 @@ $startDateDisplay = request('start_date', now()->startOfMonth()->format('Y-m-d')
 $endDateDisplay = request('end_date', now()->endOfMonth()->format('Y-m-d'));
 $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' — ' . date('M d, Y', strtotime($endDateDisplay));
 
-// Semi-monthly amounts (monthly basic ÷ 2, deductions ÷ 2)
 $payrollRecords = $payrollRecords ?? [];
+$viewMode = $viewMode ?? 'daily';
 
 $grossPayroll = $payrollRecords->sum('basic');
 $totalOtPay = $payrollRecords->sum('ot_pay');
@@ -116,6 +116,11 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
                     <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
                     <option value="On Hold" {{ request('status') == 'On Hold' ? 'selected' : '' }}>On Hold</option>
                 </select>
+                <select class="filter-select" name="view_mode" style="background: #f7f6ff; border-color: #0b044d; color: #0b044d; font-weight: 600;">
+                    <option value="daily" {{ request('view_mode', 'daily') == 'daily' ? 'selected' : '' }}>Daily View</option>
+                    <option value="employee" {{ request('view_mode') == 'employee' ? 'selected' : '' }}>By Employee</option>
+                    <option value="monthly" {{ request('view_mode') == 'monthly' ? 'selected' : '' }}>Monthly Summary</option>
+                </select>
                 <button type="submit" class="btn-filter-main">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                     Filter
@@ -165,6 +170,13 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
                 <tr>
                     <th>Employee</th>
                     <th>Department</th>
+                    @if($viewMode === 'daily')
+                        <th>Work Date</th>
+                        <th>Daily Rate</th>
+                    @else
+                        <th>Days Worked</th>
+                        <th>Daily Rate</th>
+                    @endif
                     <th>Basic Pay</th>
                     <th>OT Pay</th>
                     <th>Late Deduction</th>
@@ -193,6 +205,13 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
                         </div>
                     </td>
                     <td><span class="dept-tag">{{ $record['dept'] }}</span></td>
+                    @if($viewMode === 'daily')
+                        <td class="work-date">{{ date('M d, Y', strtotime($record['work_date'])) }}</td>
+                        <td class="daily-rate">{{ peso($record['daily_rate']) }}</td>
+                    @else
+                        <td class="days-count">{{ $record['days_count'] }} days</td>
+                        <td class="daily-rate">{{ peso($record['daily_rate']) }}</td>
+                    @endif
                     <td class="pay-cell">{{ peso($record['basic']) }}</td>
                     <td class="ot-pay">{{ peso($record['ot_pay']) }}</td>
                     <td class="deduction">{{ peso($record['late_deduction']) }}</td>
@@ -269,6 +288,16 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
 }
 .net-pay {
     font-size: 13px; color: #15803d; font-weight: 700;
+}
+.daily-rate {
+    font-size: 13px; color: #5a0f0b; font-weight: 600;
+}
+.work-date {
+    font-size: 12.5px; color: #6b6a8a; font-weight: 500;
+}
+.days-count {
+    font-size: 12.5px; color: #0b044d; font-weight: 600;
+    background: #f0effe; padding: 4px 10px; border-radius: 4px;
 }
 .btn-filter-main {
     padding: 7px 16px; background: #0b044d; color: #fff;
