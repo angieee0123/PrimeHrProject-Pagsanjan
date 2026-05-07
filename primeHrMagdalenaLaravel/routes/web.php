@@ -573,6 +573,7 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
     $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
     $department = $request->input('department');
     $status = $request->input('status');
+    $viewMode = $request->input('view_mode', 'daily');
 
     // Get daily salary computations for the period
     $query = \App\Models\DailySalaryComputation::with([
@@ -580,7 +581,9 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
         'employee.employmentDetail.designationRelation',
         'accreditedHoursLog'
     ])
-    ->whereBetween('work_date', [$startDate, $endDate]);
+    ->whereBetween('work_date', [$startDate, $endDate])
+    ->orderBy('work_date', 'desc')
+    ->orderBy('employee_id');
 
     if ($department) {
         $query->whereHas('employee.employmentDetail.departmentRelation', function($q) use ($department) {
@@ -590,28 +593,54 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
 
     $dailyComputations = $query->get();
 
-    // Group by employee and aggregate
-    $payrollRecords = $dailyComputations->groupBy('employee_id')->map(function($records, $employeeId) use ($status) {
-        $employee = $records->first()->employee;
-        $totalBasicPay = $records->sum('daily_basic_pay');
-        $totalOtPay = $records->sum('ot_pay');
-        $totalLateDeduction = $records->sum('late_deduction');
-        $totalUndertimeDeduction = $records->sum('undertime_deduction');
-        
-        $recordStatus = $records->every(fn($r) => $r->daily_gross_pay > 0) ? 'Processed' : 'Pending';
-        
-        return [
-            'id' => $employee->employee_id ?? 'N/A',
-            'name' => trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name),
-            'position' => $employee->employmentDetail?->designationRelation?->title ?? 'N/A',
-            'dept' => $employee->employmentDetail?->departmentRelation?->name ?? 'N/A',
-            'basic' => $totalBasicPay,
-            'ot_pay' => $totalOtPay,
-            'late_deduction' => $totalLateDeduction,
-            'undertime_deduction' => $totalUndertimeDeduction,
-            'status' => $recordStatus,
-        ];
-    })->values();
+    // Process based on view mode
+    if ($viewMode === 'employee' || $viewMode === 'monthly') {
+        // Group by employee
+        $payrollRecords = $dailyComputations->groupBy('employee_id')->map(function($records) use ($viewMode) {
+            $employee = $records->first()->employee;
+            $totalBasicPay = $records->sum('daily_basic_pay');
+            $totalOtPay = $records->sum('ot_pay');
+            $totalLateDeduction = $records->sum('late_deduction');
+            $totalUndertimeDeduction = $records->sum('undertime_deduction');
+            $recordStatus = $records->every(fn($r) => $r->daily_gross_pay > 0) ? 'Processed' : 'Pending';
+            
+            return [
+                'id' => $employee->employee_id ?? 'N/A',
+                'name' => trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name),
+                'position' => $employee->employmentDetail?->designationRelation?->title ?? 'N/A',
+                'dept' => $employee->employmentDetail?->departmentRelation?->name ?? 'N/A',
+                'work_date' => null,
+                'daily_rate' => $records->first()->daily_rate ?? 0,
+                'basic' => $totalBasicPay,
+                'ot_pay' => $totalOtPay,
+                'late_deduction' => $totalLateDeduction,
+                'undertime_deduction' => $totalUndertimeDeduction,
+                'status' => $recordStatus,
+                'days_count' => $records->count(),
+            ];
+        })->values();
+    } else {
+        // Daily view - one row per day per employee
+        $payrollRecords = $dailyComputations->map(function($record) {
+            $employee = $record->employee;
+            $recordStatus = $record->daily_gross_pay > 0 ? 'Processed' : 'Pending';
+            
+            return [
+                'id' => $employee->employee_id ?? 'N/A',
+                'name' => trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name),
+                'position' => $employee->employmentDetail?->designationRelation?->title ?? 'N/A',
+                'dept' => $employee->employmentDetail?->departmentRelation?->name ?? 'N/A',
+                'work_date' => $record->work_date,
+                'daily_rate' => $record->daily_rate,
+                'basic' => $record->daily_basic_pay,
+                'ot_pay' => $record->ot_pay,
+                'late_deduction' => $record->late_deduction,
+                'undertime_deduction' => $record->undertime_deduction,
+                'status' => $recordStatus,
+                'days_count' => null,
+            ];
+        });
+    }
 
     // Filter by status if provided
     if ($status) {
@@ -621,7 +650,7 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
     // Get unique departments for filter
     $departments = \App\Models\Department::where('status', 'Active')->pluck('name');
 
-    return view('admin.payroll.adminPayroll', compact('payrollRecords', 'departments'));
+    return view('admin.payroll.adminPayroll', compact('payrollRecords', 'departments', 'viewMode'));
 })->middleware('auth')->name('admin.payroll');
 
 Route::get('/admin/departments', function () {

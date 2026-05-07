@@ -4,18 +4,24 @@ import sys
 
 HOST = "localhost"
 USER = "root"
-PASSWORD = ""
+PASSWORD = "admin"
 DATABASE = "primehrismagdalena"
 
 SQL_FOLDER = os.path.join(os.path.dirname(__file__), "database")
 MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"
 
-# Run migrations first, then users, then dependent tables
 ORDER = [
     "primehrismagdalena_migrations.sql",
-    "primehrismagdalena_users.sql",
+    "primehrismagdalena_cache.sql",
+    "primehrismagdalena_cache_locks.sql",
+    "primehrismagdalena_failed_jobs.sql",
+    "primehrismagdalena_jobs.sql",
+    "primehrismagdalena_job_batches.sql",
+    "primehrismagdalena_password_reset_tokens.sql",
     "primehrismagdalena_departments.sql",
+    "primehrismagdalena_designations.sql",
     "primehrismagdalena_employees.sql",
+    "primehrismagdalena_users.sql",
     "primehrismagdalena_addresses.sql",
     "primehrismagdalena_contacts.sql",
     "primehrismagdalena_government_ids.sql",
@@ -27,6 +33,12 @@ ORDER = [
     "primehrismagdalena_documents.sql",
     "primehrismagdalena_legal_requirements.sql",
     "primehrismagdalena_employment_details.sql",
+    "primehrismagdalena_schedules.sql",
+    "primehrismagdalena_attendance.sql",
+    "primehrismagdalena_attendance_corrections.sql",
+    "primehrismagdalena_accredited_hours_log.sql",
+    "primehrismagdalena_daily_salary_computations.sql",
+    "primehrismagdalena_salary_computations.sql",
     "primehrismagdalena_sessions.sql",
 ]
 

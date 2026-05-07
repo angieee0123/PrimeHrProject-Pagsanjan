@@ -57,6 +57,11 @@ def get_db_schema():
 def generate_sql_query(user_question, schema):
     """Use Groq to convert natural language question to SQL"""
     
+    # Extract and clean employee name from question
+    extracted_name = extract_name_from_question(user_question)
+    if extracted_name:
+        print(f"👤 Extracted name: '{extracted_name}'")
+    
     # Translate Filipino to English if needed
     question_to_process = user_question
     if _is_tagalog_question(user_question):
@@ -70,6 +75,12 @@ def generate_sql_query(user_question, schema):
         with open(guide_path, 'r', encoding='utf-8') as f:
             salary_guide = f.read()
     
+    # Build name hint for AI
+    name_hint = ""
+    if extracted_name:
+        name_condition = build_flexible_name_condition(extracted_name)
+        name_hint = f"\n\nEXTRACTED EMPLOYEE NAME: {extracted_name}\nUSE THIS WHERE CONDITION: ({name_condition})"
+    
     prompt = f"""You are a MySQL expert. Given the database schema below, generate a valid MySQL SELECT query to answer the user's question.
 
 Database Schema:
@@ -77,24 +88,43 @@ Database Schema:
 
 SALARY COMPUTATION SYSTEM GUIDE:
 {salary_guide}
+{name_hint}
 
 IMPORTANT TABLE RELATIONSHIPS:
 - employees.id → daily_salary_computations.employee_id
 - employees.id → accredited_hours_log.employee_id
+- employees.id → employment_details.employee_id
+- employment_details.designation_id → designations.id
+- designations.monthly_rate contains the monthly salary
 - accredited_hours_log.id → daily_salary_computations.accredited_hours_log_id
-- daily_salary_computations contains: late_deduction, undertime_deduction, ot_pay, daily_basic_pay, daily_gross_pay
+- daily_salary_computations contains: late_deduction, undertime_deduction, ot_pay, daily_basic_pay, daily_gross_pay, monthly_rate, daily_rate, hourly_rate
 - accredited_hours_log contains: late_minutes, undertime_minutes, ot_minutes, total_accredited_minutes
 - To find employee by name, search in employees table (first_name, middle_name, last_name)
+
+NAME SEARCH RULES (VERY IMPORTANT):
+- ALWAYS use flexible name matching with multiple OR conditions
+- Search for FIRST NAME match: first_name LIKE '%name%'
+- Search for LAST NAME match: last_name LIKE '%name%'
+- Search for FULL NAME match: CONCAT(first_name, ' ', last_name) LIKE '%name%'
+- Use OR conditions to match any part of the name
+- Example: For "Jeremy Pogi" search for:
+  WHERE (first_name LIKE '%Jeremy%' OR last_name LIKE '%Pogi%' OR CONCAT(first_name, ' ', last_name) LIKE '%Jeremy%Pogi%')
+- Ignore middle initials and suffixes in search (they are optional)
+- Match even if only first name or last name is provided
+- If name is extracted above, USE THE PROVIDED WHERE CONDITION EXACTLY
 
 Rules:
 - Only generate SELECT queries, never INSERT, UPDATE, DELETE, or DROP
 - Return ONLY the raw SQL query, no explanation, no markdown, no backticks
 - If the question cannot be answered from the schema, return: CANNOT_ANSWER
 - All monetary values are in Philippine Peso (PHP), never use dollar signs
-- When searching for employee names, use CONCAT(first_name, ' ', IFNULL(middle_name, ''), ' ', last_name) LIKE '%name%'
-- For salary/deduction questions, JOIN employees with daily_salary_computations
-- For attendance time questions, JOIN employees with accredited_hours_log
+- For salary questions: JOIN employees → employment_details → designations to get monthly_rate
+- For deduction questions: JOIN employees → daily_salary_computations
+- For attendance time questions: JOIN employees → accredited_hours_log
 - For "why" questions about deductions, also JOIN with accredited_hours_log to show the minutes
+- For calculations (SUM, AVG, COUNT), use appropriate aggregate functions
+- For monthly salary: use designations.monthly_rate
+- For daily computations: use daily_salary_computations table
 
 User Question: {question_to_process}
 
@@ -110,9 +140,58 @@ SQL Query:"""
 
 def _is_tagalog_question(question):
     """Check if question contains Tagalog/Filipino keywords"""
-    tagalog_words = ['ang', 'ilan', 'paano', 'ano', 'ilang', 'sa', 'ng', 'ay', 'para', 'mula']
+    tagalog_words = ['ang', 'ilan', 'paano', 'ano', 'ilang', 'sa', 'ng', 'ay', 'para', 'mula', 'magkano', 'sahod', 'sweldo', 'ni', 'kay']
     question_lower = question.lower()
     return any(word in question_lower for word in tagalog_words)
+
+def extract_name_from_question(question):
+    """Extract employee name from question and clean it"""
+    # Common patterns: "ni [Name]", "of [Name]", "for [Name]", "[Name]'s"
+    patterns = [
+        r'\bni\s+([A-Z][a-z]+(?:\s+[A-Z]\.?)?(?:\s+(?:Dela|De la|De|Van|Von)\s+)?[A-Z][a-z]+)',  # ni Jeremy R. Pogi, ni Juan Dela Cruz
+        r'\bkay\s+([A-Z][a-z]+(?:\s+[A-Z]\.?)?(?:\s+(?:Dela|De la|De|Van|Von)\s+)?[A-Z][a-z]+)',  # kay Jeremy
+        r'\bof\s+([A-Z][a-z]+(?:\s+[A-Z]\.?)?(?:\s+(?:Dela|De la|De|Van|Von)\s+)?[A-Z][a-z]+)',  # of Jeremy
+        r'\bfor\s+([A-Z][a-z]+(?:\s+[A-Z]\.?)?(?:\s+(?:Dela|De la|De|Van|Von)\s+)?[A-Z][a-z]+)',  # for Jeremy
+        r"([A-Z][a-z]+(?:\s+[A-Z]\.?)?(?:\s+(?:Dela|De la|De|Van|Von)\s+)?[A-Z][a-z]+)'s",  # Jeremy's
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, question)
+        if match:
+            full_name = match.group(1)
+            # Remove middle initial and period but keep compound last names
+            name_parts = full_name.split()
+            cleaned_parts = []
+            
+            for i, part in enumerate(name_parts):
+                # Keep compound last name prefixes (Dela, De la, etc.)
+                if part in ['Dela', 'De', 'Van', 'Von']:
+                    cleaned_parts.append(part)
+                # Skip single letter initials (R., M., etc.)
+                elif len(part.replace('.', '')) > 1:
+                    cleaned_parts.append(part)
+            
+            return ' '.join(cleaned_parts)
+    
+    return None
+
+def build_flexible_name_condition(name):
+    """Build SQL WHERE condition for flexible name matching"""
+    if not name:
+        return ""
+    
+    name_parts = name.split()
+    conditions = []
+    
+    # Add condition for each name part
+    for part in name_parts:
+        conditions.append(f"first_name LIKE '%{part}%'")
+        conditions.append(f"last_name LIKE '%{part}%'")
+    
+    # Add condition for full name
+    conditions.append(f"CONCAT(first_name, ' ', last_name) LIKE '%{name}%'")
+    
+    return " OR ".join(conditions)
 
 def translate_tagalog_to_english(tagalog_text):
     """Translate Tagalog question to English using Groq"""
@@ -144,6 +223,12 @@ def execute_query(sql):
 def generate_natural_response(user_question, sql, results):
     """Use Groq to convert SQL results into a conversational response"""
     results_preview = str(results[:10]) if results else "No results found"
+    
+    # Detect if original question was in Tagalog
+    is_tagalog = _is_tagalog_question(user_question)
+    language_instruction = ""
+    if is_tagalog:
+        language_instruction = "\n\nIMPORTANT: The user asked in TAGALOG/FILIPINO. You MUST respond in TAGALOG/FILIPINO language. Use natural Filipino conversational tone."
 
     prompt = f"""You are a friendly database assistant. A user asked a question, a SQL query was run, and here are the results. 
 Answer the user's question naturally and conversationally based on the results.
@@ -154,6 +239,9 @@ Query Results: {results_preview}
 Total Records Found: {len(results)}
 
 IMPORTANT CONTEXT:
+- monthly_rate is the employee's monthly salary from designations table
+- daily_rate = monthly_rate / 22 working days
+- hourly_rate = daily_rate / 8 hours
 - late_deduction comes from late_minutes in attendance (late arrival time)
 - undertime_deduction comes from undertime_minutes (leaving early)
 - ot_pay comes from ot_minutes (overtime work)
@@ -161,14 +249,16 @@ IMPORTANT CONTEXT:
 - Deductions are computed as: (minutes / 60) × hourly_rate
 - OT pay is computed as: (ot_minutes / 60) × hourly_rate × 1.25
 - Example: 120 undertime_minutes × PHP 689/hour = PHP 1,378 undertime deduction
+- daily_gross_pay = daily_basic_pay + ot_pay - late_deduction - undertime_deduction
+{language_instruction}
 
 Answer in a friendly, concise tone (3-5 sentences max). If no results, say so politely.
 IMPORTANT: All monetary amounts must be expressed in Philippine Peso (PHP). Never use dollar signs ($). Use the format "PHP X,XXX.XX" or "X,XXX.XX Philippine Pesos".
-If explaining deductions, mention:
-1. The amount deducted
-2. How many minutes caused it (if available in results)
-3. That it comes from attendance records (late arrival or leaving early)
-4. Show the calculation if minutes are available"""
+If explaining salary or deductions, mention:
+1. The amount (monthly salary, deduction, or payment)
+2. How it was calculated (if relevant)
+3. Any related details from the results (minutes, rates, etc.)
+4. Show the calculation breakdown if helpful"""
 
     response = groq_client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
@@ -323,7 +413,7 @@ def search_codebase(codebase, query, top_k=5):
 def classify_question(user_question):
     """
     Classify if question is about:
-    - 'database': Data queries (user counts, records, reports)
+    - 'database': Data queries (user counts, records, reports, salary, calculations)
     - 'system': How-to, process flows, features
     - 'both': Could be either
     
@@ -334,18 +424,24 @@ def classify_question(user_question):
     # English database keywords
     db_keywords = [
         'how many', 'count', 'list', 'show', 'find', 'search', 'where', 
-        'filter', 'report', 'total', 'number', 'many', 'all', 'view'
+        'filter', 'report', 'total', 'number', 'many', 'all', 'view',
+        'salary', 'sahod', 'deduction', 'kaltas', 'pay', 'bayad', 'sweldo',
+        'late', 'undertime', 'overtime', 'ot', 'monthly', 'daily', 'hourly',
+        'calculate', 'computation', 'compute', 'amount', 'halaga', 'magkano',
+        'why', 'bakit', 'reason', 'dahilan'
     ]
     
     # Filipino/Tagalog database keywords
     # ilan = how many, ilang = how many, total, lahat = all, dami = amount
     db_keywords_tagalog = [
-        'ilan', 'ilang', 'dami', 'total', 'lahat', 'list', 'view', 'show', 'magpakita'
+        'ilan', 'ilang', 'dami', 'total', 'lahat', 'list', 'view', 'show', 'magpakita',
+        'magkano', 'sahod', 'sweldo', 'kaltas', 'bayad', 'buwan', 'araw', 'oras',
+        'bakit', 'dahilan', 'halaga'
     ]
     
     # English process keywords
     process_keywords = [
-        'how', 'how do', 'how to', 'process', 'flow', 'step', 'register', 
+        'how do', 'how to', 'process', 'flow', 'step', 'register', 
         'create', 'add', 'submit', 'upload', 'scan', 'work', 'use', 'make'
     ]
     
@@ -364,8 +460,12 @@ def classify_question(user_question):
     process_score = sum(1 for kw in process_keywords if kw in question_lower)
     process_score += sum(1 for kw in process_keywords_tagalog if kw in question_lower) * 1.5
     
+    # Boost database score for salary/calculation questions
+    if any(word in question_lower for word in ['magkano', 'salary', 'sahod', 'sweldo', 'kaltas', 'deduction']):
+        db_score += 10
+    
     # Boost database score if question ends with "?" and contains count/number words
-    if '?' in question_lower and any(word in question_lower for word in ['ilan', 'how many', 'count', 'total']):
+    if '?' in question_lower and any(word in question_lower for word in ['ilan', 'how many', 'count', 'total', 'magkano']):
         db_score += 5
     
     if process_score > db_score:
@@ -374,7 +474,7 @@ def classify_question(user_question):
         return 'database'
     else:
         # Default: if question starts with common DB pattern, use database
-        if any(question_lower.startswith(kw) for kw in ['what', 'ano', 'show', 'magpakita']):
+        if any(question_lower.startswith(kw) for kw in ['what', 'ano', 'show', 'magpakita', 'magkano']):
             return 'database'
         return 'both'
 
