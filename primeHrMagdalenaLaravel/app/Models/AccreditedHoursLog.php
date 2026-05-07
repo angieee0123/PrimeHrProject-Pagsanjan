@@ -28,6 +28,9 @@ class AccreditedHoursLog extends Model
         'am_grace_applied' => 'boolean',
         'pm_grace_applied' => 'boolean',
     ];
+    
+    // Eager load relationships to prevent N+1 queries
+    protected $with = ['employee.employmentDetail.designationRelation', 'attendance'];
 
     public function attendance()
     {
