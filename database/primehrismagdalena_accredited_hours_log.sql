@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: primehrismagdalena
+-- Host: localhost    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.41
+-- Server version	8.0.45
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -36,7 +36,7 @@ CREATE TABLE `accredited_hours_log` (
   `total_actual_minutes` smallint unsigned NOT NULL DEFAULT '0',
   `am_grace_applied` tinyint(1) NOT NULL DEFAULT '0',
   `pm_grace_applied` tinyint(1) NOT NULL DEFAULT '0',
-  `computation_notes` text COLLATE utf8mb4_unicode_ci,
+  `computation_notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -46,7 +46,7 @@ CREATE TABLE `accredited_hours_log` (
   CONSTRAINT `accredited_hours_log_attendance_id_foreign` FOREIGN KEY (`attendance_id`) REFERENCES `attendance` (`id`) ON DELETE CASCADE,
   CONSTRAINT `accredited_hours_log_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE,
   CONSTRAINT `accredited_hours_log_schedule_id_foreign` FOREIGN KEY (`schedule_id`) REFERENCES `schedules` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -55,7 +55,7 @@ CREATE TABLE `accredited_hours_log` (
 
 LOCK TABLES `accredited_hours_log` WRITE;
 /*!40000 ALTER TABLE `accredited_hours_log` DISABLE KEYS */;
-INSERT INTO `accredited_hours_log` VALUES (1,1,8,1,240,240,0,0,0,480,600,1,1,'Attendance correction by  at 2026-05-06 23:37:10','2026-05-06 15:37:10','2026-05-06 15:37:10');
+INSERT INTO `accredited_hours_log` VALUES (1,1,8,1,240,240,0,0,0,480,600,1,1,'Attendance correction by  at 2026-05-06 23:37:10','2026-05-06 15:37:10','2026-05-06 15:37:10'),(2,2,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(3,3,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(4,4,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(5,5,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(6,6,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(7,7,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(8,8,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(9,9,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(10,10,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(11,11,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(12,12,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(13,13,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(14,14,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(15,15,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(16,16,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(17,17,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(18,18,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(19,19,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(20,20,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(21,21,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(22,22,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(23,23,8,1,240,240,0,0,0,480,480,0,0,'Auto-generated for April 2026','2026-05-07 03:39:13','2026-05-07 03:39:13'),(24,24,8,1,240,224,0,0,0,464,593,1,0,'Attendance correction by  at 2026-05-07 05:48:18','2026-05-06 21:48:18','2026-05-06 21:48:18');
 /*!40000 ALTER TABLE `accredited_hours_log` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -68,4 +68,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-07  7:42:01
+-- Dump completed on 2026-05-09 23:15:02
