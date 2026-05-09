@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: primehrismagdalena
+-- Host: localhost    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.41
+-- Server version	8.0.45
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -27,7 +27,7 @@ CREATE TABLE `salary_computations` (
   `employee_id` bigint unsigned NOT NULL,
   `period_start` date NOT NULL,
   `period_end` date NOT NULL,
-  `payroll_type` enum('monthly','semi-monthly','weekly') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'monthly',
+  `payroll_type` enum('monthly','semi-monthly','weekly') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'monthly',
   `monthly_rate` decimal(12,2) NOT NULL,
   `daily_rate` decimal(12,2) NOT NULL,
   `hourly_rate` decimal(12,2) NOT NULL,
@@ -45,10 +45,10 @@ CREATE TABLE `salary_computations` (
   `other_deductions` decimal(12,2) NOT NULL DEFAULT '0.00',
   `gross_pay` decimal(12,2) NOT NULL DEFAULT '0.00',
   `net_pay` decimal(12,2) NOT NULL DEFAULT '0.00',
-  `status` enum('draft','pending','approved','paid') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
+  `status` enum('draft','pending','approved','paid') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
   `computed_by` bigint unsigned DEFAULT NULL,
   `approved_by` bigint unsigned DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -81,4 +81,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-07  7:42:00
+-- Dump completed on 2026-05-09 23:15:04

@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: primehrismagdalena
+-- Host: localhost    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.41
+-- Server version	8.0.45
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -24,12 +24,12 @@ DROP TABLE IF EXISTS `designations`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `designations` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `department_id` bigint unsigned NOT NULL,
-  `salary_grade` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `salary_grade` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `monthly_rate` decimal(12,2) DEFAULT NULL,
-  `employment_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `employment_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -57,4 +57,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-07  7:41:56
+-- Dump completed on 2026-05-09 23:15:01
