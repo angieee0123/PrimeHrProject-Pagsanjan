@@ -17,11 +17,15 @@
                         <label class="form-label">
                             Leave Type <span style="color: #8e1e18;">*</span>
                         </label>
-                        <select name="leave_code" class="form-input" required>
+                        <select name="leave_type_id" class="form-input" required>
                             <option value="">Select Leave Type</option>
-                            <option value="VL">VL - Vacation Leave</option>
-                            <option value="SL">SL - Sick Leave</option>
-                            <!-- Add more accrued leave types as needed -->
+                            @if(isset($accruedLeaveTypes) && $accruedLeaveTypes->count() > 0)
+                                @foreach($accruedLeaveTypes as $leaveType)
+                                    <option value="{{ $leaveType->id }}">{{ $leaveType->leave_code }} - {{ $leaveType->leave_name }}</option>
+                                @endforeach
+                            @else
+                                <option value="" disabled>No accrued leave types available</option>
+                            @endif
                         </select>
                         <small class="form-hint">Only accrued leave types are shown</small>
                     </div>
@@ -187,7 +191,7 @@ function updateAccrualHint() {
     const serviceHint = document.getElementById('serviceHint');
     const creditsHint = document.getElementById('creditsHint');
     const example = document.getElementById('calculationExample');
-    
+
     if (frequency === 'daily') {
         serviceHint.textContent = 'Usually 1 day for daily accrual';
         creditsHint.innerHTML = 'Example: 0.0417 credits per day (1.25 days ÷ 30 days)';
@@ -223,9 +227,9 @@ function closeCalculatorModal(event) {
 function calculateRate() {
     const annualDays = parseFloat(document.getElementById('calcAnnualDays').value) || 15;
     const method = document.getElementById('calcMethod').value;
-    
+
     let rate, formula;
-    
+
     if (method === 'daily') {
         rate = (annualDays / 360).toFixed(4);
         formula = `${annualDays} ÷ 360 = ${rate} credits per day`;
@@ -233,7 +237,7 @@ function calculateRate() {
         rate = (annualDays / 12).toFixed(4);
         formula = `${annualDays} ÷ 12 = ${rate} credits per month`;
     }
-    
+
     document.getElementById('calculatedRate').textContent = rate;
     document.getElementById('calculationFormula').textContent = formula;
 }
@@ -241,9 +245,9 @@ function calculateRate() {
 function applyCalculatedRate() {
     const rate = document.getElementById('calculatedRate').textContent;
     const method = document.getElementById('calcMethod').value;
-    
+
     document.querySelector('input[name="credits_earned_per_period"]').value = rate;
-    
+
     if (method === 'daily') {
         document.querySelector('select[name="accrual_frequency"]').value = 'daily';
         document.querySelector('input[name="days_of_service_required"]').value = '1.00';
@@ -251,7 +255,7 @@ function applyCalculatedRate() {
         document.querySelector('select[name="accrual_frequency"]').value = 'monthly';
         document.querySelector('input[name="days_of_service_required"]').value = '30.00';
     }
-    
+
     updateAccrualHint();
     closeCalculatorModal();
 }
@@ -260,25 +264,25 @@ window.openAddAccrualRateModal = function() {
     const form = document.getElementById('addAccrualRateForm');
     form.reset();
     form.action = '/admin/leave/accrual-rates';
-    
+
     const methodInput = form.querySelector('input[name="_method"]');
     if (methodInput) methodInput.remove();
-    
+
     document.querySelector('#addAccrualRateModal .modal-title').textContent = 'Add Accrual Rate';
     document.querySelector('#addAccrualRateModal .modal-subtitle').textContent = 'Configure leave credit earning rate';
-    
+
     form.querySelector('.btn-submit').textContent = 'Add Accrual Rate';
-    
+
     // Set default values
     document.querySelector('select[name="accrual_frequency"]').value = 'daily';
     document.querySelector('input[name="days_of_service_required"]').value = '1.00';
     document.querySelector('input[name="credits_earned_per_period"]').value = '0.0417';
     document.querySelector('select[name="is_active"]').value = '1';
-    
+
     // Set today as default effective date
     const today = new Date().toISOString().split('T')[0];
     document.querySelector('input[name="effective_date"]').value = today;
-    
+
     updateAccrualHint();
     document.getElementById('addAccrualRateModal').classList.add('active');
 }
@@ -293,7 +297,7 @@ window.closeAccrualRateModal = function(event) {
 document.addEventListener('DOMContentLoaded', function() {
     const creditsInput = document.querySelector('input[name="credits_earned_per_period"]');
     const daysInput = document.querySelector('input[name="days_of_service_required"]');
-    
+
     if (creditsInput && daysInput) {
         creditsInput.addEventListener('input', updateCalculationExample);
         daysInput.addEventListener('input', updateCalculationExample);
@@ -304,7 +308,7 @@ function updateCalculationExample() {
     const credits = parseFloat(document.querySelector('input[name="credits_earned_per_period"]').value) || 0;
     const days = parseFloat(document.querySelector('input[name="days_of_service_required"]').value) || 1;
     const frequency = document.querySelector('select[name="accrual_frequency"]').value;
-    
+
     let example;
     if (frequency === 'daily') {
         const result = (30 * credits).toFixed(2);
@@ -314,7 +318,7 @@ function updateCalculationExample() {
     } else {
         example = `If an employee works <strong>1 year (${days} days)</strong>, they earn: <strong>${credits} credits</strong>`;
     }
-    
+
     document.getElementById('calculationExample').innerHTML = example;
 }
 </script>

@@ -41,9 +41,15 @@ class LeaveController extends Controller
         // Fetch accrual rates with leave type relationship
         $accrualRates = LeaveAccrualRate::with('leaveType')
             ->orderBy('is_active', 'desc')
-            ->orderBy('leave_code', 'asc')
+            ->orderBy('leave_type_id', 'asc')
             ->orderBy('effective_date', 'desc')
             ->paginate(10);
+
+        // Get only accrued leave types for the modal dropdown
+        $accruedLeaveTypes = LeaveType::where('is_accrued', true)
+            ->where('is_active', true)
+            ->orderBy('leave_name')
+            ->get();
 
         // Sample leave requests data (you can create a table for this later)
         $leaveRequests = [
@@ -65,7 +71,7 @@ class LeaveController extends Controller
             ['empId' => 'PGS-0310', 'name' => 'Roberto T. Flores', 'gsis' => '₱2,748', 'philhealth' => '₱775', 'pagibig' => '₱100', 'vlBalance' => 8, 'slBalance' => 10],
         ];
 
-        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact('leaveTypes', 'leaveRequests', 'benefitsData', 'accrualRates'));
+        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact('leaveTypes', 'leaveRequests', 'benefitsData', 'accrualRates', 'accruedLeaveTypes'));
     }
 
     public function storeLeaveType(Request $request)
@@ -152,5 +158,57 @@ class LeaveController extends Controller
         ]);
 
         return redirect()->route('admin.leave')->with('success', 'Leave type updated successfully!');
+    }
+
+    public function storeAccrualRate(Request $request)
+    {
+        $validated = $request->validate([
+            'leave_type_id' => 'required|exists:leave_types_config,id',
+            'accrual_frequency' => 'required|in:daily,monthly,yearly',
+            'days_of_service_required' => 'required|numeric|min:0.01',
+            'credits_earned_per_period' => 'required|numeric|min:0.0001',
+            'effective_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:effective_date',
+            'is_active' => 'required|boolean',
+            'notes' => 'nullable|string',
+        ]);
+
+        LeaveAccrualRate::create($validated);
+
+        return redirect()->route('admin.leave')->with('success', 'Accrual rate added successfully!');
+    }
+
+    public function showAccrualRate($id)
+    {
+        $accrualRate = LeaveAccrualRate::with('leaveType')->findOrFail($id);
+        return response()->json($accrualRate);
+    }
+
+    public function updateAccrualRate(Request $request, $id)
+    {
+        $accrualRate = LeaveAccrualRate::findOrFail($id);
+
+        $validated = $request->validate([
+            'leave_type_id' => 'required|exists:leave_types_config,id',
+            'accrual_frequency' => 'required|in:daily,monthly,yearly',
+            'days_of_service_required' => 'required|numeric|min:0.01',
+            'credits_earned_per_period' => 'required|numeric|min:0.0001',
+            'effective_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:effective_date',
+            'is_active' => 'required|boolean',
+            'notes' => 'nullable|string',
+        ]);
+
+        $accrualRate->update($validated);
+
+        return redirect()->route('admin.leave')->with('success', 'Accrual rate updated successfully!');
+    }
+
+    public function destroyAccrualRate($id)
+    {
+        $accrualRate = LeaveAccrualRate::findOrFail($id);
+        $accrualRate->delete();
+
+        return redirect()->route('admin.leave')->with('success', 'Accrual rate deleted successfully!');
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class LeaveAccrualRate extends Model
 {
     protected $fillable = [
-        'leave_code',
+        'leave_type_id',
         'days_of_service_required',
         'credits_earned_per_period',
         'accrual_frequency',
@@ -28,6 +28,6 @@ class LeaveAccrualRate extends Model
 
     public function leaveType(): BelongsTo
     {
-        return $this->belongsTo(LeaveType::class, 'leave_code', 'leave_code');
+        return $this->belongsTo(LeaveType::class, 'leave_type_id', 'id');
     }
 }

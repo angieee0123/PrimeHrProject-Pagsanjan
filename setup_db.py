@@ -39,6 +39,8 @@ ORDER = [
     "primehrismagdalena_accredited_hours_log.sql",
     "primehrismagdalena_daily_salary_computations.sql",
     "primehrismagdalena_salary_computations.sql",
+    "primehrismagdalena_leave_types_config.sql",
+    "primehrismagdalena_leave_accrual_rates.sql",
     "primehrismagdalena_sessions.sql",
 ]
 
