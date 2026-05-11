@@ -7,7 +7,8 @@ window.switchTab = function(tab) {
     buttons.forEach(btn => {
         if ((tab === 'leave' && btn.textContent.includes('Leave Requests')) ||
             (tab === 'benefits' && btn.textContent.includes('Benefits Summary')) ||
-            (tab === 'types' && btn.textContent.includes('Leave Types'))) {
+            (tab === 'types' && btn.textContent.includes('Leave Types')) ||
+            (tab === 'accrual' && btn.textContent.includes('CSC Daily Accrual'))) {
             btn.classList.add('active');
         }
     });
@@ -15,6 +16,7 @@ window.switchTab = function(tab) {
     document.getElementById('leave-tab').style.display = 'none';
     document.getElementById('benefits-tab').style.display = 'none';
     document.getElementById('types-tab').style.display = 'none';
+    document.getElementById('accrual-tab').style.display = 'none';
 
     if (tab === 'leave') {
         document.getElementById('leave-tab').style.display = 'block';
@@ -22,6 +24,8 @@ window.switchTab = function(tab) {
         document.getElementById('benefits-tab').style.display = 'block';
     } else if (tab === 'types') {
         document.getElementById('types-tab').style.display = 'block';
+    } else if (tab === 'accrual') {
+        document.getElementById('accrual-tab').style.display = 'block';
     }
 }
 

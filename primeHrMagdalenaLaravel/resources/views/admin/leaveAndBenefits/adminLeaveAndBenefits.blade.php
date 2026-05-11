@@ -79,6 +79,7 @@ $totalDays = array_sum(array_column($leaveRequests, 'days'));
     <button class="tab-btn active" onclick="switchTab('leave')">Leave Requests</button>
     <button class="tab-btn" onclick="switchTab('benefits')">Benefits Summary</button>
     <button class="tab-btn" onclick="switchTab('types')">Leave Types</button>
+    <button class="tab-btn" onclick="switchTab('accrual')">CSC Daily Accrual</button>
 </div>
 
 @include('admin.leaveAndBenefits.partials.leave-requests-tab')
@@ -87,9 +88,13 @@ $totalDays = array_sum(array_column($leaveRequests, 'days'));
 
 @include('admin.leaveAndBenefits.partials.leave-types-tab')
 
+@include('admin.leaveAndBenefits.partials.csc-daily-accrual-tab')
+
 @include('admin.leaveAndBenefits.modals.add-leave-type-modal')
 
 @include('admin.leaveAndBenefits.modals.view-leave-type-modal')
+
+@include('admin.leaveAndBenefits.modals.add-accrual-rate-modal')
 
 @vite(['resources/css/adminLeaveAndBenefits.css', 'resources/js/adminLeaveAndBenefits.js'])
 
@@ -105,6 +110,8 @@ document.addEventListener('DOMContentLoaded', function() {
         switchTab('benefits');
     } else if (activeTab === 'leave') {
         switchTab('leave');
+    } else if (activeTab === 'accrual') {
+        switchTab('accrual');
     }
 });
 </script>

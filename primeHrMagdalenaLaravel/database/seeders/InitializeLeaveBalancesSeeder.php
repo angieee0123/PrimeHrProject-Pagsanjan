@@ -80,24 +80,32 @@ class InitializeLeaveBalancesSeeder extends Seeder
     {
         $code = $leaveType->leave_code;
         
+        // Check if employee has served 6 months for leaves that require it
+        $hasServed6Months = $this->hasServedSixMonths($appointmentDate);
+        
         // Accrued leaves (VL, SL) - calculate based on months served
         if ($leaveType->is_accrued) {
             if ($appointmentDate) {
                 $monthsServed = $this->getMonthsServedInYear($appointmentDate, $year);
-                return round($monthsServed * 1.25, 2); // 1.25 days per month
+                $accruedCredits = round($monthsServed * 1.25, 2); // 1.25 days per month
+                
+                // VL requires 6 months before it can be USED (but still accrues)
+                // SL can be used immediately as earned
+                return $accruedCredits;
             }
             return $leaveType->annual_limit; // Full 15 days if no appointment date
         }
 
-        // Fixed allocation leaves
+        // Fixed allocation leaves - check 6-month requirement
         switch ($code) {
-            case 'SPL': // Special Privilege Leave
-                return 3.00;
-            case 'ML': // Maternity Leave
-            case 'MLE': // Maternity Leave Extension
-            case 'PL': // Paternity Leave
-            case 'SOPL': // Solo Parent Leave
-            case 'VAWC': // VAWC Leave
+            case 'SPL': // Special Privilege Leave - REQUIRES 6 MONTHS
+                return $hasServed6Months ? 3.00 : 0.00;
+            case 'SOPL': // Solo Parent Leave - REQUIRES 6 MONTHS (RA 11861)
+                return $hasServed6Months ? 7.00 : 0.00;
+            case 'ML': // Maternity Leave - IMMEDIATE
+            case 'MLE': // Maternity Leave Extension - IMMEDIATE
+            case 'PL': // Paternity Leave - IMMEDIATE
+            case 'VAWC': // VAWC Leave - IMMEDIATE (Emergency)
             case 'SLBW': // Special Leave Benefits for Women
             case 'MCL': // Magna Carta Leave
             case 'BL': // Bereavement Leave
@@ -125,14 +133,14 @@ class InitializeLeaveBalancesSeeder extends Seeder
             case 'VL': // Vacation Leave - prorated
             case 'SL': // Sick Leave - prorated
                 return 5.00; // Limited credits
-            case 'ML': // Maternity Leave
-            case 'PL': // Paternity Leave
-            case 'SOPL': // Solo Parent Leave
-            case 'VAWC': // VAWC Leave
+            case 'ML': // Maternity Leave - IMMEDIATE (Statutory)
+            case 'PL': // Paternity Leave - IMMEDIATE (Statutory)
+            case 'VAWC': // VAWC Leave - IMMEDIATE (Emergency)
                 return $leaveType->annual_limit; // Mandated by law
-            case 'SPL': // Special Privilege Leave
+            case 'SOPL': // Solo Parent Leave - REQUIRES 6 MONTHS
+            case 'SPL': // Special Privilege Leave - REQUIRES 6 MONTHS
             case 'BL': // Bereavement Leave
-                return 3.00;
+                return 0.00; // Usually not granted to contractual
             default:
                 return null; // Not eligible
         }
@@ -146,11 +154,12 @@ class InitializeLeaveBalancesSeeder extends Seeder
         switch ($code) {
             case 'SL': // Sick Leave only
                 return 5.00; // Limited sick leave
-            case 'ML': // Maternity Leave
-            case 'PL': // Paternity Leave
-            case 'SOPL': // Solo Parent Leave
-            case 'VAWC': // VAWC Leave
+            case 'ML': // Maternity Leave - IMMEDIATE (Statutory)
+            case 'PL': // Paternity Leave - IMMEDIATE (Statutory)
+            case 'VAWC': // VAWC Leave - IMMEDIATE (Emergency)
                 return $leaveType->annual_limit; // Mandated by law
+            case 'SOPL': // Solo Parent Leave - REQUIRES 6 MONTHS
+                return 0.00; // Usually not granted to casual
             default:
                 return null; // Not eligible for other leaves
         }
@@ -174,5 +183,15 @@ class InitializeLeaveBalancesSeeder extends Seeder
         }
 
         return $serviceStart->diffInMonths($serviceEnd) + 1;
+    }
+
+    private function hasServedSixMonths($appointmentDate)
+    {
+        if (!$appointmentDate) {
+            return true; // Assume eligible if no appointment date
+        }
+        
+        $monthsServed = Carbon::parse($appointmentDate)->diffInMonths(Carbon::now());
+        return $monthsServed >= 6;
     }
 }
