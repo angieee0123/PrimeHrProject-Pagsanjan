@@ -279,3 +279,36 @@ window.updateFileName = function(input) {
         fileNameDisplay.textContent = 'Choose PDF file or drag here';
     }
 }
+
+window.sortLeaveTypes = function(column) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSort = urlParams.get('sort_by');
+    const currentOrder = urlParams.get('sort_order') || 'asc';
+    
+    let newOrder = 'asc';
+    if (currentSort === column && currentOrder === 'asc') {
+        newOrder = 'desc';
+    }
+    
+    urlParams.set('sort_by', column);
+    urlParams.set('sort_order', newOrder);
+    urlParams.set('tab', 'types'); // Preserve tab
+    
+    window.location.search = urlParams.toString();
+}
+
+window.changePerPage = function(perPage) {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('per_page', perPage);
+    urlParams.delete('page'); // Reset to first page
+    urlParams.set('tab', 'types'); // Preserve tab
+    
+    window.location.search = urlParams.toString();
+}
+
+window.navigateToPage = function(url) {
+    // Add tab parameter to URL
+    const urlObj = new URL(url, window.location.origin);
+    urlObj.searchParams.set('tab', 'types');
+    window.location.href = urlObj.toString();
+}

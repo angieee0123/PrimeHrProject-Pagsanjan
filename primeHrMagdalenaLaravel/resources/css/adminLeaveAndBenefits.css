@@ -52,9 +52,12 @@
     border-radius: 6px; background: #fff; color: #6b6a8a;
     font-size: 13px; font-weight: 600; cursor: pointer;
     font-family: 'Poppins', sans-serif; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
 }
 .page-btn.active { background: #0b044d; color: #fff; border-color: #0b044d; }
-.page-btn:hover { background: #f7f6ff; }
+.page-btn:hover:not(:disabled) { background: #f7f6ff; }
+.page-btn:disabled { cursor: not-allowed; opacity: 0.5; }
 .deduction {
     font-size: 13px; color: #8e1e18; font-weight: 600;
 }
@@ -313,3 +316,29 @@
     display: flex; align-items: center; gap: 6px;
 }
 .modal-btn-primary:hover { background: #1a0f6e; }
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: all 0.2s;
+}
+.sortable:hover {
+    background: #f7f6ff;
+}
+.sort-icon {
+    display: inline-block;
+    margin-left: 4px;
+    opacity: 0.3;
+    transition: all 0.2s;
+    vertical-align: middle;
+}
+.sortable:hover .sort-icon {
+    opacity: 0.6;
+}
+.sortable.active .sort-icon {
+    opacity: 1;
+    color: #0b044d;
+}
+.sortable.desc .sort-icon {
+    transform: rotate(180deg);
+}

@@ -9,10 +9,33 @@ class LeaveController extends Controller
 {
     public function index()
     {
-        // Fetch leave types from database with pagination
-        $leaveTypes = LeaveType::where('is_active', true)
-            ->orderBy('leave_code')
-            ->paginate(10); // 10 items per page
+        // Get query parameters
+        $sortBy = request('sort_by', 'leave_code');
+        $sortOrder = request('sort_order', 'asc');
+        $perPage = request('per_page', 10);
+
+        // Validate sort column
+        $allowedSortColumns = ['leave_code', 'leave_name', 'annual_limit', 'is_accrued', 'is_active'];
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'leave_code';
+        }
+
+        // Validate sort order
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
+
+        // Validate per page
+        $perPage = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 10;
+
+        // Fetch leave types from database with pagination and sorting
+        $leaveTypes = LeaveType::orderBy($sortBy, $sortOrder)
+            ->paginate($perPage)
+            ->appends([
+                'sort_by' => $sortBy,
+                'sort_order' => $sortOrder,
+                'per_page' => $perPage
+            ]);
 
         // Sample leave requests data (you can create a table for this later)
         $leaveRequests = [

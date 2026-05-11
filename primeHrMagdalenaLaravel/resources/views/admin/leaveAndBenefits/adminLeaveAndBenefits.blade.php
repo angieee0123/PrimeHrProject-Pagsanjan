@@ -92,4 +92,20 @@ $totalDays = array_sum(array_column($leaveRequests, 'days'));
 @include('admin.leaveAndBenefits.modals.view-leave-type-modal')
 
 @vite(['resources/css/adminLeaveAndBenefits.css', 'resources/js/adminLeaveAndBenefits.js'])
+
+<script>
+// Check URL parameter and switch to correct tab on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeTab = urlParams.get('tab');
+    
+    if (activeTab === 'types') {
+        switchTab('types');
+    } else if (activeTab === 'benefits') {
+        switchTab('benefits');
+    } else if (activeTab === 'leave') {
+        switchTab('leave');
+    }
+});
+</script>
 @endsection
