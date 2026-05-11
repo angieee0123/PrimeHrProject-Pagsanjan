@@ -28,7 +28,7 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .tab-content.active { display: block; }
 
 .table-section { background: #fff; border-radius: 12px; border: 1px solid #f0effe; overflow: hidden; }
-.table-header { padding: 20px 24px; border-bottom: 1px solid #f0effe; display: flex; justify-content: space-between; align-items: center; }
+.table-header { padding: 20px 24px; border-bottom: 1px solid #f0effe; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
 .table-title { font-size: 16px; font-weight: 700; color: #0b044d; margin-bottom: 4px; }
 .table-sub { font-size: 12px; color: #9999bb; }
 .table-actions { display: flex; gap: 10px; }
@@ -38,10 +38,12 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .btn-export:hover { box-shadow: 0 0 0 2px rgba(11,4,77,0.15); }
 .modal-btn-primary { background: #0b044d; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; }
 
-.table-wrapper { overflow-x: auto; }
+.table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #f0effe; }
 .payroll-table { width: 100%; border-collapse: collapse; }
-.payroll-table th { text-align: left; padding: 14px 20px; font-size: 11.5px; font-weight: 700; color: #6b6a8a; text-transform: uppercase; letter-spacing: 0.5px; background: #f7f6ff; border-bottom: 1px solid #f0effe; }
-.payroll-table td { padding: 16px 20px; font-size: 13px; border-bottom: 1px solid #f7f6ff; }
+.payroll-table th { text-align: left; padding: 14px 20px; font-size: 12px; font-weight: 700; color: #0b044d; text-transform: uppercase; letter-spacing: 0.5px; background: #f7f6ff; border-bottom: 2px solid #e8e7f5; }
+.payroll-table tbody tr { border-bottom: 1px solid #f5f4fb; transition: background 0.15s; }
+.payroll-table tbody tr:hover { background: #fafaf9; }
+.payroll-table td { padding: 16px 20px; font-size: 13px; color: #0b044d; }
 .emp-cell { display: flex; align-items: center; gap: 12px; }
 .emp-avatar { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; flex-shrink: 0; }
 .emp-name { font-size: 13.5px; font-weight: 600; color: #0b044d; margin-bottom: 2px; }
@@ -51,11 +53,11 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .pay-cell { font-weight: 600; color: #0b044d; }
 .deduction { color: #8e1e18; font-weight: 600; }
 .net-pay { color: #15803d; font-weight: 700; font-size: 14px; }
-.badge-status { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
-.badge-status.processed { background: #e8f9ef; color: #15803d; }
-.badge-status.pending { background: #fef3e8; color: #d9bb00; }
-.badge-status.on-hold { background: #fee8e8; color: #8e1e18; }
-.btn-view { padding: 6px 16px; background: #f0effe; color: #0b044d; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
+.badge-status { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; border: none; }
+.badge-status.processed { background: #dcfce7; color: #15803d; }
+.badge-status.pending { background: #fef3d8; color: #b45309; }
+.badge-status.on-hold { background: #fee2e2; color: #8e1e18; }
+.btn-view { padding: 7px 14px; background: #f0effe; color: #0b044d; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
 .btn-view:hover { background: #e8e7f5; }
 
 /* ══════════════════════════════════════════════════════
@@ -119,6 +121,10 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
     .table-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
 
     .filter-select, .btn-export, .modal-btn-primary { min-width: auto; }
+
+    .leave-type-item { flex-direction: column; align-items: flex-start; }
+    .leave-type-meta { width: 100%; }
+    .leave-type-actions { width: 100%; justify-content: flex-start; }
 }
 
 @media (max-width: 768px) {

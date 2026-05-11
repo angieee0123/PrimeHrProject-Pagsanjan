@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\EmployeeRegistrationController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\LeaveController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -564,9 +565,8 @@ Route::get('/admin/attendance/record/{attendanceId}', [AttendanceController::cla
 Route::get('/admin/attendance/{attendanceId}/accredited-log', [AttendanceController::class, 'getAccreditedHoursLog'])->middleware('auth')->name('admin.attendance.accredited-log');
 Route::post('/admin/attendance/correct', [AttendanceController::class, 'correctAttendance'])->middleware('auth')->name('admin.attendance.correct');
 
-Route::get('/admin/leave', function () {
-    return view('admin.leaveAndBenefits.adminLeaveAndBenefits');
-})->middleware('auth')->name('admin.leave');
+Route::get('/admin/leave', [LeaveController::class, 'index'])->middleware('auth')->name('admin.leave');
+Route::post('/admin/leave/types/store', [LeaveController::class, 'storeLeaveType'])->middleware('auth')->name('admin.leave.types.store');
 
 Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
     $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
