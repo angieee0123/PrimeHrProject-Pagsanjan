@@ -712,7 +712,7 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .modal-btn-primary { background: #0b044d; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; }
 
 .table-wrapper { overflow-x: auto; }
-.payroll-table { width: 100%; border-collapse: collapse; }
+.payroll-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .payroll-table th { text-align: left; padding: 14px 20px; font-size: 11.5px; font-weight: 700; color: #6b6a8a; text-transform: uppercase; letter-spacing: 0.5px; background: #f7f6ff; border-bottom: 1px solid #f0effe; }
 .payroll-table td { padding: 16px 20px; font-size: 13px; border-bottom: 1px solid #f7f6ff; }
 .emp-cell { display: flex; align-items: center; gap: 12px; }
