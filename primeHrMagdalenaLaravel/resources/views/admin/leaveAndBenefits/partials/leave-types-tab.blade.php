@@ -43,10 +43,6 @@
                         Annual Limit
                         <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </th>
-                    <th class="sortable" onclick="sortLeaveTypes('is_accrued')">
-                        Type
-                        <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                    </th>
                     <th>Attachment</th>
                     <th class="sortable" onclick="sortLeaveTypes('is_active')">
                         Status
@@ -59,7 +55,7 @@
                 @forelse($leaveTypes as $type)
                 <tr class="leave-type-row" data-status="{{ $type->is_active ? 'active' : 'inactive' }}" data-accrual="{{ $type->is_accrued ? 'accrued' : 'fixed' }}">
                     <td>
-                        <div class="emp-avatar" style="background: {{ ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'][$loop->index % 6] }}; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; color: white; font-weight: 600; font-size: 13px;">
+                        <div class="emp-avatar" style="background: {{ ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'][$loop->index % 6] }};">
                             {{ $type->leave_code }}
                         </div>
                     </td>
@@ -71,8 +67,7 @@
                             <span style="color: #6b6a8a;">As needed</span>
                         @endif
                     </td>
-                    <td><span class="badge-type {{ $type->is_accrued ? 'accrued' : 'fixed' }}">{{ $type->is_accrued ? 'Accrued' : 'Fixed' }}</span></td>
-                    <td style="font-size: 13px; color: #6b6a8a;">
+                    <td>
                         @if($type->attachment_info)
                             {{ $type->attachment_info }}
                         @else
@@ -89,7 +84,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 40px; color: #6b6a8a;">No leave types found</td>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #6b6a8a;">No leave types found</td>
                 </tr>
                 @endforelse
             </tbody>

@@ -1,11 +1,9 @@
 // JavaScript for adminLeaveAndBenefits.blade.php
 
 window.switchTab = function(tab) {
-    // Update tab buttons
     const buttons = document.querySelectorAll('.tab-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
     
-    // Find and activate the clicked button
     buttons.forEach(btn => {
         if ((tab === 'leave' && btn.textContent.includes('Leave Requests')) ||
             (tab === 'benefits' && btn.textContent.includes('Benefits Summary')) ||
@@ -14,7 +12,6 @@ window.switchTab = function(tab) {
         }
     });
 
-    // Show/hide tab content
     document.getElementById('leave-tab').style.display = 'none';
     document.getElementById('benefits-tab').style.display = 'none';
     document.getElementById('types-tab').style.display = 'none';
@@ -28,41 +25,19 @@ window.switchTab = function(tab) {
     }
 }
 
-window.openLeaveTypesModal = function() {
-    document.getElementById('leaveTypesModal').classList.add('active');
-}
-
-window.closeLeaveTypesModal = function(event) {
-    if (!event || event.target.id === 'leaveTypesModal') {
-        document.getElementById('leaveTypesModal').classList.remove('active');
-    }
-}
-
-window.openAddLeaveTypeForm = function() {
-    alert('Add Leave Type form will be implemented next!');
-}
-
 window.openAddLeaveTypeModal = function() {
-    // Reset form for adding new leave type
     const form = document.getElementById('addLeaveTypeForm');
     form.reset();
     form.action = '/admin/leave/types';
     
-    // Remove method spoofing if exists
     const methodInput = form.querySelector('input[name="_method"]');
     if (methodInput) methodInput.remove();
     
-    // Reset modal title
     document.querySelector('#addLeaveTypeModal .modal-title').textContent = 'Add New Leave Type';
     document.querySelector('#addLeaveTypeModal .modal-subtitle').textContent = 'Create a new leave type for LGU Pagsanjan';
     
-    // Reset leave code readonly
     form.querySelector('input[name="leave_code"]').readOnly = false;
-    
-    // Reset submit button
     form.querySelector('.btn-submit').textContent = 'Add Leave Type';
-    
-    // Reset file display
     document.getElementById('fileNameDisplay').textContent = 'Choose PDF file or drag here';
     
     document.getElementById('addLeaveTypeModal').classList.add('active');
@@ -85,8 +60,6 @@ document.getElementById('addLeaveTypeForm')?.addEventListener('submit', function
             return false;
         }
     }
-
-    // Form will submit normally to the server
 });
 
 window.viewLeaveType = function(code) {
@@ -98,12 +71,10 @@ window.viewLeaveType = function(code) {
             document.getElementById('viewAnnualLimit').textContent = data.annual_limit > 0 ? `${data.annual_limit} days` : 'As needed';
             document.getElementById('viewLeaveTypeAccrual').textContent = data.is_accrued ? 'Accrued' : 'Fixed';
             
-            // Status badge
             const statusBadge = document.getElementById('viewLeaveStatus');
             statusBadge.textContent = data.is_active ? 'Active' : 'Inactive';
             statusBadge.className = data.is_active ? 'badge-status processed' : 'badge-status on-hold';
 
-            // Configuration badges
             const configContainer = document.getElementById('viewLeaveConfig');
             configContainer.innerHTML = '';
             const configs = [];
@@ -124,7 +95,6 @@ window.viewLeaveType = function(code) {
                 configContainer.innerHTML = '<span style="color: #9ca3af; font-size: 13px;">No special configuration</span>';
             }
 
-            // Attachment info
             const attachmentGroup = document.getElementById('viewAttachmentInfoGroup');
             if (data.attachment_info) {
                 document.getElementById('viewAttachmentInfo').textContent = data.attachment_info;
@@ -133,7 +103,6 @@ window.viewLeaveType = function(code) {
                 attachmentGroup.style.display = 'none';
             }
 
-            // Document
             const documentGroup = document.getElementById('viewDocumentGroup');
             if (data.document_path) {
                 document.getElementById('viewDocumentLink').href = `/storage/${data.document_path}`;
@@ -142,7 +111,6 @@ window.viewLeaveType = function(code) {
                 documentGroup.style.display = 'none';
             }
 
-            // Store code for edit
             document.getElementById('viewLeaveTypeModal').setAttribute('data-leave-code', code);
             document.getElementById('viewLeaveTypeModal').classList.add('active');
         })
@@ -168,15 +136,12 @@ window.editLeaveType = function(code) {
     fetch(`/admin/leave/types/${code}`)
         .then(response => response.json())
         .then(data => {
-            // Update modal title
             document.querySelector('#addLeaveTypeModal .modal-title').textContent = 'Edit Leave Type';
             document.querySelector('#addLeaveTypeModal .modal-subtitle').textContent = 'Update leave type configuration';
             
-            // Update form action
             const form = document.getElementById('addLeaveTypeForm');
             form.action = `/admin/leave/types/${code}`;
             
-            // Add method spoofing for PUT request
             let methodInput = form.querySelector('input[name="_method"]');
             if (!methodInput) {
                 methodInput = document.createElement('input');
@@ -186,32 +151,25 @@ window.editLeaveType = function(code) {
             }
             methodInput.value = 'PUT';
             
-            // Populate form fields
             form.querySelector('input[name="leave_code"]').value = data.leave_code;
             form.querySelector('input[name="leave_code"]').readOnly = true;
             form.querySelector('input[name="leave_name"]').value = data.leave_name;
             form.querySelector('input[name="annual_limit"]').value = data.annual_limit;
             form.querySelector('select[name="is_active"]').value = data.is_active ? '1' : '0';
             
-            // Checkboxes
             form.querySelector('input[name="is_accrued"]').checked = data.is_accrued;
             form.querySelector('input[name="is_cumulative"]').checked = data.is_cumulative;
             form.querySelector('input[name="requires_6_months"]').checked = data.requires_6_months;
             form.querySelector('input[name="is_monetizable"]').checked = data.is_monetizable;
             form.querySelector('input[name="requires_attachment"]').checked = data.requires_attachment;
             
-            // Textarea
             form.querySelector('textarea[name="attachment_info"]').value = data.attachment_info || '';
-            
-            // Update submit button
             form.querySelector('.btn-submit').textContent = 'Update Leave Type';
             
-            // Show document info if exists
             if (data.document_path) {
                 document.getElementById('fileNameDisplay').textContent = 'Current: ' + data.document_path.split('/').pop();
             }
             
-            // Open modal
             document.getElementById('addLeaveTypeModal').classList.add('active');
         })
         .catch(error => {
@@ -292,7 +250,7 @@ window.sortLeaveTypes = function(column) {
     
     urlParams.set('sort_by', column);
     urlParams.set('sort_order', newOrder);
-    urlParams.set('tab', 'types'); // Preserve tab
+    urlParams.set('tab', 'types');
     
     window.location.search = urlParams.toString();
 }
@@ -300,14 +258,13 @@ window.sortLeaveTypes = function(column) {
 window.changePerPage = function(perPage) {
     const urlParams = new URLSearchParams(window.location.search);
     urlParams.set('per_page', perPage);
-    urlParams.delete('page'); // Reset to first page
-    urlParams.set('tab', 'types'); // Preserve tab
+    urlParams.delete('page');
+    urlParams.set('tab', 'types');
     
     window.location.search = urlParams.toString();
 }
 
 window.navigateToPage = function(url) {
-    // Add tab parameter to URL
     const urlObj = new URL(url, window.location.origin);
     urlObj.searchParams.set('tab', 'types');
     window.location.href = urlObj.toString();
