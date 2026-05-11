@@ -570,6 +570,12 @@ Route::post('/admin/leave/types/store', [LeaveController::class, 'storeLeaveType
 Route::get('/admin/leave/types/{code}', [LeaveController::class, 'show'])->middleware('auth')->name('admin.leave.types.show');
 Route::put('/admin/leave/types/{code}', [LeaveController::class, 'update'])->middleware('auth')->name('admin.leave.types.update');
 
+// Accrual Rate Routes
+Route::post('/admin/leave/accrual-rates', [LeaveController::class, 'storeAccrualRate'])->middleware('auth')->name('admin.leave.accrual-rates.store');
+Route::get('/admin/leave/accrual-rates/{id}', [LeaveController::class, 'showAccrualRate'])->middleware('auth')->name('admin.leave.accrual-rates.show');
+Route::put('/admin/leave/accrual-rates/{id}', [LeaveController::class, 'updateAccrualRate'])->middleware('auth')->name('admin.leave.accrual-rates.update');
+Route::delete('/admin/leave/accrual-rates/{id}', [LeaveController::class, 'destroyAccrualRate'])->middleware('auth')->name('admin.leave.accrual-rates.destroy');
+
 Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
     $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
     $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
