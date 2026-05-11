@@ -31,19 +31,38 @@
         <table class="payroll-table">
             <thead>
                 <tr>
-                    <th>Code</th>
-                    <th>Leave Type</th>
-                    <th>Annual Limit</th>
-                    <th>Type</th>
+                    <th class="sortable" onclick="sortLeaveTypes('leave_code')">
+                        Code
+                        <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </th>
+                    <th class="sortable" onclick="sortLeaveTypes('leave_name')">
+                        Leave Type
+                        <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </th>
+                    <th class="sortable" onclick="sortLeaveTypes('annual_limit')">
+                        Annual Limit
+                        <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </th>
+                    <th class="sortable" onclick="sortLeaveTypes('is_accrued')">
+                        Type
+                        <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </th>
                     <th>Attachment</th>
-                    <th>Status</th>
+                    <th class="sortable" onclick="sortLeaveTypes('is_active')">
+                        Status
+                        <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($leaveTypes as $type)
                 <tr class="leave-type-row" data-status="{{ $type->is_active ? 'active' : 'inactive' }}" data-accrual="{{ $type->is_accrued ? 'accrued' : 'fixed' }}">
-                    <td><span class="leave-code-badge">{{ $type->leave_code }}</span></td>
+                    <td>
+                        <div class="emp-avatar" style="background: {{ ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'][$loop->index % 6] }}; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; color: white; font-weight: 600; font-size: 13px;">
+                            {{ $type->leave_code }}
+                        </div>
+                    </td>
                     <td style="font-size: 13px; color: #0b044d; font-weight: 500;">{{ $type->leave_name }}</td>
                     <td style="font-weight: 600; color: #0b044d; font-size: 13px;">
                         @if($type->annual_limit > 0)
@@ -78,27 +97,70 @@
     </div>
 
     <div class="table-footer">
-        <p>Showing <strong>{{ $leaveTypes->firstItem() ?? 0 }}</strong> to <strong>{{ $leaveTypes->lastItem() ?? 0 }}</strong> of <strong>{{ $leaveTypes->total() }}</strong> leave types</p>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <p style="margin: 0;">Showing <strong>{{ $leaveTypes->firstItem() ?? 0 }}</strong> to <strong>{{ $leaveTypes->lastItem() ?? 0 }}</strong> of <strong>{{ $leaveTypes->total() }}</strong> leave types</p>
+            <select class="filter-select" style="width: auto; padding: 6px 10px;" onchange="changePerPage(this.value)">
+                <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10 rows</option>
+                <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 rows</option>
+                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 rows</option>
+                <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100 rows</option>
+            </select>
+        </div>
         <div class="pagination">
             @if ($leaveTypes->onFirstPage())
                 <button class="page-btn" disabled>‹</button>
             @else
-                <a href="{{ $leaveTypes->previousPageUrl() }}" class="page-btn">‹</a>
+                <a href="{{ $leaveTypes->appends(request()->except('page'))->previousPageUrl() }}#types-tab" class="page-btn" onclick="event.preventDefault(); navigateToPage('{{ $leaveTypes->appends(request()->except('page'))->previousPageUrl() }}');">‹</a>
             @endif
 
             @foreach ($leaveTypes->getUrlRange(1, $leaveTypes->lastPage()) as $page => $url)
                 @if ($page == $leaveTypes->currentPage())
                     <button class="page-btn active">{{ $page }}</button>
                 @else
-                    <a href="{{ $url }}" class="page-btn">{{ $page }}</a>
+                    <a href="{{ $leaveTypes->appends(request()->except('page'))->url($page) }}#types-tab" class="page-btn" onclick="event.preventDefault(); navigateToPage('{{ $leaveTypes->appends(request()->except('page'))->url($page) }}');">{{ $page }}</a>
                 @endif
             @endforeach
 
             @if ($leaveTypes->hasMorePages())
-                <a href="{{ $leaveTypes->nextPageUrl() }}" class="page-btn">›</a>
+                <a href="{{ $leaveTypes->appends(request()->except('page'))->nextPageUrl() }}#types-tab" class="page-btn" onclick="event.preventDefault(); navigateToPage('{{ $leaveTypes->appends(request()->except('page'))->nextPageUrl() }}');">›</a>
             @else
                 <button class="page-btn" disabled>›</button>
             @endif
         </div>
     </div>
 </section>
+
+<script>
+// Highlight active sort column
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sortBy = urlParams.get('sort_by');
+    const sortOrder = urlParams.get('sort_order') || 'asc';
+    
+    if (sortBy) {
+        const columnMap = {
+            'leave_code': 0,
+            'leave_name': 1,
+            'annual_limit': 2,
+            'is_accrued': 3,
+            'is_active': 5
+        };
+        
+        const columnIndex = columnMap[sortBy];
+        if (columnIndex !== undefined) {
+            const headers = document.querySelectorAll('#types-tab th.sortable');
+            const targetHeader = Array.from(headers).find((th, idx) => {
+                const onclick = th.getAttribute('onclick');
+                return onclick && onclick.includes(sortBy);
+            });
+            
+            if (targetHeader) {
+                targetHeader.classList.add('active');
+                if (sortOrder === 'desc') {
+                    targetHeader.classList.add('desc');
+                }
+            }
+        }
+    }
+});
+</script>
