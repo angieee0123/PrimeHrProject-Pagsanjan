@@ -199,7 +199,8 @@
 }
 .badge-type {
     font-size: 11px; padding: 5px 12px; border-radius: 20px;
-    font-weight: 600; border: none;
+    font-weight: 600; border: none; display: inline-block;
+    vertical-align: middle;
 }
 .badge-type.accrued {
     background: #dcfce7; color: #15803d;
@@ -341,4 +342,27 @@
 }
 .sortable.desc .sort-icon {
     transform: rotate(180deg);
+}
+
+#types-tab .payroll-table tbody tr {
+    height: 70px;
+}
+
+#types-tab .payroll-table td {
+    vertical-align: middle;
+}
+
+#types-tab .payroll-table td:nth-child(1) {
+    text-align: center;
+}
+
+#types-tab .payroll-table td:nth-child(4) {
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#types-tab .emp-avatar {
+    display: inline-flex;
 }
