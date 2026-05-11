@@ -567,6 +567,8 @@ Route::post('/admin/attendance/correct', [AttendanceController::class, 'correctA
 
 Route::get('/admin/leave', [LeaveController::class, 'index'])->middleware('auth')->name('admin.leave');
 Route::post('/admin/leave/types/store', [LeaveController::class, 'storeLeaveType'])->middleware('auth')->name('admin.leave.types.store');
+Route::get('/admin/leave/types/{code}', [LeaveController::class, 'show'])->middleware('auth')->name('admin.leave.types.show');
+Route::put('/admin/leave/types/{code}', [LeaveController::class, 'update'])->middleware('auth')->name('admin.leave.types.update');
 
 Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
     $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));

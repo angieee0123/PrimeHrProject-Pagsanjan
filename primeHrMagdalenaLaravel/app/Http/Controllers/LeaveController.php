@@ -74,4 +74,52 @@ class LeaveController extends Controller
 
         return redirect()->route('admin.leave')->with('success', 'Leave type added successfully!');
     }
+
+    public function show($code)
+    {
+        $leaveType = LeaveType::where('leave_code', $code)->firstOrFail();
+        return response()->json($leaveType);
+    }
+
+    public function update(Request $request, $code)
+    {
+        $leaveType = LeaveType::where('leave_code', $code)->firstOrFail();
+
+        $validated = $request->validate([
+            'leave_name' => 'required|string|max:100',
+            'annual_limit' => 'required|numeric|min:0',
+            'is_accrued' => 'boolean',
+            'is_cumulative' => 'boolean',
+            'requires_6_months' => 'boolean',
+            'is_monetizable' => 'boolean',
+            'requires_attachment' => 'boolean',
+            'attachment_info' => 'nullable|string',
+            'is_active' => 'required|boolean',
+            'document' => 'nullable|file|mimes:pdf|max:5120',
+        ]);
+
+        $documentPath = $leaveType->document_path;
+        if ($request->hasFile('document')) {
+            // Delete old document if exists
+            if ($documentPath && \Storage::disk('public')->exists($documentPath)) {
+                \Storage::disk('public')->delete($documentPath);
+            }
+            $documentPath = $request->file('document')->store('leave_types_documents', 'public');
+        }
+
+        $leaveType->update([
+            'leave_name' => $validated['leave_name'],
+            'annual_limit' => $validated['annual_limit'],
+            'is_accrued' => $request->has('is_accrued'),
+            'is_cumulative' => $request->has('is_cumulative'),
+            'requires_6_months' => $request->has('requires_6_months'),
+            'is_monetizable' => $request->has('is_monetizable'),
+            'requires_attachment' => $request->has('requires_attachment'),
+            'attachment_info' => $validated['attachment_info'],
+            'document_path' => $documentPath,
+            'is_active' => $validated['is_active'],
+        ]);
+
+        return redirect()->route('admin.leave')->with('success', 'Leave type updated successfully!');
+    }
 }
