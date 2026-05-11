@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
 --
--- Host: localhost    Database: primehrismagdalena
+-- Host: 127.0.0.1    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.45
+-- Server version	8.0.41
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -41,7 +41,7 @@ CREATE TABLE `sessions` (
 
 LOCK TABLES `sessions` WRITE;
 /*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
-INSERT INTO `sessions` VALUES ('hfHpD6RDZMOLF9oS4KyzYCITJgpNP2PlUNdjsZcG',1,'127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36','eyJfdG9rZW4iOiJHUmo4MkZpcXozc1FmaFFReHpGdFJid01qODFicUZYTlZOZUlpYWw0IiwiX3ByZXZpb3VzIjp7InVybCI6Imh0dHA6XC9cLzEyNy4wLjAuMTo4MDAwXC9hZG1pblwvbGVhdmUiLCJyb3V0ZSI6ImFkbWluLmxlYXZlIn0sIl9mbGFzaCI6eyJvbGQiOltdLCJuZXciOltdfSwibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiOjF9',1778133557);
+INSERT INTO `sessions` VALUES ('os4ojEY533jkmNBZag0uSi82teNy67W40gg5oRnq',1,'127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36','eyJfdG9rZW4iOiJvWGV3c1N6VE9LODlDMDJtOUR0NXEzRWRGOWlCYVdWVUFKNWpKSlQ0IiwiX3ByZXZpb3VzIjp7InVybCI6Imh0dHA6XC9cLzEyNy4wLjAuMTo4MDAwXC9hZG1pblwvbGVhdmUiLCJyb3V0ZSI6ImFkbWluLmxlYXZlIn0sIl9mbGFzaCI6eyJvbGQiOltdLCJuZXciOltdfSwibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiOjF9',1778512104);
 /*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-09 23:15:01
+-- Dump completed on 2026-05-11 23:13:25
