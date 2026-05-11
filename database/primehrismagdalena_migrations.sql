@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
 --
--- Host: localhost    Database: primehrismagdalena
+-- Host: 127.0.0.1    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.45
+-- Server version	8.0.41
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -27,7 +27,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -36,7 +36,7 @@ CREATE TABLE `migrations` (
 
 LOCK TABLES `migrations` WRITE;
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
-INSERT INTO `migrations` VALUES (1,'0001_01_01_000000_create_users_table',1),(2,'0001_01_01_000001_create_cache_table',1),(3,'0001_01_01_000002_create_jobs_table',1),(4,'2026_04_13_160307_create_departments_table',1),(5,'2026_04_13_160308_create_employees_table',1),(6,'2026_04_13_160309_create_addresses_table',1),(7,'2026_04_13_160310_create_government_ids_table',1),(8,'2026_04_13_160311_create_educations_table',1),(9,'2026_04_13_160312_create_eligibilities_table',1),(10,'2026_04_13_160313_create_work_experiences_table',1),(11,'2026_04_13_160314_create_trainings_table',1),(12,'2026_04_13_160315_create_family_members_table',1),(13,'2026_04_13_160316_create_documents_table',1),(14,'2026_04_13_160317_create_legal_requirements_table',1),(15,'2026_04_13_160318_create_employment_details_table',1),(16,'2026_04_13_160319_alter_users_table',1),(17,'2026_04_13_160320_create_contacts_table',1),(18,'2026_04_13_160321_drop_mobile_number_from_employees_table',1),(19,'2026_04_13_160322_add_photo_to_employees_table',1),(20,'2026_04_15_182306_add_timestamps_to_tables',1),(21,'2026_04_24_172146_add_status_to_users_table',1),(22,'2026_04_25_221916_create_attendance_table',1),(23,'2026_04_25_221917_create_attendance_corrections_table',1),(24,'2026_05_01_000001_add_department_id_to_employment_details_table',1),(25,'2026_05_01_000002_create_designations_table',1),(26,'2026_05_01_000003_add_monthly_rate_to_designations_table',1),(27,'2026_05_02_153215_add_accredited_hours_to_attendance_table',1),(28,'2026_05_04_000002_create_salary_computations_table',2),(29,'2026_06_01_000001_rename_position_to_designation_id_in_employment_details',2),(30,'2026_06_02_000001_create_schedules_table',2),(31,'2026_06_02_000002_add_dates_to_schedules_table',2),(32,'2026_06_03_000001_add_total_hours_to_attendance_table',2),(33,'2026_06_03_000002_create_accredited_hours_log_table',2),(34,'2026_06_03_000003_normalize_accredited_hours_log_table',2),(35,'2026_06_04_000001_create_daily_salary_computations_table',2);
+INSERT INTO `migrations` VALUES (1,'0001_01_01_000000_create_users_table',1),(2,'0001_01_01_000001_create_cache_table',1),(3,'0001_01_01_000002_create_jobs_table',1),(4,'2026_04_13_160307_create_departments_table',1),(5,'2026_04_13_160308_create_employees_table',1),(6,'2026_04_13_160309_create_addresses_table',1),(7,'2026_04_13_160310_create_government_ids_table',1),(8,'2026_04_13_160311_create_educations_table',1),(9,'2026_04_13_160312_create_eligibilities_table',1),(10,'2026_04_13_160313_create_work_experiences_table',1),(11,'2026_04_13_160314_create_trainings_table',1),(12,'2026_04_13_160315_create_family_members_table',1),(13,'2026_04_13_160316_create_documents_table',1),(14,'2026_04_13_160317_create_legal_requirements_table',1),(15,'2026_04_13_160318_create_employment_details_table',1),(16,'2026_04_13_160319_alter_users_table',1),(17,'2026_04_13_160320_create_contacts_table',1),(18,'2026_04_13_160321_drop_mobile_number_from_employees_table',1),(19,'2026_04_13_160322_add_photo_to_employees_table',1),(20,'2026_04_15_182306_add_timestamps_to_tables',1),(21,'2026_04_24_172146_add_status_to_users_table',1),(22,'2026_04_25_221916_create_attendance_table',1),(23,'2026_04_25_221917_create_attendance_corrections_table',1),(24,'2026_05_01_000001_add_department_id_to_employment_details_table',1),(25,'2026_05_01_000002_create_designations_table',1),(26,'2026_05_01_000003_add_monthly_rate_to_designations_table',1),(27,'2026_05_02_153215_add_accredited_hours_to_attendance_table',1),(28,'2026_05_04_000002_create_salary_computations_table',2),(29,'2026_06_01_000001_rename_position_to_designation_id_in_employment_details',2),(30,'2026_06_02_000001_create_schedules_table',2),(31,'2026_06_02_000002_add_dates_to_schedules_table',2),(32,'2026_06_03_000001_add_total_hours_to_attendance_table',2),(33,'2026_06_03_000002_create_accredited_hours_log_table',2),(34,'2026_06_03_000003_normalize_accredited_hours_log_table',2),(35,'2026_06_04_000001_create_daily_salary_computations_table',2),(36,'2026_06_05_000001_create_leave_types_config_table',3);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -49,4 +49,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-09 23:15:01
+-- Dump completed on 2026-05-11 23:13:18
