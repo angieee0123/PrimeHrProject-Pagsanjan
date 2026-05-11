@@ -210,6 +210,75 @@
         </div>
 
         <div id="tab-credits" class="tab-content hidden">
+                <section class="table-section" style="margin-bottom: 24px;">
+                    <div class="table-header">
+                        <div>
+                            <h3 class="table-title">Available Leave Types</h3>
+                            <p class="table-sub">All registered leave types you can file · Based on CSC 2026 guidelines</p>
+                        </div>
+                    </div>
+                    <div class="table-wrapper" style="overflow-x: auto;">
+                        <table class="payroll-table" style="min-width: 800px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80px;">Code</th>
+                                    <th>Leave Type</th>
+                                    <th style="width: 130px;">Annual Limit</th>
+                                    <th style="width: 120px;">Available</th>
+                                    <th style="width: 100px;">Used</th>
+                                    <th style="width: 100px;">Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($leaveTypes ?? [] as $type)
+                                <tr>
+                                    <td>
+                                        <span class="leave-code-badge">{{ $type->leave_code }}</span>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <p style="font-size: 13px; color: #0b044d; font-weight: 600; margin: 0;">{{ $type->leave_name }}</p>
+                                            @if($type->attachment_info)
+                                            <p style="font-size: 11px; color: #6b6a8a; margin: 2px 0 0 0; line-height: 1.4;">{{ Str::limit($type->attachment_info, 80) }}</p>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td style="font-weight: 600; color: #0b044d; font-size: 13px;">
+                                        @if($type->annual_limit > 0)
+                                            {{ number_format($type->annual_limit, 0) }} days
+                                        @else
+                                            <span style="color: #6b6a8a;">As needed</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            // TODO: Replace with actual user leave balance from database
+                                            $available = $type->annual_limit > 0 ? $type->annual_limit : 0;
+                                        @endphp
+                                        <span style="font-size: 14px; font-weight: 700; color: #15803d;">{{ number_format($available, 0) }}</span>
+                                    </td>
+                                    <td>
+                                        <span style="font-size: 13px; font-weight: 600; color: #8e1e18;">0</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge-type {{ $type->is_accrued ? 'accrued' : 'fixed' }}">{{ $type->is_accrued ? 'Accrued' : 'Fixed' }}</span>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 40px; color: #6b6a8a;">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 12px; opacity: 0.3;">
+                                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        <p style="margin: 0; font-size: 14px;">No leave types available</p>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
                 <div class="credits-grid">
                     <div class="credit-card">
                         <div class="credit-header">

@@ -1582,3 +1582,21 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
         font-size: 16px;
     }
 }
+
+/* Leave Types Table Styles */
+.leave-code-badge {
+    display: inline-block; padding: 6px 12px; background: #0b044d;
+    color: #fff; border-radius: 6px; font-size: 12px;
+    font-weight: 700; font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+}
+.badge-type {
+    font-size: 11px; padding: 5px 12px; border-radius: 20px;
+    font-weight: 600; border: none;
+}
+.badge-type.accrued {
+    background: #dcfce7; color: #15803d;
+}
+.badge-type.fixed {
+    background: #f0effe; color: #0b044d;
+}
