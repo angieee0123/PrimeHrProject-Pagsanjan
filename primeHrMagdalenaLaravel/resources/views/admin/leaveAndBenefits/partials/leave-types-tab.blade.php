@@ -43,6 +43,10 @@
                         Annual Limit
                         <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </th>
+                    <th class="sortable" onclick="sortLeaveTypes('is_accrued')">
+                        Type
+                        <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </th>
                     <th>Attachment</th>
                     <th class="sortable" onclick="sortLeaveTypes('is_active')">
                         Status
@@ -63,11 +67,12 @@
                     <td style="font-weight: 600; color: #0b044d; font-size: 13px;">
                         @if($type->annual_limit > 0)
                             {{ number_format($type->annual_limit, 0) }} days
-                        @else
+                        @
                             <span style="color: #6b6a8a;">As needed</span>
                         @endif
                     </td>
-                    <td>
+                    <td><span class="badge-type {{ $type->is_accrued ? 'accrued' : 'fixed' }}">{{ $type->is_accrued ? 'Accrued' : 'Fixed' }}</span></td>
+                    <td style="font-size: 13px; color: #6b6a8a;">
                         @if($type->attachment_info)
                             {{ $type->attachment_info }}
                         @else
@@ -84,7 +89,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 40px; color: #6b6a8a;">No leave types found</td>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #6b6a8a;">No leave types found</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -131,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const sortBy = urlParams.get('sort_by');
     const sortOrder = urlParams.get('sort_order') || 'asc';
-    
+
     if (sortBy) {
         const columnMap = {
             'leave_code': 0,
@@ -140,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'is_accrued': 3,
             'is_active': 5
         };
-        
+
         const columnIndex = columnMap[sortBy];
         if (columnIndex !== undefined) {
             const headers = document.querySelectorAll('#types-tab th.sortable');
@@ -148,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const onclick = th.getAttribute('onclick');
                 return onclick && onclick.includes(sortBy);
             });
-            
+
             if (targetHeader) {
                 targetHeader.classList.add('active');
                 if (sortOrder === 'desc') {
