@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\LeaveType;
+use App\Models\LeaveAccrualRate;
 
 class LeaveController extends Controller
 {
@@ -37,6 +38,13 @@ class LeaveController extends Controller
                 'per_page' => $perPage
             ]);
 
+        // Fetch accrual rates with leave type relationship
+        $accrualRates = LeaveAccrualRate::with('leaveType')
+            ->orderBy('is_active', 'desc')
+            ->orderBy('leave_code', 'asc')
+            ->orderBy('effective_date', 'desc')
+            ->paginate(10);
+
         // Sample leave requests data (you can create a table for this later)
         $leaveRequests = [
             ['id' => 'LV-2025-001', 'empId' => 'PGS-0041', 'name' => 'Maria B. Santos', 'position' => 'Administrative Officer IV', 'dept' => 'Office of the Mayor', 'type' => 'Vacation Leave', 'from' => 'Jun 10, 2025', 'to' => 'Jun 12, 2025', 'days' => 3, 'reason' => 'Family vacation', 'status' => 'Approved'],
@@ -57,7 +65,7 @@ class LeaveController extends Controller
             ['empId' => 'PGS-0310', 'name' => 'Roberto T. Flores', 'gsis' => '₱2,748', 'philhealth' => '₱775', 'pagibig' => '₱100', 'vlBalance' => 8, 'slBalance' => 10],
         ];
 
-        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact('leaveTypes', 'leaveRequests', 'benefitsData'));
+        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact('leaveTypes', 'leaveRequests', 'benefitsData', 'accrualRates'));
     }
 
     public function storeLeaveType(Request $request)
