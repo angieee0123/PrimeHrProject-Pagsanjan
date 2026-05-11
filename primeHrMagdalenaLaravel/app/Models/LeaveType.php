@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class LeaveType extends Model
 {
     protected $table = 'leave_types_config';
-    protected $primaryKey = 'leave_code';
-    public $incrementing = false;
-    protected $keyType = 'string';
 
     protected $fillable = [
         'leave_code',
