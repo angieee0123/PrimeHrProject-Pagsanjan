@@ -4,7 +4,7 @@ import sys
 
 HOST = "localhost"
 USER = "root"
-PASSWORD = ""
+PASSWORD = "admin"
 DATABASE = "primehrismagdalena"
 
 SQL_FOLDER = os.path.join(os.path.dirname(__file__), "database")
@@ -42,6 +42,7 @@ ORDER = [
     "primehrismagdalena_leave_types_config.sql",
     "primehrismagdalena_leave_accrual_rates.sql",
     "primehrismagdalena_sessions.sql",
+    "primehrismagdalena_chat_history.sql",
 ]
 
 def mysql_cmd(sql, db=None):

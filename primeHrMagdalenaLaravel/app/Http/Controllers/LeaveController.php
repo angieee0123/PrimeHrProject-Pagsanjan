@@ -5,6 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\LeaveType;
 use App\Models\LeaveAccrualRate;
+use App\Models\LeaveApplication;
+use App\Models\LeaveBalance;
+use App\Models\LeaveTransaction;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class LeaveController extends Controller
 {
@@ -210,5 +216,110 @@ class LeaveController extends Controller
         $accrualRate->delete();
 
         return redirect()->route('admin.leave')->with('success', 'Accrual rate deleted successfully!');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'leave_code' => 'required|exists:leave_types_config,leave_code',
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'number_of_days' => 'required|numeric|min:0.5',
+            'reason' => 'required|string|max:500',
+            'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $employee = auth()->user()->employee;
+            
+            if (!$employee) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Employee record not found'
+                ], 404);
+            }
+
+            $leaveType = LeaveType::where('leave_code', $validated['leave_code'])->first();
+            
+            // Check if attachment is required
+            if ($leaveType->requires_attachment && !$request->hasFile('attachment')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Attachment is required for this leave type'
+                ], 422);
+            }
+
+            // Check leave balance
+            $year = Carbon::parse($validated['start_date'])->year;
+            $leaveBalance = LeaveBalance::where('employee_id', $employee->id)
+                ->where('leave_code', $validated['leave_code'])
+                ->where('year', $year)
+                ->first();
+
+            if (!$leaveBalance || $leaveBalance->available_credits < $validated['number_of_days']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Insufficient leave balance'
+                ], 422);
+            }
+
+            // Handle file upload
+            $attachmentPath = null;
+            if ($request->hasFile('attachment')) {
+                $attachmentPath = $request->file('attachment')->store('leave_attachments', 'public');
+            }
+
+            // Create leave application
+            $leaveApplication = LeaveApplication::create([
+                'employee_id' => $employee->id,
+                'leave_code' => $validated['leave_code'],
+                'start_date' => $validated['start_date'],
+                'end_date' => $validated['end_date'],
+                'number_of_days' => $validated['number_of_days'],
+                'reason' => $validated['reason'],
+                'status' => 'pending',
+                'attachment_path' => $attachmentPath,
+                'filed_by' => auth()->id(),
+            ]);
+
+            // Create pending transaction
+            $balanceBefore = $leaveBalance->available_credits;
+            $leaveBalance->pending_credits += $validated['number_of_days'];
+            $leaveBalance->available_credits -= $validated['number_of_days'];
+            $leaveBalance->save();
+
+            LeaveTransaction::create([
+                'employee_id' => $employee->id,
+                'leave_code' => $validated['leave_code'],
+                'year' => $year,
+                'transaction_type' => 'pending',
+                'amount' => -$validated['number_of_days'],
+                'balance_before' => $balanceBefore,
+                'balance_after' => $leaveBalance->available_credits,
+                'reference_type' => 'leave_application',
+                'reference_id' => $leaveApplication->id,
+                'transaction_date' => now(),
+                'processed_by' => auth()->id(),
+                'remarks' => "Pending leave application {$leaveApplication->application_number}",
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Leave application submitted successfully',
+                'application_number' => $leaveApplication->application_number
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to submit leave application: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

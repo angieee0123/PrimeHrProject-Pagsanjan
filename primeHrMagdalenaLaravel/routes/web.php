@@ -102,8 +102,12 @@ Route::get('/permanent/payslip', function () {
 })->middleware('auth')->name('permanent.payslip');
 
 Route::get('/permanent/leave', function () {
-    return view('permanent.leaveandbenefits.permanentLeaveandbenefits');
+    $leaveTypes = \App\Models\LeaveType::where('is_active', true)->orderBy('leave_name')->get();
+    return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes'));
 })->middleware('auth')->name('permanent.leave');
+
+// Leave Application Routes
+Route::post('/leave/store', [LeaveController::class, 'store'])->middleware('auth')->name('leave.store');
 
 Route::get('/permanent/performance', function () {
     return view('permanent.performance.permanentPerformance');
