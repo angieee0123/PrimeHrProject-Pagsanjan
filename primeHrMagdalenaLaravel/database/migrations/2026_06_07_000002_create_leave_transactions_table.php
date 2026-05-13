@@ -14,9 +14,9 @@ return new class extends Migration
             $table->string('leave_code', 10);
             $table->integer('year')->comment('Year this transaction applies to');
             $table->enum('transaction_type', ['credit', 'debit', 'pending', 'reversal', 'adjustment'])->comment('Type of transaction');
-            $table->decimal('amount', 8, 2)->comment('Number of days (positive for credit, negative for debit)');
-            $table->decimal('balance_before', 8, 2)->comment('Available balance before transaction');
-            $table->decimal('balance_after', 8, 2)->comment('Available balance after transaction');
+            $table->decimal('amount', 10, 6)->comment('Number of days (positive for credit, negative for debit)');
+            $table->decimal('balance_before', 10, 6)->comment('Available balance before transaction');
+            $table->decimal('balance_after', 10, 6)->comment('Available balance after transaction');
             $table->enum('reference_type', ['accrual', 'leave_application', 'manual_adjustment', 'carryover', 'initialization'])->comment('What triggered this transaction');
             $table->unsignedBigInteger('reference_id')->nullable()->comment('ID of related record (e.g., leave_application_id)');
             $table->date('transaction_date');

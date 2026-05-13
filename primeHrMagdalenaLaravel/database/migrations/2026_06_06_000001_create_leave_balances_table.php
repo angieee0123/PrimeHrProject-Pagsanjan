@@ -14,11 +14,11 @@ return new class extends Migration
             $table->string('leave_code', 10);
             $table->foreign('leave_code')->references('leave_code')->on('leave_types_config')->cascadeOnDelete();
             $table->year('year')->comment('Calendar year for this balance');
-            $table->decimal('total_credits', 8, 2)->default(0)->comment('Total credits allocated for the year');
-            $table->decimal('used_credits', 8, 2)->default(0)->comment('Credits already used/consumed');
-            $table->decimal('pending_credits', 8, 2)->default(0)->comment('Credits in pending leave requests');
-            $table->decimal('available_credits', 8, 2)->default(0)->comment('Remaining available credits');
-            $table->decimal('carried_over', 8, 2)->default(0)->comment('Credits carried over from previous year (for VL/SL)');
+            $table->decimal('total_credits', 10, 6)->default(0)->comment('Total credits allocated for the year');
+            $table->decimal('used_credits', 10, 6)->default(0)->comment('Credits already used/consumed');
+            $table->decimal('pending_credits', 10, 6)->default(0)->comment('Credits in pending leave requests');
+            $table->decimal('available_credits', 10, 6)->default(0)->comment('Remaining available credits');
+            $table->decimal('carried_over', 10, 6)->default(0)->comment('Credits carried over from previous year (for VL/SL)');
             $table->timestamps();
             
             $table->unique(['employee_id', 'leave_code', 'year']);

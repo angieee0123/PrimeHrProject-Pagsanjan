@@ -661,9 +661,22 @@ function renderDetailedDTR(data) {
             // Add late deduction indicator if late was deducted from leave
             if (record.late_deducted_from_leave && record.late_deduction_leave_type) {
                 const lateMinutes = record.late_minutes || 0;
-                const lateDays = (lateMinutes / 480).toFixed(4);
-                accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Late Covered by ${record.late_deduction_leave_type}</small>`;
-                accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${lateMinutes} min late deducted (${lateDays} days)</small>`;
+                const lateDays = (lateMinutes / 1440).toFixed(6); // Correct: 1440 minutes in 24-hour day
+                const isPartial = record.late_deduction_leave_type.includes('partial');
+                const isFull = record.late_deduction_leave_type.includes('full');
+                
+                if (isFull) {
+                    accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Late Fully Covered by ${record.late_deduction_leave_type.replace(' (full)', '')}</small>`;
+                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${lateMinutes} min late → ${lateDays} days deducted</small>`;
+                } else if (isPartial) {
+                    const leaveTypes = record.late_deduction_leave_type.replace(' (partial)', '');
+                    accreditedDisplay += `<br><small style="color: #a16207; font-size: 10px; font-weight: 600;">⚠ Partial Coverage by ${leaveTypes}</small>`;
+                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${lateMinutes} min late, insufficient leave</small>`;
+                    accreditedDisplay += `<br><small style="color: #8e1e18; font-size: 9px;">Remaining deducted from hours</small>`;
+                } else {
+                    accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Late Covered by ${record.late_deduction_leave_type}</small>`;
+                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${lateMinutes} min late → ${lateDays} days deducted</small>`;
+                }
             }
         }
 

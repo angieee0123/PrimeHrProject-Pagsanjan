@@ -71,16 +71,16 @@
                         </div>
                     </td>
                     <td class="pay-cell">
-                        {{ number_format($totalCredits, 1) }} days
+                        {{ number_format($totalCredits, 4) }} days
                     </td>
                     <td class="deduction">
-                        {{ number_format($used, 1) }}
+                        {{ number_format($used, 4) }}
                     </td>
                     <td class="ot-pay" style="color: #d9bb00; font-weight: 600;">
-                        {{ number_format($pending, 1) }}
+                        {{ number_format($pending, 4) }}
                     </td>
                     <td class="net-pay">
-                        {{ number_format($available, 1) }}
+                        {{ number_format($available, 4) }}
                     </td>
                     <td>
                         @if($type->is_accrued)

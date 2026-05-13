@@ -18,7 +18,7 @@ class LateDeductionService
 
         DB::transaction(function () use ($log) {
             $lateMinutes = $log->late_minutes;
-            $lateDays = round($lateMinutes / 480, 4);
+            $lateDays = $lateMinutes / 1440; // Convert minutes to days (1440 minutes = 24 hours)
             $employeeId = $log->employee_id;
             $year = date('Y', strtotime($log->created_at));
 
@@ -32,32 +32,59 @@ class LateDeductionService
                 ->where('year', $year)
                 ->first();
 
-            if ($vlBalance && $vlBalance->available_credits >= $lateDays) {
-                $this->deductFromLeave($vlBalance, $lateDays, $log, 'VL');
-            } elseif ($vlBalance && $vlBalance->available_credits > 0) {
-                $remaining = $lateDays - $vlBalance->available_credits;
-                $this->deductFromLeave($vlBalance, $vlBalance->available_credits, $log, 'VL');
+            $remainingLateDays = $lateDays;
+            $deductedFromLeave = false;
+            $leaveTypes = [];
+
+            // Try to deduct from VL first
+            if ($vlBalance && $vlBalance->available_credits > 0) {
+                $deductAmount = min($vlBalance->available_credits, $remainingLateDays);
+                $this->deductFromLeave($vlBalance, $deductAmount, $log, 'VL', false);
+                $remainingLateDays -= $deductAmount;
+                $deductedFromLeave = true;
+                $leaveTypes[] = 'VL';
+            }
+
+            // If still have remaining late, try SL
+            if ($remainingLateDays > 0 && $slBalance && $slBalance->available_credits > 0) {
+                $deductAmount = min($slBalance->available_credits, $remainingLateDays);
+                $this->deductFromLeave($slBalance, $deductAmount, $log, 'SL', false);
+                $remainingLateDays -= $deductAmount;
+                $deductedFromLeave = true;
+                $leaveTypes[] = 'SL';
+            }
+
+            // Update log based on coverage
+            if ($remainingLateDays <= 0) {
+                // Fully covered by leave - credit full 8 hours
+                $log->update([
+                    'total_accredited_minutes' => 480,
+                    'late_deducted_from_leave' => true,
+                    'late_deduction_leave_type' => implode('+', $leaveTypes) . ' (full)'
+                ]);
                 
-                if ($slBalance && $slBalance->available_credits >= $remaining) {
-                    $this->deductFromLeave($slBalance, $remaining, $log, 'SL');
-                } elseif ($slBalance && $slBalance->available_credits > 0) {
-                    $this->deductFromLeave($slBalance, $slBalance->available_credits, $log, 'SL');
-                    $log->update(['late_deducted_from_leave' => false]);
-                } else {
-                    $log->update(['late_deducted_from_leave' => false]);
+                if ($log->attendance) {
+                    $log->attendance->update(['accredited_hours' => 480]);
                 }
-            } elseif ($slBalance && $slBalance->available_credits >= $lateDays) {
-                $this->deductFromLeave($slBalance, $lateDays, $log, 'SL');
-            } elseif ($slBalance && $slBalance->available_credits > 0) {
-                $this->deductFromLeave($slBalance, $slBalance->available_credits, $log, 'SL');
-                $log->update(['late_deducted_from_leave' => false]);
             } else {
-                $log->update(['late_deducted_from_leave' => false]);
+                // Partially covered - deduct remaining from accredited hours
+                $remainingLateMinutes = round($remainingLateDays * 1440);
+                $newAccreditedMinutes = max(0, $log->total_accredited_minutes - $remainingLateMinutes);
+                
+                $log->update([
+                    'total_accredited_minutes' => $newAccreditedMinutes,
+                    'late_deducted_from_leave' => $deductedFromLeave,
+                    'late_deduction_leave_type' => $deductedFromLeave ? implode('+', $leaveTypes) . ' (partial)' : null
+                ]);
+                
+                if ($log->attendance) {
+                    $log->attendance->update(['accredited_hours' => $newAccreditedMinutes]);
+                }
             }
         });
     }
 
-    private function deductFromLeave(LeaveBalance $balance, float $amount, AccreditedHoursLog $log, string $leaveType): void
+    private function deductFromLeave(LeaveBalance $balance, float $amount, AccreditedHoursLog $log, string $leaveType, bool $updateLog = true): void
     {
         $balanceBefore = $balance->available_credits;
         
@@ -77,19 +104,22 @@ class LateDeductionService
             'reference_id' => $log->id,
             'transaction_date' => date('Y-m-d'),
             'processed_by' => auth()->id(),
-            'remarks' => "Late deduction: {$log->late_minutes} minutes (" . round($amount, 4) . " days) from attendance on " . date('Y-m-d', strtotime($log->created_at))
+            'remarks' => "Late deduction: {$log->late_minutes} minutes (" . number_format($amount, 6, '.', '') . " days) from attendance on " . date('Y-m-d', strtotime($log->created_at))
         ]);
 
-        // Credit full 8 hours (480 minutes) when late is deducted from leave
-        $log->update([
-            'total_accredited_minutes' => 480,
-            'late_deducted_from_leave' => true,
-            'late_deduction_leave_type' => $leaveType
-        ]);
-        
-        // Also update the attendance record's accredited_hours
-        if ($log->attendance) {
-            $log->attendance->update(['accredited_hours' => 480]);
+        // Only update log if this is the final deduction (for backward compatibility)
+        if ($updateLog) {
+            // Credit full 8 hours (480 minutes) when late is fully deducted from leave
+            $log->update([
+                'total_accredited_minutes' => 480,
+                'late_deducted_from_leave' => true,
+                'late_deduction_leave_type' => $leaveType
+            ]);
+            
+            // Also update the attendance record's accredited_hours
+            if ($log->attendance) {
+                $log->attendance->update(['accredited_hours' => 480]);
+            }
         }
     }
 }

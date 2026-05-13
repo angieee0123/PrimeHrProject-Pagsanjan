@@ -129,13 +129,20 @@ Route::get('/permanent/leave', function () {
     
     $currentYear = now()->year;
     
+    // Only show leave types that have been assigned to the employee (total_credits > 0)
     $leaveTypes = \App\Models\LeaveType::where('is_active', true)
         ->with(['leaveBalances' => function($query) use ($employee, $currentYear) {
             $query->where('employee_id', $employee->id)
-                  ->where('year', $currentYear);
+                  ->where('year', $currentYear)
+                  ->where('total_credits', '>', 0); // Only show assigned leaves
         }])
         ->orderBy('leave_name')
-        ->get();
+        ->get()
+        ->filter(function($leaveType) {
+            // Filter out leave types that don't have any balance records
+            return $leaveType->leaveBalances->isNotEmpty();
+        })
+        ->values(); // Reset array keys
     
     $leaveApplications = \App\Models\LeaveApplication::where('employee_id', $employee->id)
         ->with('leaveType')

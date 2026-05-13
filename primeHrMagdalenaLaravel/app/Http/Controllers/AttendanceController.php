@@ -134,7 +134,7 @@ class AttendanceController extends Controller
                 }
 
                 $totalDays = $present + $absent + $halfday;
-                $rate = $totalDays > 0 ? round(($present / $totalDays) * 100) : 0;
+                $rate = $totalDays > 0 ? number_format(($present / $totalDays) * 100, 2, '.', '') : 0;
                 $workingDaysCount = $totalDays;
                 $status = ($absent === 0 && $late <= 2 && $workingDaysCount > 0) ? 'Complete' : 'Incomplete';
 
@@ -153,7 +153,7 @@ class AttendanceController extends Controller
                     'absent' => $absent,
                     'late' => $late,
                     'halfday' => $halfday,
-                    'overtime' => round($overtime, 1),
+                    'overtime' => $overtime, // Exact hours, no rounding
                     'on_leave' => $onLeave,
                     'rate' => $rate,
                     'status' => $status,
@@ -359,11 +359,11 @@ class AttendanceController extends Controller
         $mins = $minutes % 60;
         
         if ($hours > 0 && $mins > 0) {
-            return $hours . ' hr' . ($hours > 1 ? 's' : '') . ' ' . round($mins) . ' min';
+            return $hours . ' hr' . ($hours > 1 ? 's' : '') . ' ' . $mins . ' min'; // Exact minutes
         } elseif ($hours > 0) {
             return $hours . ' hr' . ($hours > 1 ? 's' : '');
         } else {
-            return round($mins) . ' min';
+            return $mins . ' min'; // Exact minutes
         }
     }
 
@@ -612,7 +612,7 @@ class AttendanceController extends Controller
 
             // Use stored total_hours from database (actual time worked in minutes)
             $totalHoursMinutes = $attendance ? $attendance->total_hours : 0;
-            $totalHours = $totalHoursMinutes ? round($totalHoursMinutes / 60, 1) : 0;
+            $totalHours = $totalHoursMinutes ? number_format($totalHoursMinutes / 60, 4, '.', '') : 0; // Exact hours with 4 decimals
             $needsReview = ($lateMinutes > 0 && $undertime > 0);
 
             // Get accredited hours from log if exists, otherwise calculate
