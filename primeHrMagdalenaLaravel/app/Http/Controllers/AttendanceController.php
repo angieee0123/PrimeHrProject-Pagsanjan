@@ -704,6 +704,8 @@ class AttendanceController extends Controller
                 'pm_accredited_minutes' => $pmAccreditedMins,
                 'am_grace_applied' => $amGraceApplied,
                 'pm_grace_applied' => $pmGraceApplied,
+                'late_deducted_from_leave' => $hasLog && $log->late_deducted_from_leave,
+                'late_deduction_leave_type' => $hasLog ? $log->late_deduction_leave_type : null,
                 'schedule' => $scheduleUsed ?: [
                     'am_in' => $expectedAmIn->format('H:i'),
                     'am_out' => $expectedAmOut->format('H:i'),

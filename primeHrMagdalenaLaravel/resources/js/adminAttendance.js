@@ -657,6 +657,14 @@ function renderDetailedDTR(data) {
             if (record.has_log) {
                 accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">📋 From Log</small>`;
             }
+            
+            // Add late deduction indicator if late was deducted from leave
+            if (record.late_deducted_from_leave && record.late_deduction_leave_type) {
+                const lateMinutes = record.late_minutes || 0;
+                const lateDays = (lateMinutes / 480).toFixed(4);
+                accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Late Covered by ${record.late_deduction_leave_type}</small>`;
+                accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${lateMinutes} min late deducted (${lateDays} days)</small>`;
+            }
         }
 
         // Build leave deduction display

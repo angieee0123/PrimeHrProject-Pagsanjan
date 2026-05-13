@@ -80,9 +80,16 @@ class LateDeductionService
             'remarks' => "Late deduction: {$log->late_minutes} minutes (" . round($amount, 4) . " days) from attendance on " . date('Y-m-d', strtotime($log->created_at))
         ]);
 
+        // Credit full 8 hours (480 minutes) when late is deducted from leave
         $log->update([
+            'total_accredited_minutes' => 480,
             'late_deducted_from_leave' => true,
             'late_deduction_leave_type' => $leaveType
         ]);
+        
+        // Also update the attendance record's accredited_hours
+        if ($log->attendance) {
+            $log->attendance->update(['accredited_hours' => 480]);
+        }
     }
 }
