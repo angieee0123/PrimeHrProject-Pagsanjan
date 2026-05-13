@@ -104,22 +104,20 @@ Route::get('/permanent/payslip', function () {
 Route::get('/permanent/leave', function () {
     $employee = auth()->user()->employee;
     
-    // Check if employee record exists
     if (!$employee) {
-        // Still show leave types but without balances
         $leaveTypes = \App\Models\LeaveType::where('is_active', true)
             ->orderBy('leave_name')
             ->get();
         
         $leaveApplications = collect();
+        $employeeTransactions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
         
-        return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes', 'leaveApplications'))
+        return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions'))
             ->with('warning', 'Employee record not found. Displaying leave types without balance information.');
     }
     
     $currentYear = now()->year;
     
-    // Get leave types with their balances for the current employee
     $leaveTypes = \App\Models\LeaveType::where('is_active', true)
         ->with(['leaveBalances' => function($query) use ($employee, $currentYear) {
             $query->where('employee_id', $employee->id)
@@ -128,13 +126,40 @@ Route::get('/permanent/leave', function () {
         ->orderBy('leave_name')
         ->get();
     
-    // Get leave applications for the current employee
     $leaveApplications = \App\Models\LeaveApplication::where('employee_id', $employee->id)
         ->with('leaveType')
         ->orderBy('created_at', 'desc')
         ->get();
     
-    return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes', 'leaveApplications'));
+    // Fetch employee transactions with filtering and sorting
+    $transactionQuery = \App\Models\LeaveTransaction::where('employee_id', $employee->id)
+        ->with('processedBy.employee');
+
+    if (request('filter_type')) {
+        $transactionQuery->where('transaction_type', request('filter_type'));
+    }
+    if (request('filter_leave_code')) {
+        $transactionQuery->where('leave_code', request('filter_leave_code'));
+    }
+    if (request('filter_date')) {
+        $transactionQuery->whereDate('transaction_date', request('filter_date'));
+    }
+
+    $sortBy = request('sort_by', 'transaction_date');
+    $sortOrder = request('sort_order', 'desc');
+    $allowedSortColumns = ['transaction_date', 'leave_code', 'transaction_type', 'amount', 'balance_before', 'balance_after'];
+    
+    if (in_array($sortBy, $allowedSortColumns)) {
+        $transactionQuery->orderBy($sortBy, $sortOrder);
+    } else {
+        $transactionQuery->orderBy('transaction_date', 'desc');
+    }
+    
+    $transactionQuery->orderBy('created_at', 'desc');
+    
+    $employeeTransactions = $transactionQuery->paginate(15)->appends(request()->except('page'));
+    
+    return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions'));
 })->middleware('auth')->name('permanent.leave');
 
 // Leave Application Routes

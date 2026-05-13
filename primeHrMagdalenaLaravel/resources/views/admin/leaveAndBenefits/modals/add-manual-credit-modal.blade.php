@@ -1,23 +1,24 @@
-<div class="modal" id="addManualCreditModal" onclick="closeManualCreditModal(event)">
-    <div class="modal-content" style="max-width: 600px;">
+<div id="addManualCreditModal" class="modal-overlay" onclick="closeManualCreditModal(event)">
+    <div class="modal-container" onclick="event.stopPropagation()">
         <div class="modal-header">
             <div>
-                <h2 class="modal-title" id="modalTitle">Add Manual Leave Credits</h2>
+                <h3 class="modal-title" id="modalTitle">Add Manual Leave Credits</h3>
                 <p class="modal-subtitle" id="modalSubtitle">Manually adjust employee leave balance</p>
             </div>
-            <button class="modal-close" onclick="closeManualCreditModal()">&times;</button>
+            <button class="modal-close" onclick="closeManualCreditModal()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
         </div>
 
-        <form id="addManualCreditForm" method="POST" action="{{ route('admin.leave.manual-credit.store') }}">
-            @csrf
-            <input type="hidden" name="transaction_type" id="transactionType" value="add">
-            <div class="modal-body">
-                <div class="form-grid">
+        <div class="modal-body">
+            <form id="addManualCreditForm" action="{{ route('admin.leave.manual-credit.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="transaction_type" id="transactionType" value="add">
+                
+                <div class="form-row">
                     <!-- Employee Selection -->
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label class="form-label">
-                            Employee <span style="color: #8e1e18;">*</span>
-                        </label>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Employee <span style="color: #8e1e18;">*</span></label>
                         <select name="employee_id" class="form-input" required onchange="loadEmployeeLeaveTypes(this.value)">
                             <option value="">Select Employee</option>
                             @foreach($employees ?? [] as $employee)
@@ -26,54 +27,47 @@
                                 </option>
                             @endforeach
                         </select>
-                        <small class="form-hint">Select the employee to adjust credits for</small>
                     </div>
+                </div>
 
+                <div class="form-row">
                     <!-- Leave Type Selection -->
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label class="form-label">
-                            Leave Type <span style="color: #8e1e18;">*</span>
-                        </label>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Leave Type <span style="color: #8e1e18;">*</span></label>
                         <select name="leave_code" id="leaveTypeSelect" class="form-input" required onchange="showCurrentBalance(this.value)">
                             <option value="">Select Leave Type</option>
                         </select>
-                        <small class="form-hint">Choose which leave type to adjust</small>
                     </div>
+                </div>
 
-                    <!-- Current Balance Display -->
-                    <div id="currentBalanceDisplay" style="grid-column: span 2; display: none; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; padding: 12px; margin-bottom: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #075985; font-size: 13px; font-weight: 600;">Current Balance:</span>
-                            <span id="currentBalanceValue" style="color: #0369a1; font-size: 16px; font-weight: 700;">0.00 days</span>
-                        </div>
+                <!-- Current Balance Display -->
+                <div id="currentBalanceDisplay" style="display: none; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; padding: 12px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #075985; font-size: 13px; font-weight: 600;">Current Balance:</span>
+                        <span id="currentBalanceValue" style="color: #0369a1; font-size: 16px; font-weight: 700;">0.00 days</span>
                     </div>
+                </div>
 
+                <div class="form-row">
                     <!-- Credit Amount -->
-                    <div class="form-group">
-                        <label class="form-label" id="amountLabel">
-                            Credit Amount (Days) <span style="color: #8e1e18;">*</span>
-                        </label>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label" id="amountLabel">Credit Amount (Days) <span style="color: #8e1e18;">*</span></label>
                         <input type="number" name="amount" class="form-input" step="0.01" min="0.01" placeholder="e.g., 5.00" required onchange="calculateNewBalance()">
-                        <small class="form-hint" id="amountHint">Number of days to add</small>
+                        <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;" id="amountHint">Number of days to add</p>
                     </div>
 
                     <!-- Transaction Date -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            Transaction Date <span style="color: #8e1e18;">*</span>
-                        </label>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Transaction Date <span style="color: #8e1e18;">*</span></label>
                         <input type="date" name="transaction_date" class="form-input" value="{{ date('Y-m-d') }}" required>
-                        <small class="form-hint">Date of adjustment</small>
+                        <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;">Date of adjustment</p>
                     </div>
+                </div>
 
-                    <!-- Reason/Remarks -->
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label class="form-label">
-                            Reason / Remarks <span style="color: #8e1e18;">*</span>
-                        </label>
-                        <textarea name="remarks" class="form-input" rows="3" placeholder="e.g., Manual adjustment for service award, correction of previous error, etc." required></textarea>
-                        <small class="form-hint">Explain why this manual adjustment is being made</small>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">Reason / Remarks <span style="color: #8e1e18;">*</span></label>
+                    <textarea name="remarks" class="form-input" rows="3" placeholder="e.g., Manual adjustment for service award, correction of previous error, etc." required></textarea>
+                    <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;">Explain why this manual adjustment is being made</p>
                 </div>
 
                 <!-- Preview Box -->
@@ -94,13 +88,13 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="modal-footer">
-                <button type="button" class="btn-cancel" onclick="closeManualCreditModal()">Cancel</button>
-                <button type="submit" class="btn-submit" id="submitBtn">Add Credits</button>
-            </div>
-        </form>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeManualCreditModal()">Cancel</button>
+                    <button type="submit" class="btn-submit" id="submitBtn">Add Credits</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -239,12 +233,12 @@ window.openManualCreditModal = function(type = 'add') {
         document.getElementById('previewTitle').textContent = 'Preview - Deducting Credits';
     }
     
-    document.getElementById('addManualCreditModal').classList.add('active');
+    document.getElementById('addManualCreditModal').style.display = 'flex';
 }
 
 window.closeManualCreditModal = function(event) {
     if (!event || event.target.id === 'addManualCreditModal') {
-        document.getElementById('addManualCreditModal').classList.remove('active');
+        document.getElementById('addManualCreditModal').style.display = 'none';
     }
 }
 

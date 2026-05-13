@@ -19,6 +19,8 @@ $totalPending = $leaveApplications->where('status', 'pending')->count();
 $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_days');
 @endphp
 
+@include('admin.topbar.leaveAndBenefitsTopbar')
+
 <div class="stats-grid" style="margin-bottom: 20px;">
     <div class="stat-card">
         <div class="stat-top">
@@ -77,12 +79,15 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 <!-- Tabs -->
 <div style="display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1.5px solid #eceaf8; padding-bottom: 0;">
     <button class="tab-btn active" onclick="switchTab('leave')">Leave Requests</button>
+    <button class="tab-btn" onclick="switchTab('transactions')">Transaction History</button>
     <button class="tab-btn" onclick="switchTab('benefits')">Benefits Summary</button>
     <button class="tab-btn" onclick="switchTab('types')">Leave Types</button>
     <button class="tab-btn" onclick="switchTab('accrual')">CSC Daily Accrual</button>
 </div>
 
 @include('admin.leaveAndBenefits.partials.leave-requests-tab')
+
+@include('admin.leaveAndBenefits.partials.transaction-history-tab')
 
 @include('admin.leaveAndBenefits.partials.benefits-summary-tab')
 
@@ -114,6 +119,8 @@ document.addEventListener('DOMContentLoaded', function() {
         switchTab('leave');
     } else if (activeTab === 'accrual') {
         switchTab('accrual');
+    } else if (activeTab === 'transactions') {
+        switchTab('transactions');
     }
 });
 </script>

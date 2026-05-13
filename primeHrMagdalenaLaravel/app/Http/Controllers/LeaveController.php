@@ -79,6 +79,49 @@ class LeaveController extends Controller
             ->orderBy('employee_id')
             ->get();
 
+        // Fetch leave transactions with pagination, filtering, and sorting
+        $transactionQuery = LeaveTransaction::with([
+            'employee',
+            'processedBy.employee'
+        ]);
+
+        // Apply filters
+        if (request('filter_employee')) {
+            $transactionQuery->where('employee_id', request('filter_employee'));
+        }
+        if (request('filter_type')) {
+            $transactionQuery->where('transaction_type', request('filter_type'));
+        }
+        if (request('filter_leave_code')) {
+            $transactionQuery->where('leave_code', request('filter_leave_code'));
+        }
+        if (request('filter_date')) {
+            $transactionQuery->whereDate('transaction_date', request('filter_date'));
+        }
+
+        // Apply sorting
+        $sortBy = request('sort_by', 'transaction_date');
+        $sortOrder = request('sort_order', 'desc');
+        $allowedSortColumns = ['transaction_date', 'employee_id', 'leave_code', 'transaction_type', 'amount', 'balance_before', 'balance_after'];
+        
+        if (in_array($sortBy, $allowedSortColumns)) {
+            $transactionQuery->orderBy($sortBy, $sortOrder);
+        } else {
+            $transactionQuery->orderBy('transaction_date', 'desc');
+        }
+        
+        $transactionQuery->orderBy('created_at', 'desc');
+        
+        $leaveTransactions = $transactionQuery->paginate(15)->appends(request()->except('page'));
+
+        // Get unique employees who have transactions for filter
+        $transactionEmployees = \App\Models\Employee::whereHas('leaveTransactions')
+            ->orderBy('employee_id')
+            ->get();
+
+        // Debug: Log transaction count
+        \Log::info('Leave Transactions Count: ' . $leaveTransactions->total());
+
         // Sample benefits data (you can create a table for this later)
         $benefitsData = [
             ['empId' => 'PGS-0041', 'name' => 'Maria B. Santos', 'gsis' => '₱3,794', 'philhealth' => '₱1,050', 'pagibig' => '₱100', 'vlBalance' => 15, 'slBalance' => 15],
@@ -89,7 +132,7 @@ class LeaveController extends Controller
             ['empId' => 'PGS-0310', 'name' => 'Roberto T. Flores', 'gsis' => '₱2,748', 'philhealth' => '₱775', 'pagibig' => '₱100', 'vlBalance' => 8, 'slBalance' => 10],
         ];
 
-        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact('leaveTypes', 'leaveApplications', 'benefitsData', 'accrualRates', 'accruedLeaveTypes', 'departments', 'employees'));
+        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact('leaveTypes', 'leaveApplications', 'benefitsData', 'accrualRates', 'accruedLeaveTypes', 'departments', 'employees', 'leaveTransactions', 'transactionEmployees'));
     }
 
     public function storeLeaveType(Request $request)

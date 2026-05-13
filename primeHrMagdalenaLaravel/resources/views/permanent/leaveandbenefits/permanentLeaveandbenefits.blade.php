@@ -104,6 +104,7 @@
         <div class="lb-tabs">
             <button class="tab-btn active" onclick="switchTab('leave', this)">My Leave Requests</button>
             <button class="tab-btn" onclick="switchTab('credits', this)">Leave Credits</button>
+            <button class="tab-btn" onclick="switchTab('transactions', this)">Transaction History</button>
             <button class="tab-btn" onclick="switchTab('benefits', this)">My Benefits</button>
         </div>
 
@@ -114,6 +115,10 @@
 
         <div id="tab-credits" class="tab-content hidden">
             @include('permanent.leaveandbenefits.tabs.leave-credits.leaveCreditsTab')
+        </div>
+
+        <div id="tab-transactions" class="tab-content hidden" style="display: none;">
+            @include('permanent.leaveandbenefits.tabs.transaction-history.transactionHistoryTab')
         </div>
 
         <div id="tab-benefits" class="tab-content hidden">
@@ -301,6 +306,42 @@
     // Initialize pagination when credits tab is shown
     document.addEventListener('DOMContentLoaded', function() {
         initLeaveCreditsTable();
+        
+        // Check URL for tab parameter and switch to that tab
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get('tab');
+        
+        if (activeTab && ['leave', 'credits', 'transactions', 'benefits'].includes(activeTab)) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(c => {
+                c.classList.add('hidden');
+                c.style.display = 'none';
+            });
+            
+            // Show the active tab
+            const tabContent = document.getElementById('tab-' + activeTab);
+            if (tabContent) {
+                tabContent.classList.remove('hidden');
+                tabContent.style.display = 'block';
+            }
+            
+            // Update tab button states
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Find and activate the correct button
+            const buttons = document.querySelectorAll('.tab-btn');
+            const tabIndex = ['leave', 'credits', 'transactions', 'benefits'].indexOf(activeTab);
+            if (buttons[tabIndex]) {
+                buttons[tabIndex].classList.add('active');
+            }
+            
+            // Initialize pagination for credits tab
+            if (activeTab === 'credits') {
+                setTimeout(() => initLeaveCreditsTable(), 100);
+            }
+        }
     });
 
     function switchTab(tabId, btn) {
@@ -313,6 +354,11 @@
         active.style.display = 'block';
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+
+        // Update URL with tab parameter
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tabId);
+        window.history.pushState({}, '', url.toString());
 
         // Initialize pagination when switching to credits tab
         if (tabId === 'credits') {
