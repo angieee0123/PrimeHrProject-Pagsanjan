@@ -57,15 +57,22 @@ class LeaveController extends Controller
             ->orderBy('leave_name')
             ->get();
 
-        // Sample leave requests data (you can create a table for this later)
-        $leaveRequests = [
-            ['id' => 'LV-2025-001', 'empId' => 'PGS-0041', 'name' => 'Maria B. Santos', 'position' => 'Administrative Officer IV', 'dept' => 'Office of the Mayor', 'type' => 'Vacation Leave', 'from' => 'Jun 10, 2025', 'to' => 'Jun 12, 2025', 'days' => 3, 'reason' => 'Family vacation', 'status' => 'Approved'],
-            ['id' => 'LV-2025-002', 'empId' => 'PGS-0115', 'name' => 'Ana R. Reyes', 'position' => 'Nurse II', 'dept' => 'Municipal Health Office', 'type' => 'Sick Leave', 'from' => 'Jun 15, 2025', 'to' => 'Jun 16, 2025', 'days' => 2, 'reason' => 'Medical consultation', 'status' => 'Approved'],
-            ['id' => 'LV-2025-003', 'empId' => 'PGS-0203', 'name' => 'Carlos M. Mendoza', 'position' => 'Municipal Treasurer III', 'dept' => 'Office of the Mun. Treasurer', 'type' => 'Sick Leave', 'from' => 'Jun 20, 2025', 'to' => 'Jun 22, 2025', 'days' => 3, 'reason' => 'Flu and fever', 'status' => 'Pending'],
-            ['id' => 'LV-2025-004', 'empId' => 'PGS-0267', 'name' => 'Liza G. Gomez', 'position' => 'Social Welfare Officer II', 'dept' => 'MSWD – Pagsanjan', 'type' => 'Emergency Leave', 'from' => 'Jun 18, 2025', 'to' => 'Jun 18, 2025', 'days' => 1, 'reason' => 'Family emergency', 'status' => 'Approved'],
-            ['id' => 'LV-2025-005', 'empId' => 'PGS-0082', 'name' => 'Juan P. dela Cruz', 'position' => 'Municipal Engineer II', 'dept' => 'Office of the Mun. Engineer', 'type' => 'Vacation Leave', 'from' => 'Jul 1, 2025', 'to' => 'Jul 3, 2025', 'days' => 3, 'reason' => 'Rest and recreation', 'status' => 'Pending'],
-            ['id' => 'LV-2025-006', 'empId' => 'PGS-0310', 'name' => 'Roberto T. Flores', 'position' => 'Municipal Civil Registrar I', 'dept' => 'Municipal Civil Registrar', 'type' => 'Vacation Leave', 'from' => 'Jun 25, 2025', 'to' => 'Jun 25, 2025', 'days' => 1, 'reason' => 'Personal errand', 'status' => 'Rejected'],
-        ];
+        // Fetch all leave applications with relationships
+        $leaveApplications = LeaveApplication::with([
+            'employee.employmentDetail.departmentRelation',
+            'employee.employmentDetail.designationRelation',
+            'leaveType'
+        ])
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+        // Get unique departments for filter
+        $departments = $leaveApplications
+            ->pluck('employee.employmentDetail.departmentRelation.name')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
 
         // Sample benefits data (you can create a table for this later)
         $benefitsData = [
@@ -77,7 +84,7 @@ class LeaveController extends Controller
             ['empId' => 'PGS-0310', 'name' => 'Roberto T. Flores', 'gsis' => '₱2,748', 'philhealth' => '₱775', 'pagibig' => '₱100', 'vlBalance' => 8, 'slBalance' => 10],
         ];
 
-        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact('leaveTypes', 'leaveRequests', 'benefitsData', 'accrualRates', 'accruedLeaveTypes'));
+        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact('leaveTypes', 'leaveApplications', 'benefitsData', 'accrualRates', 'accruedLeaveTypes', 'departments'));
     }
 
     public function storeLeaveType(Request $request)
@@ -251,6 +258,26 @@ class LeaveController extends Controller
                 ], 422);
             }
 
+            // Check for overlapping leave requests (pending or approved)
+            $hasOverlap = LeaveApplication::where('employee_id', $employee->id)
+                ->whereIn('status', ['pending', 'approved'])
+                ->where(function($query) use ($validated) {
+                    $query->whereBetween('start_date', [$validated['start_date'], $validated['end_date']])
+                          ->orWhereBetween('end_date', [$validated['start_date'], $validated['end_date']])
+                          ->orWhere(function($q) use ($validated) {
+                              $q->where('start_date', '<=', $validated['start_date'])
+                                ->where('end_date', '>=', $validated['end_date']);
+                          });
+                })
+                ->exists();
+
+            if ($hasOverlap) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You already have a leave request for the selected dates. Please choose different dates or cancel your existing leave request.'
+                ], 422);
+            }
+
             // Check leave balance
             $year = Carbon::parse($validated['start_date'])->year;
             $leaveBalance = LeaveBalance::where('employee_id', $employee->id)
@@ -290,20 +317,20 @@ class LeaveController extends Controller
             $leaveBalance->available_credits -= $validated['number_of_days'];
             $leaveBalance->save();
 
-            LeaveTransaction::create([
-                'employee_id' => $employee->id,
-                'leave_code' => $validated['leave_code'],
-                'year' => $year,
-                'transaction_type' => 'pending',
-                'amount' => -$validated['number_of_days'],
-                'balance_before' => $balanceBefore,
-                'balance_after' => $leaveBalance->available_credits,
-                'reference_type' => 'leave_application',
-                'reference_id' => $leaveApplication->id,
-                'transaction_date' => now(),
-                'processed_by' => auth()->id(),
-                'remarks' => "Pending leave application {$leaveApplication->application_number}",
-            ]);
+                LeaveTransaction::create([
+                    'employee_id' => $employee->id,
+                    'leave_code' => $validated['leave_code'],
+                    'year' => $year,
+                    'transaction_type' => 'pending',
+                    'amount' => -$validated['number_of_days'],
+                    'balance_before' => $balanceBefore,
+                    'balance_after' => $leaveBalance->available_credits,
+                    'reference_type' => 'leave_application',
+                    'reference_id' => $leaveApplication->id,
+                    'transaction_date' => now(),
+                    'processed_by' => auth()->id(),
+                    'remarks' => "Pending leave application {$leaveApplication->application_number}",
+                ]);
 
             DB::commit();
 
@@ -319,6 +346,219 @@ class LeaveController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to submit leave application: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function cancel($id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $employee = auth()->user()->employee;
+            
+            if (!$employee) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Employee record not found'
+                ], 404);
+            }
+
+            $leaveApplication = LeaveApplication::where('id', $id)
+                ->where('employee_id', $employee->id)
+                ->first();
+
+            if (!$leaveApplication) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Leave application not found'
+                ], 404);
+            }
+
+            if ($leaveApplication->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending leave requests can be cancelled'
+                ], 422);
+            }
+
+            $year = Carbon::parse($leaveApplication->start_date)->year;
+            $leaveBalance = LeaveBalance::where('employee_id', $employee->id)
+                ->where('leave_code', $leaveApplication->leave_code)
+                ->where('year', $year)
+                ->first();
+
+            if ($leaveBalance) {
+                $balanceBefore = $leaveBalance->available_credits;
+                $leaveBalance->pending_credits -= $leaveApplication->number_of_days;
+                $leaveBalance->available_credits += $leaveApplication->number_of_days;
+                $leaveBalance->save();
+
+                LeaveTransaction::create([
+                    'employee_id' => $employee->id,
+                    'leave_code' => $leaveApplication->leave_code,
+                    'year' => $year,
+                    'transaction_type' => 'credit',
+                    'amount' => $leaveApplication->number_of_days,
+                    'balance_before' => $balanceBefore,
+                    'balance_after' => $leaveBalance->available_credits,
+                    'reference_type' => 'leave_application',
+                    'reference_id' => $leaveApplication->id,
+                    'transaction_date' => now(),
+                    'processed_by' => auth()->id(),
+                    'remarks' => "Cancelled leave application {$leaveApplication->application_number}",
+                ]);
+            }
+
+            $leaveApplication->status = 'cancelled';
+            $leaveApplication->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Leave request cancelled successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel leave request: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function approve($id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $leaveApplication = LeaveApplication::findOrFail($id);
+
+            if ($leaveApplication->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending leave requests can be approved'
+                ], 422);
+            }
+
+            $year = Carbon::parse($leaveApplication->start_date)->year;
+            $leaveBalance = LeaveBalance::where('employee_id', $leaveApplication->employee_id)
+                ->where('leave_code', $leaveApplication->leave_code)
+                ->where('year', $year)
+                ->first();
+
+            if ($leaveBalance) {
+                $balanceBefore = $leaveBalance->available_credits;
+                $leaveBalance->pending_credits -= $leaveApplication->number_of_days;
+                $leaveBalance->used_credits += $leaveApplication->number_of_days;
+                $leaveBalance->save();
+
+                LeaveTransaction::create([
+                    'employee_id' => $leaveApplication->employee_id,
+                    'leave_code' => $leaveApplication->leave_code,
+                    'year' => $year,
+                    'transaction_type' => 'debit',
+                    'amount' => -$leaveApplication->number_of_days,
+                    'balance_before' => $balanceBefore,
+                    'balance_after' => $leaveBalance->available_credits,
+                    'reference_type' => 'leave_application',
+                    'reference_id' => $leaveApplication->id,
+                    'transaction_date' => now(),
+                    'processed_by' => auth()->id(),
+                    'remarks' => "Approved leave application {$leaveApplication->application_number}",
+                ]);
+            }
+
+            $leaveApplication->status = 'approved';
+            $leaveApplication->approved_by = auth()->id();
+            $leaveApplication->approved_at = now();
+            $leaveApplication->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Leave request approved successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to approve leave request: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function reject(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $validated = $request->validate([
+                'remarks' => 'required|string|max:500'
+            ]);
+
+            $leaveApplication = LeaveApplication::findOrFail($id);
+
+            if ($leaveApplication->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending leave requests can be rejected'
+                ], 422);
+            }
+
+            $year = Carbon::parse($leaveApplication->start_date)->year;
+            $leaveBalance = LeaveBalance::where('employee_id', $leaveApplication->employee_id)
+                ->where('leave_code', $leaveApplication->leave_code)
+                ->where('year', $year)
+                ->first();
+
+            if ($leaveBalance) {
+                $balanceBefore = $leaveBalance->available_credits;
+                $leaveBalance->pending_credits -= $leaveApplication->number_of_days;
+                $leaveBalance->available_credits += $leaveApplication->number_of_days;
+                $leaveBalance->save();
+
+                LeaveTransaction::create([
+                    'employee_id' => $leaveApplication->employee_id,
+                    'leave_code' => $leaveApplication->leave_code,
+                    'year' => $year,
+                    'transaction_type' => 'credit',
+                    'amount' => $leaveApplication->number_of_days,
+                    'balance_before' => $balanceBefore,
+                    'balance_after' => $leaveBalance->available_credits,
+                    'reference_type' => 'leave_application',
+                    'reference_id' => $leaveApplication->id,
+                    'transaction_date' => now(),
+                    'processed_by' => auth()->id(),
+                    'remarks' => "Rejected leave application {$leaveApplication->application_number}: {$validated['remarks']}",
+                ]);
+            }
+
+            $leaveApplication->status = 'rejected';
+            $leaveApplication->approved_by = auth()->id();
+            $leaveApplication->approved_at = now();
+            $leaveApplication->approver_remarks = $validated['remarks'];
+            $leaveApplication->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Leave request rejected successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reject leave request: ' . $e->getMessage()
             ], 500);
         }
     }

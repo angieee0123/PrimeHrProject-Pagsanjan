@@ -14,9 +14,9 @@ function getInitials($name) {
     return strtoupper(substr($initials, 0, 2));
 }
 
-$totalApproved = count(array_filter($leaveRequests, fn($r) => $r['status'] === 'Approved'));
-$totalPending = count(array_filter($leaveRequests, fn($r) => $r['status'] === 'Pending'));
-$totalDays = array_sum(array_column($leaveRequests, 'days'));
+$totalApproved = $leaveApplications->where('status', 'approved')->count();
+$totalPending = $leaveApplications->where('status', 'pending')->count();
+$totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_days');
 @endphp
 
 <div class="stats-grid" style="margin-bottom: 20px;">
@@ -27,7 +27,7 @@ $totalDays = array_sum(array_column($leaveRequests, 'days'));
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
             </div>
         </div>
-        <h2 class="stat-value">{{ count($leaveRequests) }}</h2>
+        <h2 class="stat-value">{{ $leaveApplications->count() }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #0b044d;"></span>
             <p class="stat-sub">All time</p>
@@ -66,7 +66,7 @@ $totalDays = array_sum(array_column($leaveRequests, 'days'));
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
         </div>
-        <h2 class="stat-value">{{ $totalDays }}</h2>
+        <h2 class="stat-value">{{ number_format($totalDays, 0) }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #8e1e18;"></span>
             <p class="stat-sub">Across all employees</p>

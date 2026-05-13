@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: primehrismagdalena
+-- Host: localhost    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.41
+-- Server version	8.0.45
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -27,11 +27,11 @@ CREATE TABLE `leave_accrual_rates` (
   `leave_type_id` bigint unsigned NOT NULL,
   `days_of_service_required` decimal(5,2) NOT NULL DEFAULT '1.00' COMMENT 'Days of service needed to earn credits (e.g., 1 day, 30 days)',
   `credits_earned_per_period` decimal(8,4) NOT NULL DEFAULT '0.0000' COMMENT 'Credits earned per service period (e.g., 0.0417 per day for VL/SL)',
-  `accrual_frequency` enum('daily','monthly','yearly') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'monthly' COMMENT 'How often credits are earned',
+  `accrual_frequency` enum('daily','monthly','yearly') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'monthly' COMMENT 'How often credits are earned',
   `effective_date` date NOT NULL COMMENT 'When this rate becomes effective',
   `end_date` date DEFAULT NULL COMMENT 'When this rate expires (null = current)',
   `is_active` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Whether this rate is currently active',
-  `notes` text COLLATE utf8mb4_unicode_ci COMMENT 'CSC memo or policy reference',
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'CSC memo or policy reference',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -59,4 +59,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-12  5:48:29
+-- Dump completed on 2026-05-13 20:42:30

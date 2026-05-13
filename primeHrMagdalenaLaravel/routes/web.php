@@ -102,12 +102,44 @@ Route::get('/permanent/payslip', function () {
 })->middleware('auth')->name('permanent.payslip');
 
 Route::get('/permanent/leave', function () {
-    $leaveTypes = \App\Models\LeaveType::where('is_active', true)->orderBy('leave_name')->get();
-    return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes'));
+    $employee = auth()->user()->employee;
+    
+    // Check if employee record exists
+    if (!$employee) {
+        // Still show leave types but without balances
+        $leaveTypes = \App\Models\LeaveType::where('is_active', true)
+            ->orderBy('leave_name')
+            ->get();
+        
+        $leaveApplications = collect();
+        
+        return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes', 'leaveApplications'))
+            ->with('warning', 'Employee record not found. Displaying leave types without balance information.');
+    }
+    
+    $currentYear = now()->year;
+    
+    // Get leave types with their balances for the current employee
+    $leaveTypes = \App\Models\LeaveType::where('is_active', true)
+        ->with(['leaveBalances' => function($query) use ($employee, $currentYear) {
+            $query->where('employee_id', $employee->id)
+                  ->where('year', $currentYear);
+        }])
+        ->orderBy('leave_name')
+        ->get();
+    
+    // Get leave applications for the current employee
+    $leaveApplications = \App\Models\LeaveApplication::where('employee_id', $employee->id)
+        ->with('leaveType')
+        ->orderBy('created_at', 'desc')
+        ->get();
+    
+    return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes', 'leaveApplications'));
 })->middleware('auth')->name('permanent.leave');
 
 // Leave Application Routes
 Route::post('/leave/store', [LeaveController::class, 'store'])->middleware('auth')->name('leave.store');
+Route::post('/leave/{id}/cancel', [LeaveController::class, 'cancel'])->middleware('auth')->name('leave.cancel');
 
 Route::get('/permanent/performance', function () {
     return view('permanent.performance.permanentPerformance');
@@ -573,6 +605,10 @@ Route::get('/admin/leave', [LeaveController::class, 'index'])->middleware('auth'
 Route::post('/admin/leave/types/store', [LeaveController::class, 'storeLeaveType'])->middleware('auth')->name('admin.leave.types.store');
 Route::get('/admin/leave/types/{code}', [LeaveController::class, 'show'])->middleware('auth')->name('admin.leave.types.show');
 Route::put('/admin/leave/types/{code}', [LeaveController::class, 'update'])->middleware('auth')->name('admin.leave.types.update');
+
+// Leave Application Admin Actions
+Route::post('/admin/leave/{id}/approve', [LeaveController::class, 'approve'])->middleware('auth')->name('admin.leave.approve');
+Route::post('/admin/leave/{id}/reject', [LeaveController::class, 'reject'])->middleware('auth')->name('admin.leave.reject');
 
 // Accrual Rate Routes
 Route::post('/admin/leave/accrual-rates', [LeaveController::class, 'storeAccrualRate'])->middleware('auth')->name('admin.leave.accrual-rates.store');

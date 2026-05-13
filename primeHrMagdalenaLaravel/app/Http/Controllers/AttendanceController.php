@@ -32,17 +32,49 @@ class AttendanceController extends Controller
                     ->whereBetween('date', [$startDate, $endDate])
                     ->get();
 
+                // Get approved leaves for this employee in the date range
+                $approvedLeaves = \App\Models\LeaveApplication::where('employee_id', $employee->id)
+                    ->where('status', 'approved')
+                    ->where(function($query) use ($startDate, $endDate) {
+                        $query->whereBetween('start_date', [$startDate, $endDate])
+                              ->orWhereBetween('end_date', [$startDate, $endDate])
+                              ->orWhere(function($q) use ($startDate, $endDate) {
+                                  $q->where('start_date', '<=', $startDate)
+                                    ->where('end_date', '>=', $endDate);
+                              });
+                    })
+                    ->with('leaveType')
+                    ->get();
+
                 $present = 0;
                 $absent = 0;
                 $late = 0;
                 $halfday = 0;
                 $overtime = 0;
+                $onLeave = 0;
 
                 // Get employee's schedule or use defaults
                 $graceMinutes = 15;
 
                 $workingDays = $this->getWorkingDays($startDate, $endDate);
                 $attendedDates = $attendances->pluck('date')->map(fn($d) => $d->format('Y-m-d'))->toArray();
+                
+                // Get all leave dates
+                $leaveDates = [];
+                foreach ($approvedLeaves as $leave) {
+                    $leaveStart = Carbon::parse($leave->start_date);
+                    $leaveEnd = Carbon::parse($leave->end_date);
+                    $current = $leaveStart->copy();
+                    
+                    while ($current->lte($leaveEnd)) {
+                        // Only count working days (exclude weekends)
+                        if (!in_array($current->dayOfWeek, [0, 6])) {
+                            $leaveDates[] = $current->format('Y-m-d');
+                        }
+                        $current->addDay();
+                    }
+                }
+                $leaveDates = array_unique($leaveDates);
 
                 foreach ($attendances as $attendance) {
                     $hasAttendance = $attendance->am_in || $attendance->pm_in;
@@ -86,10 +118,17 @@ class AttendanceController extends Controller
                     }
                 }
 
-                // Calculate absences (working days without attendance)
+                // Calculate absences (working days without attendance and not on leave)
                 foreach ($workingDays as $workingDay) {
-                    if (!in_array($workingDay->format('Y-m-d'), $attendedDates)) {
-                        $absent++;
+                    $dayStr = $workingDay->format('Y-m-d');
+                    if (!in_array($dayStr, $attendedDates)) {
+                        // Check if this day is covered by approved leave
+                        if (in_array($dayStr, $leaveDates)) {
+                            $onLeave++;
+                            $present++; // Count leave as present
+                        } else {
+                            $absent++;
+                        }
                     }
                 }
 
@@ -114,6 +153,7 @@ class AttendanceController extends Controller
                     'late' => $late,
                     'halfday' => $halfday,
                     'overtime' => round($overtime, 1),
+                    'on_leave' => $onLeave,
                     'rate' => $rate,
                     'status' => $status,
                 ];
@@ -135,6 +175,7 @@ class AttendanceController extends Controller
         $totalAbsent = array_sum(array_column($attendanceRecords, 'absent'));
         $totalLate = array_sum(array_column($attendanceRecords, 'late'));
         $totalOT = array_sum(array_column($attendanceRecords, 'overtime'));
+        $totalOnLeave = array_sum(array_column($attendanceRecords, 'on_leave'));
         $completeCount = count(array_filter($attendanceRecords, fn($r) => $r['status'] === 'Complete'));
         $incompleteCount = count(array_filter($attendanceRecords, fn($r) => $r['status'] === 'Incomplete'));
 
@@ -152,6 +193,7 @@ class AttendanceController extends Controller
             'totalAbsent',
             'totalLate',
             'totalOT',
+            'totalOnLeave',
             'completeCount',
             'incompleteCount',
             'departments'
@@ -204,7 +246,21 @@ class AttendanceController extends Controller
                 return Carbon::parse($a->date)->format('Y-m-d');
             });
 
-        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee);
+        // Get approved leaves for this employee in the date range
+        $approvedLeaves = \App\Models\LeaveApplication::where('employee_id', $employeeId)
+            ->where('status', 'approved')
+            ->where(function($query) use ($startDate, $endDate) {
+                $query->whereBetween('start_date', [$startDate, $endDate])
+                      ->orWhereBetween('end_date', [$startDate, $endDate])
+                      ->orWhere(function($q) use ($startDate, $endDate) {
+                          $q->where('start_date', '<=', $startDate)
+                            ->where('end_date', '>=', $endDate);
+                      });
+            })
+            ->with('leaveType')
+            ->get();
+
+        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee, $approvedLeaves);
 
         return response()->json([
             'records' => $records,
@@ -310,9 +366,30 @@ class AttendanceController extends Controller
         }
     }
 
-    private function generateDetailedRecords($startDate, $endDate, $attendances, $employee = null)
+    private function generateDetailedRecords($startDate, $endDate, $attendances, $employee = null, $approvedLeaves = null)
     {
         $graceMinutes = 15;
+
+        // Build leave dates map with leave details
+        $leaveDatesMap = [];
+        if ($approvedLeaves) {
+            foreach ($approvedLeaves as $leave) {
+                $leaveStart = Carbon::parse($leave->start_date);
+                $leaveEnd = Carbon::parse($leave->end_date);
+                $current = $leaveStart->copy();
+                
+                while ($current->lte($leaveEnd)) {
+                    $dateKey = $current->format('Y-m-d');
+                    $leaveDatesMap[$dateKey] = [
+                        'leave_type' => $leave->leaveType->leave_name ?? 'Leave',
+                        'leave_code' => $leave->leaveType->leave_code ?? 'N/A',
+                        'application_number' => $leave->application_number,
+                        'days' => $leave->number_of_days,
+                    ];
+                    $current->addDay();
+                }
+            }
+        }
 
         $records = [];
         $current = $startDate->copy();
@@ -320,6 +397,8 @@ class AttendanceController extends Controller
         while ($current->lte($endDate)) {
             $dateKey = $current->format('Y-m-d');
             $attendance = $attendances->get($dateKey);
+            $isOnLeave = isset($leaveDatesMap[$dateKey]);
+            $leaveInfo = $isOnLeave ? $leaveDatesMap[$dateKey] : null;
 
             // Get schedule for this specific date
             $schedule = $employee ? $employee->getScheduleForDate($dateKey) : null;
@@ -383,6 +462,45 @@ class AttendanceController extends Controller
                         $otOut = null;
                     }
                 }
+            }
+
+            // If on approved leave, mark as present with leave indicator
+            if ($isOnLeave && !in_array($current->dayOfWeek, [0, 6])) {
+                $records[] = [
+                    'date' => $current->format('M d, Y'),
+                    'day' => $current->format('l'),
+                    'am_in' => 'ON LEAVE',
+                    'am_out' => 'ON LEAVE',
+                    'pm_in' => 'ON LEAVE',
+                    'pm_out' => 'ON LEAVE',
+                    'ot_in' => null,
+                    'ot_out' => null,
+                    'late_minutes' => 0,
+                    'late_display' => '-',
+                    'undertime' => 0,
+                    'undertime_display' => '-',
+                    'total_hours' => '8.0 hrs',
+                    'accredited_minutes' => 480, // 8 hours
+                    'am_accredited_minutes' => 240,
+                    'pm_accredited_minutes' => 240,
+                    'am_grace_applied' => false,
+                    'pm_grace_applied' => false,
+                    'schedule' => [
+                        'am_in' => $expectedAmIn->format('H:i'),
+                        'am_out' => $expectedAmOut->format('H:i'),
+                        'pm_in' => $expectedPmIn->format('H:i'),
+                        'pm_out' => $expectedPmOut->format('H:i'),
+                    ],
+                    'has_log' => false,
+                    'needs_review' => false,
+                    'is_incomplete' => false,
+                    'attendance_id' => null,
+                    'date_key' => $current->format('Y-m-d'),
+                    'is_on_leave' => true,
+                    'leave_info' => $leaveInfo,
+                ];
+                $current->addDay();
+                continue;
             }
 
             // Calculate late minutes with grace period
@@ -516,6 +634,8 @@ class AttendanceController extends Controller
                 'is_incomplete' => !$amOut || !$pmIn,
                 'attendance_id' => $attendance ? $attendance->id : null,
                 'date_key' => $current->format('Y-m-d'),
+                'is_on_leave' => false,
+                'leave_info' => null,
             ];
 
             $current->addDay();

@@ -2,28 +2,28 @@
     <div class="table-header">
         <div>
             <h3 class="table-title">My Leave Requests</h3>
-            <p class="table-sub">6 of 6 records</p>
+            <p class="table-sub">{{ $leaveApplications->count() }} of {{ $leaveApplications->count() }} records</p>
         </div>
         <div class="table-actions">
             <select class="filter-select" id="filterType" onchange="applyLeaveFilters()">
                 <option value="">All Types</option>
-                <option>Vacation Leave</option>
-                <option>Sick Leave</option>
-                <option>Emergency Leave</option>
-                <option>Special Leave</option>
+                @foreach($leaveTypes as $type)
+                    <option value="{{ $type->leave_name }}">{{ $type->leave_name }}</option>
+                @endforeach
             </select>
             <select class="filter-select" id="filterStatus" onchange="applyLeaveFilters()">
                 <option value="">All Status</option>
-                <option>Approved</option>
-                <option>Pending</option>
-                <option>Rejected</option>
+                <option value="approved">Approved</option>
+                <option value="pending">Pending</option>
+                <option value="rejected">Rejected</option>
+                <option value="cancelled">Cancelled</option>
             </select>
             <button class="btn-export" onclick="openFileModal()">+ File Leave</button>
         </div>
     </div>
     
     <div class="table-wrapper">
-        <table class="payroll-table lb-leave-table">
+        <table class="payroll-table">
             <thead>
                 <tr>
                     <th>Leave ID</th>
@@ -37,71 +37,61 @@
                 </tr>
             </thead>
             <tbody>
-                <tr data-type="Sick Leave" data-status="Approved">
-                    <td class="lb-leave-id">LV-2025-002</td>
-                    <td class="lb-leave-type">Sick Leave</td>
-                    <td>Jun 15, 2025</td>
-                    <td>Jun 16, 2025</td>
-                    <td class="lb-leave-days">2</td>
-                    <td class="lb-leave-reason">Medical consultation</td>
-                    <td><span class="badge-status processed">Approved</span></td>
-                    <td><button class="btn-view" onclick="openDetailModal('Sick Leave', 'Jun 15, 2025', 'Jun 16, 2025', 2, 'Medical consultation', 'Approved')">View</button></td>
+                @forelse($leaveApplications as $application)
+                <tr data-type="{{ $application->leaveType->leave_name ?? 'N/A' }}" data-status="{{ ucfirst($application->status) }}">
+                    <td class="emp-id">{{ $application->application_number }}</td>
+                    <td><span class="dept-tag">{{ $application->leaveType->leave_name ?? 'N/A' }}</span></td>
+                    <td class="work-date">{{ $application->start_date->format('M d, Y') }}</td>
+                    <td class="work-date">{{ $application->end_date->format('M d, Y') }}</td>
+                    <td class="days-count">{{ number_format($application->number_of_days, 0) }} {{ $application->number_of_days == 1 ? 'day' : 'days' }}</td>
+                    <td style="font-size: 13px; color: #6b6a8a;">{{ Str::limit($application->reason, 50) }}</td>
+                    <td>
+                        @if($application->status === 'approved')
+                            <span class="badge-status processed">Approved</span>
+                        @elseif($application->status === 'pending')
+                            <span class="badge-status pending">Pending</span>
+                        @elseif($application->status === 'rejected')
+                            <span class="badge-status rejected">Rejected</span>
+                        @else
+                            <span class="badge-status cancelled">Cancelled</span>
+                        @endif
+                    </td>
+                    <td>
+                        <button class="btn-view" onclick="openDetailModal(
+                            '{{ addslashes($application->leaveType->leave_name ?? 'N/A') }}',
+                            '{{ $application->start_date->format('M d, Y') }}',
+                            '{{ $application->end_date->format('M d, Y') }}',
+                            {{ $application->number_of_days }},
+                            '{{ addslashes($application->reason) }}',
+                            '{{ ucfirst($application->status) }}',
+                            '{{ $application->application_number }}',
+                            '{{ $application->attachment_path ? asset('storage/' . $application->attachment_path) : '' }}',
+                            '{{ addslashes($application->approver_remarks ?? '') }}',
+                            {{ $application->id }}
+                        )">View</button>
+                    </td>
                 </tr>
-                <tr data-type="Vacation Leave" data-status="Approved">
-                    <td class="lb-leave-id">LV-2025-007</td>
-                    <td class="lb-leave-type">Vacation Leave</td>
-                    <td>Jun 10, 2025</td>
-                    <td>Jun 11, 2025</td>
-                    <td class="lb-leave-days">2</td>
-                    <td class="lb-leave-reason">Rest and recreation</td>
-                    <td><span class="badge-status processed">Approved</span></td>
-                    <td><button class="btn-view" onclick="openDetailModal('Vacation Leave', 'Jun 10, 2025', 'Jun 11, 2025', 2, 'Rest and recreation', 'Approved')">View</button></td>
+                @empty
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 60px 20px;">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" style="margin: 0 auto 16px; display: block;">
+                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p style="margin: 0; font-size: 15px; color: #6b7280; font-weight: 500;">No leave requests found</p>
+                        <p style="margin: 8px 0 0 0; font-size: 13px; color: #9ca3af;">Your leave applications will appear here</p>
+                    </td>
                 </tr>
-                <tr data-type="Emergency Leave" data-status="Approved">
-                    <td class="lb-leave-id">LV-2025-010</td>
-                    <td class="lb-leave-type">Emergency Leave</td>
-                    <td>May 22, 2025</td>
-                    <td>May 22, 2025</td>
-                    <td class="lb-leave-days">1</td>
-                    <td class="lb-leave-reason">Family emergency</td>
-                    <td><span class="badge-status processed">Approved</span></td>
-                    <td><button class="btn-view" onclick="openDetailModal('Emergency Leave', 'May 22, 2025', 'May 22, 2025', 1, 'Family emergency', 'Approved')">View</button></td>
-                </tr>
-                <tr data-type="Sick Leave" data-status="Approved">
-                    <td class="lb-leave-id">LV-2025-013</td>
-                    <td class="lb-leave-type">Sick Leave</td>
-                    <td>May 5, 2025</td>
-                    <td>May 6, 2025</td>
-                    <td class="lb-leave-days">2</td>
-                    <td class="lb-leave-reason">Flu and fever</td>
-                    <td><span class="badge-status processed">Approved</span></td>
-                    <td><button class="btn-view" onclick="openDetailModal('Sick Leave', 'May 5, 2025', 'May 6, 2025', 2, 'Flu and fever', 'Approved')">View</button></td>
-                </tr>
-                <tr data-type="Vacation Leave" data-status="Approved">
-                    <td class="lb-leave-id">LV-2025-018</td>
-                    <td class="lb-leave-type">Vacation Leave</td>
-                    <td>Apr 14, 2025</td>
-                    <td>Apr 16, 2025</td>
-                    <td class="lb-leave-days">3</td>
-                    <td class="lb-leave-reason">Family vacation</td>
-                    <td><span class="badge-status processed">Approved</span></td>
-                    <td><button class="btn-view" onclick="openDetailModal('Vacation Leave', 'Apr 14, 2025', 'Apr 16, 2025', 3, 'Family vacation', 'Approved')">View</button></td>
-                </tr>
-                <tr data-type="Vacation Leave" data-status="Pending">
-                    <td class="lb-leave-id">LV-2025-021</td>
-                    <td class="lb-leave-type">Vacation Leave</td>
-                    <td>Jul 7, 2025</td>
-                    <td>Jul 9, 2025</td>
-                    <td class="lb-leave-days">3</td>
-                    <td class="lb-leave-reason">Personal trip</td>
-                    <td><span class="badge-status pending">Pending</span></td>
-                    <td><button class="btn-view" onclick="openDetailModal('Vacation Leave', 'Jul 7, 2025', 'Jul 9, 2025', 3, 'Personal trip', 'Pending')">View</button></td>
-                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
     
     <div class="table-footer">
-        <span id="leaveCount">Showing <strong>6</strong> of <strong>6</strong> records</span>
+        <p id="leaveCount">Showing <strong>{{ $leaveApplications->count() }}</strong> of <strong>{{ $leaveApplications->count() }}</strong> records</p>
+        <div class="pagination">
+            <button class="page-btn">‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">›</button>
+        </div>
     </div>
 </section>
