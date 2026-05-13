@@ -28,7 +28,8 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
     if (Auth::attempt($credentials, $request->boolean('remember'))) {
         $request->session()->regenerate();
 
-        $user = Auth::user();
+        // Eager load employee data with relationships
+        $user = Auth::user()->load('employee.employmentDetail.departmentRelation', 'employee.employmentDetail.designationRelation');
 
         if ($user->email === 'admin@gmail.com' || $user->role === 'admin') {
             return redirect()->route('admin.dashboard');
@@ -38,6 +39,16 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
             return redirect()->route('admin.dashboard');
         }
 
+        // Check if employee has permanent employment status
+        if ($user->employee && $user->employee->employmentDetail) {
+            $employmentStatus = $user->employee->employmentDetail->employment_status;
+            
+            if ($employmentStatus === 'Permanent') {
+                return redirect()->route('permanent.dashboard');
+            }
+        }
+
+        // Fallback for explicit permanent role or email
         if ($user->role === 'permanent' || $user->email === 'permanent@gmail.com') {
             return redirect()->route('permanent.dashboard');
         }

@@ -213,9 +213,24 @@
         initLeaveCreditsTable();
     }
 
+    function changeItemsPerPage() {
+        const select = document.getElementById('itemsPerPage');
+        const value = select.value;
+        
+        if (value === 'all') {
+            leaveCreditsRowsPerPage = 999999; // Show all
+        } else {
+            leaveCreditsRowsPerPage = parseInt(value);
+        }
+        
+        leaveCreditsCurrentPage = 1;
+        displayLeaveCreditsPage();
+        updateLeaveCreditsPageButtons();
+    }
+
     // Leave Credits Table Pagination
     let leaveCreditsCurrentPage = 1;
-    let leaveCreditsRowsPerPage = 10;
+    let leaveCreditsRowsPerPage = 20; // Increased from 10 to 20 to show all leave types
     let leaveCreditsVisibleRows = [];
 
     function initLeaveCreditsTable() {

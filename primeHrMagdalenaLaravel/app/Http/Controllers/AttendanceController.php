@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\AttendanceCorrection;
 use App\Models\AccreditedHoursLog;
 use App\Models\DailySalaryComputation;
+use App\Services\LateDeductionService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -1160,6 +1161,10 @@ class AttendanceController extends Controller
             
             // Trigger daily salary computation
             \App\Models\DailySalaryComputation::computeFromAccreditedLog($accreditedLog);
+            
+            // Process late deduction from leave balances
+            $lateDeductionService = new LateDeductionService();
+            $lateDeductionService->processLateDeduction($accreditedLog);
         }
 
         return response()->json([

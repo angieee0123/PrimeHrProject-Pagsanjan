@@ -50,7 +50,7 @@ CREATE TABLE `leave_applications` (
   CONSTRAINT `leave_applications_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE,
   CONSTRAINT `leave_applications_filed_by_foreign` FOREIGN KEY (`filed_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `leave_applications_leave_code_foreign` FOREIGN KEY (`leave_code`) REFERENCES `leave_types_config` (`leave_code`) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -59,6 +59,7 @@ CREATE TABLE `leave_applications` (
 
 LOCK TABLES `leave_applications` WRITE;
 /*!40000 ALTER TABLE `leave_applications` DISABLE KEYS */;
+INSERT INTO `leave_applications` VALUES (2,'LA-2026-0001',9,'BL','2026-05-15','2026-05-19',3.00,'libingh ng dog namin huhunuhuhhu','approved','leave_attachments/OBkITI62yn3XeN2lBCvrgDdMsrUaekmXKDej3kZU.png',7,1,'2026-05-13 06:08:34',NULL,'2026-05-13 06:07:48','2026-05-13 06:08:34');
 /*!40000 ALTER TABLE `leave_applications` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -71,4 +72,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-13 20:42:32
+-- Dump completed on 2026-05-14  1:07:23

@@ -74,12 +74,12 @@
 
     <div class="sidebar-footer">
         <div class="user-avatar-wrap">
-            <div class="user-avatar">AD</div>
+            <div class="user-avatar">{{ $authInitials ?? 'AD' }}</div>
             <span class="user-status-dot"></span>
         </div>
         <div class="user-info">
-            <p class="user-name">Admin User</p>
-            <p class="user-role">HR Staff</p>
+            <p class="user-name">{{ $authFullName ?? 'Admin User' }}</p>
+            <p class="user-role">{{ $authRole ?? 'HR Staff' }}</p>
         </div>
         <form action="{{ route('logout') }}" method="POST" style="display: inline;">
             @csrf
