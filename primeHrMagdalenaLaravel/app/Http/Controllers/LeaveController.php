@@ -74,6 +74,11 @@ class LeaveController extends Controller
             ->sort()
             ->values();
 
+        // Get all employees for manual credit modal
+        $employees = \App\Models\Employee::with('employmentDetail.departmentRelation')
+            ->orderBy('employee_id')
+            ->get();
+
         // Sample benefits data (you can create a table for this later)
         $benefitsData = [
             ['empId' => 'PGS-0041', 'name' => 'Maria B. Santos', 'gsis' => '₱3,794', 'philhealth' => '₱1,050', 'pagibig' => '₱100', 'vlBalance' => 15, 'slBalance' => 15],
@@ -84,7 +89,7 @@ class LeaveController extends Controller
             ['empId' => 'PGS-0310', 'name' => 'Roberto T. Flores', 'gsis' => '₱2,748', 'philhealth' => '₱775', 'pagibig' => '₱100', 'vlBalance' => 8, 'slBalance' => 10],
         ];
 
-        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact('leaveTypes', 'leaveApplications', 'benefitsData', 'accrualRates', 'accruedLeaveTypes', 'departments'));
+        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact('leaveTypes', 'leaveApplications', 'benefitsData', 'accrualRates', 'accruedLeaveTypes', 'departments', 'employees'));
     }
 
     public function storeLeaveType(Request $request)
@@ -560,6 +565,130 @@ class LeaveController extends Controller
                 'success' => false,
                 'message' => 'Failed to reject leave request: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function getEmployeeBalances($employeeId)
+    {
+        try {
+            $year = now()->year;
+            
+            // Get all leave balances for the employee
+            $balances = LeaveBalance::where('employee_id', $employeeId)
+                ->where('year', $year)
+                ->pluck('available_credits', 'leave_code');
+
+            // Get all active leave types
+            $leaveTypes = LeaveType::where('is_active', true)
+                ->orderBy('leave_name')
+                ->get(['leave_code', 'leave_name']);
+
+            return response()->json([
+                'success' => true,
+                'balances' => $balances,
+                'leaveTypes' => $leaveTypes
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load employee balances: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function storeManualCredit(Request $request)
+    {
+        $validated = $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+            'leave_code' => 'required|exists:leave_types_config,leave_code',
+            'amount' => 'required|numeric|min:0.01',
+            'transaction_date' => 'required|date',
+            'transaction_type' => 'required|in:add,deduct',
+            'remarks' => 'required|string|max:500',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $year = Carbon::parse($validated['transaction_date'])->year;
+            $isDeduction = $validated['transaction_type'] === 'deduct';
+            
+            // Get or create leave balance for the employee
+            $leaveBalance = LeaveBalance::firstOrCreate(
+                [
+                    'employee_id' => $validated['employee_id'],
+                    'leave_code' => $validated['leave_code'],
+                    'year' => $year,
+                ],
+                [
+                    'total_credits' => 0,
+                    'used_credits' => 0,
+                    'pending_credits' => 0,
+                    'available_credits' => 0,
+                    'carried_over' => 0,
+                ]
+            );
+
+            $balanceBefore = $leaveBalance->available_credits;
+            
+            // Check if deduction would result in negative balance (warning only, still allow)
+            if ($isDeduction && $balanceBefore < $validated['amount']) {
+                // Log warning but proceed
+                \Log::warning('Manual deduction results in negative balance', [
+                    'employee_id' => $validated['employee_id'],
+                    'leave_code' => $validated['leave_code'],
+                    'current_balance' => $balanceBefore,
+                    'deduction_amount' => $validated['amount'],
+                    'processed_by' => auth()->id()
+                ]);
+            }
+            
+            // Apply adjustment
+            if ($isDeduction) {
+                $leaveBalance->total_credits -= $validated['amount'];
+                $leaveBalance->available_credits -= $validated['amount'];
+                $transactionAmount = -$validated['amount'];
+                $transactionType = 'debit';
+            } else {
+                $leaveBalance->total_credits += $validated['amount'];
+                $leaveBalance->available_credits += $validated['amount'];
+                $transactionAmount = $validated['amount'];
+                $transactionType = 'credit';
+            }
+            
+            $leaveBalance->save();
+
+            // Create transaction record
+            LeaveTransaction::create([
+                'employee_id' => $validated['employee_id'],
+                'leave_code' => $validated['leave_code'],
+                'year' => $year,
+                'transaction_type' => 'adjustment',
+                'amount' => $transactionAmount,
+                'balance_before' => $balanceBefore,
+                'balance_after' => $leaveBalance->available_credits,
+                'reference_type' => 'manual_adjustment',
+                'reference_id' => null,
+                'transaction_date' => $validated['transaction_date'],
+                'processed_by' => auth()->id(),
+                'remarks' => ($isDeduction ? '[DEDUCTION] ' : '[ADDITION] ') . $validated['remarks'],
+            ]);
+
+            DB::commit();
+
+            $message = $isDeduction 
+                ? 'Leave credits deducted successfully!' 
+                : 'Leave credits added successfully!';
+
+            return redirect()->route('admin.leave')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return redirect()->route('admin.leave')
+                ->with('error', 'Failed to adjust leave credits: ' . $e->getMessage());
         }
     }
 }

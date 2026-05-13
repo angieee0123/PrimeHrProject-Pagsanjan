@@ -96,6 +96,8 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 
 @include('admin.leaveAndBenefits.modals.add-accrual-rate-modal')
 
+@include('admin.leaveAndBenefits.modals.add-manual-credit-modal')
+
 @vite(['resources/css/adminLeaveAndBenefits.css', 'resources/js/adminLeaveAndBenefits.js'])
 
 <script>

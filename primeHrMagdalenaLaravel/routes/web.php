@@ -616,6 +616,10 @@ Route::get('/admin/leave/accrual-rates/{id}', [LeaveController::class, 'showAccr
 Route::put('/admin/leave/accrual-rates/{id}', [LeaveController::class, 'updateAccrualRate'])->middleware('auth')->name('admin.leave.accrual-rates.update');
 Route::delete('/admin/leave/accrual-rates/{id}', [LeaveController::class, 'destroyAccrualRate'])->middleware('auth')->name('admin.leave.accrual-rates.destroy');
 
+// Manual Credit Adjustment Routes
+Route::get('/admin/leave/employee/{employeeId}/balances', [LeaveController::class, 'getEmployeeBalances'])->middleware('auth')->name('admin.leave.employee.balances');
+Route::post('/admin/leave/manual-credit/store', [LeaveController::class, 'storeManualCredit'])->middleware('auth')->name('admin.leave.manual-credit.store');
+
 Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
     $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
     $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
