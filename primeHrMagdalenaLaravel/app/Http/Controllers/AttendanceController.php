@@ -54,7 +54,7 @@ class AttendanceController extends Controller
                 $onLeave = 0;
 
                 // Get employee's schedule or use defaults
-                $graceMinutes = 15;
+                $graceMinutes = 5;
 
                 $workingDays = $this->getWorkingDays($startDate, $endDate);
                 $attendedDates = $attendances->pluck('date')->map(fn($d) => $d->format('Y-m-d'))->toArray();
@@ -368,7 +368,7 @@ class AttendanceController extends Controller
 
     private function generateDetailedRecords($startDate, $endDate, $attendances, $employee = null, $approvedLeaves = null)
     {
-        $graceMinutes = 15;
+        $graceMinutes = 5;
 
         // Build leave dates map with leave details
         $leaveDatesMap = [];
@@ -516,6 +516,44 @@ class AttendanceController extends Controller
                 }
             }
 
+            // Check if employee only timed in AM without returning (no AM out and no PM in)
+            // This means they left and never came back - mark as ABSENT
+            $isAbandoned = false;
+            if ($attendance && $attendance->am_in && !$attendance->am_out && !$attendance->pm_in && !in_array($current->dayOfWeek, [0, 6])) {
+                $isAbandoned = true;
+            }
+
+            // Check if truly absent (no time records at all)
+            $isTrulyAbsent = !$attendance || (!$attendance->am_in && !$attendance->am_out && !$attendance->pm_in && !$attendance->pm_out);
+
+            // Determine if incomplete vs absent
+            // INCOMPLETE: Has substantial attendance but missing some entries
+            // ABSENT: No attendance, abandoned, or only single time-in without pair
+            $isIncomplete = false;
+            $isAbsent = false;
+            
+            if ($attendance && !in_array($current->dayOfWeek, [0, 6])) {
+                $hasAmPair = $attendance->am_in && $attendance->am_out;
+                $hasPmPair = $attendance->pm_in && $attendance->pm_out;
+                $hasOnlyAmIn = $attendance->am_in && !$attendance->am_out && !$attendance->pm_in && !$attendance->pm_out;
+                $hasOnlyPmIn = !$attendance->am_in && !$attendance->am_out && $attendance->pm_in && !$attendance->pm_out;
+                
+                // ABSENT cases:
+                // 1. Abandoned (AM in only, no AM out, no PM in)
+                // 2. Only single time-in without any out (suspicious)
+                if ($isAbandoned || $hasOnlyAmIn || $hasOnlyPmIn) {
+                    $isAbsent = true;
+                }
+                // INCOMPLETE cases:
+                // 1. Has AM pair but incomplete PM
+                // 2. Has PM pair but incomplete AM  
+                // 3. Has AM in, AM out, PM in but no PM out (worked but forgot to clock out)
+                else if (($hasAmPair && !$hasPmPair) || (!$hasAmPair && $hasPmPair) || 
+                         ($attendance->am_in && $attendance->am_out && $attendance->pm_in && !$attendance->pm_out)) {
+                    $isIncomplete = true;
+                }
+            }
+
             // Calculate undertime (in minutes)
             $undertime = 0;
             if ($attendance && $attendance->pm_out && !in_array($current->dayOfWeek, [0, 6])) {
@@ -527,6 +565,48 @@ class AttendanceController extends Controller
                 } catch (\Exception $e) {
                     $undertime = 0;
                 }
+            }
+
+            // If abandoned or only single time-in, treat as ABSENT
+            if ($isAbandoned || $isAbsent) {
+                $statusLabel = $isAbandoned ? 'ABANDONED' : 'ABSENT';
+                $records[] = [
+                    'date' => $current->format('M d, Y'),
+                    'day' => $current->format('l'),
+                    'am_in' => $amIn,
+                    'am_out' => $statusLabel,
+                    'pm_in' => $statusLabel,
+                    'pm_out' => $statusLabel,
+                    'ot_in' => null,
+                    'ot_out' => null,
+                    'late_minutes' => 0,
+                    'late_display' => '-',
+                    'undertime' => 480, // 8 hours undertime
+                    'undertime_display' => '8 hrs',
+                    'total_hours' => '0 hrs',
+                    'accredited_minutes' => 0,
+                    'am_accredited_minutes' => 0,
+                    'pm_accredited_minutes' => 0,
+                    'am_grace_applied' => false,
+                    'pm_grace_applied' => false,
+                    'schedule' => [
+                        'am_in' => $expectedAmIn->format('H:i'),
+                        'am_out' => $expectedAmOut->format('H:i'),
+                        'pm_in' => $expectedPmIn->format('H:i'),
+                        'pm_out' => $expectedPmOut->format('H:i'),
+                    ],
+                    'has_log' => false,
+                    'needs_review' => true,
+                    'is_incomplete' => false,
+                    'is_absent' => true,
+                    'is_abandoned' => $isAbandoned,
+                    'attendance_id' => $attendance ? $attendance->id : null,
+                    'date_key' => $current->format('Y-m-d'),
+                    'is_on_leave' => false,
+                    'leave_info' => null,
+                ];
+                $current->addDay();
+                continue;
             }
 
             // Use stored total_hours from database (actual time worked in minutes)
@@ -568,10 +648,10 @@ class AttendanceController extends Controller
                 
                 $AM_START = $toMin($expectedAmIn->format('H:i'));
                 $AM_END = $toMin($expectedAmOut->format('H:i'));
-                $AM_GRACE = $AM_START + 15;
+                $AM_GRACE = $AM_START + 5;
                 $PM_START = $toMin($expectedPmIn->format('H:i'));
                 $PM_END = $toMin($expectedPmOut->format('H:i'));
-                $PM_GRACE = $PM_START + 15;
+                $PM_GRACE = $PM_START + 5;
                 
                 // Calculate AM accredited
                 $amInMin = $toMin($amIn);
@@ -631,7 +711,9 @@ class AttendanceController extends Controller
                 ],
                 'has_log' => $hasLog,
                 'needs_review' => $needsReview,
-                'is_incomplete' => !$amOut || !$pmIn,
+                'is_incomplete' => $isIncomplete,
+                'is_absent' => false,
+                'is_abandoned' => false,
                 'attendance_id' => $attendance ? $attendance->id : null,
                 'date_key' => $current->format('Y-m-d'),
                 'is_on_leave' => false,
@@ -765,10 +847,30 @@ class AttendanceController extends Controller
         // Use employee's schedule or defaults
         $AM_START   = $schedule ? $toMin($schedule->am_in) : 480;  // Default 08:00
         $AM_END     = $schedule ? $toMin($schedule->am_out) : 720;  // Default 12:00
-        $AM_GRACE   = $AM_START + 15;  // 15 minutes grace
+        $AM_GRACE   = $AM_START + 5;  // 5 minutes grace
         $PM_START   = $schedule ? $toMin($schedule->pm_in) : 780;  // Default 13:00
         $PM_END     = $schedule ? $toMin($schedule->pm_out) : 1020; // Default 17:00
-        $PM_GRACE   = $PM_START + 15;  // 15 minutes grace
+        $PM_GRACE   = $PM_START + 5;  // 5 minutes grace
+
+        // Check if employee abandoned (only AM in, no AM out, no PM in)
+        // This means they left and never came back - treat as absent (0 accredited hours)
+        if ($amIn && !$amOut && !$pmIn) {
+            return [
+                'accredited_minutes' => 0,
+                'log_data' => [
+                    'schedule_id' => $schedule ? $schedule->id : null,
+                    'am_accredited_minutes' => 0,
+                    'pm_accredited_minutes' => 0,
+                    'ot_minutes' => 0,
+                    'late_minutes' => 0,
+                    'undertime_minutes' => 480, // 8 hours absent
+                    'total_accredited_minutes' => 0,
+                    'total_actual_minutes' => 0,
+                    'am_grace_applied' => false,
+                    'pm_grace_applied' => false,
+                ]
+            ];
+        }
 
         $amMins = 0;
         $amGraceApplied = false;

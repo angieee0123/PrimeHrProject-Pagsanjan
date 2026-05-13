@@ -89,6 +89,7 @@ input[type="date"].filter-select::-webkit-calendar-picker-indicator { cursor: po
 .day-absent { background: #fff5f5 !important; }
 .day-needs-review { background: #fffbf0 !important; }
 .badge-incomplete { display: inline-block; padding: 3px 8px; background: #ffe8e8; color: #8e1e18; border-radius: 4px; font-size: 10px; font-weight: 700; margin-left: 6px; }
+.badge-absent { display: inline-block; padding: 3px 8px; background: #8e1e18; color: #fff; border-radius: 4px; font-size: 10px; font-weight: 700; margin-left: 6px; }
 .badge-needs-review { display: inline-block; padding: 3px 8px; background: #fce8d4; color: #a16207; border-radius: 4px; font-size: 10px; font-weight: 700; margin-left: 6px; }
 textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
 .file-preview-item { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #f7f6ff; border: 1px solid #e8e7f5; border-radius: 6px; font-size: 11px; color: #0b044d; }

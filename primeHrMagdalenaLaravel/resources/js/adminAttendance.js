@@ -294,10 +294,10 @@ window.calculateTotalHours = function() {
         otMinutes = Math.max(0, otDiff);
     }
 
-    // Calculate late with 15-min grace period
+    // Calculate late with 5-min grace period
     if (amIn) {
         const amInTime = new Date('1970-01-01 ' + amIn);
-        const graceThreshold = new Date('1970-01-01 08:15:00');
+        const graceThreshold = new Date('1970-01-01 08:05:00');
         const expectedIn = new Date('1970-01-01 08:00:00');
         if (amInTime > graceThreshold) {
             lateMinutes = Math.max(0, (amInTime - expectedIn) / 1000 / 60);
@@ -530,14 +530,14 @@ function computeAccreditedHours(record) {
 
     const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
 
-    // AM window: 08:00 – 12:00 (15-min grace: if amIn <= 08:15, treat as 08:00)
+    // AM window: 08:00 – 12:00 (5-min grace: if amIn <= 08:05, treat as 08:00)
     const AM_START   = 8 * 60;         // 08:00
     const AM_END     = 12 * 60;        // 12:00
-    const AM_GRACE   = AM_START + 15;  // 08:15
-    // PM window: 13:00 – 17:00 (15-min grace: if pmIn <= 13:15, treat as 13:00)
+    const AM_GRACE   = AM_START + 5;   // 08:05
+    // PM window: 13:00 – 17:00 (5-min grace: if pmIn <= 13:05, treat as 13:00)
     const PM_START   = 13 * 60;        // 13:00
     const PM_END     = 17 * 60;        // 17:00
-    const PM_GRACE   = PM_START + 15;  // 13:15
+    const PM_GRACE   = PM_START + 5;   // 13:05
 
     // AM: if within grace period, count from 08:00; otherwise count from actual amIn
     const amInMin  = toMin(amIn);
@@ -588,7 +588,7 @@ function renderDetailedDTR(data) {
         }
 
         const hasAnyLog = record.am_in || record.am_out || record.pm_in || record.pm_out;
-        const isAbsent = !isWeekend && !hasAnyLog;
+        const isAbsent = !isWeekend && !hasAnyLog && !record.is_on_leave;
         if (isAbsent) {
             tr.className = 'day-absent';
             totalAbsent++;
@@ -613,7 +613,13 @@ function renderDetailedDTR(data) {
 
         // Build status badge
         let statusBadge = '';
-        if (record.is_incomplete) {
+        if (record.is_abandoned) {
+            statusBadge = ' <span class="badge-absent">ABANDONED</span>';
+            tr.className = 'day-absent';
+        } else if (record.is_absent || isAbsent) {
+            statusBadge = ' <span class="badge-absent">ABSENT</span>';
+            tr.className = 'day-absent';
+        } else if (record.is_incomplete) {
             statusBadge = ' <span class="badge-incomplete">Incomplete</span>';
         } else if (record.needs_review) {
             statusBadge = ' <span class="badge-needs-review">Needs Review</span>';
@@ -621,7 +627,11 @@ function renderDetailedDTR(data) {
 
         // Format accredited hours from backend calculation
         let accreditedDisplay = '<span class="badge-incomplete">Incomplete</span>';
-        if (record.accredited_minutes > 0) {
+        
+        // Handle abandoned/absent cases
+        if (record.is_abandoned || record.is_absent || isAbsent) {
+            accreditedDisplay = '<strong style="color:#8e1e18;">0 hrs</strong><br><small style="color: #8e1e18; font-size: 10px;">⚠️ Absent</small>';
+        } else if (record.accredited_minutes > 0) {
             const hrs = Math.floor(record.accredited_minutes / 60);
             const mins = record.accredited_minutes % 60;
             const label = hrs > 0 && mins > 0 ? `${hrs}h ${mins}m` : hrs > 0 ? `${hrs} hrs` : `${mins} min`;
