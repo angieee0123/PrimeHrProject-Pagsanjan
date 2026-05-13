@@ -50,6 +50,7 @@
                             <th>Late</th>
                             <th>Total Hours</th>
                             <th>Accredited Hours</th>
+                            <th>Leave Deduction</th>
                             <th>Action</th>
                         </tr>
                     </thead>

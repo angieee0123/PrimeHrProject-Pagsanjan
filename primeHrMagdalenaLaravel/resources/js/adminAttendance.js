@@ -631,6 +631,9 @@ function renderDetailedDTR(data) {
         // Handle abandoned/absent cases
         if (record.is_abandoned || record.is_absent || isAbsent) {
             accreditedDisplay = '<strong style="color:#8e1e18;">0 hrs</strong><br><small style="color: #8e1e18; font-size: 10px;">⚠️ Absent</small>';
+        } else if (record.is_on_leave) {
+            // On approved leave - show full 8 hours
+            accreditedDisplay = '<strong style="color:#15803d;">8 hrs</strong><br><small style="color: #15803d; font-size: 10px;">✓ On Leave</small>';
         } else if (record.accredited_minutes > 0) {
             const hrs = Math.floor(record.accredited_minutes / 60);
             const mins = record.accredited_minutes % 60;
@@ -656,6 +659,15 @@ function renderDetailedDTR(data) {
             }
         }
 
+        // Build leave deduction display
+        let leaveDeductionDisplay = '—';
+        if (record.is_on_leave && record.leave_info) {
+            const leaveType = record.leave_info.leave_type || 'Leave';
+            const leaveCode = record.leave_info.leave_code || 'N/A';
+            const days = record.leave_info.days || 1;
+            leaveDeductionDisplay = `<span style="color: #0b044d; font-weight: 600;">${leaveCode}</span><br><small style="color: #6b6a8a; font-size: 10px;">${leaveType} (${days} day${days > 1 ? 's' : ''})</small>`;
+        }
+
         tr.innerHTML = `
             <td><strong>${record.date}</strong>${statusBadge}</td>
             <td>${record.day}</td>
@@ -669,6 +681,7 @@ function renderDetailedDTR(data) {
             <td>${record.late_display ? '<span class="log-late">' + record.late_display + '</span>' : (record.am_in ? '0 min' : '—')}</td>
             <td><strong>${record.total_hours}</strong></td>
             <td>${accreditedDisplay}</td>
+            <td>${leaveDeductionDisplay}</td>
             <td><button class="btn-edit-time" onclick="openCorrectModal(${record.attendance_id ? record.attendance_id : "'new_" + currentDetailedEmployeeId + "_" + record.date_key + "'"}, '${record.date}')" title="${record.attendance_id ? 'Edit time records' : 'Add time records'}">Edit</button></td>
         `;
 
