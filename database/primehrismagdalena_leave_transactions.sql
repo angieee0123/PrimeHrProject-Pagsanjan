@@ -47,7 +47,7 @@ CREATE TABLE `leave_transactions` (
   CONSTRAINT `leave_transactions_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE,
   CONSTRAINT `leave_transactions_leave_code_foreign` FOREIGN KEY (`leave_code`) REFERENCES `leave_types_config` (`leave_code`) ON DELETE RESTRICT,
   CONSTRAINT `leave_transactions_processed_by_foreign` FOREIGN KEY (`processed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=304 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=312 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -56,7 +56,7 @@ CREATE TABLE `leave_transactions` (
 
 LOCK TABLES `leave_transactions` WRITE;
 /*!40000 ALTER TABLE `leave_transactions` DISABLE KEYS */;
-INSERT INTO `leave_transactions` VALUES (302,8,'VL',2026,'adjustment',0.125000,0.000000,0.125000,'manual_adjustment',NULL,'2026-05-14',1,'[ADDITION] fasdf','2026-05-13 21:13:51','2026-05-13 21:13:51'),(303,8,'VL',2026,'debit',-0.104167,0.125000,0.020833,'manual_adjustment',42,'2026-05-14',1,'Late deduction: 50 minutes (0.104167 days) from attendance on 2026-05-14','2026-05-13 21:14:36','2026-05-13 21:14:36');
+INSERT INTO `leave_transactions` VALUES (302,8,'VL',2026,'adjustment',0.125000,0.000000,0.125000,'manual_adjustment',NULL,'2026-05-14',1,'[ADDITION] fasdf','2026-05-13 21:13:51','2026-05-13 21:13:51'),(303,8,'VL',2026,'debit',-0.104167,0.125000,0.020833,'manual_adjustment',42,'2026-05-14',1,'Late deduction: 50 minutes (0.104167 days) from attendance on 2026-05-14','2026-05-13 21:14:36','2026-05-13 21:14:36'),(307,8,'BL',2026,'adjustment',3.000000,0.000000,3.000000,'manual_adjustment',NULL,'2026-05-14',1,'[ADDITION] asdfasdf','2026-05-14 07:40:16','2026-05-14 07:40:16'),(308,8,'BL',2026,'pending',-3.000000,3.000000,0.000000,'leave_application',5,'2026-05-14',6,'Pending leave application LA-2026-0001','2026-05-14 08:10:14','2026-05-14 08:10:14'),(310,8,'BL',2026,'debit',-3.000000,0.000000,0.000000,'leave_application',5,'2026-05-14',1,'Approved leave application LA-2026-0001','2026-05-14 08:13:38','2026-05-14 08:13:38'),(311,8,'VL',2026,'debit',-0.020833,0.020833,0.000000,'manual_adjustment',47,'2026-05-14',1,'Late deduction: 60 minutes (0.020833 days) from attendance on 2026-05-14','2026-05-14 08:22:56','2026-05-14 08:22:56');
 /*!40000 ALTER TABLE `leave_transactions` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -69,4 +69,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-14 13:22:58
+-- Dump completed on 2026-05-15  1:17:01

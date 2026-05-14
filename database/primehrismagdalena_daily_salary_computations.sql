@@ -47,7 +47,7 @@ CREATE TABLE `daily_salary_computations` (
   KEY `daily_salary_computations_employee_id_work_date_index` (`employee_id`,`work_date`),
   CONSTRAINT `daily_salary_computations_accredited_hours_log_id_foreign` FOREIGN KEY (`accredited_hours_log_id`) REFERENCES `accredited_hours_log` (`id`) ON DELETE CASCADE,
   CONSTRAINT `daily_salary_computations_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -56,7 +56,7 @@ CREATE TABLE `daily_salary_computations` (
 
 LOCK TABLES `daily_salary_computations` WRITE;
 /*!40000 ALTER TABLE `daily_salary_computations` DISABLE KEYS */;
-INSERT INTO `daily_salary_computations` VALUES (42,8,42,'2026-05-04',121264.00,5512.00,689.00,5512.00,0.00,574.17,0.00,4937.83,0,0,NULL,NULL,'2026-05-13 21:14:36','2026-05-13 21:14:36');
+INSERT INTO `daily_salary_computations` VALUES (42,8,42,'2026-05-04',121264.00,5512.00,689.00,5512.00,0.00,574.17,0.00,4937.83,0,0,NULL,NULL,'2026-05-13 21:14:36','2026-05-13 21:14:36'),(43,8,43,'2026-05-15',121264.00,5512.00,689.00,5512.00,0.00,0.00,0.00,5512.00,0,0,NULL,NULL,'2026-05-14 08:13:38','2026-05-14 08:13:38'),(44,8,44,'2026-05-18',121264.00,5512.00,689.00,5512.00,0.00,0.00,0.00,5512.00,0,0,NULL,NULL,'2026-05-14 08:13:38','2026-05-14 08:13:38'),(45,8,45,'2026-05-19',121264.00,5512.00,689.00,5512.00,0.00,0.00,0.00,5512.00,0,0,NULL,NULL,'2026-05-14 08:13:38','2026-05-14 08:13:38'),(46,8,46,'2026-05-05',121264.00,5512.00,689.00,3445.00,0.00,0.00,689.00,2756.00,0,0,NULL,NULL,'2026-05-14 08:17:40','2026-05-14 08:18:01'),(47,8,47,'2026-05-06',121264.00,5512.00,689.00,3445.00,0.00,689.00,1378.00,1378.00,0,0,NULL,NULL,'2026-05-14 08:22:56','2026-05-14 08:28:52');
 /*!40000 ALTER TABLE `daily_salary_computations` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -69,4 +69,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-14 13:23:01
+-- Dump completed on 2026-05-15  1:16:55
