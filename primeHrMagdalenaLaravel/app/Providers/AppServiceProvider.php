@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use App\Models\AccreditedHoursLog;
 use App\Observers\AccreditedHoursLogObserver;
+use App\Models\LeaveApplication;
+use App\Observers\LeaveApplicationObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         AccreditedHoursLog::observe(AccreditedHoursLogObserver::class);
+        LeaveApplication::observe(LeaveApplicationObserver::class);
         
         // Share authenticated user data with all views
         View::composer('*', function ($view) {

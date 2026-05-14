@@ -485,14 +485,35 @@ class AttendanceController extends Controller
 
             // Calculate late minutes with grace period
             $lateMinutes = 0;
-            if ($attendance && $attendance->am_in) {
-                try {
-                    $amInTime = Carbon::parse($attendance->am_in);
-                    if ($amInTime->gt($graceThresholdAm)) {
-                        $lateMinutes = $expectedAmIn->diffInMinutes($amInTime);
+            $undertimeMinutes = 0;
+            
+            // If we have a log, use the values from the log (already calculated correctly)
+            if ($attendance && $attendance->accreditedHoursLogs->isNotEmpty()) {
+                $log = $attendance->accreditedHoursLogs->last();
+                $lateMinutes = $log->late_minutes;
+                $undertimeMinutes = $log->undertime_minutes;
+            } else {
+                // Fallback: Calculate if no log exists
+                if ($attendance && $attendance->am_in) {
+                    try {
+                        $amInTime = Carbon::parse($attendance->am_in);
+                        if ($amInTime->gt($graceThresholdAm)) {
+                            $lateMinutes = $expectedAmIn->diffInMinutes($amInTime);
+                        }
+                    } catch (\Exception $e) {
+                        $lateMinutes = 0;
                     }
-                } catch (\Exception $e) {
-                    $lateMinutes = 0;
+                }
+                
+                if ($attendance && $attendance->pm_out) {
+                    try {
+                        $pmOutTime = Carbon::parse($attendance->pm_out);
+                        if ($pmOutTime->lt($expectedPmOut)) {
+                            $undertimeMinutes = $pmOutTime->diffInMinutes($expectedPmOut);
+                        }
+                    } catch (\Exception $e) {
+                        $undertimeMinutes = 0;
+                    }
                 }
             }
 
@@ -531,19 +552,6 @@ class AttendanceController extends Controller
                 else if (($hasAmPair && !$hasPmPair) || (!$hasAmPair && $hasPmPair) || 
                          ($attendance->am_in && $attendance->am_out && $attendance->pm_in && !$attendance->pm_out)) {
                     $isIncomplete = true;
-                }
-            }
-
-            // Calculate undertime (in minutes)
-            $undertime = 0;
-            if ($attendance && $attendance->pm_out && !in_array($current->dayOfWeek, [0, 6])) {
-                try {
-                    $pmOutTime = Carbon::parse($attendance->pm_out);
-                    if ($pmOutTime->lt($expectedPmOut)) {
-                        $undertime = $pmOutTime->diffInMinutes($expectedPmOut);
-                    }
-                } catch (\Exception $e) {
-                    $undertime = 0;
                 }
             }
 
@@ -592,7 +600,7 @@ class AttendanceController extends Controller
             // Use stored total_hours from database (actual time worked in minutes)
             $totalHoursMinutes = $attendance ? $attendance->total_hours : 0;
             $totalHours = $totalHoursMinutes ? number_format($totalHoursMinutes / 60, 4, '.', '') : 0; // Exact hours with 4 decimals
-            $needsReview = ($lateMinutes > 0 && $undertime > 0);
+            $needsReview = ($lateMinutes > 0 && $undertimeMinutes > 0);
 
             // Get accredited hours from log if exists, otherwise calculate
             $accreditedMinutes = 0;
@@ -675,8 +683,8 @@ class AttendanceController extends Controller
                 'ot_out' => $otOut,
                 'late_minutes' => $lateMinutes,
                 'late_display' => $this->formatMinutes($lateMinutes),
-                'undertime' => $undertime,
-                'undertime_display' => $this->formatMinutes($undertime),
+                'undertime' => $undertimeMinutes,
+                'undertime_display' => $this->formatMinutes($undertimeMinutes),
                 'total_hours' => $totalHours . ' hrs',
                 'accredited_minutes' => $accreditedMinutes,
                 'am_accredited_minutes' => $amAccreditedMins,
@@ -890,18 +898,37 @@ class AttendanceController extends Controller
 
         // Calculate late and undertime
         $lateMins = 0;
+        $undertimeMins = 0;
+        
+        // AM In late
         if ($amIn) {
             $amInMin = $toMin($amIn);
             if ($amInMin > $AM_GRACE) {
-                $lateMins = $amInMin - $AM_START;
+                $lateMins += $amInMin - $AM_START;
             }
         }
-
-        $undertimeMins = 0;
+        
+        // AM Out undertime (left early before lunch)
+        if ($amOut) {
+            $amOutMin = $toMin($amOut);
+            if ($amOutMin < $AM_END) {
+                $undertimeMins += $AM_END - $amOutMin;
+            }
+        }
+        
+        // PM In late (returned late from lunch)
+        if ($pmIn) {
+            $pmInMin = $toMin($pmIn);
+            if ($pmInMin > $PM_GRACE) {
+                $lateMins += $pmInMin - $PM_START;
+            }
+        }
+        
+        // PM Out undertime (left early at end of day)
         if ($pmOut) {
             $pmOutMin = $toMin($pmOut);
             if ($pmOutMin < $PM_END) {
-                $undertimeMins = $PM_END - $pmOutMin;
+                $undertimeMins += $PM_END - $pmOutMin;
             }
         }
 

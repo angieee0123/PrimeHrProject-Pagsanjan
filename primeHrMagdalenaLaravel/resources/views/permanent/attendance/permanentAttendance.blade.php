@@ -154,6 +154,10 @@
                         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         View Summary
                     </button>
+                    <button class="modal-btn-primary" onclick="showDetailedDTRModal()">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        View Detailed
+                    </button>
                 </div>
             </div>
 
@@ -314,6 +318,10 @@
         document.getElementById(id).style.display = 'none';
     }
 
+    function showDetailedDTRModal() {
+        document.getElementById('detailedDTRModal').style.display = 'flex';
+    }
+
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
@@ -321,6 +329,7 @@
     });
 </script>
 
+@include('permanent.attendance.modals.detailedDtrModal')
 @include('permanent.chatbot.permanentChatbot')
 
 @endsection

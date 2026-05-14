@@ -54,14 +54,14 @@ class LeaveApplicationObserver
                         // Get employee schedule for this date
                         $schedule = $employee->getScheduleForDate($dateKey);
 
-                        // Create attendance record with CSC standard 8-hour work day
+                        // Create attendance record with NULL time values for leave
                         $attendance = Attendance::create([
                             'employee_id' => $employee->id,
                             'date' => $dateKey,
-                            'am_in' => 'ON_LEAVE',
-                            'am_out' => 'ON_LEAVE',
-                            'pm_in' => 'ON_LEAVE',
-                            'pm_out' => 'ON_LEAVE',
+                            'am_in' => null,
+                            'am_out' => null,
+                            'pm_in' => null,
+                            'pm_out' => null,
                             'ot_in' => null,
                             'ot_out' => null,
                             'accredited_hours' => CscTimeConversionService::MINUTES_PER_WORK_DAY, // 480 minutes = 8 hours
@@ -147,13 +147,14 @@ class LeaveApplicationObserver
             $startDate = Carbon::parse($leaveApplication->start_date);
             $endDate = Carbon::parse($leaveApplication->end_date);
 
-            // Find and delete attendance records marked as 'ON_LEAVE'
+            // Find and delete attendance records with NULL time values and full accredited hours
             $deletedCount = Attendance::where('employee_id', $employee->id)
                 ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-                ->where('am_in', 'ON_LEAVE')
-                ->where('am_out', 'ON_LEAVE')
-                ->where('pm_in', 'ON_LEAVE')
-                ->where('pm_out', 'ON_LEAVE')
+                ->whereNull('am_in')
+                ->whereNull('am_out')
+                ->whereNull('pm_in')
+                ->whereNull('pm_out')
+                ->where('accredited_hours', CscTimeConversionService::MINUTES_PER_WORK_DAY)
                 ->delete();
 
             // Note: Cascading deletes will handle accredited_hours_log and daily_salary_computations
