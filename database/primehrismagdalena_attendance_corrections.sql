@@ -51,7 +51,7 @@ CREATE TABLE `attendance_corrections` (
   CONSTRAINT `attendance_corrections_attendance_id_foreign` FOREIGN KEY (`attendance_id`) REFERENCES `attendance` (`id`) ON DELETE CASCADE,
   CONSTRAINT `attendance_corrections_corrected_by_foreign` FOREIGN KEY (`corrected_by`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `attendance_corrections_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -60,7 +60,7 @@ CREATE TABLE `attendance_corrections` (
 
 LOCK TABLES `attendance_corrections` WRITE;
 /*!40000 ALTER TABLE `attendance_corrections` DISABLE KEYS */;
-INSERT INTO `attendance_corrections` VALUES (16,34,8,'2026-05-04',NULL,NULL,NULL,NULL,NULL,NULL,'10:00:00','12:00:00','12:05:00','17:00:00',NULL,NULL,'HAHA','[\"attendance_corrections/8N4jgWNlsrf4LSY3E8v7KGKNfyC6FlPd0PUEwcla.pdf\"]',1,'2026-05-13 11:21:46','2026-05-13 11:21:46');
+INSERT INTO `attendance_corrections` VALUES (24,42,8,'2026-05-04',NULL,NULL,NULL,NULL,NULL,NULL,'08:50:00','12:02:00','12:06:00','18:00:00',NULL,NULL,'asdfa','[\"attendance_corrections/qKS2bDKA4fmajiaAfUrzQrBINtNPOYfGoRFGUps8.pdf\"]',1,'2026-05-13 21:14:36','2026-05-13 21:14:36');
 /*!40000 ALTER TABLE `attendance_corrections` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -73,4 +73,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-14  3:24:18
+-- Dump completed on 2026-05-14 13:23:02

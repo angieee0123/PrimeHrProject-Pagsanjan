@@ -33,6 +33,8 @@ CREATE TABLE `accredited_hours_log` (
   `late_minutes` smallint unsigned NOT NULL DEFAULT '0',
   `late_deducted_from_leave` tinyint(1) NOT NULL DEFAULT '0',
   `late_deduction_leave_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lwop_minutes` int NOT NULL DEFAULT '0' COMMENT 'Minutes to be deducted from salary (Leave Without Pay)',
+  `requires_salary_deduction` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Flag indicating salary deduction is required for payroll',
   `undertime_minutes` smallint unsigned NOT NULL DEFAULT '0',
   `total_accredited_minutes` smallint unsigned NOT NULL DEFAULT '0',
   `total_actual_minutes` smallint unsigned NOT NULL DEFAULT '0',
@@ -48,7 +50,7 @@ CREATE TABLE `accredited_hours_log` (
   CONSTRAINT `accredited_hours_log_attendance_id_foreign` FOREIGN KEY (`attendance_id`) REFERENCES `attendance` (`id`) ON DELETE CASCADE,
   CONSTRAINT `accredited_hours_log_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE,
   CONSTRAINT `accredited_hours_log_schedule_id_foreign` FOREIGN KEY (`schedule_id`) REFERENCES `schedules` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -57,7 +59,7 @@ CREATE TABLE `accredited_hours_log` (
 
 LOCK TABLES `accredited_hours_log` WRITE;
 /*!40000 ALTER TABLE `accredited_hours_log` DISABLE KEYS */;
-INSERT INTO `accredited_hours_log` VALUES (34,34,8,1,120,240,0,120,0,NULL,0,480,415,0,1,'Attendance correction by  at 2026-05-13 19:21:46','2026-05-13 11:21:46','2026-05-13 11:21:46');
+INSERT INTO `accredited_hours_log` VALUES (42,42,8,1,190,240,0,50,1,'VL (full)',0,0,0,480,546,0,1,'Attendance correction by  at 2026-05-14 05:14:36','2026-05-13 21:14:36','2026-05-13 21:14:36');
 /*!40000 ALTER TABLE `accredited_hours_log` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -70,4 +72,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-14  3:24:17
+-- Dump completed on 2026-05-14 13:23:01

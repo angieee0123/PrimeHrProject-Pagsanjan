@@ -39,7 +39,7 @@ CREATE TABLE `leave_balances` (
   KEY `leave_code` (`leave_code`),
   CONSTRAINT `leave_balances_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE,
   CONSTRAINT `leave_balances_ibfk_2` FOREIGN KEY (`leave_code`) REFERENCES `leave_types_config` (`leave_code`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=229 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=237 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -48,7 +48,7 @@ CREATE TABLE `leave_balances` (
 
 LOCK TABLES `leave_balances` WRITE;
 /*!40000 ALTER TABLE `leave_balances` DISABLE KEYS */;
-INSERT INTO `leave_balances` VALUES (228,8,'VL',2026,0.420000,0.083333,0.000000,0.336667,0.000000,'2026-05-13 11:20:30','2026-05-13 11:21:46');
+INSERT INTO `leave_balances` VALUES (236,8,'VL',2026,0.125000,0.104167,0.000000,0.020833,0.000000,'2026-05-13 21:13:51','2026-05-13 21:14:36');
 /*!40000 ALTER TABLE `leave_balances` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -61,4 +61,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-14  3:24:15
+-- Dump completed on 2026-05-14 13:23:00
