@@ -52,17 +52,17 @@ class CscTimeConversionService
 
     /**
      * Convert days to minutes (CSC standard: 1 day = 480 minutes)
-     * NO ROUNDING - Uses floor to prevent rounding up
+     * EXACT CONVERSION - No rounding, uses integer multiplication
      * 
      * @param float $days Number of working days
-     * @return int Number of minutes
+     * @return int Number of minutes (exact)
      */
     public static function convertDaysToMinutes(float $days): int
     {
-        // Use floor instead of round to prevent rounding up
-        // 0.125 days = 60 minutes (exact)
-        // 0.124999 days = 59.9995 minutes → floor = 59 minutes (not rounded up)
-        return (int) floor($days * self::MINUTES_PER_WORK_DAY);
+        // Exact conversion: multiply then cast to int
+        // 0.125 * 480 = 60.0 → (int) 60.0 = 60 (exact)
+        // No floor, no round, no ceil - just exact multiplication
+        return (int)($days * self::MINUTES_PER_WORK_DAY);
     }
 
     /**
@@ -78,15 +78,16 @@ class CscTimeConversionService
 
     /**
      * Convert hours to minutes
-     * NO ROUNDING - Uses floor to prevent rounding up
+     * EXACT CONVERSION - No rounding, uses integer multiplication
      * 
      * @param float $hours Number of hours
-     * @return int Number of minutes
+     * @return int Number of minutes (exact)
      */
     public static function convertHoursToMinutes(float $hours): int
     {
-        // Use floor instead of round to prevent rounding up
-        return (int) floor($hours * self::MINUTES_PER_HOUR);
+        // Exact conversion: multiply then cast to int
+        // 1.0 * 60 = 60.0 → (int) 60.0 = 60 (exact)
+        return (int)($hours * self::MINUTES_PER_HOUR);
     }
 
     /**
