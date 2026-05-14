@@ -8,6 +8,7 @@ use App\Models\LeaveAccrualRate;
 use App\Models\LeaveApplication;
 use App\Models\LeaveBalance;
 use App\Models\LeaveTransaction;
+use App\Services\CscTimeConversionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
@@ -303,6 +304,20 @@ class LeaveController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Attachment is required for this leave type'
+                ], 422);
+            }
+
+            // Validate working days using CSC service (excludes weekends automatically)
+            $validation = CscTimeConversionService::validateLeaveDays(
+                $validated['start_date'],
+                $validated['end_date'],
+                $validated['number_of_days']
+            );
+
+            if (!$validation['is_valid']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validation['message'] . ' Please adjust your leave request to match working days only (excluding weekends).'
                 ], 422);
             }
 

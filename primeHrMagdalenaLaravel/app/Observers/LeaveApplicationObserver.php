@@ -6,6 +6,7 @@ use App\Models\LeaveApplication;
 use App\Models\Attendance;
 use App\Models\AccreditedHoursLog;
 use App\Models\DailySalaryComputation;
+use App\Services\CscTimeConversionService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -40,8 +41,8 @@ class LeaveApplicationObserver
             $recordsCreated = 0;
 
             while ($current->lte($endDate)) {
-                // Skip weekends (Saturday = 6, Sunday = 0)
-                if (!in_array($current->dayOfWeek, [0, 6])) {
+                // Skip weekends using CSC service
+                if (!CscTimeConversionService::isWeekend($current)) {
                     $dateKey = $current->format('Y-m-d');
 
                     // Check if attendance record already exists
@@ -53,7 +54,7 @@ class LeaveApplicationObserver
                         // Get employee schedule for this date
                         $schedule = $employee->getScheduleForDate($dateKey);
 
-                        // Create attendance record
+                        // Create attendance record with CSC standard 8-hour work day
                         $attendance = Attendance::create([
                             'employee_id' => $employee->id,
                             'date' => $dateKey,
@@ -63,22 +64,22 @@ class LeaveApplicationObserver
                             'pm_out' => 'ON_LEAVE',
                             'ot_in' => null,
                             'ot_out' => null,
-                            'accredited_hours' => 480, // 8 hours in minutes
-                            'total_hours' => 480,
+                            'accredited_hours' => CscTimeConversionService::MINUTES_PER_WORK_DAY, // 480 minutes = 8 hours
+                            'total_hours' => CscTimeConversionService::MINUTES_PER_WORK_DAY,
                         ]);
 
-                        // Create accredited hours log
+                        // Create accredited hours log with CSC standard values
                         $accreditedLog = AccreditedHoursLog::create([
                             'attendance_id' => $attendance->id,
                             'employee_id' => $employee->id,
                             'schedule_id' => $schedule ? $schedule->id : null,
-                            'am_accredited_minutes' => 240, // 4 hours
-                            'pm_accredited_minutes' => 240, // 4 hours
+                            'am_accredited_minutes' => CscTimeConversionService::MINUTES_PER_HALF_DAY, // 240 minutes = 4 hours
+                            'pm_accredited_minutes' => CscTimeConversionService::MINUTES_PER_HALF_DAY, // 240 minutes = 4 hours
                             'ot_minutes' => 0,
                             'late_minutes' => 0,
                             'undertime_minutes' => 0,
-                            'total_accredited_minutes' => 480, // 8 hours
-                            'total_actual_minutes' => 480,
+                            'total_accredited_minutes' => CscTimeConversionService::MINUTES_PER_WORK_DAY, // 480 minutes = 8 hours
+                            'total_actual_minutes' => CscTimeConversionService::MINUTES_PER_WORK_DAY,
                             'am_grace_applied' => false,
                             'pm_grace_applied' => false,
                             'computation_notes' => sprintf(

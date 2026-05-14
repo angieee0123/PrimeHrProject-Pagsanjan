@@ -8,6 +8,7 @@ use App\Models\AttendanceCorrection;
 use App\Models\AccreditedHoursLog;
 use App\Models\DailySalaryComputation;
 use App\Services\LateDeductionService;
+use App\Services\CscTimeConversionService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -203,18 +204,8 @@ class AttendanceController extends Controller
 
     private function getWorkingDays($startDate, $endDate)
     {
-        $workingDays = [];
-        $current = $startDate->copy();
-
-        while ($current->lte($endDate)) {
-            // Exclude weekends (Saturday = 6, Sunday = 0)
-            if (!in_array($current->dayOfWeek, [0, 6])) {
-                $workingDays[] = $current->copy();
-            }
-            $current->addDay();
-        }
-
-        return $workingDays;
+        // Use CSC service to get working days (excludes weekends automatically)
+        return CscTimeConversionService::getWorkingDates($startDate, $endDate);
     }
 
     public function detailedDTR(Request $request, $employeeId)
@@ -351,20 +342,8 @@ class AttendanceController extends Controller
 
     private function formatMinutes($minutes)
     {
-        if ($minutes <= 0) {
-            return '0 min';
-        }
-        
-        $hours = floor($minutes / 60);
-        $mins = $minutes % 60;
-        
-        if ($hours > 0 && $mins > 0) {
-            return $hours . ' hr' . ($hours > 1 ? 's' : '') . ' ' . $mins . ' min'; // Exact minutes
-        } elseif ($hours > 0) {
-            return $hours . ' hr' . ($hours > 1 ? 's' : '');
-        } else {
-            return $mins . ' min'; // Exact minutes
-        }
+        // Use CSC service for consistent formatting
+        return CscTimeConversionService::formatMinutes($minutes);
     }
 
     private function generateDetailedRecords($startDate, $endDate, $attendances, $employee = null, $approvedLeaves = null)

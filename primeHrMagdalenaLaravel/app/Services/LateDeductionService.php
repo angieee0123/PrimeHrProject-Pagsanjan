@@ -7,6 +7,7 @@ use App\Models\LeaveBalance;
 use App\Models\LeaveTransaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\CscTimeConversionService;
 
 class LateDeductionService
 {
@@ -18,7 +19,7 @@ class LateDeductionService
 
         DB::transaction(function () use ($log) {
             $lateMinutes = $log->late_minutes;
-            $lateDays = $lateMinutes / 480; // Convert minutes to work days (480 minutes = 8 hours = 1 work day)
+            $lateDays = CscTimeConversionService::convertMinutesToDays($lateMinutes); // CSC standard: 480 minutes = 1 work day
             $employeeId = $log->employee_id;
             $year = date('Y', strtotime($log->created_at));
 
@@ -60,21 +61,29 @@ class LateDeductionService
                 $log->update([
                     'total_accredited_minutes' => 480,
                     'late_deducted_from_leave' => true,
-                    'late_deduction_leave_type' => implode('+', $leaveTypes) . ' (full)'
+                    'late_deduction_leave_type' => implode('+', $leaveTypes) . ' (full)',
+                    'lwop_minutes' => 0,
+                    'requires_salary_deduction' => false
                 ]);
                 
                 if ($log->attendance) {
                     $log->attendance->update(['accredited_hours' => 480]);
                 }
             } else {
-                // Partially covered - deduct remaining from accredited hours
-                $remainingLateMinutes = round($remainingLateDays * 480);
-                $newAccreditedMinutes = max(0, $log->total_accredited_minutes - $remainingLateMinutes);
+                // Partially covered - restore leave-covered time, keep only LWOP deduction
+                // Example: 180 min late, VL covered 60 min, SL covered 60 min → Restore 120 min, keep 60 min LWOP
+                $remainingLateMinutes = CscTimeConversionService::convertDaysToMinutes($remainingLateDays);
+                $coveredByLeaveMinutes = $lateMinutes - $remainingLateMinutes;
+                
+                // Restore the time that was covered by leave credits
+                $newAccreditedMinutes = min(480, $log->total_accredited_minutes + $coveredByLeaveMinutes);
                 
                 $log->update([
                     'total_accredited_minutes' => $newAccreditedMinutes,
                     'late_deducted_from_leave' => $deductedFromLeave,
-                    'late_deduction_leave_type' => $deductedFromLeave ? implode('+', $leaveTypes) . ' (partial)' : null
+                    'late_deduction_leave_type' => $deductedFromLeave ? implode('+', $leaveTypes) . ' (partial)' : null,
+                    'lwop_minutes' => $remainingLateMinutes,
+                    'requires_salary_deduction' => true
                 ]);
                 
                 if ($log->attendance) {
