@@ -39,4 +39,19 @@ class LeaveType extends Model
     {
         return $this->hasMany(LeaveBalance::class, 'leave_code', 'leave_code');
     }
+
+    public function leaveApplications()
+    {
+        return $this->hasMany(LeaveApplication::class, 'leave_code', 'leave_code');
+    }
+
+    public function leaveTransactions()
+    {
+        return $this->hasMany(LeaveTransaction::class, 'leave_code', 'leave_code');
+    }
+
+    public function accrualRates()
+    {
+        return $this->hasMany(LeaveAccrualRate::class, 'leave_type_id', 'id');
+    }
 }

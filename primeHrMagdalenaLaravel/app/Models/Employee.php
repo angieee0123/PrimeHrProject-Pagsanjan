@@ -89,6 +89,11 @@ class Employee extends Model
         return $this->hasMany(LeaveBalance::class);
     }
 
+    public function leaveApplications()
+    {
+        return $this->hasMany(LeaveApplication::class);
+    }
+
     public function leaveTransactions()
     {
         return $this->hasMany(LeaveTransaction::class);

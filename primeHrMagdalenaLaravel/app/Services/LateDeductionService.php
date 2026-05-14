@@ -18,7 +18,7 @@ class LateDeductionService
 
         DB::transaction(function () use ($log) {
             $lateMinutes = $log->late_minutes;
-            $lateDays = $lateMinutes / 1440; // Convert minutes to days (1440 minutes = 24 hours)
+            $lateDays = $lateMinutes / 480; // Convert minutes to work days (480 minutes = 8 hours = 1 work day)
             $employeeId = $log->employee_id;
             $year = date('Y', strtotime($log->created_at));
 
@@ -68,7 +68,7 @@ class LateDeductionService
                 }
             } else {
                 // Partially covered - deduct remaining from accredited hours
-                $remainingLateMinutes = round($remainingLateDays * 1440);
+                $remainingLateMinutes = round($remainingLateDays * 480);
                 $newAccreditedMinutes = max(0, $log->total_accredited_minutes - $remainingLateMinutes);
                 
                 $log->update([
