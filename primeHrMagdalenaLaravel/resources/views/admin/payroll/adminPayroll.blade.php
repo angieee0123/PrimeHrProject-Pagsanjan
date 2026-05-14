@@ -25,15 +25,13 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' — ' . date('
 $payrollRecords = $payrollRecords ?? [];
 $viewMode = $viewMode ?? 'daily';
 
-$grossPayroll = $payrollRecords->sum('basic');
+$totalBasicPay = $payrollRecords->sum('basic');
 $totalOtPay = $payrollRecords->sum('ot_pay');
-$totalDeductions = 0;
-$totalNet = 0;
-foreach ($payrollRecords as $record) {
-    $deductions = $record['late_deduction'] + $record['undertime_deduction'];
-    $totalDeductions += $deductions;
-    $totalNet += ($record['basic'] + $record['ot_pay'] - $deductions);
-}
+$totalLateDeduction = $payrollRecords->sum('late_deduction');
+$totalUndertimeDeduction = $payrollRecords->sum('undertime_deduction');
+$totalDeductions = $totalLateDeduction + $totalUndertimeDeduction;
+$grossPayroll = $totalBasicPay + $totalOtPay;
+$totalNet = $grossPayroll - $totalDeductions;
 $processedCount = $payrollRecords->where('status', 'Processed')->count();
 $pendingCount = $payrollRecords->where('status', 'Pending')->count();
 @endphp
@@ -189,8 +187,13 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
             <tbody>
                 @foreach($payrollRecords as $index => $record)
                 @php
-                    $deductions = $record['late_deduction'] + $record['undertime_deduction'];
-                    $net = $record['basic'] + $record['ot_pay'] - $deductions;
+                    $basicPay = $record['basic'];
+                    $otPay = $record['ot_pay'];
+                    $lateDeduction = $record['late_deduction'];
+                    $undertimeDeduction = $record['undertime_deduction'];
+                    $grossPay = $basicPay + $otPay;
+                    $totalDeductionsRow = $lateDeduction + $undertimeDeduction;
+                    $netPay = $grossPay - $totalDeductionsRow;
                 @endphp
                 <tr>
                     <td>
@@ -212,11 +215,11 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
                         <td class="days-count">{{ $record['days_count'] }} days</td>
                         <td class="daily-rate">{{ peso($record['daily_rate']) }}</td>
                     @endif
-                    <td class="pay-cell">{{ peso($record['basic']) }}</td>
-                    <td class="ot-pay">{{ peso($record['ot_pay']) }}</td>
-                    <td class="deduction">{{ peso($record['late_deduction']) }}</td>
-                    <td class="deduction">{{ peso($record['undertime_deduction']) }}</td>
-                    <td class="net-pay">{{ peso($net) }}</td>
+                    <td class="pay-cell">{{ peso($basicPay) }}</td>
+                    <td class="ot-pay">{{ peso($otPay) }}</td>
+                    <td class="deduction">{{ peso($lateDeduction) }}</td>
+                    <td class="deduction">{{ peso($undertimeDeduction) }}</td>
+                    <td class="net-pay">{{ peso($netPay) }}</td>
                     <td><span class="badge-status {{ $record['status'] === 'Processed' ? 'processed' : ($record['status'] === 'Pending' ? 'pending' : 'on-hold') }}">{{ $record['status'] }}</span></td>
                     <td>
                         <div class="row-actions">
