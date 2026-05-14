@@ -169,6 +169,23 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .table-sub { font-size: 12px; color: #9999bb; }
 .table-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .filter-select { padding: 7px 14px; border: 1.5px solid #e8e7f5; border-radius: 8px; font-size: 12.5px; font-family: 'Poppins', sans-serif; color: #0b044d; background: #fff; cursor: pointer; }
+.btn-filter-main {
+    height: 34px;
+    padding: 0 14px;
+    background: #0b044d;
+    border: none;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s;
+}
+.btn-filter-main:hover { background: #1a0f6e; }
 .btn-export { height: 34px; padding: 0 14px; background: #fff; border: 1.5px solid #e4e3f0; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: #0b044d; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
 .btn-export:hover { border-color: #0b044d; background: #f4f3ff; }
 .modal-btn-primary { height: 34px; padding: 0 16px; background: #0b044d; color: #fff; border: none; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; transition: background 0.2s; }
@@ -518,6 +535,67 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
    Summary strip (.attendance-summary-*), DTR modal (#dtrModal), history table helpers
    --------------------------------------------------------------------------- */
 #dtrModal { display: none; }
+
+/* Tab buttons for attendance page */
+.tab-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #9999bb;
+    border-bottom: 2.5px solid transparent;
+    margin-bottom: -1.5px;
+    transition: all 0.2s;
+}
+.tab-btn:hover { color: #0b044d; }
+.tab-btn.active { color: #0b044d; border-bottom-color: #0b044d; }
+
+/* Detailed time record row states */
+.day-weekend {
+    background: #fafafe !important;
+}
+.day-absent {
+    background: #fef2f2 !important;
+}
+.day-needs-review {
+    background: #fffbeb !important;
+}
+.badge-absent {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 6px;
+    background: #fee2e2;
+    color: #8e1e18;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 3px;
+}
+.badge-incomplete {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 6px;
+    background: #ffe8e8;
+    color: #8e1e18;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 3px;
+}
+.log-missing {
+    color: #9999bb;
+    font-size: 11px;
+}
+.log-late {
+    font-weight: 600;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 .attendance-summary-bar {
     background: linear-gradient(135deg, #fafafe 0%, #f7f6ff 100%);
     border: 1.5px solid #e4e3f0;

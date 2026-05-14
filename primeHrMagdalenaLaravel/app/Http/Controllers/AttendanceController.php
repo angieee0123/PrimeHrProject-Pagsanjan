@@ -189,6 +189,110 @@ class AttendanceController extends Controller
             ->sort()
             ->values();
 
+        // Fetch all daily attendance records for detailed tab
+        // Use the same logic as detailedDTR modal - generate ALL dates for ALL employees
+        $detailedRecords = [];
+        $employees = Employee::with(['employmentDetail.departmentRelation', 'schedule'])->get();
+        
+        // Apply department filter
+        if ($department && $department !== 'All Departments') {
+            $employees = $employees->filter(function($emp) use ($department) {
+                return $emp->employmentDetail && 
+                       $emp->employmentDetail->departmentRelation && 
+                       $emp->employmentDetail->departmentRelation->name === $department;
+            });
+        }
+        
+        // Apply employee name filter
+        $employeeName = $request->get('employee_name');
+        if ($employeeName) {
+            $employees = $employees->filter(function($emp) use ($employeeName) {
+                $fullName = trim($emp->first_name . ' ' . ($emp->middle_name ? $emp->middle_name . ' ' : '') . $emp->last_name);
+                return stripos($fullName, $employeeName) !== false || 
+                       stripos($emp->employee_id, $employeeName) !== false;
+            });
+        }
+        
+        foreach ($employees as $employee) {
+            // Get all approved leaves for this employee
+            $approvedLeaves = \App\Models\LeaveApplication::where('employee_id', $employee->id)
+                ->where('status', 'approved')
+                ->where(function($query) use ($startDate, $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate])
+                          ->orWhereBetween('end_date', [$startDate, $endDate])
+                          ->orWhere(function($q) use ($startDate, $endDate) {
+                              $q->where('start_date', '<=', $startDate)
+                                ->where('end_date', '>=', $endDate);
+                          });
+                })
+                ->with('leaveType')
+                ->get();
+            
+            // Get attendance records for this employee
+            $attendances = Attendance::with(['accreditedHoursLogs'])
+                ->where('employee_id', $employee->id)
+                ->whereBetween('date', [$startDate, $endDate])
+                ->get()
+                ->keyBy(function($a) {
+                    return Carbon::parse($a->date)->format('Y-m-d');
+                });
+            
+            // Generate records for all dates using the same logic as detailedDTR
+            $employeeRecords = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee, $approvedLeaves);
+            
+            // Convert to the format needed for the view
+            $deptName = 'N/A';
+            if ($employee->employmentDetail && $employee->employmentDetail->departmentRelation) {
+                $deptName = $employee->employmentDetail->departmentRelation->name;
+            }
+            
+            foreach ($employeeRecords as $record) {
+                $detailedRecords[] = [
+                    'date' => $record['date'],
+                    'day' => $record['day'],
+                    'employee_id' => $employee->id,
+                    'employee_name' => trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name),
+                    'employee_code' => $employee->employee_id,
+                    'department' => $deptName,
+                    'am_in' => $record['am_in'] === 'ON LEAVE' ? 'ON LEAVE' : $record['am_in'],
+                    'am_out' => $record['am_out'] === 'ON LEAVE' ? 'ON LEAVE' : $record['am_out'],
+                    'pm_in' => $record['pm_in'] === 'ON LEAVE' ? 'ON LEAVE' : $record['pm_in'],
+                    'pm_out' => $record['pm_out'] === 'ON LEAVE' ? 'ON LEAVE' : $record['pm_out'],
+                    'ot_in' => $record['ot_in'],
+                    'ot_out' => $record['ot_out'],
+                    'total_hours' => str_replace(' hrs', '', $record['total_hours']),
+                    'accredited_hours' => $record['accredited_minutes'],
+                    'late_minutes' => $record['late_minutes'],
+                    'undertime_minutes' => $record['undertime'],
+                    'is_on_leave' => $record['is_on_leave'],
+                    'is_absent' => $record['is_absent'] ?? false,
+                    'leave_info' => $record['leave_info'],
+                    'attendance_id' => $record['attendance_id'],
+                ];
+            }
+        }
+        
+        // Sort by date ascending
+        usort($detailedRecords, function($a, $b) {
+            return strtotime($a['date']) - strtotime($b['date']);
+        });
+        
+        // Apply pagination
+        $totalDetailedRecords = count($detailedRecords);
+        $perPage = 50;
+        $currentPage = $request->get('page', 1);
+        $detailedRecords = array_slice($detailedRecords, ($currentPage - 1) * $perPage, $perPage);
+        
+        // Calculate pagination data
+        $detailedPagination = [
+            'current_page' => $currentPage,
+            'per_page' => $perPage,
+            'total' => $totalDetailedRecords,
+            'last_page' => ceil($totalDetailedRecords / $perPage),
+            'from' => (($currentPage - 1) * $perPage) + 1,
+            'to' => min($currentPage * $perPage, $totalDetailedRecords),
+        ];
+
         return view('admin.attendance.adminAttendance', compact(
             'attendanceRecords',
             'totalPresent',
@@ -198,7 +302,9 @@ class AttendanceController extends Controller
             'totalOnLeave',
             'completeCount',
             'incompleteCount',
-            'departments'
+            'departments',
+            'detailedRecords',
+            'detailedPagination'
         ));
     }
 

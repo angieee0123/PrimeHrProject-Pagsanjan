@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\EmployeeRegistrationController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\PermanentAttendanceController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -104,9 +105,8 @@ Route::get('/permanent/dashboard', function () {
     return view('permanent.dashboard.permanentDashboard');
 })->middleware('auth')->name('permanent.dashboard');
 
-Route::get('/permanent/attendance', function () {
-    return view('permanent.attendance.permanentAttendance');
-})->middleware('auth')->name('permanent.attendance');
+Route::get('/permanent/attendance', [PermanentAttendanceController::class, 'index'])->middleware('auth')->name('permanent.attendance');
+Route::get('/permanent/attendance/detailed', [PermanentAttendanceController::class, 'detailedDTR'])->middleware('auth')->name('permanent.attendance.detailed');
 
 Route::get('/permanent/payslip', function () {
     return view('permanent.payslip.permanentPayslip');
@@ -677,7 +677,7 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
         'accreditedHoursLog'
     ])
     ->whereBetween('work_date', [$startDate, $endDate])
-    ->orderBy('work_date', 'desc')
+    ->orderBy('work_date', 'asc')
     ->orderBy('employee_id');
 
     if ($department) {
