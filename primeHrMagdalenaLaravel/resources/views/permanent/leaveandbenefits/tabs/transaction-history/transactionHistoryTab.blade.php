@@ -68,13 +68,13 @@
                         @endif
                     </td>
                     <td data-label="Amount" style="text-align: center; font-weight: 600; color: {{ $transaction->amount >= 0 ? '#15803d' : '#dc2626' }};">
-                        {{ $transaction->amount >= 0 ? '+' : '' }}{{ number_format($transaction->amount, 4) }} days
+                        {{ $transaction->amount >= 0 ? '+' : '' }}{{ number_format($transaction->amount, 6) }} days
                     </td>
                     <td data-label="Before" style="text-align: center; color: #6b6a8a;">
-                        {{ number_format($transaction->balance_before, 4) }}
+                        {{ number_format($transaction->balance_before, 6) }}
                     </td>
                     <td data-label="After" style="text-align: center; font-weight: 600; color: #0b044d;">
-                        {{ number_format($transaction->balance_after, 4) }}
+                        {{ number_format($transaction->balance_after, 6) }}
                     </td>
                     <td data-label="Date" style="text-align: center; color: #6b6a8a; font-size: 12px;">
                         {{ $transaction->transaction_date ? $transaction->transaction_date->format('M d, Y') : 'N/A' }}
@@ -253,11 +253,11 @@ function viewEmployeeTransactionDetails(leaveType, type, amount, balanceBefore, 
          type === 'Adjustment' ? 'pending' : 'cancelled');
     
     const amountEl = document.getElementById('empTransactionAmount');
-    amountEl.textContent = (amount >= 0 ? '+' : '') + parseFloat(amount).toFixed(4) + ' days';
+    amountEl.textContent = (amount >= 0 ? '+' : '') + parseFloat(amount).toFixed(6) + ' days';
     amountEl.style.color = amount >= 0 ? '#15803d' : '#dc2626';
     
-    document.getElementById('empTransactionBalanceBefore').textContent = parseFloat(balanceBefore).toFixed(4) + ' days';
-    document.getElementById('empTransactionBalanceAfter').textContent = parseFloat(balanceAfter).toFixed(4) + ' days';
+    document.getElementById('empTransactionBalanceBefore').textContent = parseFloat(balanceBefore).toFixed(6) + ' days';
+    document.getElementById('empTransactionBalanceAfter').textContent = parseFloat(balanceAfter).toFixed(6) + ' days';
     document.getElementById('empTransactionDate').textContent = date;
     document.getElementById('empTransactionReference').textContent = reference;
     document.getElementById('empTransactionRemarks').textContent = remarks || 'No remarks provided';

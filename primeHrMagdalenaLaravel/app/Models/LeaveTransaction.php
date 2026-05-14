@@ -24,9 +24,9 @@ class LeaveTransaction extends Model
 
     protected $casts = [
         'year' => 'integer',
-        'amount' => 'decimal:2',
-        'balance_before' => 'decimal:2',
-        'balance_after' => 'decimal:2',
+        'amount' => 'decimal:6',
+        'balance_before' => 'decimal:6',
+        'balance_after' => 'decimal:6',
         'transaction_date' => 'date',
     ];
 

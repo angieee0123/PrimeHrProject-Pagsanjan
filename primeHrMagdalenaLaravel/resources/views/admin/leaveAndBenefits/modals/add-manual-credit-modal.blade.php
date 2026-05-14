@@ -52,8 +52,8 @@
                     <!-- Credit Amount -->
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label" id="amountLabel">Credit Amount (Days) <span style="color: #8e1e18;">*</span></label>
-                        <input type="number" name="amount" class="form-input" step="0.01" min="0.01" placeholder="e.g., 5.00" required onchange="calculateNewBalance()">
-                        <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;" id="amountHint">Number of days to add</p>
+                        <input type="number" name="amount" class="form-input" step="0.000001" min="0.000001" placeholder="e.g., 5.125000 or 0.083333" required onchange="calculateNewBalance()">
+                        <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;" id="amountHint">Number of days to add (up to 6 decimals, e.g., 0.125000 = 1 hour)</p>
                     </div>
 
                     <!-- Transaction Date -->
@@ -143,7 +143,7 @@ function showCurrentBalance(leaveCode) {
     }
 
     const balance = employeeLeaveBalances[leaveCode];
-    document.getElementById('currentBalanceValue').textContent = `${parseFloat(balance).toFixed(2)} days`;
+    document.getElementById('currentBalanceValue').textContent = `${parseFloat(balance).toFixed(6)} days`;
     document.getElementById('currentBalanceDisplay').style.display = 'block';
     
     calculateNewBalance();
@@ -171,8 +171,8 @@ function calculateNewBalance() {
         document.getElementById('previewTitle').style.color = '#dc2626';
         document.getElementById('previewText').style.color = '#991b1b';
         document.getElementById('previewText').innerHTML = `
-            <strong>⚠️ Warning:</strong> This deduction will result in a negative balance of <strong>${newBalance.toFixed(2)} days</strong>. 
-            Current balance is only <strong>${currentBalance.toFixed(2)} days</strong>.
+            <strong>⚠️ Warning:</strong> This deduction will result in a negative balance of <strong>${newBalance.toFixed(6)} days</strong>. 
+            Current balance is only <strong>${currentBalance.toFixed(6)} days</strong>.
         `;
         document.getElementById('previewBox').style.display = 'block';
         return;
@@ -196,10 +196,10 @@ function calculateNewBalance() {
         document.getElementById('previewText').style.color = '#92400e';
     }
 
-    document.getElementById('previewAmount').textContent = amount.toFixed(2);
+    document.getElementById('previewAmount').textContent = amount.toFixed(6);
     document.getElementById('previewAction').textContent = currentTransactionType === 'add' ? 'added to' : 'deducted from';
     document.getElementById('previewLeaveType').textContent = leaveTypeName;
-    document.getElementById('previewNewBalance').textContent = newBalance.toFixed(2);
+    document.getElementById('previewNewBalance').textContent = newBalance.toFixed(6);
     document.getElementById('previewBox').style.display = 'block';
 }
 
@@ -219,7 +219,7 @@ window.openManualCreditModal = function(type = 'add') {
         document.getElementById('modalTitle').textContent = 'Add Manual Leave Credits';
         document.getElementById('modalSubtitle').textContent = 'Manually add credits to employee leave balance';
         document.getElementById('amountLabel').innerHTML = 'Credit Amount (Days) <span style="color: #8e1e18;">*</span>';
-        document.getElementById('amountHint').textContent = 'Number of days to add';
+        document.getElementById('amountHint').textContent = 'Number of days to add (up to 6 decimals, e.g., 0.125000 = 1 hour)';
         document.getElementById('submitBtn').textContent = 'Add Credits';
         document.getElementById('submitBtn').style.background = '#0b044d';
         document.getElementById('previewTitle').textContent = 'Preview - Adding Credits';
@@ -227,7 +227,7 @@ window.openManualCreditModal = function(type = 'add') {
         document.getElementById('modalTitle').textContent = 'Deduct Leave Credits';
         document.getElementById('modalSubtitle').textContent = 'Manually deduct credits from employee leave balance';
         document.getElementById('amountLabel').innerHTML = 'Deduction Amount (Days) <span style="color: #8e1e18;">*</span>';
-        document.getElementById('amountHint').textContent = 'Number of days to deduct';
+        document.getElementById('amountHint').textContent = 'Number of days to deduct (up to 6 decimals, e.g., 0.125000 = 1 hour)';
         document.getElementById('submitBtn').textContent = 'Deduct Credits';
         document.getElementById('submitBtn').style.background = '#8e1e18';
         document.getElementById('previewTitle').textContent = 'Preview - Deducting Credits';

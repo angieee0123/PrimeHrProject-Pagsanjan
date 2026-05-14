@@ -660,7 +660,7 @@ class LeaveController extends Controller
         $validated = $request->validate([
             'employee_id' => 'required|exists:employees,id',
             'leave_code' => 'required|exists:leave_types_config,leave_code',
-            'amount' => 'required|numeric|min:0.01',
+            'amount' => 'required|numeric|min:0.000001|max:999.999999',
             'transaction_date' => 'required|date',
             'transaction_type' => 'required|in:add,deduct',
             'remarks' => 'required|string|max:500',
