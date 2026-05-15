@@ -30,20 +30,30 @@
 
                 <div class="form-row">
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Loan Provider <span style="color: #8e1e18;">*</span></label>
-                        <select name="deduction_type_id" id="loanProvider" class="form-input" required onchange="loadLoanTypes()">
-                            <option value="">Select Provider</option>
-                            @foreach(\App\Models\DeductionType::where('category', 'LOAN')->where('is_active', true)->orderBy('name')->get() as $type)
-                                <option value="{{ $type->id }}">{{ $type->name }}</option>
-                            @endforeach
-                            <option value="OTHER">Other (External Provider)</option>
+                        <label class="form-label">Loan Type <span style="color: #8e1e18;">*</span></label>
+                        <select name="deduction_type_id" id="loanProvider" class="form-input" required onchange="handleLoanTypeChange()">
+                            <option value="">Select Loan Type</option>
+                            <optgroup label="GSIS Loans">
+                                @foreach(\App\Models\DeductionType::where('category', 'LOAN')->where('is_active', true)->where('code', 'LIKE', 'LOAN_GSIS%')->orderBy('name')->get() as $type)
+                                    <option value="{{ $type->id }}" data-provider="GSIS">{{ str_replace('GSIS ', '', $type->name) }}</option>
+                                @endforeach
+                            </optgroup>
+                            <optgroup label="Pag-IBIG Loans">
+                                @foreach(\App\Models\DeductionType::where('category', 'LOAN')->where('is_active', true)->where('code', 'LIKE', 'LOAN_PAGIBIG%')->orderBy('name')->get() as $type)
+                                    <option value="{{ $type->id }}" data-provider="PAG-IBIG">{{ str_replace('Pag-IBIG ', '', $type->name) }}</option>
+                                @endforeach
+                            </optgroup>
+                            <optgroup label="Other Loans">
+                                @foreach(\App\Models\DeductionType::where('category', 'LOAN')->where('is_active', true)->where('code', 'NOT LIKE', 'LOAN_GSIS%')->where('code', 'NOT LIKE', 'LOAN_PAGIBIG%')->orderBy('name')->get() as $type)
+                                    <option value="{{ $type->id }}" data-provider="OTHER">{{ $type->name }}</option>
+                                @endforeach
+                            </optgroup>
+                            <option value="OTHER" data-provider="CUSTOM">Other (External Provider)</option>
                         </select>
                     </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Loan Type <span style="color: #8e1e18;">*</span></label>
-                        <select name="loan_type_id" id="loanType" class="form-input" required disabled>
-                            <option value="">Select loan provider first</option>
-                        </select>
+                    <div class="form-group" style="flex: 1;" id="loanProviderDisplay">
+                        <label class="form-label">Provider</label>
+                        <input type="text" id="providerName" class="form-input" readonly placeholder="Select loan type first" style="background: #f7f6ff; cursor: not-allowed;">
                     </div>
                 </div>
 
@@ -53,8 +63,8 @@
                         <input type="text" name="other_provider_name" id="otherProviderName" class="form-input" placeholder="e.g., SSS, Private Bank, Cooperative">
                     </div>
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Loan Type Name <span style="color: #8e1e18;">*</span></label>
-                        <input type="text" name="other_loan_type" id="otherLoanType" class="form-input" placeholder="e.g., Personal Loan, Calamity Loan">
+                        <label class="form-label">Loan Description <span style="color: #8e1e18;">*</span></label>
+                        <input type="text" name="other_loan_type" id="otherLoanType" class="form-input" placeholder="e.g., Personal Loan, Emergency Loan">
                     </div>
                 </div>
 
@@ -302,16 +312,18 @@ function closeAddLoanModal(event) {
     if (event && event.target !== event.currentTarget) return;
     document.getElementById('addLoanModal').classList.remove('active');
     document.getElementById('addLoanForm').reset();
-    document.getElementById('loanType').disabled = true;
-    document.getElementById('loanType').innerHTML = '<option value="">Select loan provider first</option>';
+    document.getElementById('providerName').value = '';
     document.getElementById('otherProviderFields').style.display = 'none';
     document.getElementById('otherProviderName').removeAttribute('required');
     document.getElementById('otherLoanType').removeAttribute('required');
 }
 
-function loadLoanTypes() {
-    const providerId = document.getElementById('loanProvider').value;
-    const loanTypeSelect = document.getElementById('loanType');
+function handleLoanTypeChange() {
+    const loanSelect = document.getElementById('loanProvider');
+    const selectedOption = loanSelect.options[loanSelect.selectedIndex];
+    const providerId = loanSelect.value;
+    const providerType = selectedOption.getAttribute('data-provider');
+    const providerNameInput = document.getElementById('providerName');
     const otherProviderFields = document.getElementById('otherProviderFields');
     const otherProviderName = document.getElementById('otherProviderName');
     const otherLoanType = document.getElementById('otherLoanType');
@@ -322,62 +334,23 @@ function loadLoanTypes() {
     otherLoanType.removeAttribute('required');
     
     if (!providerId) {
-        loanTypeSelect.disabled = true;
-        loanTypeSelect.innerHTML = '<option value="">Select loan provider first</option>';
+        providerNameInput.value = '';
         return;
     }
     
-    // Handle "Other" provider
+    // Handle "Other" (external provider)
     if (providerId === 'OTHER') {
-        loanTypeSelect.disabled = true;
-        loanTypeSelect.innerHTML = '<option value="OTHER">Custom Loan Type</option>';
-        loanTypeSelect.value = 'OTHER';
+        providerNameInput.value = 'External Provider';
         otherProviderFields.style.display = 'flex';
         otherProviderName.setAttribute('required', 'required');
         otherLoanType.setAttribute('required', 'required');
         return;
     }
     
-    // Loan types data structure
-    const loanTypes = {
-        // GSIS loans
-        'gsis': [
-            { id: 'GSIS_EMERGENCY', name: 'Emergency Loan' },
-            { id: 'GSIS_EDUCATIONAL', name: 'Educational Assistance Loan' },
-            { id: 'GSIS_SALARY', name: 'Salary Loan' },
-            { id: 'GSIS_POLICY', name: 'Policy Loan' },
-            { id: 'GSIS_ENHANCED', name: 'Enhanced Salary Loan' },
-            { id: 'GSIS_SUMMER', name: 'Summer One-Month Salary Loan' },
-            { id: 'GSIS_CONSO', name: 'Consolidated Loan' }
-        ],
-        // Pag-IBIG loans
-        'pagibig': [
-            { id: 'PAGIBIG_MPL', name: 'Multi-Purpose Loan (MPL)' },
-            { id: 'PAGIBIG_HOUSING', name: 'Housing Loan' },
-            { id: 'PAGIBIG_CALAMITY', name: 'Calamity Loan' }
-        ]
-    };
-    
-    // Get provider name from select option text
-    const providerText = document.getElementById('loanProvider').options[document.getElementById('loanProvider').selectedIndex].text.toLowerCase();
-    let types = [];
-    
-    if (providerText.includes('gsis')) {
-        types = loanTypes.gsis;
-    } else if (providerText.includes('pag-ibig') || providerText.includes('pagibig')) {
-        types = loanTypes.pagibig;
+    // Set provider name based on data attribute
+    if (providerType) {
+        providerNameInput.value = providerType;
     }
-    
-    // Populate loan type dropdown
-    loanTypeSelect.innerHTML = '<option value="">Select Loan Type</option>';
-    types.forEach(type => {
-        const option = document.createElement('option');
-        option.value = type.id;
-        option.textContent = type.name;
-        loanTypeSelect.appendChild(option);
-    });
-    
-    loanTypeSelect.disabled = false;
 }
 
 function calculateLoanInstallment() {

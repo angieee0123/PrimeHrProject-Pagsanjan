@@ -99,6 +99,11 @@ class Employee extends Model
         return $this->hasMany(LeaveTransaction::class);
     }
 
+    public function deductions()
+    {
+        return $this->hasMany(EmployeeDeduction::class);
+    }
+
     public function getScheduleForDate($date)
     {
         return $this->schedule()

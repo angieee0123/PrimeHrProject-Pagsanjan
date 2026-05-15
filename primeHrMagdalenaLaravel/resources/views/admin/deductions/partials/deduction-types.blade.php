@@ -49,132 +49,66 @@
             </tr>
         </thead>
         <tbody>
+            @php
+                $deductionTypes = \App\Models\DeductionType::with('schedules')->orderBy('category')->orderBy('name')->get();
+            @endphp
+            @forelse($deductionTypes as $type)
             <tr>
-                <td><strong style="color: #0b044d; font-size: 13px;">GSIS</strong></td>
-                <td>GSIS Contribution</td>
-                <td><span class="badge-status processed">MANDATORY</span></td>
-                <td>PERCENTAGE</td>
-                <td class="pay-cell">9.00%</td>
-                <td>BASIC</td>
-                <td>—</td>
-                <td><span class="badge-status processed">Active</span></td>
+                <td><strong style="color: #0b044d; font-size: 13px;">{{ $type->code }}</strong></td>
+                <td>{{ $type->name }}</td>
+                <td>
+                    @if($type->category === 'MANDATORY')
+                        <span class="badge-status processed">MANDATORY</span>
+                    @elseif($type->category === 'LOAN')
+                        <span class="badge-emptype">LOAN</span>
+                    @else
+                        <span class="badge-status pending">OTHER</span>
+                    @endif
+                </td>
+                <td>{{ $type->computation_type }}</td>
+                <td class="pay-cell">
+                    @if($type->computation_type === 'PERCENTAGE' && $type->percentage_rate)
+                        {{ number_format($type->percentage_rate, 2) }}%
+                    @elseif($type->computation_type === 'FIXED' && $type->max_amount)
+                        ₱{{ number_format($type->max_amount, 2) }}
+                    @else
+                        —
+                    @endif
+                </td>
+                <td>{{ $type->base_salary_type ?? '—' }}</td>
+                <td class="net-pay">
+                    @if($type->max_amount)
+                        ₱{{ number_format($type->max_amount, 2) }}
+                    @else
+                        —
+                    @endif
+                </td>
+                <td>
+                    @if($type->is_active)
+                        <span class="badge-status processed">Active</span>
+                    @else
+                        <span class="badge-status pending">Inactive</span>
+                    @endif
+                </td>
                 <td>
                     <div class="row-actions">
-                        <button class="btn-view" onclick="editDeductionType('GSIS')">Edit</button>
+                        <button class="btn-view" onclick="editDeductionType('{{ $type->code }}')">Edit</button>
                     </div>
                 </td>
             </tr>
+            @empty
             <tr>
-                <td><strong style="color: #0b044d; font-size: 13px;">PHILHEALTH</strong></td>
-                <td>PhilHealth Contribution</td>
-                <td><span class="badge-status processed">MANDATORY</span></td>
-                <td>PERCENTAGE</td>
-                <td class="pay-cell">2.50%</td>
-                <td>BASIC</td>
-                <td>—</td>
-                <td><span class="badge-status processed">Active</span></td>
-                <td>
-                    <div class="row-actions">
-                        <button class="btn-view" onclick="editDeductionType('PHILHEALTH')">Edit</button>
-                    </div>
+                <td colspan="9" style="text-align: center; padding: 40px; color: #9999bb;">
+                    No deduction types found. Click "Add Deduction Type" to create one.
                 </td>
             </tr>
-            <tr>
-                <td><strong style="color: #0b044d; font-size: 13px;">PAGIBIG</strong></td>
-                <td>Pag-IBIG Contribution</td>
-                <td><span class="badge-status processed">MANDATORY</span></td>
-                <td>PERCENTAGE</td>
-                <td class="pay-cell">2.00%</td>
-                <td>BASIC</td>
-                <td class="net-pay">₱100.00</td>
-                <td><span class="badge-status processed">Active</span></td>
-                <td>
-                    <div class="row-actions">
-                        <button class="btn-view" onclick="editDeductionType('PAGIBIG')">Edit</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td><strong style="color: #0b044d; font-size: 13px;">WTAX</strong></td>
-                <td>Withholding Tax</td>
-                <td><span class="badge-status processed">MANDATORY</span></td>
-                <td>CUSTOM</td>
-                <td>—</td>
-                <td>CUSTOM</td>
-                <td>—</td>
-                <td><span class="badge-status processed">Active</span></td>
-                <td>
-                    <div class="row-actions">
-                        <button class="btn-view" onclick="editDeductionType('WTAX')">Edit</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td><strong style="color: #0b044d; font-size: 13px;">LOAN_GSIS_SALARY</strong></td>
-                <td>GSIS Salary Loan</td>
-                <td><span class="badge-emptype">LOAN</span></td>
-                <td>FIXED</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-                <td><span class="badge-status processed">Active</span></td>
-                <td>
-                    <div class="row-actions">
-                        <button class="btn-view" onclick="editDeductionType('LOAN_GSIS_SALARY')">Edit</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td><strong style="color: #0b044d; font-size: 13px;">LOAN_GSIS_POLICY</strong></td>
-                <td>GSIS Policy Loan</td>
-                <td><span class="badge-emptype">LOAN</span></td>
-                <td>FIXED</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-                <td><span class="badge-status processed">Active</span></td>
-                <td>
-                    <div class="row-actions">
-                        <button class="btn-view" onclick="editDeductionType('LOAN_GSIS_POLICY')">Edit</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td><strong style="color: #0b044d; font-size: 13px;">LOAN_PAGIBIG_MPL</strong></td>
-                <td>Pag-IBIG Multi-Purpose Loan</td>
-                <td><span class="badge-emptype">LOAN</span></td>
-                <td>FIXED</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-                <td><span class="badge-status processed">Active</span></td>
-                <td>
-                    <div class="row-actions">
-                        <button class="btn-view" onclick="editDeductionType('LOAN_PAGIBIG_MPL')">Edit</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td><strong style="color: #0b044d; font-size: 13px;">LOAN_PAGIBIG_HOUSING</strong></td>
-                <td>Pag-IBIG Housing Loan</td>
-                <td><span class="badge-emptype">LOAN</span></td>
-                <td>FIXED</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-                <td><span class="badge-status processed">Active</span></td>
-                <td>
-                    <div class="row-actions">
-                        <button class="btn-view" onclick="editDeductionType('LOAN_PAGIBIG_HOUSING')">Edit</button>
-                    </div>
-                </td>
-            </tr>
+            @endforelse
         </tbody>
     </table>
 </div>
 
 <div class="table-footer">
-    <p>Showing <strong>8</strong> of <strong>8</strong> deduction types</p>
+    <p>Showing <strong>{{ $deductionTypes->count() }}</strong> of <strong>{{ $deductionTypes->count() }}</strong> deduction types</p>
 </div>
 
 @include('admin.deductions.modals.addDeductionTypeModal')

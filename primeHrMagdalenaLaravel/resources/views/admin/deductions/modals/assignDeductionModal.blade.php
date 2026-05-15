@@ -11,11 +11,11 @@
         </div>
 
         <div class="modal-body">
-            <form id="assignDeductionForm" action="{{ route('admin.deductions.employee.store') }}" method="POST">
+            <form id="assignDeductionForm" action="{{ route('admin.deductions.employee.bulk-assign') }}" method="POST">
                 @csrf
                 <div class="form-group">
                     <label class="form-label">Employee <span style="color: #8e1e18;">*</span></label>
-                    <select name="employee_id" id="employee_id" class="form-input" required>
+                    <select name="employee_id" id="assignEmployee" class="form-input" required onchange="checkExistingDeductions()">
                         <option value="">Select Employee</option>
                         @foreach(\App\Models\Employee::with('employmentDetail.departmentRelation')->orderBy('last_name')->get() as $emp)
                             <option value="{{ $emp->id }}">
@@ -28,8 +28,28 @@
                     </select>
                 </div>
 
+                <div id="existingDeductionsWarning" class="warning-box" style="display: none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="min-width: 16px;">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <div>
+                        <strong>Existing Deductions:</strong>
+                        <p id="existingDeductionsList" style="margin: 4px 0 0 0; font-size: 12px;"></p>
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label class="form-label">Deduction Types <span style="color: #8e1e18;">*</span></label>
+                    <label class="form-label">
+                        Deduction Types <span style="color: #8e1e18;">*</span>
+                        <span id="selectedCount" style="color: #6b6a8a; font-weight: 400; margin-left: 8px;">(0 selected)</span>
+                    </label>
+                    <div class="checkbox-actions">
+                        <button type="button" class="btn-link" onclick="selectAllDeductions()">Select All</button>
+                        <button type="button" class="btn-link" onclick="deselectAllDeductions()">Deselect All</button>
+                        <button type="button" class="btn-link" onclick="selectMandatoryOnly()">Mandatory Only</button>
+                    </div>
                     <div class="checkbox-group">
                         @php
                             $deductionTypes = \App\Models\DeductionType::where('is_active', true)->orderBy('category')->orderBy('name')->get()->groupBy('category');
@@ -41,9 +61,16 @@
                                     <label class="checkbox-label">
                                         <input type="checkbox" name="deduction_types[]" value="{{ $type->id }}" 
                                                data-category="{{ $type->category }}" 
-                                               data-computation="{{ $type->computation_type }}" 
+                                               data-computation="{{ $type->computation_type }}"
+                                               data-code="{{ $type->code }}"
                                                onchange="handleCheckboxChange()">
-                                        <span class="checkbox-text">{{ $type->name }} <span style="color: #9999bb; font-size: 11px;">({{ $type->code }})</span></span>
+                                        <span class="checkbox-text">
+                                            {{ $type->name }} 
+                                            <span style="color: #9999bb; font-size: 11px;">({{ $type->code }})</span>
+                                            @if($type->computation_type === 'PERCENTAGE')
+                                                <span style="color: #6b6a8a; font-size: 11px;"> - {{ $type->percentage_rate }}%</span>
+                                            @endif
+                                        </span>
                                     </label>
                                 @endforeach
                             </div>
@@ -328,6 +355,45 @@ textarea.form-input {
     color: #0b044d;
     user-select: none;
 }
+
+.warning-box {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: #fff8e1;
+    border: 1px solid #ffd54f;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #6b6a8a;
+}
+
+.warning-box svg {
+    color: #f9a825;
+}
+
+.checkbox-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: #0b044d;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-link:hover {
+    background: #f7f6ff;
+}
 </style>
 
 <script>
@@ -340,20 +406,109 @@ function closeAssignDeductionModal(event) {
     if (event && event.target !== event.currentTarget) return;
     document.getElementById('assignDeductionModal').classList.remove('active');
     document.getElementById('assignDeductionForm').reset();
+    document.getElementById('existingDeductionsWarning').style.display = 'none';
+    deselectAllDeductions();
 }
 
 function handleCheckboxChange() {
     const checkboxes = document.querySelectorAll('input[name="deduction_types[]"]:checked');
     const submitBtn = document.querySelector('#assignDeductionForm .btn-submit');
+    const selectedCount = document.getElementById('selectedCount');
+    
+    // Update selected count
+    selectedCount.textContent = `(${checkboxes.length} selected)`;
     
     // Enable/disable submit button based on selection
     if (checkboxes.length > 0) {
         submitBtn.disabled = false;
         submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
     } else {
         submitBtn.disabled = true;
         submitBtn.style.opacity = '0.5';
+        submitBtn.style.cursor = 'not-allowed';
     }
+}
+
+function selectAllDeductions() {
+    const checkboxes = document.querySelectorAll('input[name="deduction_types[]"]:not(:disabled)');
+    checkboxes.forEach(cb => cb.checked = true);
+    handleCheckboxChange();
+}
+
+function deselectAllDeductions() {
+    const checkboxes = document.querySelectorAll('input[name="deduction_types[]"]');
+    checkboxes.forEach(cb => cb.checked = false);
+    handleCheckboxChange();
+}
+
+function selectMandatoryOnly() {
+    deselectAllDeductions();
+    const checkboxes = document.querySelectorAll('input[name="deduction_types[]"]');
+    checkboxes.forEach(cb => {
+        if (cb.dataset.category === 'MANDATORY') {
+            cb.checked = true;
+        }
+    });
+    handleCheckboxChange();
+}
+
+function checkExistingDeductions() {
+    const employeeId = document.getElementById('assignEmployee').value;
+    const warningBox = document.getElementById('existingDeductionsWarning');
+    const warningList = document.getElementById('existingDeductionsList');
+    
+    if (!employeeId) {
+        warningBox.style.display = 'none';
+        // Enable all checkboxes
+        document.querySelectorAll('input[name="deduction_types[]"]').forEach(cb => {
+            cb.disabled = false;
+            cb.parentElement.style.opacity = '1';
+        });
+        return;
+    }
+    
+    // Fetch existing deductions via AJAX
+    fetch(`/admin/deductions/employee/${employeeId}/active`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.deductions && data.deductions.length > 0) {
+                // Show warning
+                warningBox.style.display = 'flex';
+                const deductionNames = data.deductions.map(d => d.name).join(', ');
+                warningList.textContent = `This employee already has: ${deductionNames}`;
+                
+                // Disable checkboxes for existing deductions
+                document.querySelectorAll('input[name="deduction_types[]"]').forEach(cb => {
+                    const deductionTypeId = parseInt(cb.value);
+                    const hasDeduction = data.deductions.some(d => d.id === deductionTypeId);
+                    
+                    if (hasDeduction) {
+                        cb.disabled = true;
+                        cb.checked = false;
+                        cb.parentElement.style.opacity = '0.5';
+                        cb.parentElement.title = 'Already assigned to this employee';
+                    } else {
+                        cb.disabled = false;
+                        cb.parentElement.style.opacity = '1';
+                        cb.parentElement.title = '';
+                    }
+                });
+            } else {
+                warningBox.style.display = 'none';
+                // Enable all checkboxes
+                document.querySelectorAll('input[name="deduction_types[]"]').forEach(cb => {
+                    cb.disabled = false;
+                    cb.parentElement.style.opacity = '1';
+                    cb.parentElement.title = '';
+                });
+            }
+            handleCheckboxChange();
+        })
+        .catch(error => {
+            console.error('Error fetching existing deductions:', error);
+            warningBox.style.display = 'none';
+        });
 }
 
 // Initialize button state on modal open

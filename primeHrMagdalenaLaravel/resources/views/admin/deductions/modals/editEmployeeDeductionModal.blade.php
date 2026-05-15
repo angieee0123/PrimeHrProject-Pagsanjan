@@ -14,54 +14,54 @@
             <form id="editEmployeeDeductionForm" method="POST">
                 @csrf
                 @method('PUT')
+                <input type="hidden" id="editDeductionId" name="deduction_id">
                 
-                <div class="form-group">
-                    <label class="form-label">Employee</label>
-                    <input type="text" id="edit_employee_name" class="form-input" readonly style="background: #f7f6ff;">
+                <div class="info-box" style="background: #f7f6ff; padding: 12px; border-radius: 6px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span style="font-size: 11px; color: #6b6a8a; font-weight: 600;">EMPLOYEE</span>
+                        <span id="editEmployeeName" style="font-size: 13px; color: #0b044d; font-weight: 600;"></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="font-size: 11px; color: #6b6a8a; font-weight: 600;">DEDUCTION TYPE</span>
+                        <span id="editDeductionType" style="font-size: 13px; color: #0b044d; font-weight: 600;"></span>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Deduction Type</label>
-                    <input type="text" id="edit_deduction_name" class="form-input" readonly style="background: #f7f6ff;">
-                </div>
-
-                <div class="form-row" id="edit_loanFields" style="display: none;">
+                <div class="form-row" id="editLoanFields" style="display: none;">
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Total Amount</label>
-                        <input type="number" name="total_amount" id="edit_total_amount" class="form-input" step="0.01" min="0" readonly style="background: #f7f6ff;">
+                        <input type="number" id="editTotalAmount" class="form-input" step="0.01" min="0" readonly style="background: #f7f6ff; cursor: not-allowed;">
                     </div>
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Remaining Balance</label>
-                        <input type="number" name="remaining_balance" id="edit_remaining_balance" class="form-input" step="0.01" min="0">
+                        <input type="number" name="remaining_balance" id="editRemainingBalance" class="form-input" step="0.01" min="0">
                     </div>
                 </div>
 
-                <div class="form-row" id="edit_loanInstallment" style="display: none;">
-                    <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Installment Amount <span style="color: #8e1e18;">*</span></label>
-                        <input type="number" name="installment_amount" id="edit_installment_amount" class="form-input" step="0.01" min="0">
-                    </div>
+                <div class="form-group" id="editInstallmentField" style="display: none;">
+                    <label class="form-label">Monthly Installment <span style="color: #8e1e18;">*</span></label>
+                    <input type="number" name="installment_amount" id="editInstallmentAmount" class="form-input" step="0.01" min="0">
                 </div>
 
-                <div class="form-group" id="edit_fixedAmountField" style="display: none;">
+                <div class="form-group" id="editFixedAmountField" style="display: none;">
                     <label class="form-label">Deduction Amount <span style="color: #8e1e18;">*</span></label>
-                    <input type="number" name="amount" id="edit_amount" class="form-input" step="0.01" min="0">
+                    <input type="number" name="amount" id="editAmount" class="form-input" step="0.01" min="0">
                 </div>
 
                 <div class="form-row">
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Start Date <span style="color: #8e1e18;">*</span></label>
-                        <input type="date" name="start_date" id="edit_start_date" class="form-input" required>
+                        <input type="date" name="start_date" id="editStartDate" class="form-input" required>
                     </div>
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">End Date</label>
-                        <input type="date" name="end_date" id="edit_end_date" class="form-input">
+                        <input type="date" name="end_date" id="editEndDate" class="form-input">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Status <span style="color: #8e1e18;">*</span></label>
-                    <select name="status" id="edit_status" class="form-input" required>
+                    <select name="status" id="editStatus" class="form-input" required>
                         <option value="ACTIVE">Active</option>
                         <option value="SUSPENDED">Suspended</option>
                         <option value="COMPLETED">Completed</option>
@@ -70,7 +70,7 @@
 
                 <div class="form-group">
                     <label class="form-label">Remarks</label>
-                    <textarea name="remarks" id="edit_remarks" class="form-input" rows="2"></textarea>
+                    <textarea name="remarks" id="editRemarks" class="form-input" rows="2"></textarea>
                 </div>
 
                 <div class="form-actions">
@@ -82,6 +82,15 @@
     </div>
 </div>
 
+<style>
+.info-box {
+    background: #f7f6ff;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+</style>
+
 <script>
 function openEditEmployeeDeductionModal() {
     document.getElementById('editEmployeeDeductionModal').classList.add('active');
@@ -90,21 +99,6 @@ function openEditEmployeeDeductionModal() {
 function closeEditEmployeeDeductionModal(event) {
     if (event && event.target !== event.currentTarget) return;
     document.getElementById('editEmployeeDeductionModal').classList.remove('active');
-}
-
-function editEmployeeDeduction(id) {
-    // This would typically fetch data via AJAX
-    // For now, showing the modal
-    openEditEmployeeDeductionModal();
-    
-    // Example: Fetch and populate data
-    // fetch(`/admin/deductions/employee/${id}`)
-    //     .then(response => response.json())
-    //     .then(data => {
-    //         document.getElementById('edit_employee_name').value = data.employee_name;
-    //         document.getElementById('edit_deduction_name').value = data.deduction_name;
-    //         // ... populate other fields
-    //         document.getElementById('editEmployeeDeductionForm').action = `/admin/deductions/employee/${id}`;
-    //     });
+    document.getElementById('editEmployeeDeductionForm').reset();
 }
 </script>

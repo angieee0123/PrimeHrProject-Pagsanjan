@@ -256,47 +256,62 @@ function loadEmployeeDeductions(employeeId) {
     const deductionsList = document.getElementById('deductionsList');
     deductionsList.innerHTML = '<p style="margin:0; font-size:13px; color:#9999bb; text-align:center; padding:20px;">Loading deductions...</p>';
     
-    // TODO: Replace with actual API call
-    // For now, using sample data
-    setTimeout(() => {
-        const sampleDeductions = [
-            { id: 1, name: 'GSIS Contribution', type: 'MANDATORY', amount: '₱2,250.00', current_schedule: '1ST_ONLY' },
-            { id: 2, name: 'PhilHealth Contribution', type: 'MANDATORY', amount: '₱625.00', current_schedule: '1ST_ONLY' },
-            { id: 3, name: 'Pag-IBIG Contribution', type: 'MANDATORY', amount: '₱100.00', current_schedule: '2ND_ONLY' },
-            { id: 4, name: 'GSIS Salary Loan', type: 'LOAN', amount: '₱2,500.00/month', current_schedule: '1ST_ONLY' },
-        ];
-        
-        if (sampleDeductions.length === 0) {
-            deductionsList.innerHTML = '<p style="margin:0; font-size:13px; color:#9999bb; text-align:center; padding:20px;">No active deductions found for this employee.</p>';
-            return;
-        }
-        
-        deductionsList.innerHTML = sampleDeductions.map(deduction => `
-            <div class="deduction-schedule-item">
-                <div class="deduction-info">
-                    <p class="deduction-name">${deduction.name}</p>
-                    <p class="deduction-details">
-                        <span style="display:inline-block; padding:2px 8px; background:#f0effe; border-radius:4px; font-size:10px; font-weight:600; color:#0b044d; margin-right:6px;">${deduction.type}</span>
-                        ${deduction.amount}
-                    </p>
-                </div>
-                <div class="cutoff-selector">
-                    <label class="cutoff-radio">
-                        <input type="radio" name="deduction_${deduction.id}_cutoff" value="1ST" ${deduction.current_schedule === '1ST_ONLY' ? 'checked' : ''} required>
-                        <span>1st Cutoff</span>
-                    </label>
-                    <label class="cutoff-radio">
-                        <input type="radio" name="deduction_${deduction.id}_cutoff" value="2ND" ${deduction.current_schedule === '2ND_ONLY' ? 'checked' : ''} required>
-                        <span>2nd Cutoff</span>
-                    </label>
-                    <label class="cutoff-radio">
-                        <input type="radio" name="deduction_${deduction.id}_cutoff" value="BOTH" ${deduction.current_schedule === 'BOTH_SPLIT' ? 'checked' : ''} required>
-                        <span>Both</span>
-                    </label>
-                </div>
-            </div>
-        `).join('');
-    }, 500);
+    // Fetch employee deductions from API
+    fetch(`/admin/deductions/employee/${employeeId}/deductions`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.deductions || data.deductions.length === 0) {
+                deductionsList.innerHTML = '<p style="margin:0; font-size:13px; color:#9999bb; text-align:center; padding:20px;">No active deductions found for this employee.</p>';
+                return;
+            }
+            
+            deductionsList.innerHTML = data.deductions.map(deduction => {
+                // Determine which radio should be checked based on current schedule
+                let checked1st = '';
+                let checked2nd = '';
+                let checkedBoth = '';
+                
+                if (deduction.current_schedule === '1ST_ONLY') {
+                    checked1st = 'checked';
+                } else if (deduction.current_schedule === '2ND_ONLY') {
+                    checked2nd = 'checked';
+                } else if (deduction.current_schedule === 'BOTH_SPLIT' || deduction.current_schedule === 'BOTH_FULL') {
+                    checkedBoth = 'checked';
+                } else {
+                    checked1st = 'checked'; // Default to 1st cutoff
+                }
+                
+                return `
+                    <div class="deduction-schedule-item">
+                        <div class="deduction-info">
+                            <p class="deduction-name">${deduction.name}</p>
+                            <p class="deduction-details">
+                                <span style="display:inline-block; padding:2px 8px; background:#f0effe; border-radius:4px; font-size:10px; font-weight:600; color:#0b044d; margin-right:6px;">${deduction.category}</span>
+                                ${deduction.amount}
+                            </p>
+                        </div>
+                        <div class="cutoff-selector">
+                            <label class="cutoff-radio">
+                                <input type="radio" name="deduction_${deduction.id}_cutoff" value="1ST" ${checked1st} required>
+                                <span>1st Cutoff</span>
+                            </label>
+                            <label class="cutoff-radio">
+                                <input type="radio" name="deduction_${deduction.id}_cutoff" value="2ND" ${checked2nd} required>
+                                <span>2nd Cutoff</span>
+                            </label>
+                            <label class="cutoff-radio">
+                                <input type="radio" name="deduction_${deduction.id}_cutoff" value="BOTH" ${checkedBoth} required>
+                                <span>Both</span>
+                            </label>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        })
+        .catch(error => {
+            console.error('Error loading deductions:', error);
+            deductionsList.innerHTML = '<p style="margin:0; font-size:13px; color:#8e1e18; text-align:center; padding:20px;">Failed to load deductions. Please try again.</p>';
+        });
 }
 
 function handleDeductionScheduleSubmit(event) {

@@ -26,10 +26,10 @@ function getInitials($name) {
                 </svg>
             </div>
         </div>
-        <h2 class="stat-value">8</h2>
+        <h2 class="stat-value">{{ $stats['total_types'] }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #0b044d;"></span>
-            <p class="stat-sub">4 mandatory, 4 loans</p>
+            <p class="stat-sub">{{ $stats['mandatory_count'] }} mandatory, {{ $stats['loan_count'] }} loans</p>
         </div>
     </div>
     <div class="stat-card">
@@ -42,10 +42,10 @@ function getInitials($name) {
                 </svg>
             </div>
         </div>
-        <h2 class="stat-value">0</h2>
+        <h2 class="stat-value">{{ $stats['active_loans'] }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #d9bb00;"></span>
-            <p class="stat-sub">No active loans</p>
+            <p class="stat-sub">{{ $stats['active_loans'] > 0 ? 'Ongoing loans' : 'No active loans' }}</p>
         </div>
     </div>
     <div class="stat-card">
@@ -57,7 +57,7 @@ function getInitials($name) {
                 </svg>
             </div>
         </div>
-        <h2 class="stat-value" style="font-size: 18px;">₱0.00</h2>
+        <h2 class="stat-value" style="font-size: 18px;">₱{{ number_format($stats['total_outstanding'], 2) }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #8e1e18;"></span>
             <p class="stat-sub">Loan balances</p>
@@ -73,7 +73,7 @@ function getInitials($name) {
                 </svg>
             </div>
         </div>
-        <h2 class="stat-value">0</h2>
+        <h2 class="stat-value">{{ $stats['transactions_this_month'] }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #15803d;"></span>
             <p class="stat-sub">This month</p>
