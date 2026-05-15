@@ -1,0 +1,306 @@
+<div id="addDeductionTypeModal" class="modal-overlay" onclick="closeAddDeductionTypeModal(event)">
+    <div class="modal-container" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title">Add Deduction Type</h3>
+                <p class="modal-subtitle">Create a new deduction type for payroll processing</p>
+            </div>
+            <button class="modal-close" onclick="closeAddDeductionTypeModal()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <form id="addDeductionTypeForm" action="{{ route('admin.deductions.types.store') }}" method="POST">
+                @csrf
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Code <span style="color: #8e1e18;">*</span></label>
+                        <input type="text" name="code" class="form-input" placeholder="e.g., GSIS" maxlength="50" required>
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label class="form-label">Name <span style="color: #8e1e18;">*</span></label>
+                        <input type="text" name="name" class="form-input" placeholder="e.g., GSIS Contribution" maxlength="100" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Category <span style="color: #8e1e18;">*</span></label>
+                        <select name="category" class="form-input" required>
+                            <option value="">Select Category</option>
+                            <option value="MANDATORY">Mandatory</option>
+                            <option value="LOAN">Loan</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Computation Type <span style="color: #8e1e18;">*</span></label>
+                        <select name="computation_type" class="form-input" id="computationType" required>
+                            <option value="">Select Type</option>
+                            <option value="PERCENTAGE">Percentage</option>
+                            <option value="FIXED">Fixed Amount</option>
+                            <option value="CUSTOM">Custom</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row" id="rateAmountRow">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label" id="rateLabel">Rate (%)</label>
+                        <input type="number" name="rate" class="form-input" placeholder="e.g., 9.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Base Salary</label>
+                        <select name="base_salary" class="form-input">
+                            <option value="">None</option>
+                            <option value="BASIC">Basic Salary</option>
+                            <option value="GROSS">Gross Salary</option>
+                            <option value="CUSTOM">Custom</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Max Amount</label>
+                        <input type="number" name="max_amount" class="form-input" placeholder="e.g., 100.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Status <span style="color: #8e1e18;">*</span></label>
+                        <select name="is_active" class="form-input" required>
+                            <option value="1">Active</option>
+                            <option value="0">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-input" rows="2" placeholder="Brief description of this deduction type..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeAddDeductionTypeModal()">Cancel</button>
+                    <button type="submit" class="btn-submit">Add Deduction Type</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(11, 4, 77, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-container {
+    background: #fff;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(11, 4, 77, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 24px;
+    border-bottom: 1px solid #f0effe;
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0b044d;
+    margin: 0 0 4px 0;
+}
+
+.modal-subtitle {
+    font-size: 12px;
+    color: #6b6a8a;
+    margin: 0;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: #6b6a8a;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: #f7f6ff;
+    color: #0b044d;
+}
+
+.modal-body {
+    padding: 24px;
+    max-height: calc(90vh - 140px);
+    overflow-y: auto;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #0b044d;
+    margin-bottom: 6px;
+}
+
+.form-input {
+    padding: 10px 12px;
+    border: 1px solid #e5e3f8;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #0b044d;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #0b044d;
+    box-shadow: 0 0 0 3px rgba(11, 4, 77, 0.1);
+}
+
+.form-input::placeholder {
+    color: #b3b1c8;
+}
+
+textarea.form-input {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #f0effe;
+}
+
+.btn-cancel {
+    padding: 10px 20px;
+    border: 1px solid #e5e3f8;
+    background: #fff;
+    color: #6b6a8a;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-cancel:hover {
+    background: #f7f6ff;
+    border-color: #0b044d;
+    color: #0b044d;
+}
+
+.btn-submit {
+    padding: 10px 20px;
+    border: none;
+    background: #0b044d;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-submit:hover {
+    background: #1a0f6e;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(11, 4, 77, 0.3);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+function openAddDeductionTypeModal() {
+    document.getElementById('addDeductionTypeModal').classList.add('active');
+}
+
+function closeAddDeductionTypeModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('addDeductionTypeModal').classList.remove('active');
+}
+
+document.getElementById('computationType')?.addEventListener('change', function() {
+    const rateLabel = document.getElementById('rateLabel');
+    const rateInput = document.querySelector('input[name="rate"]');
+    
+    if (this.value === 'PERCENTAGE') {
+        rateLabel.textContent = 'Rate (%)';
+        rateInput.placeholder = 'e.g., 9.00';
+    } else if (this.value === 'FIXED') {
+        rateLabel.textContent = 'Amount';
+        rateInput.placeholder = 'e.g., 500.00';
+    } else {
+        rateLabel.textContent = 'Rate/Amount';
+        rateInput.placeholder = 'N/A';
+    }
+});
+</script>

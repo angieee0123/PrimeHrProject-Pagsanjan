@@ -748,6 +748,95 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
     return view('admin.payroll.adminPayroll', compact('payrollRecords', 'departments', 'viewMode'));
 })->middleware('auth')->name('admin.payroll');
 
+Route::get('/admin/deductions', function () {
+    return view('admin.deductions.adminDeductions');
+})->middleware('auth')->name('admin.deductions');
+
+// Deduction Type Routes
+Route::post('/admin/deductions/types', function (\Illuminate\Http\Request $request) {
+    $data = $request->validate([
+        'code' => 'required|string|max:50|unique:deduction_types,code',
+        'name' => 'required|string|max:100',
+        'category' => 'required|in:MANDATORY,LOAN,OTHER',
+        'computation_type' => 'required|in:PERCENTAGE,FIXED,CUSTOM',
+        'rate' => 'nullable|numeric|min:0',
+        'base_salary' => 'nullable|in:BASIC,GROSS,CUSTOM',
+        'max_amount' => 'nullable|numeric|min:0',
+        'is_active' => 'required|boolean',
+        'description' => 'nullable|string',
+    ]);
+
+    \App\Models\DeductionType::create($data);
+
+    return redirect()->route('admin.deductions')->with('success', 'Deduction type added successfully.');
+})->middleware('auth')->name('admin.deductions.types.store');
+
+Route::put('/admin/deductions/types/{code}', function (\Illuminate\Http\Request $request, $code) {
+    $deductionType = \App\Models\DeductionType::where('code', $code)->firstOrFail();
+
+    $data = $request->validate([
+        'name' => 'required|string|max:100',
+        'category' => 'required|in:MANDATORY,LOAN,OTHER',
+        'computation_type' => 'required|in:PERCENTAGE,FIXED,CUSTOM',
+        'rate' => 'nullable|numeric|min:0',
+        'base_salary' => 'nullable|in:BASIC,GROSS,CUSTOM',
+        'max_amount' => 'nullable|numeric|min:0',
+        'is_active' => 'required|boolean',
+        'description' => 'nullable|string',
+    ]);
+
+    $deductionType->update($data);
+
+    return redirect()->route('admin.deductions')->with('success', 'Deduction type updated successfully.');
+})->middleware('auth')->name('admin.deductions.types.update');
+
+// Employee Deduction Routes
+Route::post('/admin/deductions/employee', function (\Illuminate\Http\Request $request) {
+    $data = $request->validate([
+        'employee_id' => 'required|exists:employees,id',
+        'deduction_type_id' => 'required|exists:deduction_types,id',
+        'amount' => 'nullable|numeric|min:0',
+        'total_amount' => 'nullable|numeric|min:0',
+        'installment_amount' => 'nullable|numeric|min:0',
+        'start_date' => 'required|date',
+        'end_date' => 'nullable|date|after_or_equal:start_date',
+        'status' => 'required|in:ACTIVE,SUSPENDED,COMPLETED',
+        'remarks' => 'nullable|string',
+    ]);
+
+    // Set remaining balance equal to total amount for loans
+    if ($data['total_amount'] ?? null) {
+        $data['remaining_balance'] = $data['total_amount'];
+    }
+
+    \App\Models\EmployeeDeduction::create($data);
+
+    return redirect()->route('admin.deductions')->with('success', 'Deduction assigned successfully.');
+})->middleware('auth')->name('admin.deductions.employee.store');
+
+Route::put('/admin/deductions/employee/{id}', function (\Illuminate\Http\Request $request, $id) {
+    $employeeDeduction = \App\Models\EmployeeDeduction::findOrFail($id);
+
+    $data = $request->validate([
+        'amount' => 'nullable|numeric|min:0',
+        'remaining_balance' => 'nullable|numeric|min:0',
+        'installment_amount' => 'nullable|numeric|min:0',
+        'start_date' => 'required|date',
+        'end_date' => 'nullable|date|after_or_equal:start_date',
+        'status' => 'required|in:ACTIVE,SUSPENDED,COMPLETED',
+        'remarks' => 'nullable|string',
+    ]);
+
+    $employeeDeduction->update($data);
+
+    return redirect()->route('admin.deductions')->with('success', 'Employee deduction updated successfully.');
+})->middleware('auth')->name('admin.deductions.employee.update');
+
+Route::get('/admin/deductions/employee/{id}', function ($id) {
+    $deduction = \App\Models\EmployeeDeduction::with(['employee', 'deductionType'])->findOrFail($id);
+    return response()->json($deduction);
+})->middleware('auth')->name('admin.deductions.employee.show');
+
 Route::get('/admin/departments', function () {
     $departments  = \App\Models\Department::orderBy('name')->get();
     $designations = \App\Models\Designation::with('department')->orderBy('title')->get();
