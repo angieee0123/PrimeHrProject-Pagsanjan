@@ -16,32 +16,41 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `documents`
+-- Table structure for table `deduction_transactions`
 --
 
-DROP TABLE IF EXISTS `documents`;
+DROP TABLE IF EXISTS `deduction_transactions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `documents` (
+CREATE TABLE `deduction_transactions` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `payroll_id` bigint unsigned DEFAULT NULL,
   `employee_id` bigint unsigned NOT NULL,
-  `document_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `uploaded_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `employee_deduction_id` bigint unsigned DEFAULT NULL,
+  `deduction_type_id` bigint unsigned NOT NULL,
+  `cutoff_period` enum('1ST','2ND') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `amount_deducted` decimal(10,2) NOT NULL,
+  `computation_details` json DEFAULT NULL,
+  `deduction_date` date NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `documents_employee_id_foreign` (`employee_id`),
-  CONSTRAINT `documents_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
+  KEY `deduction_transactions_employee_id_foreign` (`employee_id`),
+  KEY `deduction_transactions_employee_deduction_id_foreign` (`employee_deduction_id`),
+  KEY `deduction_transactions_deduction_type_id_foreign` (`deduction_type_id`),
+  CONSTRAINT `deduction_transactions_deduction_type_id_foreign` FOREIGN KEY (`deduction_type_id`) REFERENCES `deduction_types` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `deduction_transactions_employee_deduction_id_foreign` FOREIGN KEY (`employee_deduction_id`) REFERENCES `employee_deductions` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `deduction_transactions_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `documents`
+-- Dumping data for table `deduction_transactions`
 --
 
-LOCK TABLES `documents` WRITE;
-/*!40000 ALTER TABLE `documents` DISABLE KEYS */;
-/*!40000 ALTER TABLE `documents` ENABLE KEYS */;
+LOCK TABLES `deduction_transactions` WRITE;
+/*!40000 ALTER TABLE `deduction_transactions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `deduction_transactions` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -53,4 +62,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-15 10:29:20
+-- Dump completed on 2026-05-15 10:29:22

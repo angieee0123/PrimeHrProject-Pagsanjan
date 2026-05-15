@@ -26,6 +26,12 @@
             </svg>
             Export
         </button>
+        <button class="btn-secondary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px; background: #fff; border: 1.5px solid #e8e7f5; color: #0b044d;" onclick="openAddLoanTypeModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 2v20M2 12h20"/>
+            </svg>
+            Manage Loan Types
+        </button>
         <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAddLoanModal()">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="12" y1="5" x2="12" y2="19"/>
@@ -66,3 +72,4 @@
 </div>
 
 @include('admin.deductions.modals.addLoanModal')
+@include('admin.deductions.modals.addLoanTypeModal')

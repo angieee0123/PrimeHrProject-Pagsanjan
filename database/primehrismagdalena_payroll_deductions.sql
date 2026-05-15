@@ -16,32 +16,43 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `documents`
+-- Table structure for table `payroll_deductions`
 --
 
-DROP TABLE IF EXISTS `documents`;
+DROP TABLE IF EXISTS `payroll_deductions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `documents` (
+CREATE TABLE `payroll_deductions` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `employee_id` bigint unsigned NOT NULL,
-  `document_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `uploaded_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `period_start` date NOT NULL,
+  `period_end` date NOT NULL,
+  `cutoff` enum('1-15','16-31') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `basic_salary` decimal(10,2) NOT NULL,
+  `gsis_personal` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `philhealth_personal` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `pagibig_personal` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `withholding_tax` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `total_loans` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `gross_pay` decimal(10,2) NOT NULL,
+  `total_deductions` decimal(10,2) NOT NULL,
+  `net_pay` decimal(10,2) NOT NULL,
+  `net_pay_protected` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `documents_employee_id_foreign` (`employee_id`),
-  CONSTRAINT `documents_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
+  KEY `payroll_deductions_employee_id_foreign` (`employee_id`),
+  CONSTRAINT `payroll_deductions_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `documents`
+-- Dumping data for table `payroll_deductions`
 --
 
-LOCK TABLES `documents` WRITE;
-/*!40000 ALTER TABLE `documents` DISABLE KEYS */;
-/*!40000 ALTER TABLE `documents` ENABLE KEYS */;
+LOCK TABLES `payroll_deductions` WRITE;
+/*!40000 ALTER TABLE `payroll_deductions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `payroll_deductions` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -53,4 +64,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-15 10:29:20
+-- Dump completed on 2026-05-15 10:29:21
