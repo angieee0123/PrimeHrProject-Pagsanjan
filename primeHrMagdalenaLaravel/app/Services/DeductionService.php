@@ -31,7 +31,7 @@ class DeductionService
         switch ($deductionType->computation_type) {
             case 'PERCENTAGE':
                 $amount = $basicSalary * ($deductionType->percentage_rate / 100);
-                
+
                 // Apply max amount if set
                 if ($deductionType->max_amount && $amount > $deductionType->max_amount) {
                     $amount = $deductionType->max_amount;

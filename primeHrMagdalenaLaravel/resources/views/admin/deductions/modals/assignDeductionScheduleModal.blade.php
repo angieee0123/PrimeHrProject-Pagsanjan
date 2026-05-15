@@ -21,7 +21,7 @@
 
         <form id="assignDeductionScheduleForm" onsubmit="handleDeductionScheduleSubmit(event)">
             <input type="hidden" name="employee_id" id="deductionScheduleEmployeeId">
-            
+
             <div style="padding:24px; overflow-y:auto; flex:1;">
                 <div style="margin-bottom:20px;">
                     <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:8px;">
@@ -56,7 +56,7 @@
 
                 <div style="background:#f7f6ff; border:1.5px solid #e8e7f5; border-radius:10px; padding:16px; margin-bottom:20px;">
                     <p style="margin:0 0 12px; font-size:11px; font-weight:700; letter-spacing:1px; color:#9999bb;">EMPLOYEE DEDUCTIONS & LOANS</p>
-                    
+
                     <div id="deductionsList" style="display:flex; flex-direction:column; gap:10px;">
                         <!-- Deductions will be loaded here dynamically -->
                         <p style="margin:0; font-size:13px; color:#9999bb; text-align:center; padding:20px;">
@@ -232,16 +232,16 @@ function openAssignDeductionScheduleModal(employeeId, employeeName) {
     document.getElementById('deductionScheduleEmployeeName').textContent = employeeName;
     document.getElementById('assignDeductionScheduleModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
-    
+
     // Set default to current month for both start and end
     const now = new Date();
     const currentMonth = now.toISOString().slice(0, 7);
     document.getElementById('startMonth').value = currentMonth;
     document.getElementById('endMonth').value = currentMonth;
-    
+
     // Load employee deductions
     loadEmployeeDeductions(employeeId);
-    
+
     // Load existing schedules
     loadExistingSchedules(employeeId);
 }
@@ -255,7 +255,7 @@ function closeAssignDeductionScheduleModal() {
 function loadEmployeeDeductions(employeeId) {
     const deductionsList = document.getElementById('deductionsList');
     deductionsList.innerHTML = '<p style="margin:0; font-size:13px; color:#9999bb; text-align:center; padding:20px;">Loading deductions...</p>';
-    
+
     // Fetch employee deductions from API
     fetch(`/admin/deductions/employee/${employeeId}/deductions`)
         .then(response => response.json())
@@ -264,13 +264,13 @@ function loadEmployeeDeductions(employeeId) {
                 deductionsList.innerHTML = '<p style="margin:0; font-size:13px; color:#9999bb; text-align:center; padding:20px;">No active deductions found for this employee.</p>';
                 return;
             }
-            
+
             deductionsList.innerHTML = data.deductions.map(deduction => {
                 // Determine which radio should be checked based on current schedule
                 let checked1st = '';
                 let checked2nd = '';
                 let checkedBoth = '';
-                
+
                 if (deduction.current_schedule === '1ST_ONLY') {
                     checked1st = 'checked';
                 } else if (deduction.current_schedule === '2ND_ONLY') {
@@ -280,7 +280,7 @@ function loadEmployeeDeductions(employeeId) {
                 } else {
                     checked1st = 'checked'; // Default to 1st cutoff
                 }
-                
+
                 return `
                     <div class="deduction-schedule-item">
                         <div class="deduction-info">
@@ -316,23 +316,23 @@ function loadEmployeeDeductions(employeeId) {
 
 function handleDeductionScheduleSubmit(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
     const employeeId = formData.get('employee_id');
     const startMonth = formData.get('start_month');
     const endMonth = formData.get('end_month');
-    
+
     // Validate date range
     if (startMonth > endMonth) {
         alert('End month must be equal to or after start month.');
         return;
     }
-    
+
     // Collect all deduction schedules
     const schedules = [];
     const form = event.target;
     const radioGroups = form.querySelectorAll('input[type="radio"]:checked');
-    
+
     radioGroups.forEach(radio => {
         const deductionId = radio.name.match(/deduction_(\d+)_cutoff/)[1];
         schedules.push({
@@ -340,28 +340,44 @@ function handleDeductionScheduleSubmit(event) {
             cutoff: radio.value
         });
     });
+
+    // Create form data for submission
+    const submitData = new FormData();
+    submitData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+    submitData.append('employee_id', employeeId);
+    submitData.append('start_month', startMonth);
+    submitData.append('end_month', endMonth);
     
-    const data = {
-        employee_id: employeeId,
-        start_month: startMonth,
-        end_month: endMonth,
-        schedules: schedules
-    };
-    
-    // TODO: Send to backend when route is created
-    console.log('Deduction schedule data:', data);
-    
-    // Calculate number of months
-    const start = new Date(startMonth);
-    const end = new Date(endMonth);
-    const monthsDiff = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
-    
-    // For now, just show success message and close modal
-    alert(`Deduction schedule saved successfully for ${monthsDiff} month(s)! (Backend integration pending)`);
-    closeAssignDeductionScheduleModal();
-    
-    // Reload page to show changes (when backend is ready)
-    // window.location.reload();
+    schedules.forEach((schedule, index) => {
+        submitData.append(`schedules[${index}][deduction_id]`, schedule.deduction_id);
+        submitData.append(`schedules[${index}][cutoff]`, schedule.cutoff);
+    });
+
+    // Submit to backend
+    fetch('/admin/deductions/schedules/update', {
+        method: 'POST',
+        body: submitData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            return response.json();
+        }
+    })
+    .then(data => {
+        if (data && data.success) {
+            closeAssignDeductionScheduleModal();
+            window.location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error saving schedule:', error);
+        alert('Failed to save schedule. Please try again.');
+    });
 }
 
 function loadExistingSchedules(employeeId) {
@@ -372,14 +388,14 @@ function loadExistingSchedules(employeeId) {
         { period: 'Apr 2024 - Jun 2024', status: 'active', deductions: 4, created: '2024-04-01' },
         { period: 'Jul 2024 - Dec 2024', status: 'future', deductions: 5, created: '2024-06-15' },
     ];
-    
+
     if (sampleSchedules.length === 0) {
         document.getElementById('existingSchedulesSection').style.display = 'none';
         return;
     }
-    
+
     document.getElementById('existingSchedulesSection').style.display = 'block';
-    
+
     const historyList = document.getElementById('scheduleHistoryList');
     historyList.innerHTML = sampleSchedules.map(schedule => {
         const statusLabels = {
@@ -387,7 +403,7 @@ function loadExistingSchedules(employeeId) {
             'active': 'Active',
             'future': 'Scheduled'
         };
-        
+
         return `
             <div class="schedule-history-item">
                 <div class="schedule-period">
@@ -406,7 +422,7 @@ function toggleScheduleHistory() {
     const historyList = document.getElementById('scheduleHistoryList');
     const toggleText = document.getElementById('toggleScheduleText');
     const toggleIcon = document.getElementById('toggleScheduleIcon');
-    
+
     if (historyList.style.display === 'none') {
         historyList.style.display = 'block';
         toggleText.textContent = 'Hide History';

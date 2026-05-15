@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PayrollDeduction extends Model
 {
-    protected $table = 'deduction_transactions';
+    protected $table = 'payroll_deductions';
 
     protected $fillable = [
         'payroll_id',

@@ -33,21 +33,56 @@
                         <label class="form-label">Loan Type <span style="color: #8e1e18;">*</span></label>
                         <select name="deduction_type_id" id="loanProvider" class="form-input" required onchange="handleLoanTypeChange()">
                             <option value="">Select Loan Type</option>
-                            <optgroup label="GSIS Loans">
-                                @foreach(\App\Models\DeductionType::where('category', 'LOAN')->where('is_active', true)->where('code', 'LIKE', 'LOAN_GSIS%')->orderBy('name')->get() as $type)
-                                    <option value="{{ $type->id }}" data-provider="GSIS">{{ str_replace('GSIS ', '', $type->name) }}</option>
-                                @endforeach
-                            </optgroup>
-                            <optgroup label="Pag-IBIG Loans">
-                                @foreach(\App\Models\DeductionType::where('category', 'LOAN')->where('is_active', true)->where('code', 'LIKE', 'LOAN_PAGIBIG%')->orderBy('name')->get() as $type)
-                                    <option value="{{ $type->id }}" data-provider="PAG-IBIG">{{ str_replace('Pag-IBIG ', '', $type->name) }}</option>
-                                @endforeach
-                            </optgroup>
-                            <optgroup label="Other Loans">
-                                @foreach(\App\Models\DeductionType::where('category', 'LOAN')->where('is_active', true)->where('code', 'NOT LIKE', 'LOAN_GSIS%')->where('code', 'NOT LIKE', 'LOAN_PAGIBIG%')->orderBy('name')->get() as $type)
-                                    <option value="{{ $type->id }}" data-provider="OTHER">{{ $type->name }}</option>
-                                @endforeach
-                            </optgroup>
+                            @php
+                                $loanTypes = \App\Models\LoanType::with('deductionType')
+                                    ->where('is_active', true)
+                                    ->orderBy('name')
+                                    ->get()
+                                    ->groupBy(function($loan) {
+                                        if (str_contains($loan->code, 'GSIS')) return 'GSIS';
+                                        if (str_contains($loan->code, 'PAGIBIG')) return 'PAG-IBIG';
+                                        return 'Other';
+                                    });
+                            @endphp
+                            @if($loanTypes->has('GSIS'))
+                                <optgroup label="GSIS Loans">
+                                    @foreach($loanTypes['GSIS'] as $loan)
+                                        <option value="{{ $loan->deduction_type_id }}" 
+                                                data-provider="GSIS" 
+                                                data-max-amount="{{ $loan->max_loanable_amount }}" 
+                                                data-interest-rate="{{ $loan->interest_rate }}" 
+                                                data-max-terms="{{ $loan->max_terms_months }}">
+                                            {{ $loan->name }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                            @if($loanTypes->has('PAG-IBIG'))
+                                <optgroup label="Pag-IBIG Loans">
+                                    @foreach($loanTypes['PAG-IBIG'] as $loan)
+                                        <option value="{{ $loan->deduction_type_id }}" 
+                                                data-provider="PAG-IBIG" 
+                                                data-max-amount="{{ $loan->max_loanable_amount }}" 
+                                                data-interest-rate="{{ $loan->interest_rate }}" 
+                                                data-max-terms="{{ $loan->max_terms_months }}">
+                                            {{ $loan->name }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                            @if($loanTypes->has('Other'))
+                                <optgroup label="Other Loans">
+                                    @foreach($loanTypes['Other'] as $loan)
+                                        <option value="{{ $loan->deduction_type_id }}" 
+                                                data-provider="OTHER" 
+                                                data-max-amount="{{ $loan->max_loanable_amount }}" 
+                                                data-interest-rate="{{ $loan->interest_rate }}" 
+                                                data-max-terms="{{ $loan->max_terms_months }}">
+                                            {{ $loan->name }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
                             <option value="OTHER" data-provider="CUSTOM">Other (External Provider)</option>
                         </select>
                     </div>
@@ -72,6 +107,7 @@
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Total Loan Amount <span style="color: #8e1e18;">*</span></label>
                         <input type="number" name="total_amount" id="loanTotalAmount" class="form-input" placeholder="e.g., 50000.00" step="0.01" min="0" required onchange="calculateLoanInstallment()">
+                        <p id="maxAmountHint" style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0; display: none;"></p>
                     </div>
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Monthly Installment <span style="color: #8e1e18;">*</span></label>
@@ -327,11 +363,15 @@ function handleLoanTypeChange() {
     const otherProviderFields = document.getElementById('otherProviderFields');
     const otherProviderName = document.getElementById('otherProviderName');
     const otherLoanType = document.getElementById('otherLoanType');
+    const maxAmountHint = document.getElementById('maxAmountHint');
+    const totalAmountInput = document.getElementById('loanTotalAmount');
     
     // Reset other provider fields
     otherProviderFields.style.display = 'none';
     otherProviderName.removeAttribute('required');
     otherLoanType.removeAttribute('required');
+    maxAmountHint.style.display = 'none';
+    totalAmountInput.removeAttribute('max');
     
     if (!providerId) {
         providerNameInput.value = '';
@@ -350,6 +390,25 @@ function handleLoanTypeChange() {
     // Set provider name based on data attribute
     if (providerType) {
         providerNameInput.value = providerType;
+    }
+    
+    // Show loan constraints
+    const maxAmount = selectedOption.getAttribute('data-max-amount');
+    const interestRate = selectedOption.getAttribute('data-interest-rate');
+    const maxTerms = selectedOption.getAttribute('data-max-terms');
+    
+    if (maxAmount && parseFloat(maxAmount) > 0) {
+        maxAmountHint.textContent = `Max loanable: ₱${parseFloat(maxAmount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        maxAmountHint.style.display = 'block';
+        totalAmountInput.setAttribute('max', maxAmount);
+    }
+    
+    if (interestRate && parseFloat(interestRate) > 0) {
+        maxAmountHint.textContent += ` | Interest: ${interestRate}%`;
+    }
+    
+    if (maxTerms && parseInt(maxTerms) > 0) {
+        maxAmountHint.textContent += ` | Max terms: ${maxTerms} months`;
     }
 }
 

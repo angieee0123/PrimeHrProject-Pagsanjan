@@ -11,7 +11,8 @@
         </div>
 
         <div class="modal-body">
-            <form id="addLoanTypeForm" onsubmit="handleLoanTypeSubmit(event)">
+            <form id="addLoanTypeForm" action="{{ route('admin.deductions.loan-types.store') }}" method="POST">
+                @csrf
                 <div class="form-row">
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Loan Provider <span style="color: #8e1e18;">*</span></label>
@@ -76,13 +77,13 @@
                         <line x1="12" y1="8" x2="12.01" y2="8"/>
                     </svg>
                     <p style="margin: 0; font-size: 12px; color: #0d47a1; line-height: 1.5;">
-                        This loan type will automatically appear in the "Add Loan" modal and can be assigned to employees. It will also be listed in the Deduction Types tab.
+                        This loan type will be stored in the <strong>loan_types</strong> table and linked to <strong>deduction_types</strong> via foreign key. It will automatically appear in the "Add Employee Loan" dropdown and can be assigned to multiple employees.
                     </p>
                 </div>
 
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="closeAddLoanTypeModal()">Cancel</button>
-                    <button type="submit" class="btn-submit">Add Loan Type</button>
+                    <button type="submit" class="btn-submit">Register Loan Type</button>
                 </div>
             </form>
         </div>
@@ -278,60 +279,3 @@ textarea.form-input {
     }
 }
 </style>
-
-<script>
-function openAddLoanTypeModal() {
-    document.getElementById('addLoanTypeModal').classList.add('active');
-}
-
-function closeAddLoanTypeModal(event) {
-    if (event && event.target !== event.currentTarget) return;
-    document.getElementById('addLoanTypeModal').classList.remove('active');
-    document.getElementById('addLoanTypeForm').reset();
-}
-
-function updateLoanCode() {
-    const provider = document.getElementById('loanProvider').value;
-    const name = document.getElementById('loanTypeName').value;
-    const codeInput = document.getElementById('loanTypeCode');
-    
-    if (provider && name) {
-        // Generate code from provider and name
-        const namePart = name.toUpperCase()
-            .replace(/[^A-Z0-9\s]/g, '') // Remove special characters
-            .split(' ')
-            .map(word => word.substring(0, 4)) // Take first 4 letters of each word
-            .join('_')
-            .substring(0, 20); // Limit length
-        
-        const code = `${provider}_${namePart}`;
-        codeInput.value = code;
-    }
-}
-
-function handleLoanTypeSubmit(event) {
-    event.preventDefault();
-    
-    const formData = new FormData(event.target);
-    const data = {
-        provider: formData.get('provider'),
-        code: formData.get('code'),
-        name: formData.get('name'),
-        max_loanable_amount: formData.get('max_loanable_amount'),
-        interest_rate: formData.get('interest_rate'),
-        max_terms_months: formData.get('max_terms_months'),
-        is_active: formData.get('is_active'),
-        description: formData.get('description')
-    };
-    
-    // TODO: Send to backend when route is created
-    console.log('Loan type data:', data);
-    
-    // For now, just show success message and close modal
-    alert(`Loan type "${data.name}" created successfully! (Backend integration pending)\n\nThis loan type will appear in:\n- Deduction Types tab\n- Add Loan modal\n- Loan filters`);
-    closeAddLoanTypeModal();
-    
-    // Reload page to show changes (when backend is ready)
-    // window.location.reload();
-}
-</script>

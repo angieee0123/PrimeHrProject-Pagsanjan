@@ -237,17 +237,22 @@
                         <tr>
                             <th>Date</th>
                             <th>Day</th>
-                            <th>Time In</th>
-                            <th>Time Out</th>
+                            <th>AM In</th>
+                            <th>AM Out</th>
+                            <th>PM In</th>
+                            <th>PM Out</th>
+                            <th>OT In</th>
+                            <th>OT Out</th>
                             <th>Late</th>
                             <th>Undertime</th>
-                            <th>Hours Worked</th>
+                            <th>Total Hours</th>
+                            <th>Accredited Hours</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id="detailedTableBody">
                         <tr>
-                            <td colspan="8" style="text-align: center; padding: 40px; color: #9999bb;">
+                            <td colspan="13" style="text-align: center; padding: 40px; color: #9999bb;">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite; margin: 0 auto;">
                                     <circle cx="12" cy="12" r="10" opacity="0.25"/>
                                     <path d="M12 2a10 10 0 0 1 10 10" opacity="0.75"/>
@@ -641,7 +646,7 @@
         if (allDetailedRecords.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="8" style="text-align: center; padding: 40px; color: #9999bb;">
+                    <td colspan="13" style="text-align: center; padding: 40px; color: #9999bb;">
                         No detailed records found for this period.
                     </td>
                 </tr>
@@ -661,82 +666,57 @@
         currentRecords.forEach(record => {
             const row = document.createElement('tr');
             const isOnLeave = record.is_on_leave;
-            const isAbsent = !record.am_in && !record.pm_in && !isOnLeave;
+            const hasAmIn = record.am_in && record.am_in !== '-';
+            const hasAmOut = record.am_out && record.am_out !== '-';
+            const hasPmIn = record.pm_in && record.pm_in !== '-';
+            const hasPmOut = record.pm_out && record.pm_out !== '-';
+            const isAbsent = !hasAmIn && !hasPmIn && !isOnLeave;
             const isWeekend = record.day === 'Saturday' || record.day === 'Sunday';
-            const isIncomplete = (record.am_in && !record.am_out) || (record.pm_in && !record.pm_out) || (!record.am_in && record.am_out) || (!record.pm_in && record.pm_out);
+            
+            // Determine attendance status
+            let status = '';
+            let statusColor = '';
+            let statusBg = '';
+            
+            if (isOnLeave) {
+                status = 'On Leave';
+                statusColor = '#6b6a8a';
+                statusBg = '#6b6a8a18';
+            } else if (!hasAmIn && !hasPmIn) {
+                // No clock in at all = Absent
+                status = 'Absent';
+                statusColor = '#8e1e18';
+                statusBg = '#8e1e1818';
+            } else if ((hasAmIn && !hasAmOut && !hasPmIn) || (hasPmIn && !hasPmOut && !hasAmIn)) {
+                // Clocked in but never clocked out (single period only) = Abandoned
+                status = 'Abandoned';
+                statusColor = '#d97706';
+                statusBg = '#d9770618';
+            } else if (hasAmIn && hasAmOut && hasPmIn && hasPmOut) {
+                // All 4 logs complete = Present
+                status = 'Present';
+                statusColor = '#15803d';
+                statusBg = '#15803d18';
+            } else {
+                // Has some attendance but not complete = Incomplete
+                status = 'Incomplete';
+                statusColor = '#d9bb00';
+                statusBg = '#d9bb0018';
+            }
             
             // Apply row classes
             if (isWeekend) {
                 row.classList.add('day-weekend');
             } else if (isAbsent && !isOnLeave) {
                 row.classList.add('day-absent');
-            } else if (isIncomplete) {
-                row.classList.add('day-needs-review');
             }
-            
-            // Date badge
-            let dateBadge = '';
-            if (isAbsent && !isOnLeave && !isWeekend) {
-                dateBadge = '<span class="badge-absent" style="display: inline-block; margin-left: 6px; padding: 2px 6px; background: #fee; color: #8e1e18; font-size: 10px; font-weight: 600; border-radius: 3px;">ABSENT</span>';
-            } else if (isIncomplete) {
-                dateBadge = '<span class="badge-incomplete" style="display: inline-block; margin-left: 6px; padding: 2px 6px; background: #ffe8e8; color: #8e1e18; font-size: 10px; font-weight: 600; border-radius: 3px;">Incomplete</span>';
-            }
-            
-            // Status badge
-            let statusBadge = '';
-            if (isOnLeave) {
-                statusBadge = '<span class="badge-status processed">On Leave</span>';
-            } else if (isAbsent) {
-                statusBadge = '<span class="badge-status on-hold">Absent</span>';
-            } else if (record.late_minutes > 0) {
-                statusBadge = '<span class="badge-status pending">Late</span>';
-            } else if (record.accredited_minutes > 0) {
-                statusBadge = '<span class="badge-status processed">Present</span>';
-            } else {
-                statusBadge = '<span class="badge-status on-hold">Incomplete</span>';
-            }
-            
-            // Time display helper - combine AM/PM times
-            const getTimeInDisplay = () => {
-                if (isOnLeave) {
-                    return '<span style="color: #0369a1; font-weight: 600; font-size: 12px;">ON LEAVE</span>';
-                } else if (isAbsent) {
-                    return '<span class="log-missing" style="color: #9999bb; font-size: 12px;">No Record</span>';
-                } else if (record.am_in) {
-                    return `<div style="line-height: 1.6;">
-                        <div style="font-weight: 600; color: #0b044d;">${record.am_in}</div>
-                        ${record.pm_in ? '<div style="font-size: 11px; color: #6b6a8a;">' + record.pm_in + '</div>' : ''}
-                    </div>`;
-                } else if (record.pm_in) {
-                    return `<div style="font-weight: 600; color: #0b044d;">${record.pm_in}</div>`;
-                } else {
-                    return '<span class="log-missing" style="color: #9999bb; font-size: 12px;">No Record</span>';
-                }
-            };
-            
-            const getTimeOutDisplay = () => {
-                if (isOnLeave) {
-                    return '<span style="color: #0369a1; font-weight: 600; font-size: 12px;">ON LEAVE</span>';
-                } else if (isAbsent) {
-                    return '<span class="log-missing" style="color: #9999bb; font-size: 12px;">No Record</span>';
-                } else if (record.pm_out) {
-                    return `<div style="line-height: 1.6;">
-                        ${record.am_out ? '<div style="font-size: 11px; color: #6b6a8a;">' + record.am_out + '</div>' : ''}
-                        <div style="font-weight: 600; color: #0b044d;">${record.pm_out}</div>
-                    </div>`;
-                } else if (record.am_out) {
-                    return `<div style="font-weight: 600; color: #0b044d;">${record.am_out}</div>`;
-                } else {
-                    return '<span class="log-missing" style="color: #9999bb; font-size: 12px;">No Record</span>';
-                }
-            };
             
             // Late display
             let lateDisplay = '<span style="color: #9999bb;">—</span>';
             if (record.late_minutes > 0) {
                 const lateHrs = Math.floor(record.late_minutes / 60);
                 const lateMins = record.late_minutes % 60;
-                lateDisplay = `<span class="log-late" style="color: #a16207; font-weight: 600;">${lateHrs > 0 ? lateHrs + 'h ' + lateMins + 'm' : lateMins + ' min'}</span>`;
+                lateDisplay = `<span style="color: #a16207; font-weight: 600;">${lateHrs > 0 ? lateHrs + 'h ' + lateMins + 'm' : lateMins + ' min'}</span>`;
             }
             
             // Undertime display
@@ -744,49 +724,33 @@
             if (record.undertime > 0) {
                 const utHrs = Math.floor(record.undertime / 60);
                 const utMins = record.undertime % 60;
-                undertimeDisplay = `<span class="log-late" style="color: #8e1e18; font-weight: 600;">${utHrs > 0 ? utHrs + 'h ' + utMins + 'm' : utMins + ' min'}</span>`;
+                undertimeDisplay = `<span style="color: #8e1e18; font-weight: 600;">${utHrs > 0 ? utHrs + 'h ' + utMins + 'm' : utMins + ' min'}</span>`;
             }
             
-            // Accredited hours display (simplified)
-            let hoursWorkedDisplay = '';
-            if (isAbsent && !isOnLeave) {
-                hoursWorkedDisplay = '<strong style="color: #8e1e18;">0 hrs</strong>';
-            } else {
-                const accredited = record.accredited_minutes || 0;
-                const hrs = Math.floor(accredited / 60);
-                const mins = accredited % 60;
-                const color = accredited >= 480 ? '#15803d' : (accredited >= 240 ? '#a16207' : '#8e1e18');
-                if (hrs > 0 && mins > 0) {
-                    hoursWorkedDisplay = `<strong style="color: ${color};">${hrs}h ${mins}m</strong>`;
-                } else if (hrs > 0) {
-                    hoursWorkedDisplay = `<strong style="color: ${color};">${hrs} hrs</strong>`;
-                } else if (mins > 0) {
-                    hoursWorkedDisplay = `<strong style="color: ${color};">${mins} min</strong>`;
-                } else {
-                    hoursWorkedDisplay = '<strong style="color: #9999bb;">0 hrs</strong>';
-                }
-            }
+            // Total hours display
+            let totalHoursDisplay = record.total_hours || '0h 0m';
             
-            // Leave info display
-            let leaveDisplay = '<span style="color: #9999bb;">—</span>';
-            if (isOnLeave && record.leave_type) {
-                leaveDisplay = `<span style="color: #0b044d; font-weight: 600;">${record.leave_type}</span>`;
-            }
-            
-            // Enhanced status badge with leave info
-            if (isOnLeave) {
-                statusBadge = `<span class="badge-status processed">On Leave</span>${record.leave_type ? '<br><small style="color: #6b6a8a; font-size: 10px;">' + record.leave_type + '</small>' : ''}`;
-            }
+            // Accredited hours display
+            const accredited = record.accredited_minutes || 0;
+            const accHrs = Math.floor(accredited / 60);
+            const accMins = accredited % 60;
+            const accColor = accredited >= 480 ? '#15803d' : (accredited >= 240 ? '#a16207' : '#8e1e18');
+            let accreditedDisplay = `<strong style="color: ${accColor};">${accHrs}h ${accMins}m</strong>`;
             
             row.innerHTML = `
-                <td><strong>${record.date}</strong>${dateBadge}</td>
-                <td class="attendance-cell-day">${record.day}</td>
-                <td>${getTimeInDisplay()}</td>
-                <td>${getTimeOutDisplay()}</td>
+                <td><strong>${record.date}</strong></td>
+                <td style="color: #6b6a8a;">${record.day}</td>
+                <td><span style="font-family: 'Courier New', monospace; color: ${hasAmIn ? '#0b044d' : '#9999bb'};">${record.am_in || '--:--'}</span></td>
+                <td><span style="font-family: 'Courier New', monospace; color: ${hasAmOut ? '#0b044d' : '#9999bb'};">${record.am_out || '--:--'}</span></td>
+                <td><span style="font-family: 'Courier New', monospace; color: ${hasPmIn ? '#0b044d' : '#9999bb'};">${record.pm_in || '--:--'}</span></td>
+                <td><span style="font-family: 'Courier New', monospace; color: ${hasPmOut ? '#0b044d' : '#9999bb'};">${record.pm_out || '--:--'}</span></td>
+                <td><span style="font-family: 'Courier New', monospace; color: ${record.ot_in ? '#0b044d' : '#9999bb'};">${record.ot_in || '--:--'}</span></td>
+                <td><span style="font-family: 'Courier New', monospace; color: ${record.ot_out ? '#0b044d' : '#9999bb'};">${record.ot_out || '--:--'}</span></td>
                 <td>${lateDisplay}</td>
                 <td>${undertimeDisplay}</td>
-                <td>${hoursWorkedDisplay}</td>
-                <td>${statusBadge}</td>
+                <td><strong>${totalHoursDisplay}</strong></td>
+                <td>${accreditedDisplay}</td>
+                <td><span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: ${statusBg}; color: ${statusColor};">${status}</span></td>
             `;
             tbody.appendChild(row);
         });

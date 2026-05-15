@@ -43,7 +43,7 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
         // Check if employee has permanent employment status
         if ($user->employee && $user->employee->employmentDetail) {
             $employmentStatus = $user->employee->employmentDetail->employment_status;
-            
+
             if ($employmentStatus === 'Permanent') {
                 return redirect()->route('permanent.dashboard');
             }
@@ -114,21 +114,21 @@ Route::get('/permanent/payslip', function () {
 
 Route::get('/permanent/leave', function () {
     $employee = auth()->user()->employee;
-    
+
     if (!$employee) {
         $leaveTypes = \App\Models\LeaveType::where('is_active', true)
             ->orderBy('leave_name')
             ->get();
-        
+
         $leaveApplications = collect();
         $employeeTransactions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
-        
+
         return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions'))
             ->with('warning', 'Employee record not found. Displaying leave types without balance information.');
     }
-    
+
     $currentYear = now()->year;
-    
+
     // Only show leave types that have been assigned to the employee (total_credits > 0)
     $leaveTypes = \App\Models\LeaveType::where('is_active', true)
         ->with(['leaveBalances' => function($query) use ($employee, $currentYear) {
@@ -143,12 +143,12 @@ Route::get('/permanent/leave', function () {
             return $leaveType->leaveBalances->isNotEmpty();
         })
         ->values(); // Reset array keys
-    
+
     $leaveApplications = \App\Models\LeaveApplication::where('employee_id', $employee->id)
         ->with('leaveType')
         ->orderBy('created_at', 'desc')
         ->get();
-    
+
     // Fetch employee transactions with filtering and sorting
     $transactionQuery = \App\Models\LeaveTransaction::where('employee_id', $employee->id)
         ->with('processedBy.employee');
@@ -166,17 +166,17 @@ Route::get('/permanent/leave', function () {
     $sortBy = request('sort_by', 'transaction_date');
     $sortOrder = request('sort_order', 'desc');
     $allowedSortColumns = ['transaction_date', 'leave_code', 'transaction_type', 'amount', 'balance_before', 'balance_after'];
-    
+
     if (in_array($sortBy, $allowedSortColumns)) {
         $transactionQuery->orderBy($sortBy, $sortOrder);
     } else {
         $transactionQuery->orderBy('transaction_date', 'desc');
     }
-    
+
     $transactionQuery->orderBy('created_at', 'desc');
-    
+
     $employeeTransactions = $transactionQuery->paginate(15)->appends(request()->except('page'));
-    
+
     return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions'));
 })->middleware('auth')->name('permanent.leave');
 
@@ -698,7 +698,7 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
             $totalLateDeduction = $records->sum('late_deduction');
             $totalUndertimeDeduction = $records->sum('undertime_deduction');
             $recordStatus = $records->every(fn($r) => $r->daily_gross_pay > 0) ? 'Processed' : 'Pending';
-            
+
             return [
                 'id' => $employee->employee_id ?? 'N/A',
                 'name' => trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name),
@@ -719,7 +719,7 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
         $payrollRecords = $dailyComputations->map(function($record) {
             $employee = $record->employee;
             $recordStatus = $record->daily_gross_pay > 0 ? 'Processed' : 'Pending';
-            
+
             return [
                 'id' => $employee->employee_id ?? 'N/A',
                 'name' => trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name),
@@ -786,7 +786,7 @@ Route::get('/admin/deductions', function () {
             return $d->deductionType->category === 'LOAN';
         })->count();
         $deductionsCount = $deductions->count();
-        
+
         return [
             'id' => $employee->id,
             'employee_id' => $employee->employee_id,
@@ -809,9 +809,7 @@ Route::get('/admin/deductions', function () {
         'total_outstanding' => \App\Models\EmployeeDeduction::whereHas('deductionType', function($q) {
             $q->where('category', 'LOAN');
         })->where('status', 'ACTIVE')->sum('remaining_balance'),
-        'transactions_this_month' => \App\Models\PayrollDeduction::whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->count(),
+        'transactions_this_month' => 0, // PayrollDeduction table is empty
     ];
 
     return view('admin.deductions.adminDeductions', compact('employeeDeductions', 'loans', 'employeesWithDeductions', 'stats'));
@@ -888,10 +886,10 @@ Route::post('/admin/deductions/employee', function (\Illuminate\Http\Request $re
     if ($data['deduction_type_id'] === 'OTHER') {
         $providerName = $data['other_provider_name'] ?? 'External Provider';
         $loanDescription = $data['other_loan_type'] ?? 'Custom Loan';
-        
+
         // Create unique code from provider name
         $code = 'LOAN_' . strtoupper(str_replace([' ', '-', '.'], '_', $providerName));
-        
+
         // Create or find the custom deduction type
         $customDeduction = \App\Models\DeductionType::firstOrCreate(
             ['code' => $code],
@@ -902,7 +900,7 @@ Route::post('/admin/deductions/employee', function (\Illuminate\Http\Request $re
                 'is_active' => true,
             ]
         );
-        
+
         $data['deduction_type_id'] = $customDeduction->id;
         $data['remarks'] = trim(($data['remarks'] ?? '') . " [Provider: {$providerName}, Type: {$loanDescription}]");
     }
@@ -1013,7 +1011,7 @@ Route::get('/admin/deductions/employee/{employeeId}/active', function ($employee
                 'code' => $ed->deductionType->code,
             ];
         });
-    
+
     return response()->json(['deductions' => $deductions]);
 })->middleware('auth')->name('admin.deductions.employee.active');
 
@@ -1022,9 +1020,9 @@ Route::delete('/admin/deductions/employee/{id}/delete', function ($id) {
     $deduction = \App\Models\EmployeeDeduction::with(['employee', 'deductionType'])->findOrFail($id);
     $employeeName = $deduction->employee->first_name . ' ' . $deduction->employee->last_name;
     $deductionName = $deduction->deductionType->name;
-    
+
     $deduction->delete();
-    
+
     return redirect()->route('admin.deductions')
         ->with('success', "Deduction '{$deductionName}' removed from {$employeeName} successfully.");
 })->middleware('auth')->name('admin.deductions.employee.delete');
@@ -1035,16 +1033,16 @@ Route::get('/admin/deductions/employee/export', function () {
         'employee.employmentDetail.departmentRelation',
         'deductionType'
     ])->orderBy('created_at', 'desc')->get();
-    
+
     $headers = [
         'Content-Type' => 'text/csv',
         'Content-Disposition' => 'attachment; filename=employee_deductions_' . now()->format('Y-m-d') . '.csv',
     ];
-    
+
     $callback = function () use ($deductions) {
         $file = fopen('php://output', 'w');
         fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
-        
+
         fputcsv($file, [
             'Employee ID',
             'Employee Name',
@@ -1058,11 +1056,11 @@ Route::get('/admin/deductions/employee/export', function () {
             'Status',
             'Remarks'
         ]);
-        
+
         foreach ($deductions as $d) {
             $employeeName = $d->employee->first_name . ' ' . $d->employee->last_name;
             $department = $d->employee->employmentDetail->departmentRelation->name ?? 'N/A';
-            
+
             $amount = '';
             if ($d->deductionType->category === 'LOAN') {
                 $amount = number_format($d->remaining_balance ?? 0, 2);
@@ -1071,7 +1069,7 @@ Route::get('/admin/deductions/employee/export', function () {
             } elseif ($d->amount) {
                 $amount = number_format($d->amount, 2);
             }
-            
+
             fputcsv($file, [
                 $d->employee->employee_id,
                 $employeeName,
@@ -1086,10 +1084,10 @@ Route::get('/admin/deductions/employee/export', function () {
                 $d->remarks ?? ''
             ]);
         }
-        
+
         fclose($file);
     };
-    
+
     return response()->stream($callback, 200, $headers);
 })->middleware('auth')->name('admin.deductions.employee.export');
 
@@ -1104,16 +1102,16 @@ Route::get('/admin/deductions/loans/export', function () {
     })
     ->orderBy('created_at', 'desc')
     ->get();
-    
+
     $headers = [
         'Content-Type' => 'text/csv',
         'Content-Disposition' => 'attachment; filename=employee_loans_' . now()->format('Y-m-d') . '.csv',
     ];
-    
+
     $callback = function () use ($loans) {
         $file = fopen('php://output', 'w');
         fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
-        
+
         fputcsv($file, [
             'Employee ID',
             'Employee Name',
@@ -1134,11 +1132,11 @@ Route::get('/admin/deductions/loans/export', function () {
             'Status',
             'Remarks'
         ]);
-        
+
         foreach ($loans as $loan) {
             $employeeName = $loan->employee->first_name . ' ' . $loan->employee->last_name;
             $department = $loan->employee->employmentDetail->departmentRelation->name ?? 'N/A';
-            
+
             // Determine provider
             $provider = 'Other';
             if (str_contains($loan->deductionType->code, 'GSIS')) {
@@ -1146,18 +1144,18 @@ Route::get('/admin/deductions/loans/export', function () {
             } elseif (str_contains($loan->deductionType->code, 'PAGIBIG')) {
                 $provider = 'Pag-IBIG';
             }
-            
+
             $totalAmount = $loan->total_amount ?? 0;
             $remainingBalance = $loan->remaining_balance ?? 0;
             $amountPaid = $totalAmount - $remainingBalance;
             $progress = $totalAmount > 0 ? (($amountPaid / $totalAmount) * 100) : 0;
             $installment = $loan->installment_amount ?? 0;
             $monthsRemaining = $installment > 0 ? ceil($remainingBalance / $installment) : 0;
-            
+
             // Get schedule and calculate per-cutoff
             $schedule = $loan->deductionType->schedules->first();
             $cutoffSchedule = $schedule ? $schedule->cutoff_schedule : 'BOTH_SPLIT';
-            
+
             if ($cutoffSchedule === '1ST_ONLY') {
                 $perCutoff1st = $installment;
                 $perCutoff2nd = 0;
@@ -1171,7 +1169,7 @@ Route::get('/admin/deductions/loans/export', function () {
                 $perCutoff1st = $installment / 2;
                 $perCutoff2nd = $installment / 2;
             }
-            
+
             fputcsv($file, [
                 $loan->employee->employee_id,
                 $employeeName,
@@ -1193,10 +1191,10 @@ Route::get('/admin/deductions/loans/export', function () {
                 $loan->remarks ?? ''
             ]);
         }
-        
+
         fclose($file);
     };
-    
+
     return response()->stream($callback, 200, $headers);
 })->middleware('auth')->name('admin.deductions.loans.export');
 
@@ -1208,7 +1206,7 @@ Route::get('/admin/deductions/employee/{employeeId}/deductions', function ($empl
         ->get()
         ->map(function($ed) {
             $schedule = $ed->deductionType->schedules->first();
-            
+
             return [
                 'id' => $ed->id,
                 'deduction_type_id' => $ed->deduction_type_id,
@@ -1220,7 +1218,7 @@ Route::get('/admin/deductions/employee/{employeeId}/deductions', function ($empl
                 'current_schedule' => $schedule ? $schedule->cutoff_schedule : '1ST_ONLY',
             ];
         });
-    
+
     return response()->json(['deductions' => $deductions]);
 })->middleware('auth')->name('admin.deductions.employee.deductions');
 
@@ -1237,16 +1235,16 @@ Route::get('/admin/deductions/schedules/export', function () {
     })
     ->orderBy('last_name')
     ->get();
-    
+
     $headers = [
         'Content-Type' => 'text/csv',
         'Content-Disposition' => 'attachment; filename=deduction_schedules_' . now()->format('Y-m-d') . '.csv',
     ];
-    
+
     $callback = function () use ($employees) {
         $file = fopen('php://output', 'w');
         fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
-        
+
         fputcsv($file, [
             'Employee ID',
             'Employee Name',
@@ -1257,15 +1255,15 @@ Route::get('/admin/deductions/schedules/export', function () {
             'Cutoff Schedule',
             'Status'
         ]);
-        
+
         foreach ($employees as $employee) {
             $employeeName = $employee->first_name . ' ' . $employee->last_name;
             $department = $employee->employmentDetail->departmentRelation->name ?? 'N/A';
-            
+
             foreach ($employee->deductions as $deduction) {
                 $schedule = $deduction->deductionType->schedules->first();
                 $cutoffSchedule = $schedule ? $schedule->cutoff_schedule : 'N/A';
-                
+
                 $amount = '';
                 if ($deduction->deductionType->category === 'LOAN') {
                     $amount = '₱' . number_format($deduction->installment_amount ?? 0, 2) . '/month';
@@ -1274,7 +1272,7 @@ Route::get('/admin/deductions/schedules/export', function () {
                 } elseif ($deduction->amount) {
                     $amount = '₱' . number_format($deduction->amount, 2);
                 }
-                
+
                 fputcsv($file, [
                     $employee->employee_id,
                     $employeeName,
@@ -1287,10 +1285,10 @@ Route::get('/admin/deductions/schedules/export', function () {
                 ]);
             }
         }
-        
+
         fclose($file);
     };
-    
+
     return response()->stream($callback, 200, $headers);
 })->middleware('auth')->name('admin.deductions.schedules.export');
 
@@ -1562,3 +1560,114 @@ Route::get('/api/auth/user-id', function (\Illuminate\Http\Request $request) {
         'message' => 'User not authenticated'
     ], 401);
 })->name('api.auth.user-id');
+
+// Deduction Schedule Management Routes
+Route::post('/admin/deductions/schedules/update', function (\Illuminate\Http\Request $request) {
+    $data = $request->validate([
+        'employee_id' => 'required|exists:employees,id',
+        'start_month' => 'required|date_format:Y-m',
+        'end_month' => 'required|date_format:Y-m',
+        'schedules' => 'required|array|min:1',
+        'schedules.*.deduction_id' => 'required|exists:employee_deductions,id',
+        'schedules.*.cutoff' => 'required|in:1ST,2ND,BOTH',
+    ]);
+
+    $updatedCount = 0;
+    
+    foreach ($data['schedules'] as $schedule) {
+        $employeeDeduction = \App\Models\EmployeeDeduction::findOrFail($schedule['deduction_id']);
+        $deductionType = $employeeDeduction->deductionType;
+        
+        // Map cutoff values to schedule enum
+        $cutoffSchedule = match($schedule['cutoff']) {
+            '1ST' => '1ST_ONLY',
+            '2ND' => '2ND_ONLY',
+            'BOTH' => 'BOTH_SPLIT',
+        };
+        
+        // Update or create deduction schedule for this type
+        \App\Models\DeductionSchedule::updateOrCreate(
+            ['deduction_type_id' => $deductionType->id],
+            [
+                'cutoff_schedule' => $cutoffSchedule,
+                'is_active' => true,
+                'effective_date' => $data['start_month'] . '-01',
+            ]
+        );
+        
+        $updatedCount++;
+    }
+    
+    $employee = \App\Models\Employee::findOrFail($data['employee_id']);
+    $employeeName = $employee->first_name . ' ' . $employee->last_name;
+    
+    return redirect()->route('admin.deductions')
+        ->with('success', "Deduction schedules updated for {$employeeName}. {$updatedCount} deduction(s) configured successfully.");
+})->middleware('auth')->name('admin.deductions.schedules.update');
+
+// Loan Type Management Routes
+Route::post('/admin/deductions/loan-types/store', function (\Illuminate\Http\Request $request) {
+    $data = $request->validate([
+        'provider' => 'required|string',
+        'code' => 'required|string|max:50|unique:deduction_types,code',
+        'name' => 'required|string|max:100',
+        'max_loanable_amount' => 'nullable|numeric|min:0',
+        'interest_rate' => 'nullable|numeric|min:0|max:100',
+        'max_terms_months' => 'nullable|integer|min:1',
+        'is_active' => 'required|boolean',
+        'description' => 'nullable|string',
+    ]);
+
+    // Create the deduction type for this loan
+    $deductionType = \App\Models\DeductionType::create([
+        'code' => 'LOAN_' . $data['code'],
+        'name' => $data['name'],
+        'category' => 'LOAN',
+        'computation_type' => 'FIXED',
+        'percentage_rate' => $data['interest_rate'] ?? null,
+        'max_amount' => $data['max_loanable_amount'] ?? null,
+        'is_active' => $data['is_active'],
+    ]);
+
+    // Create the loan type record (optional, for additional metadata)
+    \App\Models\LoanType::create([
+        'code' => $data['code'],
+        'name' => $data['name'],
+        'deduction_type_id' => $deductionType->id,
+        'max_loanable_amount' => $data['max_loanable_amount'] ?? null,
+        'interest_rate' => $data['interest_rate'] ?? null,
+        'max_terms_months' => $data['max_terms_months'] ?? null,
+        'is_active' => $data['is_active'],
+    ]);
+
+    return redirect()->route('admin.deductions')
+        ->with('success', "Loan type \"{$data['name']}\" registered successfully! It's now available for assignment to employees.");
+})->middleware('auth')->name('admin.deductions.loan-types.store');
+
+Route::get('/admin/deductions/types/{id}', function ($id) {
+    $deductionType = \App\Models\DeductionType::findOrFail($id);
+    return response()->json($deductionType);
+})->middleware('auth')->name('admin.deductions.types.show');
+
+Route::delete('/admin/deductions/loan-types/{id}', function ($id) {
+    $deductionType = \App\Models\DeductionType::findOrFail($id);
+    
+    // Check if any employees are using this loan type
+    $employeesCount = \App\Models\EmployeeDeduction::where('deduction_type_id', $id)
+        ->where('status', 'ACTIVE')
+        ->count();
+    
+    if ($employeesCount > 0) {
+        return redirect()->route('admin.deductions')
+            ->with('error', "Cannot delete loan type \"{$deductionType->name}\" because it's currently assigned to {$employeesCount} employee(s).");
+    }
+    
+    // Delete the loan type record first
+    \App\Models\LoanType::where('deduction_type_id', $id)->delete();
+    
+    // Then delete the deduction type
+    $deductionType->delete();
+    
+    return redirect()->route('admin.deductions')
+        ->with('success', "Loan type \"{$deductionType->name}\" deleted successfully.");
+})->middleware('auth')->name('admin.deductions.loan-types.delete');

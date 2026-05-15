@@ -44,6 +44,7 @@
                             <th>AM Out</th>
                             <th>PM In</th>
                             <th>PM Out</th>
+                            <th>Status</th>
                             <th>OT In</th>
                             <th>OT Out</th>
                             <th>Undertime</th>
@@ -59,10 +60,12 @@
             </div>
         </div>
         <div class="modal-footer" style="background: #fafafe; border-top: 1px solid #f0effe;">
-            <div style="flex: 1; display: flex; gap: 16px; font-size: 12px;">
+            <div style="flex: 1; display: flex; gap: 16px; font-size: 12px; flex-wrap: wrap;">
                 <div><span style="color: #9999bb;">Total Days:</span> <strong id="detailedTotalDays" style="color: #0b044d;">0</strong></div>
                 <div><span style="color: #9999bb;">Present:</span> <strong id="detailedTotalPresent" style="color: #15803d;">0</strong></div>
                 <div><span style="color: #9999bb;">Absent:</span> <strong id="detailedTotalAbsent" style="color: #8e1e18;">0</strong></div>
+                <div><span style="color: #9999bb;">Incomplete:</span> <strong id="detailedTotalIncomplete" style="color: #d9bb00;">0</strong></div>
+                <div><span style="color: #9999bb;">Abandoned:</span> <strong id="detailedTotalAbandoned" style="color: #d97706;">0</strong></div>
                 <div><span style="color: #9999bb;">Late:</span> <strong id="detailedTotalLate" style="color: #a16207;">0 times</strong></div>
                 <div><span style="color: #9999bb;">Total Late:</span> <strong id="detailedTotalLateMinutes" style="color: #a16207;">0 min</strong></div>
                 <div><span style="color: #9999bb;">Total Undertime:</span> <strong id="detailedTotalUndertime" style="color: #8e1e18;">0 min</strong></div>
@@ -241,6 +244,8 @@ function displayDetailedDTR(records) {
     let totalDays = 0;
     let totalPresent = 0;
     let totalAbsent = 0;
+    let totalIncomplete = 0;
+    let totalAbandoned = 0;
     let totalLate = 0;
     let totalLateMinutes = 0;
     let totalUndertimeMinutes = 0;
@@ -249,11 +254,47 @@ function displayDetailedDTR(records) {
         const row = document.createElement('tr');
         
         const isOnLeave = record.is_on_leave;
-        const isAbsent = !record.am_in && !record.pm_in && !isOnLeave;
+        const hasAmIn = record.am_in && record.am_in !== '-';
+        const hasAmOut = record.am_out && record.am_out !== '-';
+        const hasPmIn = record.pm_in && record.pm_in !== '-';
+        const hasPmOut = record.pm_out && record.pm_out !== '-';
+        
+        // Determine attendance status
+        let status = '';
+        let statusColor = '';
+        let statusBg = '';
+        
+        if (isOnLeave) {
+            status = 'On Leave';
+            statusColor = '#6b6a8a';
+            statusBg = '#6b6a8a18';
+        } else if (!hasAmIn && !hasPmIn) {
+            // No clock in at all = Absent
+            status = 'Absent';
+            statusColor = '#8e1e18';
+            statusBg = '#8e1e1818';
+            totalAbsent++;
+        } else if ((hasAmIn && !hasAmOut && !hasPmIn) || (hasPmIn && !hasPmOut && !hasAmIn)) {
+            // Clocked in but never clocked out (single period only) = Abandoned
+            status = 'Abandoned';
+            statusColor = '#d97706';
+            statusBg = '#d9770618';
+            totalAbandoned++;
+        } else if (hasAmIn && hasAmOut && hasPmIn && hasPmOut) {
+            // All 4 logs complete = Present
+            status = 'Present';
+            statusColor = '#15803d';
+            statusBg = '#15803d18';
+            totalPresent++;
+        } else {
+            // Has some attendance but not complete = Incomplete
+            status = 'Incomplete';
+            statusColor = '#d9bb00';
+            statusBg = '#d9bb0018';
+            totalIncomplete++;
+        }
         
         if (!isOnLeave) totalDays++;
-        if (record.accredited_minutes > 0 || isOnLeave) totalPresent++;
-        if (isAbsent) totalAbsent++;
         if (record.late_minutes > 0) {
             totalLate++;
             totalLateMinutes += record.late_minutes;
@@ -261,18 +302,19 @@ function displayDetailedDTR(records) {
         totalUndertimeMinutes += record.undertime;
         
         row.innerHTML = `
-            <td>${record.date}</td>
-            <td>${record.day}</td>
-            <td>${record.am_in || '-'}</td>
-            <td>${record.am_out || '-'}</td>
-            <td>${record.pm_in || '-'}</td>
-            <td>${record.pm_out || '-'}</td>
-            <td>${record.ot_in || '-'}</td>
-            <td>${record.ot_out || '-'}</td>
+            <td><strong>${record.date}</strong></td>
+            <td style="color: #6b6a8a;">${record.day}</td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${hasAmIn ? '#0b044d' : '#9999bb'};">${record.am_in || '--:--'}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${hasAmOut ? '#0b044d' : '#9999bb'};">${record.am_out || '--:--'}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${hasPmIn ? '#0b044d' : '#9999bb'};">${record.pm_in || '--:--'}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${hasPmOut ? '#0b044d' : '#9999bb'};">${record.pm_out || '--:--'}</span></td>
+            <td><span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: ${statusBg}; color: ${statusColor};">${status}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${record.ot_in ? '#0b044d' : '#9999bb'};">${record.ot_in || '--:--'}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${record.ot_out ? '#0b044d' : '#9999bb'};">${record.ot_out || '--:--'}</span></td>
             <td>${record.undertime_display}</td>
             <td>${record.late_display}</td>
-            <td>${record.total_hours}</td>
-            <td>${(record.accredited_minutes / 60).toFixed(1)} hrs</td>
+            <td><strong>${record.total_hours}</strong></td>
+            <td><strong style="color: #15803d;">${(record.accredited_minutes / 60).toFixed(1)} hrs</strong></td>
             <td>${record.leave_deduction}</td>
         `;
         tbody.appendChild(row);
@@ -281,6 +323,8 @@ function displayDetailedDTR(records) {
     document.getElementById('detailedTotalDays').textContent = totalDays;
     document.getElementById('detailedTotalPresent').textContent = totalPresent;
     document.getElementById('detailedTotalAbsent').textContent = totalAbsent;
+    document.getElementById('detailedTotalIncomplete').textContent = totalIncomplete;
+    document.getElementById('detailedTotalAbandoned').textContent = totalAbandoned;
     document.getElementById('detailedTotalLate').textContent = totalLate + ' times';
     document.getElementById('detailedTotalLateMinutes').textContent = totalLateMinutes + ' min';
     document.getElementById('detailedTotalUndertime').textContent = totalUndertimeMinutes + ' min';

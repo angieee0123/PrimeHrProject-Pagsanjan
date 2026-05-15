@@ -347,4 +347,20 @@ function exportLoans() {
 </script>
 
 @include('admin.deductions.modals.addLoanModal')
-@include('admin.deductions.modals.addLoanTypeModal')
+
+<script>
+// Ensure modal functions are in global scope
+window.openAddLoanModal = function() {
+    document.getElementById('addLoanModal').classList.add('active');
+};
+
+window.closeAddLoanModal = function(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('addLoanModal').classList.remove('active');
+    document.getElementById('addLoanForm').reset();
+    document.getElementById('providerName').value = '';
+    document.getElementById('otherProviderFields').style.display = 'none';
+    document.getElementById('otherProviderName').removeAttribute('required');
+    document.getElementById('otherLoanType').removeAttribute('required');
+};
+</script>
