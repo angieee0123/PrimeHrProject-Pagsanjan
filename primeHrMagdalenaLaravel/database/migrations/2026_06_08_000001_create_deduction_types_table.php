@@ -15,7 +15,7 @@ return new class extends Migration
             $table->enum('category', ['MANDATORY', 'LOAN', 'OTHER']);
             $table->enum('computation_type', ['PERCENTAGE', 'FIXED', 'CUSTOM']);
             $table->decimal('percentage_rate', 5, 2)->nullable();
-            $table->enum('base_salary_type', ['BASIC', 'GROSS', 'CUSTOM'])->nullable();
+            $table->enum('base_salary_type', ['BASIC', 'GROSS', 'MONTHLY', 'CUSTOM'])->nullable();
             $table->decimal('max_amount', 10, 2)->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();

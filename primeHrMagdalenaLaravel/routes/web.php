@@ -722,7 +722,21 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
                 
                 if ($deductionType->category === 'MANDATORY') {
                     if ($deductionType->computation_type === 'PERCENTAGE') {
-                        $deductions[$code] = $totalBasicPay * ($deductionType->percentage_rate / 100);
+                        $baseAmount = 0;
+                        
+                        // Determine base amount based on base_salary_type
+                        if ($deductionType->base_salary_type === 'BASIC') {
+                            $baseAmount = $totalBasicPay;
+                        } elseif ($deductionType->base_salary_type === 'GROSS') {
+                            $baseAmount = $totalBasicPay + $totalOtPay;
+                        } elseif ($deductionType->base_salary_type === 'MONTHLY') {
+                            // Get monthly salary from designation
+                            $baseAmount = $employee->employmentDetail?->designationRelation?->monthly_rate ?? 0;
+                        } else {
+                            $baseAmount = $totalBasicPay; // Default to basic
+                        }
+                        
+                        $deductions[$code] = $baseAmount * ($deductionType->percentage_rate / 100);
                     } else {
                         $deductions[$code] = $deduction->amount ?? 0;
                     }
@@ -761,7 +775,22 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
                 
                 if ($deductionType->category === 'MANDATORY') {
                     if ($deductionType->computation_type === 'PERCENTAGE') {
-                        $deductions[$code] = $record->daily_basic_pay * ($deductionType->percentage_rate / 100);
+                        $baseAmount = 0;
+                        
+                        // Determine base amount based on base_salary_type
+                        if ($deductionType->base_salary_type === 'BASIC') {
+                            $baseAmount = $record->daily_basic_pay;
+                        } elseif ($deductionType->base_salary_type === 'GROSS') {
+                            $baseAmount = $record->daily_basic_pay + $record->ot_pay;
+                        } elseif ($deductionType->base_salary_type === 'MONTHLY') {
+                            // Get monthly salary from designation and prorate to daily
+                            $monthlySalary = $employee->employmentDetail?->designationRelation?->monthly_rate ?? 0;
+                            $baseAmount = $monthlySalary / 22; // Prorated daily
+                        } else {
+                            $baseAmount = $record->daily_basic_pay; // Default to basic
+                        }
+                        
+                        $deductions[$code] = $baseAmount * ($deductionType->percentage_rate / 100);
                     } else {
                         $deductions[$code] = ($deduction->amount ?? 0) / 22; // Prorated daily
                     }
@@ -1175,7 +1204,21 @@ Route::get('/admin/payroll/export', function (\Illuminate\Http\Request $request)
                 $code = $deduction->deductionType->code;
                 if ($deduction->deductionType->category === 'MANDATORY') {
                     if ($deduction->deductionType->computation_type === 'PERCENTAGE') {
-                        $deductions[$code] = $basicPay * ($deduction->deductionType->percentage_rate / 100);
+                        $baseAmount = 0;
+                        
+                        // Determine base amount based on base_salary_type
+                        if ($deduction->deductionType->base_salary_type === 'BASIC') {
+                            $baseAmount = $basicPay;
+                        } elseif ($deduction->deductionType->base_salary_type === 'GROSS') {
+                            $baseAmount = $basicPay + $otPay;
+                        } elseif ($deduction->deductionType->base_salary_type === 'MONTHLY') {
+                            // Get monthly salary from designation
+                            $baseAmount = $employee->employmentDetail?->designationRelation?->monthly_rate ?? 0;
+                        } else {
+                            $baseAmount = $basicPay; // Default to basic
+                        }
+                        
+                        $deductions[$code] = $baseAmount * ($deduction->deductionType->percentage_rate / 100);
                     } else {
                         $deductions[$code] = $deduction->amount ?? 0;
                     }
@@ -1325,7 +1368,7 @@ Route::post('/admin/deductions/types', function (\Illuminate\Http\Request $reque
         'category' => 'required|in:MANDATORY,LOAN,OTHER',
         'computation_type' => 'required|in:PERCENTAGE,FIXED,CUSTOM',
         'rate' => 'nullable|numeric|min:0',
-        'base_salary' => 'nullable|in:BASIC,GROSS,CUSTOM',
+        'base_salary' => 'nullable|in:BASIC,GROSS,MONTHLY,CUSTOM',
         'max_amount' => 'nullable|numeric|min:0',
         'is_active' => 'required|boolean',
         'description' => 'nullable|string',
@@ -1357,13 +1400,21 @@ Route::put('/admin/deductions/types/{code}', function (\Illuminate\Http\Request 
         'category' => 'required|in:MANDATORY,LOAN,OTHER',
         'computation_type' => 'required|in:PERCENTAGE,FIXED,CUSTOM',
         'rate' => 'nullable|numeric|min:0',
-        'base_salary' => 'nullable|in:BASIC,GROSS,CUSTOM',
+        'base_salary' => 'nullable|in:BASIC,GROSS,MONTHLY,CUSTOM',
         'max_amount' => 'nullable|numeric|min:0',
         'is_active' => 'required|boolean',
         'description' => 'nullable|string',
     ]);
 
-    $deductionType->update($data);
+    $deductionType->update([
+        'name' => $data['name'],
+        'category' => $data['category'],
+        'computation_type' => $data['computation_type'],
+        'percentage_rate' => $data['rate'] ?? null,
+        'base_salary_type' => $data['base_salary'] ?? null,
+        'max_amount' => $data['max_amount'] ?? null,
+        'is_active' => $data['is_active'],
+    ]);
 
     return redirect()->route('admin.deductions')->with('success', 'Deduction type updated successfully.');
 })->middleware('auth')->name('admin.deductions.types.update');
@@ -2146,8 +2197,8 @@ Route::post('/admin/deductions/loan-types/store', function (\Illuminate\Http\Req
         ->with('success', "Loan type \"{$data['name']}\" registered successfully! It's now available for assignment to employees.");
 })->middleware('auth')->name('admin.deductions.loan-types.store');
 
-Route::get('/admin/deductions/types/{id}', function ($id) {
-    $deductionType = \App\Models\DeductionType::findOrFail($id);
+Route::get('/admin/deductions/types/{code}', function ($code) {
+    $deductionType = \App\Models\DeductionType::where('code', $code)->firstOrFail();
     return response()->json($deductionType);
 })->middleware('auth')->name('admin.deductions.types.show');
 

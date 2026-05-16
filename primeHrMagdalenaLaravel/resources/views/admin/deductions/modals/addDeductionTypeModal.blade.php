@@ -57,6 +57,7 @@
                             <option value="">None</option>
                             <option value="BASIC">Basic Salary</option>
                             <option value="GROSS">Gross Salary</option>
+                            <option value="MONTHLY">Monthly Salary</option>
                             <option value="CUSTOM">Custom</option>
                         </select>
                         <small class="field-hint" id="baseSalaryHint" style="display: none;"></small>
