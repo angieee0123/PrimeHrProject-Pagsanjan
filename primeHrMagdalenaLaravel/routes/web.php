@@ -737,6 +737,9 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
                         }
                         
                         $deductions[$code] = $baseAmount * ($deductionType->percentage_rate / 100);
+                    } elseif ($deductionType->computation_type === 'FIXED') {
+                        // For FIXED, use percentage_rate column (which stores the fixed amount)
+                        $deductions[$code] = $deductionType->percentage_rate ?? $deduction->amount ?? 0;
                     } else {
                         $deductions[$code] = $deduction->amount ?? 0;
                     }
@@ -791,6 +794,9 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
                         }
                         
                         $deductions[$code] = $baseAmount * ($deductionType->percentage_rate / 100);
+                    } elseif ($deductionType->computation_type === 'FIXED') {
+                        // For FIXED, use percentage_rate column (which stores the fixed amount) and prorate to daily
+                        $deductions[$code] = ($deductionType->percentage_rate ?? $deduction->amount ?? 0) / 22;
                     } else {
                         $deductions[$code] = ($deduction->amount ?? 0) / 22; // Prorated daily
                     }
@@ -1219,6 +1225,9 @@ Route::get('/admin/payroll/export', function (\Illuminate\Http\Request $request)
                         }
                         
                         $deductions[$code] = $baseAmount * ($deduction->deductionType->percentage_rate / 100);
+                    } elseif ($deduction->deductionType->computation_type === 'FIXED') {
+                        // For FIXED, use percentage_rate column (which stores the fixed amount)
+                        $deductions[$code] = $deduction->deductionType->percentage_rate ?? $deduction->amount ?? 0;
                     } else {
                         $deductions[$code] = $deduction->amount ?? 0;
                     }
