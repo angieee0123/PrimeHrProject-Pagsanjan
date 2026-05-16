@@ -8,6 +8,7 @@ use App\Models\AttendanceCorrection;
 use App\Models\AccreditedHoursLog;
 use App\Models\DailySalaryComputation;
 use App\Services\LateDeductionService;
+use App\Services\UndertimeDeductionService;
 use App\Services\CscTimeConversionService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -799,6 +800,9 @@ class AttendanceController extends Controller
                 'pm_grace_applied' => $pmGraceApplied,
                 'late_deducted_from_leave' => $hasLog && $log->late_deducted_from_leave,
                 'late_deduction_leave_type' => $hasLog ? $log->late_deduction_leave_type : null,
+                'undertime_deducted_from_leave' => $hasLog && $log->undertime_deducted_from_leave,
+                'undertime_deduction_leave_type' => $hasLog ? $log->undertime_deduction_leave_type : null,
+                'lwop_minutes' => $hasLog ? $log->lwop_minutes : 0,
                 'schedule' => $scheduleUsed ?: [
                     'am_in' => $expectedAmIn->format('H:i'),
                     'am_out' => $expectedAmOut->format('H:i'),
@@ -1279,6 +1283,10 @@ class AttendanceController extends Controller
             // Process late deduction from leave balances
             $lateDeductionService = new LateDeductionService();
             $lateDeductionService->processLateDeduction($accreditedLog);
+            
+            // Process undertime deduction from leave balances
+            $undertimeDeductionService = new UndertimeDeductionService();
+            $undertimeDeductionService->processUndertimeDeduction($accreditedLog);
         }
 
         return response()->json([

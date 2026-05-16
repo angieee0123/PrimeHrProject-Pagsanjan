@@ -44,7 +44,7 @@
                     <th style="text-align: center; cursor: pointer;" onclick="sortEmployeeTransactionTable('transaction_date')">
                         Date <span class="sort-icon">{{ request('sort_by') == 'transaction_date' || !request('sort_by') ? (request('sort_order', 'desc') == 'asc' ? '↑' : '↓') : '⇅' }}</span>
                     </th>
-                    <th style="text-align: center;">Reference</th>
+                    <th style="text-align: center;">Source/Reason</th>
                     <th style="text-align: center;">Actions</th>
                 </tr>
             </thead>
@@ -79,17 +79,75 @@
                     <td data-label="Date" style="text-align: center; color: #6b6a8a; font-size: 12px;">
                         {{ $transaction->transaction_date ? $transaction->transaction_date->format('M d, Y') : 'N/A' }}
                     </td>
-                    <td data-label="Reference" style="text-align: center; font-size: 12px;">
-                        @if($transaction->reference_type === 'leave_application')
-                            <span style="color: #0b044d; font-weight: 500;">Leave App</span>
-                        @elseif($transaction->reference_type === 'manual_adjustment')
-                            <span style="color: #8e1e18; font-weight: 500;">Manual</span>
-                        @elseif($transaction->reference_type === 'accrual')
-                            <span style="color: #15803d; font-weight: 500;">Accrual</span>
-                        @elseif($transaction->reference_type === 'initialization')
-                            <span style="color: #6b3fa0; font-weight: 500;">Initialization</span>
+                    <td data-label="Source" style="text-align: left; font-size: 12px; padding-left: 16px;">
+                        @php
+                            $remarks = $transaction->remarks ?? '';
+                            $isLateDeduction = str_contains($remarks, 'Late deduction');
+                            $isUndertimeDeduction = str_contains($remarks, 'Undertime deduction');
+                            $isLeaveApp = $transaction->reference_type === 'leave_application';
+                            $isManual = $transaction->reference_type === 'manual_adjustment';
+                            $isAccrual = $transaction->reference_type === 'accrual';
+                        @endphp
+                        
+                        @if($isLateDeduction)
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a16207" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                                <span style="color: #a16207; font-weight: 600;">Late Deduction</span>
+                            </div>
+                            <small style="color: #6b6a8a; display: block; margin-top: 2px; padding-left: 20px;">{{ $remarks }}</small>
+                        @elseif($isUndertimeDeduction)
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e1e18" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 8 10"/>
+                                </svg>
+                                <span style="color: #8e1e18; font-weight: 600;">Undertime Deduction</span>
+                            </div>
+                            <small style="color: #6b6a8a; display: block; margin-top: 2px; padding-left: 20px;">{{ $remarks }}</small>
+                        @elseif($isLeaveApp)
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0b044d" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                                <span style="color: #0b044d; font-weight: 600;">Leave Application</span>
+                            </div>
+                            <small style="color: #6b6a8a; display: block; margin-top: 2px; padding-left: 20px;">{{ $remarks }}</small>
+                        @elseif($isManual)
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b3fa0" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                                <span style="color: #6b3fa0; font-weight: 600;">Manual Adjustment</span>
+                            </div>
+                            <small style="color: #6b6a8a; display: block; margin-top: 2px; padding-left: 20px;">{{ $remarks }}</small>
+                        @elseif($isAccrual)
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                </svg>
+                                <span style="color: #15803d; font-weight: 600;">Monthly Accrual</span>
+                            </div>
+                            <small style="color: #6b6a8a; display: block; margin-top: 2px; padding-left: 20px;">{{ $remarks }}</small>
                         @else
-                            <span style="color: #6b6a8a;">{{ ucfirst(str_replace('_', ' ', $transaction->reference_type ?? 'N/A')) }}</span>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b6a8a" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="16" x2="12" y2="12"/>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                </svg>
+                                <span style="color: #6b6a8a; font-weight: 500;">{{ ucfirst(str_replace('_', ' ', $transaction->reference_type ?? 'Other')) }}</span>
+                            </div>
+                            @if($remarks)
+                                <small style="color: #6b6a8a; display: block; margin-top: 2px; padding-left: 20px;">{{ $remarks }}</small>
+                            @endif
                         @endif
                     </td>
                     <td data-label="Actions" style="text-align: center;">
@@ -179,11 +237,22 @@
             <div class="modal-row"><span>Balance After</span><strong id="empTransactionBalanceAfter">15.00 days</strong></div>
             <div class="modal-row"><span>Transaction Date</span><strong id="empTransactionDate">Jan 15, 2026</strong></div>
             
-            <span class="modal-section-label modal-section-deductions">REFERENCE</span>
-            <div class="modal-row"><span>Reference Type</span><strong id="empTransactionReference">Manual Adjustment</strong></div>
-            
-            <span class="modal-section-label modal-section-deductions">REMARKS</span>
-            <div class="modal-row"><span id="empTransactionRemarks" style="color: #6b7280; font-style: italic;">No remarks provided</span></div>
+            <span class="modal-section-label modal-section-deductions">SOURCE/REASON</span>
+            <div class="modal-row">
+                <div style="width: 100%;">
+                    <div id="empTransactionSourceLabel" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <svg id="empTransactionSourceIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b6a8a" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        <strong id="empTransactionReference" style="color: #0b044d;">Manual Adjustment</strong>
+                    </div>
+                    <div style="background: #f7f6ff; padding: 12px; border-radius: 8px; border-left: 3px solid #0b044d;">
+                        <span id="empTransactionRemarks" style="color: #6b7280; font-size: 13px; line-height: 1.5;">No remarks provided</span>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="modal-footer">
             <button class="modal-btn-ghost" onclick="closeEmployeeTransactionDetailModal()">Close</button>
@@ -259,8 +328,51 @@ function viewEmployeeTransactionDetails(leaveType, type, amount, balanceBefore, 
     document.getElementById('empTransactionBalanceBefore').textContent = parseFloat(balanceBefore).toFixed(6) + ' days';
     document.getElementById('empTransactionBalanceAfter').textContent = parseFloat(balanceAfter).toFixed(6) + ' days';
     document.getElementById('empTransactionDate').textContent = date;
-    document.getElementById('empTransactionReference').textContent = reference;
-    document.getElementById('empTransactionRemarks').textContent = remarks || 'No remarks provided';
+    
+    // Determine source type and update icon/label
+    const sourceIcon = document.getElementById('empTransactionSourceIcon');
+    const sourceLabel = document.getElementById('empTransactionReference');
+    const remarksEl = document.getElementById('empTransactionRemarks');
+    
+    const isLateDeduction = remarks.includes('Late deduction');
+    const isUndertimeDeduction = remarks.includes('Undertime deduction');
+    const isLeaveApp = reference.toLowerCase().includes('leave app');
+    const isAccrual = reference.toLowerCase().includes('accrual');
+    const isManual = reference.toLowerCase().includes('manual');
+    
+    if (isLateDeduction) {
+        sourceIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>';
+        sourceIcon.setAttribute('stroke', '#a16207');
+        sourceLabel.textContent = 'Late Deduction';
+        sourceLabel.style.color = '#a16207';
+    } else if (isUndertimeDeduction) {
+        sourceIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 8 10"/>';
+        sourceIcon.setAttribute('stroke', '#8e1e18');
+        sourceLabel.textContent = 'Undertime Deduction';
+        sourceLabel.style.color = '#8e1e18';
+    } else if (isLeaveApp) {
+        sourceIcon.innerHTML = '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>';
+        sourceIcon.setAttribute('stroke', '#0b044d');
+        sourceLabel.textContent = 'Leave Application';
+        sourceLabel.style.color = '#0b044d';
+    } else if (isAccrual) {
+        sourceIcon.innerHTML = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>';
+        sourceIcon.setAttribute('stroke', '#15803d');
+        sourceLabel.textContent = 'Monthly Accrual';
+        sourceLabel.style.color = '#15803d';
+    } else if (isManual) {
+        sourceIcon.innerHTML = '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>';
+        sourceIcon.setAttribute('stroke', '#6b3fa0');
+        sourceLabel.textContent = 'Manual Adjustment';
+        sourceLabel.style.color = '#6b3fa0';
+    } else {
+        sourceIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>';
+        sourceIcon.setAttribute('stroke', '#6b6a8a');
+        sourceLabel.textContent = reference;
+        sourceLabel.style.color = '#6b6a8a';
+    }
+    
+    remarksEl.textContent = remarks || 'No remarks provided';
     
     document.getElementById('employeeTransactionDetailModal').style.display = 'flex';
 }

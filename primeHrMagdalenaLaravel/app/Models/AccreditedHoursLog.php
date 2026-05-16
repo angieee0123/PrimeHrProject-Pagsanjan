@@ -25,6 +25,8 @@ class AccreditedHoursLog extends Model
         'computation_notes',
         'late_deducted_from_leave',
         'late_deduction_leave_type',
+        'undertime_deducted_from_leave',
+        'undertime_deduction_leave_type',
         'lwop_minutes',
         'requires_salary_deduction',
     ];
@@ -33,6 +35,7 @@ class AccreditedHoursLog extends Model
         'am_grace_applied' => 'boolean',
         'pm_grace_applied' => 'boolean',
         'late_deducted_from_leave' => 'boolean',
+        'undertime_deducted_from_leave' => 'boolean',
         'requires_salary_deduction' => 'boolean',
     ];
     

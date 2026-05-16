@@ -685,6 +685,34 @@ function renderDetailedDTR(data) {
                     accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${lateMinutes} min late → ${lateDays} days deducted</small>`;
                 }
             }
+            
+            // Add undertime deduction indicator if undertime was deducted from leave
+            if (record.undertime_deducted_from_leave && record.undertime_deduction_leave_type) {
+                const undertimeMinutes = record.undertime || 0;
+                const undertimeDays = (undertimeMinutes / 480).toFixed(6); // CSC standard: 480 minutes = 1 work day
+                const isPartial = record.undertime_deduction_leave_type.includes('partial');
+                const isFull = record.undertime_deduction_leave_type.includes('full');
+                
+                if (isFull) {
+                    accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Undertime Fully Covered by ${record.undertime_deduction_leave_type.replace(' (full)', '')}</small>`;
+                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${undertimeMinutes} min undertime → ${undertimeDays} days deducted</small>`;
+                } else if (isPartial) {
+                    const leaveTypes = record.undertime_deduction_leave_type.replace(' (partial)', '');
+                    accreditedDisplay += `<br><small style="color: #a16207; font-size: 10px; font-weight: 600;">⚠ Partial Coverage by ${leaveTypes}</small>`;
+                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${undertimeMinutes} min undertime, insufficient leave</small>`;
+                    
+                    // Show LWOP if available
+                    if (record.lwop_minutes && record.lwop_minutes > 0) {
+                        const lwopDays = (record.lwop_minutes / 480).toFixed(6);
+                        accreditedDisplay += `<br><small style="color: #8e1e18; font-size: 9px;">LWOP: ${record.lwop_minutes} min (${lwopDays} days) → Salary deduction</small>`;
+                    } else {
+                        accreditedDisplay += `<br><small style="color: #8e1e18; font-size: 9px;">Remaining deducted from hours</small>`;
+                    }
+                } else {
+                    accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Undertime Covered by ${record.undertime_deduction_leave_type}</small>`;
+                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${undertimeMinutes} min undertime → ${undertimeDays} days deducted</small>`;
+                }
+            }
         }
 
         // Build leave deduction display
