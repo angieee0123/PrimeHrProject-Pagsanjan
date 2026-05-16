@@ -34,7 +34,7 @@ CREATE TABLE `deduction_schedules` (
   PRIMARY KEY (`id`),
   KEY `deduction_schedules_deduction_type_id_foreign` (`deduction_type_id`),
   CONSTRAINT `deduction_schedules_deduction_type_id_foreign` FOREIGN KEY (`deduction_type_id`) REFERENCES `deduction_types` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,6 +43,7 @@ CREATE TABLE `deduction_schedules` (
 
 LOCK TABLES `deduction_schedules` WRITE;
 /*!40000 ALTER TABLE `deduction_schedules` DISABLE KEYS */;
+INSERT INTO `deduction_schedules` VALUES (5,9,'1ST_ONLY',0,1,'2026-05-01','2026-05-14 20:15:18','2026-05-14 20:15:18'),(6,10,'1ST_ONLY',0,1,'2026-05-01','2026-05-14 20:15:18','2026-05-14 20:15:18'),(7,16,'2ND_ONLY',0,1,'2026-05-01','2026-05-14 21:27:42','2026-05-14 21:27:42'),(8,17,'2ND_ONLY',0,1,'2026-05-01','2026-05-15 06:54:55','2026-05-15 06:54:55');
 /*!40000 ALTER TABLE `deduction_schedules` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -55,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-15 10:29:22
+-- Dump completed on 2026-05-16 21:24:11

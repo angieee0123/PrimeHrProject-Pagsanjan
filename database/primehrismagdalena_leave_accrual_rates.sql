@@ -37,7 +37,7 @@ CREATE TABLE `leave_accrual_rates` (
   PRIMARY KEY (`id`),
   KEY `leave_accrual_rates_leave_type_id_foreign` (`leave_type_id`),
   CONSTRAINT `leave_accrual_rates_leave_type_id_foreign` FOREIGN KEY (`leave_type_id`) REFERENCES `leave_types_config` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -46,7 +46,7 @@ CREATE TABLE `leave_accrual_rates` (
 
 LOCK TABLES `leave_accrual_rates` WRITE;
 /*!40000 ALTER TABLE `leave_accrual_rates` DISABLE KEYS */;
-INSERT INTO `leave_accrual_rates` VALUES (1,19,30.00,1.2500,'monthly','2026-05-11',NULL,1,NULL,'2026-05-11 13:44:17','2026-05-11 13:44:17'),(2,11,30.00,1.2500,'monthly','2026-05-11',NULL,1,NULL,'2026-05-11 13:44:17','2026-05-11 13:44:17');
+INSERT INTO `leave_accrual_rates` VALUES (1,19,30.00,1.2500,'monthly','2026-05-11',NULL,1,NULL,'2026-05-11 13:44:17','2026-05-11 13:44:17'),(2,11,30.00,1.2500,'monthly','2026-05-11',NULL,1,NULL,'2026-05-11 13:44:17','2026-05-11 13:44:17'),(3,19,30.00,1.2500,'monthly','2026-05-15',NULL,1,NULL,'2026-05-15 06:30:02','2026-05-15 06:30:02');
 /*!40000 ALTER TABLE `leave_accrual_rates` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -59,4 +59,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-15 10:29:22
+-- Dump completed on 2026-05-16 21:24:04

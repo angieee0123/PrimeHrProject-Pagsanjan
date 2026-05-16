@@ -41,7 +41,7 @@ CREATE TABLE `employee_deductions` (
   KEY `employee_deductions_deduction_type_id_foreign` (`deduction_type_id`),
   CONSTRAINT `employee_deductions_deduction_type_id_foreign` FOREIGN KEY (`deduction_type_id`) REFERENCES `deduction_types` (`id`) ON DELETE CASCADE,
   CONSTRAINT `employee_deductions_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -50,6 +50,7 @@ CREATE TABLE `employee_deductions` (
 
 LOCK TABLES `employee_deductions` WRITE;
 /*!40000 ALTER TABLE `employee_deductions` DISABLE KEYS */;
+INSERT INTO `employee_deductions` VALUES (1,8,9,NULL,'2026-05-15',NULL,NULL,NULL,NULL,'ACTIVE',NULL,'2026-05-14 19:32:35','2026-05-14 19:32:35'),(2,8,10,NULL,'2026-05-15','2027-05-15',10000.00,10000.00,833.33,'ACTIVE','[Provider: GSIS INSURANCE, Type: MPL LITE]','2026-05-14 19:40:29','2026-05-14 19:40:29'),(3,8,16,NULL,'2026-05-15','2026-05-15',10000.00,10000.00,1000.00,'ACTIVE',NULL,'2026-05-14 21:26:15','2026-05-14 21:26:15'),(4,8,17,NULL,'2026-05-15','2027-03-15',10000.00,10000.00,1000.00,'ACTIVE',NULL,'2026-05-15 06:54:05','2026-05-15 06:54:05');
 /*!40000 ALTER TABLE `employee_deductions` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -62,4 +63,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-15 10:29:19
+-- Dump completed on 2026-05-16 21:24:07

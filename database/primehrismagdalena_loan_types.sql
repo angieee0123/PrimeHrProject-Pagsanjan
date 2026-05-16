@@ -37,7 +37,7 @@ CREATE TABLE `loan_types` (
   UNIQUE KEY `loan_types_code_unique` (`code`),
   KEY `loan_types_deduction_type_id_foreign` (`deduction_type_id`),
   CONSTRAINT `loan_types_deduction_type_id_foreign` FOREIGN KEY (`deduction_type_id`) REFERENCES `deduction_types` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -46,6 +46,7 @@ CREATE TABLE `loan_types` (
 
 LOCK TABLES `loan_types` WRITE;
 /*!40000 ALTER TABLE `loan_types` DISABLE KEYS */;
+INSERT INTO `loan_types` VALUES (1,'GSIS_SALARY','GSIS Salary Loan',11,100000.00,6.00,36,1,'2026-05-14 20:36:20','2026-05-14 20:36:20'),(2,'GSIS_POLICY','GSIS Policy Loan',12,50000.00,6.00,24,1,'2026-05-14 20:36:20','2026-05-14 20:36:20'),(3,'GSIS_EMERGENCY','GSIS Emergency Loan',13,20000.00,6.00,12,1,'2026-05-14 20:36:20','2026-05-14 20:36:20'),(4,'PAGIBIG_MPL','Pag-IBIG Multi-Purpose Loan',14,80000.00,10.50,24,1,'2026-05-14 20:36:20','2026-05-14 20:36:20'),(5,'PAGIBIG_CALAMITY','Pag-IBIG Calamity Loan',15,40000.00,5.95,24,1,'2026-05-14 20:36:20','2026-05-14 20:36:20'),(6,'LJP','LOAN NI JEREMY POGI',16,NULL,NULL,NULL,1,'2026-05-14 21:25:20','2026-05-14 21:25:20'),(7,'EL','EKAY LOAN HAHA',17,NULL,NULL,NULL,1,'2026-05-15 06:53:09','2026-05-15 06:53:09');
 /*!40000 ALTER TABLE `loan_types` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -58,4 +59,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-15 10:29:23
+-- Dump completed on 2026-05-16 21:24:09

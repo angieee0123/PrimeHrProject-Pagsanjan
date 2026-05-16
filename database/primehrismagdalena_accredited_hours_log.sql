@@ -50,7 +50,7 @@ CREATE TABLE `accredited_hours_log` (
   CONSTRAINT `accredited_hours_log_attendance_id_foreign` FOREIGN KEY (`attendance_id`) REFERENCES `attendance` (`id`) ON DELETE CASCADE,
   CONSTRAINT `accredited_hours_log_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE,
   CONSTRAINT `accredited_hours_log_schedule_id_foreign` FOREIGN KEY (`schedule_id`) REFERENCES `schedules` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -59,7 +59,7 @@ CREATE TABLE `accredited_hours_log` (
 
 LOCK TABLES `accredited_hours_log` WRITE;
 /*!40000 ALTER TABLE `accredited_hours_log` DISABLE KEYS */;
-INSERT INTO `accredited_hours_log` VALUES (42,42,8,1,190,240,0,50,1,'VL (full)',0,0,0,480,546,0,1,'Attendance correction by  at 2026-05-14 05:14:36','2026-05-13 21:14:36','2026-05-13 21:14:36'),(43,43,8,1,240,240,0,0,0,NULL,0,0,0,480,480,0,0,'On approved leave: Bereavement Leave - LA-2026-0001 (BL)','2026-05-14 08:13:38','2026-05-14 08:13:38'),(44,44,8,1,240,240,0,0,0,NULL,0,0,0,480,480,0,0,'On approved leave: Bereavement Leave - LA-2026-0001 (BL)','2026-05-14 08:13:38','2026-05-14 08:13:38'),(45,45,8,1,240,240,0,0,0,NULL,0,0,0,480,480,0,0,'On approved leave: Bereavement Leave - LA-2026-0001 (BL)','2026-05-14 08:13:38','2026-05-14 08:13:38'),(46,46,8,1,180,120,0,0,0,NULL,0,0,60,300,353,1,0,'Attendance correction by  at 2026-05-14 16:18:01','2026-05-14 08:17:40','2026-05-14 08:18:01'),(47,47,8,1,180,120,0,60,1,'VL (partial)',51,1,120,300,360,1,0,'Attendance correction by  at 2026-05-14 16:22:56','2026-05-14 08:22:56','2026-05-14 08:28:52'),(48,48,8,1,0,0,0,0,0,NULL,0,0,480,0,0,0,0,'Attendance correction by  at 2026-05-14 18:58:55','2026-05-14 10:58:55','2026-05-14 10:58:55');
+INSERT INTO `accredited_hours_log` VALUES (51,51,8,1,240,240,0,0,0,NULL,0,0,0,480,480,0,0,'On approved leave: Bereavement Leave - LA-2026-0001 (BL)','2026-05-15 06:40:21','2026-05-15 06:40:21'),(52,52,8,1,240,240,0,0,0,NULL,0,0,0,480,480,0,0,'On approved leave: Bereavement Leave - LA-2026-0001 (BL)','2026-05-15 06:40:21','2026-05-15 06:40:21'),(53,53,8,1,240,240,0,0,0,NULL,0,0,0,480,480,0,0,'On approved leave: Bereavement Leave - LA-2026-0001 (BL)','2026-05-15 06:40:21','2026-05-15 06:40:21'),(54,54,8,1,175,240,0,65,1,'VL (full)',0,0,0,480,473,0,1,'Attendance correction by  at 2026-05-15 14:47:12','2026-05-15 06:47:12','2026-05-15 06:47:12'),(55,55,8,1,120,120,0,60,1,'VL (full)',0,0,180,480,294,1,0,'Attendance correction by  at 2026-05-15 14:49:07','2026-05-15 06:49:07','2026-05-15 06:49:08');
 /*!40000 ALTER TABLE `accredited_hours_log` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -72,4 +72,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-15 10:29:24
+-- Dump completed on 2026-05-16 21:24:05
