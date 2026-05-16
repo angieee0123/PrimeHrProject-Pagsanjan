@@ -2,18 +2,6 @@
 
 @section('content')
 @php
-$avatarColors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
-function getInitials($name) {
-    $parts = explode(' ', $name);
-    $initials = '';
-    foreach ($parts as $part) {
-        if (preg_match('/^[A-Z]/', $part)) {
-            $initials .= $part[0];
-        }
-    }
-    return strtoupper(substr($initials, 0, 2));
-}
-
 function peso($amount) {
     return '₱' . number_format($amount, 2);
 }
@@ -24,17 +12,41 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' — ' . date('
 
 $payrollRecords = $payrollRecords ?? [];
 $viewMode = $viewMode ?? 'daily';
+$activeTab = request('tab', 'register');
 
 $totalBasicPay = $payrollRecords->sum('basic');
 $totalOtPay = $payrollRecords->sum('ot_pay');
 $totalLateDeduction = $payrollRecords->sum('late_deduction');
 $totalUndertimeDeduction = $payrollRecords->sum('undertime_deduction');
-$totalDeductions = $totalLateDeduction + $totalUndertimeDeduction;
+
+// Calculate total deductions from all sources
+$totalOtherDeductions = 0;
+foreach ($payrollRecords as $record) {
+    if (isset($record['deductions'])) {
+        foreach ($record['deductions'] as $deductionAmount) {
+            $totalOtherDeductions += $deductionAmount;
+        }
+    }
+}
+
+$totalDeductions = $totalLateDeduction + $totalUndertimeDeduction + $totalOtherDeductions;
 $grossPayroll = $totalBasicPay + $totalOtPay;
 $totalNet = $grossPayroll - $totalDeductions;
 $processedCount = $payrollRecords->where('status', 'Processed')->count();
 $pendingCount = $payrollRecords->where('status', 'Pending')->count();
 @endphp
+
+@if(session('success'))
+<div class="alert alert-success" style="margin-bottom: 20px; padding: 12px 16px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; color: #155724; font-size: 13px;">
+    <strong>✓</strong> {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert alert-error" style="margin-bottom: 20px; padding: 12px 16px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 6px; color: #721c24; font-size: 13px;">
+    <strong>✗</strong> {{ session('error') }}
+</div>
+@endif
 
 <div class="stats-grid" style="margin-bottom: 20px;">
     <div class="stat-card">
@@ -73,7 +85,7 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
         <h2 class="stat-value" style="font-size: 18px;">{{ peso($totalDeductions) }}</h2>
         <div class="stat-footer">
             <span class="stat-dot" style="background: #8e1e18;"></span>
-            <p class="stat-sub">Late & Undertime</p>
+            <p class="stat-sub">All deductions included</p>
         </div>
     </div>
     <div class="stat-card">
@@ -91,159 +103,64 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
     </div>
 </div>
 
+<div class="payroll-tabs">
+    <a href="{{ route('admin.payroll', ['tab' => 'register'] + request()->except('tab')) }}" 
+       class="tab-link {{ $activeTab === 'register' ? 'active' : '' }}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Payroll Register
+    </a>
+    <a href="{{ route('admin.payroll', ['tab' => 'generate'] + request()->except('tab')) }}" 
+       class="tab-link {{ $activeTab === 'generate' ? 'active' : '' }}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Generate Payroll
+    </a>
+</div>
+
 <section class="table-section">
-    <div class="table-header">
-        <div>
-            <h3 class="table-title">Payroll Register — {{ $periodDisplay }}</h3>
-            <p class="table-sub">Municipal Government of Pagsanjan · Pay Date: {{ date('M d, Y', strtotime($endDateDisplay)) }} · {{ $payrollRecords->count() }} records</p>
-        </div>
-        <div class="table-actions">
-            <form method="GET" action="{{ route('admin.payroll') }}" id="filterForm" style="display: contents;">
-                <input type="date" class="filter-select" name="start_date" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}">
-                <span style="font-size: 12px; color: #9999bb;">to</span>
-                <input type="date" class="filter-select" name="end_date" value="{{ request('end_date', now()->endOfMonth()->format('Y-m-d')) }}">
-                <select class="filter-select" name="department">
-                    <option value="">All Departments</option>
-                    @foreach($departments as $dept)
-                        <option value="{{ $dept }}" {{ request('department') == $dept ? 'selected' : '' }}>{{ $dept }}</option>
-                    @endforeach
-                </select>
-                <select class="filter-select" name="status">
-                    <option value="">All Status</option>
-                    <option value="Processed" {{ request('status') == 'Processed' ? 'selected' : '' }}>Processed</option>
-                    <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="On Hold" {{ request('status') == 'On Hold' ? 'selected' : '' }}>On Hold</option>
-                </select>
-                <select class="filter-select" name="view_mode" style="background: #f7f6ff; border-color: #0b044d; color: #0b044d; font-weight: 600;">
-                    <option value="daily" {{ request('view_mode', 'daily') == 'daily' ? 'selected' : '' }}>Daily View</option>
-                    <option value="employee" {{ request('view_mode') == 'employee' ? 'selected' : '' }}>By Employee</option>
-                    <option value="monthly" {{ request('view_mode') == 'monthly' ? 'selected' : '' }}>Monthly Summary</option>
-                </select>
-                <button type="submit" class="btn-filter-main">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                    Filter
-                </button>
-            </form>
-            <button class="btn-export">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
-            <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                Run Payroll
-            </button>
-        </div>
-    </div>
-
-    <div class="payroll-summary-bar" style="margin-top: 0; margin-bottom: 16px;">
-        <div class="psummary-item">
-            <span>Gross Total</span>
-            <strong>{{ peso($grossPayroll) }}</strong>
-        </div>
-        <div class="psummary-divider"></div>
-        <div class="psummary-item">
-            <span>Total Deductions</span>
-            <strong class="deduction">{{ peso($totalDeductions) }}</strong>
-        </div>
-        <div class="psummary-divider"></div>
-        <div class="psummary-item">
-            <span>Total Net Pay</span>
-            <strong class="net-pay">{{ peso($totalNet) }}</strong>
-        </div>
-        <div class="psummary-divider"></div>
-        <div class="psummary-item">
-            <span>Pay Date</span>
-            <strong>{{ date('M d, Y', strtotime($endDateDisplay)) }}</strong>
-        </div>
-        <div class="psummary-divider"></div>
-        <div class="psummary-item">
-            <span>Records</span>
-            <strong>{{ $payrollRecords->count() }}</strong>
-        </div>
-    </div>
-
-    <div class="table-wrapper">
-        <table class="payroll-table">
-            <thead>
-                <tr>
-                    <th>Employee</th>
-                    <th>Department</th>
-                    @if($viewMode === 'daily')
-                        <th>Work Date</th>
-                        <th>Daily Rate</th>
-                    @else
-                        <th>Days Worked</th>
-                        <th>Daily Rate</th>
-                    @endif
-                    <th>Basic Pay</th>
-                    <th>OT Pay</th>
-                    <th>Late Deduction</th>
-                    <th>Undertime Deduction</th>
-                    <th>Net Pay</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($payrollRecords as $index => $record)
-                @php
-                    $basicPay = $record['basic'];
-                    $otPay = $record['ot_pay'];
-                    $lateDeduction = $record['late_deduction'];
-                    $undertimeDeduction = $record['undertime_deduction'];
-                    $grossPay = $basicPay + $otPay;
-                    $totalDeductionsRow = $lateDeduction + $undertimeDeduction;
-                    $netPay = $grossPay - $totalDeductionsRow;
-                @endphp
-                <tr>
-                    <td>
-                        <div class="emp-cell">
-                            <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
-                                {{ getInitials($record['name']) }}
-                            </div>
-                            <div>
-                                <p class="emp-name">{{ $record['name'] }}</p>
-                                <p class="emp-id">{{ $record['id'] }}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span class="dept-tag">{{ $record['dept'] }}</span></td>
-                    @if($viewMode === 'daily')
-                        <td class="work-date">{{ date('M d, Y', strtotime($record['work_date'])) }}</td>
-                        <td class="daily-rate">{{ peso($record['daily_rate']) }}</td>
-                    @else
-                        <td class="days-count">{{ $record['days_count'] }} days</td>
-                        <td class="daily-rate">{{ peso($record['daily_rate']) }}</td>
-                    @endif
-                    <td class="pay-cell">{{ peso($basicPay) }}</td>
-                    <td class="ot-pay">{{ peso($otPay) }}</td>
-                    <td class="deduction">{{ peso($lateDeduction) }}</td>
-                    <td class="deduction">{{ peso($undertimeDeduction) }}</td>
-                    <td class="net-pay">{{ peso($netPay) }}</td>
-                    <td><span class="badge-status {{ $record['status'] === 'Processed' ? 'processed' : ($record['status'] === 'Pending' ? 'pending' : 'on-hold') }}">{{ $record['status'] }}</span></td>
-                    <td>
-                        <div class="row-actions">
-                            <button class="btn-view">Payslip</button>
-                            <button class="btn-edit">Edit</button>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <div class="table-footer">
-        <p>Showing <strong>{{ $payrollRecords->count() }}</strong> of <strong>{{ $payrollRecords->count() }}</strong> records</p>
-        <div class="pagination">
-            <button class="page-btn active">1</button>
-            <button class="page-btn">2</button>
-            <button class="page-btn">›</button>
-        </div>
-    </div>
+    @if($activeTab === 'register')
+        @include('admin.payroll.partials.payroll-register')
+    @elseif($activeTab === 'generate')
+        @include('admin.payroll.partials.generate-payroll')
+    @endif
 </section>
 
 <style>
+.payroll-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f0effe;
+}
+
+.tab-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b6a8a;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+}
+
+.tab-link:hover {
+    color: #0b044d;
+    background: #f7f6ff;
+}
+
+.tab-link.active {
+    color: #0b044d;
+    border-bottom-color: #0b044d;
+}
+
+.tab-link svg {
+    width: 16px;
+    height: 16px;
+}
+
 .badge-emptype {
     font-size: 11px; color: #0b044d; background: #f0effe;
     padding: 3px 10px; border-radius: 20px; font-weight: 600;

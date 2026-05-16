@@ -1,39 +1,41 @@
-<div class="table-header" style="margin-bottom: 16px;">
-    <div>
-        <h3 class="table-title" style="font-size: 16px; margin-bottom: 4px;">Employee Loans</h3>
-        <p class="table-sub">Manage GSIS and Pag-IBIG loans with automatic balance tracking</p>
+<div id="loans-tab" style="display: none;">
+<section class="table-section">
+    <div class="table-header">
+        <div>
+            <h3 class="table-title">Employee Loans</h3>
+            <p class="table-sub">Municipal Government of Pagsanjan · Manage GSIS and Pag-IBIG loans with automatic balance tracking</p>
+        </div>
+        <div class="table-actions">
+            <input type="text" id="searchLoan" class="filter-select" placeholder="Search employee..." style="width: 200px;" onkeyup="filterLoans()">
+            <select id="filterLoanType" class="filter-select" onchange="filterLoans()">
+                <option value="">All Loan Types</option>
+                @foreach(\App\Models\DeductionType::where('category', 'LOAN')->where('is_active', true)->orderBy('name')->get() as $loanType)
+                    <option value="{{ $loanType->id }}">{{ $loanType->name }}</option>
+                @endforeach
+            </select>
+            <select id="filterLoanStatus" class="filter-select" onchange="filterLoans()">
+                <option value="">All Status</option>
+                <option value="ACTIVE">Active</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="SUSPENDED">Suspended</option>
+            </select>
+            <button class="btn-export" onclick="exportLoans()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export
+            </button>
+            <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAddLoanModal()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Add Loan
+            </button>
+        </div>
     </div>
-    <div class="table-actions">
-        <input type="text" id="searchLoan" class="filter-select" placeholder="Search employee..." style="width: 200px;" onkeyup="filterLoans()">
-        <select id="filterLoanType" class="filter-select" onchange="filterLoans()">
-            <option value="">All Loan Types</option>
-            @foreach(\App\Models\DeductionType::where('category', 'LOAN')->where('is_active', true)->orderBy('name')->get() as $loanType)
-                <option value="{{ $loanType->id }}">{{ $loanType->name }}</option>
-            @endforeach
-        </select>
-        <select id="filterLoanStatus" class="filter-select" onchange="filterLoans()">
-            <option value="">All Status</option>
-            <option value="ACTIVE">Active</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="SUSPENDED">Suspended</option>
-        </select>
-        <button class="btn-export" onclick="exportLoans()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Export
-        </button>
-        <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAddLoanModal()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Add Loan
-        </button>
-    </div>
-</div>
 
 <div class="table-wrapper">
     <table class="payroll-table">
@@ -228,9 +230,10 @@
     </table>
 </div>
 
-<div class="table-footer">
-    <p>Showing <strong id="showingLoansCount">{{ $loans->count() }}</strong> of <strong id="totalLoansCount">{{ $loans->count() }}</strong> loans</p>
-</div>
+    <div class="table-footer">
+        <p>Showing <strong id="showingLoansCount">{{ $loans->count() }}</strong> of <strong id="totalLoansCount">{{ $loans->count() }}</strong> loans</p>
+    </div>
+</section>
 
 <script>
 function filterLoans() {
@@ -364,3 +367,4 @@ window.closeAddLoanModal = function(event) {
     document.getElementById('otherLoanType').removeAttribute('required');
 };
 </script>
+</div>

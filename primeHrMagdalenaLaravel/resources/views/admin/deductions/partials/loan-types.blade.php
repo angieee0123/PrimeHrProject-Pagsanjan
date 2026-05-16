@@ -1,30 +1,32 @@
-<div class="table-header" style="margin-bottom: 16px;">
-    <div>
-        <h3 class="table-title" style="font-size: 16px; margin-bottom: 4px;">Loan Type Registry</h3>
-        <p class="table-sub">Register and manage reusable loan types that can be assigned to multiple employees</p>
+<div id="loan-types-tab" style="display: none;">
+<section class="table-section">
+    <div class="table-header">
+        <div>
+            <h3 class="table-title">Loan Type Registry</h3>
+            <p class="table-sub">Municipal Government of Pagsanjan · Register and manage reusable loan types that can be assigned to multiple employees</p>
+        </div>
+        <div class="table-actions">
+            <input type="text" id="searchLoanType" class="filter-select" placeholder="Search loan type..." style="width: 200px;" onkeyup="filterLoanTypes()">
+            <select id="filterLoanTypeProvider" class="filter-select" onchange="filterLoanTypes()">
+                <option value="">All Providers</option>
+                <option value="GSIS">GSIS</option>
+                <option value="PAG-IBIG">Pag-IBIG</option>
+                <option value="OTHER">Other</option>
+            </select>
+            <select id="filterLoanTypeStatus" class="filter-select" onchange="filterLoanTypes()">
+                <option value="">All Status</option>
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+            </select>
+            <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAddLoanTypeModal()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Register Loan Type
+            </button>
+        </div>
     </div>
-    <div class="table-actions">
-        <input type="text" id="searchLoanType" class="filter-select" placeholder="Search loan type..." style="width: 200px;" onkeyup="filterLoanTypes()">
-        <select id="filterLoanTypeProvider" class="filter-select" onchange="filterLoanTypes()">
-            <option value="">All Providers</option>
-            <option value="GSIS">GSIS</option>
-            <option value="PAG-IBIG">Pag-IBIG</option>
-            <option value="OTHER">Other</option>
-        </select>
-        <select id="filterLoanTypeStatus" class="filter-select" onchange="filterLoanTypes()">
-            <option value="">All Status</option>
-            <option value="1">Active</option>
-            <option value="0">Inactive</option>
-        </select>
-        <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAddLoanTypeModal()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Register Loan Type
-        </button>
-    </div>
-</div>
 
 <div style="background: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: #1565c0;">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -175,9 +177,10 @@
     </table>
 </div>
 
-<div class="table-footer">
-    <p>Showing <strong id="showingLoanTypesCount">{{ $loanTypes->count() }}</strong> of <strong id="totalLoanTypesCount">{{ $loanTypes->count() }}</strong> loan types</p>
-</div>
+    <div class="table-footer">
+        <p>Showing <strong id="showingLoanTypesCount">{{ $loanTypes->count() }}</strong> of <strong id="totalLoanTypesCount">{{ $loanTypes->count() }}</strong> loan types</p>
+    </div>
+</section>
 
 <script>
 function filterLoanTypes() {
@@ -310,3 +313,4 @@ window.updateLoanCode = function() {
     }
 };
 </script>
+</div>

@@ -1,37 +1,39 @@
-<div class="table-header" style="margin-bottom: 16px;">
-    <div>
-        <h3 class="table-title" style="font-size: 16px; margin-bottom: 4px;">Deduction Types</h3>
-        <p class="table-sub">Manage mandatory contributions, loans, and other deduction types</p>
+<div id="deduction-types-tab" style="display: block;">
+<section class="table-section">
+    <div class="table-header">
+        <div>
+            <h3 class="table-title">Deduction Types</h3>
+            <p class="table-sub">Municipal Government of Pagsanjan · Manage mandatory contributions, loans, and other deduction types</p>
+        </div>
+        <div class="table-actions">
+            <select class="filter-select">
+                <option value="">All Categories</option>
+                <option value="MANDATORY">Mandatory</option>
+                <option value="LOAN">Loan</option>
+                <option value="OTHER">Other</option>
+            </select>
+            <select class="filter-select">
+                <option value="">All Status</option>
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+            </select>
+            <button class="btn-export">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export
+            </button>
+            <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAddDeductionTypeModal()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Add Deduction Type
+            </button>
+        </div>
     </div>
-    <div class="table-actions">
-        <select class="filter-select">
-            <option value="">All Categories</option>
-            <option value="MANDATORY">Mandatory</option>
-            <option value="LOAN">Loan</option>
-            <option value="OTHER">Other</option>
-        </select>
-        <select class="filter-select">
-            <option value="">All Status</option>
-            <option value="1">Active</option>
-            <option value="0">Inactive</option>
-        </select>
-        <button class="btn-export">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Export
-        </button>
-        <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAddDeductionTypeModal()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Add Deduction Type
-        </button>
-    </div>
-</div>
 
 <div class="table-wrapper">
     <table class="payroll-table">
@@ -107,9 +109,11 @@
     </table>
 </div>
 
-<div class="table-footer">
-    <p>Showing <strong>{{ $deductionTypes->count() }}</strong> of <strong>{{ $deductionTypes->count() }}</strong> deduction types</p>
-</div>
+    <div class="table-footer">
+        <p>Showing <strong>{{ $deductionTypes->count() }}</strong> of <strong>{{ $deductionTypes->count() }}</strong> deduction types</p>
+    </div>
+</section>
 
 @include('admin.deductions.modals.addDeductionTypeModal')
 @include('admin.deductions.modals.editDeductionTypeModal')
+</div>

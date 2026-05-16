@@ -667,6 +667,7 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
     $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
     $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
     $department = $request->input('department');
+    $employeeName = $request->input('employee_name');
     $status = $request->input('status');
     $viewMode = $request->input('view_mode', 'daily');
 
@@ -674,6 +675,14 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
     $query = \App\Models\DailySalaryComputation::with([
         'employee.employmentDetail.departmentRelation',
         'employee.employmentDetail.designationRelation',
+        'employee.deductions' => function($q) use ($startDate, $endDate) {
+            $q->where('status', 'ACTIVE')
+              ->where('start_date', '<=', $endDate)
+              ->where(function($query) use ($endDate) {
+                  $query->whereNull('end_date')->orWhere('end_date', '>=', $endDate);
+              })
+              ->with('deductionType');
+        },
         'accreditedHoursLog'
     ])
     ->whereBetween('work_date', [$startDate, $endDate])
@@ -686,18 +695,41 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
         });
     }
 
+    if ($employeeName) {
+        $query->whereHas('employee', function($q) use ($employeeName) {
+            $q->whereRaw("CONCAT(first_name, ' ', COALESCE(CONCAT(SUBSTRING(middle_name, 1, 1), '. '), ''), last_name) = ?", [$employeeName]);
+        });
+    }
+
     $dailyComputations = $query->get();
 
     // Process based on view mode
     if ($viewMode === 'employee' || $viewMode === 'monthly') {
         // Group by employee
-        $payrollRecords = $dailyComputations->groupBy('employee_id')->map(function($records) use ($viewMode) {
+        $payrollRecords = $dailyComputations->groupBy('employee_id')->map(function($records) use ($viewMode, $startDate, $endDate) {
             $employee = $records->first()->employee;
             $totalBasicPay = $records->sum('daily_basic_pay');
             $totalOtPay = $records->sum('ot_pay');
             $totalLateDeduction = $records->sum('late_deduction');
             $totalUndertimeDeduction = $records->sum('undertime_deduction');
             $recordStatus = $records->every(fn($r) => $r->daily_gross_pay > 0) ? 'Processed' : 'Pending';
+
+            // Calculate deductions by type
+            $deductions = [];
+            foreach ($employee->deductions as $deduction) {
+                $deductionType = $deduction->deductionType;
+                $code = $deductionType->code;
+                
+                if ($deductionType->category === 'MANDATORY') {
+                    if ($deductionType->computation_type === 'PERCENTAGE') {
+                        $deductions[$code] = $totalBasicPay * ($deductionType->percentage_rate / 100);
+                    } else {
+                        $deductions[$code] = $deduction->amount ?? 0;
+                    }
+                } elseif ($deductionType->category === 'LOAN') {
+                    $deductions[$code] = $deduction->installment_amount ?? 0;
+                }
+            }
 
             return [
                 'id' => $employee->employee_id ?? 'N/A',
@@ -710,15 +742,33 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
                 'ot_pay' => $totalOtPay,
                 'late_deduction' => $totalLateDeduction,
                 'undertime_deduction' => $totalUndertimeDeduction,
+                'deductions' => $deductions,
                 'status' => $recordStatus,
                 'days_count' => $records->count(),
             ];
         })->values();
     } else {
         // Daily view - one row per day per employee
-        $payrollRecords = $dailyComputations->map(function($record) {
+        $payrollRecords = $dailyComputations->map(function($record) use ($startDate, $endDate) {
             $employee = $record->employee;
             $recordStatus = $record->daily_gross_pay > 0 ? 'Processed' : 'Pending';
+
+            // Calculate deductions by type (prorated for daily)
+            $deductions = [];
+            foreach ($employee->deductions as $deduction) {
+                $deductionType = $deduction->deductionType;
+                $code = $deductionType->code;
+                
+                if ($deductionType->category === 'MANDATORY') {
+                    if ($deductionType->computation_type === 'PERCENTAGE') {
+                        $deductions[$code] = $record->daily_basic_pay * ($deductionType->percentage_rate / 100);
+                    } else {
+                        $deductions[$code] = ($deduction->amount ?? 0) / 22; // Prorated daily
+                    }
+                } elseif ($deductionType->category === 'LOAN') {
+                    $deductions[$code] = ($deduction->installment_amount ?? 0) / 22; // Prorated daily
+                }
+            }
 
             return [
                 'id' => $employee->employee_id ?? 'N/A',
@@ -731,6 +781,7 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
                 'ot_pay' => $record->ot_pay,
                 'late_deduction' => $record->late_deduction,
                 'undertime_deduction' => $record->undertime_deduction,
+                'deductions' => $deductions,
                 'status' => $recordStatus,
                 'days_count' => null,
             ];
@@ -742,11 +793,462 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
         $payrollRecords = $payrollRecords->filter(fn($r) => $r['status'] === $status)->values();
     }
 
+    // Get all unique deduction types from the records
+    $deductionTypes = collect();
+    foreach ($payrollRecords as $record) {
+        if (isset($record['deductions'])) {
+            foreach (array_keys($record['deductions']) as $code) {
+                if (!$deductionTypes->contains($code)) {
+                    $deductionTypes->push($code);
+                }
+            }
+        }
+    }
+
     // Get unique departments for filter
     $departments = \App\Models\Department::where('status', 'Active')->pluck('name');
 
-    return view('admin.payroll.adminPayroll', compact('payrollRecords', 'departments', 'viewMode'));
+    // Get unique employee names for filter
+    $employees = \App\Models\Employee::orderBy('first_name')
+        ->get()
+        ->map(function($emp) {
+            return trim($emp->first_name . ' ' . ($emp->middle_name ? substr($emp->middle_name, 0, 1) . '. ' : '') . $emp->last_name);
+        })
+        ->unique()
+        ->values();
+
+    return view('admin.payroll.adminPayroll', compact('payrollRecords', 'departments', 'employees', 'viewMode', 'deductionTypes'));
 })->middleware('auth')->name('admin.payroll');
+
+Route::post('/admin/payroll/generate', function (\Illuminate\Http\Request $request) {
+    $data = $request->validate([
+        'start_date' => 'required|date',
+        'end_date' => 'required|date|after_or_equal:start_date',
+        'pay_date' => 'required|date',
+        'payroll_type' => 'required|in:regular,13th_month,bonus,special',
+        'department' => 'nullable|string',
+        'employment_status' => 'nullable|string',
+        'include_deductions' => 'nullable|boolean',
+        'include_loans' => 'nullable|boolean',
+        'include_overtime' => 'nullable|boolean',
+    ]);
+
+    try {
+        // Get employees based on filters
+        $employeesQuery = \App\Models\Employee::with([
+            'employmentDetail.departmentRelation',
+            'employmentDetail.designationRelation'
+        ]);
+
+        if ($data['department']) {
+            $employeesQuery->whereHas('employmentDetail.departmentRelation', function($q) use ($data) {
+                $q->where('name', $data['department']);
+            });
+        }
+
+        if ($data['employment_status']) {
+            $employeesQuery->whereHas('employmentDetail', function($q) use ($data) {
+                $q->where('employment_status', $data['employment_status']);
+            });
+        }
+
+        $employees = $employeesQuery->get();
+        $processedCount = 0;
+        $errors = [];
+
+        foreach ($employees as $employee) {
+            // Get all attendance records for the period
+            $attendances = \App\Models\Attendance::where('employee_id', $employee->id)
+                ->whereBetween('date', [$data['start_date'], $data['end_date']])
+                ->get();
+
+            foreach ($attendances as $attendance) {
+                // Check if accredited hours log exists
+                $accreditedLog = \App\Models\AccreditedHoursLog::where('attendance_id', $attendance->id)->first();
+                
+                if (!$accreditedLog) {
+                    $errors[] = "No accredited hours log for {$employee->first_name} {$employee->last_name} on {$attendance->date}";
+                    continue;
+                }
+
+                // Check if salary computation already exists
+                $existingComputation = \App\Models\DailySalaryComputation::where('accredited_hours_log_id', $accreditedLog->id)->first();
+                
+                if (!$existingComputation) {
+                    // Generate salary computation
+                    \App\Models\DailySalaryComputation::computeFromAccreditedLog($accreditedLog);
+                    $processedCount++;
+                }
+            }
+        }
+
+        $message = "Payroll generated successfully! Processed {$processedCount} record(s) for period " . 
+                   date('M d, Y', strtotime($data['start_date'])) . ' to ' . 
+                   date('M d, Y', strtotime($data['end_date']));
+
+        if (count($errors) > 0) {
+            $message .= " (" . count($errors) . " records skipped due to missing data)";
+        }
+
+        return redirect()->route('admin.payroll', ['tab' => 'register', 'start_date' => $data['start_date'], 'end_date' => $data['end_date']])
+            ->with('success', $message);
+
+    } catch (\Exception $e) {
+        return redirect()->route('admin.payroll', ['tab' => 'generate'])
+            ->with('error', 'Failed to generate payroll: ' . $e->getMessage());
+    }
+})->middleware('auth')->name('admin.payroll.generate');
+
+Route::get('/admin/payroll/preview', function (\Illuminate\Http\Request $request) {
+    $startDate = $request->input('start_date');
+    $endDate = $request->input('end_date');
+    $department = $request->input('department');
+    $employmentStatus = $request->input('employment_status');
+
+    // Get employees based on filters
+    $employeesQuery = \App\Models\Employee::with([
+        'employmentDetail.departmentRelation',
+        'employmentDetail.designationRelation'
+    ]);
+
+    if ($department) {
+        $employeesQuery->whereHas('employmentDetail.departmentRelation', function($q) use ($department) {
+            $q->where('name', $department);
+        });
+    }
+
+    if ($employmentStatus) {
+        $employeesQuery->whereHas('employmentDetail', function($q) use ($employmentStatus) {
+            $q->where('employment_status', $employmentStatus);
+        });
+    }
+
+    $employees = $employeesQuery->get();
+    $employeeIds = $employees->pluck('id');
+
+    // Get existing salary computations for the period
+    $computations = \App\Models\DailySalaryComputation::whereIn('employee_id', $employeeIds)
+        ->whereBetween('work_date', [$startDate, $endDate])
+        ->get();
+
+    $estimatedGross = $computations->sum('daily_basic_pay') + $computations->sum('ot_pay');
+    $estimatedDeductions = $computations->sum('late_deduction') + $computations->sum('undertime_deduction');
+    $estimatedNet = $estimatedGross - $estimatedDeductions;
+
+    return response()->json([
+        'employee_count' => $employees->count(),
+        'estimated_gross' => number_format($estimatedGross, 2, '.', ''),
+        'estimated_deductions' => number_format($estimatedDeductions, 2, '.', ''),
+        'estimated_net' => number_format($estimatedNet, 2, '.', ''),
+    ]);
+})->middleware('auth')->name('admin.payroll.preview');
+
+Route::post('/admin/payroll/calculate', function (\Illuminate\Http\Request $request) {
+    $data = $request->validate([
+        'start_date' => 'required|date',
+        'end_date' => 'required|date|after_or_equal:start_date',
+        'pay_date' => 'required|date',
+        'payroll_type' => 'required|in:regular,13th_month,bonus,special',
+        'department' => 'nullable|string',
+        'employment_status' => 'nullable|string',
+    ]);
+
+    try {
+        // Get employees based on filters
+        $employeesQuery = \App\Models\Employee::with([
+            'employmentDetail.departmentRelation',
+            'employmentDetail.designationRelation',
+            'deductions' => function($q) use ($data) {
+                $q->where('status', 'ACTIVE')
+                  ->whereBetween('start_date', [$data['start_date'], $data['end_date']]);
+            },
+            'deductions.deductionType'
+        ]);
+
+        if ($data['department']) {
+            $employeesQuery->whereHas('employmentDetail.departmentRelation', function($q) use ($data) {
+                $q->where('name', $data['department']);
+            });
+        }
+
+        if ($data['employment_status']) {
+            $employeesQuery->whereHas('employmentDetail', function($q) use ($data) {
+                $q->where('employment_status', $data['employment_status']);
+            });
+        }
+
+        $employees = $employeesQuery->get();
+        $payrollData = [];
+
+        foreach ($employees as $employee) {
+            // Get salary computations for the period
+            $computations = \App\Models\DailySalaryComputation::where('employee_id', $employee->id)
+                ->whereBetween('work_date', [$data['start_date'], $data['end_date']])
+                ->get();
+
+            if ($computations->isEmpty()) {
+                continue;
+            }
+
+            $basicPay = $computations->sum('daily_basic_pay');
+            $otPay = $computations->sum('ot_pay');
+            $lateDeduction = $computations->sum('late_deduction');
+            $undertimeDeduction = $computations->sum('undertime_deduction');
+            $daysWorked = $computations->count();
+            $dailyRate = $computations->first()->daily_rate ?? 0;
+
+            // Calculate mandatory deductions (SSS, GSIS, PhilHealth, Pag-IBIG)
+            $mandatoryDeductions = 0;
+            $loanDeductions = 0;
+
+            foreach ($employee->deductions as $deduction) {
+                if ($deduction->deductionType->category === 'MANDATORY') {
+                    if ($deduction->deductionType->computation_type === 'PERCENTAGE') {
+                        $mandatoryDeductions += ($basicPay * ($deduction->deductionType->percentage_rate / 100));
+                    } else {
+                        $mandatoryDeductions += $deduction->amount ?? 0;
+                    }
+                } elseif ($deduction->deductionType->category === 'LOAN') {
+                    $loanDeductions += $deduction->installment_amount ?? 0;
+                }
+            }
+
+            $payrollData[] = [
+                'name' => trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name),
+                'position' => $employee->employmentDetail?->designationRelation?->title ?? 'N/A',
+                'department' => $employee->employmentDetail?->departmentRelation?->name ?? 'N/A',
+                'days_worked' => $daysWorked,
+                'daily_rate' => $dailyRate,
+                'basic_pay' => $basicPay,
+                'ot_pay' => $otPay,
+                'late' => $lateDeduction,
+                'undertime' => $undertimeDeduction,
+                'mandatory_deductions' => $mandatoryDeductions,
+                'loan_deductions' => $loanDeductions,
+            ];
+        }
+
+        $payrollTypeLabels = [
+            'regular' => 'Regular Payroll',
+            '13th_month' => '13th Month Pay',
+            'bonus' => 'Bonus',
+            'special' => 'Special Payroll'
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'period' => date('M d, Y', strtotime($data['start_date'])) . ' - ' . date('M d, Y', strtotime($data['end_date'])),
+                'pay_date' => date('M d, Y', strtotime($data['pay_date'])),
+                'payroll_type' => $payrollTypeLabels[$data['payroll_type']],
+                'employees' => $payrollData,
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+})->middleware('auth')->name('admin.payroll.calculate');
+
+Route::get('/admin/payroll/export', function (\Illuminate\Http\Request $request) {
+    $startDate = $request->input('start_date');
+    $endDate = $request->input('end_date');
+    $payDate = $request->input('pay_date');
+    $department = $request->input('department');
+    $employmentStatus = $request->input('employment_status');
+
+    // Get employees based on filters
+    $employeesQuery = \App\Models\Employee::with([
+        'employmentDetail.departmentRelation',
+        'employmentDetail.designationRelation',
+        'deductions' => function($q) use ($startDate, $endDate) {
+            $q->where('status', 'ACTIVE')
+              ->where('start_date', '<=', $endDate)
+              ->where(function($query) use ($endDate) {
+                  $query->whereNull('end_date')
+                        ->orWhere('end_date', '>=', $endDate);
+              })
+              ->with('deductionType');
+        }
+    ]);
+
+    if ($department) {
+        $employeesQuery->whereHas('employmentDetail.departmentRelation', function($q) use ($department) {
+            $q->where('name', $department);
+        });
+    }
+
+    if ($employmentStatus) {
+        $employeesQuery->whereHas('employmentDetail', function($q) use ($employmentStatus) {
+            $q->where('employment_status', $employmentStatus);
+        });
+    }
+
+    $employees = $employeesQuery->get();
+
+    // Get all unique deduction types
+    $deductionTypeCodes = [];
+    $deductionTypeNames = [];
+    foreach ($employees as $employee) {
+        foreach ($employee->deductions as $deduction) {
+            $code = $deduction->deductionType->code;
+            if (!in_array($code, $deductionTypeCodes)) {
+                $deductionTypeCodes[] = $code;
+                $deductionTypeNames[$code] = $deduction->deductionType->name;
+            }
+        }
+    }
+
+    $headers = [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => 'attachment; filename=payroll_' . date('Y-m-d', strtotime($startDate)) . '_to_' . date('Y-m-d', strtotime($endDate)) . '.csv',
+    ];
+
+    $callback = function () use ($employees, $startDate, $endDate, $payDate, $deductionTypeCodes, $deductionTypeNames) {
+        $file = fopen('php://output', 'w');
+        fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
+
+        // Header rows
+        fputcsv($file, ['MUNICIPAL GOVERNMENT OF PAGSANJAN']);
+        fputcsv($file, ['PAYROLL REGISTER']);
+        fputcsv($file, ['Period: ' . date('M d, Y', strtotime($startDate)) . ' - ' . date('M d, Y', strtotime($endDate))]);
+        fputcsv($file, ['Pay Date: ' . date('M d, Y', strtotime($payDate))]);
+        fputcsv($file, []); // Empty row
+
+        // Column headers
+        $columnHeaders = [
+            'No.',
+            'Employee Name',
+            'Position',
+            'Department',
+            'Days Worked',
+            'Daily Rate',
+            'Basic Pay',
+            'OT Pay',
+            'Late Deduction',
+            'Undertime Deduction',
+        ];
+        
+        // Add deduction type columns
+        foreach ($deductionTypeCodes as $code) {
+            $columnHeaders[] = $deductionTypeNames[$code];
+        }
+        
+        $columnHeaders[] = 'Total Deductions';
+        $columnHeaders[] = 'Net Pay';
+        
+        fputcsv($file, $columnHeaders);
+
+        $totals = [
+            'basic_pay' => 0,
+            'ot_pay' => 0,
+            'late' => 0,
+            'undertime' => 0,
+            'deductions' => array_fill_keys($deductionTypeCodes, 0),
+            'total_deductions' => 0,
+            'net_pay' => 0
+        ];
+
+        $rowNum = 1;
+        foreach ($employees as $employee) {
+            $computations = \App\Models\DailySalaryComputation::where('employee_id', $employee->id)
+                ->whereBetween('work_date', [$startDate, $endDate])
+                ->get();
+
+            if ($computations->isEmpty()) {
+                continue;
+            }
+
+            $basicPay = $computations->sum('daily_basic_pay');
+            $otPay = $computations->sum('ot_pay');
+            $lateDeduction = $computations->sum('late_deduction');
+            $undertimeDeduction = $computations->sum('undertime_deduction');
+            $daysWorked = $computations->count();
+            $dailyRate = $computations->first()->daily_rate ?? 0;
+
+            // Calculate deductions by type
+            $deductions = array_fill_keys($deductionTypeCodes, 0);
+            foreach ($employee->deductions as $deduction) {
+                $code = $deduction->deductionType->code;
+                if ($deduction->deductionType->category === 'MANDATORY') {
+                    if ($deduction->deductionType->computation_type === 'PERCENTAGE') {
+                        $deductions[$code] = $basicPay * ($deduction->deductionType->percentage_rate / 100);
+                    } else {
+                        $deductions[$code] = $deduction->amount ?? 0;
+                    }
+                } elseif ($deduction->deductionType->category === 'LOAN') {
+                    $deductions[$code] = $deduction->installment_amount ?? 0;
+                }
+            }
+
+            $totalDeductions = $lateDeduction + $undertimeDeduction + array_sum($deductions);
+            $netPay = $basicPay + $otPay - $totalDeductions;
+
+            $totals['basic_pay'] += $basicPay;
+            $totals['ot_pay'] += $otPay;
+            $totals['late'] += $lateDeduction;
+            $totals['undertime'] += $undertimeDeduction;
+            foreach ($deductionTypeCodes as $code) {
+                $totals['deductions'][$code] += $deductions[$code];
+            }
+            $totals['total_deductions'] += $totalDeductions;
+            $totals['net_pay'] += $netPay;
+
+            $rowData = [
+                $rowNum++,
+                trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name),
+                $employee->employmentDetail?->designationRelation?->title ?? 'N/A',
+                $employee->employmentDetail?->departmentRelation?->name ?? 'N/A',
+                $daysWorked,
+                number_format($dailyRate, 2),
+                number_format($basicPay, 2),
+                number_format($otPay, 2),
+                number_format($lateDeduction, 2),
+                number_format($undertimeDeduction, 2),
+            ];
+            
+            // Add deduction amounts
+            foreach ($deductionTypeCodes as $code) {
+                $rowData[] = number_format($deductions[$code], 2);
+            }
+            
+            $rowData[] = number_format($totalDeductions, 2);
+            $rowData[] = number_format($netPay, 2);
+            
+            fputcsv($file, $rowData);
+        }
+
+        // Total row
+        $totalRow = [
+            '',
+            '',
+            '',
+            '',
+            '',
+            'TOTAL:',
+            number_format($totals['basic_pay'], 2),
+            number_format($totals['ot_pay'], 2),
+            number_format($totals['late'], 2),
+            number_format($totals['undertime'], 2),
+        ];
+        
+        foreach ($deductionTypeCodes as $code) {
+            $totalRow[] = number_format($totals['deductions'][$code], 2);
+        }
+        
+        $totalRow[] = number_format($totals['total_deductions'], 2);
+        $totalRow[] = number_format($totals['net_pay'], 2);
+        
+        fputcsv($file, $totalRow);
+
+        fclose($file);
+    };
+
+    return response()->stream($callback, 200, $headers);
+})->middleware('auth')->name('admin.payroll.export');
 
 Route::get('/admin/deductions', function () {
     // Get all employee deductions with relationships

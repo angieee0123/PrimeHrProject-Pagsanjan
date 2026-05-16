@@ -1,39 +1,41 @@
-<div class="table-header" style="margin-bottom: 16px;">
-    <div>
-        <h3 class="table-title" style="font-size: 16px; margin-bottom: 4px;">Employee Deductions</h3>
-        <p class="table-sub">Assign and manage deductions for employees</p>
+<div id="employee-deductions-tab" style="display: none;">
+<section class="table-section">
+    <div class="table-header">
+        <div>
+            <h3 class="table-title">Employee Deductions</h3>
+            <p class="table-sub">Municipal Government of Pagsanjan · Assign and manage deductions for employees</p>
+        </div>
+        <div class="table-actions">
+            <input type="text" id="searchEmployee" class="filter-select" placeholder="Search employee..." style="width: 200px;" onkeyup="filterEmployeeDeductions()">
+            <select id="filterType" class="filter-select" onchange="filterEmployeeDeductions()">
+                <option value="">All Types</option>
+                <option value="MANDATORY">Mandatory</option>
+                <option value="LOAN">Loans</option>
+                <option value="OTHER">Other</option>
+            </select>
+            <select id="filterStatus" class="filter-select" onchange="filterEmployeeDeductions()">
+                <option value="">All Status</option>
+                <option value="ACTIVE">Active</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="SUSPENDED">Suspended</option>
+            </select>
+            <button class="btn-export" onclick="exportEmployeeDeductions()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export
+            </button>
+            <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAssignDeductionModal()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Assign Deduction
+            </button>
+        </div>
     </div>
-    <div class="table-actions">
-        <input type="text" id="searchEmployee" class="filter-select" placeholder="Search employee..." style="width: 200px;" onkeyup="filterEmployeeDeductions()">
-        <select id="filterType" class="filter-select" onchange="filterEmployeeDeductions()">
-            <option value="">All Types</option>
-            <option value="MANDATORY">Mandatory</option>
-            <option value="LOAN">Loans</option>
-            <option value="OTHER">Other</option>
-        </select>
-        <select id="filterStatus" class="filter-select" onchange="filterEmployeeDeductions()">
-            <option value="">All Status</option>
-            <option value="ACTIVE">Active</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="SUSPENDED">Suspended</option>
-        </select>
-        <button class="btn-export" onclick="exportEmployeeDeductions()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Export
-        </button>
-        <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAssignDeductionModal()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Assign Deduction
-        </button>
-    </div>
-</div>
 
 <div class="table-wrapper">
     <table class="payroll-table">
@@ -44,6 +46,7 @@
                 <th>Deduction Type</th>
                 <th>Category</th>
                 <th>Amount/Balance</th>
+                <th>Cutoff Schedule</th>
                 <th>Start Date</th>
                 <th>End Date</th>
                 <th>Status</th>
@@ -116,6 +119,34 @@
                         @endif
                     </td>
                     <td>
+                        @php
+                            // Get the deduction schedule
+                            $schedule = $deduction->deductionType->schedules->first();
+                            $cutoffSchedule = $schedule ? $schedule->cutoff_schedule : 'BOTH_SPLIT';
+                            
+                            // Display cutoff schedule
+                            if ($cutoffSchedule === '1ST_ONLY') {
+                                $scheduleDisplay = '1st Cutoff Only';
+                                $scheduleColor = '#0b044d';
+                            } elseif ($cutoffSchedule === '2ND_ONLY') {
+                                $scheduleDisplay = '2nd Cutoff Only';
+                                $scheduleColor = '#15803d';
+                            } elseif ($cutoffSchedule === 'BOTH_FULL') {
+                                $scheduleDisplay = 'Both (Full Each)';
+                                $scheduleColor = '#d9bb00';
+                            } else { // BOTH_SPLIT
+                                $scheduleDisplay = 'Both (Split 50-50)';
+                                $scheduleColor = '#6b6a8a';
+                            }
+                        @endphp
+                        <div>
+                            <p style="font-weight: 600; color: {{ $scheduleColor }}; margin: 0; font-size: 13px;">
+                                {{ $scheduleDisplay }}
+                            </p>
+                            <p style="color: #9999bb; margin: 0; font-size: 11px;">{{ $cutoffSchedule }}</p>
+                        </div>
+                    </td>
+                    <td>
                         <span style="font-size: 12px; color: #6b6a8a;">
                             {{ \Carbon\Carbon::parse($deduction->start_date)->format('M d, Y') }}
                         </span>
@@ -157,7 +188,7 @@
                 </tr>
             @empty
                 <tr id="noDataRow">
-                    <td colspan="9" style="text-align: center; padding: 40px; color: #9999bb;">
+                    <td colspan="10" style="text-align: center; padding: 40px; color: #9999bb;">
                         No employee deductions found. Click "Assign Deduction" to add.
                     </td>
                 </tr>
@@ -166,9 +197,10 @@
     </table>
 </div>
 
-<div class="table-footer">
-    <p>Showing <strong id="showingCount">{{ $employeeDeductions->count() }}</strong> of <strong id="totalCount">{{ $employeeDeductions->count() }}</strong> records</p>
-</div>
+    <div class="table-footer">
+        <p>Showing <strong id="showingCount">{{ $employeeDeductions->count() }}</strong> of <strong id="totalCount">{{ $employeeDeductions->count() }}</strong> records</p>
+    </div>
+</section>
 
 <script>
 function filterEmployeeDeductions() {
@@ -285,3 +317,4 @@ function exportEmployeeDeductions() {
 
 @include('admin.deductions.modals.assignDeductionModal')
 @include('admin.deductions.modals.editEmployeeDeductionModal')
+</div>

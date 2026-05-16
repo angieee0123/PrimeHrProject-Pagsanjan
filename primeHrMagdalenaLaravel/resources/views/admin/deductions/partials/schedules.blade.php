@@ -1,26 +1,28 @@
-<div class="table-header" style="margin-bottom: 16px;">
-    <div>
-        <h3 class="table-title" style="font-size: 16px; margin-bottom: 4px;">Deduction Schedules</h3>
-        <p class="table-sub">Manage when deductions are applied per cutoff period for each employee</p>
+<div id="schedules-tab" style="display: none;">
+<section class="table-section">
+    <div class="table-header">
+        <div>
+            <h3 class="table-title">Deduction Schedules</h3>
+            <p class="table-sub">Municipal Government of Pagsanjan · Manage when deductions are applied per cutoff period for each employee</p>
+        </div>
+        <div class="table-actions">
+            <input type="text" id="searchSchedule" class="filter-select" placeholder="Search employee..." style="width: 200px;" onkeyup="filterSchedules()">
+            <select id="filterDepartment" class="filter-select" onchange="filterSchedules()">
+                <option value="">All Departments</option>
+                @foreach(\App\Models\Department::where('status', 'Active')->orderBy('name')->get() as $dept)
+                    <option value="{{ $dept->name }}">{{ $dept->name }}</option>
+                @endforeach
+            </select>
+            <button class="btn-export" onclick="exportSchedules()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export
+            </button>
+        </div>
     </div>
-    <div class="table-actions">
-        <input type="text" id="searchSchedule" class="filter-select" placeholder="Search employee..." style="width: 200px;" onkeyup="filterSchedules()">
-        <select id="filterDepartment" class="filter-select" onchange="filterSchedules()">
-            <option value="">All Departments</option>
-            @foreach(\App\Models\Department::where('status', 'Active')->orderBy('name')->get() as $dept)
-                <option value="{{ $dept->name }}">{{ $dept->name }}</option>
-            @endforeach
-        </select>
-        <button class="btn-export" onclick="exportSchedules()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Export
-        </button>
-    </div>
-</div>
 
 <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: #1e40af;">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -104,9 +106,10 @@
     </table>
 </div>
 
-<div class="table-footer">
-    <p>Showing <strong id="showingSchedulesCount">{{ count($employeesWithDeductions) }}</strong> of <strong id="totalSchedulesCount">{{ count($employeesWithDeductions) }}</strong> employees</p>
-</div>
+    <div class="table-footer">
+        <p>Showing <strong id="showingSchedulesCount">{{ count($employeesWithDeductions) }}</strong> of <strong id="totalSchedulesCount">{{ count($employeesWithDeductions) }}</strong> employees</p>
+    </div>
+</section>
 
 <script>
 function filterSchedules() {
@@ -147,3 +150,4 @@ function exportSchedules() {
 </script>
 
 @include('admin.deductions.modals.assignDeductionScheduleModal')
+</div>
