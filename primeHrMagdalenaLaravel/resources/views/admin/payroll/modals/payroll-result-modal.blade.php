@@ -254,18 +254,49 @@
 </style>
 
 <script>
+let currentPayrollData = null;
+
 function closePayrollModal() {
     document.getElementById('payrollResultModal').style.display = 'none';
 }
 
 function showPayrollModal(data) {
+    currentPayrollData = data;
+    
     // Populate modal info
     document.getElementById('modalPeriod').textContent = data.period;
     document.getElementById('modalPayDate').textContent = data.pay_date;
     document.getElementById('modalPayrollType').textContent = data.payroll_type;
     document.getElementById('modalEmployeeCount').textContent = data.employees.length;
 
-    // Populate table
+    // Build dynamic table header
+    const thead = document.querySelector('.payroll-summary-table thead');
+    const deductionTypes = data.deduction_types || [];
+    const deductionNames = data.deduction_names || {};
+    
+    thead.innerHTML = `
+        <tr>
+            <th rowspan="2">No.</th>
+            <th rowspan="2">Employee Name</th>
+            <th rowspan="2">Position</th>
+            <th rowspan="2">Department</th>
+            <th rowspan="2">Days Worked</th>
+            <th rowspan="2">Daily Rate</th>
+            <th colspan="2">Earnings</th>
+            <th colspan="${2 + deductionTypes.length}">Deductions</th>
+            <th rowspan="2">Total Deductions</th>
+            <th rowspan="2">Net Pay</th>
+        </tr>
+        <tr>
+            <th>Basic Pay</th>
+            <th>OT Pay</th>
+            <th>Late</th>
+            <th>Undertime</th>
+            ${deductionTypes.map(code => `<th>${deductionNames[code] || code}</th>`).join('')}
+        </tr>
+    `;
+
+    // Populate table body
     const tbody = document.getElementById('payrollTableBody');
     tbody.innerHTML = '';
 
@@ -274,26 +305,46 @@ function showPayrollModal(data) {
         otPay: 0,
         late: 0,
         undertime: 0,
-        mandatory: 0,
-        loans: 0,
-        deductions: 0,
+        deductions: {},
+        totalDeductions: 0,
         netPay: 0
     };
+    
+    // Initialize deduction totals
+    deductionTypes.forEach(code => {
+        totals.deductions[code] = 0;
+    });
 
     data.employees.forEach((emp, index) => {
         const row = document.createElement('tr');
         
-        const totalDeductions = emp.late + emp.undertime + emp.mandatory_deductions + emp.loan_deductions;
+        // Calculate total deductions
+        let totalDeductions = emp.late + emp.undertime;
+        Object.values(emp.deductions || {}).forEach(amount => {
+            totalDeductions += amount;
+        });
+        
         const netPay = emp.basic_pay + emp.ot_pay - totalDeductions;
 
+        // Update totals
         totals.basicPay += emp.basic_pay;
         totals.otPay += emp.ot_pay;
         totals.late += emp.late;
         totals.undertime += emp.undertime;
-        totals.mandatory += emp.mandatory_deductions;
-        totals.loans += emp.loan_deductions;
-        totals.deductions += totalDeductions;
+        totals.totalDeductions += totalDeductions;
         totals.netPay += netPay;
+        
+        // Update deduction totals
+        deductionTypes.forEach(code => {
+            const amount = emp.deductions[code] || 0;
+            totals.deductions[code] += amount;
+        });
+
+        // Build deduction columns
+        const deductionCells = deductionTypes.map(code => {
+            const amount = emp.deductions[code] || 0;
+            return `<td class="text-right">₱${parseFloat(amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`;
+        }).join('');
 
         row.innerHTML = `
             <td class="text-center">${index + 1}</td>
@@ -306,23 +357,31 @@ function showPayrollModal(data) {
             <td class="text-right">₱${parseFloat(emp.ot_pay).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="text-right">₱${parseFloat(emp.late).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="text-right">₱${parseFloat(emp.undertime).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="text-right">₱${parseFloat(emp.mandatory_deductions).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="text-right">₱${parseFloat(emp.loan_deductions).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            ${deductionCells}
             <td class="text-right">₱${parseFloat(totalDeductions).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="text-right">₱${parseFloat(netPay).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
         `;
         tbody.appendChild(row);
     });
 
-    // Update totals
-    document.getElementById('totalBasicPay').textContent = '₱' + totals.basicPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('totalOtPay').textContent = '₱' + totals.otPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('totalLate').textContent = '₱' + totals.late.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('totalUndertime').textContent = '₱' + totals.undertime.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('totalMandatory').textContent = '₱' + totals.mandatory.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('totalLoans').textContent = '₱' + totals.loans.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('totalDeductions').textContent = '₱' + totals.deductions.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('totalNetPay').textContent = '₱' + totals.netPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    // Build dynamic footer
+    const tfoot = document.querySelector('.payroll-summary-table tfoot');
+    const deductionTotalCells = deductionTypes.map(code => {
+        return `<td id="total_${code}">₱${totals.deductions[code].toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`;
+    }).join('');
+    
+    tfoot.innerHTML = `
+        <tr class="total-row">
+            <td colspan="6" style="text-align: right; font-weight: 700;">TOTAL:</td>
+            <td id="totalBasicPay">₱${totals.basicPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td id="totalOtPay">₱${totals.otPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td id="totalLate">₱${totals.late.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td id="totalUndertime">₱${totals.undertime.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            ${deductionTotalCells}
+            <td id="totalDeductions">₱${totals.totalDeductions.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td id="totalNetPay">₱${totals.netPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+        </tr>
+    `;
 
     // Show modal
     document.getElementById('payrollResultModal').style.display = 'flex';

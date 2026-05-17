@@ -671,6 +671,10 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
     $status = $request->input('status');
     $viewMode = $request->input('view_mode', 'daily');
 
+    // Determine cutoff period (1st or 2nd half of month)
+    $startDay = (int) date('d', strtotime($startDate));
+    $isCutoff1st = $startDay <= 15;
+    
     // Get daily salary computations for the period
     $query = \App\Models\DailySalaryComputation::with([
         'employee.employmentDetail.departmentRelation',
@@ -681,7 +685,7 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
               ->where(function($query) use ($endDate) {
                   $query->whereNull('end_date')->orWhere('end_date', '>=', $endDate);
               })
-              ->with('deductionType');
+              ->with('deductionType.schedules');
         },
         'accreditedHoursLog'
     ])
@@ -706,7 +710,7 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
     // Process based on view mode
     if ($viewMode === 'employee' || $viewMode === 'monthly') {
         // Group by employee
-        $payrollRecords = $dailyComputations->groupBy('employee_id')->map(function($records) use ($viewMode, $startDate, $endDate) {
+        $payrollRecords = $dailyComputations->groupBy('employee_id')->map(function($records) use ($viewMode, $startDate, $endDate, $isCutoff1st) {
             $employee = $records->first()->employee;
             $totalBasicPay = $records->sum('daily_basic_pay');
             $totalOtPay = $records->sum('ot_pay');
@@ -714,42 +718,61 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
             $totalUndertimeDeduction = $records->sum('undertime_deduction');
             $recordStatus = $records->every(fn($r) => $r->daily_gross_pay > 0) ? 'Processed' : 'Pending';
 
-            // Calculate deductions by type
+            // Calculate deductions by type with cutoff schedule
             $deductions = [];
             foreach ($employee->deductions as $deduction) {
                 $deductionType = $deduction->deductionType;
                 $code = $deductionType->code;
                 
-                // Skip employer/government shares (only deduct employee shares)
                 if (!$deductionType->deducted_from_employee) {
                     continue;
                 }
                 
+                // Get schedule - prioritize employee's custom schedule over deduction type schedule
+                $cutoffSchedule = 'BOTH_SPLIT'; // Default
+                if ($deduction->custom_cutoff_schedule) {
+                    // Use employee-specific custom schedule
+                    $cutoffSchedule = $deduction->custom_cutoff_schedule;
+                } else {
+                    // Use deduction type's default schedule
+                    $schedule = $deductionType->schedules->first();
+                    $cutoffSchedule = $schedule ? $schedule->cutoff_schedule : 'BOTH_SPLIT';
+                }
+                
+                // Calculate base deduction amount
+                $deductionAmount = 0;
+                
                 if ($deductionType->category === 'MANDATORY') {
                     if ($deductionType->computation_type === 'PERCENTAGE') {
                         $baseAmount = 0;
-                        
-                        // Determine base amount based on base_salary_type
                         if ($deductionType->base_salary_type === 'BASIC') {
                             $baseAmount = $totalBasicPay;
                         } elseif ($deductionType->base_salary_type === 'GROSS') {
                             $baseAmount = $totalBasicPay + $totalOtPay;
                         } elseif ($deductionType->base_salary_type === 'MONTHLY') {
-                            // Get monthly salary from designation
                             $baseAmount = $employee->employmentDetail?->designationRelation?->monthly_rate ?? 0;
                         } else {
-                            $baseAmount = $totalBasicPay; // Default to basic
+                            $baseAmount = $totalBasicPay;
                         }
-                        
-                        $deductions[$code] = $baseAmount * ($deductionType->percentage_rate / 100);
+                        $deductionAmount = $baseAmount * ($deductionType->percentage_rate / 100);
                     } elseif ($deductionType->computation_type === 'FIXED') {
-                        // For FIXED, use percentage_rate column (which stores the fixed amount)
-                        $deductions[$code] = $deductionType->percentage_rate ?? $deduction->amount ?? 0;
+                        $deductionAmount = $deductionType->percentage_rate ?? $deduction->amount ?? 0;
                     } else {
-                        $deductions[$code] = $deduction->amount ?? 0;
+                        $deductionAmount = $deduction->amount ?? 0;
                     }
                 } elseif ($deductionType->category === 'LOAN') {
-                    $deductions[$code] = $deduction->installment_amount ?? 0;
+                    $deductionAmount = $deduction->installment_amount ?? 0;
+                }
+                
+                // Apply cutoff schedule
+                if ($cutoffSchedule === '1ST_ONLY') {
+                    $deductions[$code] = $isCutoff1st ? $deductionAmount : 0;
+                } elseif ($cutoffSchedule === '2ND_ONLY') {
+                    $deductions[$code] = $isCutoff1st ? 0 : $deductionAmount;
+                } elseif ($cutoffSchedule === 'BOTH_FULL') {
+                    $deductions[$code] = $deductionAmount;
+                } else { // BOTH_SPLIT
+                    $deductions[$code] = $deductionAmount / 2;
                 }
             }
 
@@ -771,47 +794,66 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
         })->values();
     } else {
         // Daily view - one row per day per employee
-        $payrollRecords = $dailyComputations->map(function($record) use ($startDate, $endDate) {
+        $payrollRecords = $dailyComputations->map(function($record) use ($startDate, $endDate, $isCutoff1st) {
             $employee = $record->employee;
             $recordStatus = $record->daily_gross_pay > 0 ? 'Processed' : 'Pending';
 
-            // Calculate deductions by type (prorated for daily)
+            // Calculate deductions by type (prorated for daily) with cutoff schedule
             $deductions = [];
             foreach ($employee->deductions as $deduction) {
                 $deductionType = $deduction->deductionType;
                 $code = $deductionType->code;
                 
-                // Skip employer/government shares (only deduct employee shares)
                 if (!$deductionType->deducted_from_employee) {
                     continue;
                 }
                 
+                // Get schedule - prioritize employee's custom schedule over deduction type schedule
+                $cutoffSchedule = 'BOTH_SPLIT'; // Default
+                if ($deduction->custom_cutoff_schedule) {
+                    // Use employee-specific custom schedule
+                    $cutoffSchedule = $deduction->custom_cutoff_schedule;
+                } else {
+                    // Use deduction type's default schedule
+                    $schedule = $deductionType->schedules->first();
+                    $cutoffSchedule = $schedule ? $schedule->cutoff_schedule : 'BOTH_SPLIT';
+                }
+                
+                // Calculate base deduction amount
+                $deductionAmount = 0;
+                
                 if ($deductionType->category === 'MANDATORY') {
                     if ($deductionType->computation_type === 'PERCENTAGE') {
                         $baseAmount = 0;
-                        
-                        // Determine base amount based on base_salary_type
                         if ($deductionType->base_salary_type === 'BASIC') {
                             $baseAmount = $record->daily_basic_pay;
                         } elseif ($deductionType->base_salary_type === 'GROSS') {
                             $baseAmount = $record->daily_basic_pay + $record->ot_pay;
                         } elseif ($deductionType->base_salary_type === 'MONTHLY') {
-                            // Get monthly salary from designation and prorate to daily
                             $monthlySalary = $employee->employmentDetail?->designationRelation?->monthly_rate ?? 0;
-                            $baseAmount = $monthlySalary / 22; // Prorated daily
+                            $baseAmount = $monthlySalary / 22;
                         } else {
-                            $baseAmount = $record->daily_basic_pay; // Default to basic
+                            $baseAmount = $record->daily_basic_pay;
                         }
-                        
-                        $deductions[$code] = $baseAmount * ($deductionType->percentage_rate / 100);
+                        $deductionAmount = $baseAmount * ($deductionType->percentage_rate / 100);
                     } elseif ($deductionType->computation_type === 'FIXED') {
-                        // For FIXED, use percentage_rate column (which stores the fixed amount) and prorate to daily
-                        $deductions[$code] = ($deductionType->percentage_rate ?? $deduction->amount ?? 0) / 22;
+                        $deductionAmount = ($deductionType->percentage_rate ?? $deduction->amount ?? 0) / 22;
                     } else {
-                        $deductions[$code] = ($deduction->amount ?? 0) / 22; // Prorated daily
+                        $deductionAmount = ($deduction->amount ?? 0) / 22;
                     }
                 } elseif ($deductionType->category === 'LOAN') {
-                    $deductions[$code] = ($deduction->installment_amount ?? 0) / 22; // Prorated daily
+                    $deductionAmount = ($deduction->installment_amount ?? 0) / 22;
+                }
+                
+                // Apply cutoff schedule (for daily view, prorate based on cutoff)
+                if ($cutoffSchedule === '1ST_ONLY') {
+                    $deductions[$code] = $isCutoff1st ? $deductionAmount : 0;
+                } elseif ($cutoffSchedule === '2ND_ONLY') {
+                    $deductions[$code] = $isCutoff1st ? 0 : $deductionAmount;
+                } elseif ($cutoffSchedule === 'BOTH_FULL') {
+                    $deductions[$code] = $deductionAmount;
+                } else { // BOTH_SPLIT
+                    $deductions[$code] = $deductionAmount / 2;
                 }
             }
 
@@ -999,15 +1041,23 @@ Route::post('/admin/payroll/calculate', function (\Illuminate\Http\Request $requ
     ]);
 
     try {
+        // Determine cutoff period
+        $startDay = (int) date('d', strtotime($data['start_date']));
+        $isCutoff1st = $startDay <= 15;
+        
         // Get employees based on filters
         $employeesQuery = \App\Models\Employee::with([
             'employmentDetail.departmentRelation',
             'employmentDetail.designationRelation',
             'deductions' => function($q) use ($data) {
                 $q->where('status', 'ACTIVE')
-                  ->whereBetween('start_date', [$data['start_date'], $data['end_date']]);
-            },
-            'deductions.deductionType'
+                  ->where('start_date', '<=', $data['end_date'])
+                  ->where(function($query) use ($data) {
+                      $query->whereNull('end_date')
+                            ->orWhere('end_date', '>=', $data['end_date']);
+                  })
+                  ->with('deductionType.schedules');
+            }
         ]);
 
         if ($data['department']) {
@@ -1024,6 +1074,7 @@ Route::post('/admin/payroll/calculate', function (\Illuminate\Http\Request $requ
 
         $employees = $employeesQuery->get();
         $payrollData = [];
+        $allDeductionTypes = collect();
 
         foreach ($employees as $employee) {
             // Get salary computations for the period
@@ -1042,24 +1093,52 @@ Route::post('/admin/payroll/calculate', function (\Illuminate\Http\Request $requ
             $daysWorked = $computations->count();
             $dailyRate = $computations->first()->daily_rate ?? 0;
 
-            // Calculate mandatory deductions (SSS, GSIS, PhilHealth, Pag-IBIG)
-            $mandatoryDeductions = 0;
-            $loanDeductions = 0;
-
+            // Calculate deductions by type with cutoff schedule
+            $deductions = [];
             foreach ($employee->deductions as $deduction) {
-                // Skip employer/government shares (only deduct employee shares)
-                if (!$deduction->deductionType->deducted_from_employee) {
+                $deductionType = $deduction->deductionType;
+                $code = $deductionType->code;
+                
+                if (!$deductionType->deducted_from_employee) {
                     continue;
                 }
                 
-                if ($deduction->deductionType->category === 'MANDATORY') {
-                    if ($deduction->deductionType->computation_type === 'PERCENTAGE') {
-                        $mandatoryDeductions += ($basicPay * ($deduction->deductionType->percentage_rate / 100));
+                // Get schedule - prioritize custom over default
+                $cutoffSchedule = $deduction->custom_cutoff_schedule 
+                    ?? ($deductionType->schedules->first()->cutoff_schedule ?? 'BOTH_SPLIT');
+                
+                // Calculate base amount
+                $deductionAmount = 0;
+                if ($deductionType->category === 'MANDATORY') {
+                    if ($deductionType->computation_type === 'PERCENTAGE') {
+                        $baseAmount = $deductionType->base_salary_type === 'BASIC' ? $basicPay 
+                            : ($deductionType->base_salary_type === 'GROSS' ? $basicPay + $otPay 
+                            : ($deductionType->base_salary_type === 'MONTHLY' ? ($employee->employmentDetail?->designationRelation?->monthly_rate ?? 0) 
+                            : $basicPay));
+                        $deductionAmount = $baseAmount * ($deductionType->percentage_rate / 100);
+                    } elseif ($deductionType->computation_type === 'FIXED') {
+                        $deductionAmount = $deductionType->percentage_rate ?? $deduction->amount ?? 0;
                     } else {
-                        $mandatoryDeductions += $deduction->amount ?? 0;
+                        $deductionAmount = $deduction->amount ?? 0;
                     }
-                } elseif ($deduction->deductionType->category === 'LOAN') {
-                    $loanDeductions += $deduction->installment_amount ?? 0;
+                } elseif ($deductionType->category === 'LOAN') {
+                    $deductionAmount = $deduction->installment_amount ?? 0;
+                }
+                
+                // Apply cutoff schedule
+                if ($cutoffSchedule === '1ST_ONLY') {
+                    $deductions[$code] = $isCutoff1st ? $deductionAmount : 0;
+                } elseif ($cutoffSchedule === '2ND_ONLY') {
+                    $deductions[$code] = $isCutoff1st ? 0 : $deductionAmount;
+                } elseif ($cutoffSchedule === 'BOTH_FULL') {
+                    $deductions[$code] = $deductionAmount;
+                } else {
+                    $deductions[$code] = $deductionAmount / 2;
+                }
+                
+                // Collect unique deduction types
+                if (!$allDeductionTypes->contains($code)) {
+                    $allDeductionTypes->push($code);
                 }
             }
 
@@ -1073,9 +1152,17 @@ Route::post('/admin/payroll/calculate', function (\Illuminate\Http\Request $requ
                 'ot_pay' => $otPay,
                 'late' => $lateDeduction,
                 'undertime' => $undertimeDeduction,
-                'mandatory_deductions' => $mandatoryDeductions,
-                'loan_deductions' => $loanDeductions,
+                'deductions' => $deductions,
             ];
+        }
+        
+        // Get deduction type names
+        $deductionTypeNames = [];
+        if ($allDeductionTypes->isNotEmpty()) {
+            $deductionTypeModels = \App\Models\DeductionType::whereIn('code', $allDeductionTypes)->get();
+            foreach ($deductionTypeModels as $dt) {
+                $deductionTypeNames[$dt->code] = $dt->name;
+            }
         }
 
         $payrollTypeLabels = [
@@ -1092,6 +1179,8 @@ Route::post('/admin/payroll/calculate', function (\Illuminate\Http\Request $requ
                 'pay_date' => date('M d, Y', strtotime($data['pay_date'])),
                 'payroll_type' => $payrollTypeLabels[$data['payroll_type']],
                 'employees' => $payrollData,
+                'deduction_types' => $allDeductionTypes->toArray(),
+                'deduction_names' => $deductionTypeNames,
             ]
         ]);
 
@@ -1797,6 +1886,10 @@ Route::get('/admin/deductions/employee/{employeeId}/deductions', function ($empl
         ->get()
         ->map(function($ed) {
             $schedule = $ed->deductionType->schedules->first();
+            $defaultSchedule = $schedule ? $schedule->cutoff_schedule : '1ST_ONLY';
+            
+            // Use custom schedule if set, otherwise use default
+            $currentSchedule = $ed->custom_cutoff_schedule ?? $defaultSchedule;
 
             return [
                 'id' => $ed->id,
@@ -1806,7 +1899,9 @@ Route::get('/admin/deductions/employee/{employeeId}/deductions', function ($empl
                 'category' => $ed->deductionType->category,
                 'computation_type' => $ed->deductionType->computation_type,
                 'amount' => $ed->installment_amount ?? $ed->amount ?? ($ed->deductionType->percentage_rate ? $ed->deductionType->percentage_rate . '%' : 'Auto'),
-                'current_schedule' => $schedule ? $schedule->cutoff_schedule : '1ST_ONLY',
+                'current_schedule' => $currentSchedule,
+                'has_custom_schedule' => $ed->custom_cutoff_schedule !== null,
+                'default_schedule' => $defaultSchedule,
             ];
         });
 
@@ -1844,6 +1939,7 @@ Route::get('/admin/deductions/schedules/export', function () {
             'Category',
             'Amount',
             'Cutoff Schedule',
+            'Schedule Type',
             'Status'
         ]);
 
@@ -1852,13 +1948,16 @@ Route::get('/admin/deductions/schedules/export', function () {
             $department = $employee->employmentDetail->departmentRelation->name ?? 'N/A';
 
             foreach ($employee->deductions as $deduction) {
-                // Skip employer/government shares (only show employee shares in schedule export)
                 if (!$deduction->deductionType->deducted_from_employee) {
                     continue;
                 }
                 
                 $schedule = $deduction->deductionType->schedules->first();
-                $cutoffSchedule = $schedule ? $schedule->cutoff_schedule : 'N/A';
+                $defaultSchedule = $schedule ? $schedule->cutoff_schedule : 'N/A';
+                
+                // Use custom schedule if set, otherwise use default
+                $cutoffSchedule = $deduction->custom_cutoff_schedule ?? $defaultSchedule;
+                $scheduleType = $deduction->custom_cutoff_schedule ? 'Custom' : 'Default';
 
                 $amount = '';
                 if ($deduction->deductionType->category === 'LOAN') {
@@ -1877,6 +1976,7 @@ Route::get('/admin/deductions/schedules/export', function () {
                     $deduction->deductionType->category,
                     $amount,
                     $cutoffSchedule,
+                    $scheduleType,
                     $deduction->status
                 ]);
             }
@@ -2165,31 +2265,28 @@ Route::post('/admin/deductions/schedules/update', function (\Illuminate\Http\Req
         'end_month' => 'required|date_format:Y-m',
         'schedules' => 'required|array|min:1',
         'schedules.*.deduction_id' => 'required|exists:employee_deductions,id',
-        'schedules.*.cutoff' => 'required|in:1ST,2ND,BOTH',
+        'schedules.*.cutoff' => 'required|in:1ST,2ND,BOTH,DEFAULT',
     ]);
 
     $updatedCount = 0;
     
     foreach ($data['schedules'] as $schedule) {
         $employeeDeduction = \App\Models\EmployeeDeduction::findOrFail($schedule['deduction_id']);
-        $deductionType = $employeeDeduction->deductionType;
         
         // Map cutoff values to schedule enum
-        $cutoffSchedule = match($schedule['cutoff']) {
-            '1ST' => '1ST_ONLY',
-            '2ND' => '2ND_ONLY',
-            'BOTH' => 'BOTH_SPLIT',
-        };
-        
-        // Update or create deduction schedule for this type
-        \App\Models\DeductionSchedule::updateOrCreate(
-            ['deduction_type_id' => $deductionType->id],
-            [
-                'cutoff_schedule' => $cutoffSchedule,
-                'is_active' => true,
-                'effective_date' => $data['start_month'] . '-01',
-            ]
-        );
+        if ($schedule['cutoff'] === 'DEFAULT') {
+            // Remove custom schedule, use deduction type's default
+            $employeeDeduction->update(['custom_cutoff_schedule' => null]);
+        } else {
+            $cutoffSchedule = match($schedule['cutoff']) {
+                '1ST' => '1ST_ONLY',
+                '2ND' => '2ND_ONLY',
+                'BOTH' => 'BOTH_SPLIT',
+            };
+            
+            // Set custom schedule for this specific employee deduction
+            $employeeDeduction->update(['custom_cutoff_schedule' => $cutoffSchedule]);
+        }
         
         $updatedCount++;
     }
@@ -2198,7 +2295,7 @@ Route::post('/admin/deductions/schedules/update', function (\Illuminate\Http\Req
     $employeeName = $employee->first_name . ' ' . $employee->last_name;
     
     return redirect()->route('admin.deductions')
-        ->with('success', "Deduction schedules updated for {$employeeName}. {$updatedCount} deduction(s) configured successfully.");
+        ->with('success', "Custom deduction schedules updated for {$employeeName}. {$updatedCount} deduction(s) configured successfully.");
 })->middleware('auth')->name('admin.deductions.schedules.update');
 
 // Loan Type Management Routes
@@ -2242,8 +2339,61 @@ Route::post('/admin/deductions/loan-types/store', function (\Illuminate\Http\Req
 
 Route::get('/admin/deductions/types/{code}', function ($code) {
     $deductionType = \App\Models\DeductionType::where('code', $code)->firstOrFail();
-    return response()->json($deductionType);
+    
+    // Get employee count
+    $employeesCount = \App\Models\EmployeeDeduction::where('deduction_type_id', $deductionType->id)
+        ->where('status', 'ACTIVE')
+        ->distinct('employee_id')
+        ->count();
+    
+    return response()->json([
+        'id' => $deductionType->id,
+        'code' => $deductionType->code,
+        'name' => $deductionType->name,
+        'category' => $deductionType->category,
+        'computation_type' => $deductionType->computation_type,
+        'percentage_rate' => $deductionType->percentage_rate,
+        'max_amount' => $deductionType->max_amount,
+        'is_active' => $deductionType->is_active,
+        'employees_count' => $employeesCount,
+    ]);
 })->middleware('auth')->name('admin.deductions.types.show');
+
+Route::put('/admin/deductions/loan-types/{id}', function (\Illuminate\Http\Request $request, $id) {
+    $deductionType = \App\Models\DeductionType::findOrFail($id);
+    
+    $data = $request->validate([
+        'name' => 'required|string|max:100',
+        'max_loanable_amount' => 'nullable|numeric|min:0',
+        'interest_rate' => 'nullable|numeric|min:0|max:100',
+        'max_terms_months' => 'nullable|integer|min:1',
+        'is_active' => 'required|boolean',
+        'description' => 'nullable|string',
+    ]);
+    
+    // Update deduction type
+    $deductionType->update([
+        'name' => $data['name'],
+        'percentage_rate' => $data['interest_rate'] ?? null,
+        'max_amount' => $data['max_loanable_amount'] ?? null,
+        'is_active' => $data['is_active'],
+    ]);
+    
+    // Update loan type record if exists
+    $loanType = \App\Models\LoanType::where('deduction_type_id', $id)->first();
+    if ($loanType) {
+        $loanType->update([
+            'name' => $data['name'],
+            'max_loanable_amount' => $data['max_loanable_amount'] ?? null,
+            'interest_rate' => $data['interest_rate'] ?? null,
+            'max_terms_months' => $data['max_terms_months'] ?? null,
+            'is_active' => $data['is_active'],
+        ]);
+    }
+    
+    return redirect()->route('admin.deductions')
+        ->with('success', "Loan type \"{$data['name']}\" updated successfully!");
+})->middleware('auth')->name('admin.deductions.loan-types.update');
 
 Route::delete('/admin/deductions/loan-types/{id}', function ($id) {
     $deductionType = \App\Models\DeductionType::findOrFail($id);

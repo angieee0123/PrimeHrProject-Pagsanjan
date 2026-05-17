@@ -59,7 +59,6 @@ CREATE TABLE `leave_applications` (
 
 LOCK TABLES `leave_applications` WRITE;
 /*!40000 ALTER TABLE `leave_applications` DISABLE KEYS */;
-INSERT INTO `leave_applications` VALUES (6,'LA-2026-0001',8,'BL','2026-05-15','2026-05-19',3.00,'Libing ng aso namin HUHUHUHU','approved','leave_attachments/yed5DTx3cdOH09mau5S9mHu94IwSeZ3u2yD60ZVJ.pdf',6,1,'2026-05-15 06:40:21',NULL,'2026-05-15 06:38:36','2026-05-15 06:40:21'),(7,'LA-2026-0002',8,'SOPL','2026-05-25','2026-05-31',5.00,'HAHA','approved','leave_attachments/e7OD0UKIcNcgvW1ci51DIOdlYVivEeZq53tkPbXt.pdf',6,1,'2026-05-16 10:16:58',NULL,'2026-05-16 10:16:46','2026-05-16 10:16:58'),(8,'LA-2026-0003',8,'SOPL','2026-06-01','2026-06-12',10.00,'QASDFRASD','approved','leave_attachments/hk0voBQhDnlDAt9vbQSGn9aiKR9daREAQSUp2vto.pdf',6,1,'2026-05-16 11:42:34',NULL,'2026-05-16 11:42:29','2026-05-16 11:42:34');
 /*!40000 ALTER TABLE `leave_applications` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -72,4 +71,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-17  3:48:15
+-- Dump completed on 2026-05-17 23:15:04

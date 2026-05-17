@@ -1,0 +1,31 @@
+-- Insert attendance records for Jeremy R. Pogi and Juan R. Dela Cruz
+-- From January 1, 2026 to May 17, 2026 (Monday to Friday only)
+-- Based on schedule: 08:00-12:00 (AM), 13:00-17:00 (PM)
+
+INSERT INTO attendance (employee_id, date, am_in, am_out, pm_in, pm_out)
+SELECT 
+    emp.id,
+    dates.date,
+    '08:00:00',
+    '12:00:00',
+    '13:00:00',
+    '17:00:00'
+FROM 
+    (SELECT 8 AS id UNION ALL SELECT 9) AS emp
+CROSS JOIN (
+    SELECT DATE('2026-01-01') + INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY AS date
+    FROM 
+        (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS a
+    CROSS JOIN 
+        (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS b
+    CROSS JOIN 
+        (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS c
+) AS dates
+WHERE 
+    dates.date BETWEEN '2026-01-01' AND '2026-05-17'
+    AND DAYOFWEEK(dates.date) BETWEEN 2 AND 6
+ON DUPLICATE KEY UPDATE 
+    am_in = VALUES(am_in),
+    am_out = VALUES(am_out),
+    pm_in = VALUES(pm_in),
+    pm_out = VALUES(pm_out);

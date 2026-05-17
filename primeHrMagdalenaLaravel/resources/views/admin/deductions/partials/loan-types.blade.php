@@ -248,8 +248,47 @@ function viewLoanTypeDetails(id) {
 }
 
 function editLoanType(id) {
-    // TODO: Implement edit functionality
-    alert('Edit loan type functionality - Coming soon!');
+    // Fetch loan type data
+    fetch(`/admin/deductions/types/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            // Determine provider from code
+            let provider = 'OTHER';
+            if (data.code.includes('GSIS')) provider = 'GSIS';
+            else if (data.code.includes('PAGIBIG')) provider = 'PAGIBIG';
+            else if (data.code.includes('SSS')) provider = 'SSS';
+            else if (data.code.includes('BANK')) provider = 'BANK';
+            else if (data.code.includes('COOP')) provider = 'COOP';
+            
+            // Populate form
+            document.getElementById('editLoanTypeId').value = data.id;
+            document.getElementById('editLoanProvider').value = provider;
+            document.getElementById('editLoanTypeCode').value = data.code;
+            document.getElementById('editLoanTypeName').value = data.name;
+            document.getElementById('editMaxLoanable').value = data.max_amount || '';
+            document.getElementById('editInterestRate').value = data.percentage_rate || '';
+            document.getElementById('editMaxTerms').value = '';
+            document.getElementById('editIsActive').value = data.is_active ? '1' : '0';
+            document.getElementById('editDescription').value = '';
+            
+            // Show warning if employees are using this loan type
+            if (data.employees_count > 0) {
+                document.getElementById('editEmployeesUsingWarning').style.display = 'block';
+                document.getElementById('editEmployeesCount').textContent = data.employees_count;
+            } else {
+                document.getElementById('editEmployeesUsingWarning').style.display = 'none';
+            }
+            
+            // Set form action
+            document.getElementById('editLoanTypeForm').action = `/admin/deductions/loan-types/${data.id}`;
+            
+            // Open modal
+            document.getElementById('editLoanTypeModal').classList.add('active');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to load loan type details.');
+        });
 }
 
 function deleteLoanType(id, name) {
@@ -282,6 +321,7 @@ function deleteLoanType(id, name) {
 </script>
 
 @include('admin.deductions.modals.addLoanTypeModal')
+@include('admin.deductions.modals.editLoanTypeModal')
 
 <script>
 // Ensure modal functions are in global scope
@@ -293,6 +333,12 @@ window.closeAddLoanTypeModal = function(event) {
     if (event && event.target !== event.currentTarget) return;
     document.getElementById('addLoanTypeModal').classList.remove('active');
     document.getElementById('addLoanTypeForm').reset();
+};
+
+window.closeEditLoanTypeModal = function(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('editLoanTypeModal').classList.remove('active');
+    document.getElementById('editLoanTypeForm').reset();
 };
 
 window.updateLoanCode = function() {

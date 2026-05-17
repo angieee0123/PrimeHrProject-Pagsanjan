@@ -18,6 +18,7 @@ class EmployeeDeduction extends Model
         'total_amount',
         'installment_amount',
         'status',
+        'custom_cutoff_schedule',
         'remarks',
     ];
 

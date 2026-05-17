@@ -22,7 +22,7 @@
         <form id="assignDeductionScheduleForm" onsubmit="handleDeductionScheduleSubmit(event)">
             <input type="hidden" name="employee_id" id="deductionScheduleEmployeeId">
 
-            <div style="padding:24px; overflow-y:auto; flex:1;">
+            <div style="padding:24px; overflow-y:auto; flex:1; max-height:calc(90vh - 200px);">
                 <div style="margin-bottom:20px;">
                     <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:8px;">
                         Effective Period <span style="color:#8e1e18;">*</span>
@@ -57,7 +57,7 @@
                 <div style="background:#f7f6ff; border:1.5px solid #e8e7f5; border-radius:10px; padding:16px; margin-bottom:20px;">
                     <p style="margin:0 0 12px; font-size:11px; font-weight:700; letter-spacing:1px; color:#9999bb;">EMPLOYEE DEDUCTIONS & LOANS</p>
 
-                    <div id="deductionsList" style="display:flex; flex-direction:column; gap:10px;">
+                    <div id="deductionsList" style="display:flex; flex-direction:column; gap:10px; max-height:400px; overflow-y:auto; padding-right:8px;">
                         <!-- Deductions will be loaded here dynamically -->
                         <p style="margin:0; font-size:13px; color:#9999bb; text-align:center; padding:20px;">
                             Loading deductions...
@@ -223,6 +223,47 @@
 .schedule-status.future {
     background: #e3f2fd;
     color: #1565c0;
+}
+
+/* Custom Scrollbar Styling */
+#deductionsList::-webkit-scrollbar,
+#scheduleHistoryList::-webkit-scrollbar {
+    width: 8px;
+}
+
+#deductionsList::-webkit-scrollbar-track,
+#scheduleHistoryList::-webkit-scrollbar-track {
+    background: #f7f6ff;
+    border-radius: 10px;
+}
+
+#deductionsList::-webkit-scrollbar-thumb,
+#scheduleHistoryList::-webkit-scrollbar-thumb {
+    background: #c5c3e0;
+    border-radius: 10px;
+    transition: background 0.2s;
+}
+
+#deductionsList::-webkit-scrollbar-thumb:hover,
+#scheduleHistoryList::-webkit-scrollbar-thumb:hover {
+    background: #0b044d;
+}
+
+/* Scroll indicator shadow */
+#deductionsList {
+    position: relative;
+}
+
+#deductionsList::after {
+    content: '';
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(to top, #f7f6ff, transparent);
+    pointer-events: none;
+    display: block;
 }
 </style>
 
