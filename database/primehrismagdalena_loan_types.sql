@@ -37,7 +37,7 @@ CREATE TABLE `loan_types` (
   UNIQUE KEY `loan_types_code_unique` (`code`),
   KEY `loan_types_deduction_type_id_foreign` (`deduction_type_id`),
   CONSTRAINT `loan_types_deduction_type_id_foreign` FOREIGN KEY (`deduction_type_id`) REFERENCES `deduction_types` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -46,6 +46,7 @@ CREATE TABLE `loan_types` (
 
 LOCK TABLES `loan_types` WRITE;
 /*!40000 ALTER TABLE `loan_types` DISABLE KEYS */;
+INSERT INTO `loan_types` VALUES (8,'gsis EL','Emergency Loan',26,NULL,NULL,NULL,1,'2026-05-17 08:15:22','2026-05-17 08:15:22'),(9,'MPL','MP LOAN',27,NULL,NULL,NULL,1,'2026-05-17 08:17:03','2026-05-17 08:17:03');
 /*!40000 ALTER TABLE `loan_types` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -58,4 +59,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-17 23:15:03
+-- Dump completed on 2026-05-18  1:09:11
