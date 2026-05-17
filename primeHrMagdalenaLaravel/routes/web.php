@@ -720,6 +720,11 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
                 $deductionType = $deduction->deductionType;
                 $code = $deductionType->code;
                 
+                // Skip employer/government shares (only deduct employee shares)
+                if (!$deductionType->deducted_from_employee) {
+                    continue;
+                }
+                
                 if ($deductionType->category === 'MANDATORY') {
                     if ($deductionType->computation_type === 'PERCENTAGE') {
                         $baseAmount = 0;
@@ -775,6 +780,11 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
             foreach ($employee->deductions as $deduction) {
                 $deductionType = $deduction->deductionType;
                 $code = $deductionType->code;
+                
+                // Skip employer/government shares (only deduct employee shares)
+                if (!$deductionType->deducted_from_employee) {
+                    continue;
+                }
                 
                 if ($deductionType->category === 'MANDATORY') {
                     if ($deductionType->computation_type === 'PERCENTAGE') {
@@ -1037,6 +1047,11 @@ Route::post('/admin/payroll/calculate', function (\Illuminate\Http\Request $requ
             $loanDeductions = 0;
 
             foreach ($employee->deductions as $deduction) {
+                // Skip employer/government shares (only deduct employee shares)
+                if (!$deduction->deductionType->deducted_from_employee) {
+                    continue;
+                }
+                
                 if ($deduction->deductionType->category === 'MANDATORY') {
                     if ($deduction->deductionType->computation_type === 'PERCENTAGE') {
                         $mandatoryDeductions += ($basicPay * ($deduction->deductionType->percentage_rate / 100));
@@ -1124,11 +1139,16 @@ Route::get('/admin/payroll/export', function (\Illuminate\Http\Request $request)
 
     $employees = $employeesQuery->get();
 
-    // Get all unique deduction types
+    // Get all unique deduction types (only employee shares)
     $deductionTypeCodes = [];
     $deductionTypeNames = [];
     foreach ($employees as $employee) {
         foreach ($employee->deductions as $deduction) {
+            // Skip employer/government shares (only show employee shares in export)
+            if (!$deduction->deductionType->deducted_from_employee) {
+                continue;
+            }
+            
             $code = $deduction->deductionType->code;
             if (!in_array($code, $deductionTypeCodes)) {
                 $deductionTypeCodes[] = $code;
@@ -1207,6 +1227,11 @@ Route::get('/admin/payroll/export', function (\Illuminate\Http\Request $request)
             // Calculate deductions by type
             $deductions = array_fill_keys($deductionTypeCodes, 0);
             foreach ($employee->deductions as $deduction) {
+                // Skip employer/government shares (only deduct employee shares)
+                if (!$deduction->deductionType->deducted_from_employee) {
+                    continue;
+                }
+                
                 $code = $deduction->deductionType->code;
                 if ($deduction->deductionType->category === 'MANDATORY') {
                     if ($deduction->deductionType->computation_type === 'PERCENTAGE') {
@@ -1380,6 +1405,7 @@ Route::post('/admin/deductions/types', function (\Illuminate\Http\Request $reque
         'base_salary' => 'nullable|in:BASIC,GROSS,MONTHLY,CUSTOM',
         'max_amount' => 'nullable|numeric|min:0',
         'is_active' => 'required|boolean',
+        'deducted_from_employee' => 'required|boolean',
         'description' => 'nullable|string',
     ]);
 
@@ -1393,6 +1419,7 @@ Route::post('/admin/deductions/types', function (\Illuminate\Http\Request $reque
         'base_salary_type' => $data['base_salary'] ?? null,
         'max_amount' => $data['max_amount'] ?? null,
         'is_active' => $data['is_active'],
+        'deducted_from_employee' => $data['deducted_from_employee'],
     ];
 
     \App\Models\DeductionType::create($deductionData);
@@ -1412,6 +1439,7 @@ Route::put('/admin/deductions/types/{code}', function (\Illuminate\Http\Request 
         'base_salary' => 'nullable|in:BASIC,GROSS,MONTHLY,CUSTOM',
         'max_amount' => 'nullable|numeric|min:0',
         'is_active' => 'required|boolean',
+        'deducted_from_employee' => 'required|boolean',
         'description' => 'nullable|string',
     ]);
 
@@ -1423,6 +1451,7 @@ Route::put('/admin/deductions/types/{code}', function (\Illuminate\Http\Request 
         'base_salary_type' => $data['base_salary'] ?? null,
         'max_amount' => $data['max_amount'] ?? null,
         'is_active' => $data['is_active'],
+        'deducted_from_employee' => $data['deducted_from_employee'],
     ]);
 
     return redirect()->route('admin.deductions')->with('success', 'Deduction type updated successfully.');
@@ -1823,6 +1852,11 @@ Route::get('/admin/deductions/schedules/export', function () {
             $department = $employee->employmentDetail->departmentRelation->name ?? 'N/A';
 
             foreach ($employee->deductions as $deduction) {
+                // Skip employer/government shares (only show employee shares in schedule export)
+                if (!$deduction->deductionType->deducted_from_employee) {
+                    continue;
+                }
+                
                 $schedule = $deduction->deductionType->schedules->first();
                 $cutoffSchedule = $schedule ? $schedule->cutoff_schedule : 'N/A';
 

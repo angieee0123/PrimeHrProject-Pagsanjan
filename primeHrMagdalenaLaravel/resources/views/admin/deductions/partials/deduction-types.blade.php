@@ -42,6 +42,7 @@
                 <th>Code</th>
                 <th>Name</th>
                 <th>Category</th>
+                <th>Deduction Type</th>
                 <th>Computation Type</th>
                 <th>Rate/Amount</th>
                 <th>Base</th>
@@ -65,6 +66,13 @@
                         <span class="badge-emptype">LOAN</span>
                     @else
                         <span class="badge-status pending">OTHER</span>
+                    @endif
+                </td>
+                <td>
+                    @if($type->deducted_from_employee)
+                        <span class="badge-status pending" style="background: #fff3e0; color: #e65100;">Employee Share</span>
+                    @else
+                        <span class="badge-status processed" style="background: #e8f5e9; color: #2e7d32;">Employer Share</span>
                     @endif
                 </td>
                 <td>{{ $type->computation_type }}</td>
@@ -100,7 +108,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="9" style="text-align: center; padding: 40px; color: #9999bb;">
+                <td colspan="10" style="text-align: center; padding: 40px; color: #9999bb;">
                     No deduction types found. Click "Add Deduction Type" to create one.
                 </td>
             </tr>

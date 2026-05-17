@@ -16,12 +16,14 @@ class DeductionType extends Model
         'base_salary_type',
         'max_amount',
         'is_active',
+        'deducted_from_employee',
     ];
 
     protected $casts = [
         'percentage_rate' => 'decimal:2',
         'max_amount' => 'decimal:2',
         'is_active' => 'boolean',
+        'deducted_from_employee' => 'boolean',
     ];
 
     public function schedules(): HasMany

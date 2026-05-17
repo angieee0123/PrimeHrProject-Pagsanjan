@@ -76,6 +76,18 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">Deduction Type <span style="color: #8e1e18;">*</span></label>
+                    <select name="deducted_from_employee" id="edit_deducted_from_employee" class="form-input" required>
+                        <option value="1">Employee Share (Deducted from salary)</option>
+                        <option value="0">Employer/Government Share (Record-keeping only)</option>
+                    </select>
+                    <small class="field-hint" style="display: block; margin-top: 6px;">
+                        Select "Employee Share" if this will be deducted from employee's salary.<br>
+                        Select "Employer/Government Share" if this is paid by the government/employer (e.g., government's GSIS contribution).
+                    </small>
+                </div>
+
+                <div class="form-group">
                     <label class="form-label">Description</label>
                     <textarea name="description" id="edit_description" class="form-input" rows="2"></textarea>
                 </div>
@@ -113,6 +125,7 @@ function editDeductionType(code) {
             document.getElementById('edit_base_salary').value = data.base_salary_type || '';
             document.getElementById('edit_max_amount').value = data.max_amount || '';
             document.getElementById('edit_is_active').value = data.is_active ? '1' : '0';
+            document.getElementById('edit_deducted_from_employee').value = data.deducted_from_employee ? '1' : '0';
             document.getElementById('edit_description').value = data.description || '';
             
             // Set form action

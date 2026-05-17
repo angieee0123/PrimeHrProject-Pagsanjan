@@ -65,7 +65,7 @@
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group" style="flex: 1;" id="maxAmountGroup">
+                    <div class="form-group" style="flex: 1;">
                         <label class="form-label">Max Amount</label>
                         <input type="number" name="max_amount" class="form-input" id="maxAmountInput" placeholder="e.g., 100.00" step="0.01" min="0">
                         <small class="field-hint" id="maxAmountHint" style="display: none;"></small>
@@ -77,6 +77,18 @@
                             <option value="0">Inactive</option>
                         </select>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Deduction Type <span style="color: #8e1e18;">*</span></label>
+                    <select name="deducted_from_employee" class="form-input" required>
+                        <option value="1">Employee Share (Deducted from salary)</option>
+                        <option value="0">Employer/Government Share (Record-keeping only)</option>
+                    </select>
+                    <small class="field-hint" style="display: block; margin-top: 6px;">
+                        Select "Employee Share" if this will be deducted from employee's salary.<br>
+                        Select "Employer/Government Share" if this is paid by the government/employer (e.g., government's GSIS contribution).
+                    </small>
                 </div>
 
                 <div class="form-group">
