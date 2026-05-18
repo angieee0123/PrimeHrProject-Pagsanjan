@@ -6,6 +6,7 @@ use App\Http\Controllers\EmployeeRegistrationController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\PermanentAttendanceController;
+use App\Models\User;
 
 Route::get('/', function () {
     return view('welcome');
@@ -30,7 +31,13 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
         $request->session()->regenerate();
 
         // Eager load employee data with relationships
-        $user = Auth::user()->load('employee.employmentDetail.departmentRelation', 'employee.employmentDetail.designationRelation');
+        $user = Auth::user();
+        if (!$user instanceof User) {
+            Auth::logout();
+            return back()->withInput($request->only('email'))
+                ->with('error', 'Invalid email or password. Please try again.');
+        }
+        $user->load('employee.employmentDetail.departmentRelation', 'employee.employmentDetail.designationRelation');
 
         if ($user->email === 'admin@gmail.com' || $user->role === 'admin') {
             return redirect()->route('admin.dashboard');
@@ -113,7 +120,8 @@ Route::get('/permanent/payslip', function () {
 })->middleware('auth')->name('permanent.payslip');
 
 Route::get('/permanent/leave', function () {
-    $employee = auth()->user()->employee;
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
 
     if (!$employee) {
         $leaveTypes = \App\Models\LeaveType::where('is_active', true)
@@ -189,8 +197,155 @@ Route::get('/permanent/performance', function () {
 })->middleware('auth')->name('permanent.performance');
 
 Route::get('/permanent/training', function () {
-    return view('permanent.training.permanentTraining');
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
+
+    if (!$employee) {
+        return view('permanent.training.permanentTraining', [
+            'trainings'   => collect(),
+            'stats'       => ['total_hours' => 0, 'verified' => 0, 'pending' => 0, 'rejected' => 0],
+            'breakdown'   => ['leadership' => 0, 'technical' => 0, 'core' => 0],
+            'goal_hours'  => 40,
+            'fiscal_year' => date('Y'),
+        ]);
+    }
+
+    $trainings = \App\Models\Training::where('employee_id', $employee->id)
+        ->orderBy('date_from', 'desc')
+        ->get();
+
+    $verified = $trainings->where('status', 'verified');
+    $stats = [
+        'total_hours' => $verified->sum('hours'),
+        'verified'    => $verified->count(),
+        'pending'     => $trainings->where('status', 'pending')->count(),
+        'rejected'    => $trainings->where('status', 'rejected')->count(),
+    ];
+
+    $breakdown = ['leadership' => 0, 'technical' => 0, 'core' => 0];
+    foreach ($verified as $training) {
+        $cat = $training->ldCategory();
+        $breakdown[$cat] = ($breakdown[$cat] ?? 0) + (int) $training->hours;
+    }
+
+    return view('permanent.training.permanentTraining', compact('trainings', 'stats', 'breakdown'));
 })->middleware('auth')->name('permanent.training');
+
+Route::post('/permanent/training', function (\Illuminate\Http\Request $request) {
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
+    if (!$employee) {
+        return back()->with('error', 'No employee record found.');
+    }
+
+    $data = $request->validate([
+        'title'         => 'required|string|max:255',
+        'conducted_by'  => 'required|string|max:255',
+        'date_from'     => 'required|date',
+        'date_to'       => 'required|date|after_or_equal:date_from',
+        'hours'         => 'required|integer|min:1|max:999',
+        'position_type' => 'required|in:Managerial,Supervisory,Technical,Clerical',
+        'venue'         => 'nullable|string|max:255',
+        'cert_no'       => 'nullable|string|max:100',
+        'ref_doc_no'    => 'required|string|max:100',
+        'certificate'   => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+    ]);
+
+    $path = $request->file('certificate')->store('training_certificates', 'public');
+
+    \App\Models\Training::create([
+        'employee_id'      => $employee->id,
+        'title'            => $data['title'],
+        'conducted_by'     => $data['conducted_by'],
+        'date_from'        => $data['date_from'],
+        'date_to'          => $data['date_to'],
+        'hours'            => $data['hours'],
+        'position_type'    => $data['position_type'],
+        'venue'            => $data['venue'] ?? null,
+        'cert_no'          => $data['cert_no'] ?? null,
+        'ref_doc_no'       => $data['ref_doc_no'],
+        'certificate_path' => $path,
+        'status'           => 'pending',
+    ]);
+
+    return redirect()->route('permanent.training')
+        ->with('success', 'Training record submitted for HR verification.');
+})->middleware('auth')->name('permanent.training.store');
+
+Route::delete('/permanent/training/{id}', function ($id) {
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
+    if (!$employee) {
+        return redirect()->route('permanent.training')->with('error', 'No employee record found.');
+    }
+    $training = \App\Models\Training::where('id', $id)
+        ->where('employee_id', $employee->id)
+        ->where('status', 'pending')
+        ->firstOrFail();
+
+    if ($training->certificate_path) {
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($training->certificate_path);
+    }
+    $training->delete();
+
+    return redirect()->route('permanent.training')->with('success', 'Training record deleted.');
+})->middleware('auth')->name('permanent.training.delete');
+
+Route::get('/permanent/training/export', function () {
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
+    if (!$employee) {
+        return redirect()->route('permanent.training')->with('error', 'No employee record found.');
+    }
+    $trainings = \App\Models\Training::where('employee_id', $employee->id)
+        ->where('status', 'verified')
+        ->orderBy('date_from', 'desc')
+        ->get();
+
+    $headers = [
+        'Content-Type'        => 'text/csv',
+        'Content-Disposition' => 'attachment; filename=training_pds_' . date('Y-m-d') . '.csv',
+    ];
+
+    $callback = function () use ($trainings) {
+        $file = fopen('php://output', 'w');
+        fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+        fputcsv($file, ['Title of Seminar/Training', 'Date From', 'Date To', 'No. of Hours', 'Type of Position', 'Conducted/Sponsored By', 'Venue', 'Cert No', 'Ref Doc No']);
+        foreach ($trainings as $t) {
+            fputcsv($file, [
+                $t->title,
+                $t->date_from ? $t->date_from->format('m/d/Y') : '',
+                $t->date_to   ? $t->date_to->format('m/d/Y')   : '',
+                $t->hours,
+                $t->position_type,
+                $t->conducted_by,
+                $t->venue    ?? '',
+                $t->cert_no  ?? '',
+                $t->ref_doc_no ?? '',
+            ]);
+        }
+        fclose($file);
+    };
+
+    return response()->stream($callback, 200, $headers);
+})->middleware('auth')->name('permanent.training.export');
+
+Route::get('/permanent/training/{id}/certificate', function ($id) {
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
+    if (!$employee) {
+        abort(403, 'No employee record found.');
+    }
+    $training = \App\Models\Training::where('id', $id)
+        ->where('employee_id', $employee->id)
+        ->firstOrFail();
+
+    if (!$training->certificate_path || !\Illuminate\Support\Facades\Storage::disk('public')->exists($training->certificate_path)) {
+        abort(404, 'Certificate not found.');
+    }
+
+    return response()->file(storage_path('app/public/' . $training->certificate_path));
+})->middleware('auth')->name('permanent.training.certificate');
 
 Route::get('/permanent/profile', function () {
     return view('permanent.profile.permanentProfile');
@@ -630,8 +785,59 @@ Route::get('/admin/personnel/{id}', function ($id) {
 })->middleware('auth')->name('admin.personnel.show');
 
 Route::get('/admin/training', function () {
-    return view('admin.training.adminTraining');
+    $trainings = \App\Models\Training::with(['employee.employmentDetail.departmentRelation'])
+        ->orderByRaw("FIELD(status, 'pending', 'rejected', 'verified')")
+        ->orderBy('created_at', 'desc')
+        ->get();
+    $stats = [
+        'pending'  => $trainings->where('status', 'pending')->count(),
+        'verified' => $trainings->where('status', 'verified')->count(),
+        'rejected' => $trainings->where('status', 'rejected')->count(),
+        'total'    => $trainings->count(),
+    ];
+    return view('admin.training.adminTraining', compact('trainings', 'stats'));
 })->middleware('auth')->name('admin.training');
+
+Route::post('/admin/training/{id}/approve', function ($id) {
+    $training = \App\Models\Training::findOrFail($id);
+    $training->update(['status' => 'verified', 'verified_by' => Auth::id(), 'verified_at' => now(), 'rejected_reason' => null]);
+    return redirect()->route('admin.training')->with('success', 'Training approved for ' . $training->employee->first_name . ' ' . $training->employee->last_name . '.');
+})->middleware('auth')->name('admin.training.approve');
+
+Route::post('/admin/training/{id}/reject', function (\Illuminate\Http\Request $request, $id) {
+    $request->validate(['reason' => 'required|string|max:1000']);
+    $training = \App\Models\Training::findOrFail($id);
+    $training->update(['status' => 'rejected', 'rejected_reason' => $request->reason, 'verified_by' => null, 'verified_at' => null]);
+    return redirect()->route('admin.training')->with('success', 'Submission rejected.');
+})->middleware('auth')->name('admin.training.reject');
+
+Route::get('/admin/training/export', function () {
+    $trainings = \App\Models\Training::with(['employee.employmentDetail.departmentRelation'])
+        ->orderBy('status')->orderBy('created_at', 'desc')->get();
+    $headers = ['Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment; filename=training_verification_' . date('Y-m-d') . '.csv'];
+    $callback = function () use ($trainings) {
+        $file = fopen('php://output', 'w');
+        fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+        fputcsv($file, ['Employee ID','Employee Name','Department','Training Title','Date From','Date To','Hours','Position Type','Conducted By','Ref Doc No','Cert No','Status','Submitted','Verified At','Rejected Reason']);
+        foreach ($trainings as $t) {
+            $emp = $t->employee;
+            $dept = $emp->employmentDetail->departmentRelation->name ?? 'N/A';
+            fputcsv($file, [$emp->employee_id, $emp->first_name.' '.$emp->last_name, $dept, $t->title,
+                $t->date_from?$t->date_from->format('m/d/Y'):'', $t->date_to?$t->date_to->format('m/d/Y'):'',
+                $t->hours, $t->position_type, $t->conducted_by, $t->ref_doc_no, $t->cert_no??'',
+                $t->status, $t->created_at?$t->created_at->format('m/d/Y'):'',
+                $t->verified_at?$t->verified_at->format('m/d/Y'):'', $t->rejected_reason??'']);
+        }
+        fclose($file);
+    };
+    return response()->stream($callback, 200, $headers);
+})->middleware('auth')->name('admin.training.export');
+
+Route::get('/admin/training/{id}/certificate', function ($id) {
+    $training = \App\Models\Training::findOrFail($id);
+    if (!$training->certificate_path || !\Illuminate\Support\Facades\Storage::disk('public')->exists($training->certificate_path)) abort(404);
+    return response()->file(storage_path('app/public/' . $training->certificate_path));
+})->middleware('auth')->name('admin.training.certificate');
 
 Route::get('/admin/performance', function () {
     return view('admin.performance.adminPerformance');
@@ -1533,13 +1739,13 @@ Route::put('/admin/deductions/types/{code}', function (\Illuminate\Http\Request 
     ]);
 
     $deductionType->update([
-        'name' => $data['name'],
-        'category' => $data['category'],
-        'computation_type' => $data['computation_type'],
-        'percentage_rate' => $data['rate'] ?? null,
-        'base_salary_type' => $data['base_salary'] ?? null,
-        'max_amount' => $data['max_amount'] ?? null,
-        'is_active' => $data['is_active'],
+        'name'                   => $data['name'],
+        'category'               => $data['category'],
+        'computation_type'       => $data['computation_type'],
+        'percentage_rate'        => $data['rate'] ?? null,
+        'base_salary_type'       => $data['base_salary'] ?? null,
+        'max_amount'             => $data['max_amount'] ?? null,
+        'is_active'              => $data['is_active'],
         'deducted_from_employee' => $data['deducted_from_employee'],
     ]);
 
@@ -1673,40 +1879,6 @@ Route::post('/admin/deductions/employee/bulk-assign', function (\Illuminate\Http
     }
 })->middleware('auth')->name('admin.deductions.employee.bulk-assign');
 
-Route::get('/admin/deductions/employee/{id}', function ($id) {
-    $deduction = \App\Models\EmployeeDeduction::with(['employee', 'deductionType'])->findOrFail($id);
-    return response()->json($deduction);
-})->middleware('auth')->name('admin.deductions.employee.show');
-
-// Get active deductions for an employee
-Route::get('/admin/deductions/employee/{employeeId}/active', function ($employeeId) {
-    $deductions = \App\Models\EmployeeDeduction::where('employee_id', $employeeId)
-        ->where('status', 'ACTIVE')
-        ->with('deductionType')
-        ->get()
-        ->map(function($ed) {
-            return [
-                'id' => $ed->deduction_type_id,
-                'name' => $ed->deductionType->name,
-                'code' => $ed->deductionType->code,
-            ];
-        });
-
-    return response()->json(['deductions' => $deductions]);
-})->middleware('auth')->name('admin.deductions.employee.active');
-
-// Delete employee deduction
-Route::delete('/admin/deductions/employee/{id}/delete', function ($id) {
-    $deduction = \App\Models\EmployeeDeduction::with(['employee', 'deductionType'])->findOrFail($id);
-    $employeeName = $deduction->employee->first_name . ' ' . $deduction->employee->last_name;
-    $deductionName = $deduction->deductionType->name;
-
-    $deduction->delete();
-
-    return redirect()->route('admin.deductions')
-        ->with('success', "Deduction '{$deductionName}' removed from {$employeeName} successfully.");
-})->middleware('auth')->name('admin.deductions.employee.delete');
-
 // Export employee deductions
 Route::get('/admin/deductions/employee/export', function () {
     $deductions = \App\Models\EmployeeDeduction::with([
@@ -1770,6 +1942,40 @@ Route::get('/admin/deductions/employee/export', function () {
 
     return response()->stream($callback, 200, $headers);
 })->middleware('auth')->name('admin.deductions.employee.export');
+
+Route::get('/admin/deductions/employee/{id}', function ($id) {
+    $deduction = \App\Models\EmployeeDeduction::with(['employee', 'deductionType'])->findOrFail($id);
+    return response()->json($deduction);
+})->middleware('auth')->name('admin.deductions.employee.show');
+
+// Get active deductions for an employee
+Route::get('/admin/deductions/employee/{employeeId}/active', function ($employeeId) {
+    $deductions = \App\Models\EmployeeDeduction::where('employee_id', $employeeId)
+        ->where('status', 'ACTIVE')
+        ->with('deductionType')
+        ->get()
+        ->map(function($ed) {
+            return [
+                'id' => $ed->deduction_type_id,
+                'name' => $ed->deductionType->name,
+                'code' => $ed->deductionType->code,
+            ];
+        });
+
+    return response()->json(['deductions' => $deductions]);
+})->middleware('auth')->name('admin.deductions.employee.active');
+
+// Delete employee deduction
+Route::delete('/admin/deductions/employee/{id}/delete', function ($id) {
+    $deduction = \App\Models\EmployeeDeduction::with(['employee', 'deductionType'])->findOrFail($id);
+    $employeeName = $deduction->employee->first_name . ' ' . $deduction->employee->last_name;
+    $deductionName = $deduction->deductionType->name;
+
+    $deduction->delete();
+
+    return redirect()->route('admin.deductions')
+        ->with('success', "Deduction '{$deductionName}' removed from {$employeeName} successfully.");
+})->middleware('auth')->name('admin.deductions.employee.delete');
 
 // Export loans
 Route::get('/admin/deductions/loans/export', function () {

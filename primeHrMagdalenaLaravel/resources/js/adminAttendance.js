@@ -409,6 +409,8 @@ window.closeCorrectModal = function() {
     currentCorrectAttendanceId = null;
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+
 document.getElementById('correctAttachments').addEventListener('change', function(e) {
     const preview = document.getElementById('filePreview');
     preview.innerHTML = '';
@@ -462,6 +464,8 @@ document.getElementById('correctForm').addEventListener('submit', function(e) {
         btn.disabled = false;
     });
 });
+
+}); // end DOMContentLoaded
 
 window.openDetailedDTRModal = function(employeeId, name, empId) {
     currentDetailedEmployeeId = employeeId;

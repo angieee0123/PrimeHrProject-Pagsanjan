@@ -28,25 +28,7 @@
 
         @include('joborder.notification.joborderNotification')
 
-        {{-- Welcome Banner --}}
-        <div class="welcome-banner">
-            <div class="banner-left">
-                <div class="banner-icon">
-                    <svg width="22" height="22" fill="none" stroke="#d9bb00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                </div>
-                <div>
-                    <h2>My Training</h2>
-                    <p><span data-live-datetime data-variant="datetime">{{ now()->timezone('Asia/Manila')->format('l, F j, Y g:i:s A') }}</span> &nbsp;·&nbsp; Utility Worker I · General Services Office · JO-0042</p>
-                </div>
-            </div>
-            <div class="banner-right">
-                <span class="banner-badge">
-                    <span class="banner-badge-dot"></span>
-                    Training & Development
-                </span>
-                <span class="banner-badge outline">2 Programs Enrolled</span>
-            </div>
-        </div>
+        @include('joborder.topbar.trainingTopbar')
 
         {{-- Stats Grid --}}
         <div class="stats-grid stats-grid-4">
@@ -553,6 +535,13 @@ table .type-badge.soft-skills { background:#fefce8; color:#a16207; }
     function closeModal(id) {
         document.getElementById(id).style.display = 'none';
         document.getElementById('modalStatus').style.display = 'inline-block';
+    }
+
+    function filterTrainingTable(query) {
+        const q = query.toLowerCase();
+        document.querySelectorAll('.payroll-table tbody tr, .training-card').forEach(el => {
+            el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
     }
     
     document.addEventListener('keydown', function(e) {

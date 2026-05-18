@@ -24,29 +24,7 @@
 
         @include('permanent.notification.permanentNotification')
 
-        {{-- Welcome Banner --}}
-        <div class="welcome-banner">
-            <div class="banner-left">
-                <div class="banner-icon">
-                    <svg width="22" height="22" fill="none" stroke="#d9bb00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                </div>
-                <div>
-                    <h2>Leave & Benefits</h2>
-                    <p><span data-live-datetime data-variant="datetime">{{ now()->timezone('Asia/Manila')->format('l, F j, Y g:i:s A') }}</span> &nbsp;·&nbsp; Nurse II · Municipal Health Office · PGS-0115</p>
-                </div>
-            </div>
-            <div class="banner-right">
-                @php
-                    $vlBalance = $leaveTypes->firstWhere('leave_code', 'VL')?->leaveBalances->first()?->available_credits ?? 0;
-                    $slBalance = $leaveTypes->firstWhere('leave_code', 'SL')?->leaveBalances->first()?->available_credits ?? 0;
-                @endphp
-                <span class="banner-badge">
-                    <span class="banner-badge-dot"></span>
-                    VL: {{ number_format($vlBalance, 0) }} days
-                </span>
-                <span class="banner-badge outline">SL: {{ number_format($slBalance, 0) }} days</span>
-            </div>
-        </div>
+        @include('permanent.topbar.leaveandbenefitsTopbar')
         {{-- Stats Grid --}}
         <div class="stats-grid stats-grid-4">
             <div class="stat-card">
@@ -664,6 +642,15 @@
         });
     });
 
+    function filterLeaveTable(query) {
+        const q = query.toLowerCase();
+        document.querySelectorAll('#tab-leave tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+        document.querySelectorAll('#tab-benefits tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
     function submitLeave() {
         document.getElementById('leaveApplicationForm').submit();
     }

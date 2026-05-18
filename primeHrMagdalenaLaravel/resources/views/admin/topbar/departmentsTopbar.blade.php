@@ -1,31 +1,33 @@
-<div style="background: linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%); padding: 24px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <div>
-        <h3 style="margin: 0 0 4px; font-size: 20px; font-weight: 700; color: #fff;">Departments & Offices</h3>
-        <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.7);">{{ now()->format('l, F j, Y') }} · Municipal Government of Pagsanjan</p>
-    </div>
-    <div style="display: flex; align-items: center; gap: 12px;">
-        <!-- Search Bar -->
-        <div style="position: relative;">
-            <input type="text" id="dept-search" placeholder="Search department or code..." style="width: 320px; padding: 10px 40px 10px 16px; border: none; border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; color: #0b044d; background: #fff;" />
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9999bb" stroke-width="2" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35"/>
+{{-- Welcome Banner --}}
+<div class="welcome-banner">
+    <div class="banner-left">
+        <div class="banner-icon">
+            <svg width="22" height="22" fill="none" stroke="#d9bb00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/>
             </svg>
         </div>
-
-        <!-- Notification Bell -->
-        <button style="background: rgba(255,255,255,0.1); border: none; color: #fff; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative;" title="Notifications" onclick="toggleNotifications()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-            </svg>
-            <span style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; border: 2px solid #0b044d;"></span>
-        </button>
+        <div>
+            <h2>Departments & Offices</h2>
+            <p>{{ now()->format('l, F j, Y') }} &nbsp;·&nbsp; Municipal Government of Pagsanjan</p>
+        </div>
+    </div>
+    <div class="banner-right">
+        <div class="topbar-search-wrap">
+            <svg class="topbar-search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="dept-search" class="topbar-search-input" placeholder="Search department or code...">
+        </div>
     </div>
 </div>
 
-<script>
-function toggleNotifications() {
-    alert('Notifications feature coming soon!');
+<style>
+.topbar-search-wrap { position: relative; display: flex; align-items: center; }
+.topbar-search-icon { position: absolute; left: 10px; color: #6b6a8a; pointer-events: none; }
+.topbar-search-input { background: #fff; border: 1.5px solid #e5e4f0; border-radius: 9px; padding: 8px 12px 8px 32px; font-size: 12.5px; color: #0b044d; outline: none; width: 260px; font-family: 'Poppins', sans-serif; transition: border-color 0.2s, box-shadow 0.2s; box-shadow: 0 1px 3px rgba(11,4,77,0.06); }
+.topbar-search-input::placeholder { color: #aaa8cc; }
+.topbar-search-input:focus { border-color: #0b044d; box-shadow: 0 0 0 3px rgba(11,4,77,0.1); }
+@media (max-width: 768px) {
+    .banner-right { flex-wrap: wrap; }
+    .topbar-search-wrap { width: 100%; }
+    .topbar-search-input { width: 100%; }
 }
-</script>
+</style>

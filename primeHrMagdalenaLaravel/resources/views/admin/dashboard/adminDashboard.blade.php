@@ -1,295 +1,417 @@
 @extends('layouts.app')
 
 @section('content')
-<div>
-    <!-- Welcome Banner -->
-    <div class="welcome-banner">
-        <div class="banner-left">
-            <div class="banner-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d9bb00" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M8 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/></svg>
-            </div>
-            <div>
-                <h2>Welcome to PRIME HRIS Dashboard</h2>
-                <p>Municipal Government of Pagsanjan · Human Resource Management Office</p>
+@include('admin.topbar.adminTopbar')
+@include('admin.notification.adminNotification')
+
+{{-- Stats Grid --}}
+<div class="stats-grid stats-grid-4">
+    <div class="stat-card">
+        <div class="stat-top">
+            <p class="stat-label">Total Employees</p>
+            <div class="stat-icon-wrap" style="background:#f0effe">
+                <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
         </div>
-        <div class="banner-right">
-            <div class="banner-badge"><span class="banner-badge-dot"></span>System Active</div>
-            <div class="banner-badge outline">Fiscal Year 2025</div>
+        <p class="stat-value">248</p>
+        <div class="stat-footer">
+            <span class="stat-dot" style="background:#22c55e"></span>
+            <p class="stat-sub">+4 new this month</p>
         </div>
     </div>
 
-    <!-- Stats Grid -->
-    <section class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
-        @php
-        $stats = [
-            ['label' => 'Total Personnel', 'value' => '348', 'sub' => '+6 this month', 'accent' => '#0b044d', 'icon' => 'users'],
-            ['label' => 'Semi-Monthly Payroll', 'value' => '₱2,436,300', 'sub' => '+1.8% vs last period', 'accent' => '#8e1e18', 'icon' => 'peso'],
-            ['label' => 'Open Job Positions', 'value' => '8', 'sub' => '45 applicants', 'accent' => '#15803d', 'icon' => 'user'],
-            ['label' => 'Ongoing Trainings', 'value' => '5', 'sub' => '83 participants', 'accent' => '#d9bb00', 'icon' => 'bookOpen'],
-            ['label' => 'Pending Evaluations', 'value' => '12', 'sub' => 'Due by Jun 30', 'accent' => '#1a6e3c', 'icon' => 'activity'],
-            ['label' => 'Avg Performance', 'value' => '4.7', 'sub' => 'Out of 5.0', 'accent' => '#6b3fa0', 'icon' => 'award'],
-        ];
-        @endphp
-
-        @foreach($stats as $stat)
-        <div class="stat-card">
-            <div class="stat-top">
-                <p class="stat-label">{{ $stat['label'] }}</p>
-                <div class="stat-icon-wrap" style="background: {{ $stat['accent'] }}15;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{ $stat['accent'] }}" stroke-width="2">
-                        @if($stat['icon'] === 'users')
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-                        @elseif($stat['icon'] === 'peso')
-                        <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                        @elseif($stat['icon'] === 'user')
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                        @elseif($stat['icon'] === 'bookOpen')
-                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                        @elseif($stat['icon'] === 'activity')
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                        @elseif($stat['icon'] === 'award')
-                        <circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
-                        @endif
-                    </svg>
-                </div>
-            </div>
-            <h2 class="stat-value">{{ $stat['value'] }}</h2>
-            <div class="stat-footer">
-                <span class="stat-dot" style="background: {{ $stat['accent'] }};"></span>
-                <p class="stat-sub">{{ $stat['sub'] }}</p>
+    <div class="stat-card">
+        <div class="stat-top">
+            <p class="stat-label">Present Today</p>
+            <div class="stat-icon-wrap" style="background:#e8f9ef">
+                <svg width="17" height="17" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
             </div>
         </div>
-        @endforeach
-    </section>
-
-    <!-- Quick Actions -->
-    <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 22px;">
-        <div class="stat-card" style="cursor: pointer; transition: all 0.2s;">
-            <div style="display: flex; align-items: center; gap: 14px;">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #15803d 0%, #22c55e 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(21, 128, 61, 0.2);">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                </div>
-                <div style="flex: 1;">
-                    <p style="font-size: 14px; font-weight: 700; color: #0b044d; margin-bottom: 3px;">Recruitment</p>
-                    <p style="font-size: 12px; color: #9999bb;">8 open positions · 45 applicants</p>
-                </div>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9999bb" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
+        <p class="stat-value">211</p>
+        <div class="stat-footer">
+            <span class="stat-dot" style="background:#22c55e"></span>
+            <p class="stat-sub">85.1% attendance rate</p>
         </div>
-
-        <div class="stat-card" style="cursor: pointer; transition: all 0.2s;">
-            <div style="display: flex; align-items: center; gap: 14px;">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #d9bb00 0%, #fbbf24 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(217, 187, 0, 0.2);">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                </div>
-                <div style="flex: 1;">
-                    <p style="font-size: 14px; font-weight: 700; color: #0b044d; margin-bottom: 3px;">Training Programs</p>
-                    <p style="font-size: 12px; color: #9999bb;">5 ongoing · 83 participants</p>
-                </div>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9999bb" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-        </div>
-
-        <div class="stat-card" style="cursor: pointer; transition: all 0.2s;">
-            <div style="display: flex; align-items: center; gap: 14px;">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #6b3fa0 0%, #8b5cf6 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(107, 63, 160, 0.2);">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                </div>
-                <div style="flex: 1;">
-                    <p style="font-size: 14px; font-weight: 700; color: #0b044d; margin-bottom: 3px;">Performance Reviews</p>
-                    <p style="font-size: 12px; color: #9999bb;">12 pending evaluations</p>
-                </div>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9999bb" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-        </div>
-    </section>
-
-    <!-- Tabs -->
-    <div style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #f0effe; padding-bottom: 0;">
-        <button class="tab-btn active" data-tab="overview">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            Overview
-        </button>
-        <button class="tab-btn" data-tab="payroll">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            Recent Payroll
-        </button>
-        <button class="tab-btn" data-tab="activity">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            Recent Activity
-        </button>
     </div>
 
-    <!-- Overview Tab -->
-    <section class="table-section tab-content active" id="overview">
-        <div class="table-header">
-            <div>
-                <h3 class="table-title">Recent Activity</h3>
-                <p class="table-sub">Latest updates and actions across all modules</p>
+    <div class="stat-card">
+        <div class="stat-top">
+            <p class="stat-label">On Leave</p>
+            <div class="stat-icon-wrap" style="background:#fefce8">
+                <svg width="17" height="17" fill="none" stroke="#a16207" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
         </div>
-        <div style="padding: 20px 24px;">
-            @php
-            $activities = [
-                ['type' => 'success', 'title' => 'Payroll Processed', 'desc' => 'Jun 16-30, 2025 payroll completed for 348 employees', 'time' => '2 hours ago', 'icon' => 'checkCircle'],
-                ['type' => 'info', 'title' => 'New Job Posting', 'desc' => 'Administrative Officer IV position opened in Office of the Mayor', 'time' => '5 hours ago', 'icon' => 'clipboard'],
-                ['type' => 'warning', 'title' => 'Pending Evaluations', 'desc' => '12 performance evaluations due by Jun 30, 2025', 'time' => '1 day ago', 'icon' => 'clock'],
-                ['type' => 'info', 'title' => 'Training Completed', 'desc' => '30 employees completed Customer Service Excellence training', 'time' => '2 days ago', 'icon' => 'bookOpen'],
-                ['type' => 'success', 'title' => 'New Employee Onboarded', 'desc' => 'Roberto T. Flores (PGS-0310) successfully onboarded', 'time' => '3 days ago', 'icon' => 'user'],
-            ];
-            @endphp
+        <p class="stat-value">22</p>
+        <div class="stat-footer">
+            <span class="stat-dot" style="background:#f59e0b"></span>
+            <p class="stat-sub">8 pending approval</p>
+        </div>
+    </div>
 
-            @foreach($activities as $i => $activity)
-            <div style="display: flex; gap: 14px; padding: 14px 0; border-bottom: {{ $i < 4 ? '1px solid #f7f6ff' : 'none' }};">
-                <div style="width: 40px; height: 40px; border-radius: 10px; background: {{ $activity['type'] === 'success' ? '#e8f9ef' : ($activity['type'] === 'warning' ? '#fefce8' : '#f0effe') }}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: {{ $activity['type'] === 'success' ? '#15803d' : ($activity['type'] === 'warning' ? '#d9bb00' : '#0b044d') }};">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        @if($activity['icon'] === 'checkCircle')
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                        @elseif($activity['icon'] === 'clipboard')
-                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-                        @elseif($activity['icon'] === 'clock')
-                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                        @elseif($activity['icon'] === 'bookOpen')
-                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                        @elseif($activity['icon'] === 'user')
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    <div class="stat-card">
+        <div class="stat-top">
+            <p class="stat-label">Monthly Payroll</p>
+            <div class="stat-icon-wrap" style="background:#fdf0ef">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="#8e1e18" stroke="none"><text x="3" y="19" font-size="17" font-weight="bold" font-family="Arial, sans-serif">₱</text></svg>
+            </div>
+        </div>
+        <p class="stat-value" style="font-size:20px">₱1.24M</p>
+        <div class="stat-footer">
+            <span class="stat-dot" style="background:#0b044d"></span>
+            <p class="stat-sub">{{ now()->format('F Y') }} payroll</p>
+        </div>
+    </div>
+</div>
+
+{{-- Recent Employees Table --}}
+<div class="table-section">
+    <div class="table-header">
+        <div>
+            <p class="table-title">Employee Directory</p>
+            <p class="table-sub">All active government personnel</p>
+        </div>
+        <div class="table-actions">
+            <select class="filter-select" id="filterDept" onchange="applyFilters()">
+                <option value="">All Departments</option>
+                <option>Administration</option>
+                <option>Engineering</option>
+                <option>Health</option>
+                <option>Finance</option>
+                <option>HRMO</option>
+            </select>
+            <select class="filter-select" id="filterType" onchange="applyFilters()">
+                <option value="">All Types</option>
+                <option>Permanent</option>
+                <option>Job Order</option>
+            </select>
+            <button class="btn-export">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export
+            </button>
+            <button class="modal-btn-primary" onclick="openAddEmployee()">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Employee
+            </button>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="payroll-table">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Position</th>
+                    <th>Department</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                $employees = [
+                    ['initials'=>'JD','color'=>'#0b044d','name'=>'Juan Dela Cruz','id'=>'EMP-001','position'=>'Administrative Officer II','dept'=>'Administration','type'=>'Permanent','status'=>'active'],
+                    ['initials'=>'MR','color'=>'#8e1e18','name'=>'Maria Reyes','id'=>'EMP-002','position'=>'Nurse II','dept'=>'Health','type'=>'Permanent','status'=>'active'],
+                    ['initials'=>'PS','color'=>'#15803d','name'=>'Pedro Santos','id'=>'EMP-003','position'=>'Engineer I','dept'=>'Engineering','type'=>'Permanent','status'=>'on-leave'],
+                    ['initials'=>'AL','color'=>'#a16207','name'=>'Ana Lim','id'=>'EMP-004','position'=>'Bookkeeper','dept'=>'Finance','type'=>'Job Order','status'=>'active'],
+                    ['initials'=>'RC','color'=>'#7c3aed','name'=>'Roberto Cruz','id'=>'EMP-005','position'=>'Driver','dept'=>'Administration','type'=>'Job Order','status'=>'active'],
+                ];
+                @endphp
+                @foreach($employees as $emp)
+                <tr data-dept="{{ $emp['dept'] }}" data-type="{{ $emp['type'] }}">
+                    <td>
+                        <div class="emp-cell">
+                            <div class="emp-avatar emp-avatar-dynamic" data-bg="{{ $emp['color'] }}">{{ $emp['initials'] }}</div>
+                            <div>
+                                <p class="emp-name">{{ $emp['name'] }}</p>
+                                <p class="emp-id">{{ $emp['id'] }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="position-cell">{{ $emp['position'] }}</span></td>
+                    <td><span class="dept-tag">{{ $emp['dept'] }}</span></td>
+                    <td><span class="dept-tag emp-type-tag {{ $emp['type']==='Permanent' ? 'is-permanent' : 'is-joborder' }}">{{ $emp['type'] }}</span></td>
+                    <td>
+                        @if($emp['status']==='active')
+                            <span class="badge-status processed">Active</span>
+                        @else
+                            <span class="badge-status pending">On Leave</span>
                         @endif
-                    </svg>
-                </div>
-                <div style="flex: 1;">
-                    <p style="font-size: 13.5px; font-weight: 600; color: #0b044d; margin-bottom: 3px;">{{ $activity['title'] }}</p>
-                    <p style="font-size: 12px; color: #6b6a8a; line-height: 1.5;">{{ $activity['desc'] }}</p>
-                    <p style="font-size: 11px; color: #aaa8cc; margin-top: 4px;">{{ $activity['time'] }}</p>
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </section>
+                    </td>
+                    <td><button class="btn-view">View</button></td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 
-    <!-- Payroll Tab -->
-    <section class="table-section tab-content" id="payroll">
+    <div class="table-footer">
+        <span id="filterCount">Showing <strong>1–5</strong> of <strong>5</strong> employees</span>
+        <div class="pagination">
+            <button class="page-btn">‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">›</button>
+        </div>
+    </div>
+</div>
+
+{{-- Bottom Row: Leave Requests + Quick Stats --}}
+<div class="bottom-row">
+
+    {{-- Leave Requests --}}
+    <div class="table-section mb-0">
         <div class="table-header">
             <div>
-                <h3 class="table-title">Payroll Register — Jun 16–30, 2025</h3>
-                <p class="table-sub">Municipal Government of Pagsanjan · Pay Date: Jun 30, 2025</p>
+                <p class="table-title">Pending Leave Requests</p>
+                <p class="table-sub">Requires your approval</p>
             </div>
-            <div class="table-actions">
-                <select class="filter-select">
-                    <option>All Departments</option>
-                    <option>Office of the Mayor</option>
-                    <option>Municipal Health Office</option>
-                </select>
-                <select class="filter-select">
-                    <option>June 2025</option>
-                    <option>May 2025</option>
-                </select>
-                <button class="btn-export">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Export
-                </button>
-                <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    Process Payroll
-                </button>
-            </div>
+            <button class="btn-export">View All</button>
         </div>
-
         <div class="table-wrapper">
             <table class="payroll-table">
                 <thead>
-                    <tr>
-                        <th>Personnel</th>
-                        <th>Position</th>
-                        <th>Department / Office</th>
-                        <th>Basic Pay</th>
-                        <th>Deductions</th>
-                        <th>Net Pay</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
+                    <tr><th>Employee</th><th>Type</th><th>Duration</th><th>Action</th></tr>
                 </thead>
                 <tbody>
                     @php
-                    $payrollData = [
-                        ['id' => 'PGS-0041', 'name' => 'Maria B. Santos', 'position' => 'Administrative Officer IV', 'dept' => 'Office of the Mayor', 'basic' => '₱21,079.50', 'deductions' => '₱4,215.50', 'net' => '₱16,864.00', 'status' => 'Processed'],
-                        ['id' => 'PGS-0082', 'name' => 'Juan P. dela Cruz', 'position' => 'Municipal Engineer II', 'dept' => 'Office of the Mun. Engineer', 'basic' => '₱19,042.50', 'deductions' => '₱3,809.00', 'net' => '₱15,233.50', 'status' => 'Processed'],
-                        ['id' => 'PGS-0115', 'name' => 'Ana R. Reyes', 'position' => 'Nurse II', 'dept' => 'Municipal Health Office', 'basic' => '₱16,921.50', 'deductions' => '₱3,384.00', 'net' => '₱13,537.50', 'status' => 'Pending'],
+                    $leaves = [
+                        ['initials'=>'JD','color'=>'#0b044d','name'=>'Juan Dela Cruz','type'=>'Vacation Leave','days'=>'3 days'],
+                        ['initials'=>'MR','color'=>'#8e1e18','name'=>'Maria Reyes','type'=>'Sick Leave','days'=>'2 days'],
+                        ['initials'=>'AL','color'=>'#a16207','name'=>'Ana Lim','type'=>'Emergency Leave','days'=>'1 day'],
                     ];
-                    $avatarColors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#0b044d'];
                     @endphp
-
-                    @foreach($payrollData as $i => $row)
+                    @foreach($leaves as $l)
                     <tr>
                         <td>
                             <div class="emp-cell">
-                                <div class="emp-avatar" style="background: {{ $avatarColors[$i % count($avatarColors)] }};">
-                                    {{ strtoupper(substr($row['name'], 0, 1) . substr(explode(' ', $row['name'])[1] ?? '', 0, 1)) }}
-                                </div>
-                                <div>
-                                    <p class="emp-name">{{ $row['name'] }}</p>
-                                    <p class="emp-id">{{ $row['id'] }}</p>
-                                </div>
+                                <div class="emp-avatar emp-avatar-sm emp-avatar-dynamic" data-bg="{{ $l['color'] }}">{{ $l['initials'] }}</div>
+                                <p class="emp-name" style="margin:0">{{ $l['name'] }}</p>
                             </div>
                         </td>
-                        <td class="position-cell">{{ $row['position'] }}</td>
-                        <td><span class="dept-tag">{{ $row['dept'] }}</span></td>
-                        <td class="pay-cell">{{ $row['basic'] }}</td>
-                        <td class="deduction">{{ $row['deductions'] }}</td>
-                        <td class="net-pay">{{ $row['net'] }}</td>
-                        <td><span class="badge-status {{ strtolower(str_replace(' ', '-', $row['status'])) }}">{{ $row['status'] }}</span></td>
-                        <td><button class="btn-view">View</button></td>
+                        <td><span class="dept-tag">{{ $l['type'] }}</span></td>
+                        <td style="font-size:12.5px;color:#5a5888">{{ $l['days'] }}</td>
+                        <td>
+                            <div style="display:flex;gap:6px">
+                                <button class="btn-activate">Approve</button>
+                                <button class="btn-deactivate">Deny</button>
+                            </div>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
-    </section>
+    </div>
 
-    <!-- Activity Tab -->
-    <section class="table-section tab-content" id="activity">
-        <div class="table-header">
-            <div>
-                <h3 class="table-title">System Activity Log</h3>
-                <p class="table-sub">Comprehensive activity tracking across all HRIS modules</p>
+    {{-- Quick Overview --}}
+    <div class="side-col">
+
+        <div class="table-section mb-0">
+            <div class="table-header" style="padding:16px 20px">
+                <p class="table-title" style="font-size:13px">Department Breakdown</p>
             </div>
-        </div>
-        <div style="padding: 20px 24px;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 20px;">
-                @php
-                $modules = [
-                    ['module' => 'Recruitment', 'count' => 8, 'color' => '#15803d'],
-                    ['module' => 'Training', 'count' => 5, 'color' => '#d9bb00'],
-                    ['module' => 'Performance', 'count' => 12, 'color' => '#6b3fa0'],
-                    ['module' => 'Payroll', 'count' => 348, 'color' => '#8e1e18'],
-                ];
-                @endphp
-
-                @foreach($modules as $mod)
-                <div style="background: #f7f6ff; border-radius: 10px; padding: 16px; display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 48px; height: 48px; border-radius: 10px; background: {{ $mod['color'] }}15; border: 2px solid {{ $mod['color'] }}; display: flex; align-items: center; justify-content: center;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{ $mod['color'] }}" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            @php
+            $depts = [
+                ['name'=>'Administration','count'=>62,'color'=>'#0b044d'],
+                ['name'=>'Engineering','count'=>38,'color'=>'#8e1e18'],
+                ['name'=>'Health','count'=>55,'color'=>'#15803d'],
+                ['name'=>'Finance','count'=>29,'color'=>'#a16207'],
+                ['name'=>'HRMO','count'=>14,'color'=>'#7c3aed'],
+            ];
+            $total = 248;
+            @endphp
+            <div style="padding:4px 20px 16px">
+                @foreach($depts as $d)
+                <div style="margin-bottom:10px">
+                    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                        <span style="font-weight:600;color:#0b044d">{{ $d['name'] }}</span>
+                        <span style="color:#9999bb">{{ $d['count'] }}</span>
                     </div>
-                    <div>
-                        <p style="font-size: 11px; color: #9999bb; font-weight: 600; margin-bottom: 2px;">{{ $mod['module'] }}</p>
-                        <p style="font-size: 20px; font-weight: 800; color: {{ $mod['color'] }};">{{ $mod['count'] }}</p>
+                    <div style="height:6px;background:#f0effe;border-radius:99px;overflow:hidden">
+                        <div class="dept-fill" data-w="{{ round($d['count']/$total*100) }}%" data-bg="{{ $d['color'] }}"></div>
                     </div>
                 </div>
                 @endforeach
             </div>
-            <p style="font-size: 12px; color: #9999bb; text-align: center; padding: 20px;">Detailed activity logs and audit trails available in Reports module</p>
         </div>
-    </section>
+
+        <div class="stat-card no-margin">
+            <p class="stat-label" style="margin-bottom:12px">Upcoming Events</p>
+            @php
+            $events = [
+                ['label'=>'Payroll Release','date'=>'Jun 15','color'=>'#0b044d'],
+                ['label'=>'CSC Training','date'=>'Jun 18','color'=>'#8e1e18'],
+                ['label'=>'Performance Review','date'=>'Jun 25','color'=>'#15803d'],
+            ];
+            @endphp
+            @foreach($events as $ev)
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f7f6ff">
+                <div class="event-icon event-icon-dynamic" data-bg="{{ $ev['color'] }}">
+                    <svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div style="flex:1">
+                    <p style="font-size:12.5px;font-weight:600;color:#0b044d;margin:0 0 2px">{{ $ev['label'] }}</p>
+                    <p style="font-size:11px;color:#9999bb;margin:0">{{ $ev['date'] }}, {{ now()->year }}</p>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+    </div>
+</div>
+
+{{-- Add Employee Modal --}}
+<div class="modal-overlay" id="addEmployeeModal" onclick="closeAddEmployee()">
+    <div class="modal-box" style="max-width:560px" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="pmodal-hero">
+                <div class="pmodal-hero-icon" style="background:linear-gradient(135deg,#0b044d,#1a0f6e)">
+                    <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                </div>
+                <div>
+                    <span class="modal-eyebrow">EMPLOYEE MANAGEMENT</span>
+                    <h3 class="modal-title">Add New Employee</h3>
+                    <p class="modal-sub">Fill in the details to register a new employee</p>
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeAddEmployee()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body" style="padding:20px 24px;max-height:65vh;overflow-y:auto">
+            <form id="addEmployeeForm" onsubmit="submitAddEmployee(event)">
+                <div class="form-section-label">PERSONAL INFORMATION</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">First Name <span class="form-required">*</span></label>
+                        <input type="text" class="form-input" name="first_name" placeholder="e.g. Juan" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name <span class="form-required">*</span></label>
+                        <input type="text" class="form-input" name="last_name" placeholder="e.g. Dela Cruz" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Middle Name</label>
+                        <input type="text" class="form-input" name="middle_name" placeholder="e.g. Santos">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date of Birth <span class="form-required">*</span></label>
+                        <input type="date" class="form-input" name="dob" required>
+                    </div>
+                </div>
+
+                <div class="form-section-label" style="margin-top:18px">EMPLOYMENT DETAILS</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Employee Type <span class="form-required">*</span></label>
+                        <select class="form-input" name="emp_type" required>
+                            <option value="">Select type</option>
+                            <option value="Permanent">Permanent</option>
+                            <option value="Job Order">Job Order</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Department <span class="form-required">*</span></label>
+                        <select class="form-input" name="department" required>
+                            <option value="">Select department</option>
+                            <option>Administration</option>
+                            <option>Engineering</option>
+                            <option>Health</option>
+                            <option>Finance</option>
+                            <option>HRMO</option>
+                            <option>General Services</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Position <span class="form-required">*</span></label>
+                        <input type="text" class="form-input" name="position" placeholder="e.g. Administrative Officer II" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date Hired <span class="form-required">*</span></label>
+                        <input type="date" class="form-input" name="date_hired" required>
+                    </div>
+                </div>
+
+                <div class="form-section-label" style="margin-top:18px">CONTACT INFORMATION</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-input" name="email" placeholder="e.g. juan@lgu.gov.ph">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Number</label>
+                        <input type="text" class="form-input" name="contact" placeholder="e.g. 09XX-XXX-XXXX">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px 24px;border-top:1px solid #e5e4f0">
+            <button class="modal-btn-ghost" onclick="closeAddEmployee()">Cancel</button>
+            <button class="modal-btn-primary" onclick="submitAddEmployee(event)">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save Employee
+            </button>
+        </div>
+    </div>
 </div>
 
 <script>
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        this.classList.add('active');
-        document.getElementById(this.dataset.tab).classList.add('active');
+function applyFilters() {
+    const dept = document.getElementById('filterDept').value;
+    const type = document.getElementById('filterType').value;
+    const rows = document.querySelectorAll('.payroll-table tbody tr[data-dept]');
+    let visible = 0;
+    rows.forEach(row => {
+        const matchDept = !dept || row.dataset.dept === dept;
+        const matchType = !type || row.dataset.type === type;
+        const show = matchDept && matchType;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
     });
+    const total = rows.length;
+    document.getElementById('filterCount').innerHTML =
+        visible === total
+            ? 'Showing <strong>1–' + total + '</strong> of <strong>' + total + '</strong> employees'
+            : 'Showing <strong>' + visible + '</strong> of <strong>' + total + '</strong> employees';
+}
+
+function openAddEmployee() {
+    document.getElementById('addEmployeeModal').classList.add('show');
+}
+
+function closeAddEmployee() {
+    document.getElementById('addEmployeeModal').classList.remove('show');
+    document.getElementById('addEmployeeForm').reset();
+}
+
+function submitAddEmployee(e) {
+    e.preventDefault();
+    const form = document.getElementById('addEmployeeForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    const data = Object.fromEntries(new FormData(form));
+    alert('Employee added successfully!\\n\\n' + data.first_name + ' ' + data.last_name + ' (' + data.emp_type + ')\\n' + data.position + ' · ' + data.department);
+    closeAddEmployee();
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeAddEmployee();
+});
+
+// Apply dynamic colors (avoid Blade-in-style lint issues)
+document.querySelectorAll('.emp-avatar-dynamic, .event-icon-dynamic, .dept-fill').forEach(el => {
+    const bg = el.dataset.bg;
+    if (bg) el.style.backgroundColor = bg;
+    const w = el.dataset.w;
+    if (w) el.style.width = w;
 });
 </script>
 @endsection

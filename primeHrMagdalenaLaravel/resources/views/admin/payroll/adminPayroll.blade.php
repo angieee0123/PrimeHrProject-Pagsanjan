@@ -36,14 +36,16 @@ $processedCount = $payrollRecords->where('status', 'Processed')->count();
 $pendingCount = $payrollRecords->where('status', 'Pending')->count();
 @endphp
 
+@include('admin.topbar.payrollTopbar')
+@include('admin.notification.adminNotification')
+
 @if(session('success'))
-<div class="alert alert-success" style="margin-bottom: 20px; padding: 12px 16px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; color: #155724; font-size: 13px;">
+<div style="margin-bottom: 20px; padding: 12px 16px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; color: #155724; font-size: 13px;">
     <strong>✓</strong> {{ session('success') }}
 </div>
 @endif
-
 @if(session('error'))
-<div class="alert alert-error" style="margin-bottom: 20px; padding: 12px 16px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 6px; color: #721c24; font-size: 13px;">
+<div style="margin-bottom: 20px; padding: 12px 16px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 6px; color: #721c24; font-size: 13px;">
     <strong>✗</strong> {{ session('error') }}
 </div>
 @endif

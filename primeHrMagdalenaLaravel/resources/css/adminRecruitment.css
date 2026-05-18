@@ -1,0 +1,149 @@
+/* ── adminRecruitment.css ── */
+
+/* Stat icon wrap colours */
+.rc-icon-primary { background: rgba(11,4,77,0.1); }
+.rc-icon-success { background: rgba(21,128,61,0.1); }
+.rc-icon-warning { background: rgba(217,187,0,0.1); }
+.rc-icon-danger  { background: rgba(142,30,24,0.1); }
+
+/* Stat dot colours */
+.rc-dot-primary { background: #0b044d; }
+.rc-dot-success { background: #15803d; }
+.rc-dot-warning { background: #d9bb00; }
+.rc-dot-danger  { background: #8e1e18; }
+
+/* Job grid */
+.job-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+/* Job card */
+.job-card {
+    background: #fff;
+    border: 1.5px solid #eceaf8;
+    border-radius: 14px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+}
+.job-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #0b044d, #15803d);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+.job-card:hover {
+    border-color: #0b044d;
+    box-shadow: 0 8px 24px rgba(11,4,77,0.12);
+    transform: translateY(-2px);
+}
+.job-card:hover::before { opacity: 1; }
+
+.job-card-header {
+    position: absolute;
+    top: 16px; right: 16px;
+}
+
+.job-card-body {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.job-slot-badge {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #15803d 0%, #22c55e 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 18px; font-weight: 700;
+    flex-shrink: 0;
+}
+
+.job-card-info { flex: 1; min-width: 0; }
+.job-id    { font-size: 10px; color: #9999bb; font-weight: 600; margin: 0 0 2px; }
+.job-title { font-size: 14px; font-weight: 700; color: #0b044d; margin: 0; line-height: 1.3; }
+.job-dept  { font-size: 12px; color: #6b6a8a; margin: 0 0 12px; }
+
+.job-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.job-card-footer {
+    border-top: 1px solid #f0effe;
+    padding-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.job-deadline-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: #9999bb;
+    margin: 0 0 2px;
+}
+.job-deadline-date { font-size: 12px; color: #0b044d; font-weight: 600; margin: 0; }
+
+.job-actions { display: flex; gap: 6px; }
+
+/* List view table cell helpers */
+.job-id-cell     { font-size: 12.5px; color: #6b6a8a; font-weight: 500; }
+.slots-cell      { font-size: 13px; color: #6b6a8a; text-align: center; }
+.applicants-cell { font-size: 13px; color: #0b044d; font-weight: 600; text-align: center; }
+.deadline-cell   { font-size: 12.5px; color: #6b6a8a; white-space: nowrap; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 60px 20px; }
+.empty-icon {
+    width: 80px; height: 80px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #f7f6ff 0%, #eceaf8 100%);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+}
+.empty-title { font-size: 16px; font-weight: 700; color: #0b044d; margin: 0 0 8px; }
+.empty-sub   { font-size: 13px; color: #9999bb; margin: 0; }
+
+/* View Applicants button variant */
+.modal-btn-success {
+    background: linear-gradient(135deg, #15803d 0%, #22c55e 100%) !important;
+    box-shadow: 0 2px 8px rgba(21,128,61,0.3) !important;
+}
+.modal-btn-success:hover {
+    box-shadow: 0 4px 12px rgba(21,128,61,0.4) !important;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .job-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+}
+
+@media (max-width: 768px) {
+    .job-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+    .job-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+    .job-card { padding: 16px; }
+    .job-card-footer { flex-direction: column; gap: 10px; align-items: stretch; }
+    .job-actions { gap: 8px; }
+    .job-actions .btn-view,
+    .job-actions .btn-edit { flex: 1; justify-content: center; }
+}

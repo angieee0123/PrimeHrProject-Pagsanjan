@@ -2,6 +2,7 @@
 
 @section('content')
 @include('admin.topbar.attendanceTopbar')
+@include('admin.notification.adminNotification')
 @php
 $avatarColors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
 function getInitials($name) {
@@ -24,7 +25,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">DTR Submitted</p>
-            <div class="stat-icon-wrap" style="background: #0b044d18; color: #0b044d;">
+            <div class="stat-icon-wrap" style="background: #f0effe;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
             </div>
         </div>
@@ -37,7 +38,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Present</p>
-            <div class="stat-icon-wrap" style="background: #15803d18; color: #15803d;">
+            <div class="stat-icon-wrap" style="background: #e8f9ef;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
         </div>
@@ -50,7 +51,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Absences</p>
-            <div class="stat-icon-wrap" style="background: #8e1e1818; color: #8e1e18;">
+            <div class="stat-icon-wrap" style="background: #fdf0ef;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
             </div>
         </div>
@@ -63,7 +64,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Overtime Hours</p>
-            <div class="stat-icon-wrap" style="background: #d9bb0018; color: #d9bb00;">
+            <div class="stat-icon-wrap" style="background: #fefce8;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
         </div>
@@ -90,10 +91,6 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 @include('admin.attendance.modals.editDtrModal')
 @include('admin.attendance.modals.correctAttendanceModal')
 @include('admin.attendance.modals.successModal')
-
-@push('styles')
-@vite('resources/css/adminAttendance.css')
-@endpush
 
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>

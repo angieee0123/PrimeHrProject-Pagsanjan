@@ -1,0 +1,492 @@
+/* Styles for adminLeaveAndBenefits.blade.php */
+
+.tab-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 10px 20px; font-family: 'Poppins', sans-serif;
+    font-size: 13.5px; font-weight: 600;
+    color: #9999bb;
+    border-bottom: 2.5px solid transparent;
+    margin-bottom: -1.5px;
+    transition: all 0.2s;
+}
+.tab-btn.active {
+    color: #0b044d;
+    border-bottom: 2.5px solid #0b044d;
+}
+.tab-btn:hover { color: #0b044d; }
+.badge-emptype {
+    font-size: 11px; color: #0b044d; background: #f0effe;
+    padding: 3px 10px; border-radius: 20px; font-weight: 600;
+    border: 1px solid #dddcf0;
+}
+.btn-edit {
+    padding: 6px 16px; background: #f7f6ff; color: #0b044d;
+    border: 1px solid #e8e7f5; border-radius: 6px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+}
+.btn-edit:hover { background: #e8e7f5; }
+.btn-approve {
+    padding: 6px 16px; background: #e8f9ef; color: #15803d;
+    border: 1px solid #bbf7d0; border-radius: 6px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+}
+.btn-approve:hover { background: #d1fae5; }
+.btn-reject {
+    padding: 6px 16px; background: #fdf0ef; color: #8e1e18;
+    border: 1px solid #fecaca; border-radius: 6px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+}
+.btn-reject:hover { background: #fee8e8; }
+.row-actions { display: flex; gap: 8px; justify-content: center; }
+.table-footer {
+    padding: 16px 24px; border-top: 1px solid #f0effe;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.table-footer p { font-size: 13px; color: #6b6a8a; }
+.pagination { display: flex; gap: 6px; }
+.page-btn {
+    width: 32px; height: 32px; border: 1px solid #e8e7f5;
+    border-radius: 6px; background: #fff; color: #6b6a8a;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+}
+.page-btn.active { background: #0b044d; color: #fff; border-color: #0b044d; }
+.page-btn:hover:not(:disabled) { background: #f7f6ff; }
+.page-btn:disabled { cursor: not-allowed; opacity: 0.5; }
+.deduction {
+    font-size: 13px; color: #8e1e18; font-weight: 600;
+}
+.btn-manage-types {
+    padding: 8px 16px; background: #f7f6ff; color: #0b044d;
+    border: 1px solid #e8e7f5; border-radius: 6px;
+    font-size: 12.5px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+}
+.btn-manage-types:hover { background: #e8e7f5; }
+.modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(11, 4, 77, 0.4); backdrop-filter: blur(2px);
+    z-index: 9999; align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-container {
+    background: #fff; border-radius: 12px; width: 90%; max-width: 700px;
+    max-height: 85vh; display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(11, 4, 77, 0.3);
+}
+.modal-header {
+    padding: 24px; border-bottom: 1px solid #f0effe;
+    display: flex; justify-content: space-between; align-items: flex-start;
+}
+.modal-title {
+    font-size: 18px; font-weight: 700; color: #0b044d; margin: 0;
+    font-family: 'Poppins', sans-serif;
+}
+.modal-subtitle {
+    font-size: 12.5px; color: #6b6a8a; margin: 4px 0 0 0;
+    font-family: 'Poppins', sans-serif;
+}
+.modal-close {
+    background: #f7f6ff; border: 1px solid #e8e7f5; border-radius: 6px;
+    width: 32px; height: 32px; display: flex; align-items: center;
+    justify-content: center; cursor: pointer; transition: all 0.2s;
+}
+.modal-close:hover { background: #e8e7f5; }
+.modal-body {
+    padding: 24px; overflow-y: auto; flex: 1; background: #fafaf9;
+}
+.btn-add-leave-type {
+    width: 100%; padding: 12px; background: #0b044d; color: #fff;
+    border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+    font-family: 'Poppins', sans-serif; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.2s; margin-bottom: 20px;
+}
+.btn-add-leave-type:hover { background: #1a0f6e; }
+.leave-types-list {
+    display: flex; flex-direction: column; gap: 14px;
+}
+.leave-type-item {
+    background: #f7f6ff; border: 1px solid #e8e7f5; border-radius: 8px;
+    padding: 16px; display: flex; align-items: flex-start; gap: 16px;
+    transition: all 0.2s;
+    flex-wrap: wrap;
+}
+.leave-type-item:hover { border-color: #d0cfe8; background: #fafaf9; }
+.leave-type-info { flex: 1; min-width: 200px; }
+.leave-type-name {
+    font-size: 14px; font-weight: 600; color: #0b044d; margin: 0;
+    font-family: 'Poppins', sans-serif;
+}
+.leave-type-desc {
+    font-size: 12px; color: #6b6a8a; margin: 4px 0 0 0;
+    font-family: 'Poppins', sans-serif;
+}
+.leave-type-meta {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px;
+}
+.leave-type-days {
+    font-size: 12px; font-weight: 600; color: #0b044d;
+    background: #fff; padding: 5px 12px; border-radius: 6px;
+    border: 1px solid #e8e7f5;
+}
+.badge-active {
+    font-size: 11px; font-weight: 600; color: #15803d;
+    background: #dcfce7; padding: 5px 12px; border-radius: 20px;
+    border: none;
+}
+.leave-type-actions {
+    display: flex; gap: 8px; align-self: center;
+}
+.btn-icon-edit, .btn-icon-delete {
+    width: 36px; height: 36px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; border: none;
+    flex-shrink: 0;
+}
+.btn-icon-edit {
+    background: #f0effe; color: #0b044d;
+}
+.btn-icon-edit:hover { background: #e8e7f5; }
+.btn-icon-delete {
+    background: #fef0f0; color: #8e1e18;
+}
+.btn-icon-delete:hover { background: #fee2e2; }
+.form-group {
+    margin-bottom: 16px;
+}
+.form-label {
+    display: block; font-size: 12.5px; font-weight: 600;
+    color: #0b044d; margin-bottom: 6px;
+    font-family: 'Poppins', sans-serif;
+}
+.form-input {
+    width: 100%; padding: 10px 12px; border: 1px solid #e8e7f5;
+    border-radius: 6px; font-size: 13px; color: #0b044d;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+}
+.form-input:focus {
+    outline: none; border-color: #0b044d;
+}
+.form-actions {
+    display: flex; gap: 10px; margin-top: 24px;
+}
+.btn-cancel {
+    flex: 1; padding: 10px; background: #f7f6ff; color: #0b044d;
+    border: 1px solid #e8e7f5; border-radius: 6px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+}
+.btn-cancel:hover { background: #e8e7f5; }
+.btn-submit {
+    flex: 1; padding: 10px; background: #0b044d; color: #fff;
+    border: none; border-radius: 6px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+}
+.btn-submit:hover { background: #1a0f6e; }
+.leave-code-badge {
+    display: inline-block; padding: 6px 12px; background: #0b044d;
+    color: #fff; border-radius: 6px; font-size: 12px;
+    font-weight: 700; font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+}
+
+.prop-tag {
+    font-size: 11px; padding: 4px 8px; background: #fff;
+    color: #0b044d; border: 1px solid #e8e7f5; border-radius: 5px;
+    font-weight: 500; white-space: nowrap; display: inline-block;
+}
+.leave-type-row.hidden {
+    display: none;
+}
+.detail-group {
+    margin-bottom: 16px;
+}
+.detail-label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: #6b6a8a; margin-bottom: 6px; text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.detail-value {
+    font-size: 14px; color: #0b044d; margin: 0;
+    font-family: 'Poppins', sans-serif;
+}
+.document-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; background: #f7f6ff; color: #0b044d;
+    border: 1px solid #e8e7f5; border-radius: 6px;
+    font-size: 13px; font-weight: 600; text-decoration: none;
+    transition: all 0.2s;
+}
+.document-link:hover {
+    background: #e8e7f5;
+}
+.form-row {
+    display: flex; gap: 16px;
+}
+.checkbox-group {
+    display: flex; flex-direction: column; gap: 10px;
+}
+.checkbox-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #0b044d; cursor: pointer;
+}
+.form-checkbox {
+    width: 16px; height: 16px; cursor: pointer;
+}
+.file-upload-wrapper {
+    position: relative;
+}
+.file-input {
+    display: none;
+}
+.file-upload-label {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px; border: 2px dashed #e8e7f5; border-radius: 6px;
+    background: #fafaf9; cursor: pointer; transition: all 0.2s;
+    font-size: 13px; color: #6b6a8a;
+}
+.file-upload-label:hover {
+    border-color: #0b044d; background: #f7f6ff;
+}
+.config-badge {
+    display: inline-block; font-size: 11px; padding: 5px 12px;
+    background: #f0effe; color: #0b044d; border-radius: 20px;
+    font-weight: 600; border: 1px solid #e8e7f5;
+}
+.modal-box {
+    background: #fff; border-radius: 12px; width: 90%; max-width: 600px;
+    max-height: 85vh; display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(11, 4, 77, 0.3);
+}
+.modal-eyebrow {
+    font-size: 11px; font-weight: 700; color: #9999bb;
+    text-transform: uppercase; letter-spacing: 1px;
+    font-family: 'Poppins', sans-serif;
+}
+.modal-sub {
+    font-size: 12.5px; color: #6b6a8a; margin: 4px 0 0 0;
+    font-family: 'Poppins', sans-serif;
+}
+.modal-section-label {
+    font-size: 11px; font-weight: 700; color: #9999bb;
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px; font-family: 'Poppins', sans-serif;
+}
+.modal-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid #f0effe;
+    font-size: 13px; color: #6b6a8a;
+}
+.modal-row strong {
+    color: #0b044d; font-weight: 600;
+}
+.modal-footer {
+    padding: 20px 24px; border-top: 1px solid #f0effe;
+    display: flex; gap: 10px; justify-content: flex-end;
+}
+.modal-btn-ghost {
+    padding: 10px 20px; background: #f7f6ff; color: #0b044d;
+    border: 1px solid #e8e7f5; border-radius: 6px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+}
+.modal-btn-ghost:hover { background: #e8e7f5; }
+.modal-btn-primary {
+    padding: 10px 20px; background: #0b044d; color: #fff;
+    border: none; border-radius: 6px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+}
+.modal-btn-primary:hover { background: #1a0f6e; }
+#types-tab .payroll-table tbody tr {
+    height: 70px;
+}
+
+#types-tab .payroll-table td {
+    vertical-align: middle;
+}
+
+#types-tab .payroll-table th:nth-child(1),
+#types-tab .payroll-table td:nth-child(1) {
+    text-align: center;
+}
+
+#types-tab .emp-avatar {
+    display: inline-flex;
+}
+
+/* Responsive table for mobile */
+@media (max-width: 1024px) {
+    #types-tab .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    #types-tab .payroll-table {
+        min-width: 800px;
+    }
+}
+
+@media (max-width: 768px) {
+    #types-tab .payroll-table {
+        min-width: 100%;
+        display: block;
+    }
+    
+    #types-tab .payroll-table thead {
+        display: none;
+    }
+    
+    #types-tab .payroll-table tbody {
+        display: block;
+    }
+    
+    #types-tab .payroll-table tbody tr {
+        display: block;
+        margin-bottom: 16px;
+        border: 1px solid #f0effe;
+        border-radius: 8px;
+        padding: 16px;
+        background: #fff;
+        height: auto;
+    }
+    
+    #types-tab .payroll-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border: none;
+        text-align: right;
+    }
+    
+    #types-tab .payroll-table td:before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 11.5px;
+        color: #6b6a8a;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left;
+    }
+    
+    #types-tab .payroll-table td:nth-child(1) {
+        justify-content: center;
+        border-bottom: 1px solid #f0effe;
+        padding-bottom: 12px;
+        margin-bottom: 8px;
+    }
+    
+    #types-tab .payroll-table td:nth-child(1):before {
+        display: none;
+    }
+    
+    #types-tab .row-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(11, 4, 77, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(11, 4, 77, 0.3);
+    position: relative;
+}
+
+/* Form grid for two-column layout */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-grid .form-group {
+    margin-bottom: 0;
+}
+
+/* Form hint text */
+.form-hint {
+    display: block;
+    font-size: 11.5px;
+    color: #6b6a8a;
+    margin-top: 4px;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Secondary button style */
+.btn-secondary {
+    padding: 10px 16px;
+    background: #f7f6ff;
+    color: #0b044d;
+    border: 1px solid #e8e7f5;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-secondary:hover {
+    background: #e8e7f5;
+}
+
+/* Accrual rate row styles */
+.accrual-rate-row.hidden {
+    display: none;
+}
+
+/* Responsive modal */
+@media (max-width: 768px) {
+    .modal-content {
+        max-width: 100%;
+        max-height: 95vh;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-grid .form-group {
+        grid-column: span 1 !important;
+    }
+}

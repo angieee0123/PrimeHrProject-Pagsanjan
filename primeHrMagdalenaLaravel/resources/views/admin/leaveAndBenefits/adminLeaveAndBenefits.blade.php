@@ -19,13 +19,14 @@ $totalPending = $leaveApplications->where('status', 'pending')->count();
 $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_days');
 @endphp
 
-@include('admin.topbar.leaveAndBenefitsTopbar')
+@include('admin.topbar.leaveandbenefitsTopbar')
+@include('admin.notification.adminNotification')
 
-<div class="stats-grid" style="margin-bottom: 20px;">
+<div class="stats-grid stats-grid-4" style="margin-bottom: 20px;">
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Leave Requests</p>
-            <div class="stat-icon-wrap" style="background: #0b044d18; color: #0b044d;">
+            <div class="stat-icon-wrap" style="background: #f0effe;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
             </div>
         </div>
@@ -38,7 +39,7 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Approved</p>
-            <div class="stat-icon-wrap" style="background: #15803d18; color: #15803d;">
+            <div class="stat-icon-wrap" style="background: #e8f9ef;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
         </div>
@@ -51,7 +52,7 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Pending Approval</p>
-            <div class="stat-icon-wrap" style="background: #d9bb0018; color: #d9bb00;">
+            <div class="stat-icon-wrap" style="background: #fefce8;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
         </div>
@@ -64,7 +65,7 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Leave Days</p>
-            <div class="stat-icon-wrap" style="background: #8e1e1818; color: #8e1e18;">
+            <div class="stat-icon-wrap" style="background: #fdf0ef;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
         </div>

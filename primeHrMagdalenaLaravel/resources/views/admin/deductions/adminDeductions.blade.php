@@ -103,6 +103,10 @@ function getInitials($name) {
 
 @include('admin.deductions.partials.transactions')
 
+<style>
+.modal-overlay.active { display: flex !important; align-items: center; justify-content: center; }
+</style>
+
 @push('scripts')
 <script>
     function switchTab(tabName) {

@@ -24,25 +24,7 @@
 
         @include('permanent.notification.permanentNotification')
 
-        {{-- Welcome Banner --}}
-        <div class="welcome-banner">
-            <div class="banner-left">
-                <div class="banner-icon">
-                    <svg width="22" height="22" fill="none" stroke="#d9bb00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </div>
-                <div>
-                    <h2>My Attendance</h2>
-                    <p><span data-live-datetime data-variant="datetime">{{ now()->timezone('Asia/Manila')->format('l, F j, Y g:i:s A') }}</span> &nbsp;·&nbsp; {{ $employee->employmentDetail->designationRelation->title ?? 'N/A' }} · {{ $employee->employmentDetail->departmentRelation->name ?? 'N/A' }} · {{ $employee->employee_id }}</p>
-                </div>
-            </div>
-            <div class="banner-right">
-                <span class="banner-badge">
-                    <span class="banner-badge-dot"></span>
-                    Schedule: 8:00 AM - 5:00 PM
-                </span>
-                <span class="banner-badge outline">{{ $periodDisplay }}</span>
-            </div>
-        </div>
+        @include('permanent.topbar.attendanceTopbar')
 
         {{-- Stats Grid --}}
         <div class="stats-grid stats-grid-4">
@@ -368,8 +350,11 @@
         document.getElementById(id).style.display = 'none';
     }
 
-    function showDetailedDTRModal() {
-        document.getElementById('detailedDTRModal').style.display = 'flex';
+    function filterPermanentAttendanceTable(query) {
+        const q = query.toLowerCase();
+        document.querySelectorAll('.payroll-table tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
     }
 
     document.addEventListener('keydown', function(e) {

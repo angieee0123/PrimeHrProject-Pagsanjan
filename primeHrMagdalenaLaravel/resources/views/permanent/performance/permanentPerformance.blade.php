@@ -24,18 +24,7 @@
 
         @include('permanent.notification.permanentNotification')
 
-        {{-- Welcome Banner --}}
-        <div class="welcome-banner">
-            <div class="banner-left">
-                <div class="banner-icon">
-                    <svg width="22" height="22" fill="none" stroke="#d9bb00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                </div>
-                <div>
-                    <h2>Performance Overview</h2>
-                    <p><span data-live-datetime data-variant="datetime">{{ now()->timezone('Asia/Manila')->format('l, F j, Y g:i:s A') }}</span> &nbsp;·&nbsp; Nurse II · Municipal Health Office · PGS-0115</p>
-                </div>
-            </div>
-        </div>
+        @include('permanent.topbar.performanceTopbar')
 
         {{-- Stats Grid --}}
         <div class="stats-grid stats-grid-4 performance-stats-grid">
@@ -512,6 +501,16 @@
     
     function closeModal() {
             document.getElementById('evalModal').classList.remove('show');
+    }
+
+    function filterPermanentPerformance(query) {
+        const q = query.toLowerCase();
+        document.querySelectorAll('.payroll-table tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+        document.querySelectorAll('.goal-card').forEach(card => {
+            card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
     }
     
     function openGoal(title, category, progress, target, status) {

@@ -1,3 +1,4 @@
+<div class="admin-chatbot-ui">
 <!-- AI Chatbot FAB Button -->
 <button class="chat-fab" onclick="toggleChatbot()" title="HRIS Assistant">
     <svg class="chat-fab-icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -15,7 +16,7 @@
     <div class="chatbot-header">
         <div class="chatbot-header-left">
             <div class="chatbot-avatar">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
             </div>
@@ -25,6 +26,15 @@
             </div>
         </div>
         <div class="chatbot-header-right">
+            <button class="chatbot-clear" onclick="clearChatbotConversation()" title="Clear conversation">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6"/>
+                    <path d="M14 11v6"/>
+                    <path d="M9 6V4h6v2"/>
+                </svg>
+            </button>
             <button class="chatbot-fullscreen" id="fullscreenButton" onclick="toggleFullscreen()" title="Fullscreen">
                 <svg id="fullscreenIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
@@ -42,22 +52,42 @@
         </div>
     </div>
 
+    <div class="chatbot-quick-actions">
+        <button class="chatbot-quick-btn" onclick="sendPredefinedMessage('How many people work here?')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+            Total employees
+        </button>
+        <button class="chatbot-quick-btn" onclick="sendPredefinedMessage('Show me active employees')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            Active staff
+        </button>
+        <button class="chatbot-quick-btn" onclick="sendPredefinedMessage('Who works in Mayor office?')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Mayor's Office
+        </button>
+        <button class="chatbot-quick-btn" onclick="sendPredefinedMessage('Find administrator')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+            Find employee
+        </button>
+    </div>
+
     <div class="chatbot-messages" id="chatbotMessages">
         <div class="chat-msg bot">
             <div class="chat-msg-avatar">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
             </div>
             <div class="chat-msg-bubble">Hello! I'm the PRIME HRIS Assistant. I can help you with employee information, departments, and HR data. I understand natural questions like "How many people work here?" or "Find John Doe" or "Who's in the Mayor's office?" Try asking me anything!</div>
         </div>
-    </div>
-
-    <div class="chatbot-faqs">
-        <button class="chatbot-faq-btn" onclick="sendPredefinedMessage('How many people work here?')">Total employees</button>
-        <button class="chatbot-faq-btn" onclick="sendPredefinedMessage('Show me active employees')">Active staff</button>
-        <button class="chatbot-faq-btn" onclick="sendPredefinedMessage('Who works in Mayor office?')">Mayor's Office</button>
-        <button class="chatbot-faq-btn" onclick="sendPredefinedMessage('Find administrator')">Find employee</button>
     </div>
 
     <div class="chatbot-input-row">
@@ -93,6 +123,7 @@
             </svg>
         </button>
     </div>
+</div>
 </div>
 
 <script>
@@ -358,6 +389,21 @@ function sendPredefinedMessage(message) {
     sendChatMessage();
 }
 
+function clearChatbotConversation() {
+    if (!confirm('Clear the conversation?')) return;
+    const messagesContainer = document.getElementById('chatbotMessages');
+    messagesContainer.innerHTML = `
+        <div class="chat-msg bot">
+            <div class="chat-msg-avatar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+            </div>
+            <div class="chat-msg-bubble">Hello! I'm the PRIME HRIS Assistant. I can help you with employee information, departments, and HR data. I understand natural questions like "How many people work here?" or "Find John Doe" or "Who's in the Mayor's office?" Try asking me anything!</div>
+        </div>
+    `;
+}
+
 function addChatMessage(from, text) {
     const messagesContainer = document.getElementById('chatbotMessages');
     const messageDiv = document.createElement('div');
@@ -370,7 +416,7 @@ function addChatMessage(from, text) {
     if (from === 'bot') {
         messageDiv.innerHTML = `
             <div class="chat-msg-avatar">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
             </div>
@@ -391,7 +437,7 @@ function addTypingIndicator() {
     typingDiv.id = 'typingIndicator';
     typingDiv.innerHTML = `
         <div class="chat-msg-avatar">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
         </div>
