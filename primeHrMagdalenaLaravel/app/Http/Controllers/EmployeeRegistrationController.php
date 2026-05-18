@@ -132,7 +132,6 @@ class EmployeeRegistrationController extends Controller
             return null;
         }
     }
-}
 
     public function bulkImport(Request $request)
     {

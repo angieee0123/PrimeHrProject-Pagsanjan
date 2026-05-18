@@ -1,17 +1,27 @@
 {{-- Permanent Profile Topbar --}}
 <div class="welcome-banner profile-banner">
     <div class="banner-left profile-banner-left">
-        <div class="profile-avatar-lg">AR</div>
+        <div class="profile-avatar-lg">
+            {{ strtoupper(substr($employee->first_name, 0, 1)) }}{{ strtoupper(substr($employee->last_name, 0, 1)) }}
+        </div>
         <div class="profile-banner-info">
             <div class="profile-banner-row profile-banner-name-row">
-                <h2 class="profile-banner-name">Ana R. Reyes</h2>
-                <span class="banner-badge"><span class="banner-badge-dot"></span>Active</span>
+                <h2 class="profile-banner-name">
+                    {{ $employee->first_name }} {{ $employee->middle_name ? substr($employee->middle_name, 0, 1) . '.' : '' }} {{ $employee->last_name }}{{ $employee->suffix ? ' ' . $employee->suffix : '' }}
+                </h2>
+                <span class="banner-badge">
+                    <span class="banner-badge-dot"></span>{{ Auth::user()->status ?? 'Active' }}
+                </span>
             </div>
-            <p class="profile-banner-sub">Nurse II · Municipal Health Office</p>
+            <p class="profile-banner-sub">
+                {{ $employee->employmentDetail->designationRelation->title ?? 'N/A' }} · {{ $employee->employmentDetail->departmentRelation->name ?? 'N/A' }}
+            </p>
             <div class="profile-banner-badges">
-                <span class="banner-badge outline">Permanent</span>
-                <span class="banner-badge outline">PGS-0115</span>
-                <span class="banner-badge outline">Hired: Jan 15, 2018</span>
+                <span class="banner-badge outline">{{ $employee->employmentDetail->employment_status ?? 'N/A' }}</span>
+                <span class="banner-badge outline">{{ $employee->employee_id ?? 'N/A' }}</span>
+                <span class="banner-badge outline">
+                    Hired: {{ $employee->employmentDetail && $employee->employmentDetail->appointment_date ? \Carbon\Carbon::parse($employee->employmentDetail->appointment_date)->format('M d, Y') : 'N/A' }}
+                </span>
             </div>
         </div>
     </div>

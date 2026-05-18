@@ -36,10 +36,10 @@
                         <svg width="17" height="17" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     </div>
                 </div>
-                <p class="stat-value stat-value-compact">₱13,537.50</p>
+                <p class="stat-value stat-value-compact">₱{{ number_format($stats['latest_net_pay'], 2) }}</p>
                 <div class="stat-footer">
                     <span class="stat-dot stat-dot-success"></span>
-                    <p class="stat-sub">Jun 16-30, 2025</p>
+                    <p class="stat-sub">{{ $latestPayslip ? $latestPayslip->period_start->format('M d') . '-' . $latestPayslip->period_end->format('d, Y') : 'No data' }}</p>
                 </div>
             </div>
 
@@ -50,7 +50,7 @@
                         <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                     </div>
                 </div>
-                <p class="stat-value stat-value-compact">₱16,921.50</p>
+                <p class="stat-value stat-value-compact">₱{{ number_format($stats['basic_pay'], 2) }}</p>
                 <div class="stat-footer">
                     <span class="stat-dot stat-dot-primary"></span>
                     <p class="stat-sub">Semi-monthly rate</p>
@@ -64,10 +64,10 @@
                         <svg width="17" height="17" fill="none" stroke="#8e1e18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                     </div>
                 </div>
-                <p class="stat-value stat-value-compact">₱3,384.00</p>
+                <p class="stat-value stat-value-compact">₱{{ number_format($stats['total_deductions'], 2) }}</p>
                 <div class="stat-footer">
                     <span class="stat-dot stat-dot-danger"></span>
-                    <p class="stat-sub">GSIS, PhilHealth, Tax</p>
+                    <p class="stat-sub">Late, Undertime, Others</p>
                 </div>
             </div>
 
@@ -78,10 +78,10 @@
                         <svg width="17" height="17" fill="none" stroke="#a16207" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     </div>
                 </div>
-                <p class="stat-value">24</p>
+                <p class="stat-value">{{ $stats['total_payslips'] }}</p>
                 <div class="stat-footer">
                     <span class="stat-dot stat-dot-amber"></span>
-                    <p class="stat-sub">Since Jan 2023</p>
+                    <p class="stat-sub">All time</p>
                 </div>
             </div>
 
@@ -119,43 +119,48 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                        $payslips = [
-                            ['period'=>'Jun 16-30, 2025','basic'=>'₱16,921.50','deduct'=>'₱3,384.00','net'=>'₱13,537.50','date'=>'Jun 30, 2025','status'=>'pending'],
-                            ['period'=>'Jun 1-15, 2025','basic'=>'₱16,921.50','deduct'=>'₱3,384.00','net'=>'₱13,537.50','date'=>'Jun 15, 2025','status'=>'processed'],
-                            ['period'=>'May 16-31, 2025','basic'=>'₱16,921.50','deduct'=>'₱3,384.00','net'=>'₱13,537.50','date'=>'May 31, 2025','status'=>'processed'],
-                            ['period'=>'May 1-15, 2025','basic'=>'₱16,921.50','deduct'=>'₱3,384.00','net'=>'₱13,537.50','date'=>'May 15, 2025','status'=>'processed'],
-                            ['period'=>'Apr 16-30, 2025','basic'=>'₱16,921.50','deduct'=>'₱3,384.00','net'=>'₱13,537.50','date'=>'Apr 30, 2025','status'=>'processed'],
-                        ];
-                        @endphp
-                        @foreach($payslips as $p)
+                        @forelse($payslips as $payslip)
                         <tr>
-                            <td class="table-cell-period">{{ $p['period'] }}</td>
-                            <td class="table-cell-basic">{{ $p['basic'] }}</td>
-                            <td class="table-cell-deduct">{{ $p['deduct'] }}</td>
-                            <td class="net-pay">{{ $p['net'] }}</td>
-                            <td class="table-cell-date">{{ $p['date'] }}</td>
+                            <td class="table-cell-period">{{ $payslip->period_start->format('M d') }}-{{ $payslip->period_end->format('d, Y') }}</td>
+                            <td class="table-cell-basic">₱{{ number_format($payslip->basic_pay, 2) }}</td>
+                            <td class="table-cell-deduct">₱{{ number_format($payslip->late_deduction + $payslip->undertime_deduction + $payslip->other_deductions, 2) }}</td>
+                            <td class="net-pay">₱{{ number_format($payslip->net_pay, 2) }}</td>
+                            <td class="table-cell-date">{{ $payslip->period_end->format('M d, Y') }}</td>
                             <td>
-                                @if($p['status']==='pending')
+                                @if($payslip->status === 'pending')
                                     <span class="badge-status pending">Pending</span>
                                 @else
                                     <span class="badge-status processed">Processed</span>
                                 @endif
                             </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 2rem;">No payslip records found</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
 
             <div class="table-footer">
-                <span>Showing <strong>1–5</strong> of <strong>24</strong> payslips</span>
+                <span>Showing <strong>{{ $payslips->firstItem() ?? 0 }}–{{ $payslips->lastItem() ?? 0 }}</strong> of <strong>{{ $payslips->total() }}</strong> payslips</span>
                 <div class="pagination">
-                    <button class="page-btn">‹</button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn">›</button>
+                    @if($payslips->onFirstPage())
+                        <button class="page-btn" disabled>‹</button>
+                    @else
+                        <a href="{{ $payslips->previousPageUrl() }}" class="page-btn">‹</a>
+                    @endif
+                    
+                    @foreach($payslips->getUrlRange(1, $payslips->lastPage()) as $page => $url)
+                        <a href="{{ $url }}" class="page-btn {{ $page == $payslips->currentPage() ? 'active' : '' }}">{{ $page }}</a>
+                    @endforeach
+                    
+                    @if($payslips->hasMorePages())
+                        <a href="{{ $payslips->nextPageUrl() }}" class="page-btn">›</a>
+                    @else
+                        <button class="page-btn" disabled>›</button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -165,13 +170,14 @@
 </div>
 
 {{-- Payslip Modal --}}
+@if($latestPayslip)
 <div class="modal-overlay" id="payslipModal" onclick="closeModal('payslipModal')">
     <div class="modal-box" onclick="event.stopPropagation()">
         <div class="modal-header">
             <div>
-                <span class="modal-eyebrow">PAYSLIP · JUN 16-30, 2025</span>
-                <h3 class="modal-title">Ana R. Reyes</h3>
-                <p class="modal-sub">Nurse II · Municipal Health Office</p>
+                <span class="modal-eyebrow">PAYSLIP · {{ strtoupper($latestPayslip->period_start->format('M d') . '-' . $latestPayslip->period_end->format('d, Y')) }}</span>
+                <h3 class="modal-title">{{ Auth::user()->employee->first_name ?? '' }} {{ Auth::user()->employee->last_name ?? '' }}</h3>
+                <p class="modal-sub">{{ Auth::user()->employee->employmentDetail->designationRelation->title ?? 'N/A' }} · {{ Auth::user()->employee->employmentDetail->departmentRelation->name ?? 'N/A' }}</p>
             </div>
             <button class="modal-close" onclick="closeModal('payslipModal')">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -179,23 +185,31 @@
         </div>
         <div class="modal-body">
             <div class="modal-emp-row">
-                <div class="emp-avatar modal-emp-avatar">AR</div>
+                <div class="emp-avatar modal-emp-avatar">{{ strtoupper(substr(Auth::user()->employee->first_name ?? 'U', 0, 1) . substr(Auth::user()->employee->last_name ?? 'N', 0, 1)) }}</div>
                 <div>
-                    <p class="modal-emp-id">PGS-0115</p>
-                    <span class="badge-status pending">Pending</span>
+                    <p class="modal-emp-id">{{ Auth::user()->employee->employee_id ?? 'N/A' }}</p>
+                    <span class="badge-status {{ $latestPayslip->status === 'pending' ? 'pending' : 'processed' }}">{{ ucfirst($latestPayslip->status) }}</span>
                 </div>
             </div>
             <div class="modal-section-label">EARNINGS</div>
-            <div class="modal-row"><span>Basic Semi-Monthly Pay</span><strong>₱16,921.50</strong></div>
+            <div class="modal-row"><span>Basic Semi-Monthly Pay</span><strong>₱{{ number_format($latestPayslip->basic_pay, 2) }}</strong></div>
+            @if($latestPayslip->ot_pay > 0)
+            <div class="modal-row"><span>Overtime Pay</span><strong>₱{{ number_format($latestPayslip->ot_pay, 2) }}</strong></div>
+            @endif
             <div class="modal-section-label modal-section-deductions">DEDUCTIONS</div>
-            <div class="modal-row"><span>GSIS Premium</span><span class="modal-deduct">₱1,523.00</span></div>
-            <div class="modal-row"><span>PhilHealth</span><span class="modal-deduct">₱425.00</span></div>
-            <div class="modal-row"><span>Pag-IBIG</span><span class="modal-deduct">₱50.00</span></div>
-            <div class="modal-row"><span>Withholding Tax</span><span class="modal-deduct">₱1,386.00</span></div>
-            <div class="modal-row total"><span>Total Deductions</span><span class="modal-deduct">₱3,384.00</span></div>
+            @if($latestPayslip->late_deduction > 0)
+            <div class="modal-row"><span>Late Deduction</span><span class="modal-deduct">₱{{ number_format($latestPayslip->late_deduction, 2) }}</span></div>
+            @endif
+            @if($latestPayslip->undertime_deduction > 0)
+            <div class="modal-row"><span>Undertime Deduction</span><span class="modal-deduct">₱{{ number_format($latestPayslip->undertime_deduction, 2) }}</span></div>
+            @endif
+            @if($latestPayslip->other_deductions > 0)
+            <div class="modal-row"><span>Other Deductions</span><span class="modal-deduct">₱{{ number_format($latestPayslip->other_deductions, 2) }}</span></div>
+            @endif
+            <div class="modal-row total"><span>Total Deductions</span><span class="modal-deduct">₱{{ number_format($latestPayslip->late_deduction + $latestPayslip->undertime_deduction + $latestPayslip->other_deductions, 2) }}</span></div>
             <div class="modal-net-row">
                 <span>NET PAY</span>
-                <strong>₱13,537.50</strong>
+                <strong>₱{{ number_format($latestPayslip->net_pay, 2) }}</strong>
             </div>
         </div>
         <div class="modal-footer">
@@ -207,6 +221,7 @@
         </div>
     </div>
 </div>
+@endif
 
 <script>
     const sidebar      = document.getElementById('sidebar');

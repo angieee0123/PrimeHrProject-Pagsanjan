@@ -5,6 +5,14 @@
     </div>
 </div>
 
+<div class="info-banner">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <div>
+        <strong>How it works:</strong> This will process attendance records and create payslip computations for the selected period. 
+        Once generated, payslips will be visible to employees in their accounts.
+    </div>
+</div>
+
 <div class="generate-payroll-container">
     <div class="generate-form-card">
         <form method="POST" action="{{ route('admin.payroll.generate') }}" id="generatePayrollForm" onsubmit="return handleGeneratePayroll(event);">
@@ -168,11 +176,32 @@ function handleGeneratePayroll(event) {
     const formData = new FormData(form);
     const generateBtn = document.getElementById('generateBtn');
     
+    // Validate dates
+    const startDate = form.querySelector('[name="start_date"]').value;
+    const endDate = form.querySelector('[name="end_date"]').value;
+    const payDate = form.querySelector('[name="pay_date"]').value;
+    
+    if (!startDate || !endDate || !payDate) {
+        showFailedModal({
+            message: 'Please fill in all required date fields.',
+            errors: ['Start Date, End Date, and Pay Date are required.']
+        });
+        return false;
+    }
+    
+    if (new Date(endDate) < new Date(startDate)) {
+        showFailedModal({
+            message: 'Invalid date range.',
+            errors: ['End Date must be after or equal to Start Date.']
+        });
+        return false;
+    }
+    
     // Disable button and show loading
     generateBtn.disabled = true;
     generateBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Generating...';
     
-    // Fetch payroll data
+    // Fetch payroll data for preview
     fetch('{{ route("admin.payroll.calculate") }}', {
         method: 'POST',
         headers: {
@@ -181,17 +210,35 @@ function handleGeneratePayroll(event) {
         },
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => Promise.reject(err));
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
-            showPayrollModal(data.data);
+            if (data.data.employees && data.data.employees.length > 0) {
+                showPayrollModal(data.data);
+            } else {
+                showFailedModal({
+                    message: 'No employees found for the selected criteria.',
+                    errors: ['Please adjust your filters and ensure employees have attendance records for the selected period.']
+                });
+            }
         } else {
-            alert('Error: ' + (data.message || 'Failed to generate payroll'));
+            showFailedModal({
+                message: data.message || 'Failed to generate payroll',
+                errors: data.errors || []
+            });
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to generate payroll. Please try again.');
+        showFailedModal({
+            message: error.message || 'Failed to generate payroll. Please try again.',
+            errors: error.errors ? Object.values(error.errors).flat() : [error.error || 'An unexpected error occurred']
+        });
     })
     .finally(() => {
         // Re-enable button
@@ -204,6 +251,7 @@ function handleGeneratePayroll(event) {
 </script>
 
 @include('admin.payroll.modals.payroll-result-modal')
+@include('admin.payroll.modals.payroll-status-modals')
 
 <style>
 .generate-payroll-container {
@@ -383,5 +431,27 @@ function handleGeneratePayroll(event) {
 
 .preview-note svg {
     flex-shrink: 0;
+}
+
+.info-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    background: #e0f2fe;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    color: #075985;
+    font-size: 13px;
+}
+
+.info-banner svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.info-banner strong {
+    font-weight: 600;
 }
 </style>

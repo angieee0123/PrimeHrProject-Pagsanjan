@@ -32,10 +32,10 @@
                         <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     </div>
                 </div>
-                <p class="stat-value">7.5</p>
+                <p class="stat-value">{{ number_format($yearsOfService, 1) }}</p>
                 <div class="stat-footer">
                     <span class="stat-dot stat-dot-primary"></span>
-                    <p class="stat-sub">Since Jan 2018</p>
+                    <p class="stat-sub">Since {{ $employee->employmentDetail && $employee->employmentDetail->appointment_date ? \Carbon\Carbon::parse($employee->employmentDetail->appointment_date)->format('M Y') : 'N/A' }}</p>
                 </div>
             </div>
             <div class="stat-card">
@@ -58,7 +58,7 @@
                         <svg width="17" height="17" fill="none" stroke="#a16207" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     </div>
                 </div>
-                <p class="stat-value">12</p>
+                <p class="stat-value">{{ number_format($leaveBalance) }}</p>
                 <div class="stat-footer">
                     <span class="stat-dot stat-dot-amber"></span>
                     <p class="stat-sub">Days remaining</p>
@@ -71,7 +71,7 @@
                         <svg width="17" height="17" fill="none" stroke="#8e1e18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                     </div>
                 </div>
-                <p class="stat-value">8</p>
+                <p class="stat-value">{{ $trainingsCompleted }}</p>
                 <div class="stat-footer">
                     <span class="stat-dot stat-dot-danger"></span>
                     <p class="stat-sub">Total programs</p>
@@ -101,43 +101,42 @@
                 {{-- Personal Info --}}
                 <div id="tab-personal" class="tab-pane active">
                     <div class="profile-grid">
-                        <div class="profile-field"><span>Full Name</span><strong>Ana R. Reyes</strong></div>
-                        <div class="profile-field"><span>Gender</span><strong>Female</strong></div>
-                        <div class="profile-field"><span>Date of Birth</span><strong>Jul 22, 1990</strong></div>
-                        <div class="profile-field"><span>Contact No.</span><strong>09201122334</strong></div>
-                        <div class="profile-field profile-field-full"><span>Email Address</span><strong>ana.reyes@pagsanjan.gov.ph</strong></div>
-                        <div class="profile-field profile-field-full"><span>Address</span><strong>123 Rizal Street, Barangay Poblacion, Pagsanjan, Laguna</strong></div>
+                        <div class="profile-field"><span>Full Name</span><strong>{{ $employee->first_name }} {{ $employee->middle_name ? substr($employee->middle_name, 0, 1) . '.' : '' }} {{ $employee->last_name }}{{ $employee->suffix ? ' ' . $employee->suffix : '' }}</strong></div>
+                        <div class="profile-field"><span>Gender</span><strong>{{ $employee->sex ?? 'N/A' }}</strong></div>
+                        <div class="profile-field"><span>Date of Birth</span><strong>{{ $employee->birth_date ? \Carbon\Carbon::parse($employee->birth_date)->format('M d, Y') : 'N/A' }}</strong></div>
+                        <div class="profile-field"><span>Contact No.</span><strong id="display-contact">{{ $employee->contacts->firstWhere('type', 'mobile')->number ?? 'N/A' }}</strong></div>
+                        <div class="profile-field profile-field-full"><span>Email Address</span><strong id="display-email">{{ Auth::user()->email }}</strong></div>
+                        <div class="profile-field profile-field-full"><span>Address</span><strong id="display-address">{{ $employee->addresses->first()->full_address ?? ($employee->addresses->first() ? trim(($employee->addresses->first()->house_no ?? '') . ' ' . ($employee->addresses->first()->street ?? '') . ', ' . ($employee->addresses->first()->barangay ?? '') . ', ' . ($employee->addresses->first()->city ?? '') . ', ' . ($employee->addresses->first()->province ?? '')) : 'N/A') }}</strong></div>
                     </div>
                 </div>
 
                 {{-- Employment --}}
                 <div id="tab-employment" class="tab-pane">
                     <div class="profile-grid">
-                        <div class="profile-field"><span>Employee ID</span><strong>PGS-0115</strong></div>
-                        <div class="profile-field"><span>Employment Type</span><strong>Permanent</strong></div>
-                        <div class="profile-field"><span>Date Hired</span><strong>Jan 15, 2018</strong></div>
-                        <div class="profile-field"><span>Status</span><strong>Active</strong></div>
-                        <div class="profile-field profile-field-full"><span>Position / Designation</span><strong>Nurse II</strong></div>
-                        <div class="profile-field profile-field-full"><span>Department / Office</span><strong>Municipal Health Office</strong></div>
+                        <div class="profile-field"><span>Employee ID</span><strong>{{ $employee->employee_id ?? 'N/A' }}</strong></div>
+                        <div class="profile-field"><span>Employment Type</span><strong>{{ $employee->employmentDetail->employment_status ?? 'N/A' }}</strong></div>
+                        <div class="profile-field"><span>Date Hired</span><strong>{{ $employee->employmentDetail && $employee->employmentDetail->appointment_date ? \Carbon\Carbon::parse($employee->employmentDetail->appointment_date)->format('M d, Y') : 'N/A' }}</strong></div>
+                        <div class="profile-field"><span>Status</span><strong>{{ Auth::user()->status ?? 'N/A' }}</strong></div>
+                        <div class="profile-field profile-field-full"><span>Position / Designation</span><strong>{{ $employee->employmentDetail->designationRelation->title ?? 'N/A' }}</strong></div>
+                        <div class="profile-field profile-field-full"><span>Department / Office</span><strong>{{ $employee->employmentDetail->departmentRelation->name ?? 'N/A' }}</strong></div>
                     </div>
                 </div>
 
                 {{-- Government IDs --}}
                 <div id="tab-government" class="tab-pane">
                     <div class="profile-grid">
-                        <div class="profile-field"><span>GSIS No.</span><strong>3456789012</strong></div>
-                        <div class="profile-field"><span>PhilHealth No.</span><strong>34-567890123-4</strong></div>
-                        <div class="profile-field"><span>Pag-IBIG No.</span><strong>3456-7890-1234</strong></div>
-                        <div class="profile-field"><span>TIN</span><strong>345-678-901</strong></div>
+                        <div class="profile-field"><span>GSIS No.</span><strong>{{ $employee->governmentIds->first()->gsis_no ?? 'N/A' }}</strong></div>
+                        <div class="profile-field"><span>PhilHealth No.</span><strong>{{ $employee->governmentIds->first()->philhealth_no ?? 'N/A' }}</strong></div>
+                        <div class="profile-field"><span>Pag-IBIG No.</span><strong>{{ $employee->governmentIds->first()->pagibig_no ?? 'N/A' }}</strong></div>
+                        <div class="profile-field"><span>TIN</span><strong>{{ $employee->governmentIds->first()->tin_no ?? 'N/A' }}</strong></div>
                     </div>
                 </div>
 
                 {{-- Emergency Contact --}}
                 <div id="tab-emergency" class="tab-pane">
                     <div class="profile-grid">
-                        <div class="profile-field"><span>Contact Person</span><strong>Roberto Reyes</strong></div>
-                        <div class="profile-field"><span>Relationship</span><strong>Spouse</strong></div>
-                        <div class="profile-field"><span>Phone Number</span><strong>09171234567</strong></div>
+                        <div class="profile-field"><span>Contact Person</span><strong id="display-emergency-contact">{{ $employee->contacts->firstWhere('type', 'emergency')->contact_person ?? 'N/A' }}</strong></div>
+                        <div class="profile-field"><span>Phone Number</span><strong id="display-emergency-phone">{{ $employee->contacts->firstWhere('type', 'emergency')->number ?? 'N/A' }}</strong></div>
                     </div>
                 </div>
 
@@ -164,30 +163,49 @@
             <div class="p-form-grid">
                 <div class="p-form-field">
                     <label>Contact No.</label>
-                    <input type="text" id="edit-contact" value="09201122334">
+                    <input type="text" id="edit-contact" value="{{ $employee->contacts->firstWhere('type', 'mobile')->number ?? '' }}">
                 </div>
                 <div class="p-form-field">
                     <label>Email Address</label>
-                    <input type="email" id="edit-email" value="ana.reyes@pagsanjan.gov.ph">
+                    <input type="email" id="edit-email" value="{{ Auth::user()->email }}">
                 </div>
-                <div class="p-form-field p-form-full">
-                    <label>Address</label>
-                    <input type="text" id="edit-address" value="123 Rizal Street, Barangay Poblacion, Pagsanjan, Laguna">
+            </div>
+            <span class="p-form-label p-form-label-gap">ADDRESS</span>
+            <div class="p-form-grid">
+                <div class="p-form-field">
+                    <label>House No.</label>
+                    <input type="text" id="edit-house-no" value="{{ $employee->addresses->first()->house_no ?? '' }}">
+                </div>
+                <div class="p-form-field">
+                    <label>Street</label>
+                    <input type="text" id="edit-street" value="{{ $employee->addresses->first()->street ?? '' }}">
+                </div>
+                <div class="p-form-field">
+                    <label>Barangay</label>
+                    <input type="text" id="edit-barangay" value="{{ $employee->addresses->first()->barangay ?? '' }}">
+                </div>
+                <div class="p-form-field">
+                    <label>City</label>
+                    <input type="text" id="edit-city" value="{{ $employee->addresses->first()->city ?? '' }}">
+                </div>
+                <div class="p-form-field">
+                    <label>Province</label>
+                    <input type="text" id="edit-province" value="{{ $employee->addresses->first()->province ?? '' }}">
+                </div>
+                <div class="p-form-field">
+                    <label>Zip Code</label>
+                    <input type="text" id="edit-zip" value="{{ $employee->addresses->first()->zip_code ?? '' }}">
                 </div>
             </div>
             <span class="p-form-label p-form-label-gap">EMERGENCY CONTACT</span>
             <div class="p-form-grid">
                 <div class="p-form-field">
                     <label>Contact Person</label>
-                    <input type="text" id="edit-emergencyContact" value="Roberto Reyes">
-                </div>
-                <div class="p-form-field">
-                    <label>Relationship</label>
-                    <input type="text" id="edit-emergencyRelation" value="Spouse">
+                    <input type="text" id="edit-emergencyContact" value="{{ $employee->contacts->firstWhere('type', 'emergency')->contact_person ?? '' }}">
                 </div>
                 <div class="p-form-field">
                     <label>Phone Number</label>
-                    <input type="text" id="edit-emergencyPhone" value="09171234567">
+                    <input type="text" id="edit-emergencyPhone" value="{{ $employee->contacts->firstWhere('type', 'emergency')->number ?? '' }}">
                 </div>
             </div>
         </div>
@@ -211,8 +229,8 @@
             <h3 class="p-success-title">Profile Updated!</h3>
             <p class="p-success-text">Your profile information has been saved successfully.</p>
             <div class="p-success-meta">
-                <div class="p-success-meta-row p-success-meta-row-border"><span class="p-success-meta-label">Updated by</span><strong class="p-success-meta-value">Ana R. Reyes</strong></div>
-                <div class="p-success-meta-row p-success-meta-row-border"><span class="p-success-meta-label">Section</span><strong class="p-success-meta-value">Contact &amp; Emergency</strong></div>
+                <div class="p-success-meta-row p-success-meta-row-border"><span class="p-success-meta-label">Updated by</span><strong class="p-success-meta-value">{{ $employee->first_name }} {{ $employee->last_name }}</strong></div>
+                <div class="p-success-meta-row p-success-meta-row-border"><span class="p-success-meta-label">Section</span><strong class="p-success-meta-value">Contact &amp; Address</strong></div>
                 <div class="p-success-meta-row"><span class="p-success-meta-label">Saved at</span><strong id="saveTimestamp" class="p-success-meta-value">—</strong></div>
             </div>
         </div>
@@ -277,15 +295,39 @@ function closeEditModal() { document.getElementById('editModal').classList.remov
 function closeSaveSuccess() { document.getElementById('saveSuccessModal').classList.remove('show'); }
 
 function saveProfile() {
-    document.querySelector('#tab-personal .profile-field:nth-child(4) strong').textContent = document.getElementById('edit-contact').value;
-    document.querySelector('#tab-personal .profile-field:nth-child(5) strong').textContent = document.getElementById('edit-email').value;
-    document.querySelector('#tab-personal .profile-field:nth-child(6) strong').textContent = document.getElementById('edit-address').value;
-    document.querySelector('#tab-emergency .profile-field:nth-child(1) strong').textContent = document.getElementById('edit-emergencyContact').value;
-    document.querySelector('#tab-emergency .profile-field:nth-child(2) strong').textContent = document.getElementById('edit-emergencyRelation').value;
-    document.querySelector('#tab-emergency .profile-field:nth-child(3) strong').textContent = document.getElementById('edit-emergencyPhone').value;
-    document.getElementById('saveTimestamp').textContent = new Date().toLocaleString('en-PH', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
-    closeEditModal();
-    document.getElementById('saveSuccessModal').classList.add('show');
+    const data = {
+        contact_number: document.getElementById('edit-contact').value,
+        email: document.getElementById('edit-email').value,
+        house_no: document.getElementById('edit-house-no').value,
+        street: document.getElementById('edit-street').value,
+        barangay: document.getElementById('edit-barangay').value,
+        city: document.getElementById('edit-city').value,
+        province: document.getElementById('edit-province').value,
+        zip_code: document.getElementById('edit-zip').value,
+        emergency_contact_person: document.getElementById('edit-emergencyContact').value,
+        emergency_phone: document.getElementById('edit-emergencyPhone').value,
+        _token: '{{ csrf_token() }}'
+    };
+
+    fetch('{{ route("permanent.profile.update") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            document.getElementById('display-contact').textContent = result.data.contact_number;
+            document.getElementById('display-email').textContent = result.data.email;
+            document.getElementById('display-address').textContent = result.data.address;
+            document.getElementById('display-emergency-contact').textContent = result.data.emergency_contact_person;
+            document.getElementById('display-emergency-phone').textContent = result.data.emergency_phone;
+            document.getElementById('saveTimestamp').textContent = new Date().toLocaleString('en-PH', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
+            closeEditModal();
+            document.getElementById('saveSuccessModal').classList.add('show');
+        }
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeEditModal(); closeSaveSuccess(); } });

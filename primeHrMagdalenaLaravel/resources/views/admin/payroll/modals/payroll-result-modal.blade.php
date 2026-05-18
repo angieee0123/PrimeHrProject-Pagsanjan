@@ -318,32 +318,42 @@ function showPayrollModal(data) {
     data.employees.forEach((emp, index) => {
         const row = document.createElement('tr');
         
-        // Calculate total deductions
-        let totalDeductions = emp.late + emp.undertime;
-        Object.values(emp.deductions || {}).forEach(amount => {
-            totalDeductions += amount;
-        });
+        // Calculate total deductions - ensure all values are numbers
+        const late = parseFloat(emp.late) || 0;
+        const undertime = parseFloat(emp.undertime) || 0;
+        let deductionSum = 0;
         
-        const netPay = emp.basic_pay + emp.ot_pay - totalDeductions;
+        // Sum all deduction amounts
+        if (emp.deductions && typeof emp.deductions === 'object') {
+            Object.values(emp.deductions).forEach(amount => {
+                const deductAmount = parseFloat(amount) || 0;
+                deductionSum += deductAmount;
+            });
+        }
+        
+        const totalDeductions = late + undertime + deductionSum;
+        const basicPay = parseFloat(emp.basic_pay) || 0;
+        const otPay = parseFloat(emp.ot_pay) || 0;
+        const netPay = basicPay + otPay - totalDeductions;
 
         // Update totals
-        totals.basicPay += emp.basic_pay;
-        totals.otPay += emp.ot_pay;
-        totals.late += emp.late;
-        totals.undertime += emp.undertime;
+        totals.basicPay += basicPay;
+        totals.otPay += otPay;
+        totals.late += late;
+        totals.undertime += undertime;
         totals.totalDeductions += totalDeductions;
         totals.netPay += netPay;
         
         // Update deduction totals
         deductionTypes.forEach(code => {
-            const amount = emp.deductions[code] || 0;
-            totals.deductions[code] += amount;
+            const amount = parseFloat(emp.deductions[code]) || 0;
+            totals.deductions[code] = (totals.deductions[code] || 0) + amount;
         });
 
         // Build deduction columns
         const deductionCells = deductionTypes.map(code => {
-            const amount = emp.deductions[code] || 0;
-            return `<td class="text-right">₱${parseFloat(amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`;
+            const amount = parseFloat(emp.deductions[code]) || 0;
+            return `<td class="text-right">₱${amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`;
         }).join('');
 
         row.innerHTML = `
@@ -353,13 +363,13 @@ function showPayrollModal(data) {
             <td>${emp.department}</td>
             <td class="text-center">${emp.days_worked}</td>
             <td class="text-right">₱${parseFloat(emp.daily_rate).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="text-right">₱${parseFloat(emp.basic_pay).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="text-right">₱${parseFloat(emp.ot_pay).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="text-right">₱${parseFloat(emp.late).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="text-right">₱${parseFloat(emp.undertime).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="text-right">₱${basicPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="text-right">₱${otPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="text-right">₱${late.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="text-right">₱${undertime.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             ${deductionCells}
-            <td class="text-right">₱${parseFloat(totalDeductions).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="text-right">₱${parseFloat(netPay).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="text-right">₱${totalDeductions.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="text-right">₱${netPay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
         `;
         tbody.appendChild(row);
     });
@@ -367,7 +377,8 @@ function showPayrollModal(data) {
     // Build dynamic footer
     const tfoot = document.querySelector('.payroll-summary-table tfoot');
     const deductionTotalCells = deductionTypes.map(code => {
-        return `<td id="total_${code}">₱${totals.deductions[code].toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`;
+        const total = totals.deductions[code] || 0;
+        return `<td id="total_${code}">₱${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`;
     }).join('');
     
     tfoot.innerHTML = `
@@ -398,8 +409,65 @@ function exportToExcel() {
 }
 
 function confirmPayroll() {
-    if (confirm('Are you sure you want to save this payroll? This action cannot be undone.')) {
-        document.getElementById('generatePayrollForm').submit();
+    if (!confirm('Are you sure you want to save this payroll? This will create salary computation records for all employees.')) {
+        return;
     }
+    
+    const confirmBtn = event.target;
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Saving...';
+    
+    const form = document.getElementById('generatePayrollForm');
+    const formData = new FormData(form);
+    
+    // Submit to save endpoint
+    fetch('{{ route("admin.payroll.generate") }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => Promise.reject(err));
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Close the preview modal
+        closePayrollModal();
+        
+        if (data.success) {
+            showSuccessModal({
+                message: data.message || 'Payroll has been successfully generated and saved.',
+                details: {
+                    employees_processed: data.employees_processed || currentPayrollData.employees.length,
+                    total_gross: data.total_gross,
+                    total_deductions: data.total_deductions,
+                    total_net: data.total_net
+                }
+            });
+        } else {
+            showFailedModal({
+                message: data.message || 'Failed to save payroll',
+                errors: data.errors || []
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        closePayrollModal();
+        showFailedModal({
+            message: 'Failed to save payroll. Please try again.',
+            error: error.message || 'An unexpected error occurred',
+            errors: error.errors ? Object.values(error.errors).flat() : []
+        });
+    })
+    .finally(() => {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Confirm & Save';
+    });
 }
 </script>

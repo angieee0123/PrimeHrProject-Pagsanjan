@@ -111,9 +111,7 @@ Route::get('/permanent/dashboard', [\App\Http\Controllers\PermanentDashboardCont
 Route::get('/permanent/attendance', [PermanentAttendanceController::class, 'index'])->middleware('auth')->name('permanent.attendance');
 Route::get('/permanent/attendance/detailed', [PermanentAttendanceController::class, 'detailedDTR'])->middleware('auth')->name('permanent.attendance.detailed');
 
-Route::get('/permanent/payslip', function () {
-    return view('permanent.payslip.permanentPayslip');
-})->middleware('auth')->name('permanent.payslip');
+Route::get('/permanent/payslip', [\App\Http\Controllers\PermanentPayslipController::class, 'index'])->middleware('auth')->name('permanent.payslip');
 
 Route::get('/permanent/leave', function () {
     $user = Auth::user();
@@ -343,9 +341,8 @@ Route::get('/permanent/training/{id}/certificate', function ($id) {
     return response()->file(storage_path('app/public/' . $training->certificate_path));
 })->middleware('auth')->name('permanent.training.certificate');
 
-Route::get('/permanent/profile', function () {
-    return view('permanent.profile.permanentProfile');
-})->middleware('auth')->name('permanent.profile');
+Route::get('/permanent/profile', [\App\Http\Controllers\PermanentProfileController::class, 'index'])->middleware('auth')->name('permanent.profile');
+Route::post('/permanent/profile/update', [\App\Http\Controllers\PermanentProfileController::class, 'update'])->middleware('auth')->name('permanent.profile.update');
 
 Route::get('/permanent/settings', function () {
     return view('permanent.settings.permanentSettings');
@@ -867,6 +864,29 @@ Route::get('/admin/leave/employee/{employeeId}/balances', [LeaveController::clas
 Route::post('/admin/leave/manual-credit/store', [LeaveController::class, 'storeManualCredit'])->middleware('auth')->name('admin.leave.manual-credit.store');
 
 Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
+    $activeTab = $request->input('tab', 'register');
+    
+    // Handle Payslip Management Tab
+    if ($activeTab === 'payslips') {
+        $salaryComputations = \App\Models\SalaryComputation::with([
+            'employee.employmentDetail.departmentRelation',
+            'employee.employmentDetail.designationRelation'
+        ])
+        ->orderBy('period_end', 'desc')
+        ->orderBy('created_at', 'desc')
+        ->paginate(15);
+        
+        // Set empty payrollRecords for stats calculation
+        $payrollRecords = collect();
+        $viewMode = 'employee';
+        $deductionTypes = collect();
+        $departments = collect();
+        $employees = collect();
+        
+        return view('admin.payroll.adminPayroll', compact('salaryComputations', 'payrollRecords', 'viewMode', 'deductionTypes', 'departments', 'employees'));
+    }
+    
+    // Handle Payroll Register Tab (existing code)
     $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
     $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
     $department = $request->input('department');
@@ -1110,84 +1130,145 @@ Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
     return view('admin.payroll.adminPayroll', compact('payrollRecords', 'departments', 'employees', 'viewMode', 'deductionTypes'));
 })->middleware('auth')->name('admin.payroll');
 
-Route::post('/admin/payroll/generate', function (\Illuminate\Http\Request $request) {
-    $data = $request->validate([
-        'start_date' => 'required|date',
-        'end_date' => 'required|date|after_or_equal:start_date',
-        'pay_date' => 'required|date',
-        'payroll_type' => 'required|in:regular,13th_month,bonus,special',
-        'department' => 'nullable|string',
-        'employment_status' => 'nullable|string',
-        'include_deductions' => 'nullable|boolean',
-        'include_loans' => 'nullable|boolean',
-        'include_overtime' => 'nullable|boolean',
-    ]);
+Route::post('/admin/payroll/generate', [\App\Http\Controllers\PayrollController::class, 'generate'])->middleware('auth')->name('admin.payroll.generate');
 
+// Payslip Management Routes
+Route::post('/admin/payroll/payslip/{id}/approve', function ($id) {
     try {
-        // Get employees based on filters
-        $employeesQuery = \App\Models\Employee::with([
-            'employmentDetail.departmentRelation',
-            'employmentDetail.designationRelation'
-        ]);
-
-        if ($data['department']) {
-            $employeesQuery->whereHas('employmentDetail.departmentRelation', function($q) use ($data) {
-                $q->where('name', $data['department']);
-            });
-        }
-
-        if ($data['employment_status']) {
-            $employeesQuery->whereHas('employmentDetail', function($q) use ($data) {
-                $q->where('employment_status', $data['employment_status']);
-            });
-        }
-
-        $employees = $employeesQuery->get();
-        $processedCount = 0;
-        $errors = [];
-
-        foreach ($employees as $employee) {
-            // Get all attendance records for the period
-            $attendances = \App\Models\Attendance::where('employee_id', $employee->id)
-                ->whereBetween('date', [$data['start_date'], $data['end_date']])
-                ->get();
-
-            foreach ($attendances as $attendance) {
-                // Check if accredited hours log exists
-                $accreditedLog = \App\Models\AccreditedHoursLog::where('attendance_id', $attendance->id)->first();
-                
-                if (!$accreditedLog) {
-                    $errors[] = "No accredited hours log for {$employee->first_name} {$employee->last_name} on {$attendance->date}";
-                    continue;
-                }
-
-                // Check if salary computation already exists
-                $existingComputation = \App\Models\DailySalaryComputation::where('accredited_hours_log_id', $accreditedLog->id)->first();
-                
-                if (!$existingComputation) {
-                    // Generate salary computation
-                    \App\Models\DailySalaryComputation::computeFromAccreditedLog($accreditedLog);
-                    $processedCount++;
-                }
-            }
-        }
-
-        $message = "Payroll generated successfully! Processed {$processedCount} record(s) for period " . 
-                   date('M d, Y', strtotime($data['start_date'])) . ' to ' . 
-                   date('M d, Y', strtotime($data['end_date']));
-
-        if (count($errors) > 0) {
-            $message .= " (" . count($errors) . " records skipped due to missing data)";
-        }
-
-        return redirect()->route('admin.payroll', ['tab' => 'register', 'start_date' => $data['start_date'], 'end_date' => $data['end_date']])
-            ->with('success', $message);
-
+        $computation = \App\Models\SalaryComputation::findOrFail($id);
+        $computation->update(['status' => 'approved']);
+        
+        return response()->json(['success' => true, 'message' => 'Payslip approved successfully']);
     } catch (\Exception $e) {
-        return redirect()->route('admin.payroll', ['tab' => 'generate'])
-            ->with('error', 'Failed to generate payroll: ' . $e->getMessage());
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
     }
-})->middleware('auth')->name('admin.payroll.generate');
+})->middleware('auth')->name('admin.payroll.payslip.approve');
+
+Route::get('/admin/payroll/payslip/{id}/details', function ($id) {
+    try {
+        $computation = \App\Models\SalaryComputation::with([
+            'employee.employmentDetail.departmentRelation',
+            'employee.employmentDetail.designationRelation'
+        ])->findOrFail($id);
+        
+        // Parse deduction_breakdown if it's a JSON string
+        $deductionBreakdown = $computation->deduction_breakdown;
+        if (is_string($deductionBreakdown)) {
+            $deductionBreakdown = json_decode($deductionBreakdown, true) ?? [];
+        } elseif (!is_array($deductionBreakdown)) {
+            $deductionBreakdown = [];
+        }
+        
+        $payslip = [
+            'id' => $computation->id,
+            'employee_name' => ($computation->employee->first_name ?? '') . ' ' . ($computation->employee->last_name ?? ''),
+            'employee_id' => $computation->employee->employee_id ?? 'N/A',
+            'department' => $computation->employee->employmentDetail->departmentRelation->name ?? 'N/A',
+            'position' => $computation->employee->employmentDetail->designationRelation->title ?? 'N/A',
+            'period' => $computation->period_start->format('M d, Y') . ' - ' . $computation->period_end->format('M d, Y'),
+            'pay_date' => $computation->pay_date ? $computation->pay_date->format('M d, Y') : null,
+            'monthly_rate' => $computation->monthly_rate,
+            'daily_rate' => $computation->daily_rate,
+            'total_days_present' => $computation->total_days_present,
+            'basic_pay' => $computation->basic_pay,
+            'ot_pay' => $computation->ot_pay,
+            'gross_pay' => $computation->gross_pay,
+            'late_deduction' => $computation->late_deduction,
+            'undertime_deduction' => $computation->undertime_deduction,
+            'other_deductions' => $computation->other_deductions,
+            'deduction_breakdown' => $deductionBreakdown,
+            'total_deductions' => $computation->late_deduction + $computation->undertime_deduction + $computation->other_deductions,
+            'net_pay' => $computation->net_pay,
+            'status' => $computation->status,
+            'notes' => $computation->notes,
+        ];
+        
+        return response()->json(['success' => true, 'payslip' => $payslip]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+    }
+})->middleware('auth')->name('admin.payroll.payslip.details');
+
+Route::post('/admin/payroll/payslip/{id}/reject', function (\Illuminate\Http\Request $request, $id) {
+    try {
+        $request->validate(['reason' => 'required|string']);
+        
+        $computation = \App\Models\SalaryComputation::findOrFail($id);
+        $computation->update([
+            'status' => 'rejected',
+            'notes' => $request->reason
+        ]);
+        
+        return response()->json(['success' => true, 'message' => 'Payslip rejected successfully']);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+    }
+})->middleware('auth')->name('admin.payroll.payslip.reject');
+
+Route::get('/admin/payroll/payslips/export', function (\Illuminate\Http\Request $request) {
+    $status = $request->input('status');
+    
+    $query = \App\Models\SalaryComputation::with([
+        'employee.employmentDetail.departmentRelation',
+        'employee.employmentDetail.designationRelation'
+    ])->orderBy('period_end', 'desc');
+    
+    if ($status) {
+        $query->where('status', $status);
+    }
+    
+    $computations = $query->get();
+    
+    $headers = [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => 'attachment; filename=payslips_' . now()->format('Y-m-d') . '.csv',
+    ];
+    
+    $callback = function () use ($computations) {
+        $file = fopen('php://output', 'w');
+        fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        fputcsv($file, [
+            'Employee ID',
+            'Employee Name',
+            'Department',
+            'Position',
+            'Period Start',
+            'Period End',
+            'Basic Pay',
+            'OT Pay',
+            'Late Deduction',
+            'Undertime Deduction',
+            'Other Deductions',
+            'Gross Pay',
+            'Net Pay',
+            'Status'
+        ]);
+        
+        foreach ($computations as $comp) {
+            fputcsv($file, [
+                $comp->employee->employee_id ?? 'N/A',
+                ($comp->employee->first_name ?? '') . ' ' . ($comp->employee->last_name ?? ''),
+                $comp->employee->employmentDetail->departmentRelation->name ?? 'N/A',
+                $comp->employee->employmentDetail->designationRelation->title ?? 'N/A',
+                $comp->period_start->format('Y-m-d'),
+                $comp->period_end->format('Y-m-d'),
+                number_format($comp->basic_pay, 2),
+                number_format($comp->ot_pay, 2),
+                number_format($comp->late_deduction, 2),
+                number_format($comp->undertime_deduction, 2),
+                number_format($comp->other_deductions, 2),
+                number_format($comp->gross_pay, 2),
+                number_format($comp->net_pay, 2),
+                ucfirst($comp->status)
+            ]);
+        }
+        
+        fclose($file);
+    };
+    
+    return response()->stream($callback, 200, $headers);
+})->middleware('auth')->name('admin.payroll.payslips.export');
 
 Route::get('/admin/payroll/preview', function (\Illuminate\Http\Request $request) {
     $startDate = $request->input('start_date');
