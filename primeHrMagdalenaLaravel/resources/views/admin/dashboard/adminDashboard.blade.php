@@ -63,6 +63,39 @@
     </div>
 </div>
 
+{{-- Charts Section --}}
+<div class="charts-grid">
+    <div class="chart-card">
+        <div class="chart-header">
+            <div>
+                <p class="chart-title">Employee Growth</p>
+                <p class="chart-sub">Total employees over time</p>
+            </div>
+            <div class="chart-tabs">
+                <button class="chart-tab" onclick="switchEmployeeChart('week')">Week</button>
+                <button class="chart-tab active" onclick="switchEmployeeChart('month')">Month</button>
+                <button class="chart-tab" onclick="switchEmployeeChart('year')">Year</button>
+            </div>
+        </div>
+        <canvas id="employeeChart" style="max-height:280px"></canvas>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-header">
+            <div>
+                <p class="chart-title">Attendance Trends</p>
+                <p class="chart-sub">Daily attendance rate</p>
+            </div>
+            <div class="chart-tabs">
+                <button class="chart-tab" onclick="switchAttendanceChart('week')">Week</button>
+                <button class="chart-tab active" onclick="switchAttendanceChart('month')">Month</button>
+                <button class="chart-tab" onclick="switchAttendanceChart('year')">Year</button>
+            </div>
+        </div>
+        <canvas id="attendanceChart" style="max-height:280px"></canvas>
+    </div>
+</div>
+
 {{-- Recent Employees Table --}}
 <div class="table-section">
     <div class="table-header">
@@ -115,7 +148,7 @@
                             <div class="emp-avatar emp-avatar-dynamic" data-bg="{{ $emp['color'] }}">{{ $emp['initials'] }}</div>
                             <div>
                                 <p class="emp-name">{{ $emp['name'] }}</p>
-                                <p class="emp-id">{{ $emp['id'] }}</p>
+                                <p class="emp-id">{{ $emp['employee_id'] }}</p>
                             </div>
                         </div>
                     </td>
@@ -129,7 +162,7 @@
                             <span class="badge-status pending">Inactive</span>
                         @endif
                     </td>
-                    <td><button class="btn-view" onclick='viewEmployee(@json($emp))'>View</button></td>
+                    <td><button class="btn-view" onclick='viewEmployeeDashboard({{ $emp["id"] ?? 0 }})'>View</button></td>
                 </tr>
                 @empty
                 <tr>
@@ -141,13 +174,27 @@
     </div>
 
     <div class="table-footer">
-        <span id="filterCount">Showing <strong>1–5</strong> of <strong>5</strong> employees</span>
+        <span id="filterCount">Showing <strong>{{ $employees->firstItem() ?? 0 }}–{{ $employees->lastItem() ?? 0 }}</strong> of <strong>{{ $employees->total() }}</strong> employees</span>
         <div class="pagination">
-            <button class="page-btn">‹</button>
-            <button class="page-btn active">1</button>
-            <button class="page-btn">2</button>
-            <button class="page-btn">3</button>
-            <button class="page-btn">›</button>
+            @if($employees->onFirstPage())
+                <button class="page-btn" disabled>‹</button>
+            @else
+                <a href="{{ $employees->previousPageUrl() }}" class="page-btn">‹</a>
+            @endif
+
+            @foreach($employees->getUrlRange(1, $employees->lastPage()) as $page => $url)
+                @if($page == $employees->currentPage())
+                    <button class="page-btn active">{{ $page }}</button>
+                @else
+                    <a href="{{ $url }}" class="page-btn">{{ $page }}</a>
+                @endif
+            @endforeach
+
+            @if($employees->hasMorePages())
+                <a href="{{ $employees->nextPageUrl() }}" class="page-btn">›</a>
+            @else
+                <button class="page-btn" disabled>›</button>
+            @endif
         </div>
     </div>
 </div>
@@ -251,46 +298,17 @@
 </div>
 
 {{-- View Employee Modal --}}
-<div class="modal-overlay" id="viewEmployeeModal" onclick="closeViewEmployee()">
-    <div class="modal-box" style="max-width:560px" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <div class="pmodal-hero">
-                <div class="pmodal-hero-icon" style="background:linear-gradient(135deg,#0b044d,#1a0f6e)">
-                    <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                </div>
-                <div>
-                    <span class="modal-eyebrow">EMPLOYEE DETAILS</span>
-                    <h3 class="modal-title" id="viewEmpName">Employee Information</h3>
-                    <p class="modal-sub" id="viewEmpId">Employee ID</p>
-                </div>
+<div id="viewEmployeeDashboardModal" style="display:none; position:fixed; inset:0; background:rgba(11,4,77,0.6); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; width:100%; max-width:900px; max-height:90vh; overflow-y:auto; box-shadow:0 25px 50px rgba(0,0,0,0.25);">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:24px; border-bottom:1.5px solid #f0effe;">
+            <div>
+                <h3 style="margin:0 0 4px; font-size:18px; font-weight:700; color:#0b044d;">Employee Details</h3>
+                <p id="viewEmployeeDashboardId" style="margin:0; font-size:13px; color:#6b6a8a;"></p>
             </div>
-            <button class="modal-close" onclick="closeViewEmployee()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+            <button onclick="closeViewDashboardModal()" style="background:none; border:none; font-size:28px; color:#6b6a8a; cursor:pointer; width:32px; height:32px; display:flex; align-items:center; justify-content:center;">&times;</button>
         </div>
-        <div class="modal-body" style="padding:20px 24px">
-            <div class="form-section-label">EMPLOYMENT INFORMATION</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-                <div>
-                    <p style="font-size:11px;color:#9999bb;margin:0 0 4px">Position</p>
-                    <p style="font-size:13px;font-weight:600;color:#0b044d;margin:0" id="viewPosition">-</p>
-                </div>
-                <div>
-                    <p style="font-size:11px;color:#9999bb;margin:0 0 4px">Department</p>
-                    <p style="font-size:13px;font-weight:600;color:#0b044d;margin:0" id="viewDept">-</p>
-                </div>
-                <div>
-                    <p style="font-size:11px;color:#9999bb;margin:0 0 4px">Employment Type</p>
-                    <p style="font-size:13px;font-weight:600;color:#0b044d;margin:0" id="viewType">-</p>
-                </div>
-                <div>
-                    <p style="font-size:11px;color:#9999bb;margin:0 0 4px">Status</p>
-                    <p style="font-size:13px;font-weight:600;color:#0b044d;margin:0" id="viewStatus">-</p>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px 24px;border-top:1px solid #e5e4f0">
-            <button class="modal-btn-ghost" onclick="closeViewEmployee()">Close</button>
+        <div id="viewEmployeeDashboardContent" style="padding:24px;">
+            <p style="text-align:center; color:#6b6a8a;">Loading...</p>
         </div>
     </div>
 </div>
@@ -395,6 +413,175 @@
 </div>
 
 <script>
+let employeeChart, attendanceChart;
+const employeeData = @json($chartData['employees']);
+const attendanceData = @json($chartData['attendance']);
+
+function initCharts() {
+    const ctx1 = document.getElementById('employeeChart').getContext('2d');
+    const ctx2 = document.getElementById('attendanceChart').getContext('2d');
+
+    employeeChart = new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: employeeData.month.labels,
+            datasets: [{
+                label: 'Total Employees',
+                data: employeeData.month.data,
+                borderColor: '#0b044d',
+                backgroundColor: 'rgba(11, 4, 77, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f0effe' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    attendanceChart = new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: attendanceData.month.labels,
+            datasets: [{
+                label: 'Attendance Rate (%)',
+                data: attendanceData.month.data,
+                borderColor: '#15803d',
+                backgroundColor: 'rgba(21, 128, 61, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                y: { beginAtZero: true, max: 100, grid: { color: '#e8f9ef' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+function switchEmployeeChart(period) {
+    const chartCard = document.getElementById('employeeChart').closest('.chart-card');
+    chartCard.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    employeeChart.data.labels = employeeData[period].labels;
+    employeeChart.data.datasets[0].data = employeeData[period].data;
+    employeeChart.update();
+}
+
+function switchAttendanceChart(period) {
+    const chartCard = document.getElementById('attendanceChart').closest('.chart-card');
+    chartCard.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    attendanceChart.data.labels = attendanceData[period].labels;
+    attendanceChart.data.datasets[0].data = attendanceData[period].data;
+    attendanceChart.update();
+}
+
+window.addEventListener('load', initCharts);
+
+function viewEmployeeDashboard(employeeId) {
+    document.getElementById('viewEmployeeDashboardModal').style.display = 'flex';
+    document.getElementById('viewEmployeeDashboardContent').innerHTML = '<p style="text-align:center; color:#6b6a8a;">Loading...</p>';
+    
+    fetch(`/admin/personnel/${employeeId}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('viewEmployeeDashboardId').textContent = data.employee_id;
+            document.getElementById('viewEmployeeDashboardContent').innerHTML = generateEmployeeViewDashboard(data);
+        })
+        .catch(error => {
+            document.getElementById('viewEmployeeDashboardContent').innerHTML = '<p style="text-align:center; color:#8e1e18;">Error loading employee details.</p>';
+        });
+}
+
+function closeViewDashboardModal() {
+    document.getElementById('viewEmployeeDashboardModal').style.display = 'none';
+}
+
+function generateEmployeeViewDashboard(data) {
+    return `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;">
+            <div>
+                <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f0effe;">👤 Personal Information</h4>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Full Name</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.first_name} ${data.middle_name || ''} ${data.last_name} ${data.suffix || ''}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Date of Birth</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.birth_date || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Place of Birth</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.place_of_birth || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Sex</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.sex || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Civil Status</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.civil_status || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Citizenship</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.citizenship || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Blood Type</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.blood_type || 'N/A'}</span></div>
+                </div>
+            </div>
+            <div>
+                <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f0effe;">💼 Employment Details</h4>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Designation</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.designation_relation?.title || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Department</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.department_relation?.name || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Employment Status</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.employment_status || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Appointment Date</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.appointment_date || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Salary Grade</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.salary_grade || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Step Increment</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.step_increment || 'N/A'}</span></div>
+                </div>
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;">
+            <div>
+                <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f0effe;">📞 Contact Information</h4>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Email</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.email || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Mobile Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.contacts?.[0]?.mobile_number || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Landline</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.contacts?.[0]?.landline_number || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Emergency Contact</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.contacts?.[0]?.emergency_contact_person || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Emergency Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.contacts?.[0]?.emergency_contact_number || 'N/A'}</span></div>
+                </div>
+            </div>
+            <div>
+                <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f0effe;">🪪 Government IDs</h4>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">GSIS Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.gsis_no || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">PhilHealth Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.philhealth_no || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">PAG-IBIG Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.pagibig_no || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">TIN Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.tin_no || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">License Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.license_no || 'N/A'}</span></div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f0effe;">📍 Address</h4>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">House No.</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.house_no || 'N/A'}</span></div>
+                <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Street</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.street || 'N/A'}</span></div>
+                <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Barangay</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.barangay || 'N/A'}</span></div>
+                <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">City/Municipality</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.city || 'N/A'}</span></div>
+                <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Province</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.province || 'N/A'}</span></div>
+                <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Zip Code</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.zip_code || 'N/A'}</span></div>
+            </div>
+        </div>
+    `;
+}
+
 function applyFilters() {
     const dept = document.getElementById('filterDept').value;
     const type = document.getElementById('filterType').value;

@@ -122,7 +122,7 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="payrollRegisterBody">
             @foreach($payrollRecords as $index => $record)
             @php
                 $basicPay = $record['basic'];
@@ -141,7 +141,7 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
                 
                 $netPay = $grossPay - $totalDeductionsRow;
             @endphp
-            <tr>
+            <tr data-name="{{ $record['name'] }}" data-id="{{ $record['id'] }}" data-dept="{{ $record['dept'] }}" data-status="{{ $record['status'] }}">
                 <td>
                     <div class="emp-cell">
                         <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
@@ -186,10 +186,14 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
 </div>
 
 <div class="table-footer">
-    <p>Showing <strong>{{ $payrollRecords->count() }}</strong> of <strong>{{ $payrollRecords->count() }}</strong> records</p>
-    <div class="pagination">
-        <button class="page-btn active">1</button>
-        <button class="page-btn">2</button>
-        <button class="page-btn">›</button>
+    <div style="display:flex;align-items:center;gap:12px;">
+        <p id="payrollRegisterFooter">Showing <strong id="payrollRowStart">1</strong>-<strong id="payrollRowEnd">{{ min(10, $payrollRecords->count()) }}</strong> of <strong id="payrollRowTotal">{{ $payrollRecords->count() }}</strong> records</p>
+        <select id="payrollRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changePayrollRowsPerPage()">
+            <option value="10">10 rows</option>
+            <option value="25">25 rows</option>
+            <option value="50">50 rows</option>
+            <option value="100">100 rows</option>
+        </select>
     </div>
+    <div class="pagination" id="payrollPaginationControls"></div>
 </div>

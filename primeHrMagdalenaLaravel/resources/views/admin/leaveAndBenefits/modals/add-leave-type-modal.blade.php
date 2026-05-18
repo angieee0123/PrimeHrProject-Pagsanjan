@@ -1,11 +1,11 @@
-<div id="addLeaveTypeModal" class="modal-overlay" onclick="closeAddLeaveTypeModal(event)">
+<div id="addLeaveTypeModal" class="modal-overlay" onclick="closeAddLeaveTypeModal(event)" style="display: none;">
     <div class="modal-container" onclick="event.stopPropagation()">
         <div class="modal-header">
             <div>
                 <h3 class="modal-title">Add New Leave Type</h3>
                 <p class="modal-subtitle">Create a new leave type for LGU Pagsanjan</p>
             </div>
-            <button class="modal-close" onclick="closeAddLeaveTypeModal()">
+            <button type="button" class="modal-close" onclick="closeAddLeaveTypeModal()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
@@ -42,23 +42,28 @@
                     <label class="form-label">Leave Type Configuration</label>
                     <div class="checkbox-group">
                         <label class="checkbox-label">
-                            <input type="checkbox" name="is_accrued" class="form-checkbox">
+                            <input type="hidden" name="is_accrued" value="0">
+                            <input type="checkbox" name="is_accrued" value="1" class="form-checkbox">
                             <span>Accrued (Earned monthly, e.g., 1.25 days/month)</span>
                         </label>
                         <label class="checkbox-label">
-                            <input type="checkbox" name="is_cumulative" class="form-checkbox">
+                            <input type="hidden" name="is_cumulative" value="0">
+                            <input type="checkbox" name="is_cumulative" value="1" class="form-checkbox">
                             <span>Cumulative (Unused days carry over to next year)</span>
                         </label>
                         <label class="checkbox-label">
-                            <input type="checkbox" name="requires_6_months" class="form-checkbox">
+                            <input type="hidden" name="requires_6_months" value="0">
+                            <input type="checkbox" name="requires_6_months" value="1" class="form-checkbox">
                             <span>Requires 6 Months Service (CSC requirement)</span>
                         </label>
                         <label class="checkbox-label">
-                            <input type="checkbox" name="is_monetizable" class="form-checkbox">
+                            <input type="hidden" name="is_monetizable" value="0">
+                            <input type="checkbox" name="is_monetizable" value="1" class="form-checkbox">
                             <span>Monetizable (Can be converted to cash)</span>
                         </label>
                         <label class="checkbox-label">
-                            <input type="checkbox" name="requires_attachment" class="form-checkbox">
+                            <input type="hidden" name="requires_attachment" value="0">
+                            <input type="checkbox" name="requires_attachment" value="1" class="form-checkbox">
                             <span>Requires Attachment (Force upload before submission)</span>
                         </label>
                     </div>

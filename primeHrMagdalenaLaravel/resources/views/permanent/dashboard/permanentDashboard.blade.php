@@ -36,10 +36,10 @@
                         <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                     </div>
                 </div>
-                <p class="stat-value stat-value-compact">₱16,921.50</p>
+                <p class="stat-value stat-value-compact">₱{{ number_format($basicPay, 2) }}</p>
                 <div class="stat-footer">
                     <span class="stat-dot stat-dot-primary"></span>
-                    <p class="stat-sub">Jun 16-30, 2025</p>
+                    <p class="stat-sub">{{ $startDate->format('M d') }}-{{ $endDate->format('d, Y') }}</p>
                 </div>
             </div>
 
@@ -50,7 +50,7 @@
                         <svg width="17" height="17" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     </div>
                 </div>
-                <p class="stat-value stat-value-compact">₱13,537.50</p>
+                <p class="stat-value stat-value-compact">₱{{ number_format($netPay, 2) }}</p>
                 <div class="stat-footer">
                     <span class="stat-dot stat-dot-success"></span>
                     <p class="stat-sub">After deductions</p>
@@ -64,10 +64,10 @@
                         <svg width="17" height="17" fill="none" stroke="#a16207" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 </div>
                 </div>
-                <p class="stat-value">22.5 days</p>
+                <p class="stat-value">{{ number_format($leaveBalances->sum('available_credits'), 1) }} days</p>
                 <div class="stat-footer">
                     <span class="stat-dot stat-dot-amber"></span>
-                    <p class="stat-sub">12.5 vacation · 10 sick</p>
+                    <p class="stat-sub">{{ $leaveBalances->count() }} leave type(s)</p>
                 </div>
             </div>
 
@@ -78,10 +78,10 @@
                         <svg width="17" height="17" fill="none" stroke="#8e1e18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     </div>
                 </div>
-                <p class="stat-value">95%</p>
+                <p class="stat-value">{{ $attendanceRate }}%</p>
                 <div class="stat-footer">
                     <span class="stat-dot stat-dot-danger"></span>
-                    <p class="stat-sub">20 days present</p>
+                    <p class="stat-sub">{{ $presentDays }} days present</p>
                 </div>
             </div>
 
@@ -119,44 +119,28 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                        $payslips = [
-                            ['period'=>'Jun 16-30, 2025','basic'=>'₱16,921.50','deduct'=>'₱3,384.00','net'=>'₱13,537.50','date'=>'Jun 30, 2025','status'=>'pending'],
-                            ['period'=>'Jun 1-15, 2025','basic'=>'₱16,921.50','deduct'=>'₱3,384.00','net'=>'₱13,537.50','date'=>'Jun 15, 2025','status'=>'processed'],
-                            ['period'=>'May 16-31, 2025','basic'=>'₱16,921.50','deduct'=>'₱3,384.00','net'=>'₱13,537.50','date'=>'May 31, 2025','status'=>'processed'],
-                            ['period'=>'May 1-15, 2025','basic'=>'₱16,921.50','deduct'=>'₱3,384.00','net'=>'₱13,537.50','date'=>'May 15, 2025','status'=>'processed'],
-                            ['period'=>'Apr 16-30, 2025','basic'=>'₱16,921.50','deduct'=>'₱3,384.00','net'=>'₱13,537.50','date'=>'Apr 30, 2025','status'=>'processed'],
-                        ];
-                        @endphp
-                        @foreach($payslips as $p)
+                        @forelse($payslips as $p)
                         <tr>
-                            <td class="table-cell-period">{{ $p['period'] }}</td>
-                            <td class="table-cell-basic">{{ $p['basic'] }}</td>
-                            <td class="table-cell-deduct">{{ $p['deduct'] }}</td>
-                            <td class="net-pay">{{ $p['net'] }}</td>
-                            <td class="table-cell-date">{{ $p['date'] }}</td>
+                            <td class="table-cell-period">{{ $p->period_label }}</td>
+                            <td class="table-cell-basic">₱{{ number_format($p->basic_pay, 2) }}</td>
+                            <td class="table-cell-deduct">₱{{ number_format($p->deductions, 2) }}</td>
+                            <td class="net-pay">₱{{ number_format($p->net_pay, 2) }}</td>
+                            <td class="table-cell-date">{{ \Carbon\Carbon::parse($p->pay_date)->format('M d, Y') }}</td>
                             <td>
-                                @if($p['status']==='pending')
-                                    <span class="badge-status pending">Pending</span>
-                                @else
-                                    <span class="badge-status processed">Processed</span>
-                                @endif
+                                <span class="badge-status processed">Processed</span>
                             </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: #6b6a8a;">No payslip records found</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
 
             <div class="table-footer">
-                <span>Showing <strong>1–5</strong> of <strong>24</strong> payslips</span>
-                <div class="pagination">
-                    <button class="page-btn">‹</button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn">›</button>
-                </div>
+                <span>Showing <strong>1–{{ $payslips->count() }}</strong> of <strong>{{ $payslips->count() }}</strong> payslips</span>
             </div>
         </div>
 
@@ -240,24 +224,24 @@
 
                 <div class="stat-card no-margin">
                     <p class="stat-label leave-balance-label">Leave Balance</p>
+                    @forelse($leaveBalances->take(3) as $balance)
                     @php
-                    $leaves = [
-                        ['label'=>'Vacation Leave','balance'=>'12.5 days','color'=>'#0b044d','percent'=>62.5],
-                        ['label'=>'Sick Leave','balance'=>'10 days','color'=>'#8e1e18','percent'=>50],
-                        ['label'=>'Emergency Leave','balance'=>'3 days','color'=>'#a16207','percent'=>100],
-                    ];
+                        $percent = $balance->total_credits > 0 ? ($balance->available_credits / $balance->total_credits) * 100 : 0;
+                        $colors = ['#0b044d', '#8e1e18', '#a16207'];
+                        $color = $colors[$loop->index % 3];
                     @endphp
-                    @foreach($leaves as $l)
                     <div class="leave-row">
                         <div class="leave-row-top">
-                            <span class="leave-row-name">{{ $l['label'] }}</span>
-                            <span class="leave-row-balance">{{ $l['balance'] }}</span>
+                            <span class="leave-row-name">{{ $balance->leaveType->leave_name ?? 'Unknown' }}</span>
+                            <span class="leave-row-balance">{{ number_format($balance->available_credits, 1) }} days</span>
                         </div>
                         <div class="leave-progress-track">
-                            <div class="leave-progress {{ $l['percent'] == 62.5 ? 'leave-progress-62' : ($l['percent'] == 50 ? 'leave-progress-50' : 'leave-progress-100') }} {{ $l['color'] == '#0b044d' ? 'leave-color-primary' : ($l['color'] == '#8e1e18' ? 'leave-color-danger' : 'leave-color-warning') }}"></div>
+                            <div class="leave-progress {{ $color == '#0b044d' ? 'leave-color-primary' : ($color == '#8e1e18' ? 'leave-color-danger' : 'leave-color-warning') }}" style="width: {{ $percent }}%"></div>
                         </div>
                     </div>
-                    @endforeach
+                    @empty
+                    <p style="text-align: center; color: #6b6a8a; padding: 20px 0;">No leave balances available</p>
+                    @endforelse
                 </div>
 
             </div>

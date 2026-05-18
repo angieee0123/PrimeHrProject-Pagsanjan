@@ -9,6 +9,7 @@ use App\Models\LeaveApplication;
 use App\Models\LeaveBalance;
 use App\Models\LeaveTransaction;
 use App\Services\CscTimeConversionService;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
@@ -138,88 +139,161 @@ class LeaveController extends Controller
 
     public function storeLeaveType(Request $request)
     {
-        $validated = $request->validate([
-            'leave_code' => 'required|string|max:10|unique:leave_types_config,leave_code',
-            'leave_name' => 'required|string|max:100',
-            'annual_limit' => 'required|numeric|min:0',
-            'is_accrued' => 'boolean',
-            'is_cumulative' => 'boolean',
-            'requires_6_months' => 'boolean',
-            'is_monetizable' => 'boolean',
-            'requires_attachment' => 'boolean',
-            'attachment_info' => 'nullable|string',
-            'is_active' => 'required|boolean',
-            'document' => 'nullable|file|mimes:pdf|max:5120',
-        ]);
+        try {
+            $validated = $request->validate([
+                'leave_code' => 'required|string|max:10|unique:leave_types_config,leave_code',
+                'leave_name' => 'required|string|max:100',
+                'annual_limit' => 'required|numeric|min:0',
+                'attachment_info' => 'nullable|string',
+                'is_active' => 'required|boolean',
+                'document' => 'nullable|file|mimes:pdf|max:5120',
+            ]);
 
-        $documentPath = null;
-        if ($request->hasFile('document')) {
-            $documentPath = $request->file('document')->store('leave_types_documents', 'public');
+            $documentPath = null;
+            if ($request->hasFile('document')) {
+                $documentPath = $request->file('document')->store('leave_types_documents', 'public');
+            }
+
+            $leaveType = LeaveType::create([
+                'leave_code' => strtoupper($validated['leave_code']),
+                'leave_name' => $validated['leave_name'],
+                'annual_limit' => $validated['annual_limit'],
+                'is_accrued' => $request->input('is_accrued') == '1',
+                'is_cumulative' => $request->input('is_cumulative') == '1',
+                'requires_6_months' => $request->input('requires_6_months') == '1',
+                'is_monetizable' => $request->input('is_monetizable') == '1',
+                'requires_attachment' => $request->input('requires_attachment') == '1',
+                'attachment_info' => $validated['attachment_info'] ?? null,
+                'document_path' => $documentPath,
+                'is_active' => $validated['is_active'],
+            ]);
+
+            // Check if request is AJAX
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Leave type '{$leaveType->leave_name}' has been registered successfully!",
+                    'data' => $leaveType
+                ]);
+            }
+
+            return redirect()->route('admin.leave', ['tab' => 'types'])
+                ->with('success', "Leave type '{$leaveType->leave_name}' has been registered successfully!");
+                
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('Failed to create leave type: ' . $e->getMessage());
+            
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to register leave type: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('admin.leave', ['tab' => 'types'])
+                ->with('error', 'Failed to register leave type: ' . $e->getMessage());
         }
-
-        LeaveType::create([
-            'leave_code' => strtoupper($validated['leave_code']),
-            'leave_name' => $validated['leave_name'],
-            'annual_limit' => $validated['annual_limit'],
-            'is_accrued' => $request->has('is_accrued'),
-            'is_cumulative' => $request->has('is_cumulative'),
-            'requires_6_months' => $request->has('requires_6_months'),
-            'is_monetizable' => $request->has('is_monetizable'),
-            'requires_attachment' => $request->has('requires_attachment'),
-            'attachment_info' => $validated['attachment_info'],
-            'document_path' => $documentPath,
-            'is_active' => $validated['is_active'],
-        ]);
-
-        return redirect()->route('admin.leave')->with('success', 'Leave type added successfully!');
     }
 
     public function show($code)
     {
         $leaveType = LeaveType::where('leave_code', $code)->firstOrFail();
-        return response()->json($leaveType);
+        
+        // Ensure all boolean fields are properly cast
+        return response()->json([
+            'id' => $leaveType->id,
+            'leave_code' => $leaveType->leave_code,
+            'leave_name' => $leaveType->leave_name,
+            'annual_limit' => $leaveType->annual_limit,
+            'is_accrued' => (bool) $leaveType->is_accrued,
+            'is_cumulative' => (bool) $leaveType->is_cumulative,
+            'requires_6_months' => (bool) $leaveType->requires_6_months,
+            'is_monetizable' => (bool) $leaveType->is_monetizable,
+            'requires_attachment' => (bool) $leaveType->requires_attachment,
+            'attachment_info' => $leaveType->attachment_info,
+            'document_path' => $leaveType->document_path,
+            'is_active' => (bool) $leaveType->is_active,
+        ]);
     }
 
     public function update(Request $request, $code)
     {
-        $leaveType = LeaveType::where('leave_code', $code)->firstOrFail();
+        try {
+            $leaveType = LeaveType::where('leave_code', $code)->firstOrFail();
 
-        $validated = $request->validate([
-            'leave_name' => 'required|string|max:100',
-            'annual_limit' => 'required|numeric|min:0',
-            'is_accrued' => 'boolean',
-            'is_cumulative' => 'boolean',
-            'requires_6_months' => 'boolean',
-            'is_monetizable' => 'boolean',
-            'requires_attachment' => 'boolean',
-            'attachment_info' => 'nullable|string',
-            'is_active' => 'required|boolean',
-            'document' => 'nullable|file|mimes:pdf|max:5120',
-        ]);
+            $validated = $request->validate([
+                'leave_name' => 'required|string|max:100',
+                'annual_limit' => 'required|numeric|min:0',
+                'attachment_info' => 'nullable|string',
+                'is_active' => 'required|boolean',
+                'document' => 'nullable|file|mimes:pdf|max:5120',
+            ]);
 
-        $documentPath = $leaveType->document_path;
-        if ($request->hasFile('document')) {
-            // Delete old document if exists
-            if ($documentPath && \Storage::disk('public')->exists($documentPath)) {
-                \Storage::disk('public')->delete($documentPath);
+            $documentPath = $leaveType->document_path;
+            if ($request->hasFile('document')) {
+                // Delete old document if exists
+                if ($documentPath && \Storage::disk('public')->exists($documentPath)) {
+                    \Storage::disk('public')->delete($documentPath);
+                }
+                $documentPath = $request->file('document')->store('leave_types_documents', 'public');
             }
-            $documentPath = $request->file('document')->store('leave_types_documents', 'public');
+
+            $leaveType->update([
+                'leave_name' => $validated['leave_name'],
+                'annual_limit' => $validated['annual_limit'],
+                'is_accrued' => $request->input('is_accrued') == '1',
+                'is_cumulative' => $request->input('is_cumulative') == '1',
+                'requires_6_months' => $request->input('requires_6_months') == '1',
+                'is_monetizable' => $request->input('is_monetizable') == '1',
+                'requires_attachment' => $request->input('requires_attachment') == '1',
+                'attachment_info' => $validated['attachment_info'] ?? null,
+                'document_path' => $documentPath,
+                'is_active' => $validated['is_active'],
+            ]);
+
+            // Check if request is AJAX
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Leave type '{$leaveType->leave_name}' has been updated successfully!",
+                    'data' => $leaveType
+                ]);
+            }
+
+            return redirect()->route('admin.leave', ['tab' => 'types'])
+                ->with('success', "Leave type '{$leaveType->leave_name}' has been updated successfully!");
+                
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('Failed to update leave type: ' . $e->getMessage());
+            
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update leave type: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('admin.leave', ['tab' => 'types'])
+                ->with('error', 'Failed to update leave type: ' . $e->getMessage());
         }
-
-        $leaveType->update([
-            'leave_name' => $validated['leave_name'],
-            'annual_limit' => $validated['annual_limit'],
-            'is_accrued' => $request->has('is_accrued'),
-            'is_cumulative' => $request->has('is_cumulative'),
-            'requires_6_months' => $request->has('requires_6_months'),
-            'is_monetizable' => $request->has('is_monetizable'),
-            'requires_attachment' => $request->has('requires_attachment'),
-            'attachment_info' => $validated['attachment_info'],
-            'document_path' => $documentPath,
-            'is_active' => $validated['is_active'],
-        ]);
-
-        return redirect()->route('admin.leave')->with('success', 'Leave type updated successfully!');
     }
 
     public function storeAccrualRate(Request $request)
@@ -373,6 +447,9 @@ class LeaveController extends Controller
                 'attachment_path' => $attachmentPath,
                 'filed_by' => auth()->id(),
             ]);
+
+            // Send notification to admin
+            NotificationService::leaveRequestSubmitted($leaveApplication);
 
             // Create pending transaction
             $balanceBefore = $leaveBalance->available_credits;
@@ -540,6 +617,9 @@ class LeaveController extends Controller
             $leaveApplication->approved_at = now();
             $leaveApplication->save();
 
+            // Send notification to employee
+            NotificationService::leaveRequestStatusChanged($leaveApplication, 'approved');
+
             DB::commit();
 
             return response()->json([
@@ -608,6 +688,9 @@ class LeaveController extends Controller
             $leaveApplication->approved_at = now();
             $leaveApplication->approver_remarks = $validated['remarks'];
             $leaveApplication->save();
+
+            // Send notification to employee
+            NotificationService::leaveRequestStatusChanged($leaveApplication, 'rejected');
 
             DB::commit();
 

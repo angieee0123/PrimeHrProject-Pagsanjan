@@ -146,6 +146,83 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
             filtered.forEach(row => tbody.appendChild(row.cloneNode(true)));
         }
     }
+
+    // Attendance Summary Pagination
+    window._attendanceCurrentPage = 1;
+    window._attendanceRowsPerPage = 10;
+
+    window.filterAttendanceSummary = function () {
+        const allRows = document.querySelectorAll('#attendanceSummaryBody tr[data-id]');
+        const filtered = [];
+        
+        allRows.forEach(row => {
+            filtered.push(row);
+        });
+        
+        window._attendanceFilteredRows = filtered;
+        window._attendanceCurrentPage = 1;
+        updateAttendancePagination();
+    };
+
+    window.updateAttendancePagination = function () {
+        const rows = window._attendanceFilteredRows || [];
+        const total = rows.length;
+        const perPage = window._attendanceRowsPerPage;
+        const totalPages = Math.ceil(total / perPage) || 1;
+        const page = Math.min(window._attendanceCurrentPage, totalPages);
+        window._attendanceCurrentPage = page;
+        
+        const start = (page - 1) * perPage;
+        const end = Math.min(start + perPage, total);
+        
+        document.querySelectorAll('#attendanceSummaryBody tr[data-id]').forEach(row => row.style.display = 'none');
+        rows.forEach((row, i) => { if (i >= start && i < end) row.style.display = ''; });
+        
+        document.getElementById('attendanceRowStart').textContent = total ? start + 1 : 0;
+        document.getElementById('attendanceRowEnd').textContent = end;
+        document.getElementById('attendanceRowTotal').textContent = total;
+        
+        const controls = document.getElementById('attendancePaginationControls');
+        if (totalPages <= 1) { controls.innerHTML = ''; return; }
+        
+        let html = '';
+        const maxVisible = 5;
+        let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+        if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
+        
+        if (page > 1) html += '<button class="page-btn" onclick="goToAttendancePage(' + (page - 1) + ')">‹</button>';
+        if (startPage > 1) {
+            html += '<button class="page-btn" onclick="goToAttendancePage(1)">1</button>';
+            if (startPage > 2) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+        }
+        for (let i = startPage; i <= endPage; i++) {
+            html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToAttendancePage(' + i + ')">' + i + '</button>';
+        }
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+            html += '<button class="page-btn" onclick="goToAttendancePage(' + totalPages + ')">' + totalPages + '</button>';
+        }
+        if (page < totalPages) html += '<button class="page-btn" onclick="goToAttendancePage(' + (page + 1) + ')">›</button>';
+        
+        controls.innerHTML = html;
+    };
+
+    window.goToAttendancePage = function (page) {
+        window._attendanceCurrentPage = page;
+        updateAttendancePagination();
+    };
+
+    window.changeAttendanceRowsPerPage = function () {
+        window._attendanceRowsPerPage = parseInt(document.getElementById('attendanceRowsPerPage').value) || 10;
+        window._attendanceCurrentPage = 1;
+        updateAttendancePagination();
+    };
+
+    // Initialize pagination on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        filterAttendanceSummary();
+    });
 </script>
 @vite('resources/js/adminAttendance.js')
 @endpush

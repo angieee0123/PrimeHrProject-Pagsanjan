@@ -106,9 +106,7 @@ Route::post('/logout', function (\Illuminate\Http\Request $request) {
 Route::get('/admin/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->middleware('auth')->name('admin.dashboard');
 
 // ── Permanent Employee Dashboard ──
-Route::get('/permanent/dashboard', function () {
-    return view('permanent.dashboard.permanentDashboard');
-})->middleware('auth')->name('permanent.dashboard');
+Route::get('/permanent/dashboard', [\App\Http\Controllers\PermanentDashboardController::class, 'index'])->middleware('auth')->name('permanent.dashboard');
 
 Route::get('/permanent/attendance', [PermanentAttendanceController::class, 'index'])->middleware('auth')->name('permanent.attendance');
 Route::get('/permanent/attendance/detailed', [PermanentAttendanceController::class, 'detailedDTR'])->middleware('auth')->name('permanent.attendance.detailed');
@@ -419,6 +417,7 @@ Route::get('/admin/personnel', function () {
 })->middleware('auth')->name('admin.personnel');
 
 Route::post('/admin/personnel', [EmployeeRegistrationController::class, 'store'])->middleware('auth')->name('admin.personnel.store');
+Route::post('/admin/personnel/bulk-import', [EmployeeRegistrationController::class, 'bulkImport'])->middleware('auth')->name('admin.personnel.bulk-import');
 
 // Schedule Routes
 Route::post('/admin/schedules/assign', function (\Illuminate\Http\Request $request) {
@@ -849,7 +848,7 @@ Route::get('/admin/attendance/{attendanceId}/accredited-log', [AttendanceControl
 Route::post('/admin/attendance/correct', [AttendanceController::class, 'correctAttendance'])->middleware('auth')->name('admin.attendance.correct');
 
 Route::get('/admin/leave', [LeaveController::class, 'index'])->middleware('auth')->name('admin.leave');
-Route::post('/admin/leave/types/store', [LeaveController::class, 'storeLeaveType'])->middleware('auth')->name('admin.leave.types.store');
+Route::post('/admin/leave/types', [LeaveController::class, 'storeLeaveType'])->middleware('auth')->name('admin.leave.types.store');
 Route::get('/admin/leave/types/{code}', [LeaveController::class, 'show'])->middleware('auth')->name('admin.leave.types.show');
 Route::put('/admin/leave/types/{code}', [LeaveController::class, 'update'])->middleware('auth')->name('admin.leave.types.update');
 
@@ -2440,6 +2439,47 @@ Route::get('/admin/chatbot', function () {
 
 // Chatbot API
 Route::post('/api/chatbot', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware('auth');
+
+// Notification API Routes
+Route::post('/api/notifications/mark-all-read', function () {
+    \App\Services\NotificationService::markAllAsRead(Auth::id());
+    return response()->json(['success' => true]);
+})->middleware('auth');
+
+Route::post('/api/notifications/{id}/read', function ($id) {
+    $notification = \App\Models\Notification::where('id', $id)
+        ->where('user_id', Auth::id())
+        ->firstOrFail();
+    
+    $notification->markAsRead();
+    
+    return response()->json(['success' => true]);
+})->middleware('auth');
+
+// Employee Request Routes
+Route::prefix('api')->middleware('auth')->group(function () {
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [\App\Http\Controllers\NotificationController::class, 'unreadCount']);
+    Route::post('/notifications/{id}/mark-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
+    
+    // Employee requests (for permanent employees)
+    Route::post('/requests/submit', [\App\Http\Controllers\NotificationController::class, 'submitRequest']);
+    Route::get('/requests/my-requests', [\App\Http\Controllers\NotificationController::class, 'myRequests']);
+    
+    // Admin request management
+    Route::get('/requests/all', [\App\Http\Controllers\NotificationController::class, 'allRequests']);
+    Route::post('/requests/{id}/update-status', [\App\Http\Controllers\NotificationController::class, 'updateRequestStatus']);
+});
+
+// Request pages
+Route::get('/permanent/requests', function () {
+    return view('permanent.requests.permanentRequests');
+})->middleware('auth')->name('permanent.requests');
+
+Route::get('/admin/requests', function () {
+    return view('admin.requests.adminRequests');
+})->middleware('auth')->name('admin.requests');
 
 // ✅ NEW: Get current authenticated user's ID for chatbot
 Route::get('/api/auth/user-id', function (\Illuminate\Http\Request $request) {

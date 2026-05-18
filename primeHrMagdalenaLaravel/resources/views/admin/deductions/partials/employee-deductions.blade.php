@@ -198,18 +198,30 @@
 </div>
 
     <div class="table-footer">
-        <p>Showing <strong id="showingCount">{{ $employeeDeductions->count() }}</strong> of <strong id="totalCount">{{ $employeeDeductions->count() }}</strong> records</p>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <p id="employeeDeductionsFooter">Showing <strong id="deductionRowStart">1</strong>-<strong id="deductionRowEnd">{{ min(10, $employeeDeductions->count()) }}</strong> of <strong id="deductionRowTotal">{{ $employeeDeductions->count() }}</strong> records</p>
+            <select id="deductionRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changeDeductionRowsPerPage()">
+                <option value="10">10 rows</option>
+                <option value="25">25 rows</option>
+                <option value="50">50 rows</option>
+                <option value="100">100 rows</option>
+            </select>
+        </div>
+        <div class="pagination" id="deductionPaginationControls"></div>
     </div>
 </section>
 
 <script>
+window._deductionCurrentPage = 1;
+window._deductionRowsPerPage = 10;
+
 function filterEmployeeDeductions() {
     const searchTerm = document.getElementById('searchEmployee').value.toLowerCase();
     const typeFilter = document.getElementById('filterType').value;
     const statusFilter = document.getElementById('filterStatus').value;
     const rows = document.querySelectorAll('#employeeDeductionsTableBody tr:not(#noDataRow)');
     
-    let visibleCount = 0;
+    const filtered = [];
     
     rows.forEach(row => {
         const employeeName = row.dataset.employee || '';
@@ -221,22 +233,82 @@ function filterEmployeeDeductions() {
         const matchesStatus = !statusFilter || status === statusFilter;
         
         if (matchesSearch && matchesType && matchesStatus) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
+            filtered.push(row);
         }
     });
     
-    // Update showing count
-    document.getElementById('showingCount').textContent = visibleCount;
+    window._deductionFilteredRows = filtered;
+    window._deductionCurrentPage = 1;
+    updateDeductionPagination();
+}
+
+window.updateDeductionPagination = function () {
+    const rows = window._deductionFilteredRows || [];
+    const total = rows.length;
+    const perPage = window._deductionRowsPerPage;
+    const totalPages = Math.ceil(total / perPage) || 1;
+    const page = Math.min(window._deductionCurrentPage, totalPages);
+    window._deductionCurrentPage = page;
+    
+    const start = (page - 1) * perPage;
+    const end = Math.min(start + perPage, total);
+    
+    document.querySelectorAll('#employeeDeductionsTableBody tr:not(#noDataRow)').forEach(row => row.style.display = 'none');
+    rows.forEach((row, i) => { if (i >= start && i < end) row.style.display = ''; });
+    
+    document.getElementById('deductionRowStart').textContent = total ? start + 1 : 0;
+    document.getElementById('deductionRowEnd').textContent = end;
+    document.getElementById('deductionRowTotal').textContent = total;
     
     // Show/hide no data row
     const noDataRow = document.getElementById('noDataRow');
     if (noDataRow) {
-        noDataRow.style.display = visibleCount === 0 ? '' : 'none';
+        noDataRow.style.display = total === 0 ? '' : 'none';
     }
-}
+    
+    const controls = document.getElementById('deductionPaginationControls');
+    if (totalPages <= 1) { controls.innerHTML = ''; return; }
+    
+    let html = '';
+    const maxVisible = 5;
+    let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
+    
+    if (page > 1) html += '<button class="page-btn" onclick="goToDeductionPage(' + (page - 1) + ')">‹</button>';
+    if (startPage > 1) {
+        html += '<button class="page-btn" onclick="goToDeductionPage(1)">1</button>';
+        if (startPage > 2) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+    }
+    for (let i = startPage; i <= endPage; i++) {
+        html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToDeductionPage(' + i + ')">' + i + '</button>';
+    }
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+        html += '<button class="page-btn" onclick="goToDeductionPage(' + totalPages + ')">' + totalPages + '</button>';
+    }
+    if (page < totalPages) html += '<button class="page-btn" onclick="goToDeductionPage(' + (page + 1) + ')">›</button>';
+    
+    controls.innerHTML = html;
+};
+
+window.goToDeductionPage = function (page) {
+    window._deductionCurrentPage = page;
+    updateDeductionPagination();
+};
+
+window.changeDeductionRowsPerPage = function () {
+    window._deductionRowsPerPage = parseInt(document.getElementById('deductionRowsPerPage').value) || 10;
+    window._deductionCurrentPage = 1;
+    updateDeductionPagination();
+};
+
+// Initialize pagination on page load
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('employeeDeductionsTableBody')) {
+        filterEmployeeDeductions();
+    }
+});
 
 function editEmployeeDeduction(id) {
     // Fetch deduction data

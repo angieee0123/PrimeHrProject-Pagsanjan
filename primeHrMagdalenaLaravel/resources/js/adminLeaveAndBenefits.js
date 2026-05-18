@@ -141,15 +141,28 @@ window.editLeaveTypeFromView = function() {
 }
 
 window.editLeaveType = function(code) {
+    console.log('Editing leave type:', code);
+    
     fetch(`/admin/leave/types/${code}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch leave type');
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Fetched data:', data);
+            
+            // Update modal title and subtitle
             document.querySelector('#addLeaveTypeModal .modal-title').textContent = 'Edit Leave Type';
             document.querySelector('#addLeaveTypeModal .modal-subtitle').textContent = 'Update leave type configuration';
             
             const form = document.getElementById('addLeaveTypeForm');
+            
+            // Set form action for update
             form.action = `/admin/leave/types/${code}`;
             
+            // Add or update _method input for PUT request
             let methodInput = form.querySelector('input[name="_method"]');
             if (!methodInput) {
                 methodInput = document.createElement('input');
@@ -159,30 +172,65 @@ window.editLeaveType = function(code) {
             }
             methodInput.value = 'PUT';
             
-            form.querySelector('input[name="leave_code"]').value = data.leave_code;
+            // Populate form fields
+            form.querySelector('input[name="leave_code"]').value = data.leave_code || '';
             form.querySelector('input[name="leave_code"]').readOnly = true;
-            form.querySelector('input[name="leave_name"]').value = data.leave_name;
-            form.querySelector('input[name="annual_limit"]').value = data.annual_limit;
+            form.querySelector('input[name="leave_name"]').value = data.leave_name || '';
+            form.querySelector('input[name="annual_limit"]').value = data.annual_limit || 0;
             form.querySelector('select[name="is_active"]').value = data.is_active ? '1' : '0';
             
-            form.querySelector('input[name="is_accrued"]').checked = data.is_accrued;
-            form.querySelector('input[name="is_cumulative"]').checked = data.is_cumulative;
-            form.querySelector('input[name="requires_6_months"]').checked = data.requires_6_months;
-            form.querySelector('input[name="is_monetizable"]').checked = data.is_monetizable;
-            form.querySelector('input[name="requires_attachment"]').checked = data.requires_attachment;
+            // Set checkboxes - properly handle boolean values
+            const checkboxFields = [
+                'is_accrued',
+                'is_cumulative',
+                'requires_6_months',
+                'is_monetizable',
+                'requires_attachment'
+            ];
             
-            form.querySelector('textarea[name="attachment_info"]').value = data.attachment_info || '';
-            form.querySelector('.btn-submit').textContent = 'Update Leave Type';
+            checkboxFields.forEach(fieldName => {
+                const checkbox = form.querySelector(`input[name="${fieldName}"][type="checkbox"]`);
+                if (checkbox) {
+                    // Ensure we're checking the actual boolean value
+                    checkbox.checked = data[fieldName] === true || data[fieldName] === 1 || data[fieldName] === '1';
+                    console.log(`Set ${fieldName} to ${checkbox.checked} (value was: ${data[fieldName]})`);
+                }
+            });
             
-            if (data.document_path) {
-                document.getElementById('fileNameDisplay').textContent = 'Current: ' + data.document_path.split('/').pop();
+            // Set textarea
+            const attachmentInfo = form.querySelector('textarea[name="attachment_info"]');
+            if (attachmentInfo) {
+                attachmentInfo.value = data.attachment_info || '';
             }
             
-            document.getElementById('addLeaveTypeModal').classList.add('active');
+            // Update submit button text
+            const submitBtn = form.querySelector('.btn-submit');
+            if (submitBtn) {
+                submitBtn.textContent = 'Update Leave Type';
+            }
+            
+            // Update file display if document exists
+            const fileDisplay = document.getElementById('fileNameDisplay');
+            if (fileDisplay) {
+                if (data.document_path) {
+                    const fileName = data.document_path.split('/').pop();
+                    fileDisplay.textContent = 'Current: ' + fileName;
+                } else {
+                    fileDisplay.textContent = 'Choose PDF file or drag here';
+                }
+            }
+            
+            // Open the modal
+            const modal = document.getElementById('addLeaveTypeModal');
+            if (modal) {
+                modal.classList.add('active');
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to load leave type for editing');
+            console.error('Error loading leave type:', error);
+            alert('Failed to load leave type for editing. Please try again.');
         });
 }
 

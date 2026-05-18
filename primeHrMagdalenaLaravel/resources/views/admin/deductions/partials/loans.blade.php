@@ -231,18 +231,30 @@
 </div>
 
     <div class="table-footer">
-        <p>Showing <strong id="showingLoansCount">{{ $loans->count() }}</strong> of <strong id="totalLoansCount">{{ $loans->count() }}</strong> loans</p>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <p id="loansFooter">Showing <strong id="loanRowStart">1</strong>-<strong id="loanRowEnd">{{ min(10, $loans->count()) }}</strong> of <strong id="loanRowTotal">{{ $loans->count() }}</strong> loans</p>
+            <select id="loanRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changeLoanRowsPerPage()">
+                <option value="10">10 rows</option>
+                <option value="25">25 rows</option>
+                <option value="50">50 rows</option>
+                <option value="100">100 rows</option>
+            </select>
+        </div>
+        <div class="pagination" id="loanPaginationControls"></div>
     </div>
 </section>
 
 <script>
+window._loanCurrentPage = 1;
+window._loanRowsPerPage = 10;
+
 function filterLoans() {
     const searchTerm = document.getElementById('searchLoan').value.toLowerCase();
     const loanTypeFilter = document.getElementById('filterLoanType').value;
     const statusFilter = document.getElementById('filterLoanStatus').value;
     const rows = document.querySelectorAll('#loansTableBody tr:not(#noLoansRow)');
     
-    let visibleCount = 0;
+    const filtered = [];
     
     rows.forEach(row => {
         const employeeName = row.dataset.employee || '';
@@ -254,22 +266,82 @@ function filterLoans() {
         const matchesStatus = !statusFilter || status === statusFilter;
         
         if (matchesSearch && matchesType && matchesStatus) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
+            filtered.push(row);
         }
     });
     
-    // Update showing count
-    document.getElementById('showingLoansCount').textContent = visibleCount;
+    window._loanFilteredRows = filtered;
+    window._loanCurrentPage = 1;
+    updateLoanPagination();
+}
+
+window.updateLoanPagination = function () {
+    const rows = window._loanFilteredRows || [];
+    const total = rows.length;
+    const perPage = window._loanRowsPerPage;
+    const totalPages = Math.ceil(total / perPage) || 1;
+    const page = Math.min(window._loanCurrentPage, totalPages);
+    window._loanCurrentPage = page;
+    
+    const start = (page - 1) * perPage;
+    const end = Math.min(start + perPage, total);
+    
+    document.querySelectorAll('#loansTableBody tr:not(#noLoansRow)').forEach(row => row.style.display = 'none');
+    rows.forEach((row, i) => { if (i >= start && i < end) row.style.display = ''; });
+    
+    document.getElementById('loanRowStart').textContent = total ? start + 1 : 0;
+    document.getElementById('loanRowEnd').textContent = end;
+    document.getElementById('loanRowTotal').textContent = total;
     
     // Show/hide no data row
     const noLoansRow = document.getElementById('noLoansRow');
     if (noLoansRow) {
-        noLoansRow.style.display = visibleCount === 0 ? '' : 'none';
+        noLoansRow.style.display = total === 0 ? '' : 'none';
     }
-}
+    
+    const controls = document.getElementById('loanPaginationControls');
+    if (totalPages <= 1) { controls.innerHTML = ''; return; }
+    
+    let html = '';
+    const maxVisible = 5;
+    let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
+    
+    if (page > 1) html += '<button class="page-btn" onclick="goToLoanPage(' + (page - 1) + ')">‹</button>';
+    if (startPage > 1) {
+        html += '<button class="page-btn" onclick="goToLoanPage(1)">1</button>';
+        if (startPage > 2) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+    }
+    for (let i = startPage; i <= endPage; i++) {
+        html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToLoanPage(' + i + ')">' + i + '</button>';
+    }
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+        html += '<button class="page-btn" onclick="goToLoanPage(' + totalPages + ')">' + totalPages + '</button>';
+    }
+    if (page < totalPages) html += '<button class="page-btn" onclick="goToLoanPage(' + (page + 1) + ')">›</button>';
+    
+    controls.innerHTML = html;
+};
+
+window.goToLoanPage = function (page) {
+    window._loanCurrentPage = page;
+    updateLoanPagination();
+};
+
+window.changeLoanRowsPerPage = function () {
+    window._loanRowsPerPage = parseInt(document.getElementById('loanRowsPerPage').value) || 10;
+    window._loanCurrentPage = 1;
+    updateLoanPagination();
+};
+
+// Initialize pagination on page load
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('loansTableBody')) {
+        filterLoans();
+    }
+});
 
 function viewLoanDetails(id) {
     // Fetch loan data

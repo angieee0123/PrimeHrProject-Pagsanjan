@@ -81,9 +81,9 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="attendanceSummaryBody">
                 @foreach($attendanceRecords as $index => $record)
-                <tr>
+                <tr data-department="{{ $record['dept'] }}" data-status="{{ $record['status'] }}" data-name="{{ $record['name'] }}" data-id="{{ $record['id'] }}">
                     <td>
                         <div class="emp-cell">
                             <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
@@ -136,6 +136,15 @@
     </div>
 
     <div class="table-footer">
-        <p>Showing <strong>{{ count($attendanceRecords) }}</strong> records</p>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <p id="attendanceSummaryFooter">Showing <strong id="attendanceRowStart">1</strong>-<strong id="attendanceRowEnd">{{ min(10, count($attendanceRecords)) }}</strong> of <strong id="attendanceRowTotal">{{ count($attendanceRecords) }}</strong> records</p>
+            <select id="attendanceRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changeAttendanceRowsPerPage()">
+                <option value="10">10 rows</option>
+                <option value="25">25 rows</option>
+                <option value="50">50 rows</option>
+                <option value="100">100 rows</option>
+            </select>
+        </div>
+        <div class="pagination" id="attendancePaginationControls"></div>
     </div>
 </section>

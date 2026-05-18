@@ -104,11 +104,204 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 
 @include('admin.leaveAndBenefits.modals.add-manual-credit-modal')
 
+@include('admin.leaveAndBenefits.modals.success-modal')
+
+@include('admin.leaveAndBenefits.modals.error-modal')
+
 @vite(['resources/css/adminLeaveAndBenefits.css', 'resources/js/adminLeaveAndBenefits.js'])
 
 <script>
+// Ensure modal functions are available immediately
+window.openAddLeaveTypeModal = function() {
+    console.log('openAddLeaveTypeModal called');
+    
+    const modal = document.getElementById('addLeaveTypeModal');
+    console.log('Modal element:', modal);
+    
+    if (!modal) {
+        console.error('Modal not found!');
+        alert('Error: Modal element not found. Please refresh the page.');
+        return;
+    }
+    
+    const form = document.getElementById('addLeaveTypeForm');
+    if (form) {
+        form.reset();
+        form.action = '{{ route('admin.leave.types.store') }}';
+        
+        const methodInput = form.querySelector('input[name="_method"]');
+        if (methodInput) methodInput.remove();
+        
+        const codeInput = form.querySelector('input[name="leave_code"]');
+        if (codeInput) codeInput.readOnly = false;
+        
+        const submitBtn = form.querySelector('.btn-submit');
+        if (submitBtn) submitBtn.textContent = 'Add Leave Type';
+        
+        const fileDisplay = document.getElementById('fileNameDisplay');
+        if (fileDisplay) fileDisplay.textContent = 'Choose PDF file or drag here';
+    }
+    
+    const title = modal.querySelector('.modal-title');
+    if (title) title.textContent = 'Add New Leave Type';
+    
+    const subtitle = modal.querySelector('.modal-subtitle');
+    if (subtitle) subtitle.textContent = 'Create a new leave type for LGU Pagsanjan';
+    
+    // Add active class
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+    
+    console.log('Modal classes:', modal.className);
+    console.log('Modal display:', window.getComputedStyle(modal).display);
+    
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeAddLeaveTypeModal = function(event) {
+    console.log('closeAddLeaveTypeModal called', event);
+    
+    if (!event || event.target.id === 'addLeaveTypeModal' || event.type === 'click') {
+        const modal = document.getElementById('addLeaveTypeModal');
+        if (modal) {
+            modal.classList.remove('active');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+};
+
+// Success Modal Functions
+window.openSuccessModal = function(message) {
+    const modal = document.getElementById('successModal');
+    const messageEl = document.getElementById('successMessage');
+    
+    if (messageEl && message) {
+        messageEl.textContent = message;
+    }
+    
+    if (modal) {
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+window.closeSuccessModal = function(event) {
+    if (!event || event.target.id === 'successModal' || event.type === 'click') {
+        const modal = document.getElementById('successModal');
+        if (modal) {
+            modal.classList.remove('active');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            
+            // Reload page to show new leave type
+            window.location.href = '{{ route('admin.leave', ['tab' => 'types']) }}';
+        }
+    }
+};
+
+// Error Modal Functions
+window.openErrorModal = function(message) {
+    const modal = document.getElementById('errorModal');
+    const messageEl = document.getElementById('errorMessage');
+    
+    if (messageEl && message) {
+        messageEl.textContent = message;
+    }
+    
+    if (modal) {
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+window.closeErrorModal = function(event) {
+    if (!event || event.target.id === 'errorModal' || event.type === 'click') {
+        const modal = document.getElementById('errorModal');
+        if (modal) {
+            modal.classList.remove('active');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+};
+
+// Handle form submission with AJAX
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('addLeaveTypeForm');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitBtn = form.querySelector('.btn-submit');
+            const originalText = submitBtn.textContent;
+            
+            // Disable submit button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+            
+            // Create FormData object
+            const formData = new FormData(form);
+            
+            // Send AJAX request
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw data;
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Close add modal
+                closeAddLeaveTypeModal();
+                
+                // Show success modal
+                openSuccessModal(data.message || 'Leave type registered successfully!');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                
+                // Close add modal
+                closeAddLeaveTypeModal();
+                
+                // Show error modal
+                let errorMessage = 'Failed to register leave type. Please try again.';
+                
+                if (error.errors) {
+                    // Laravel validation errors
+                    const firstError = Object.values(error.errors)[0];
+                    errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                openErrorModal(errorMessage);
+            });
+        });
+    }
+});
+
 // Check URL parameter and switch to correct tab on page load
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded');
+    console.log('Modal exists:', !!document.getElementById('addLeaveTypeModal'));
+    
     const urlParams = new URLSearchParams(window.location.search);
     const activeTab = urlParams.get('tab');
     

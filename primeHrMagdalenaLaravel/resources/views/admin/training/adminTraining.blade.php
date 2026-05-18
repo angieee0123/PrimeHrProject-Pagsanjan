@@ -213,7 +213,16 @@
     </div>
 
     <div class="table-footer">
-        <span>Showing <strong id="adminRowCount">{{ $trainings->count() }}</strong> submission(s)</span>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <p id="adminRowFooter">Showing <strong id="adminRowStart">1</strong>-<strong id="adminRowEnd">{{ min(10, $trainings->count()) }}</strong> of <strong id="adminRowTotal">{{ $trainings->count() }}</strong> records</p>
+            <select id="adminRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changeRowsPerPage()">
+                <option value="10">10 rows</option>
+                <option value="25">25 rows</option>
+                <option value="50">50 rows</option>
+                <option value="100">100 rows</option>
+            </select>
+        </div>
+        <div class="pagination" id="adminPaginationControls"></div>
     </div>
 </div>
 
@@ -358,26 +367,87 @@
         showToast._t = setTimeout(() => t.classList.remove('show'), 3200);
     }
 
+    window._currentPage = 1;
+    window._rowsPerPage = 10;
+
     window.filterAdminTraining = function () {
         const posFilter = document.getElementById('adminPositionFilter')?.value || '';
         const q = (document.getElementById('adminTrainingSearch')?.value || '').toLowerCase().trim();
-        let visible = 0;
-        document.querySelectorAll('#adminTrainingBody tr[data-id]').forEach(row => {
+        const allRows = document.querySelectorAll('#adminTrainingBody tr[data-id]');
+        const filtered = [];
+        
+        allRows.forEach(row => {
             const matchStatus   = !window._adminStatusFilter || window._adminStatusFilter === 'all' || row.dataset.status === window._adminStatusFilter;
             const matchPosition = !posFilter || row.dataset.position === posFilter;
             const matchSearch   = !q || [row.dataset.employee, row.dataset.empId, row.dataset.dept, row.dataset.title, row.dataset.ref].join(' ').toLowerCase().includes(q);
-            const show = matchStatus && matchPosition && matchSearch;
-            row.style.display = show ? '' : 'none';
-            if (show) visible++;
+            if (matchStatus && matchPosition && matchSearch) filtered.push(row);
         });
-        const rc = document.getElementById('adminRowCount');
-        if (rc) rc.textContent = visible;
+        
+        window._filteredRows = filtered;
+        window._currentPage = 1;
+        updatePagination();
+    };
+
+    window.updatePagination = function () {
+        const rows = window._filteredRows || [];
+        const total = rows.length;
+        const perPage = window._rowsPerPage;
+        const totalPages = Math.ceil(total / perPage) || 1;
+        const page = Math.min(window._currentPage, totalPages);
+        window._currentPage = page;
+        
+        const start = (page - 1) * perPage;
+        const end = Math.min(start + perPage, total);
+        
+        document.querySelectorAll('#adminTrainingBody tr[data-id]').forEach(row => row.style.display = 'none');
+        rows.forEach((row, i) => { if (i >= start && i < end) row.style.display = ''; });
+        
+        document.getElementById('adminRowStart').textContent = total ? start + 1 : 0;
+        document.getElementById('adminRowEnd').textContent = end;
+        document.getElementById('adminRowTotal').textContent = total;
+        
+        const controls = document.getElementById('adminPaginationControls');
+        if (totalPages <= 1) { controls.innerHTML = ''; return; }
+        
+        let html = '';
+        const maxVisible = 5;
+        let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+        if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
+        
+        if (page > 1) html += '<button class="page-btn" onclick="goToPage(' + (page - 1) + ')">‹</button>';
+        if (startPage > 1) {
+            html += '<button class="page-btn" onclick="goToPage(1)">1</button>';
+            if (startPage > 2) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+        }
+        for (let i = startPage; i <= endPage; i++) {
+            html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+        }
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+            html += '<button class="page-btn" onclick="goToPage(' + totalPages + ')">' + totalPages + '</button>';
+        }
+        if (page < totalPages) html += '<button class="page-btn" onclick="goToPage(' + (page + 1) + ')">›</button>';
+        
+        controls.innerHTML = html;
+    };
+
+    window.goToPage = function (page) {
+        window._currentPage = page;
+        updatePagination();
+    };
+
+    window.changeRowsPerPage = function () {
+        window._rowsPerPage = parseInt(document.getElementById('adminRowsPerPage').value) || 10;
+        window._currentPage = 1;
+        updatePagination();
     };
 
     window._adminStatusFilter = 'all';
     window.setAdminStatusFilter = function (status, btn) {
         window._adminStatusFilter = status;
         document.querySelectorAll('.training-filter-chip').forEach(c => c.classList.toggle('active', c === btn));
+        window._currentPage = 1;
         filterAdminTraining();
     };
 

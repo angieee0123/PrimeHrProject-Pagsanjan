@@ -347,9 +347,13 @@
   width: 32px; height: 32px; border: 1.5px solid #e4e3f0; border-radius: 7px;
   background: #ffffff; font-size: 12.5px; font-weight: 600;
   font-family: 'Poppins', sans-serif; color: #0b044d; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none;
 }
 .page-btn:hover { border-color: #0b044d; background: #f4f3ff; }
 .page-btn.active { background: #0b044d; color: #ffffff; border-color: #0b044d; }
+.page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.page-btn:disabled:hover { border-color: #e4e3f0; background: #ffffff; }
 
 .modal-overlay:not(#addEmployeeModal) {
   position: fixed; inset: 0; background: rgba(11,4,77,0.45);
@@ -693,4 +697,101 @@
   #addEmployeeModal .modal-footer { padding: 12px 16px 20px; flex-direction: column; gap: 8px; }
   #addEmployeeModal .modal-btn-ghost,
   #addEmployeeModal .modal-btn-primary { width: 100%; justify-content: center; height: 42px; font-size: 13px; }
+}
+
+/* Charts Section */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.chart-card {
+  background: #ffffff;
+  border: 1.5px solid #eceaf8;
+  border-radius: 14px;
+  padding: 20px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.chart-card:hover {
+  box-shadow: 0 6px 22px rgba(11,4,77,0.08);
+  border-color: #dddcf0;
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.chart-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0b044d;
+  margin: 0 0 3px;
+}
+
+.chart-sub {
+  font-size: 12px;
+  color: #9999bb;
+  margin: 0;
+}
+
+.chart-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f7f6ff;
+  padding: 3px;
+  border-radius: 8px;
+}
+
+.chart-tab {
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b6a8a;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.2s;
+}
+
+.chart-tab:hover {
+  color: #0b044d;
+}
+
+.chart-tab.active {
+  background: #ffffff;
+  color: #0b044d;
+  box-shadow: 0 2px 4px rgba(11,4,77,0.08);
+}
+
+@media (max-width: 900px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .chart-tabs {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .chart-tab {
+    flex: 1;
+    text-align: center;
+  }
 }
