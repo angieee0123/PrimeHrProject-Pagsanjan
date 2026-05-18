@@ -433,7 +433,10 @@ function initCharts() {
                 tension: 0.4,
                 fill: true,
                 pointRadius: 4,
-                pointHoverRadius: 6
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#0b044d',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
             }]
         },
         options: {
@@ -441,11 +444,28 @@ function initCharts() {
             maintainAspectRatio: true,
             plugins: {
                 legend: { display: false },
-                tooltip: { mode: 'index', intersect: false }
+                tooltip: { 
+                    mode: 'index', 
+                    intersect: false,
+                    backgroundColor: '#fff',
+                    titleColor: '#0b044d',
+                    bodyColor: '#5a5888',
+                    borderColor: '#eceaf8',
+                    borderWidth: 1.5,
+                    padding: 12,
+                    displayColors: false
+                }
             },
             scales: {
-                y: { beginAtZero: true, grid: { color: '#f0effe' } },
-                x: { grid: { display: false } }
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: '#f7f6ff', drawBorder: false },
+                    ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' } }
+                },
+                x: { 
+                    grid: { display: false, drawBorder: false },
+                    ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' } }
+                }
             }
         }
     });
@@ -462,7 +482,10 @@ function initCharts() {
                 tension: 0.4,
                 fill: true,
                 pointRadius: 4,
-                pointHoverRadius: 6
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#15803d',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
             }]
         },
         options: {
@@ -470,11 +493,29 @@ function initCharts() {
             maintainAspectRatio: true,
             plugins: {
                 legend: { display: false },
-                tooltip: { mode: 'index', intersect: false }
+                tooltip: { 
+                    mode: 'index', 
+                    intersect: false,
+                    backgroundColor: '#fff',
+                    titleColor: '#0b044d',
+                    bodyColor: '#5a5888',
+                    borderColor: '#eceaf8',
+                    borderWidth: 1.5,
+                    padding: 12,
+                    displayColors: false
+                }
             },
             scales: {
-                y: { beginAtZero: true, max: 100, grid: { color: '#e8f9ef' } },
-                x: { grid: { display: false } }
+                y: { 
+                    beginAtZero: true, 
+                    max: 100, 
+                    grid: { color: '#f7f6ff', drawBorder: false },
+                    ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' } }
+                },
+                x: { 
+                    grid: { display: false, drawBorder: false },
+                    ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' } }
+                }
             }
         }
     });
