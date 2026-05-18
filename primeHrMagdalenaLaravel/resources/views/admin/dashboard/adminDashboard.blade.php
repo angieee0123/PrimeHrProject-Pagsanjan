@@ -13,10 +13,10 @@
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
         </div>
-        <p class="stat-value">248</p>
+        <p class="stat-value">{{ $stats['total_employees'] }}</p>
         <div class="stat-footer">
             <span class="stat-dot" style="background:#22c55e"></span>
-            <p class="stat-sub">+4 new this month</p>
+            <p class="stat-sub">+{{ $stats['new_this_month'] }} new this month</p>
         </div>
     </div>
 
@@ -27,10 +27,10 @@
                 <svg width="17" height="17" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
             </div>
         </div>
-        <p class="stat-value">211</p>
+        <p class="stat-value">{{ $stats['present_today'] }}</p>
         <div class="stat-footer">
             <span class="stat-dot" style="background:#22c55e"></span>
-            <p class="stat-sub">85.1% attendance rate</p>
+            <p class="stat-sub">{{ $stats['attendance_rate'] }}% attendance rate</p>
         </div>
     </div>
 
@@ -41,10 +41,10 @@
                 <svg width="17" height="17" fill="none" stroke="#a16207" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
         </div>
-        <p class="stat-value">22</p>
+        <p class="stat-value">{{ $stats['on_leave'] }}</p>
         <div class="stat-footer">
             <span class="stat-dot" style="background:#f59e0b"></span>
-            <p class="stat-sub">8 pending approval</p>
+            <p class="stat-sub">{{ $stats['pending_leave'] }} pending approval</p>
         </div>
     </div>
 
@@ -55,7 +55,7 @@
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="#8e1e18" stroke="none"><text x="3" y="19" font-size="17" font-weight="bold" font-family="Arial, sans-serif">₱</text></svg>
             </div>
         </div>
-        <p class="stat-value" style="font-size:20px">₱1.24M</p>
+        <p class="stat-value" style="font-size:20px">₱{{ number_format($stats['monthly_payroll'] / 1000000, 2) }}M</p>
         <div class="stat-footer">
             <span class="stat-dot" style="background:#0b044d"></span>
             <p class="stat-sub">{{ now()->format('F Y') }} payroll</p>
@@ -108,16 +108,7 @@
                 </tr>
             </thead>
             <tbody>
-                @php
-                $employees = [
-                    ['initials'=>'JD','color'=>'#0b044d','name'=>'Juan Dela Cruz','id'=>'EMP-001','position'=>'Administrative Officer II','dept'=>'Administration','type'=>'Permanent','status'=>'active'],
-                    ['initials'=>'MR','color'=>'#8e1e18','name'=>'Maria Reyes','id'=>'EMP-002','position'=>'Nurse II','dept'=>'Health','type'=>'Permanent','status'=>'active'],
-                    ['initials'=>'PS','color'=>'#15803d','name'=>'Pedro Santos','id'=>'EMP-003','position'=>'Engineer I','dept'=>'Engineering','type'=>'Permanent','status'=>'on-leave'],
-                    ['initials'=>'AL','color'=>'#a16207','name'=>'Ana Lim','id'=>'EMP-004','position'=>'Bookkeeper','dept'=>'Finance','type'=>'Job Order','status'=>'active'],
-                    ['initials'=>'RC','color'=>'#7c3aed','name'=>'Roberto Cruz','id'=>'EMP-005','position'=>'Driver','dept'=>'Administration','type'=>'Job Order','status'=>'active'],
-                ];
-                @endphp
-                @foreach($employees as $emp)
+                @forelse($employees as $emp)
                 <tr data-dept="{{ $emp['dept'] }}" data-type="{{ $emp['type'] }}">
                     <td>
                         <div class="emp-cell">
@@ -135,12 +126,16 @@
                         @if($emp['status']==='active')
                             <span class="badge-status processed">Active</span>
                         @else
-                            <span class="badge-status pending">On Leave</span>
+                            <span class="badge-status pending">Inactive</span>
                         @endif
                     </td>
-                    <td><button class="btn-view">View</button></td>
+                    <td><button class="btn-view" onclick='viewEmployee(@json($emp))'>View</button></td>
                 </tr>
-                @endforeach
+                @empty
+                <tr>
+                    <td colspan="6" style="text-align:center;padding:40px;color:#9999bb;">No employees found</td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
@@ -175,14 +170,7 @@
                     <tr><th>Employee</th><th>Type</th><th>Duration</th><th>Action</th></tr>
                 </thead>
                 <tbody>
-                    @php
-                    $leaves = [
-                        ['initials'=>'JD','color'=>'#0b044d','name'=>'Juan Dela Cruz','type'=>'Vacation Leave','days'=>'3 days'],
-                        ['initials'=>'MR','color'=>'#8e1e18','name'=>'Maria Reyes','type'=>'Sick Leave','days'=>'2 days'],
-                        ['initials'=>'AL','color'=>'#a16207','name'=>'Ana Lim','type'=>'Emergency Leave','days'=>'1 day'],
-                    ];
-                    @endphp
-                    @foreach($leaves as $l)
+                    @forelse($leaveRequests as $l)
                     <tr>
                         <td>
                             <div class="emp-cell">
@@ -194,12 +182,19 @@
                         <td style="font-size:12.5px;color:#5a5888">{{ $l['days'] }}</td>
                         <td>
                             <div style="display:flex;gap:6px">
-                                <button class="btn-activate">Approve</button>
-                                <button class="btn-deactivate">Deny</button>
+                                <form method="POST" action="{{ route('admin.leave.approve', $l['id']) }}" style="margin:0;">
+                                    @csrf
+                                    <button type="submit" class="btn-activate">Approve</button>
+                                </form>
+                                <button class="btn-deactivate" onclick="alert('Reject functionality')">Deny</button>
                             </div>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="4" style="text-align:center;padding:20px;color:#9999bb;">No pending leave requests</td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -213,24 +208,17 @@
                 <p class="table-title" style="font-size:13px">Department Breakdown</p>
             </div>
             @php
-            $depts = [
-                ['name'=>'Administration','count'=>62,'color'=>'#0b044d'],
-                ['name'=>'Engineering','count'=>38,'color'=>'#8e1e18'],
-                ['name'=>'Health','count'=>55,'color'=>'#15803d'],
-                ['name'=>'Finance','count'=>29,'color'=>'#a16207'],
-                ['name'=>'HRMO','count'=>14,'color'=>'#7c3aed'],
-            ];
-            $total = 248;
+            $total = $stats['total_employees'];
             @endphp
             <div style="padding:4px 20px 16px">
-                @foreach($depts as $d)
+                @foreach($departments as $d)
                 <div style="margin-bottom:10px">
                     <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
                         <span style="font-weight:600;color:#0b044d">{{ $d['name'] }}</span>
                         <span style="color:#9999bb">{{ $d['count'] }}</span>
                     </div>
                     <div style="height:6px;background:#f0effe;border-radius:99px;overflow:hidden">
-                        <div class="dept-fill" data-w="{{ round($d['count']/$total*100) }}%" data-bg="{{ $d['color'] }}"></div>
+                        <div class="dept-fill" data-w="{{ $total > 0 ? round($d['count']/$total*100) : 0 }}%" data-bg="{{ $d['color'] }}"></div>
                     </div>
                 </div>
                 @endforeach
@@ -259,6 +247,51 @@
             @endforeach
         </div>
 
+    </div>
+</div>
+
+{{-- View Employee Modal --}}
+<div class="modal-overlay" id="viewEmployeeModal" onclick="closeViewEmployee()">
+    <div class="modal-box" style="max-width:560px" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="pmodal-hero">
+                <div class="pmodal-hero-icon" style="background:linear-gradient(135deg,#0b044d,#1a0f6e)">
+                    <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div>
+                    <span class="modal-eyebrow">EMPLOYEE DETAILS</span>
+                    <h3 class="modal-title" id="viewEmpName">Employee Information</h3>
+                    <p class="modal-sub" id="viewEmpId">Employee ID</p>
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeViewEmployee()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body" style="padding:20px 24px">
+            <div class="form-section-label">EMPLOYMENT INFORMATION</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+                <div>
+                    <p style="font-size:11px;color:#9999bb;margin:0 0 4px">Position</p>
+                    <p style="font-size:13px;font-weight:600;color:#0b044d;margin:0" id="viewPosition">-</p>
+                </div>
+                <div>
+                    <p style="font-size:11px;color:#9999bb;margin:0 0 4px">Department</p>
+                    <p style="font-size:13px;font-weight:600;color:#0b044d;margin:0" id="viewDept">-</p>
+                </div>
+                <div>
+                    <p style="font-size:11px;color:#9999bb;margin:0 0 4px">Employment Type</p>
+                    <p style="font-size:13px;font-weight:600;color:#0b044d;margin:0" id="viewType">-</p>
+                </div>
+                <div>
+                    <p style="font-size:11px;color:#9999bb;margin:0 0 4px">Status</p>
+                    <p style="font-size:13px;font-weight:600;color:#0b044d;margin:0" id="viewStatus">-</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px 24px;border-top:1px solid #e5e4f0">
+            <button class="modal-btn-ghost" onclick="closeViewEmployee()">Close</button>
+        </div>
     </div>
 </div>
 
@@ -402,8 +435,25 @@ function submitAddEmployee(e) {
     closeAddEmployee();
 }
 
+function viewEmployee(emp) {
+    document.getElementById('viewEmpName').textContent = emp.name;
+    document.getElementById('viewEmpId').textContent = emp.id;
+    document.getElementById('viewPosition').textContent = emp.position;
+    document.getElementById('viewDept').textContent = emp.dept;
+    document.getElementById('viewType').textContent = emp.type;
+    document.getElementById('viewStatus').textContent = emp.status.charAt(0).toUpperCase() + emp.status.slice(1);
+    document.getElementById('viewEmployeeModal').classList.add('show');
+}
+
+function closeViewEmployee() {
+    document.getElementById('viewEmployeeModal').classList.remove('show');
+}
+
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeAddEmployee();
+    if (e.key === 'Escape') {
+        closeAddEmployee();
+        closeViewEmployee();
+    }
 });
 
 // Apply dynamic colors (avoid Blade-in-style lint issues)

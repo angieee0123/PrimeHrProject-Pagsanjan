@@ -103,9 +103,7 @@ Route::post('/logout', function (\Illuminate\Http\Request $request) {
 })->name('logout');
 
 // ── Admin Dashboard ──
-Route::get('/admin/dashboard', function () {
-    return view('admin.dashboard.adminDashboard');
-})->middleware('auth')->name('admin.dashboard');
+Route::get('/admin/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->middleware('auth')->name('admin.dashboard');
 
 // ── Permanent Employee Dashboard ──
 Route::get('/permanent/dashboard', function () {
