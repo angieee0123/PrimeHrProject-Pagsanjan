@@ -27,7 +27,8 @@ CREATE TABLE `salary_computations` (
   `employee_id` bigint unsigned NOT NULL,
   `period_start` date NOT NULL,
   `period_end` date NOT NULL,
-  `payroll_type` enum('monthly','semi-monthly','weekly') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'monthly',
+  `pay_date` date DEFAULT NULL,
+  `payroll_type` enum('regular','13th_month','bonus','special','monthly','semi-monthly','weekly') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'regular',
   `monthly_rate` decimal(12,2) NOT NULL,
   `daily_rate` decimal(12,2) NOT NULL,
   `hourly_rate` decimal(12,2) NOT NULL,
@@ -43,6 +44,7 @@ CREATE TABLE `salary_computations` (
   `late_deduction` decimal(12,2) NOT NULL DEFAULT '0.00',
   `undertime_deduction` decimal(12,2) NOT NULL DEFAULT '0.00',
   `other_deductions` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `deduction_breakdown` json DEFAULT NULL,
   `gross_pay` decimal(12,2) NOT NULL DEFAULT '0.00',
   `net_pay` decimal(12,2) NOT NULL DEFAULT '0.00',
   `status` enum('draft','pending','approved','paid') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
@@ -60,7 +62,7 @@ CREATE TABLE `salary_computations` (
   CONSTRAINT `salary_computations_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `salary_computations_computed_by_foreign` FOREIGN KEY (`computed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `salary_computations_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -69,7 +71,7 @@ CREATE TABLE `salary_computations` (
 
 LOCK TABLES `salary_computations` WRITE;
 /*!40000 ALTER TABLE `salary_computations` DISABLE KEYS */;
-INSERT INTO `salary_computations` VALUES (1,9,'2026-01-01','2026-01-31','monthly',14308.00,650.36,81.30,22,0,176.00,176.00,0,0,0,14307.92,0.00,0.00,0.00,0.00,14307.92,14307.92,'draft',NULL,NULL,NULL,'2026-05-17 16:07:26','2026-05-17 16:07:26'),(2,9,'2026-02-01','2026-02-28','monthly',14308.00,650.36,81.30,20,0,160.00,160.00,0,0,0,13007.20,0.00,0.00,0.00,0.00,13007.20,13007.20,'draft',NULL,NULL,NULL,'2026-05-17 16:07:26','2026-05-17 16:07:26'),(3,9,'2026-03-01','2026-03-31','monthly',14308.00,650.36,81.30,22,0,176.00,176.00,0,0,0,14307.92,0.00,0.00,0.00,0.00,14307.92,14307.92,'draft',NULL,NULL,NULL,'2026-05-17 16:07:26','2026-05-17 16:07:26'),(4,9,'2026-04-01','2026-04-30','monthly',14308.00,650.36,81.30,22,0,176.00,176.00,0,0,0,14307.92,0.00,0.00,0.00,0.00,14307.92,14307.92,'draft',NULL,NULL,NULL,'2026-05-17 16:07:26','2026-05-17 16:07:26'),(5,9,'2026-05-01','2026-05-17','monthly',14308.00,650.36,81.30,11,0,88.00,88.00,0,0,0,7153.96,0.00,0.00,0.00,0.00,7153.96,7153.96,'draft',NULL,NULL,NULL,'2026-05-17 16:07:26','2026-05-17 16:07:26');
+INSERT INTO `salary_computations` VALUES (6,8,'2026-04-01','2026-04-16','2026-05-18','regular',121264.00,5512.00,689.00,12,0,96.00,96.00,0,0,0,66144.00,0.00,0.00,0.00,0.00,'\"[]\"',66144.00,66144.00,'approved',1,NULL,NULL,'2026-05-18 11:07:50','2026-05-18 11:07:50'),(7,9,'2026-04-01','2026-04-16','2026-05-18','regular',14308.00,650.36,81.30,12,0,96.00,96.00,0,0,0,7804.32,0.00,0.00,0.00,1824.03,'\"{\\\"LOAN_gsis EL\\\":{\\\"name\\\":\\\"Emergency Loan\\\",\\\"amount\\\":900,\\\"category\\\":\\\"LOAN\\\"},\\\"LOAN_MPL\\\":{\\\"name\\\":\\\"MP LOAN\\\",\\\"amount\\\":924.03,\\\"category\\\":\\\"LOAN\\\"}}\"',7804.32,5980.29,'approved',1,NULL,NULL,'2026-05-18 11:07:50','2026-05-18 11:07:50'),(8,8,'2026-04-17','2026-04-30','2026-04-30','regular',121264.00,5512.00,689.00,10,0,80.00,80.00,0,0,0,55120.00,0.00,0.00,0.00,0.00,'\"[]\"',55120.00,55120.00,'approved',1,NULL,NULL,'2026-05-18 11:09:36','2026-05-18 11:09:36'),(9,9,'2026-04-17','2026-04-30','2026-04-30','regular',14308.00,650.36,81.30,10,0,80.00,80.00,0,0,0,6503.60,0.00,0.00,0.00,0.00,'\"[]\"',6503.60,6503.60,'approved',1,NULL,NULL,'2026-05-18 11:09:36','2026-05-18 11:09:36'),(10,8,'2026-05-01','2026-05-31','2026-05-18','regular',121264.00,5512.00,689.00,15,0,120.00,120.00,152,18,0,82680.00,0.00,1745.47,206.70,14045.36,'\"{\\\"GSIS PS\\\":{\\\"name\\\":\\\"GSIS Personal Share\\\",\\\"amount\\\":10913.76,\\\"category\\\":\\\"MANDATORY\\\"},\\\"GSIS-SI\\\":{\\\"name\\\":\\\"GSIS State Insurance\\\",\\\"amount\\\":100,\\\"category\\\":\\\"MANDATORY\\\"},\\\"PhilHeath PS\\\":{\\\"name\\\":\\\"PhilHealth Personal Share\\\",\\\"amount\\\":3031.6,\\\"category\\\":\\\"MANDATORY\\\"}}\"',82680.00,66682.47,'approved',1,NULL,NULL,'2026-05-18 11:21:53','2026-05-18 11:21:53'),(11,9,'2026-05-01','2026-05-31','2026-05-18','regular',14308.00,650.36,81.30,11,0,88.00,88.00,0,0,0,7153.96,0.00,0.00,0.00,3855.61,'\"{\\\"LOAN_gsis EL\\\":{\\\"name\\\":\\\"Emergency Loan\\\",\\\"amount\\\":900,\\\"category\\\":\\\"LOAN\\\"},\\\"GSIS PS\\\":{\\\"name\\\":\\\"GSIS Personal Share\\\",\\\"amount\\\":1287.72,\\\"category\\\":\\\"MANDATORY\\\"},\\\"GSIS-SI\\\":{\\\"name\\\":\\\"GSIS State Insurance\\\",\\\"amount\\\":100,\\\"category\\\":\\\"MANDATORY\\\"},\\\"PAG-IBIG PS\\\":{\\\"name\\\":\\\"PAG-IBIG PERSONAL SHARE\\\",\\\"amount\\\":286.16,\\\"category\\\":\\\"MANDATORY\\\"},\\\"PhilHeath PS\\\":{\\\"name\\\":\\\"PhilHealth Personal Share\\\",\\\"amount\\\":357.7,\\\"category\\\":\\\"MANDATORY\\\"},\\\"LOAN_MPL\\\":{\\\"name\\\":\\\"MP LOAN\\\",\\\"amount\\\":924.03,\\\"category\\\":\\\"LOAN\\\"}}\"',7153.96,3298.35,'approved',1,NULL,NULL,'2026-05-18 11:21:53','2026-05-18 11:21:53');
 /*!40000 ALTER TABLE `salary_computations` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -82,4 +84,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-19  0:52:23
+-- Dump completed on 2026-05-19  4:04:54

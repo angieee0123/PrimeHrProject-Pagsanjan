@@ -39,7 +39,7 @@ CREATE TABLE `notifications` (
   KEY `notifications_user_id_is_read_index` (`user_id`,`is_read`),
   KEY `notifications_created_at_index` (`created_at`),
   CONSTRAINT `notifications_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -48,6 +48,7 @@ CREATE TABLE `notifications` (
 
 LOCK TABLES `notifications` WRITE;
 /*!40000 ALTER TABLE `notifications` DISABLE KEYS */;
+INSERT INTO `notifications` VALUES (1,6,'leave_request','Leave Request Rejected','Your Vacation Leave request has been Rejected.','http://127.0.0.1:8000/permanent/leave',12,'App\\Models\\LeaveApplication',0,NULL,'2026-05-18 11:31:09','2026-05-18 11:31:09');
 /*!40000 ALTER TABLE `notifications` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -60,4 +61,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-19  0:52:17
+-- Dump completed on 2026-05-19  4:04:54

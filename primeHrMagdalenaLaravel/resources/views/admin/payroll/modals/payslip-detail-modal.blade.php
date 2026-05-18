@@ -121,6 +121,23 @@
                     <p id="modalNotes">-</p>
                 </div>
             </div>
+
+            <!-- Signature Section -->
+            <div class="signature-section">
+                <div class="signature-row">
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p class="signature-label">Employee Signature</p>
+                        <p class="signature-date">Date: <span id="employeeSignDate">__________</span></p>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <p class="signature-label">Prepared By</p>
+                        <p class="signature-name" id="preparedByName">{{ Auth::user()->employee->first_name ?? 'Admin' }} {{ Auth::user()->employee->last_name ?? '' }}</p>
+                        <p class="signature-date">Date Released: <span id="releaseDate">__________</span></p>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn-secondary" onclick="closePayslipModal()">Close</button>
@@ -448,6 +465,60 @@
     margin: 0;
 }
 
+.notes-info p {
+    font-size: 13px;
+    color: #0b044d;
+    background: #f7f6ff;
+    padding: 12px;
+    border-radius: 6px;
+    margin: 0;
+}
+
+.signature-section {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #e8e7f5;
+}
+
+.signature-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.signature-box {
+    text-align: center;
+}
+
+.signature-line {
+    width: 100%;
+    height: 60px;
+    border-bottom: 2px solid #0b044d;
+    margin-bottom: 8px;
+}
+
+.signature-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #0b044d;
+    margin: 0 0 4px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.signature-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0b044d;
+    margin: 0 0 4px 0;
+}
+
+.signature-date {
+    font-size: 11px;
+    color: #6b6a8a;
+    margin: 0;
+}
+
 @media print {
     body * {
         visibility: hidden;
@@ -492,7 +563,6 @@
         font-size: 11px;
     }
     
-    /* Compact Header */
     .payslip-header {
         margin-bottom: 10px;
         padding-bottom: 8px;
@@ -508,29 +578,28 @@
     }
     
     .logo-image {
-        width: 60px;
-        height: 60px;
+        width: 100px;
+        height: 100px;
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
     }
     
     .payslip-logo h2 {
-        font-size: 14px;
+        font-size: 20px;
         margin: 0;
     }
     
     .payslip-logo p {
-        font-size: 10px;
+        font-size: 13px;
         margin: 0;
     }
     
     .payslip-title {
-        font-size: 12px;
+        font-size: 18px;
         margin: 5px 0 0 0;
         letter-spacing: 3px;
     }
     
-    /* Compact Info Grid */
     .payslip-info-grid {
         display: table;
         width: 100%;
@@ -550,6 +619,8 @@
         border-bottom: 1px solid #ddd;
         width: 30%;
         background: #f5f5f5;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
     }
     
     .info-group strong {
@@ -560,14 +631,12 @@
         border-left: 1px solid #ddd;
     }
     
-    /* Compact Divider */
     .payslip-divider {
         height: 0;
         margin: 8px 0;
         border: none;
     }
     
-    /* Compact Sections */
     .payslip-section {
         page-break-inside: avoid;
         margin-bottom: 8px;
@@ -581,9 +650,10 @@
         color: white;
         text-transform: uppercase;
         letter-spacing: 1px;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
     }
     
-    /* Table Layout for Earnings/Deductions */
     .payslip-table {
         display: table;
         width: 100%;
@@ -620,11 +690,15 @@
     .table-row.highlight {
         background: #f9f9f9;
         border: none;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
     }
     
     .table-row.total {
         background: #000 !important;
         border-bottom: 2px solid #000;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
     }
     
     .table-row.total span,
@@ -636,7 +710,6 @@
         padding: 5px 8px;
     }
     
-    /* Compact Net Pay */
     .net-pay-box {
         display: table;
         width: 100%;
@@ -645,6 +718,8 @@
         border: 2px solid #000;
         border-radius: 0;
         margin: 8px 0;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
     }
     
     .net-pay-box span {
@@ -664,7 +739,6 @@
         width: 30%;
     }
     
-    /* Footer */
     .payslip-footer {
         margin-top: 10px;
         padding-top: 8px;
@@ -699,9 +773,57 @@
         font-size: 9px;
         padding: 5px;
         background: #f5f5f5;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
     }
     
-    /* Page Settings */
+    .signature-section {
+        margin-top: 20px;
+        padding-top: 10px;
+        border-top: 1px solid #000;
+        page-break-inside: avoid;
+    }
+    
+    .signature-row {
+        display: table;
+        width: 100%;
+    }
+    
+    .signature-box {
+        display: table-cell;
+        width: 50%;
+        text-align: center;
+        padding: 0 10px;
+    }
+    
+    .signature-line {
+        width: 100%;
+        height: 40px;
+        border-bottom: 1px solid #000;
+        margin-bottom: 5px;
+    }
+    
+    .signature-label {
+        font-size: 9px;
+        font-weight: 600;
+        color: #000;
+        margin: 0 0 3px 0;
+        text-transform: uppercase;
+    }
+    
+    .signature-name {
+        font-size: 10px;
+        font-weight: 600;
+        color: #000;
+        margin: 0 0 3px 0;
+    }
+    
+    .signature-date {
+        font-size: 8px;
+        color: #000;
+        margin: 0;
+    }
+    
     @page {
         margin: 15mm;
         size: A4 portrait;
@@ -812,6 +934,9 @@ function populatePayslipModal(payslip) {
     } else {
         document.getElementById('modalNotesSection').style.display = 'none';
     }
+    
+    // Update release date to pay_date
+    document.getElementById('releaseDate').textContent = payslip.pay_date || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function printPayslip() {

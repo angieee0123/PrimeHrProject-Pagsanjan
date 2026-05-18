@@ -112,6 +112,7 @@ Route::get('/permanent/attendance', [PermanentAttendanceController::class, 'inde
 Route::get('/permanent/attendance/detailed', [PermanentAttendanceController::class, 'detailedDTR'])->middleware('auth')->name('permanent.attendance.detailed');
 
 Route::get('/permanent/payslip', [\App\Http\Controllers\PermanentPayslipController::class, 'index'])->middleware('auth')->name('permanent.payslip');
+Route::get('/permanent/payslip/{id}/details', [\App\Http\Controllers\PermanentPayslipController::class, 'getPayslipDetails'])->middleware('auth')->name('permanent.payslip.details');
 
 Route::get('/permanent/leave', function () {
     $user = Auth::user();
