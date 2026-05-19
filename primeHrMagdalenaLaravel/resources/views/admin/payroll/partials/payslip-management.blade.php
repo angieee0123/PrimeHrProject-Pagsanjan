@@ -58,6 +58,9 @@
                         <button class="btn-action btn-view" onclick="viewPayslipDetail({{ $computation->id }})" title="View Details">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
+                        <button class="btn-action btn-print" onclick="printPayslipDirect({{ $computation->id }})" title="Print">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        </button>
                         @if($computation->status === 'pending' || $computation->status === 'draft')
                         <button class="btn-action btn-approve" onclick="approvePayslip({{ $computation->id }})" title="Approve">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
@@ -161,6 +164,15 @@
     border-color: #8e1e18;
 }
 
+.btn-print {
+    color: #15803d;
+}
+
+.btn-print:hover {
+    background: #f0fdf4;
+    border-color: #15803d;
+}
+
 .badge-status.approved {
     background: #f0fdf4;
     color: #15803d;
@@ -245,5 +257,12 @@ function rejectPayslip(id) {
 function exportPayslips() {
     const status = document.getElementById('statusFilter').value;
     window.location.href = `/admin/payroll/payslips/export?status=${status}`;
+}
+
+function printPayslipDirect(id) {
+    viewPayslipDetail(id);
+    setTimeout(() => {
+        window.print();
+    }, 500);
 }
 </script>

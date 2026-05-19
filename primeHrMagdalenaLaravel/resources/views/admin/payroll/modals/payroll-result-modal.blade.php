@@ -409,11 +409,24 @@ function exportToExcel() {
 }
 
 function confirmPayroll() {
-    if (!confirm('Are you sure you want to save this payroll? This will create salary computation records for all employees.')) {
-        return;
-    }
+    // Show custom confirmation modal instead of built-in confirm
+    showConfirmPayrollModal();
+}
+
+function showConfirmPayrollModal() {
+    const modal = document.getElementById('confirmPayrollModal');
+    modal.classList.add('active');
+}
+
+function closeConfirmPayrollModal() {
+    const modal = document.getElementById('confirmPayrollModal');
+    modal.classList.remove('active');
+}
+
+function proceedSavePayroll() {
+    closeConfirmPayrollModal();
     
-    const confirmBtn = event.target;
+    const confirmBtn = document.querySelector('#payrollResultModal .btn-primary');
     confirmBtn.disabled = true;
     confirmBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Saving...';
     
@@ -471,3 +484,222 @@ function confirmPayroll() {
     });
 }
 </script>
+
+<!-- Confirm Payroll Modal -->
+<div id="confirmPayrollModal" class="adm-overlay" onclick="closeConfirmPayrollModal()">
+    <div class="adm-box" style="max-width:480px;" onclick="event.stopPropagation()">
+        <div class="adm-header" style="background: linear-gradient(135deg, #d9bb00, #fbbf24); border-bottom: none;">
+            <div class="adm-header-left">
+                <div class="vdm-avatar" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="adm-eyebrow" style="color: rgba(255,255,255,0.9) !important;">CONFIRMATION REQUIRED</span>
+                    <h3 class="adm-title" style="color: #fff !important;">Save Payroll</h3>
+                </div>
+            </div>
+            <button class="adm-close" style="color: rgba(255,255,255,0.8);" onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.color='#fff'" onmouseout="this.style.background='transparent'; this.style.color='rgba(255,255,255,0.8)'" onclick="closeConfirmPayrollModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="vdm-body" style="padding: 32px 24px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="width: 64px; height: 64px; margin: 0 auto 16px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </div>
+                <h4 style="font-size: 17px; font-weight: 600; color: #0b044d; margin: 0 0 12px 0;">Are you sure you want to save this payroll?</h4>
+                <p style="font-size: 13.5px; color: #6b6a8a; line-height: 1.6; margin: 0;">This will create salary computation records for all employees in the selected period. This action cannot be undone.</p>
+            </div>
+            <div style="background: #fef9f3; border: 1px solid #fed7aa; border-radius: 10px; padding: 16px;">
+                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                    <div>
+                        <p style="font-size: 12px; font-weight: 600; color: #92400e; margin: 0 0 6px 0;">What happens next:</p>
+                        <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #78350f; line-height: 1.7;">
+                            <li>Payroll records will be created for all employees</li>
+                            <li>Payslips will be generated and visible to employees</li>
+                            <li>You can still edit individual records if needed</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="adm-footer" style="background: #fafafe; padding: 20px 24px;">
+            <button class="adm-btn-ghost" onclick="closeConfirmPayrollModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Cancel
+            </button>
+            <button class="adm-btn-primary" onclick="proceedSavePayroll()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Yes, Save Payroll
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.adm-overlay {
+    display: none;
+    position: fixed;
+    z-index: 99999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(11, 4, 77, 0.4);
+    backdrop-filter: blur(4px);
+}
+
+.adm-overlay.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.adm-box {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(11, 4, 77, 0.3);
+    animation: modalSlideIn 0.3s ease;
+    overflow: hidden;
+}
+
+@keyframes modalSlideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.adm-header {
+    padding: 24px;
+    border-bottom: 1px solid #e8e6f5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.adm-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.vdm-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.adm-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    color: #ffffff !important;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.adm-title {
+    margin: 0;
+    color: #ffffff !important;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.adm-close {
+    background: none;
+    border: none;
+    color: #9999bb;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.adm-close:hover {
+    background: #f0eeff;
+    color: #0b044d;
+}
+
+.vdm-body {
+    padding: 20px 24px;
+}
+
+.adm-footer {
+    padding: 20px 24px;
+    border-top: 1px solid #e8e6f5;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.adm-btn-ghost {
+    padding: 10px 20px;
+    background: transparent;
+    color: #6b6a8a;
+    border: 1px solid #e8e7f5;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.adm-btn-ghost:hover {
+    background: #f7f6ff;
+    color: #0b044d;
+    border-color: #d0c9ff;
+}
+
+.adm-btn-primary {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #0b044d, #2d1a8e);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(11, 4, 77, 0.2);
+}
+
+.adm-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(11, 4, 77, 0.3);
+}
+
+.adm-btn-primary:active {
+    transform: translateY(0);
+}
+</style>
