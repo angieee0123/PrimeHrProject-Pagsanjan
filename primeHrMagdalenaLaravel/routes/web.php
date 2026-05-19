@@ -1729,7 +1729,7 @@ Route::get('/admin/deductions', function () {
     // Get only loans (category = LOAN)
     $loans = \App\Models\EmployeeDeduction::with([
         'employee.employmentDetail.departmentRelation',
-        'deductionType'
+        'deductionType.schedules'
     ])
     ->whereHas('deductionType', function($q) {
         $q->where('category', 'LOAN');
@@ -2192,14 +2192,24 @@ Route::get('/admin/deductions/employee/{employeeId}/deductions', function ($empl
             // Use custom schedule if set, otherwise use default
             $currentSchedule = $ed->custom_cutoff_schedule ?? $defaultSchedule;
 
+            // Format amount display
+            $amountDisplay = 'Auto';
+            if ($ed->installment_amount) {
+                $amountDisplay = '₱' . number_format($ed->installment_amount, 2) . '/month';
+            } elseif ($ed->amount) {
+                $amountDisplay = '₱' . number_format($ed->amount, 2);
+            } elseif ($ed->deductionType->percentage_rate) {
+                $amountDisplay = $ed->deductionType->percentage_rate . '%';
+            }
+
             return [
-                'id' => $ed->id,
+                'id' => $ed->id, // This is the employee_deduction ID
                 'deduction_type_id' => $ed->deduction_type_id,
                 'name' => $ed->deductionType->name,
                 'code' => $ed->deductionType->code,
                 'category' => $ed->deductionType->category,
                 'computation_type' => $ed->deductionType->computation_type,
-                'amount' => $ed->installment_amount ?? $ed->amount ?? ($ed->deductionType->percentage_rate ? $ed->deductionType->percentage_rate . '%' : 'Auto'),
+                'amount' => $amountDisplay,
                 'current_schedule' => $currentSchedule,
                 'has_custom_schedule' => $ed->custom_cutoff_schedule !== null,
                 'default_schedule' => $defaultSchedule,
@@ -2606,38 +2616,47 @@ Route::post('/admin/deductions/schedules/update', function (\Illuminate\Http\Req
         'start_month' => 'required|date_format:Y-m',
         'end_month' => 'required|date_format:Y-m',
         'schedules' => 'required|array|min:1',
-        'schedules.*.deduction_id' => 'required|exists:employee_deductions,id',
-        'schedules.*.cutoff' => 'required|in:1ST,2ND,BOTH,DEFAULT',
+        'schedules.*.deduction_id' => 'required|integer',
+        'schedules.*.cutoff' => 'required|in:1ST,2ND,BOTH',
     ]);
 
     $updatedCount = 0;
+    $errors = [];
     
     foreach ($data['schedules'] as $schedule) {
-        $employeeDeduction = \App\Models\EmployeeDeduction::findOrFail($schedule['deduction_id']);
+        // Find the employee deduction by ID
+        $employeeDeduction = \App\Models\EmployeeDeduction::where('id', $schedule['deduction_id'])
+            ->where('employee_id', $data['employee_id'])
+            ->first();
         
-        // Map cutoff values to schedule enum
-        if ($schedule['cutoff'] === 'DEFAULT') {
-            // Remove custom schedule, use deduction type's default
-            $employeeDeduction->update(['custom_cutoff_schedule' => null]);
-        } else {
-            $cutoffSchedule = match($schedule['cutoff']) {
-                '1ST' => '1ST_ONLY',
-                '2ND' => '2ND_ONLY',
-                'BOTH' => 'BOTH_SPLIT',
-            };
-            
-            // Set custom schedule for this specific employee deduction
-            $employeeDeduction->update(['custom_cutoff_schedule' => $cutoffSchedule]);
+        if (!$employeeDeduction) {
+            $errors[] = "Deduction ID {$schedule['deduction_id']} not found for this employee";
+            continue;
         }
         
+        // Map cutoff values to schedule enum
+        $cutoffSchedule = match($schedule['cutoff']) {
+            '1ST' => '1ST_ONLY',
+            '2ND' => '2ND_ONLY',
+            'BOTH' => 'BOTH_SPLIT',
+            default => 'BOTH_SPLIT',
+        };
+        
+        // Set custom schedule for this specific employee deduction
+        $employeeDeduction->update(['custom_cutoff_schedule' => $cutoffSchedule]);
         $updatedCount++;
+    }
+    
+    if (!empty($errors)) {
+        return redirect()->route('admin.deductions')
+            ->with('error', 'Some schedules could not be updated: ' . implode(', ', $errors));
     }
     
     $employee = \App\Models\Employee::findOrFail($data['employee_id']);
     $employeeName = $employee->first_name . ' ' . $employee->last_name;
     
     return redirect()->route('admin.deductions')
-        ->with('success', "Custom deduction schedules updated for {$employeeName}. {$updatedCount} deduction(s) configured successfully.");
+        ->with('success', "Deduction schedules updated for {$employeeName}. {$updatedCount} deduction(s) configured successfully.");
 })->middleware('auth')->name('admin.deductions.schedules.update');
 
 // Loan Type Management Routes

@@ -83,9 +83,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 </div>
 
 @include('admin.attendance.partials.attendance-summary-tab')
-
 @include('admin.attendance.partials.detailed-time-record-tab')
-
 @include('admin.attendance.modals.dtrDetailModal')
 @include('admin.attendance.modals.detailedDtrModal')
 @include('admin.attendance.modals.editDtrModal')
@@ -102,7 +100,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     function switchTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('[id$="-tab"]').forEach(tab => tab.style.display = 'none');
-        
+
         event.target.classList.add('active');
         document.getElementById(tabName + '-tab').style.display = 'block';
     }
@@ -111,12 +109,12 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         const activeTab = urlParams.get('tab');
-        
+
         if (activeTab === 'detailed') {
             // Switch to detailed tab
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('[id$="-tab"]').forEach(tab => tab.style.display = 'none');
-            
+
             document.querySelectorAll('.tab-btn')[1].classList.add('active');
             document.getElementById('detailed-tab').style.display = 'block';
         }
@@ -154,11 +152,11 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     window.filterAttendanceSummary = function () {
         const allRows = document.querySelectorAll('#attendanceSummaryBody tr[data-id]');
         const filtered = [];
-        
+
         allRows.forEach(row => {
             filtered.push(row);
         });
-        
+
         window._attendanceFilteredRows = filtered;
         window._attendanceCurrentPage = 1;
         updateAttendancePagination();
@@ -171,26 +169,26 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
         const totalPages = Math.ceil(total / perPage) || 1;
         const page = Math.min(window._attendanceCurrentPage, totalPages);
         window._attendanceCurrentPage = page;
-        
+
         const start = (page - 1) * perPage;
         const end = Math.min(start + perPage, total);
-        
+
         document.querySelectorAll('#attendanceSummaryBody tr[data-id]').forEach(row => row.style.display = 'none');
         rows.forEach((row, i) => { if (i >= start && i < end) row.style.display = ''; });
-        
+
         document.getElementById('attendanceRowStart').textContent = total ? start + 1 : 0;
         document.getElementById('attendanceRowEnd').textContent = end;
         document.getElementById('attendanceRowTotal').textContent = total;
-        
+
         const controls = document.getElementById('attendancePaginationControls');
         if (totalPages <= 1) { controls.innerHTML = ''; return; }
-        
+
         let html = '';
         const maxVisible = 5;
         let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
         let endPage = Math.min(totalPages, startPage + maxVisible - 1);
         if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
-        
+
         if (page > 1) html += '<button class="page-btn" onclick="goToAttendancePage(' + (page - 1) + ')">‹</button>';
         if (startPage > 1) {
             html += '<button class="page-btn" onclick="goToAttendancePage(1)">1</button>';
@@ -204,7 +202,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
             html += '<button class="page-btn" onclick="goToAttendancePage(' + totalPages + ')">' + totalPages + '</button>';
         }
         if (page < totalPages) html += '<button class="page-btn" onclick="goToAttendancePage(' + (page + 1) + ')">›</button>';
-        
+
         controls.innerHTML = html;
     };
 

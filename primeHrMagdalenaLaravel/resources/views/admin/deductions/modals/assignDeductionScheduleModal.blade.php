@@ -265,6 +265,12 @@
     pointer-events: none;
     display: block;
 }
+
+/* Loading spinner animation */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 </style>
 
 <script>
@@ -375,16 +381,27 @@ function handleDeductionScheduleSubmit(event) {
     const radioGroups = form.querySelectorAll('input[type="radio"]:checked');
 
     radioGroups.forEach(radio => {
-        const deductionId = radio.name.match(/deduction_(\d+)_cutoff/)[1];
-        schedules.push({
-            deduction_id: deductionId,
-            cutoff: radio.value
-        });
+        const match = radio.name.match(/deduction_(\d+)_cutoff/);
+        if (match) {
+            const deductionId = match[1];
+            schedules.push({
+                deduction_id: deductionId,
+                cutoff: radio.value
+            });
+        }
     });
+
+    if (schedules.length === 0) {
+        alert('Please select a cutoff schedule for at least one deduction.');
+        return;
+    }
 
     // Create form data for submission
     const submitData = new FormData();
-    submitData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (csrfToken) {
+        submitData.append('_token', csrfToken.content);
+    }
     submitData.append('employee_id', employeeId);
     submitData.append('start_month', startMonth);
     submitData.append('end_month', endMonth);
@@ -393,6 +410,12 @@ function handleDeductionScheduleSubmit(event) {
         submitData.append(`schedules[${index}][deduction_id]`, schedule.deduction_id);
         submitData.append(`schedules[${index}][cutoff]`, schedule.cutoff);
     });
+
+    // Disable submit button to prevent double submission
+    const submitButton = event.target.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.innerHTML;
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" opacity="0.75"/></svg> Saving...';
 
     // Submit to backend
     fetch('/admin/deductions/schedules/update', {
@@ -405,19 +428,25 @@ function handleDeductionScheduleSubmit(event) {
     .then(response => {
         if (response.redirected) {
             window.location.href = response.url;
-        } else {
-            return response.json();
+            return null;
         }
+        return response.json();
     })
     .then(data => {
         if (data && data.success) {
             closeAssignDeductionScheduleModal();
             window.location.reload();
+        } else if (data && data.error) {
+            alert('Error: ' + data.error);
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonText;
         }
     })
     .catch(error => {
         console.error('Error saving schedule:', error);
-        alert('Failed to save schedule. Please try again.');
+        alert('Failed to save schedule. Please check the console for details and try again.');
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonText;
     });
 }
 

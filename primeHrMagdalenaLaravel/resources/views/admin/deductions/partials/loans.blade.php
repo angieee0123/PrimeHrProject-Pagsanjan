@@ -61,9 +61,17 @@
                 @php
                     $progress = $loan->total_amount > 0 ? (($loan->total_amount - $loan->remaining_balance) / $loan->total_amount) * 100 : 0;
                     
-                    // Get the deduction schedule
-                    $schedule = $loan->deductionType->schedules->first();
-                    $cutoffSchedule = $schedule ? $schedule->cutoff_schedule : 'BOTH_SPLIT';
+                    // Get the deduction schedule - prioritize custom schedule over default
+                    $cutoffSchedule = 'BOTH_SPLIT'; // Default fallback
+                    
+                    if ($loan->custom_cutoff_schedule) {
+                        // Use employee's custom schedule
+                        $cutoffSchedule = $loan->custom_cutoff_schedule;
+                    } else {
+                        // Use deduction type's default schedule
+                        $schedule = $loan->deductionType->schedules->first();
+                        $cutoffSchedule = $schedule ? $schedule->cutoff_schedule : 'BOTH_SPLIT';
+                    }
                     
                     // Calculate per-cutoff based on schedule
                     $monthlyInstallment = $loan->installment_amount ?? 0;
@@ -83,6 +91,12 @@
                         $perCutoff1st = $monthlyInstallment / 2;
                         $perCutoff2nd = $monthlyInstallment / 2;
                         $perCutoffDisplay = '₱' . number_format($perCutoff1st, 2) . ' (split)';
+                    }
+                    
+                    // Add indicator if using custom schedule
+                    $scheduleLabel = $cutoffSchedule;
+                    if ($loan->custom_cutoff_schedule) {
+                        $scheduleLabel .= ' (Custom)';
                     }
                     
                     // Determine provider from loan type code
@@ -162,7 +176,7 @@
                             <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">
                                 {!! $perCutoffDisplay !!}
                             </p>
-                            <p style="color: #9999bb; margin: 0; font-size: 11px;">Schedule: {{ $cutoffSchedule }}</p>
+                            <p style="color: #9999bb; margin: 0; font-size: 11px;">{{ $scheduleLabel }}</p>
                         </div>
                     </td>
                     <td style="min-width: 120px;">
@@ -357,10 +371,17 @@ function viewLoanDetails(id) {
             const progress = totalAmount > 0 ? (amountPaid / totalAmount) * 100 : 0;
             const monthsRemaining = installment > 0 ? Math.ceil(remainingBalance / installment) : 0;
             
-            // Get schedule from deduction type
-            const schedule = data.deduction_type.schedules && data.deduction_type.schedules.length > 0 
-                ? data.deduction_type.schedules[0].cutoff_schedule 
-                : 'BOTH_SPLIT';
+            // Get schedule - prioritize custom schedule over default
+            let schedule = 'BOTH_SPLIT'; // Default
+            let scheduleSource = 'Default';
+            
+            if (data.custom_cutoff_schedule) {
+                schedule = data.custom_cutoff_schedule;
+                scheduleSource = 'Custom';
+            } else if (data.deduction_type.schedules && data.deduction_type.schedules.length > 0) {
+                schedule = data.deduction_type.schedules[0].cutoff_schedule;
+                scheduleSource = 'Type Default';
+            }
             
             // Calculate per-cutoff based on schedule
             let perCutoff1st, perCutoff2nd, scheduleText;
@@ -396,6 +417,7 @@ function viewLoanDetails(id) {
 ╠════════════════════════════════════════════╣
 ║ Monthly Installment: ₱${installment.toFixed(2).padStart(19)} ║
 ║ Schedule: ${scheduleText.padEnd(31)} ║
+║ Schedule Source: ${scheduleSource.padEnd(26)} ║
 ║ 1st Cutoff: ₱${perCutoff1st.toFixed(2).padStart(26)} ║
 ║ 2nd Cutoff: ₱${perCutoff2nd.toFixed(2).padStart(26)} ║
 ║ Months Remaining: ${monthsRemaining} months${' '.repeat(22 - monthsRemaining.toString().length)} ║
