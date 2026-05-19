@@ -148,12 +148,15 @@ window.openAddLeaveTypeModal = function() {
     const subtitle = modal.querySelector('.modal-subtitle');
     if (subtitle) subtitle.textContent = 'Create a new leave type for LGU Pagsanjan';
     
-    // Add active class
-    modal.classList.add('active');
+    // Force display with important styles
     modal.style.display = 'flex';
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+    modal.classList.add('active');
     
     console.log('Modal classes:', modal.className);
     console.log('Modal display:', window.getComputedStyle(modal).display);
+    console.log('Modal visibility:', window.getComputedStyle(modal).visibility);
     
     document.body.style.overflow = 'hidden';
 };
@@ -164,8 +167,10 @@ window.closeAddLeaveTypeModal = function(event) {
     if (!event || event.target.id === 'addLeaveTypeModal' || event.type === 'click') {
         const modal = document.getElementById('addLeaveTypeModal');
         if (modal) {
-            modal.classList.remove('active');
             modal.style.display = 'none';
+            modal.style.visibility = 'hidden';
+            modal.style.opacity = '0';
+            modal.classList.remove('active');
             document.body.style.overflow = '';
         }
     }
