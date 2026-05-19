@@ -221,7 +221,7 @@
                             </td>
                             <td>
                                 @if($d->status === 'active')
-                                    <span class="badge-status processed">Active</span>
+                                    <span class="badge-status" style="background: #e8f9ef; color: #15803d; border: 1px solid #bbf7d0; text-transform: none;">Active</span>
                                 @elseif($d->status === 'pending')
                                     <span class="badge-status pending">Pending</span>
                                 @else
@@ -743,7 +743,16 @@ function showDeductionModal(deductionId) {
     // Status badge
     const statusBadge = document.getElementById('deductionStatusBadge');
     statusBadge.textContent = deduction.status ? deduction.status.charAt(0).toUpperCase() + deduction.status.slice(1) : 'Active';
-    statusBadge.className = 'badge-status ' + (deduction.status === 'active' ? 'processed' : deduction.status === 'pending' ? 'pending' : 'on-hold');
+    statusBadge.className = 'badge-status';
+    if (deduction.status === 'active') {
+        statusBadge.style.cssText = 'background: #e8f9ef; color: #15803d; border: 1px solid #bbf7d0;';
+    } else if (deduction.status === 'pending') {
+        statusBadge.className = 'badge-status pending';
+        statusBadge.style.cssText = '';
+    } else {
+        statusBadge.className = 'badge-status on-hold';
+        statusBadge.style.cssText = '';
+    }
     
     // Remarks
     if (deduction.remarks) {

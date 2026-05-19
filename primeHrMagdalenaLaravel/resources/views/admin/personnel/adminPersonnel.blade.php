@@ -145,46 +145,46 @@
     </div>
 
     <div class="table-wrapper">
-        <table class="payroll-table" id="personnelTable">
+        <table class="payroll-table personnel-records-table" id="personnelTable">
             <thead>
                 <tr>
-                    <th onclick="sortTable(0)" style="cursor: pointer;">
+                    <th onclick="sortTable(0)" style="cursor: pointer; width: 25%;">
                         Employee
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;">
                             <polyline points="18 15 12 9 6 15"></polyline>
                         </svg>
                     </th>
-                    <th onclick="sortTable(1)" style="cursor: pointer;">
+                    <th onclick="sortTable(1)" style="cursor: pointer; width: 18%;">
                         Position
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;">
                             <polyline points="18 15 12 9 6 15"></polyline>
                         </svg>
                     </th>
-                    <th onclick="sortTable(2)" style="cursor: pointer;">
-                        Department / Office
+                    <th onclick="sortTable(2)" style="cursor: pointer; width: 17%;">
+                        Department
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;">
                             <polyline points="18 15 12 9 6 15"></polyline>
                         </svg>
                     </th>
-                    <th onclick="sortTable(3)" style="cursor: pointer;">
+                    <th onclick="sortTable(3)" style="cursor: pointer; width: 10%; text-align: center;">
                         Type
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;">
                             <polyline points="18 15 12 9 6 15"></polyline>
                         </svg>
                     </th>
-                    <th onclick="sortTable(4)" style="cursor: pointer;">
-                        Date Appointement
+                    <th onclick="sortTable(4)" style="cursor: pointer; width: 10%; text-align: center;">
+                        Appointed
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;">
                             <polyline points="18 15 12 9 6 15"></polyline>
                         </svg>
                     </th>
-                    <th onclick="sortTable(5)" style="cursor: pointer;">
+                    <th onclick="sortTable(5)" style="cursor: pointer; width: 8%; text-align: center;">
                         Status
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;">
                             <polyline points="18 15 12 9 6 15"></polyline>
                         </svg>
                     </th>
-                    <th>Actions</th>
+                    <th style="width: 12%;">Actions</th>
                 </tr>
             </thead>
             <tbody id="personnelTableBody">
@@ -232,8 +232,8 @@
                     <td class="position-cell">{{ $position }}</td>
                     <td><span class="dept-tag">{{ $department }}</span></td>
                     <td><span class="badge-emptype">{{ $empType }}</span></td>
-                    <td style="font-size: 12.5px; color: #6b6a8a; white-space: nowrap;">{{ $dateHired }}</td>
-                    <td><span class="badge-status {{ $status === 'Active' ? 'processed' : 'on-hold' }}">{{ $status }}</span></td>
+                    <td style="font-size: 12px; color: #6b6a8a; white-space: nowrap; text-align: center;">{{ $dateHired }}</td>
+                    <td style="text-align: center;"><span class="badge-status {{ $status === 'Active' ? 'processed' : 'on-hold' }}">{{ $status }}</span></td>
                     <td>
                         <div class="row-actions">
                             <!-- Desktop: Individual Buttons -->

@@ -130,6 +130,9 @@ Route::get('/permanent/leave', function () {
             ->with('warning', 'Employee record not found. Displaying leave types without balance information.');
     }
 
+    // Load employee relationships for topbar
+    $employee->load('employmentDetail.designationRelation', 'employmentDetail.departmentRelation');
+
     $currentYear = now()->year;
 
     // Only show leave types that have been assigned to the employee (total_credits > 0)
@@ -180,7 +183,7 @@ Route::get('/permanent/leave', function () {
 
     $employeeTransactions = $transactionQuery->paginate(15)->appends(request()->except('page'));
 
-    return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions'));
+    return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions'));
 })->middleware('auth')->name('permanent.leave');
 
 // Leave Application Routes
@@ -188,7 +191,17 @@ Route::post('/leave/store', [LeaveController::class, 'store'])->middleware('auth
 Route::post('/leave/{id}/cancel', [LeaveController::class, 'cancel'])->middleware('auth')->name('leave.cancel');
 
 Route::get('/permanent/performance', function () {
-    return view('permanent.performance.permanentPerformance');
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
+
+    if (!$employee) {
+        return view('permanent.performance.permanentPerformance');
+    }
+
+    // Load employee relationships for topbar
+    $employee->load('employmentDetail.designationRelation', 'employmentDetail.departmentRelation');
+
+    return view('permanent.performance.permanentPerformance', compact('employee'));
 })->middleware('auth')->name('permanent.performance');
 
 Route::get('/permanent/training', function () {
@@ -204,6 +217,9 @@ Route::get('/permanent/training', function () {
             'fiscal_year' => date('Y'),
         ]);
     }
+
+    // Load employee relationships for topbar
+    $employee->load('employmentDetail.designationRelation', 'employmentDetail.departmentRelation');
 
     $trainings = \App\Models\Training::where('employee_id', $employee->id)
         ->orderBy('date_from', 'desc')
@@ -223,7 +239,7 @@ Route::get('/permanent/training', function () {
         $breakdown[$cat] = ($breakdown[$cat] ?? 0) + (int) $training->hours;
     }
 
-    return view('permanent.training.permanentTraining', compact('trainings', 'stats', 'breakdown'));
+    return view('permanent.training.permanentTraining', compact('employee', 'trainings', 'stats', 'breakdown'));
 })->middleware('auth')->name('permanent.training');
 
 Route::post('/permanent/training', function (\Illuminate\Http\Request $request) {

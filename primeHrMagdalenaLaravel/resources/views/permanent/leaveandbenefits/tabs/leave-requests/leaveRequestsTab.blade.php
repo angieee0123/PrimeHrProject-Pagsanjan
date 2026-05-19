@@ -31,7 +31,6 @@
                     <th>Date From</th>
                     <th>Date To</th>
                     <th>Days</th>
-                    <th>Reason</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -44,7 +43,6 @@
                     <td class="work-date">{{ $application->start_date->format('M d, Y') }}</td>
                     <td class="work-date">{{ $application->end_date->format('M d, Y') }}</td>
                     <td class="days-count">{{ number_format($application->number_of_days, 0) }} {{ $application->number_of_days == 1 ? 'day' : 'days' }}</td>
-                    <td style="font-size: 13px; color: #6b6a8a;">{{ Str::limit($application->reason, 50) }}</td>
                     <td>
                         @if($application->status === 'approved')
                             <span class="badge-status processed">Approved</span>
@@ -73,7 +71,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" style="text-align: center; padding: 60px 20px;">
+                    <td colspan="7" style="text-align: center; padding: 60px 20px;">
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" style="margin: 0 auto 16px; display: block;">
                             <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>

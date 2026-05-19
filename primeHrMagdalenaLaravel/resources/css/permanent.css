@@ -208,9 +208,11 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .deduction { color: #8e1e18; font-weight: 600; }
 .net-pay { color: #15803d; font-weight: 700; font-size: 14px; }
 .badge-status { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-.badge-status.processed { background: #e8f9ef; color: #15803d; }
+.badge-status.processed { background: #e8f9ef; color: #15803d; border: 1px solid #bbf7d0; }
 .badge-status.pending { background: #fefce8; color: #a16207; }
 .badge-status.on-hold { background: #fdf0ef; color: #8e1e18; }
+.badge-status.rejected { background: #fdf0ef; color: #8e1e18; border: 1px solid #fecaca; }
+.badge-status.cancelled { background: #f7f6ff; color: #6b6a8a; border: 1px solid #e5e4f0; }
 .btn-view { padding: 6px 16px; background: #f0effe; color: #0b044d; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
 .btn-view:hover { background: #e8e7f5; }
 .btn-edit { padding: 6px 16px; background: #f7f6ff; color: #0b044d; border: 1px solid #e8e7f5; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
@@ -233,7 +235,7 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
     gap: 10px;
 }
 .pagination { display: flex; gap: 6px; }
-.page-btn { width: 32px; height: 32px; border: 1.5px solid #e4e3f0; border-radius: 7px; background: #fff; color: #0b044d; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
+.page-btn { width: 32px; height: 32px; border: 1.5px solid #e4e3f0; border-radius: 7px; background: #fff; color: #0b044d; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
 .page-btn.active { background: #0b044d; color: #fff; border-color: #0b044d; }
 .page-btn:hover { border-color: #0b044d; background: #f4f3ff; }
 .bottom-row { display: grid; grid-template-columns: 1fr 340px; gap: 14px; margin-bottom: 22px; }

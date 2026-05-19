@@ -443,7 +443,7 @@
             
             let statusBadge = '';
             if (isOnLeave) {
-                statusBadge = '<span class="badge-status processed">On Leave</span>';
+                statusBadge = '<span class="badge-status" style="background: #e8f9ef; color: #15803d; border: 1px solid #bbf7d0;">On Leave</span>';
             } else if (isAbsent) {
                 statusBadge = '<span class="badge-status on-hold">Absent</span>';
             } else if (record.late_minutes > 0) {

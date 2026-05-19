@@ -65,20 +65,20 @@
     </div>
 
     <div class="table-wrapper">
-        <table class="payroll-table">
+        <table class="payroll-table attendance-summary-table">
             <thead>
                 <tr>
-                    <th>Employee</th>
-                    <th>Department</th>
-                    <th>Present</th>
-                    <th>On Leave</th>
-                    <th>Absent</th>
-                    <th>Late</th>
-                    <th>Half Day</th>
-                    <th>OT Hours</th>
-                    <th>Rate</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th style="width: 22%;">Employee</th>
+                    <th style="width: 15%;">Department</th>
+                    <th style="width: 5%; text-align: center;">Present</th>
+                    <th style="width: 5%; text-align: center;">Leave</th>
+                    <th style="width: 5%; text-align: center;">Absent</th>
+                    <th style="width: 5%; text-align: center;">Late</th>
+                    <th style="width: 5%; text-align: center;">½ Day</th>
+                    <th style="width: 5%; text-align: center;">OT</th>
+                    <th style="width: 10%;">Rate</th>
+                    <th style="width: 8%;">Status</th>
+                    <th style="width: 15%;">Actions</th>
                 </tr>
             </thead>
             <tbody id="attendanceSummaryBody">
@@ -96,37 +96,31 @@
                         </div>
                     </td>
                     <td><span class="dept-tag">{{ $record['dept'] }}</span></td>
-                    <td style="color: #15803d; font-weight: 600; font-size: 13px;">{{ $record['present'] }}</td>
-                    <td>
+                    <td style="color: #15803d; font-weight: 600; font-size: 13px; text-align: center;">{{ $record['present'] }}</td>
+                    <td style="text-align: center;">
                         @if(isset($record['on_leave']) && $record['on_leave'] > 0)
-                            <span style="color: #0369a1; font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 4px;">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                    <polyline points="14 2 14 8 20 8"/>
-                                </svg>
-                                {{ $record['on_leave'] }}
-                            </span>
+                            <span style="color: #0369a1; font-weight: 600; font-size: 13px;">{{ $record['on_leave'] }}</span>
                         @else
                             <span style="color: #9999bb; font-size: 13px;">—</span>
                         @endif
                     </td>
-                    <td style="color: {{ $record['absent'] > 0 ? '#8e1e18' : '#9999bb' }}; font-weight: {{ $record['absent'] > 0 ? '600' : '400' }}; font-size: 13px;">{{ $record['absent'] }}</td>
-                    <td style="color: {{ $record['late'] > 0 ? '#a16207' : '#9999bb' }}; font-weight: {{ $record['late'] > 0 ? '600' : '400' }}; font-size: 13px;">{{ $record['late'] }}</td>
-                    <td style="color: {{ $record['halfday'] > 0 ? '#a16207' : '#9999bb' }}; font-size: 13px;">{{ $record['halfday'] }}</td>
-                    <td style="color: {{ $record['overtime'] > 0 ? '#0b044d' : '#9999bb' }}; font-weight: {{ $record['overtime'] > 0 ? '600' : '400' }}; font-size: 13px;">{{ $record['overtime'] > 0 ? $record['overtime'] . ' hrs' : '—' }}</td>
+                    <td style="color: {{ $record['absent'] > 0 ? '#8e1e18' : '#9999bb' }}; font-weight: {{ $record['absent'] > 0 ? '600' : '400' }}; font-size: 13px; text-align: center;">{{ $record['absent'] }}</td>
+                    <td style="color: {{ $record['late'] > 0 ? '#a16207' : '#9999bb' }}; font-weight: {{ $record['late'] > 0 ? '600' : '400' }}; font-size: 13px; text-align: center;">{{ $record['late'] }}</td>
+                    <td style="color: {{ $record['halfday'] > 0 ? '#a16207' : '#9999bb' }}; font-size: 13px; text-align: center;">{{ $record['halfday'] }}</td>
+                    <td style="color: {{ $record['overtime'] > 0 ? '#0b044d' : '#9999bb' }}; font-weight: {{ $record['overtime'] > 0 ? '600' : '400' }}; font-size: 12px; text-align: center;">{{ $record['overtime'] > 0 ? $record['overtime'] : '—' }}</td>
                     <td>
                         <div style="display: flex; align-items: center; gap: 6px;">
-                            <div style="flex: 1; height: 6px; background: #f0effe; border-radius: 3px; min-width: 50px;">
+                            <div style="flex: 1; height: 6px; background: #f0effe; border-radius: 3px; min-width: 40px;">
                                 <div style="width: {{ $record['rate'] }}%; height: 100%; background: {{ $record['rate'] >= 90 ? '#15803d' : ($record['rate'] >= 75 ? '#d9bb00' : '#8e1e18') }}; border-radius: 3px;"></div>
                             </div>
-                            <span style="font-size: 12px; font-weight: 600; color: #0b044d; white-space: nowrap;">{{ $record['rate'] }}%</span>
+                            <span style="font-size: 11.5px; font-weight: 600; color: #0b044d; white-space: nowrap;">{{ $record['rate'] }}%</span>
                         </div>
                     </td>
                     <td><span class="badge-status {{ $record['status'] === 'Complete' ? 'processed' : 'pending' }}">{{ $record['status'] }}</span></td>
                     <td>
                         <div class="row-actions">
-                            <button class="btn-view" onclick="openDTRModal({{ json_encode($record) }}, {{ $index }})">DTR</button>
-                            <button class="btn-detailed" onclick="openDetailedDTRModal({{ $record['employee_id'] }}, '{{ $record['name'] }}', '{{ $record['id'] }}')">Detailed DTR</button>
+                            <button class="btn-view" onclick='openDTRModal(@json($record), {{ $index }})'>DTR</button>
+                            <button class="btn-detailed" onclick="openDetailedDTRModal({{ $record['employee_id'] }}, '{{ addslashes($record['name']) }}', '{{ $record['id'] }}')">Detailed DTR</button>
                         </div>
                     </td>
                 </tr>

@@ -27,6 +27,9 @@ class PermanentPayslipController extends Controller
             ]);
         }
 
+        // Load employee relationships for topbar
+        $employee->load('employmentDetail.designationRelation', 'employmentDetail.departmentRelation');
+
         $payslips = SalaryComputation::where('employee_id', $employee->id)
             ->orderBy('period_end', 'desc')
             ->paginate(5);
@@ -42,7 +45,7 @@ class PermanentPayslipController extends Controller
             'total_payslips' => SalaryComputation::where('employee_id', $employee->id)->count()
         ];
 
-        return view('permanent.payslip.permanentPayslip', compact('payslips', 'latestPayslip', 'stats'));
+        return view('permanent.payslip.permanentPayslip', compact('employee', 'payslips', 'latestPayslip', 'stats'));
     }
 
     public function getPayslipDetails($id)

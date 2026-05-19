@@ -715,6 +715,42 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .payroll-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .payroll-table th { text-align: left; padding: 14px 20px; font-size: 11.5px; font-weight: 700; color: #6b6a8a; text-transform: uppercase; letter-spacing: 0.5px; background: #f7f6ff; border-bottom: 1px solid #f0effe; }
 .payroll-table td { padding: 16px 20px; font-size: 13px; border-bottom: 1px solid #f7f6ff; }
+
+/* Attendance Summary Table Optimizations */
+.attendance-summary-table th,
+.attendance-summary-table td { padding: 12px 14px; }
+.attendance-summary-table th { white-space: nowrap; }
+.attendance-summary-table .emp-cell { gap: 10px; }
+.attendance-summary-table .emp-avatar { width: 36px; height: 36px; font-size: 12px; }
+.attendance-summary-table .dept-tag { padding: 3px 8px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: inline-block; }
+
+/* Personnel Records Table Optimizations */
+.personnel-records-table th,
+.personnel-records-table td { padding: 12px 14px; }
+.personnel-records-table th { white-space: nowrap; }
+.personnel-records-table .emp-cell { gap: 10px; }
+.personnel-records-table .emp-avatar { width: 36px; height: 36px; font-size: 12px; }
+.personnel-records-table .position-cell { font-size: 12.5px; white-space: normal; line-height: 1.4; }
+.personnel-records-table .dept-tag { padding: 3px 8px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: inline-block; }
+.personnel-records-table .badge-emptype { padding: 3px 8px; font-size: 10.5px; white-space: nowrap; }
+.personnel-records-table .badge-status { padding: 3px 8px; font-size: 10.5px; }
+
+/* Payroll Register Table Optimizations */
+.payroll-register-table th,
+.payroll-register-table td { padding: 10px 12px; }
+.payroll-register-table th { white-space: nowrap; font-size: 11px; }
+.payroll-register-table .emp-cell { gap: 10px; }
+.payroll-register-table .emp-avatar { width: 36px; height: 36px; font-size: 12px; }
+.payroll-register-table .emp-name { font-size: 13px; }
+.payroll-register-table .emp-id { font-size: 11px; }
+.payroll-register-table .dept-tag { padding: 3px 8px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: inline-block; }
+.payroll-register-table .work-date { font-size: 12px; white-space: nowrap; }
+.payroll-register-table .days-count { font-size: 12px; font-weight: 600; background: #f0effe; padding: 3px 8px; border-radius: 4px; display: inline-block; }
+.payroll-register-table .daily-rate,
+.payroll-register-table .pay-cell,
+.payroll-register-table .ot-pay,
+.payroll-register-table .deduction,
+.payroll-register-table .net-pay { font-size: 12.5px; white-space: nowrap; }
 .emp-cell { display: flex; align-items: center; gap: 12px; }
 .emp-avatar { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; flex-shrink: 0; }
 .emp-name { font-size: 13.5px; font-weight: 600; color: #0b044d; margin-bottom: 2px; }

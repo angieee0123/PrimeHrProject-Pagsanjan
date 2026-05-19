@@ -348,8 +348,8 @@ class PermanentAttendanceController extends Controller
                 }
             }
 
-            $totalHoursMinutes = $attendance ? $attendance->total_hours : 0;
-            $totalHours = $totalHoursMinutes ? number_format($totalHoursMinutes / 60, 1) : 0;
+            // Calculate total hours from accredited minutes
+            $totalHours = $accreditedMinutes > 0 ? number_format($accreditedMinutes / 60, 1) : '0.0';
 
             $records[] = [
                 'date' => $current->format('M d, Y'),

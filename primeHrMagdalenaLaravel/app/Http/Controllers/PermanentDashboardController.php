@@ -22,6 +22,9 @@ class PermanentDashboardController extends Controller
             return view('permanent.dashboard.permanentDashboard')->with('error', 'Employee record not found.');
         }
 
+        // Load relationships
+        $employee->load('employmentDetail.designationRelation', 'employmentDetail.departmentRelation');
+
         // Get current period (last 15 days)
         $currentDate = Carbon::now();
         $startDate = $currentDate->copy()->subDays(15);
