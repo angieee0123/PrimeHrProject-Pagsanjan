@@ -1,4 +1,4 @@
-<div id="addLeaveTypeModal" class="modal-overlay" onclick="closeAddLeaveTypeModal(event)" style="display: none;">
+<div id="addLeaveTypeModal" class="modal-overlay">
     <div class="modal-container" onclick="event.stopPropagation()">
         <div class="modal-header">
             <div>
@@ -42,27 +42,22 @@
                     <label class="form-label">Leave Type Configuration</label>
                     <div class="checkbox-group">
                         <label class="checkbox-label">
-                            <input type="hidden" name="is_accrued" value="0">
                             <input type="checkbox" name="is_accrued" value="1" class="form-checkbox">
                             <span>Accrued (Earned monthly, e.g., 1.25 days/month)</span>
                         </label>
                         <label class="checkbox-label">
-                            <input type="hidden" name="is_cumulative" value="0">
                             <input type="checkbox" name="is_cumulative" value="1" class="form-checkbox">
                             <span>Cumulative (Unused days carry over to next year)</span>
                         </label>
                         <label class="checkbox-label">
-                            <input type="hidden" name="requires_6_months" value="0">
                             <input type="checkbox" name="requires_6_months" value="1" class="form-checkbox">
                             <span>Requires 6 Months Service (CSC requirement)</span>
                         </label>
                         <label class="checkbox-label">
-                            <input type="hidden" name="is_monetizable" value="0">
                             <input type="checkbox" name="is_monetizable" value="1" class="form-checkbox">
                             <span>Monetizable (Can be converted to cash)</span>
                         </label>
                         <label class="checkbox-label">
-                            <input type="hidden" name="requires_attachment" value="0">
                             <input type="checkbox" name="requires_attachment" value="1" class="form-checkbox">
                             <span>Requires Attachment (Force upload before submission)</span>
                         </label>

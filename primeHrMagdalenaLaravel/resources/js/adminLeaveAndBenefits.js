@@ -34,28 +34,60 @@ window.switchTab = function(tab) {
 }
 
 window.openAddLeaveTypeModal = function() {
-    const form = document.getElementById('addLeaveTypeForm');
-    form.reset();
-    form.action = '/admin/leave/types';
+    const modal = document.getElementById('addLeaveTypeModal');
     
-    const methodInput = form.querySelector('input[name="_method"]');
-    if (methodInput) methodInput.remove();
-    
-    document.querySelector('#addLeaveTypeModal .modal-title').textContent = 'Add New Leave Type';
-    document.querySelector('#addLeaveTypeModal .modal-subtitle').textContent = 'Create a new leave type for LGU Pagsanjan';
-    
-    form.querySelector('input[name="leave_code"]').readOnly = false;
-    form.querySelector('.btn-submit').textContent = 'Add Leave Type';
-    document.getElementById('fileNameDisplay').textContent = 'Choose PDF file or drag here';
-    
-    document.getElementById('addLeaveTypeModal').classList.add('active');
-}
-
-window.closeAddLeaveTypeModal = function(event) {
-    if (!event || event.target.id === 'addLeaveTypeModal') {
-        document.getElementById('addLeaveTypeModal').classList.remove('active');
+    if (!modal) {
+        console.error('Modal not found!');
+        return;
     }
-}
+    
+    const form = document.getElementById('addLeaveTypeForm');
+    if (form) {
+        form.reset();
+        form.action = '/admin/leave/types';
+        
+        const methodInput = form.querySelector('input[name="_method"]');
+        if (methodInput) methodInput.remove();
+        
+        const codeInput = form.querySelector('input[name="leave_code"]');
+        if (codeInput) codeInput.readOnly = false;
+        
+        const submitBtn = form.querySelector('.btn-submit');
+        if (submitBtn) submitBtn.textContent = 'Add Leave Type';
+        
+        const fileDisplay = document.getElementById('fileNameDisplay');
+        if (fileDisplay) fileDisplay.textContent = 'Choose PDF file or drag here';
+    }
+    
+    const title = modal.querySelector('.modal-title');
+    if (title) title.textContent = 'Add New Leave Type';
+    
+    const subtitle = modal.querySelector('.modal-subtitle');
+    if (subtitle) subtitle.textContent = 'Create a new leave type for LGU Pagsanjan';
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeAddLeaveTypeModal = function() {
+    const modal = document.getElementById('addLeaveTypeModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+};
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('addLeaveTypeModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeAddLeaveTypeModal();
+            }
+        });
+    }
+});
 
 document.getElementById('addLeaveTypeForm')?.addEventListener('submit', function(e) {
     const fileInput = document.getElementById('leaveTypeDocument');
@@ -249,8 +281,8 @@ window.searchLeaveTypes = function() {
 }
 
 window.filterLeaveTypes = function() {
-    const statusFilter = document.getElementById('filterLeaveStatus').value;
-    const accrualFilter = document.getElementById('filterLeaveAccrual').value;
+    const statusFilter = document.getElementById('filterLeaveTypeStatus').value;
+    const accrualFilter = document.getElementById('filterLeaveTypeAccrual').value;
     const rows = document.querySelectorAll('.leave-type-row');
 
     rows.forEach(row => {

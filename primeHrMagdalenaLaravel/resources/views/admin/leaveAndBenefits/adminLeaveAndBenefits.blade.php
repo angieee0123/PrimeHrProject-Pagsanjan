@@ -111,71 +111,6 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 @vite(['resources/css/adminLeaveAndBenefits.css', 'resources/js/adminLeaveAndBenefits.js'])
 
 <script>
-// Ensure modal functions are available immediately
-window.openAddLeaveTypeModal = function() {
-    console.log('openAddLeaveTypeModal called');
-    
-    const modal = document.getElementById('addLeaveTypeModal');
-    console.log('Modal element:', modal);
-    
-    if (!modal) {
-        console.error('Modal not found!');
-        alert('Error: Modal element not found. Please refresh the page.');
-        return;
-    }
-    
-    const form = document.getElementById('addLeaveTypeForm');
-    if (form) {
-        form.reset();
-        form.action = '{{ route('admin.leave.types.store') }}';
-        
-        const methodInput = form.querySelector('input[name="_method"]');
-        if (methodInput) methodInput.remove();
-        
-        const codeInput = form.querySelector('input[name="leave_code"]');
-        if (codeInput) codeInput.readOnly = false;
-        
-        const submitBtn = form.querySelector('.btn-submit');
-        if (submitBtn) submitBtn.textContent = 'Add Leave Type';
-        
-        const fileDisplay = document.getElementById('fileNameDisplay');
-        if (fileDisplay) fileDisplay.textContent = 'Choose PDF file or drag here';
-    }
-    
-    const title = modal.querySelector('.modal-title');
-    if (title) title.textContent = 'Add New Leave Type';
-    
-    const subtitle = modal.querySelector('.modal-subtitle');
-    if (subtitle) subtitle.textContent = 'Create a new leave type for LGU Pagsanjan';
-    
-    // Force display with important styles
-    modal.style.display = 'flex';
-    modal.style.visibility = 'visible';
-    modal.style.opacity = '1';
-    modal.classList.add('active');
-    
-    console.log('Modal classes:', modal.className);
-    console.log('Modal display:', window.getComputedStyle(modal).display);
-    console.log('Modal visibility:', window.getComputedStyle(modal).visibility);
-    
-    document.body.style.overflow = 'hidden';
-};
-
-window.closeAddLeaveTypeModal = function(event) {
-    console.log('closeAddLeaveTypeModal called', event);
-    
-    if (!event || event.target.id === 'addLeaveTypeModal' || event.type === 'click') {
-        const modal = document.getElementById('addLeaveTypeModal');
-        if (modal) {
-            modal.style.display = 'none';
-            modal.style.visibility = 'hidden';
-            modal.style.opacity = '0';
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    }
-};
-
 // Success Modal Functions
 window.openSuccessModal = function(message) {
     const modal = document.getElementById('successModal');
@@ -300,13 +235,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-});
-
-// Check URL parameter and switch to correct tab on page load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded');
-    console.log('Modal exists:', !!document.getElementById('addLeaveTypeModal'));
     
+    // Check URL parameter and switch to correct tab on page load
     const urlParams = new URLSearchParams(window.location.search);
     const activeTab = urlParams.get('tab');
     

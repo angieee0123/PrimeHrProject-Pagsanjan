@@ -5,12 +5,12 @@
             <p class="table-sub">Manage all leave types for LGU Pagsanjan · {{ $leaveTypes->total() }} records</p>
         </div>
         <div class="table-actions">
-            <select class="filter-select" id="filterLeaveStatus" onchange="filterLeaveTypes()">
+            <select class="filter-select" id="filterLeaveTypeStatus" onchange="filterLeaveTypes()">
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
             </select>
-            <select class="filter-select" id="filterLeaveAccrual" onchange="filterLeaveTypes()">
+            <select class="filter-select" id="filterLeaveTypeAccrual" onchange="filterLeaveTypes()">
                 <option value="all">All Types</option>
                 <option value="accrued">Accrued</option>
                 <option value="fixed">Fixed</option>
