@@ -73,6 +73,8 @@
 
 @include('admin.travelOrder.partials.disapproved-orders-tab')
 
+@include('admin.travelOrder.modals.viewTravelOrderModal')
+
 @vite(['resources/css/adminLeaveAndBenefits.css'])
 
 <script>

@@ -41,18 +41,18 @@
                 <tr class="approved-order-row">
                     <td data-label="Employee">
                         <div class="emp-cell">
-                            <div class="emp-avatar" style="background: {{ $colors[$loop->index % 6] }};">{{ strtoupper(substr($order->employee_name, 0, 2)) }}</div>
+                            <div class="emp-avatar" style="background: {{ $colors[$loop->index % 6] }};">{{ strtoupper(substr($order->employee->first_name, 0, 2)) }}</div>
                             <div>
-                                <p class="emp-name">{{ $order->employee_name }}</p>
-                                <p class="emp-id">{{ $order->employee_id }}</p>
+                                <p class="emp-name">{{ $order->employee->first_name }} {{ $order->employee->last_name }}</p>
+                                <p class="emp-id">{{ $order->employee->employee_id }}</p>
                             </div>
                         </div>
                     </td>
                     <td data-label="Destination" style="font-size: 13px; color: #0b044d; font-weight: 500;">{{ $order->destination }}</td>
                     <td data-label="Travel Date" style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ \Carbon\Carbon::parse($order->travel_date)->format('M d, Y') }}</td>
                     <td data-label="Duration" style="text-align: center; font-weight: 600; color: #0b044d;">{{ $order->duration }} days</td>
-                    <td data-label="Approved By" style="font-size: 13px; color: #15803d; font-weight: 500;">{{ $order->approved_by }}</td>
-                    <td data-label="Approved Date" style="font-size: 13px; color: #6b6a8a;">{{ \Carbon\Carbon::parse($order->approved_date)->format('M d, Y') }}</td>
+                    <td data-label="Approved By" style="font-size: 13px; color: #15803d; font-weight: 500;">{{ $order->approver ? ($order->approver->employee ? $order->approver->employee->first_name . ' ' . $order->approver->employee->last_name : 'Admin User') : 'Admin User' }}</td>
+                    <td data-label="Approved Date" style="font-size: 13px; color: #6b6a8a;">{{ $order->approved_at ? \Carbon\Carbon::parse($order->approved_at)->format('M d, Y') : 'N/A' }}</td>
                     <td data-label="Actions">
                         <div class="row-actions">
                             <button class="btn-view" onclick="viewOrder({{ $order->id }})">View</button>

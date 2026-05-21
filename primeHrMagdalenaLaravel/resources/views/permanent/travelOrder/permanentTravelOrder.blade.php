@@ -103,6 +103,7 @@
 </div>
 
 @include('permanent.travelOrder.modals.fileTravelOrderModal')
+@include('permanent.travelOrder.modals.viewTravelOrderModal')
 
 @include('permanent.chatbot.permanentChatbot')
 
