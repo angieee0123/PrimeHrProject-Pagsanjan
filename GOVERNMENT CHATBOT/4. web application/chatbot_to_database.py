@@ -4,10 +4,6 @@ import mysql.connector
 from groq import Groq
 import os
 from datetime import datetime
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -15,15 +11,15 @@ CORS(app, resources={r"/chat": {"origins": ["http://localhost:8000", "http://127
 
 # MySQL config
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'localhost'),
-    'user': os.getenv('DB_USER', 'root'),
-    'password': os.getenv('DB_PASSWORD', 'admin'),
-    'database': os.getenv('DB_NAME', 'primehrismagdalena'),
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'admin',
+    'database': 'primehrismagdalena',
     'auth_plugin': 'mysql_native_password'
 }
 
 # Groq client
-groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
+groq_client = Groq(api_key="***REMOVED-GROQ-KEY***")
 
 def get_db_connection():
     return mysql.connector.connect(**DB_CONFIG)
@@ -89,37 +85,28 @@ def get_policy_answer(question):
     return None
 
 def get_db_schema():
-    """Fetch all table schemas from the database dynamically with sample data"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    """Fetch all table schemas from the database dynamically"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-        cursor.execute("SHOW TABLES")
-        tables = [row[0] for row in cursor.fetchall()]
+    cursor.execute("SHOW TABLES")
+    tables = [row[0] for row in cursor.fetchall()]
 
-        schema = "=== DATABASE SCHEMA ===\n\n"
-        for table in tables:
-            cursor.execute(f"DESCRIBE `{table}`")
-            columns = cursor.fetchall()
-            col_defs = ", ".join([f"{col[0]} ({col[1]})" for col in columns])
-            schema += f"Table `{table}`: {col_defs}\n"
-            
-            # Get row count for context
-            cursor.execute(f"SELECT COUNT(*) FROM `{table}`")
-            count = cursor.fetchone()[0]
-            schema += f"  → {count} records\n"
+    schema = ""
+    for table in tables:
+        cursor.execute(f"DESCRIBE `{table}`")
+        columns = cursor.fetchall()
+        col_defs = ", ".join([f"{col[0]} ({col[1]})" for col in columns])
+        schema += f"Table `{table}`: {col_defs}\n"
 
-        cursor.close()
-        conn.close()
-        return schema
-    except Exception as e:
-        print(f"Schema fetch error: {str(e)}")
-        return "Schema unavailable"
+    cursor.close()
+    conn.close()
+    return schema
 
 def generate_sql_query(user_question, schema):
     """Use Groq to convert natural language question to SQL"""
     
-    # HRIS System Knowledge Base with RDBMS Relationships
+    # HRIS System Knowledge Base
     system_knowledge = """
 === PRIME HRIS MAGDALENA SYSTEM RULES ===
 
@@ -167,98 +154,18 @@ ATTENDANCE & LEAVE POLICIES:
    - Loans: GSIS Salary, GSIS Policy, GSIS Emergency, Pag-IBIG MPL, Pag-IBIG Calamity
    - Tax withholding
 
-=== DATABASE STRUCTURE & RELATIONSHIPS ===
-
-CORE TABLES:
-1. employees (id, employee_id, first_name, last_name, middle_name, email)
-   - Primary Key: id (bigint) ← THIS IS WHAT FOREIGN KEYS REFERENCE!
-   - Unique: employee_id (e.g., '2024001') ← This is just a display ID, NOT used in JOINs
-
-2. attendance (id, employee_id, date, am_in, am_out, pm_in, pm_out, accredited_hours)
-   - Primary Key: id
-   - Foreign Key: employee_id → employees.id (NOT employees.employee_id!)
-   - Unique: (employee_id, date)
-
-3. accredited_hours_log (id, attendance_id, employee_id, late_minutes, undertime_minutes, lwop_minutes)
-   - Primary Key: id
-   - Foreign Key: attendance_id → attendance.id
-   - Foreign Key: employee_id → employees.id (NOT employees.employee_id!)
-   - NOTE: Table name is SINGULAR 'accredited_hours_log' NOT 'accredited_hours_logs'
-
-4. leave_balances (id, employee_id, leave_code, year, total_credits, used_credits, available_credits)
-   - Primary Key: id
-   - Foreign Key: employee_id → employees(id) ON DELETE CASCADE
-   - Foreign Key: leave_code → leave_types_config(leave_code)
-   - Unique: (employee_id, leave_code, year)
-
-5. leave_types_config (leave_code, leave_name, is_accrued, is_cumulative, is_monetizable)
-   - Primary Key: leave_code (e.g., 'VL', 'SL', 'SPL')
-
-6. leave_applications (id, employee_id, leave_code, start_date, end_date, status)
-   - Foreign Key: employee_id → employees(id)
-   - Foreign Key: leave_code → leave_types_config(leave_code)
-
-=== QUERY PATTERNS (RDBMS BEST PRACTICES) ===
-
-1. EMPLOYEE SEARCH (Flexible Name Matching):
-   SELECT * FROM employees 
-   WHERE first_name LIKE '%name%' 
-      OR last_name LIKE '%name%' 
-      OR middle_name LIKE '%name%'
-
-2. ATTENDANCE WITH EMPLOYEE NAME (Always JOIN):
-   SELECT e.first_name, e.last_name, a.date, a.am_in, a.pm_in
-   FROM attendance a
-   JOIN employees e ON a.employee_id = e.id
-   WHERE e.first_name LIKE '%name%' OR e.last_name LIKE '%name%'
-   ORDER BY a.date DESC
-   
-   CRITICAL: JOIN ON a.employee_id = e.id (NOT e.employee_id!)
-
-3. LATE MINUTES (Use accredited_hours_log - SINGULAR!):
-   SELECT e.first_name, e.last_name, a.date, ahl.late_minutes
-   FROM accredited_hours_log ahl
-   JOIN attendance a ON ahl.attendance_id = a.id
-   JOIN employees e ON ahl.employee_id = e.id
-   WHERE ahl.late_minutes > 0
-   ORDER BY a.date DESC
-
-4. LEAVE BALANCE (JOIN with leave_types_config for names):
-   SELECT e.first_name, e.last_name, lt.leave_name, 
-          lb.available_credits, lb.used_credits
-   FROM leave_balances lb
-   JOIN employees e ON lb.employee_id = e.id
-   JOIN leave_types_config lt ON lb.leave_code = lt.leave_code
-   WHERE lb.year = YEAR(CURDATE())
-
-5. LAST TIME LATE (Most Recent Record):
-   SELECT e.first_name, e.last_name, a.date, ahl.late_minutes
-   FROM accredited_hours_log ahl
-   JOIN attendance a ON ahl.attendance_id = a.id
-   JOIN employees e ON ahl.employee_id = e.id
-   WHERE e.employee_id = 'EMP_ID' AND ahl.late_minutes > 0
-   ORDER BY a.date DESC
-   LIMIT 1
-
-6. ATTENDANCE ON SPECIFIC DATE:
-   SELECT e.first_name, e.last_name, a.date, a.am_in, a.am_out, a.pm_in, a.pm_out
-   FROM attendance a
-   JOIN employees e ON a.employee_id = e.id
-   WHERE (e.first_name LIKE '%name%' OR e.last_name LIKE '%name%')
-     AND a.date = '2026-05-19'
-
-CRITICAL RULES:
-- Table name is 'accredited_hours_log' (SINGULAR), NOT 'accredited_hours_logs'
-- ALWAYS JOIN with employees table to include first_name and last_name in results
-- JOIN SYNTAX: attendance.employee_id = employees.id (NOT employees.employee_id!)
-- The employees table has TWO id columns:
-  * id (bigint) ← PRIMARY KEY, used in JOINs
-  * employee_id (varchar) ← Display ID like '2024001', NOT used in JOINs
-- Use LIKE '%name%' with wildcards for flexible name search
-- Date format: 'YYYY-MM-DD' (convert "May 18, 2026" to '2026-05-18')
-- Minutes are integers (480 = 8 hours = 1 day)
-- Leave credits are decimal(10,6) for precision
-- Use proper JOINs to maintain referential integrity
+DATABASE TABLES:
+- employees: Employee master data
+- attendances: Daily time records (AM/PM/OT In/Out)
+- accredited_hours_logs: Computed accredited hours with late/undertime
+- leave_types_config: Leave type definitions
+- leave_balances: Employee leave credits by year
+- leave_applications: Leave requests (pending/approved/rejected)
+- leave_transactions: Leave credit/debit history
+- schedules: Employee work schedules
+- deduction_types: Deduction categories
+- employee_deductions: Employee-specific deductions
+- loan_types: Loan type definitions with max amounts and interest rates
 """
     
     prompt = f"""You are a MySQL expert for the Prime HRIS Magdalena system. Given the database schema and system knowledge below, generate a valid MySQL SELECT query to answer the user's question.
@@ -274,50 +181,28 @@ Rules:
 - If the question cannot be answered from the schema, return: CANNOT_ANSWER
 - All monetary values are in Philippine Peso (PHP), never use dollar signs
 - Use the system knowledge above to understand HR policies and business rules
-- For late minutes queries, use accredited_hours_log table (singular, not plural) with late_minutes column
-- For employee name searches, use LIKE '%name%' with wildcards on first_name, last_name, or middle_name
-- For "last time" or "most recent", use ORDER BY date DESC LIMIT 1
-- Convert date strings to MySQL date format 'YYYY-MM-DD' (e.g., "May 19, 2026" becomes '2026-05-19')
-- Always include employee name in results by JOINing with employees table
-- For attendance queries, use the attendance table and JOIN with employees
-- When user asks about specific date, use WHERE a.date = 'YYYY-MM-DD'
-
-CRITICAL JOIN SYNTAX:
-- CORRECT: JOIN employees e ON a.employee_id = e.id
-- WRONG: JOIN employees e ON a.employee_id = e.employee_id
-- The foreign key references employees.id (PRIMARY KEY), NOT employees.employee_id (display ID)
 
 User Question: {user_question}
 
 SQL Query:"""
 
-    try:
-        response = groq_client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model="llama-3.3-70b-versatile",
-            temperature=0.1,
-            max_tokens=300
-        )
-        return response.choices[0].message.content.strip()
-    except Exception as e:
-        print(f"SQL generation error: {str(e)}")
-        return "CANNOT_ANSWER"
+    response = groq_client.chat.completions.create(
+        messages=[{"role": "user", "content": prompt}],
+        model="llama-3.3-70b-versatile",
+        temperature=0.1,
+        max_tokens=300
+    )
+    return response.choices[0].message.content.strip()
 
 def execute_query(sql):
-    """Execute SQL and return results with error handling"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute(sql)
-        results = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        print(f"Query executed successfully. Rows returned: {len(results)}")
-        return results
-    except mysql.connector.Error as e:
-        print(f"SQL Execution Error: {str(e)}")
-        print(f"SQL Query: {sql}")
-        raise Exception(f"Database query failed: {str(e)}")
+    """Execute SQL and return results"""
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(sql)
+    results = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return results
 
 def generate_natural_response(user_question, sql, results):
     """Use Groq to convert SQL results into a conversational response"""
@@ -347,13 +232,11 @@ SQL Query Used: {sql}
 Query Results: {results_preview}
 Total Records Found: {len(results)}
 
-Answer in a friendly, concise tone (3-5 sentences max). 
+Answer in a friendly, concise tone (3-5 sentences max). If no results, say so politely.
 IMPORTANT: 
-- If no results found, politely say "No attendance record found for [name] on [date]." and suggest checking nearby dates or if it was a weekend/holiday.
 - All monetary amounts must be expressed in Philippine Peso (PHP). Never use dollar signs ($). Use the format "PHP X,XXX.XX" or "X,XXX.XX Philippine Pesos".
 - When answering policy questions (like late deductions, leave rules), use the system knowledge above to provide accurate information.
-- Be helpful and explain HR policies clearly in Tagalog or English based on the user's language.
-- If the date might be a weekend (Saturday/Sunday), mention that weekends are non-working days."""
+- Be helpful and explain HR policies clearly in Tagalog or English based on the user's language."""
 
     response = groq_client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
@@ -389,12 +272,12 @@ def chat():
         greetings = ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening', 'kumusta', 'kamusta']
         if any(g in user_input.lower() for g in greetings) and len(user_input.split()) <= 6:
             return jsonify({
-                'response': "Hello! I'm your Prime HRIS assistant. I can fetch real-time data from the database about employees, attendance, leave balances, deductions, and HR policies. What would you like to know?",
+                'response': "Hello! I'm your Prime HRIS assistant. You can ask me about employees, attendance, leave balances, deductions, and HR policies. What would you like to know?",
                 'follow_up_questions': [
-                    "How many employees are in the system?",
-                    "Show recent attendance records",
-                    "What are the leave types available?",
-                    "Show employee deductions"
+                    "Sa ating system, nababawasan ba ang vacation leave kapag na-late?",
+                    "How many employees are there?",
+                    "Show leave balances for VL and SL",
+                    "What are the leave types available?"
                 ],
                 'status': 'success'
             })
@@ -404,11 +287,6 @@ def chat():
 
         # Generate SQL from question
         sql = generate_sql_query(user_input, schema)
-        
-        # Clean up SQL (remove markdown formatting if present)
-        sql = sql.replace('```sql', '').replace('```', '').strip()
-        
-        print(f"Generated SQL: {sql}")  # Debug logging
 
         if sql == "CANNOT_ANSWER" or not sql.lower().startswith("select"):
             # Check if it's a policy question that doesn't need database query
@@ -490,19 +368,7 @@ Provide a clear, friendly answer in 2-4 sentences. Match the user's language (Ta
             })
 
         # Execute query
-        try:
-            results = execute_query(sql)
-        except Exception as query_err:
-            print(f"Query execution failed: {str(query_err)}")
-            return jsonify({
-                'response': f"I tried to fetch the data but encountered an issue with the query. The error was: {str(query_err)}. Could you rephrase your question?",
-                'follow_up_questions': [
-                    "Show all employees",
-                    "What are the attendance records?",
-                    "Show leave balances"
-                ],
-                'status': 'error'
-            })
+        results = execute_query(sql)
 
         # Generate natural language response
         response_text = generate_natural_response(user_input, sql, results)

@@ -280,7 +280,7 @@ class AttendanceController extends Controller
         
         // Apply pagination
         $totalDetailedRecords = count($detailedRecords);
-        $perPage = 50;
+        $perPage = $request->get('per_page', 10); // Default 10 records per page
         $currentPage = $request->get('page', 1);
         $detailedRecords = array_slice($detailedRecords, ($currentPage - 1) * $perPage, $perPage);
         

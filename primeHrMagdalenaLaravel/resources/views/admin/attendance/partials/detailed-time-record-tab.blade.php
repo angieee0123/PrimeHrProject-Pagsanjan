@@ -214,7 +214,26 @@
     </div>
 
     <div class="table-footer">
-        <p>Showing <strong>{{ $detailedPagination['from'] }}</strong> to <strong>{{ $detailedPagination['to'] }}</strong> of <strong>{{ $detailedPagination['total'] }}</strong> daily attendance records</p>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <p>Showing <strong>{{ $detailedPagination['from'] }}</strong>-<strong>{{ $detailedPagination['to'] }}</strong> of <strong>{{ $detailedPagination['total'] }}</strong> daily attendance records</p>
+            <form method="GET" action="{{ route('admin.attendance') }}" style="display:inline;margin:0;">
+                <input type="hidden" name="tab" value="detailed">
+                <input type="hidden" name="start_date" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}">
+                <input type="hidden" name="end_date" value="{{ request('end_date', now()->endOfMonth()->format('Y-m-d')) }}">
+                @if(request('employee_name'))
+                    <input type="hidden" name="employee_name" value="{{ request('employee_name') }}">
+                @endif
+                @if(request('department'))
+                    <input type="hidden" name="department" value="{{ request('department') }}">
+                @endif
+                <select name="per_page" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="this.form.submit()">
+                    <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 rows</option>
+                    <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 rows</option>
+                    <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 rows</option>
+                    <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100 rows</option>
+                </select>
+            </form>
+        </div>
         
         @if($detailedPagination['last_page'] > 1)
         <div class="pagination" style="display: flex; gap: 8px; align-items: center;">

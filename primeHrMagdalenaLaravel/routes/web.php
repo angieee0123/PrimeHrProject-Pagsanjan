@@ -862,6 +862,10 @@ Route::get('/admin/attendance/{attendanceId}/accredited-log', [AttendanceControl
 Route::post('/admin/attendance/correct', [AttendanceController::class, 'correctAttendance'])->middleware('auth')->name('admin.attendance.correct');
 
 Route::get('/admin/leave', [LeaveController::class, 'index'])->middleware('auth')->name('admin.leave');
+
+Route::get('/admin/travelorder', function () {
+    return view('admin.travelOrder.travelOrder');
+})->middleware('auth')->name('admin.travelorder');
 Route::post('/admin/leave/types', [LeaveController::class, 'storeLeaveType'])->middleware('auth')->name('admin.leave.types.store');
 Route::get('/admin/leave/types/{code}', [LeaveController::class, 'show'])->middleware('auth')->name('admin.leave.types.show');
 Route::put('/admin/leave/types/{code}', [LeaveController::class, 'update'])->middleware('auth')->name('admin.leave.types.update');
