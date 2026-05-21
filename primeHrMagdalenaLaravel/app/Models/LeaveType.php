@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class LeaveType extends Model
 {
     protected $table = 'leave_types_config';
-    protected $primaryKey = 'leave_code';
-    public $incrementing = false;
-    protected $keyType = 'string';
 
     protected $fillable = [
         'leave_code',
@@ -38,5 +35,20 @@ class LeaveType extends Model
     public function leaveBalances()
     {
         return $this->hasMany(LeaveBalance::class, 'leave_code', 'leave_code');
+    }
+
+    public function leaveApplications()
+    {
+        return $this->hasMany(LeaveApplication::class, 'leave_code', 'leave_code');
+    }
+
+    public function leaveTransactions()
+    {
+        return $this->hasMany(LeaveTransaction::class, 'leave_code', 'leave_code');
+    }
+
+    public function accrualRates()
+    {
+        return $this->hasMany(LeaveAccrualRate::class, 'leave_type_id', 'id');
     }
 }

@@ -26,25 +26,7 @@
 
         @include('joborder.notification.joborderNotification')
 
-        {{-- Welcome Banner --}}
-        <div class="welcome-banner">
-            <div class="banner-left">
-                <div class="banner-icon">
-                    <svg width="22" height="22" fill="none" stroke="#d9bb00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                </div>
-                <div>
-                    <h2>My Payslips</h2>
-                    <p><span data-live-datetime data-variant="datetime">{{ now()->timezone('Asia/Manila')->format('l, F j, Y g:i:s A') }}</span> &nbsp;·&nbsp; Utility Worker I · General Services Office · JO-0042</p>
-                </div>
-            </div>
-            <div class="banner-right">
-                <span class="banner-badge">
-                    <span class="banner-badge-dot"></span>
-                    June 2025 Payroll Active
-                </span>
-                <span class="banner-badge outline">Pay Date: Jun 30</span>
-            </div>
-        </div>
+        @include('joborder.topbar.payslipTopbar')
 
         {{-- Stats Grid --}}
         <div class="stats-grid stats-grid-4">
@@ -325,6 +307,13 @@
 
     function closeModal(id) {
         document.getElementById(id).style.display = 'none';
+    }
+
+    function filterPayslipTable(query) {
+        const q = query.toLowerCase();
+        document.querySelectorAll('.payroll-table tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
     }
 
     const sidebar       = document.getElementById('sidebar');

@@ -1,22 +1,6 @@
 @extends('layouts.app')
 
-@push('styles')
-    @vite('resources/css/departments.css')
-    <style>
-        .sortable-th { cursor:pointer; user-select:none; white-space:nowrap; }
-        .sortable-th:hover { background:#f0effe; }
-        .sort-icon { font-size:11px; color:#bbb; margin-left:4px; transition:color .15s; }
-        .filter-bar { display:flex; align-items:center; gap:10px; padding:12px 24px; border-top:1px solid #f0effe; flex-wrap:wrap; }
-        .filter-bar-left { display:flex; align-items:center; gap:10px; flex:1; flex-wrap:wrap; }
-        .filter-label { display:flex; align-items:center; gap:6px; font-size:12px; color:#9999bb; font-weight:600; letter-spacing:.3px; text-transform:uppercase; white-space:nowrap; }
-        .filter-bar select { font-size:13px; padding:9px 16px; border:none; border-radius:8px; color:#0b044d; background:#f7f6ff; cursor:pointer; font-family:'Poppins',sans-serif; outline:none; transition:box-shadow .2s; min-width:150px; }
-        .filter-bar select:focus { box-shadow:0 0 0 2px rgba(11,4,77,0.15); }
-        .filter-bar select.active-filter { background:#ebe9ff; font-weight:600; box-shadow:0 0 0 2px rgba(11,4,77,0.15); }
-        .filter-clear { font-size:12.5px; color:#8e1e18; background:#fee8e8; border:none; border-radius:8px; padding:9px 14px; cursor:pointer; font-family:'Poppins',sans-serif; display:none; transition:background .2s; white-space:nowrap; margin-left:auto; }
-        .filter-clear:hover { background:#fecaca; }
-        .filter-clear.visible { display:inline-flex; align-items:center; gap:5px; }
-    </style>
-@endpush
+
 
 @section('content')
 @php
@@ -27,13 +11,14 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
 @endphp
 
 @include('admin.topbar.departmentsTopbar')
+@include('admin.notification.adminNotification')
 
 {{-- Stats --}}
-<div class="stats-grid" style="margin-bottom:20px;">
+<div class="stats-grid stats-grid-4" style="margin-bottom:20px;">
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Departments</p>
-            <div class="stat-icon-wrap" style="background:#0b044d15;color:#0b044d;box-shadow:0 4px 12px rgba(11,4,77,0.18);">
+            <div class="stat-icon-wrap" style="background:#f0effe;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             </div>
         </div>
@@ -46,7 +31,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Personnel</p>
-            <div class="stat-icon-wrap" style="background:#15803d15;color:#15803d;box-shadow:0 4px 12px rgba(21,128,61,0.18);">
+            <div class="stat-icon-wrap" style="background:#e8f9ef;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
         </div>
@@ -59,7 +44,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Active Offices</p>
-            <div class="stat-icon-wrap" style="background:#d9bb0015;color:#d9bb00;box-shadow:0 4px 12px rgba(217,187,0,0.18);">
+            <div class="stat-icon-wrap" style="background:#fefce8;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
         </div>
@@ -72,7 +57,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Largest Office</p>
-            <div class="stat-icon-wrap" style="background:#8e1e1815;color:#8e1e18;box-shadow:0 4px 12px rgba(142,30,24,0.18);">
+            <div class="stat-icon-wrap" style="background:#fdf0ef;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
             </div>
         </div>

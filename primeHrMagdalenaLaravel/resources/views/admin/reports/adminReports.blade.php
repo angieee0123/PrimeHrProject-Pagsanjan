@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
+@include('admin.topbar.reportsTopbar')
+@include('admin.notification.adminNotification')
 <div>
     <!-- Report Type Tabs -->
     <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
@@ -48,10 +50,6 @@
                 <p class="table-sub">Municipal Government of Pagsanjan · Fiscal Year 2025</p>
             </div>
             <div class="table-actions">
-                <div class="search-box" style="padding: 7px 12px;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9999bb" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                    <input type="text" placeholder="Search..." id="search-input" style="width: 160px;">
-                </div>
                 <select class="filter-select" id="semi-select">
                     <option>1st (1–15)</option>
                     <option selected>2nd (16–30)</option>

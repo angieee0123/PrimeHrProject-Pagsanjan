@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: primehrismagdalena
+-- Host: localhost    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.41
+-- Server version	8.0.45
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -51,7 +51,7 @@ CREATE TABLE `attendance_corrections` (
   CONSTRAINT `attendance_corrections_attendance_id_foreign` FOREIGN KEY (`attendance_id`) REFERENCES `attendance` (`id`) ON DELETE CASCADE,
   CONSTRAINT `attendance_corrections_corrected_by_foreign` FOREIGN KEY (`corrected_by`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `attendance_corrections_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -60,7 +60,7 @@ CREATE TABLE `attendance_corrections` (
 
 LOCK TABLES `attendance_corrections` WRITE;
 /*!40000 ALTER TABLE `attendance_corrections` DISABLE KEYS */;
-INSERT INTO `attendance_corrections` VALUES (1,1,8,'2026-05-01',NULL,NULL,NULL,NULL,NULL,NULL,'06:00:00','12:00:00','13:00:00','17:00:00',NULL,NULL,'HAHA','[\"attendance_corrections/RCebphmcK7aoXXFzG3o2WscCYUn6Ju7JL10nfhQW.pdf\"]',1,'2026-05-06 15:37:10','2026-05-06 15:37:10'),(2,24,8,'2026-05-04',NULL,NULL,NULL,NULL,NULL,NULL,'08:00:00','12:09:00','13:16:00','19:00:00',NULL,NULL,'haha','[\"attendance_corrections/lI7f4J9GGcdMaq4kv31zeKrWefyrOSfLZv1TP4y0.png\"]',1,'2026-05-06 21:48:18','2026-05-06 21:48:18');
+INSERT INTO `attendance_corrections` VALUES (41,279,8,'2026-05-18',NULL,NULL,NULL,NULL,NULL,NULL,'10:26:00','11:42:00','13:06:00','17:09:00',NULL,NULL,'AHAHA','[\"attendance_corrections/3jqzVGIWEGUJAgtT1DQTioRehfWpAG59GyY4xGhN.pdf\"]',1,'2026-05-18 04:27:04','2026-05-18 04:27:04');
 /*!40000 ALTER TABLE `attendance_corrections` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -73,4 +73,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-12  5:48:23
+-- Dump completed on 2026-05-19  4:04:56

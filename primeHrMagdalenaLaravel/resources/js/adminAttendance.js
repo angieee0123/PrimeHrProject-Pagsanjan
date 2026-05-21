@@ -294,10 +294,10 @@ window.calculateTotalHours = function() {
         otMinutes = Math.max(0, otDiff);
     }
 
-    // Calculate late with 15-min grace period
+    // Calculate late with 5-min grace period
     if (amIn) {
         const amInTime = new Date('1970-01-01 ' + amIn);
-        const graceThreshold = new Date('1970-01-01 08:15:00');
+        const graceThreshold = new Date('1970-01-01 08:05:00');
         const expectedIn = new Date('1970-01-01 08:00:00');
         if (amInTime > graceThreshold) {
             lateMinutes = Math.max(0, (amInTime - expectedIn) / 1000 / 60);
@@ -409,6 +409,8 @@ window.closeCorrectModal = function() {
     currentCorrectAttendanceId = null;
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+
 document.getElementById('correctAttachments').addEventListener('change', function(e) {
     const preview = document.getElementById('filePreview');
     preview.innerHTML = '';
@@ -462,6 +464,8 @@ document.getElementById('correctForm').addEventListener('submit', function(e) {
         btn.disabled = false;
     });
 });
+
+}); // end DOMContentLoaded
 
 window.openDetailedDTRModal = function(employeeId, name, empId) {
     currentDetailedEmployeeId = employeeId;
@@ -530,14 +534,14 @@ function computeAccreditedHours(record) {
 
     const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
 
-    // AM window: 08:00 – 12:00 (15-min grace: if amIn <= 08:15, treat as 08:00)
+    // AM window: 08:00 – 12:00 (5-min grace: if amIn <= 08:05, treat as 08:00)
     const AM_START   = 8 * 60;         // 08:00
     const AM_END     = 12 * 60;        // 12:00
-    const AM_GRACE   = AM_START + 15;  // 08:15
-    // PM window: 13:00 – 17:00 (15-min grace: if pmIn <= 13:15, treat as 13:00)
+    const AM_GRACE   = AM_START + 5;   // 08:05
+    // PM window: 13:00 – 17:00 (5-min grace: if pmIn <= 13:05, treat as 13:00)
     const PM_START   = 13 * 60;        // 13:00
     const PM_END     = 17 * 60;        // 17:00
-    const PM_GRACE   = PM_START + 15;  // 13:15
+    const PM_GRACE   = PM_START + 5;   // 13:05
 
     // AM: if within grace period, count from 08:00; otherwise count from actual amIn
     const amInMin  = toMin(amIn);
@@ -588,7 +592,7 @@ function renderDetailedDTR(data) {
         }
 
         const hasAnyLog = record.am_in || record.am_out || record.pm_in || record.pm_out;
-        const isAbsent = !isWeekend && !hasAnyLog;
+        const isAbsent = !isWeekend && !hasAnyLog && !record.is_on_leave;
         if (isAbsent) {
             tr.className = 'day-absent';
             totalAbsent++;
@@ -613,7 +617,13 @@ function renderDetailedDTR(data) {
 
         // Build status badge
         let statusBadge = '';
-        if (record.is_incomplete) {
+        if (record.is_abandoned) {
+            statusBadge = ' <span class="badge-absent">ABANDONED</span>';
+            tr.className = 'day-absent';
+        } else if (record.is_absent || isAbsent) {
+            statusBadge = ' <span class="badge-absent">ABSENT</span>';
+            tr.className = 'day-absent';
+        } else if (record.is_incomplete) {
             statusBadge = ' <span class="badge-incomplete">Incomplete</span>';
         } else if (record.needs_review) {
             statusBadge = ' <span class="badge-needs-review">Needs Review</span>';
@@ -621,7 +631,14 @@ function renderDetailedDTR(data) {
 
         // Format accredited hours from backend calculation
         let accreditedDisplay = '<span class="badge-incomplete">Incomplete</span>';
-        if (record.accredited_minutes > 0) {
+        
+        // Handle abandoned/absent cases
+        if (record.is_abandoned || record.is_absent || isAbsent) {
+            accreditedDisplay = '<strong style="color:#8e1e18;">0 hrs</strong><br><small style="color: #8e1e18; font-size: 10px;">⚠️ Absent</small>';
+        } else if (record.is_on_leave) {
+            // On approved leave - show full 8 hours
+            accreditedDisplay = '<strong style="color:#15803d;">8 hrs</strong><br><small style="color: #15803d; font-size: 10px;">✓ On Leave</small>';
+        } else if (record.accredited_minutes > 0) {
             const hrs = Math.floor(record.accredited_minutes / 60);
             const mins = record.accredited_minutes % 60;
             const label = hrs > 0 && mins > 0 ? `${hrs}h ${mins}m` : hrs > 0 ? `${hrs} hrs` : `${mins} min`;
@@ -644,6 +661,71 @@ function renderDetailedDTR(data) {
             if (record.has_log) {
                 accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">📋 From Log</small>`;
             }
+            
+            // Add late deduction indicator if late was deducted from leave
+            if (record.late_deducted_from_leave && record.late_deduction_leave_type) {
+                const lateMinutes = record.late_minutes || 0;
+                const lateDays = (lateMinutes / 480).toFixed(6); // CSC standard: 480 minutes = 1 work day
+                const isPartial = record.late_deduction_leave_type.includes('partial');
+                const isFull = record.late_deduction_leave_type.includes('full');
+                
+                if (isFull) {
+                    accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Late Fully Covered by ${record.late_deduction_leave_type.replace(' (full)', '')}</small>`;
+                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${lateMinutes} min late → ${lateDays} days deducted</small>`;
+                } else if (isPartial) {
+                    const leaveTypes = record.late_deduction_leave_type.replace(' (partial)', '');
+                    accreditedDisplay += `<br><small style="color: #a16207; font-size: 10px; font-weight: 600;">⚠ Partial Coverage by ${leaveTypes}</small>`;
+                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${lateMinutes} min late, insufficient leave</small>`;
+                    
+                    // Show LWOP if available
+                    if (record.lwop_minutes && record.lwop_minutes > 0) {
+                        const lwopDays = (record.lwop_minutes / 480).toFixed(6);
+                        accreditedDisplay += `<br><small style="color: #8e1e18; font-size: 9px;">LWOP: ${record.lwop_minutes} min (${lwopDays} days) → Salary deduction</small>`;
+                    } else {
+                        accreditedDisplay += `<br><small style="color: #8e1e18; font-size: 9px;">Remaining deducted from hours</small>`;
+                    }
+                } else {
+                    accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Late Covered by ${record.late_deduction_leave_type}</small>`;
+                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${lateMinutes} min late → ${lateDays} days deducted</small>`;
+                }
+            }
+            
+            // Add undertime deduction indicator if undertime was deducted from leave
+            if (record.undertime_deducted_from_leave && record.undertime_deduction_leave_type) {
+                const undertimeMinutes = record.undertime || 0;
+                const undertimeDays = (undertimeMinutes / 480).toFixed(6); // CSC standard: 480 minutes = 1 work day
+                const isPartial = record.undertime_deduction_leave_type.includes('partial');
+                const isFull = record.undertime_deduction_leave_type.includes('full');
+                
+                if (isFull) {
+                    accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Undertime Fully Covered by ${record.undertime_deduction_leave_type.replace(' (full)', '')}</small>`;
+                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${undertimeMinutes} min undertime → ${undertimeDays} days deducted</small>`;
+                } else if (isPartial) {
+                    const leaveTypes = record.undertime_deduction_leave_type.replace(' (partial)', '');
+                    accreditedDisplay += `<br><small style="color: #a16207; font-size: 10px; font-weight: 600;">⚠ Partial Coverage by ${leaveTypes}</small>`;
+                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${undertimeMinutes} min undertime, insufficient leave</small>`;
+                    
+                    // Show LWOP if available
+                    if (record.lwop_minutes && record.lwop_minutes > 0) {
+                        const lwopDays = (record.lwop_minutes / 480).toFixed(6);
+                        accreditedDisplay += `<br><small style="color: #8e1e18; font-size: 9px;">LWOP: ${record.lwop_minutes} min (${lwopDays} days) → Salary deduction</small>`;
+                    } else {
+                        accreditedDisplay += `<br><small style="color: #8e1e18; font-size: 9px;">Remaining deducted from hours</small>`;
+                    }
+                } else {
+                    accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Undertime Covered by ${record.undertime_deduction_leave_type}</small>`;
+                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${undertimeMinutes} min undertime → ${undertimeDays} days deducted</small>`;
+                }
+            }
+        }
+
+        // Build leave deduction display
+        let leaveDeductionDisplay = '—';
+        if (record.is_on_leave && record.leave_info) {
+            const leaveType = record.leave_info.leave_type || 'Leave';
+            const leaveCode = record.leave_info.leave_code || 'N/A';
+            const days = record.leave_info.days || 1;
+            leaveDeductionDisplay = `<span style="color: #0b044d; font-weight: 600;">${leaveCode}</span><br><small style="color: #6b6a8a; font-size: 10px;">${leaveType} (${days} day${days > 1 ? 's' : ''})</small>`;
         }
 
         tr.innerHTML = `
@@ -659,6 +741,7 @@ function renderDetailedDTR(data) {
             <td>${record.late_display ? '<span class="log-late">' + record.late_display + '</span>' : (record.am_in ? '0 min' : '—')}</td>
             <td><strong>${record.total_hours}</strong></td>
             <td>${accreditedDisplay}</td>
+            <td>${leaveDeductionDisplay}</td>
             <td><button class="btn-edit-time" onclick="openCorrectModal(${record.attendance_id ? record.attendance_id : "'new_" + currentDetailedEmployeeId + "_" + record.date_key + "'"}, '${record.date}')" title="${record.attendance_id ? 'Edit time records' : 'Add time records'}">Edit</button></td>
         `;
 

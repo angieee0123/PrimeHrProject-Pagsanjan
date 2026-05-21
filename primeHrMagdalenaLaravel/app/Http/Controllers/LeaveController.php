@@ -5,6 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\LeaveType;
 use App\Models\LeaveAccrualRate;
+use App\Models\LeaveApplication;
+use App\Models\LeaveBalance;
+use App\Models\LeaveTransaction;
+use App\Services\CscTimeConversionService;
+use App\Services\NotificationService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class LeaveController extends Controller
 {
@@ -51,15 +59,70 @@ class LeaveController extends Controller
             ->orderBy('leave_name')
             ->get();
 
-        // Sample leave requests data (you can create a table for this later)
-        $leaveRequests = [
-            ['id' => 'LV-2025-001', 'empId' => 'PGS-0041', 'name' => 'Maria B. Santos', 'position' => 'Administrative Officer IV', 'dept' => 'Office of the Mayor', 'type' => 'Vacation Leave', 'from' => 'Jun 10, 2025', 'to' => 'Jun 12, 2025', 'days' => 3, 'reason' => 'Family vacation', 'status' => 'Approved'],
-            ['id' => 'LV-2025-002', 'empId' => 'PGS-0115', 'name' => 'Ana R. Reyes', 'position' => 'Nurse II', 'dept' => 'Municipal Health Office', 'type' => 'Sick Leave', 'from' => 'Jun 15, 2025', 'to' => 'Jun 16, 2025', 'days' => 2, 'reason' => 'Medical consultation', 'status' => 'Approved'],
-            ['id' => 'LV-2025-003', 'empId' => 'PGS-0203', 'name' => 'Carlos M. Mendoza', 'position' => 'Municipal Treasurer III', 'dept' => 'Office of the Mun. Treasurer', 'type' => 'Sick Leave', 'from' => 'Jun 20, 2025', 'to' => 'Jun 22, 2025', 'days' => 3, 'reason' => 'Flu and fever', 'status' => 'Pending'],
-            ['id' => 'LV-2025-004', 'empId' => 'PGS-0267', 'name' => 'Liza G. Gomez', 'position' => 'Social Welfare Officer II', 'dept' => 'MSWD – Pagsanjan', 'type' => 'Emergency Leave', 'from' => 'Jun 18, 2025', 'to' => 'Jun 18, 2025', 'days' => 1, 'reason' => 'Family emergency', 'status' => 'Approved'],
-            ['id' => 'LV-2025-005', 'empId' => 'PGS-0082', 'name' => 'Juan P. dela Cruz', 'position' => 'Municipal Engineer II', 'dept' => 'Office of the Mun. Engineer', 'type' => 'Vacation Leave', 'from' => 'Jul 1, 2025', 'to' => 'Jul 3, 2025', 'days' => 3, 'reason' => 'Rest and recreation', 'status' => 'Pending'],
-            ['id' => 'LV-2025-006', 'empId' => 'PGS-0310', 'name' => 'Roberto T. Flores', 'position' => 'Municipal Civil Registrar I', 'dept' => 'Municipal Civil Registrar', 'type' => 'Vacation Leave', 'from' => 'Jun 25, 2025', 'to' => 'Jun 25, 2025', 'days' => 1, 'reason' => 'Personal errand', 'status' => 'Rejected'],
-        ];
+        // Fetch all leave applications with relationships
+        $leaveApplications = LeaveApplication::with([
+            'employee.employmentDetail.departmentRelation',
+            'employee.employmentDetail.designationRelation',
+            'leaveType'
+        ])
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+        // Get unique departments for filter
+        $departments = $leaveApplications
+            ->pluck('employee.employmentDetail.departmentRelation.name')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+
+        // Get all employees for manual credit modal
+        $employees = \App\Models\Employee::with('employmentDetail.departmentRelation')
+            ->orderBy('employee_id')
+            ->get();
+
+        // Fetch leave transactions with pagination, filtering, and sorting
+        $transactionQuery = LeaveTransaction::with([
+            'employee',
+            'processedBy.employee'
+        ]);
+
+        // Apply filters
+        if (request('filter_employee')) {
+            $transactionQuery->where('employee_id', request('filter_employee'));
+        }
+        if (request('filter_type')) {
+            $transactionQuery->where('transaction_type', request('filter_type'));
+        }
+        if (request('filter_leave_code')) {
+            $transactionQuery->where('leave_code', request('filter_leave_code'));
+        }
+        if (request('filter_date')) {
+            $transactionQuery->whereDate('transaction_date', request('filter_date'));
+        }
+
+        // Apply sorting
+        $sortBy = request('sort_by', 'transaction_date');
+        $sortOrder = request('sort_order', 'desc');
+        $allowedSortColumns = ['transaction_date', 'employee_id', 'leave_code', 'transaction_type', 'amount', 'balance_before', 'balance_after'];
+        
+        if (in_array($sortBy, $allowedSortColumns)) {
+            $transactionQuery->orderBy($sortBy, $sortOrder);
+        } else {
+            $transactionQuery->orderBy('transaction_date', 'desc');
+        }
+        
+        $transactionQuery->orderBy('created_at', 'desc');
+        
+        $leaveTransactions = $transactionQuery->paginate(15)->appends(request()->except('page'));
+
+        // Get unique employees who have transactions for filter
+        $transactionEmployees = \App\Models\Employee::whereHas('leaveTransactions')
+            ->orderBy('employee_id')
+            ->get();
+
+        // Debug: Log transaction count
+        \Log::info('Leave Transactions Count: ' . $leaveTransactions->total());
 
         // Sample benefits data (you can create a table for this later)
         $benefitsData = [
@@ -71,93 +134,166 @@ class LeaveController extends Controller
             ['empId' => 'PGS-0310', 'name' => 'Roberto T. Flores', 'gsis' => '₱2,748', 'philhealth' => '₱775', 'pagibig' => '₱100', 'vlBalance' => 8, 'slBalance' => 10],
         ];
 
-        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact('leaveTypes', 'leaveRequests', 'benefitsData', 'accrualRates', 'accruedLeaveTypes'));
+        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact('leaveTypes', 'leaveApplications', 'benefitsData', 'accrualRates', 'accruedLeaveTypes', 'departments', 'employees', 'leaveTransactions', 'transactionEmployees'));
     }
 
     public function storeLeaveType(Request $request)
     {
-        $validated = $request->validate([
-            'leave_code' => 'required|string|max:10|unique:leave_types_config,leave_code',
-            'leave_name' => 'required|string|max:100',
-            'annual_limit' => 'required|numeric|min:0',
-            'is_accrued' => 'boolean',
-            'is_cumulative' => 'boolean',
-            'requires_6_months' => 'boolean',
-            'is_monetizable' => 'boolean',
-            'requires_attachment' => 'boolean',
-            'attachment_info' => 'nullable|string',
-            'is_active' => 'required|boolean',
-            'document' => 'nullable|file|mimes:pdf|max:5120',
-        ]);
+        try {
+            $validated = $request->validate([
+                'leave_code' => 'required|string|max:10|unique:leave_types_config,leave_code',
+                'leave_name' => 'required|string|max:100',
+                'annual_limit' => 'required|numeric|min:0',
+                'attachment_info' => 'nullable|string',
+                'is_active' => 'required|boolean',
+                'document' => 'nullable|file|mimes:pdf|max:5120',
+            ]);
 
-        $documentPath = null;
-        if ($request->hasFile('document')) {
-            $documentPath = $request->file('document')->store('leave_types_documents', 'public');
+            $documentPath = null;
+            if ($request->hasFile('document')) {
+                $documentPath = $request->file('document')->store('leave_types_documents', 'public');
+            }
+
+            $leaveType = LeaveType::create([
+                'leave_code' => strtoupper($validated['leave_code']),
+                'leave_name' => $validated['leave_name'],
+                'annual_limit' => $validated['annual_limit'],
+                'is_accrued' => $request->input('is_accrued') == '1',
+                'is_cumulative' => $request->input('is_cumulative') == '1',
+                'requires_6_months' => $request->input('requires_6_months') == '1',
+                'is_monetizable' => $request->input('is_monetizable') == '1',
+                'requires_attachment' => $request->input('requires_attachment') == '1',
+                'attachment_info' => $validated['attachment_info'] ?? null,
+                'document_path' => $documentPath,
+                'is_active' => $validated['is_active'],
+            ]);
+
+            // Check if request is AJAX
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Leave type '{$leaveType->leave_name}' has been registered successfully!",
+                    'data' => $leaveType
+                ]);
+            }
+
+            return redirect()->route('admin.leave', ['tab' => 'types'])
+                ->with('success', "Leave type '{$leaveType->leave_name}' has been registered successfully!");
+                
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('Failed to create leave type: ' . $e->getMessage());
+            
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to register leave type: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('admin.leave', ['tab' => 'types'])
+                ->with('error', 'Failed to register leave type: ' . $e->getMessage());
         }
-
-        LeaveType::create([
-            'leave_code' => strtoupper($validated['leave_code']),
-            'leave_name' => $validated['leave_name'],
-            'annual_limit' => $validated['annual_limit'],
-            'is_accrued' => $request->has('is_accrued'),
-            'is_cumulative' => $request->has('is_cumulative'),
-            'requires_6_months' => $request->has('requires_6_months'),
-            'is_monetizable' => $request->has('is_monetizable'),
-            'requires_attachment' => $request->has('requires_attachment'),
-            'attachment_info' => $validated['attachment_info'],
-            'document_path' => $documentPath,
-            'is_active' => $validated['is_active'],
-        ]);
-
-        return redirect()->route('admin.leave')->with('success', 'Leave type added successfully!');
     }
 
     public function show($code)
     {
         $leaveType = LeaveType::where('leave_code', $code)->firstOrFail();
-        return response()->json($leaveType);
+        
+        // Ensure all boolean fields are properly cast
+        return response()->json([
+            'id' => $leaveType->id,
+            'leave_code' => $leaveType->leave_code,
+            'leave_name' => $leaveType->leave_name,
+            'annual_limit' => $leaveType->annual_limit,
+            'is_accrued' => (bool) $leaveType->is_accrued,
+            'is_cumulative' => (bool) $leaveType->is_cumulative,
+            'requires_6_months' => (bool) $leaveType->requires_6_months,
+            'is_monetizable' => (bool) $leaveType->is_monetizable,
+            'requires_attachment' => (bool) $leaveType->requires_attachment,
+            'attachment_info' => $leaveType->attachment_info,
+            'document_path' => $leaveType->document_path,
+            'is_active' => (bool) $leaveType->is_active,
+        ]);
     }
 
     public function update(Request $request, $code)
     {
-        $leaveType = LeaveType::where('leave_code', $code)->firstOrFail();
+        try {
+            $leaveType = LeaveType::where('leave_code', $code)->firstOrFail();
 
-        $validated = $request->validate([
-            'leave_name' => 'required|string|max:100',
-            'annual_limit' => 'required|numeric|min:0',
-            'is_accrued' => 'boolean',
-            'is_cumulative' => 'boolean',
-            'requires_6_months' => 'boolean',
-            'is_monetizable' => 'boolean',
-            'requires_attachment' => 'boolean',
-            'attachment_info' => 'nullable|string',
-            'is_active' => 'required|boolean',
-            'document' => 'nullable|file|mimes:pdf|max:5120',
-        ]);
+            $validated = $request->validate([
+                'leave_name' => 'required|string|max:100',
+                'annual_limit' => 'required|numeric|min:0',
+                'attachment_info' => 'nullable|string',
+                'is_active' => 'required|boolean',
+                'document' => 'nullable|file|mimes:pdf|max:5120',
+            ]);
 
-        $documentPath = $leaveType->document_path;
-        if ($request->hasFile('document')) {
-            // Delete old document if exists
-            if ($documentPath && \Storage::disk('public')->exists($documentPath)) {
-                \Storage::disk('public')->delete($documentPath);
+            $documentPath = $leaveType->document_path;
+            if ($request->hasFile('document')) {
+                // Delete old document if exists
+                if ($documentPath && \Storage::disk('public')->exists($documentPath)) {
+                    \Storage::disk('public')->delete($documentPath);
+                }
+                $documentPath = $request->file('document')->store('leave_types_documents', 'public');
             }
-            $documentPath = $request->file('document')->store('leave_types_documents', 'public');
+
+            $leaveType->update([
+                'leave_name' => $validated['leave_name'],
+                'annual_limit' => $validated['annual_limit'],
+                'is_accrued' => $request->input('is_accrued') == '1',
+                'is_cumulative' => $request->input('is_cumulative') == '1',
+                'requires_6_months' => $request->input('requires_6_months') == '1',
+                'is_monetizable' => $request->input('is_monetizable') == '1',
+                'requires_attachment' => $request->input('requires_attachment') == '1',
+                'attachment_info' => $validated['attachment_info'] ?? null,
+                'document_path' => $documentPath,
+                'is_active' => $validated['is_active'],
+            ]);
+
+            // Check if request is AJAX
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Leave type '{$leaveType->leave_name}' has been updated successfully!",
+                    'data' => $leaveType
+                ]);
+            }
+
+            return redirect()->route('admin.leave', ['tab' => 'types'])
+                ->with('success', "Leave type '{$leaveType->leave_name}' has been updated successfully!");
+                
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('Failed to update leave type: ' . $e->getMessage());
+            
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update leave type: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('admin.leave', ['tab' => 'types'])
+                ->with('error', 'Failed to update leave type: ' . $e->getMessage());
         }
-
-        $leaveType->update([
-            'leave_name' => $validated['leave_name'],
-            'annual_limit' => $validated['annual_limit'],
-            'is_accrued' => $request->has('is_accrued'),
-            'is_cumulative' => $request->has('is_cumulative'),
-            'requires_6_months' => $request->has('requires_6_months'),
-            'is_monetizable' => $request->has('is_monetizable'),
-            'requires_attachment' => $request->has('requires_attachment'),
-            'attachment_info' => $validated['attachment_info'],
-            'document_path' => $documentPath,
-            'is_active' => $validated['is_active'],
-        ]);
-
-        return redirect()->route('admin.leave')->with('success', 'Leave type updated successfully!');
     }
 
     public function storeAccrualRate(Request $request)
@@ -210,5 +346,490 @@ class LeaveController extends Controller
         $accrualRate->delete();
 
         return redirect()->route('admin.leave')->with('success', 'Accrual rate deleted successfully!');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'leave_code' => 'required|exists:leave_types_config,leave_code',
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'number_of_days' => 'required|numeric|min:0.5',
+            'reason' => 'required|string|max:500',
+            'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $employee = auth()->user()->employee;
+            
+            if (!$employee) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Employee record not found'
+                ], 404);
+            }
+
+            $leaveType = LeaveType::where('leave_code', $validated['leave_code'])->first();
+            
+            // Check if attachment is required
+            if ($leaveType->requires_attachment && !$request->hasFile('attachment')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Attachment is required for this leave type'
+                ], 422);
+            }
+
+            // Validate working days using CSC service (excludes weekends automatically)
+            $validation = CscTimeConversionService::validateLeaveDays(
+                $validated['start_date'],
+                $validated['end_date'],
+                $validated['number_of_days']
+            );
+
+            if (!$validation['is_valid']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validation['message'] . ' Please adjust your leave request to match working days only (excluding weekends).'
+                ], 422);
+            }
+
+            // Check for overlapping leave requests (pending or approved)
+            $hasOverlap = LeaveApplication::where('employee_id', $employee->id)
+                ->whereIn('status', ['pending', 'approved'])
+                ->where(function($query) use ($validated) {
+                    $query->whereBetween('start_date', [$validated['start_date'], $validated['end_date']])
+                          ->orWhereBetween('end_date', [$validated['start_date'], $validated['end_date']])
+                          ->orWhere(function($q) use ($validated) {
+                              $q->where('start_date', '<=', $validated['start_date'])
+                                ->where('end_date', '>=', $validated['end_date']);
+                          });
+                })
+                ->exists();
+
+            if ($hasOverlap) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You already have a leave request for the selected dates. Please choose different dates or cancel your existing leave request.'
+                ], 422);
+            }
+
+            // Check leave balance
+            $year = Carbon::parse($validated['start_date'])->year;
+            $leaveBalance = LeaveBalance::where('employee_id', $employee->id)
+                ->where('leave_code', $validated['leave_code'])
+                ->where('year', $year)
+                ->first();
+
+            if (!$leaveBalance || $leaveBalance->available_credits < $validated['number_of_days']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Insufficient leave balance'
+                ], 422);
+            }
+
+            // Handle file upload
+            $attachmentPath = null;
+            if ($request->hasFile('attachment')) {
+                $attachmentPath = $request->file('attachment')->store('leave_attachments', 'public');
+            }
+
+            // Create leave application
+            $leaveApplication = LeaveApplication::create([
+                'employee_id' => $employee->id,
+                'leave_code' => $validated['leave_code'],
+                'start_date' => $validated['start_date'],
+                'end_date' => $validated['end_date'],
+                'number_of_days' => $validated['number_of_days'],
+                'reason' => $validated['reason'],
+                'status' => 'pending',
+                'attachment_path' => $attachmentPath,
+                'filed_by' => auth()->id(),
+            ]);
+
+            // Send notification to admin
+            NotificationService::leaveRequestSubmitted($leaveApplication);
+
+            // Create pending transaction
+            $balanceBefore = $leaveBalance->available_credits;
+            $leaveBalance->pending_credits += $validated['number_of_days'];
+            $leaveBalance->available_credits -= $validated['number_of_days'];
+            $leaveBalance->save();
+
+                LeaveTransaction::create([
+                    'employee_id' => $employee->id,
+                    'leave_code' => $validated['leave_code'],
+                    'year' => $year,
+                    'transaction_type' => 'pending',
+                    'amount' => -$validated['number_of_days'],
+                    'balance_before' => $balanceBefore,
+                    'balance_after' => $leaveBalance->available_credits,
+                    'reference_type' => 'leave_application',
+                    'reference_id' => $leaveApplication->id,
+                    'transaction_date' => now(),
+                    'processed_by' => auth()->id(),
+                    'remarks' => "Pending leave application {$leaveApplication->application_number}",
+                ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Leave application submitted successfully',
+                'application_number' => $leaveApplication->application_number
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to submit leave application: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function cancel($id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $employee = auth()->user()->employee;
+            
+            if (!$employee) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Employee record not found'
+                ], 404);
+            }
+
+            $leaveApplication = LeaveApplication::where('id', $id)
+                ->where('employee_id', $employee->id)
+                ->first();
+
+            if (!$leaveApplication) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Leave application not found'
+                ], 404);
+            }
+
+            if ($leaveApplication->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending leave requests can be cancelled'
+                ], 422);
+            }
+
+            $year = Carbon::parse($leaveApplication->start_date)->year;
+            $leaveBalance = LeaveBalance::where('employee_id', $employee->id)
+                ->where('leave_code', $leaveApplication->leave_code)
+                ->where('year', $year)
+                ->first();
+
+            if ($leaveBalance) {
+                $balanceBefore = $leaveBalance->available_credits;
+                $leaveBalance->pending_credits -= $leaveApplication->number_of_days;
+                $leaveBalance->available_credits += $leaveApplication->number_of_days;
+                $leaveBalance->save();
+
+                LeaveTransaction::create([
+                    'employee_id' => $employee->id,
+                    'leave_code' => $leaveApplication->leave_code,
+                    'year' => $year,
+                    'transaction_type' => 'credit',
+                    'amount' => $leaveApplication->number_of_days,
+                    'balance_before' => $balanceBefore,
+                    'balance_after' => $leaveBalance->available_credits,
+                    'reference_type' => 'leave_application',
+                    'reference_id' => $leaveApplication->id,
+                    'transaction_date' => now(),
+                    'processed_by' => auth()->id(),
+                    'remarks' => "Cancelled leave application {$leaveApplication->application_number}",
+                ]);
+            }
+
+            $leaveApplication->status = 'cancelled';
+            $leaveApplication->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Leave request cancelled successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel leave request: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function approve($id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $leaveApplication = LeaveApplication::findOrFail($id);
+
+            if ($leaveApplication->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending leave requests can be approved'
+                ], 422);
+            }
+
+            $year = Carbon::parse($leaveApplication->start_date)->year;
+            $leaveBalance = LeaveBalance::where('employee_id', $leaveApplication->employee_id)
+                ->where('leave_code', $leaveApplication->leave_code)
+                ->where('year', $year)
+                ->first();
+
+            if ($leaveBalance) {
+                $balanceBefore = $leaveBalance->available_credits;
+                $leaveBalance->pending_credits -= $leaveApplication->number_of_days;
+                $leaveBalance->used_credits += $leaveApplication->number_of_days;
+                $leaveBalance->save();
+
+                LeaveTransaction::create([
+                    'employee_id' => $leaveApplication->employee_id,
+                    'leave_code' => $leaveApplication->leave_code,
+                    'year' => $year,
+                    'transaction_type' => 'debit',
+                    'amount' => -$leaveApplication->number_of_days,
+                    'balance_before' => $balanceBefore,
+                    'balance_after' => $leaveBalance->available_credits,
+                    'reference_type' => 'leave_application',
+                    'reference_id' => $leaveApplication->id,
+                    'transaction_date' => now(),
+                    'processed_by' => auth()->id(),
+                    'remarks' => "Approved leave application {$leaveApplication->application_number}",
+                ]);
+            }
+
+            $leaveApplication->status = 'approved';
+            $leaveApplication->approved_by = auth()->id();
+            $leaveApplication->approved_at = now();
+            $leaveApplication->save();
+
+            // Send notification to employee
+            NotificationService::leaveRequestStatusChanged($leaveApplication, 'approved');
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Leave request approved successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to approve leave request: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function reject(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $validated = $request->validate([
+                'remarks' => 'required|string|max:500'
+            ]);
+
+            $leaveApplication = LeaveApplication::findOrFail($id);
+
+            if ($leaveApplication->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending leave requests can be rejected'
+                ], 422);
+            }
+
+            $year = Carbon::parse($leaveApplication->start_date)->year;
+            $leaveBalance = LeaveBalance::where('employee_id', $leaveApplication->employee_id)
+                ->where('leave_code', $leaveApplication->leave_code)
+                ->where('year', $year)
+                ->first();
+
+            if ($leaveBalance) {
+                $balanceBefore = $leaveBalance->available_credits;
+                $leaveBalance->pending_credits -= $leaveApplication->number_of_days;
+                $leaveBalance->available_credits += $leaveApplication->number_of_days;
+                $leaveBalance->save();
+
+                LeaveTransaction::create([
+                    'employee_id' => $leaveApplication->employee_id,
+                    'leave_code' => $leaveApplication->leave_code,
+                    'year' => $year,
+                    'transaction_type' => 'credit',
+                    'amount' => $leaveApplication->number_of_days,
+                    'balance_before' => $balanceBefore,
+                    'balance_after' => $leaveBalance->available_credits,
+                    'reference_type' => 'leave_application',
+                    'reference_id' => $leaveApplication->id,
+                    'transaction_date' => now(),
+                    'processed_by' => auth()->id(),
+                    'remarks' => "Rejected leave application {$leaveApplication->application_number}: {$validated['remarks']}",
+                ]);
+            }
+
+            $leaveApplication->status = 'rejected';
+            $leaveApplication->approved_by = auth()->id();
+            $leaveApplication->approved_at = now();
+            $leaveApplication->approver_remarks = $validated['remarks'];
+            $leaveApplication->save();
+
+            // Send notification to employee
+            NotificationService::leaveRequestStatusChanged($leaveApplication, 'rejected');
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Leave request rejected successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reject leave request: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getEmployeeBalances($employeeId)
+    {
+        try {
+            $year = now()->year;
+            
+            // Get all leave balances for the employee
+            $balances = LeaveBalance::where('employee_id', $employeeId)
+                ->where('year', $year)
+                ->pluck('available_credits', 'leave_code');
+
+            // Get all active leave types
+            $leaveTypes = LeaveType::where('is_active', true)
+                ->orderBy('leave_name')
+                ->get(['leave_code', 'leave_name']);
+
+            return response()->json([
+                'success' => true,
+                'balances' => $balances,
+                'leaveTypes' => $leaveTypes
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load employee balances: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function storeManualCredit(Request $request)
+    {
+        $validated = $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+            'leave_code' => 'required|exists:leave_types_config,leave_code',
+            'amount' => 'required|numeric|min:0.000001|max:999.999999',
+            'transaction_date' => 'required|date',
+            'transaction_type' => 'required|in:add,deduct',
+            'remarks' => 'required|string|max:500',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $year = Carbon::parse($validated['transaction_date'])->year;
+            $isDeduction = $validated['transaction_type'] === 'deduct';
+            
+            // Get or create leave balance for the employee
+            $leaveBalance = LeaveBalance::firstOrCreate(
+                [
+                    'employee_id' => $validated['employee_id'],
+                    'leave_code' => $validated['leave_code'],
+                    'year' => $year,
+                ],
+                [
+                    'total_credits' => 0,
+                    'used_credits' => 0,
+                    'pending_credits' => 0,
+                    'available_credits' => 0,
+                    'carried_over' => 0,
+                ]
+            );
+
+            $balanceBefore = $leaveBalance->available_credits;
+            
+            // Check if deduction would result in negative balance (warning only, still allow)
+            if ($isDeduction && $balanceBefore < $validated['amount']) {
+                // Log warning but proceed
+                \Log::warning('Manual deduction results in negative balance', [
+                    'employee_id' => $validated['employee_id'],
+                    'leave_code' => $validated['leave_code'],
+                    'current_balance' => $balanceBefore,
+                    'deduction_amount' => $validated['amount'],
+                    'processed_by' => auth()->id()
+                ]);
+            }
+            
+            // Apply adjustment
+            if ($isDeduction) {
+                $leaveBalance->total_credits -= $validated['amount'];
+                $leaveBalance->available_credits -= $validated['amount'];
+                $transactionAmount = -$validated['amount'];
+                $transactionType = 'debit';
+            } else {
+                $leaveBalance->total_credits += $validated['amount'];
+                $leaveBalance->available_credits += $validated['amount'];
+                $transactionAmount = $validated['amount'];
+                $transactionType = 'credit';
+            }
+            
+            $leaveBalance->save();
+
+            // Create transaction record
+            LeaveTransaction::create([
+                'employee_id' => $validated['employee_id'],
+                'leave_code' => $validated['leave_code'],
+                'year' => $year,
+                'transaction_type' => 'adjustment',
+                'amount' => $transactionAmount,
+                'balance_before' => $balanceBefore,
+                'balance_after' => $leaveBalance->available_credits,
+                'reference_type' => 'manual_adjustment',
+                'reference_id' => null,
+                'transaction_date' => $validated['transaction_date'],
+                'processed_by' => auth()->id(),
+                'remarks' => ($isDeduction ? '[DEDUCTION] ' : '[ADDITION] ') . $validated['remarks'],
+            ]);
+
+            DB::commit();
+
+            $message = $isDeduction 
+                ? 'Leave credits deducted successfully!' 
+                : 'Leave credits added successfully!';
+
+            return redirect()->route('admin.leave')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return redirect()->route('admin.leave')
+                ->with('error', 'Failed to adjust leave credits: ' . $e->getMessage());
+        }
     }
 }

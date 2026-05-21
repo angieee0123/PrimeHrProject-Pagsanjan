@@ -7,6 +7,9 @@ use App\Models\Attendance;
 use App\Models\AttendanceCorrection;
 use App\Models\AccreditedHoursLog;
 use App\Models\DailySalaryComputation;
+use App\Services\LateDeductionService;
+use App\Services\UndertimeDeductionService;
+use App\Services\CscTimeConversionService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -32,17 +35,49 @@ class AttendanceController extends Controller
                     ->whereBetween('date', [$startDate, $endDate])
                     ->get();
 
+                // Get approved leaves for this employee in the date range
+                $approvedLeaves = \App\Models\LeaveApplication::where('employee_id', $employee->id)
+                    ->where('status', 'approved')
+                    ->where(function($query) use ($startDate, $endDate) {
+                        $query->whereBetween('start_date', [$startDate, $endDate])
+                              ->orWhereBetween('end_date', [$startDate, $endDate])
+                              ->orWhere(function($q) use ($startDate, $endDate) {
+                                  $q->where('start_date', '<=', $startDate)
+                                    ->where('end_date', '>=', $endDate);
+                              });
+                    })
+                    ->with('leaveType')
+                    ->get();
+
                 $present = 0;
                 $absent = 0;
                 $late = 0;
                 $halfday = 0;
                 $overtime = 0;
+                $onLeave = 0;
 
                 // Get employee's schedule or use defaults
-                $graceMinutes = 15;
+                $graceMinutes = 5;
 
                 $workingDays = $this->getWorkingDays($startDate, $endDate);
                 $attendedDates = $attendances->pluck('date')->map(fn($d) => $d->format('Y-m-d'))->toArray();
+                
+                // Get all leave dates
+                $leaveDates = [];
+                foreach ($approvedLeaves as $leave) {
+                    $leaveStart = Carbon::parse($leave->start_date);
+                    $leaveEnd = Carbon::parse($leave->end_date);
+                    $current = $leaveStart->copy();
+                    
+                    while ($current->lte($leaveEnd)) {
+                        // Only count working days (exclude weekends)
+                        if (!in_array($current->dayOfWeek, [0, 6])) {
+                            $leaveDates[] = $current->format('Y-m-d');
+                        }
+                        $current->addDay();
+                    }
+                }
+                $leaveDates = array_unique($leaveDates);
 
                 foreach ($attendances as $attendance) {
                     $hasAttendance = $attendance->am_in || $attendance->pm_in;
@@ -86,15 +121,22 @@ class AttendanceController extends Controller
                     }
                 }
 
-                // Calculate absences (working days without attendance)
+                // Calculate absences (working days without attendance and not on leave)
                 foreach ($workingDays as $workingDay) {
-                    if (!in_array($workingDay->format('Y-m-d'), $attendedDates)) {
-                        $absent++;
+                    $dayStr = $workingDay->format('Y-m-d');
+                    if (!in_array($dayStr, $attendedDates)) {
+                        // Check if this day is covered by approved leave
+                        if (in_array($dayStr, $leaveDates)) {
+                            $onLeave++;
+                            $present++; // Count leave as present
+                        } else {
+                            $absent++;
+                        }
                     }
                 }
 
                 $totalDays = $present + $absent + $halfday;
-                $rate = $totalDays > 0 ? round(($present / $totalDays) * 100) : 0;
+                $rate = $totalDays > 0 ? number_format(($present / $totalDays) * 100, 2, '.', '') : 0;
                 $workingDaysCount = $totalDays;
                 $status = ($absent === 0 && $late <= 2 && $workingDaysCount > 0) ? 'Complete' : 'Incomplete';
 
@@ -113,7 +155,8 @@ class AttendanceController extends Controller
                     'absent' => $absent,
                     'late' => $late,
                     'halfday' => $halfday,
-                    'overtime' => round($overtime, 1),
+                    'overtime' => $overtime, // Exact hours, no rounding
+                    'on_leave' => $onLeave,
                     'rate' => $rate,
                     'status' => $status,
                 ];
@@ -135,6 +178,7 @@ class AttendanceController extends Controller
         $totalAbsent = array_sum(array_column($attendanceRecords, 'absent'));
         $totalLate = array_sum(array_column($attendanceRecords, 'late'));
         $totalOT = array_sum(array_column($attendanceRecords, 'overtime'));
+        $totalOnLeave = array_sum(array_column($attendanceRecords, 'on_leave'));
         $completeCount = count(array_filter($attendanceRecords, fn($r) => $r['status'] === 'Complete'));
         $incompleteCount = count(array_filter($attendanceRecords, fn($r) => $r['status'] === 'Incomplete'));
 
@@ -146,32 +190,129 @@ class AttendanceController extends Controller
             ->sort()
             ->values();
 
+        // Fetch all daily attendance records for detailed tab
+        // Use the same logic as detailedDTR modal - generate ALL dates for ALL employees
+        $detailedRecords = [];
+        $employees = Employee::with(['employmentDetail.departmentRelation', 'schedule'])->get();
+        
+        // Apply department filter
+        if ($department && $department !== 'All Departments') {
+            $employees = $employees->filter(function($emp) use ($department) {
+                return $emp->employmentDetail && 
+                       $emp->employmentDetail->departmentRelation && 
+                       $emp->employmentDetail->departmentRelation->name === $department;
+            });
+        }
+        
+        // Apply employee name filter
+        $employeeName = $request->get('employee_name');
+        if ($employeeName) {
+            $employees = $employees->filter(function($emp) use ($employeeName) {
+                $fullName = trim($emp->first_name . ' ' . ($emp->middle_name ? $emp->middle_name . ' ' : '') . $emp->last_name);
+                return stripos($fullName, $employeeName) !== false || 
+                       stripos($emp->employee_id, $employeeName) !== false;
+            });
+        }
+        
+        foreach ($employees as $employee) {
+            // Get all approved leaves for this employee
+            $approvedLeaves = \App\Models\LeaveApplication::where('employee_id', $employee->id)
+                ->where('status', 'approved')
+                ->where(function($query) use ($startDate, $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate])
+                          ->orWhereBetween('end_date', [$startDate, $endDate])
+                          ->orWhere(function($q) use ($startDate, $endDate) {
+                              $q->where('start_date', '<=', $startDate)
+                                ->where('end_date', '>=', $endDate);
+                          });
+                })
+                ->with('leaveType')
+                ->get();
+            
+            // Get attendance records for this employee
+            $attendances = Attendance::with(['accreditedHoursLogs'])
+                ->where('employee_id', $employee->id)
+                ->whereBetween('date', [$startDate, $endDate])
+                ->get()
+                ->keyBy(function($a) {
+                    return Carbon::parse($a->date)->format('Y-m-d');
+                });
+            
+            // Generate records for all dates using the same logic as detailedDTR
+            $employeeRecords = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee, $approvedLeaves);
+            
+            // Convert to the format needed for the view
+            $deptName = 'N/A';
+            if ($employee->employmentDetail && $employee->employmentDetail->departmentRelation) {
+                $deptName = $employee->employmentDetail->departmentRelation->name;
+            }
+            
+            foreach ($employeeRecords as $record) {
+                $detailedRecords[] = [
+                    'date' => $record['date'],
+                    'day' => $record['day'],
+                    'employee_id' => $employee->id,
+                    'employee_name' => trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name),
+                    'employee_code' => $employee->employee_id,
+                    'department' => $deptName,
+                    'am_in' => $record['am_in'] === 'ON LEAVE' ? 'ON LEAVE' : $record['am_in'],
+                    'am_out' => $record['am_out'] === 'ON LEAVE' ? 'ON LEAVE' : $record['am_out'],
+                    'pm_in' => $record['pm_in'] === 'ON LEAVE' ? 'ON LEAVE' : $record['pm_in'],
+                    'pm_out' => $record['pm_out'] === 'ON LEAVE' ? 'ON LEAVE' : $record['pm_out'],
+                    'ot_in' => $record['ot_in'],
+                    'ot_out' => $record['ot_out'],
+                    'total_hours' => str_replace(' hrs', '', $record['total_hours']),
+                    'accredited_hours' => $record['accredited_minutes'],
+                    'late_minutes' => $record['late_minutes'],
+                    'undertime_minutes' => $record['undertime'],
+                    'is_on_leave' => $record['is_on_leave'],
+                    'is_absent' => $record['is_absent'] ?? false,
+                    'leave_info' => $record['leave_info'],
+                    'attendance_id' => $record['attendance_id'],
+                ];
+            }
+        }
+        
+        // Sort by date ascending
+        usort($detailedRecords, function($a, $b) {
+            return strtotime($a['date']) - strtotime($b['date']);
+        });
+        
+        // Apply pagination
+        $totalDetailedRecords = count($detailedRecords);
+        $perPage = 50;
+        $currentPage = $request->get('page', 1);
+        $detailedRecords = array_slice($detailedRecords, ($currentPage - 1) * $perPage, $perPage);
+        
+        // Calculate pagination data
+        $detailedPagination = [
+            'current_page' => $currentPage,
+            'per_page' => $perPage,
+            'total' => $totalDetailedRecords,
+            'last_page' => ceil($totalDetailedRecords / $perPage),
+            'from' => (($currentPage - 1) * $perPage) + 1,
+            'to' => min($currentPage * $perPage, $totalDetailedRecords),
+        ];
+
         return view('admin.attendance.adminAttendance', compact(
             'attendanceRecords',
             'totalPresent',
             'totalAbsent',
             'totalLate',
             'totalOT',
+            'totalOnLeave',
             'completeCount',
             'incompleteCount',
-            'departments'
+            'departments',
+            'detailedRecords',
+            'detailedPagination'
         ));
     }
 
     private function getWorkingDays($startDate, $endDate)
     {
-        $workingDays = [];
-        $current = $startDate->copy();
-
-        while ($current->lte($endDate)) {
-            // Exclude weekends (Saturday = 6, Sunday = 0)
-            if (!in_array($current->dayOfWeek, [0, 6])) {
-                $workingDays[] = $current->copy();
-            }
-            $current->addDay();
-        }
-
-        return $workingDays;
+        // Use CSC service to get working days (excludes weekends automatically)
+        return CscTimeConversionService::getWorkingDates($startDate, $endDate);
     }
 
     public function detailedDTR(Request $request, $employeeId)
@@ -204,7 +345,21 @@ class AttendanceController extends Controller
                 return Carbon::parse($a->date)->format('Y-m-d');
             });
 
-        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee);
+        // Get approved leaves for this employee in the date range
+        $approvedLeaves = \App\Models\LeaveApplication::where('employee_id', $employeeId)
+            ->where('status', 'approved')
+            ->where(function($query) use ($startDate, $endDate) {
+                $query->whereBetween('start_date', [$startDate, $endDate])
+                      ->orWhereBetween('end_date', [$startDate, $endDate])
+                      ->orWhere(function($q) use ($startDate, $endDate) {
+                          $q->where('start_date', '<=', $startDate)
+                            ->where('end_date', '>=', $endDate);
+                      });
+            })
+            ->with('leaveType')
+            ->get();
+
+        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee, $approvedLeaves);
 
         return response()->json([
             'records' => $records,
@@ -294,25 +449,34 @@ class AttendanceController extends Controller
 
     private function formatMinutes($minutes)
     {
-        if ($minutes <= 0) {
-            return '0 min';
-        }
-        
-        $hours = floor($minutes / 60);
-        $mins = $minutes % 60;
-        
-        if ($hours > 0 && $mins > 0) {
-            return $hours . ' hr' . ($hours > 1 ? 's' : '') . ' ' . round($mins) . ' min';
-        } elseif ($hours > 0) {
-            return $hours . ' hr' . ($hours > 1 ? 's' : '');
-        } else {
-            return round($mins) . ' min';
-        }
+        // Use CSC service for consistent formatting
+        return CscTimeConversionService::formatMinutes($minutes);
     }
 
-    private function generateDetailedRecords($startDate, $endDate, $attendances, $employee = null)
+    private function generateDetailedRecords($startDate, $endDate, $attendances, $employee = null, $approvedLeaves = null)
     {
-        $graceMinutes = 15;
+        $graceMinutes = 5;
+
+        // Build leave dates map with leave details
+        $leaveDatesMap = [];
+        if ($approvedLeaves) {
+            foreach ($approvedLeaves as $leave) {
+                $leaveStart = Carbon::parse($leave->start_date);
+                $leaveEnd = Carbon::parse($leave->end_date);
+                $current = $leaveStart->copy();
+                
+                while ($current->lte($leaveEnd)) {
+                    $dateKey = $current->format('Y-m-d');
+                    $leaveDatesMap[$dateKey] = [
+                        'leave_type' => $leave->leaveType->leave_name ?? 'Leave',
+                        'leave_code' => $leave->leaveType->leave_code ?? 'N/A',
+                        'application_number' => $leave->application_number,
+                        'days' => $leave->number_of_days,
+                    ];
+                    $current->addDay();
+                }
+            }
+        }
 
         $records = [];
         $current = $startDate->copy();
@@ -320,6 +484,8 @@ class AttendanceController extends Controller
         while ($current->lte($endDate)) {
             $dateKey = $current->format('Y-m-d');
             $attendance = $attendances->get($dateKey);
+            $isOnLeave = isset($leaveDatesMap[$dateKey]);
+            $leaveInfo = $isOnLeave ? $leaveDatesMap[$dateKey] : null;
 
             // Get schedule for this specific date
             $schedule = $employee ? $employee->getScheduleForDate($dateKey) : null;
@@ -385,36 +551,163 @@ class AttendanceController extends Controller
                 }
             }
 
+            // If on approved leave, mark as present with leave indicator
+            if ($isOnLeave && !in_array($current->dayOfWeek, [0, 6])) {
+                $records[] = [
+                    'date' => $current->format('M d, Y'),
+                    'day' => $current->format('l'),
+                    'am_in' => 'ON LEAVE',
+                    'am_out' => 'ON LEAVE',
+                    'pm_in' => 'ON LEAVE',
+                    'pm_out' => 'ON LEAVE',
+                    'ot_in' => null,
+                    'ot_out' => null,
+                    'late_minutes' => 0,
+                    'late_display' => '-',
+                    'undertime' => 0,
+                    'undertime_display' => '-',
+                    'total_hours' => '8.0 hrs',
+                    'accredited_minutes' => 480, // 8 hours
+                    'am_accredited_minutes' => 240,
+                    'pm_accredited_minutes' => 240,
+                    'am_grace_applied' => false,
+                    'pm_grace_applied' => false,
+                    'schedule' => [
+                        'am_in' => $expectedAmIn->format('H:i'),
+                        'am_out' => $expectedAmOut->format('H:i'),
+                        'pm_in' => $expectedPmIn->format('H:i'),
+                        'pm_out' => $expectedPmOut->format('H:i'),
+                    ],
+                    'has_log' => false,
+                    'needs_review' => false,
+                    'is_incomplete' => false,
+                    'attendance_id' => null,
+                    'date_key' => $current->format('Y-m-d'),
+                    'is_on_leave' => true,
+                    'leave_info' => $leaveInfo,
+                ];
+                $current->addDay();
+                continue;
+            }
+
             // Calculate late minutes with grace period
             $lateMinutes = 0;
-            if ($attendance && $attendance->am_in) {
-                try {
-                    $amInTime = Carbon::parse($attendance->am_in);
-                    if ($amInTime->gt($graceThresholdAm)) {
-                        $lateMinutes = $expectedAmIn->diffInMinutes($amInTime);
+            $undertimeMinutes = 0;
+            
+            // If we have a log, use the values from the log (already calculated correctly)
+            if ($attendance && $attendance->accreditedHoursLogs->isNotEmpty()) {
+                $log = $attendance->accreditedHoursLogs->last();
+                $lateMinutes = $log->late_minutes;
+                $undertimeMinutes = $log->undertime_minutes;
+            } else {
+                // Fallback: Calculate if no log exists
+                if ($attendance && $attendance->am_in) {
+                    try {
+                        $amInTime = Carbon::parse($attendance->am_in);
+                        if ($amInTime->gt($graceThresholdAm)) {
+                            $lateMinutes = $expectedAmIn->diffInMinutes($amInTime);
+                        }
+                    } catch (\Exception $e) {
+                        $lateMinutes = 0;
                     }
-                } catch (\Exception $e) {
-                    $lateMinutes = 0;
+                }
+                
+                if ($attendance && $attendance->pm_out) {
+                    try {
+                        $pmOutTime = Carbon::parse($attendance->pm_out);
+                        if ($pmOutTime->lt($expectedPmOut)) {
+                            $undertimeMinutes = $pmOutTime->diffInMinutes($expectedPmOut);
+                        }
+                    } catch (\Exception $e) {
+                        $undertimeMinutes = 0;
+                    }
                 }
             }
 
-            // Calculate undertime (in minutes)
-            $undertime = 0;
-            if ($attendance && $attendance->pm_out && !in_array($current->dayOfWeek, [0, 6])) {
-                try {
-                    $pmOutTime = Carbon::parse($attendance->pm_out);
-                    if ($pmOutTime->lt($expectedPmOut)) {
-                        $undertime = $pmOutTime->diffInMinutes($expectedPmOut);
-                    }
-                } catch (\Exception $e) {
-                    $undertime = 0;
+            // Check if employee only timed in AM without returning (no AM out and no PM in)
+            // This means they left and never came back - mark as ABSENT
+            $isAbandoned = false;
+            if ($attendance && $attendance->am_in && !$attendance->am_out && !$attendance->pm_in && !in_array($current->dayOfWeek, [0, 6])) {
+                $isAbandoned = true;
+            }
+
+            // Check if truly absent (no time records at all)
+            $isTrulyAbsent = !$attendance || (!$attendance->am_in && !$attendance->am_out && !$attendance->pm_in && !$attendance->pm_out);
+
+            // Determine if incomplete vs absent
+            // INCOMPLETE: Has substantial attendance but missing some entries
+            // ABSENT: No attendance, abandoned, or only single time-in without pair
+            $isIncomplete = false;
+            $isAbsent = false;
+            
+            if ($attendance && !in_array($current->dayOfWeek, [0, 6])) {
+                $hasAmPair = $attendance->am_in && $attendance->am_out;
+                $hasPmPair = $attendance->pm_in && $attendance->pm_out;
+                $hasOnlyAmIn = $attendance->am_in && !$attendance->am_out && !$attendance->pm_in && !$attendance->pm_out;
+                $hasOnlyPmIn = !$attendance->am_in && !$attendance->am_out && $attendance->pm_in && !$attendance->pm_out;
+                
+                // ABSENT cases:
+                // 1. Abandoned (AM in only, no AM out, no PM in)
+                // 2. Only single time-in without any out (suspicious)
+                if ($isAbandoned || $hasOnlyAmIn || $hasOnlyPmIn) {
+                    $isAbsent = true;
                 }
+                // INCOMPLETE cases:
+                // 1. Has AM pair but incomplete PM
+                // 2. Has PM pair but incomplete AM  
+                // 3. Has AM in, AM out, PM in but no PM out (worked but forgot to clock out)
+                else if (($hasAmPair && !$hasPmPair) || (!$hasAmPair && $hasPmPair) || 
+                         ($attendance->am_in && $attendance->am_out && $attendance->pm_in && !$attendance->pm_out)) {
+                    $isIncomplete = true;
+                }
+            }
+
+            // If abandoned or only single time-in, treat as ABSENT
+            if ($isAbandoned || $isAbsent) {
+                $statusLabel = $isAbandoned ? 'ABANDONED' : 'ABSENT';
+                $records[] = [
+                    'date' => $current->format('M d, Y'),
+                    'day' => $current->format('l'),
+                    'am_in' => $amIn,
+                    'am_out' => $statusLabel,
+                    'pm_in' => $statusLabel,
+                    'pm_out' => $statusLabel,
+                    'ot_in' => null,
+                    'ot_out' => null,
+                    'late_minutes' => 0,
+                    'late_display' => '-',
+                    'undertime' => 480, // 8 hours undertime
+                    'undertime_display' => '8 hrs',
+                    'total_hours' => '0 hrs',
+                    'accredited_minutes' => 0,
+                    'am_accredited_minutes' => 0,
+                    'pm_accredited_minutes' => 0,
+                    'am_grace_applied' => false,
+                    'pm_grace_applied' => false,
+                    'schedule' => [
+                        'am_in' => $expectedAmIn->format('H:i'),
+                        'am_out' => $expectedAmOut->format('H:i'),
+                        'pm_in' => $expectedPmIn->format('H:i'),
+                        'pm_out' => $expectedPmOut->format('H:i'),
+                    ],
+                    'has_log' => false,
+                    'needs_review' => true,
+                    'is_incomplete' => false,
+                    'is_absent' => true,
+                    'is_abandoned' => $isAbandoned,
+                    'attendance_id' => $attendance ? $attendance->id : null,
+                    'date_key' => $current->format('Y-m-d'),
+                    'is_on_leave' => false,
+                    'leave_info' => null,
+                ];
+                $current->addDay();
+                continue;
             }
 
             // Use stored total_hours from database (actual time worked in minutes)
             $totalHoursMinutes = $attendance ? $attendance->total_hours : 0;
-            $totalHours = $totalHoursMinutes ? round($totalHoursMinutes / 60, 1) : 0;
-            $needsReview = ($lateMinutes > 0 && $undertime > 0);
+            $totalHours = $totalHoursMinutes ? number_format($totalHoursMinutes / 60, 4, '.', '') : 0; // Exact hours with 4 decimals
+            $needsReview = ($lateMinutes > 0 && $undertimeMinutes > 0);
 
             // Get accredited hours from log if exists, otherwise calculate
             $accreditedMinutes = 0;
@@ -450,10 +743,10 @@ class AttendanceController extends Controller
                 
                 $AM_START = $toMin($expectedAmIn->format('H:i'));
                 $AM_END = $toMin($expectedAmOut->format('H:i'));
-                $AM_GRACE = $AM_START + 15;
+                $AM_GRACE = $AM_START + 5;
                 $PM_START = $toMin($expectedPmIn->format('H:i'));
                 $PM_END = $toMin($expectedPmOut->format('H:i'));
-                $PM_GRACE = $PM_START + 15;
+                $PM_GRACE = $PM_START + 5;
                 
                 // Calculate AM accredited
                 $amInMin = $toMin($amIn);
@@ -497,14 +790,19 @@ class AttendanceController extends Controller
                 'ot_out' => $otOut,
                 'late_minutes' => $lateMinutes,
                 'late_display' => $this->formatMinutes($lateMinutes),
-                'undertime' => $undertime,
-                'undertime_display' => $this->formatMinutes($undertime),
+                'undertime' => $undertimeMinutes,
+                'undertime_display' => $this->formatMinutes($undertimeMinutes),
                 'total_hours' => $totalHours . ' hrs',
                 'accredited_minutes' => $accreditedMinutes,
                 'am_accredited_minutes' => $amAccreditedMins,
                 'pm_accredited_minutes' => $pmAccreditedMins,
                 'am_grace_applied' => $amGraceApplied,
                 'pm_grace_applied' => $pmGraceApplied,
+                'late_deducted_from_leave' => $hasLog && $log->late_deducted_from_leave,
+                'late_deduction_leave_type' => $hasLog ? $log->late_deduction_leave_type : null,
+                'undertime_deducted_from_leave' => $hasLog && $log->undertime_deducted_from_leave,
+                'undertime_deduction_leave_type' => $hasLog ? $log->undertime_deduction_leave_type : null,
+                'lwop_minutes' => $hasLog ? $log->lwop_minutes : 0,
                 'schedule' => $scheduleUsed ?: [
                     'am_in' => $expectedAmIn->format('H:i'),
                     'am_out' => $expectedAmOut->format('H:i'),
@@ -513,9 +811,13 @@ class AttendanceController extends Controller
                 ],
                 'has_log' => $hasLog,
                 'needs_review' => $needsReview,
-                'is_incomplete' => !$amOut || !$pmIn,
+                'is_incomplete' => $isIncomplete,
+                'is_absent' => false,
+                'is_abandoned' => false,
                 'attendance_id' => $attendance ? $attendance->id : null,
                 'date_key' => $current->format('Y-m-d'),
+                'is_on_leave' => false,
+                'leave_info' => null,
             ];
 
             $current->addDay();
@@ -645,10 +947,30 @@ class AttendanceController extends Controller
         // Use employee's schedule or defaults
         $AM_START   = $schedule ? $toMin($schedule->am_in) : 480;  // Default 08:00
         $AM_END     = $schedule ? $toMin($schedule->am_out) : 720;  // Default 12:00
-        $AM_GRACE   = $AM_START + 15;  // 15 minutes grace
+        $AM_GRACE   = $AM_START + 5;  // 5 minutes grace
         $PM_START   = $schedule ? $toMin($schedule->pm_in) : 780;  // Default 13:00
         $PM_END     = $schedule ? $toMin($schedule->pm_out) : 1020; // Default 17:00
-        $PM_GRACE   = $PM_START + 15;  // 15 minutes grace
+        $PM_GRACE   = $PM_START + 5;  // 5 minutes grace
+
+        // Check if employee abandoned (only AM in, no AM out, no PM in)
+        // This means they left and never came back - treat as absent (0 accredited hours)
+        if ($amIn && !$amOut && !$pmIn) {
+            return [
+                'accredited_minutes' => 0,
+                'log_data' => [
+                    'schedule_id' => $schedule ? $schedule->id : null,
+                    'am_accredited_minutes' => 0,
+                    'pm_accredited_minutes' => 0,
+                    'ot_minutes' => 0,
+                    'late_minutes' => 0,
+                    'undertime_minutes' => 480, // 8 hours absent
+                    'total_accredited_minutes' => 0,
+                    'total_actual_minutes' => 0,
+                    'am_grace_applied' => false,
+                    'pm_grace_applied' => false,
+                ]
+            ];
+        }
 
         $amMins = 0;
         $amGraceApplied = false;
@@ -686,18 +1008,37 @@ class AttendanceController extends Controller
 
         // Calculate late and undertime
         $lateMins = 0;
+        $undertimeMins = 0;
+        
+        // AM In late
         if ($amIn) {
             $amInMin = $toMin($amIn);
             if ($amInMin > $AM_GRACE) {
-                $lateMins = $amInMin - $AM_START;
+                $lateMins += $amInMin - $AM_START;
             }
         }
-
-        $undertimeMins = 0;
+        
+        // AM Out undertime (left early before lunch)
+        if ($amOut) {
+            $amOutMin = $toMin($amOut);
+            if ($amOutMin < $AM_END) {
+                $undertimeMins += $AM_END - $amOutMin;
+            }
+        }
+        
+        // PM In late (returned late from lunch)
+        if ($pmIn) {
+            $pmInMin = $toMin($pmIn);
+            if ($pmInMin > $PM_GRACE) {
+                $lateMins += $pmInMin - $PM_START;
+            }
+        }
+        
+        // PM Out undertime (left early at end of day)
         if ($pmOut) {
             $pmOutMin = $toMin($pmOut);
             if ($pmOutMin < $PM_END) {
-                $undertimeMins = $PM_END - $pmOutMin;
+                $undertimeMins += $PM_END - $pmOutMin;
             }
         }
 
@@ -938,6 +1279,14 @@ class AttendanceController extends Controller
             
             // Trigger daily salary computation
             \App\Models\DailySalaryComputation::computeFromAccreditedLog($accreditedLog);
+            
+            // Process late deduction from leave balances
+            $lateDeductionService = new LateDeductionService();
+            $lateDeductionService->processLateDeduction($accreditedLog);
+            
+            // Process undertime deduction from leave balances
+            $undertimeDeductionService = new UndertimeDeductionService();
+            $undertimeDeductionService->processUndertimeDeduction($accreditedLog);
         }
 
         return response()->json([

@@ -48,7 +48,7 @@
                             <polyline points="18 15 12 9 6 15"></polyline>
                         </svg>
                     </th>
-                    <th>Attachment</th>
+                    <th style="width: 200px;">Attachment</th>
                     <th onclick="sortLeaveTypes('is_active')" style="cursor: pointer; text-align: center;">
                         Status
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;">
@@ -74,11 +74,11 @@
                             <span style="color: #9ca3af;">—</span>
                         @endif
                     </td>
-                    <td data-label="Attachment" style="font-size: 13px; color: #6b6a8a;">
+                    <td data-label="Attachment" style="font-size: 13px;">
                         @if($type->attachment_info)
-                            {{ $type->attachment_info }}
+                            <span style="color: #0b044d; font-weight: 500;">{{ $type->attachment_info }}</span>
                         @else
-                            <span style="color: #9ca3af;">No requirement</span>
+                            <span style="color: #9ca3af; font-style: italic;">Not required</span>
                         @endif
                     </td>
                     <td data-label="Status" style="text-align: center;"><span class="badge-status {{ $type->is_active ? 'processed' : 'on-hold' }}">{{ $type->is_active ? 'Active' : 'Inactive' }}</span></td>

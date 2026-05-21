@@ -1,0 +1,1141 @@
+SYSTEM TECHNICAL SPECIFICATION
+
+Project Overview
+For Project Overview – Tables 1.1 and 1.2, follow the instructions below:
+In Table 1.1 – Project Team Details, fill in the names of the students and key persons involved in the project. Use the exact project information given in the table (title, type, duration, and development approach) and only complete the blank fields for: Project Leader, Developers, UI/UX Designer, Adviser, and System Expert. Write full names (and section if required by your instructor).
+In Table 1.2 – Project Details, do not change the sample text unless your instructor tells you to customize it. Read the brief description and target users carefully so you understand what the system will do and who will use it. For “System Objectives,” keep the bullets short and action‑oriented (starting with a verb, such as “Apply,” “Improve,” “Enhance,” “Provide”). For “Related Policies / Standards,” list only the laws, standards, and local policies that are relevant to your project context (you may add others if allowed). Make sure all entries are clear, concise, and written in proper academic style, because this section will serve as the formal overview of your capstone project.
+
+Table 1.1 – Project Team Details
+Field
+Details
+Project Title
+AI-Enabled Incident Reporting and Decision Support System
+Project Type
+Capstone Project
+Project Duration
+6 Weeks
+Development Approach
+Agile / Rapid Application Development (RAD)
+Project Leader
+
+Developers
+
+UI/UX Designer
+
+Adviser
+
+System Expert
+
+
+Table 1.2 – Project Details
+Field
+Details 
+Brief Description
+The Emergency Response Management System (ERMS) is a web- and mobile-based platform that enables citizens to report emergencies in real time and supports local government units (LGUs) in monitoring, prioritizing, and responding to incidents through an integrated dashboard and decision support system.
+Target Users / Roles
+Citizens – submit emergency reports
+Dispatchers (MDRRMO/LGU Staff) – validate, prioritize, and assign incidents
+Responders – receive assignments and update status
+Administrators – manage users, reports, and system settings
+System Objectives
+• Apply Agile development in building a real-world system
+• Improve emergency response time and coordination
+• Enhance students’ skills in system design, development, and testing
+• Provide a digital solution for efficient incident reporting and monitoring
+Related Policies / Standards
+• Data Privacy Act of 2012 (RA 10173)
+• ISO/IEC 25010 Software Quality Standards
+• WCAG 2.1 Accessibility Guidelines
+• Local DRRM (Disaster Risk Reduction and Management) policies – Citizen Charter
+
+Project Gantt Chart
+Table 2.1 Gantt Chart April–November 2026
+Task
+Owner
+Start
+End
+Apr
+May
+Jun
+Jul
+Aug
+Sep
+Oct
+Nov
+% Progress
+Planning
+MIRANDA
+Apr 15
+May 10
+■
+■
+
+
+
+
+
+
+80%
+Requirements
+VILLARICA
+May 11
+Jun 10
+
+■
+■
+
+
+
+
+
+70%
+Design
+VILLARICA
+Jun 11
+Jul 10
+
+
+■
+■
+
+
+
+
+60%
+Development
+BERNARDINO
+Jul 11
+Sep 15
+
+
+
+■
+■
+■
+
+
+50%
+Testing
+BERNARDINO
+Sep 16
+Oct 20
+
+
+
+
+
+■
+■
+
+30%
+Deployment
+MIRANDA
+Oct 21
+Nov 30
+
+
+
+
+
+
+■
+■
+10%
+
+Software Requirements Specification
+3.1 Business Requirements and User Requirements
+Business requirements describe what the organization (e.g., LGU, MDRRMO) needs from the system, not the technical details of how it will be built. For the ERMS, the main business need is to improve emergency response times and coordination by using a single, centralized platform where incidents can be reported, monitored, and dispatched. Using the provided table, write brief, clear statements of these organizational needs—one per row—based on the sample data. Each statement should be short (one to two lines), specific, and written from the LGU/MDRRMO’s point of view (for example, “The LGU needs to reduce the time between receiving an incident report and dispatching responders”).
+
+Table 3.1 Business Requirements and User Requirements List
+Section
+Sub-Section
+Details
+Business Requirements
+Overall
+Improve emergency response time and coordination via a centralized platform for reporting, monitoring, and dispatching incidents (e.g., for LGU, MDRRMO).
+User Requirements
+Citizens
+Easy way to report emergencies quickly using mobile devices.
+
+Dispatchers
+Real-time dashboard to view, prioritize, and assign incidents.
+
+Responders
+Mobile access to receive assignments and update status.
+
+Administrators
+Reports and analytics for decision-making.
+System Objectives
+Key Objectives
+1. Reduce response time2. Improve communication between stakeholders3. Provide accurate and real-time incident data4. Support data-driven decision-making
+Major Capabilities
+Key Features
+1. Citizen emergency reporting (with GPS and media upload)2. Dispatcher incident monitoring and assignment3. Responder mobile updates (status tracking)4. Dashboard with analytics and reports5. Real-time notifications (SMS / in-app alerts)
+
+3.2  Business Processes / Operational Scenarios
+Create a three-column table labeled Flowchart (Process Flow), Persons Involved, and Description. In the first column, present the process sequentially using flow indicators (e.g., Start → Incident Reporting → Validation & Processing → … → End). In the second column, identify the responsible actors for each step (e.g., Citizen, System, Dispatcher, Responder, Administrators). In the third column, provide a brief, action-oriented description of each process step. Ensure that the workflow is logically ordered, roles are accurately assigned, and descriptions clearly reflect the system’s operations. For each business process/service, include the business process service title, business process service ID, objective, requirements, fees, and processing time before the table.
+
+1. Emergency Call / Rescue Services
+Service ID: MDRRMO-01Objective: To provide immediate emergency response and life-saving assistance.
+Requirements:
+Emergency information (location, nature of incident)
+Fees: NoneProcessing Time: 5–15 minutes (dispatch), depending on urgency
+Flowchart (Process Flow)
+Persons Involved
+Description
+Start → Receive Emergency Call
+Citizen, Dispatcher
+Emergency is reported via hotline or walk-in.
+↓ Validate Information
+Dispatcher
+Details are verified for accuracy and urgency.
+↓ Dispatch Team
+Dispatcher, ERT
+Response team is deployed immediately.
+↓ Conduct Rescue
+Responders
+Rescue and first aid are provided.
+↓ Transport (if needed)
+Responders
+Victims are brought to hospital.
+↓ Document → End
+Dispatcher
+Incident is recorded and closed.
+
+2. Ambulance / Patient Transport Service
+Service ID: MDRRMO-02Objective: To ensure safe and timely transport of patients.
+Requirements:
+Patient information
+Request (call or referral)
+Fees: NoneProcessing Time: 10–20 minutes (dispatch and preparation)
+Flowchart (Process Flow)
+Persons Involved
+Description
+Start → Receive Request
+Citizen, Dispatcher
+Ambulance service is requested.
+↓ Validate Details
+Dispatcher
+Patient condition and location verified.
+↓ Dispatch Ambulance
+Dispatcher, EMT
+Ambulance is deployed.
+↓ Provide Care
+EMT
+Pre-hospital care is given.
+↓ Transport Patient
+EMT
+Patient is brought to hospital.
+↓ Endorse & Record → End
+EMT, Hospital Staff
+Patient is endorsed and documented.
+
+3. Search and Rescue Assistance
+Service ID: MDRRMO-03Objective: To locate and rescue individuals during emergencies.
+Requirements:
+Incident report
+Location details
+Fees: NoneProcessing Time: 15–30 minutes (mobilization)
+Flowchart (Process Flow)
+Persons Involved
+Description
+Start → Receive Report
+Citizen, Dispatcher
+Incident is reported.
+↓ Assess Situation
+DRRM Officer
+Risk and urgency evaluated.
+↓ Deploy SAR Team
+Dispatcher
+Rescue team mobilized.
+↓ Conduct Rescue
+SAR Team
+Search and rescue conducted.
+↓ Provide Aid
+Medical Team
+Victims treated.
+↓ Transport & Record → End
+SAR Team
+Case documented and closed.
+
+4. Request for DRRM Vehicle
+Service ID: MDRRMO-04Objective: To provide DRRM vehicles for official use.
+Requirements:
+Request form
+Approval from authority
+Fees: NoneProcessing Time: 1–2 days
+Flowchart (Process Flow)
+Persons Involved
+Description
+Start → Submit Request
+Requestor, Admin Staff
+Request is filed.
+↓ Review Request
+Admin Staff
+Details verified.
+↓ Approval
+DRRM Head
+Request approved.
+↓ Release Vehicle
+Admin, Driver
+Vehicle assigned.
+↓ Monitor Use
+Admin
+Usage tracked.
+↓ Return & Record → End
+Driver
+Vehicle returned and logged.
+
+5. Request for Training / IEC Campaign
+Service ID: MDRRMO-05Objective: To promote disaster awareness and preparedness.
+Requirements:
+Request letter
+Training details
+Fees: NoneProcessing Time: 3–5 days
+Flowchart (Process Flow)
+Persons Involved
+Description
+Start → Submit Request
+Organization, Admin
+Training request submitted.
+↓ Review
+DRRM Staff
+Details evaluated.
+↓ Approval
+DRRM Head
+Request approved.
+↓ Prepare Training
+DRRM Staff
+Materials prepared.
+↓ Conduct Training
+Trainers
+Session delivered.
+↓ Evaluate → End
+DRRM Staff
+Results documented.
+
+6. Disaster Preparedness Training / Drills
+Service ID: MDRRMO-06Objective: To enhance disaster readiness through drills.
+Requirements:
+Coordination request
+Participant list
+Fees: NoneProcessing Time: 3–7 days
+Flowchart (Process Flow)
+Persons Involved
+Description
+Start → Identify Needs
+DRRM, Community
+Training needs assessed.
+↓ Plan Training
+DRRM Staff
+Modules prepared.
+↓ Schedule
+DRRM Staff
+Date and venue set.
+↓ Conduct Drill
+DRRM, Participants
+Drill executed.
+↓ Evaluate
+DRRM Staff
+Performance assessed.
+↓ Report → End
+DRRM Staff
+Results documented.
+
+7. Issuance of Certification (Fortuitous Events)
+Service ID: MDRRMO-07Objective: To issue official disaster-related certifications.
+Requirements:
+Request letter
+Valid ID
+Incident details
+Fees: NoneProcessing Time: 1–2 days
+Flowchart (Process Flow)
+Persons Involved
+Description
+Start → Submit Request
+Applicant, Admin
+Request received.
+↓ Verify Record
+DRRM Staff
+Incident validated.
+↓ Prepare Document
+Admin Staff
+Certification prepared.
+↓ Approval
+DRRM Head
+Signed and approved.
+↓ Release
+Admin Staff
+Document released.
+↓ Log → End
+Admin
+Recorded and filed.
+
+3.3. Business / Policy / Compliance Requirements (BR / PR)
+Please complete Table 3.4, Business / Policy / Compliance Requirements (BR / PR), by identifying all relevant business, policy, and compliance requirements for the system. For each requirement, provide a clear and concise description, indicate the source or basis if applicable, and ensure that the entries reflect the organization’s operational needs, legal obligations, and regulatory standards. Use formal language, keep the requirements specific and actionable, and make sure they are aligned with the scope and objectives of the project.
+
+Table 3.3. Business / Policy / Compliance Requirements (BR / PR)
+ID
+Requirement Name
+Brief Description
+BR-01
+LGU Incident Classification
+Incident categories must follow the LGU’s official classification.
+BR-02
+DRRMO Escalation Rules
+Escalation must follow DRRMO standard operating procedures.
+BR-03
+Records Retention
+Incident records must be retained for at least 5 years per LGU policy.
+PR-01
+Data Privacy Compliance
+System must comply with applicable data privacy laws and regulations.
+PR-02
+Audit Support
+System must provide logs and exports sufficient for internal and external audits.
+
+
+3.4. Assumptions and Dependencies
+Please complete the table by listing the project’s assumptions, dependencies, and major constraints in clear and concise statements. For each item, classify it under the appropriate category and provide accurate, context-specific details relevant to the system or study. Ensure that the entries are formal, logically grouped, and consistent with the project scope.
+
+Table 3.4.1 List of Assumptions and Dependencies 
+Category
+Item
+Assumptions
+
+Users have access to smartphones and internet connectivity.
+Emergency responders are trained to use mobile systems.
+The LGU supports digital implementation.
+Dependencies
+GPS/location services are available for accurate reporting.
+An SMS gateway or notification service is available.
+A stable internet connection is maintained.
+Integration with mapping services, such as Google Maps, is available.
+
+Table 3.4.2 List of Constraints
+Constraint Type
+Constraint
+Policy Constraint
+The system must comply with data privacy laws, such as the Data Privacy Act.
+Access to sensitive data must be controlled.
+Technical Constraint
+Limited internet connectivity may affect system use in some areas.
+The system must support Android and iOS device variations.
+The system must be scalable to support multiple users.
+Organizational Constraint
+
+There may be resistance to adopting new technology.
+Staff and responders require training before deployment.
+Budget limitations may restrict system implementation.
+
+4. System Specification Requirements
+
+Instructions: Prepare a comprehensive SRS document that defines what the system should do and its constraints.
+
+4.1 Feature and Function List
+Please develop Table 1, Functional Requirements List, by identifying the system’s functional requirements and presenting them in a clear table format with the columns ID, Requirement Name, and Brief Description. For each requirement, assign a unique ID, state the requirement name accurately, and provide a concise description of the system function it supports. Ensure that the requirements are specific, properly sequenced, and aligned with the system’s intended operations.
+
+Table 4.1 Functional Requirements List
+ID
+Requirement Name
+Brief Description
+FR-01
+Citizen Registration and Login
+Allow citizens to create an account and log in securely.
+FR-02
+Citizen Incident Reporting
+Allow citizens to submit a new incident report with required details.
+FR-03
+Incident Location Capture
+Capture incident location via address fields and/or map/GPS.
+FR-04
+Incident Category & Severity Classification
+Classify incidents by type and severity based on predefined rules.
+FR-05
+Incident Reference Code Generation
+Generate a unique reference code for each submitted incident.
+FR-06
+Incident Triage and Routing
+Route incidents to the appropriate responder group automatically.
+FR-07
+Responder Login and Authentication
+Allow responders to log in to access assigned incidents.
+FR-08
+Responder Assignment Viewing
+Show responders a list of incidents assigned to them.
+FR-09
+Responder Status Update
+Allow responders to update incident status (Received, En Route, On Scene, Resolved).
+FR-10
+Monitoring Dashboard
+Provide DRRMO/LGU staff with dashboards of incidents and KPIs.
+FR-11
+Search and Filter Incidents
+Search and filter incidents by date, barangay, status, type, etc.
+FR-12
+Incident History View
+Display a timeline of status changes and actions per incident.
+FR-13
+Notifications to Responders
+Send notifications (e.g., SMS/inapp) to responders on new or updated incidents.
+FR-14
+Notifications to Citizens
+Send acknowledgments and status updates to reporting citizens.
+FR-15
+User and Role Management
+Manage user accounts and roles (Admin, DRRMO staff, responder, etc.).
+FR-16
+Configuration of Rules and Categories
+Configure incident types, severity levels, and routing rules.
+FR-17
+Incident Data Export
+Export incident records to CSV/PDF.
+FR-18
+Summary Reports
+Generate daily/weekly/monthly summary reports.
+
+4.2 Function Details 
+For each function, provide detailed specifications using a three-column table with the headers Section, Item, and Details, following the example of Feature F01 – Citizen Emergency Report. The table should summarize the feature’s identification, inputs, processing logic, outputs, and constraints.
+
+Include the following: feature ID, feature name, brief description, related requirement IDs, and associated screens; required user inputs and data sources; core processing steps, validation rules, and business rules; on-screen outputs, stored or logged data, and notifications. 
+
+Feature ID: F01
+Feature Name: Citizen Emergency Report
+Brief Description: Enables citizens to report emergencies with essential details (contact, location, type, description, and supporting media) for action by the command center.
+Section
+Item
+Details (Example)
+Identification
+Feature ID
+F01
+
+Feature Name
+Citizen Emergency Report
+
+Brief Description
+Enables citizens to report emergencies with essential details (contact, location, type, description, and supporting media) for action by the command center.
+
+Related Requirement IDs
+FR1, FR5
+
+Related Screens / Scenes
+S-01
+Inputs
+User Inputs Required
+Name (optional), Mobile number, Location (GPS + manual address), Incident type, Description, Attachments (photo/video).
+
+Data Sources
+User device (form input, GPS), internal lists (incident type taxonomy, location reference data).
+Processing / Logic
+Main Processing Steps
+1) Validate required fields; 2) Geocode / confirm location; 3) Classify incident type and initial priority; 4) Create incident record with unique ID; 5) Add to queue; 6) Trigger notifications.
+
+Validation Rules
+Mobile number format; required fields (mobile, location, type, description); max length for description; file size/format limits for attachments.
+
+Business Rules
+Auto-set priority to High for specific incident types (e.g., Fire, Medical) or for locations in predefined high-risk areas.
+Outputs
+On-Screen Outputs
+Confirmation page with incident ID and summary of submitted details.
+
+Stored / Logged Data
+Incident record (ID, timestamps, user contact, location, type, description, attachments, initial priority, source channel).
+
+Notifications / Messages
+SMS/Push notification to citizen with incident ID; real-time alert/entry in dispatcher queue.
+Constraints & Notes
+Performance Expectations
+Form submission and incident creation should complete within ≤ 3 seconds under normal load.
+
+Security / Privacy
+Protect personal data (mobile number, location); TLS for transmission; restricted access to incident details by role.
+
+Usability / Accessibility
+Simple, mobile-friendly layout; large tap targets; clear error messages; support for screen readers; minimal required fields.
+
+Dependencies
+GPS/location services; SMS gateway; incident queue module; authentication module (if login is required).
+
+4.1 Non-Functional Requirements
+Use Table 3.2 Non-Functional Requirements List* to document the system’s quality attributes and operational constraints. Present each requirement in a three-column table with the headers ID, Requirement Name, and Brief Description.
+Assign a unique identifier (e.g., NFR01, NFR02) to each entry. Provide a concise and clearly defined requirement name, followed by a brief description that specifies the expected system behavior or constraint. Descriptions should be measurable and testable where applicable, covering aspects such as performance, security, usability, reliability, scalability, and maintainability. Ensure that each non-functional requirement is aligned with system objectives and supports overall system quality and user satisfaction.
+
+Table 4.1 Non-Functional Requirements List
+ID
+Requirement Name
+Brief Description
+NFR-01
+Performance – Response Time
+Core pages should load within 3 seconds under normal load.
+NFR-02
+Availability
+System should be available 99% during defined operating hours.
+NFR-03
+Scalability
+System should support at least N concurrent users without significant degradation.
+NFR-04
+Usability
+Key tasks should be completable within 3–5 clear steps.
+NFR-05
+Accessibility
+UI should follow basic accessibility guidelines (contrast, keyboard navigation, alt text).
+NFR-06
+Security – Transport
+All authenticated pages should use HTTPS.
+NFR-07
+Security – Password Storage
+Passwords should be stored using secure hashing mechanisms.
+NFR-08
+Privacy
+Personal data processing should comply with applicable data privacy regulations.
+NFR-09
+Reliability
+System should recover gracefully after server restart without data loss.
+NFR-10
+Maintainability
+Codebase should be modular and documented for future enhancements.
+
+
+Logging & Audit Requirements (LOG)
+ID
+Requirement Name
+Brief Description
+LOG-01
+Login/Logout Logging
+Log all user logins and logouts with timestamp and user ID.
+LOG-02
+CRUD Action Logging
+Log create/update/delete actions on incident records.
+LOG-03
+Sensitive Data Access Logging
+Log access to personally identifiable information (PII) fields.
+
+Integration Requirements (INT)
+ID
+Requirement Name
+Brief Description
+INT-01
+Map Service Integration
+Integrate with a mapping service for geolocation (map tiles, reverse geocoding).
+INT-02
+SMS / Messaging Gateway Integration
+Integrate with SMS or messaging gateway for notifications.
+INT-03
+LGU System Data Export Compatibility
+Support data export formats consumable by existing LGU systems (e.g., CSV).
+
+
+
+4.2 Use Case Specifications
+To create a Use Case Specification table, start by identifying all actors who will interact with the system, such as Admin, User, or Responder, and clearly define their roles. Next, list the main system functions and treat each as a separate use case with a unique ID (e.g., UC-01) and a clear, action-based name. For every use case, provide the key details: the actor(s) involved, a brief description of what the function does, the preconditions (what must be true before the process starts), and the postconditions (the expected outcome after completion). Finally, organize all information in a consistent table format and review it to ensure all system functionalities are complete, clear, and aligned with the project requirements.
+
+Table 4.2 Use Case Specifications
+Use Case ID
+Use Case Name
+Actor(s)
+Description
+Preconditions
+Postconditions
+Main Flow
+Alternative Flows
+UC-01
+User Registration
+User
+Allows new users to create an account
+User has internet access
+Account is created and stored
+1. Open app 2. Enter details 3. Submit 4. System validates 5. Account created
+A1: Invalid input → prompt correction
+UC-02
+User Login
+User
+Authenticates user access
+User is registered
+User gains access to system
+1. Enter credentials 2. Submit 3. System verifies 4. Access granted
+A1: Wrong credentials → show error
+UC-03
+Submit Emergency Report
+User
+Allows reporting of incidents
+User is logged in
+Report stored and queued
+1. Open report form 2. Input details 3. Submit 4. Validate 5. Save report
+A1: No internet → save locally A2: Missing fields → prompt user
+UC-04
+Capture Location
+System/User
+Captures GPS or manual location
+Device has GPS enabled
+Location attached to report
+1. Request GPS 2. Capture coordinates 3. Attach to report
+A1: GPS unavailable → manual input
+UC-05
+Upload Media
+User
+Allows adding images/videos
+User is submitting report
+Media stored with report
+1. Select media 2. Upload 3. Attach to report
+A1: File too large → reject upload
+UC-06
+Validate and Process Report
+System
+Validates and classifies report
+Report submitted
+Report categorized and prioritized
+1. Check inputs 2. Apply rules/AI 3. Assign priority
+A1: Invalid data → flag error
+UC-07
+Assign Responder
+Dispatcher
+Assigns incident to responder
+Report is validated
+Responder receives assignment
+1. View report 2. Select responder 3. Assign task
+A1: No responder available → queue repo
+
+
+4.3 Use-Case Specification - System Diagrams
+Select one UML diagram type—Use Case, Activity, or Sequence—to model your system. For a Use Case Diagram, identify the actors (e.g., Admin, User, Responder), define the system’s main functions, draw a system boundary, place actors outside and use cases inside, and connect them based on interactions. For an Activity Diagram, present the system workflow by starting with a start node, mapping step-by-step actions using activity boxes, connecting them with arrows to show flow direction, adding decision points for Yes/No conditions, and ending with a final node. For a Sequence Diagram, illustrate how actors and system components interact over time by arranging them horizontally, adding lifelines, and showing labeled messages in chronological order from top to bottom. Ensure the diagram is clear, accurate, and aligned with the system’s requirements and overall workflow.
+
+
+
+4.4 Database Design
+Create an Entity-Relationship Diagram (ERD) and a Database Schema for your system. In the ERD, identify all entities (tables) and their attributes, define relationships (1:1, 1:N, or M:N), and clearly indicate primary keys and foreign keys. Then convert your ERD into a relational database schema by listing each table with its fields/columns, data types, and constraints such as PK, FK, NOT NULL, and UNIQUE. Ensure that your design is properly normalized up to at least Third Normal Form (3NF) where applicable to reduce redundancy and maintain data integrity.
+
+4.5 UI Wireframes
+Please complete the table below by identifying each screen’s ID, title, module or process, primary user role, and platform based on the system requirements provided, ensuring that the entries are accurate, complete, and properly aligned with the corresponding functions of the application.
+Table 4.5.1 List of Screen / Scene Index
+Screen ID
+Screen Title
+Module / Process
+Primary User Role
+Platform
+S-01
+Login / Sign In
+Access & Authentication
+All Users
+Web & Mobile
+S-02
+User Dashboard
+Home / Overview
+Registered User
+Web
+S-03
+Incident Report Form
+Reporting / Data Capture
+Citizen / End User
+Mobile
+S-04
+Incident List & Filters
+Case Management
+Staff / Dispatcher
+Web
+S-05
+Incident Details & Timeline
+Case Management
+Staff / Dispatcher
+Web
+S-06
+Map View – Active Incidents
+Monitoring / Geolocation
+Staff / Dispatcher
+Web
+S-07
+Notification Center
+Alerts & Messaging
+All Logged-in Users
+Web & Mobile
+S-08
+Settings & Profile
+Account Management
+Registered User
+Web & Mobile
+S-09
+Admin – User Management
+Administration
+Admin
+Web
+S-10
+Reports & Analytics
+Reporting / Analytics
+Admin / Manager
+Web
+
+4.5.2 UI/UX design
+Design the visual structure of system interfaces by first uniquely labeling every screen with a concise ID (e.g., S-01, S-02) and then creating low-fidelity wireframes that emphasize layout over visual styling, clearly depicting navigation elements, input fields, buttons and actions, and data display areas using simple shapes and placeholders. For each screen, prepare a brief description that specifies the Screen Name and ID, its purpose or function, the key components it contains (such as forms, tables, and other controls), and the linked Functional Requirements (FR IDs) to ensure end-to-end traceability. Finally, perform a consistency check to confirm that all screens and their flows are directly aligned with documented use cases and functional requirements, and refine the wireframes where gaps or mismatches are identified. You can also create a digital and interactive wireframe 
+
+Figure 1. UI Wireframe
+
+Figure 1. Wireframe with UI and logical flow
+Include Tables 4.5.2 and 4.5.3 in the SRS, each with three columns: ID, Requirement Name, and Brief Description, listing all logging/audit (LOG-01 to LOG-03) and integration (INT-01 to INT-03) requirements with clear, action-oriented, and concise descriptions as shown, ensuring consistent formatting and requirement codes.
+
+Table 4.5.2. Logging & Audit Requirements (LOG)
+ID
+Requirement Name
+Brief Description
+LOG-01
+Login/Logout Logging
+Log all user logins and logouts with timestamp and user ID.
+LOG-02
+CRUD Action Logging
+Log create/update/delete actions on incident records.
+LOG-03
+Sensitive Data Access Logging
+Log access to personally identifiable information (PII) fields.
+
+Table 4.5.3. Integration Requirements (INT)
+ID
+Requirement Name
+Brief Description
+INT-01
+Map Service Integration
+Integrate with a mapping service for geolocation (map tiles, reverse geocoding).
+INT-02
+SMS / Messaging Gateway Integration
+Integrate with SMS or messaging gateway for notifications.
+INT-03
+LGU System Data Export Compatibility
+Support data export formats consumable by existing LGU systems (e.g., CSV).
+
+5. Environment and Platform Requirements
+Table 5.1 Development Environment
+No.
+Item
+Details
+1
+Developer Workstations
+Windows 10/11 or Ubuntu Desktop 22.04
+2
+IDE / Editors
+Visual Studio Code (preferred), plus Git client
+3
+Local Server Stack
+XAMPP or Laragon (Apache, PHP, MySQL/MariaDB)
+4
+Backend Runtime
+PHP 8.x
+5
+Backend Framework
+Laravel 10
+6
+Frontend Framework
+React or Vue.js (for interactive UI components)
+7
+Local Database
+MySQL 8.x or MariaDB 10.x
+8
+Build / Package Tools
+Composer, npm or yarn
+9
+Test Browsers (Dev)
+Latest Chrome, Edge, Firefox
+10
+Test Mobile Environment
+Android (latest version) mobile browser
+
+Table 5.2 Deployment Environment
+No.
+Item
+Details
+1
+Hosting Type
+LGU onpremises server or cloud VM (e.g., AWS EC2 / Azure VM)
+2
+Server Operating System
+Ubuntu Server 22.04 LTS
+3
+Web Server
+Apache HTTP Server 2.4+ or Nginx 1.18+
+4
+Application Runtime
+PHP 8.x with Laravel 10
+5
+Database Server
+MySQL 8.x or MariaDB 10.x
+6
+Client Web Browsers
+Chrome, Edge, Firefox (latest 2 versions)
+7
+Client Mobile OS
+Android 11+; iOS 15+
+8
+Supported Screen Sizes
+Desktop ≥ 1366×768; Mobile ≥ 360×640 (responsive UI)
+9
+External Services
+Map API (e.g., OpenStreetMap/Google Maps), SMS gateway, Chart.js
+
+Table 5.3 Policy, Regulatory, and Compliance Requirements
+No.
+Category
+Requirement
+1
+Relevant Law – Data Privacy
+The system shall comply with the Philippine Data Privacy Act of 2012 (RA 10173), including lawful processing and user consent.
+2
+Relevant Law – Cybercrime / Misuse
+The system shall include terms of use and warnings aligned with the Cybercrime Prevention Act to discourage false reporting.
+3
+LGU Policies – Incident Reporting
+The system shall follow the LGU’s official incident classification and escalation procedures approved by the DRRMO.
+4
+LGU Policies – User Access
+User roles (admin, encoder, responder) shall be defined according to the LGU’s IT security and HR policies.
+5
+Records Management – Retention
+Incident records shall be retained for a minimum of 5 years, or longer if required by LGU records management policies.
+6
+Records Management – Archiving
+Closed incidents older than 2 years shall be archived to a separate storage to optimize system performance.
+7
+Audit Trail – User Actions
+The system shall log key user actions (login, create, update, delete of incidents) with timestamp, user ID, and IP address.
+8
+Audit Trail – Access to Sensitive Data
+All views or exports of personally identifiable information (PII) shall be logged for audit and investigation purposes.
+9
+Reporting & Compliance
+The system shall support exporting logs and incident data in formats acceptable for internal and external audits.
+
+
+Table 5.4 Constraints, Assumptions, and Dependencies
+No.
+Constraint Type
+Description
+1
+Technical – Legacy Systems
+Incident data must integrate with an existing LGU MIS that uses an outdated database and no REST API.
+2
+Technical – Network Limitations
+Some barangay halls only have unstable 3G/mobile data; system must handle intermittent connectivity.
+3
+Technical – Device Limitations
+Responders may use lowend Android phones (2GB RAM); UI must be lightweight and responsive.
+4
+Organizational – Staffing
+LGU IT unit has only one system administrator; system administration tasks must be simple and lowoverhead.
+5
+Organizational – Training
+DRRMO staff have limited time for training; user training must fit in two 2hour sessions.
+6
+Organizational – Operating Hours
+Full technical support is available only during office hours; system should recover gracefully after outages.
+7
+Dependency – External Agencies
+Incident verification depends on timely responses from PNP/BFP, which may delay status updates.
+8
+Dependency – Data Providers
+Hazard maps and weather alerts rely on external APIs (e.g., PAGASA/PHIVOLCS), which may have downtime.
+9
+Dependency – Telco / SMS Gateway
+SMS alerts to citizens and responders depend on thirdparty SMS gateway and telco network availability.
+
+Table 5.5 Verification and Validation Requirements
+No.
+Major Feature / Module
+ Acceptance Criteria
+Requirement IDs Covered
+Primary Test Types
+(Unit / Integration / UAT)
+1
+Citizen Incident Reporting
+a) Citizen can submit an incident with required fields (type, location, time, contact). 
+b) System returns a unique reference code after successful submission. 
+c) Validation prevents incomplete mandatory fields.
+FR-1, FR-2, FR-5
+Unit, Integration, UAT
+2
+Location & Map Integration
+a) “Use my location” pinpoints user within acceptable accuracy range. b) User can manually adjust the map pin and address fields sync correctly.
+FR-3, NFR-2
+Unit, Integration, UAT
+3
+Incident Triage & Routing
+a) Incidents are automatically classified based on type and severity rules. 
+b) Correct responder group receives the assignment within X seconds.
+FR-6, BR-1, BR-2
+Unit, Integration, UAT
+4
+Responder Assignment & Status Update
+a) Responders can view assigned incidents after login. 
+b) Responder can change status (Received, En Route, On Scene, Resolved) and updates are reflected in real time on the dashboard.
+FR-7, FR-8
+Unit, Integration, UAT
+5
+Monitoring Dashboard & Reports
+a) Dashboard shows total incidents by status and by barangay for a selected date range. 
+b) KPIs (e.g., average response time) compute correctly within ±5% of manually calculated values.
+FR-10, NFR-3
+Integration, UAT
+6
+User Authentication & Roles
+a) Only registered users can log in. b) Role-based access (Admin, DRRMO Staff, Responder) restricts screens and actions appropriately.
+FR-4, SEC-1, SEC-2
+Unit, Integration, UAT
+7
+Audit Trail
+a) All create/update/delete operations on incidents are logged with user, timestamp, and action type. 
+b) Audit logs can be filtered by date and user.
+NFR-SEC-3, LOG-1
+Unit, Integration, UAT
+8
+Performance & Reliability
+a) System supports at least N concurrent users with average response time ≤ 3 seconds for core operations. b) No critical errors occur during a 2hour stress test.
+NFR-PERF-1, NFR-REL-1
+Integration, (Perf/Load), UAT
+System Testing Plan
+1. Objectives
+System testing and evaluation aim to verify that the fully integrated system satisfies all functional and non‑functional requirements, is stable, secure, usable, and ready for deployment. Evaluation will determine whether the system meets user needs and agreed acceptance criteria.
+
+2. Scope
+System testing covers end‑to‑end workflows (e.g., user registration, login, incident submission, review and approval, notifications, reporting), including all interfaces, integrations (maps, SMS, LGU exports), and administrative functions.
+
+A. Improved Sample Functional Testing Table (Login)
+Test Case ID
+Module / Feature
+Test Scenario / Objective
+Pre-conditions
+Test Steps (Summary)
+Expected Result
+Priority
+Status
+FT-LOGIN-01
+Login
+Verify successful login with valid credentials
+Active user account exists
+1) Open login page. 2) Enter valid username and password. 3) Click Login.
+User is authenticated and redirected to the main dashboard; login event is logged.
+High
+Not Run
+FT-LOGIN-02
+Login
+Verify error message on invalid password
+Active user account exists
+1) Open login page. 2) Enter valid username and invalid password. 3) Click Login.
+System displays clear error message (e.g., “Invalid username or password”) and does not log the user in.
+High
+Not Run
+FT-LOGIN-03
+Login
+Verify validation on empty username and/or password fields
+None
+1) Open login page. 2) Leave username and/or password blank. 3) Click Login.
+System shows fieldlevel validation messages and prevents submission.
+High
+Not Run
+FT-LOGIN-04
+Login
+Verify account lockout after consecutive failed login attempts
+Active account; lockout policy configured (e.g., 5 attempts)
+1) Open login page. 2) Enter valid username with wrong password repeatedly until limit is reached.
+Account is locked after defined number of attempts; user is informed; further logins are blocked until reset.
+High
+Not Run
+FT-LOGIN-05
+Login
+Verify “Remember Me” / session persistence (if applicable)
+Active user account exists
+1) Open login page. 2) Enter valid credentials and tick Remember Me. 3) Click Login. 4) Close and reopen browser.
+User remains logged in (within configured duration) without reentering credentials, following security policy.
+Medium
+Not Run
+
+B. Sample Use Case: UC-01 User Login
+Use Case ID: UC-01Use Case Name: User LoginPrimary Actor: Registered User (e.g., Citizen, LGU Staff, Administrator)Stakeholders and Interests:
+User – Wants secure and convenient access to the system.
+System Owner / LGU – Wants only authorized users to access protected functions and data.
+Brief Description:This use case describes how a registered user authenticates to the system using valid credentials to gain access to authorized features.
+Preconditions:
+The user account is registered and active.
+The system is available, and the login page is accessible.
+Postconditions:
+Success: User is authenticated, an active session is created, and the user is redirected to the appropriate landing page (e.g., dashboard).
+Failure: User remains unauthenticated; no secure resources are accessible; relevant error or validation messages are displayed.
+Basic Flow (Main Success Scenario)
+User navigates to the login page.
+System displays the login form (username and password fields, plus optional “Remember Me”).
+User enters a valid username and password.
+User clicks the Login button.
+System validates the credentials.
+System creates a user session and records the login event in the audit log.
+System redirects the user to the dashboard or rolebased home page.
+Alternative / Exception Flows
+A1 – Invalid Credentials
+3a. User enters incorrect username and/or password.4a. User clicks Login.5a. System detects invalid credentials.6a. System displays an error message (e.g., “Invalid username or password”) without revealing which field is wrong.7a. System allows user to try again within configured limits.
+A2 – Missing Required Fields
+3b. User leaves username or password blank and clicks Login.4b. System detects missing data.5b. System displays validation messages indicating required fields and does not proceed with authentication.
+A3 – Account Locked After Multiple Failed Attempts
+1c–4c. User repeatedly submits invalid credentials for the same account.5c. System counts failed attempts and reaches the lockout threshold.6c. System locks the account and displays an appropriate message (e.g., “Your account has been locked. Please contact support or reset your password.”).7c. System logs the lockout event for audit and security review.
+A4 – Remember Me (Optional)
+3d. User ticks Remember Me before logging in with valid credentials.4d. System creates a persistent session token according to security policy.5d. On subsequent visits within the allowed period, system recognizes the user and logs them in automatically, subject to security constraints.
+
+7. System User Evaluation
+Criterion (TAM)
+Subcriterion (ISO-based)
+Evaluation Item / Question
+Rating (1–5)
+Comments
+Perceived Usefulness (PU)
+Effectiveness
+The system helps me accomplish my tasks more effectively.
+
+
+Perceived Usefulness (PU)
+Task Appropriateness
+The system provides the functions I need for my work.
+
+
+Perceived Ease of Use (PEOU)
+Ease of Learning
+It is easy for me to learn how to use the system.
+
+
+Perceived Ease of Use (PEOU)
+Operability
+I can easily perform the operations I want using this system.
+
+
+Perceived Ease of Use (PEOU)
+Error Prevention & Recovery
+When I make a mistake, it is easy to recover and continue my work.
+
+
+Attitude Toward Using (ATU)
+Satisfaction
+Overall, I am satisfied with the way the system works.
+
+
+Attitude Toward Using (ATU)
+User Experience
+Using the system is a pleasant experience.
+
+
+Behavioral Intention (BI)
+Intention to Use
+I intend to use this system regularly in the future.
+
+
+Behavioral Intention (BI)
+Recommendation
+I would recommend this system to others (e.g., colleagues, students, staff).
+
+
+System Quality (ISO)
+Efficiency (Time/Effort)
+I can complete my tasks in a reasonable time with minimal effort using this system.
+
+
+System Quality (ISO)
+Learnability
+I can remember how to use the system even after not using it for some time.
+
+
+Context of Use (ISO)
+Accessibility / Inclusiveness
+The system is accessible and usable for different types of users (e.g., PWDs, novices).
+
+
+

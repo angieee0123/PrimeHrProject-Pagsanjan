@@ -2,6 +2,7 @@
 
 @section('content')
 @include('admin.topbar.attendanceTopbar')
+@include('admin.notification.adminNotification')
 @php
 $avatarColors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
 function getInitials($name) {
@@ -24,7 +25,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">DTR Submitted</p>
-            <div class="stat-icon-wrap" style="background: #0b044d18; color: #0b044d;">
+            <div class="stat-icon-wrap" style="background: #f0effe;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
             </div>
         </div>
@@ -37,7 +38,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Present</p>
-            <div class="stat-icon-wrap" style="background: #15803d18; color: #15803d;">
+            <div class="stat-icon-wrap" style="background: #e8f9ef;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
         </div>
@@ -50,7 +51,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Absences</p>
-            <div class="stat-icon-wrap" style="background: #8e1e1818; color: #8e1e18;">
+            <div class="stat-icon-wrap" style="background: #fdf0ef;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
             </div>
         </div>
@@ -63,7 +64,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Overtime Hours</p>
-            <div class="stat-icon-wrap" style="background: #d9bb0018; color: #d9bb00;">
+            <div class="stat-icon-wrap" style="background: #fefce8;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
         </div>
@@ -75,144 +76,49 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     </div>
 </div>
 
-<section class="table-section">
-    <div class="table-header">
-        <div>
-            <h3 class="table-title">Daily Time Record — {{ $periodDisplay }}</h3>
-            <p class="table-sub">Municipal Government of Pagsanjan · {{ count($attendanceRecords) }} records</p>
-        </div>
-        <div class="table-actions">
-            <form method="GET" action="{{ route('admin.attendance') }}" id="filterForm" style="display: contents;">
-                <input type="date" class="filter-select" name="start_date" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}">
-                <span style="font-size: 12px; color: #9999bb;">to</span>
-                <input type="date" class="filter-select" name="end_date" value="{{ request('end_date', now()->endOfMonth()->format('Y-m-d')) }}">
-                <select class="filter-select" name="department">
-                    <option value="">All Departments</option>
-                    @foreach($departments as $dept)
-                        <option value="{{ $dept }}" {{ request('department') == $dept ? 'selected' : '' }}>{{ $dept }}</option>
-                    @endforeach
-                </select>
-                <select class="filter-select" name="status">
-                    <option value="">All Status</option>
-                    <option value="Complete" {{ request('status') == 'Complete' ? 'selected' : '' }}>Complete</option>
-                    <option value="Incomplete" {{ request('status') == 'Incomplete' ? 'selected' : '' }}>Incomplete</option>
-                </select>
-                <button type="submit" class="btn-filter-main">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                    Filter
-                </button>
-            </form>
-            <button class="btn-export">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
-        </div>
-    </div>
+<!-- Tabs -->
+<div style="display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1.5px solid #eceaf8; padding-bottom: 0;">
+    <button class="tab-btn active" onclick="switchTab('summary')">Attendance Summary</button>
+    <button class="tab-btn" onclick="switchTab('detailed')">Detailed Time Record</button>
+</div>
 
-    <div class="payroll-summary-bar" style="margin-top: 0; margin-bottom: 16px;">
-        <div class="psummary-item">
-            <span>Total Present</span>
-            <strong style="color: #15803d;">{{ $totalPresent }} days</strong>
-        </div>
-        <div class="psummary-divider"></div>
-        <div class="psummary-item">
-            <span>Total Absent</span>
-            <strong style="color: #8e1e18;">{{ $totalAbsent }} days</strong>
-        </div>
-        <div class="psummary-divider"></div>
-        <div class="psummary-item">
-            <span>Late Arrivals</span>
-            <strong style="color: #a16207;">{{ $totalLate }} times</strong>
-        </div>
-        <div class="psummary-divider"></div>
-        <div class="psummary-item">
-            <span>Overtime</span>
-            <strong>{{ $totalOT }} hrs</strong>
-        </div>
-        <div class="psummary-divider"></div>
-        <div class="psummary-item">
-            <span>Records</span>
-            <strong>{{ count($attendanceRecords) }}</strong>
-        </div>
-    </div>
-
-    <div class="table-wrapper">
-        <table class="payroll-table">
-            <thead>
-                <tr>
-                    <th>Employee</th>
-                    <th>Department</th>
-                    <th>Present</th>
-                    <th>Absent</th>
-                    <th>Late</th>
-                    <th>Half Day</th>
-                    <th>OT Hours</th>
-                    <th>Rate</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($attendanceRecords as $index => $record)
-                <tr>
-                    <td>
-                        <div class="emp-cell">
-                            <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
-                                {{ getInitials($record['name']) }}
-                            </div>
-                            <div>
-                                <p class="emp-name">{{ $record['name'] }}</p>
-                                <p class="emp-id">{{ $record['id'] }}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span class="dept-tag">{{ $record['dept'] }}</span></td>
-                    <td style="color: #15803d; font-weight: 600; font-size: 13px;">{{ $record['present'] }}</td>
-                    <td style="color: {{ $record['absent'] > 0 ? '#8e1e18' : '#9999bb' }}; font-weight: {{ $record['absent'] > 0 ? '600' : '400' }}; font-size: 13px;">{{ $record['absent'] }}</td>
-                    <td style="color: {{ $record['late'] > 0 ? '#a16207' : '#9999bb' }}; font-weight: {{ $record['late'] > 0 ? '600' : '400' }}; font-size: 13px;">{{ $record['late'] }}</td>
-                    <td style="color: {{ $record['halfday'] > 0 ? '#a16207' : '#9999bb' }}; font-size: 13px;">{{ $record['halfday'] }}</td>
-                    <td style="color: {{ $record['overtime'] > 0 ? '#0b044d' : '#9999bb' }}; font-weight: {{ $record['overtime'] > 0 ? '600' : '400' }}; font-size: 13px;">{{ $record['overtime'] > 0 ? $record['overtime'] . ' hrs' : '—' }}</td>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <div style="flex: 1; height: 6px; background: #f0effe; border-radius: 3px; min-width: 50px;">
-                                <div style="width: {{ $record['rate'] }}%; height: 100%; background: {{ $record['rate'] >= 90 ? '#15803d' : ($record['rate'] >= 75 ? '#d9bb00' : '#8e1e18') }}; border-radius: 3px;"></div>
-                            </div>
-                            <span style="font-size: 12px; font-weight: 600; color: #0b044d; white-space: nowrap;">{{ $record['rate'] }}%</span>
-                        </div>
-                    </td>
-                    <td><span class="badge-status {{ $record['status'] === 'Complete' ? 'processed' : 'pending' }}">{{ $record['status'] }}</span></td>
-                    <td>
-                        <div class="row-actions">
-                            <button class="btn-view" onclick="openDTRModal({{ json_encode($record) }}, {{ $index }})">DTR</button>
-                            <button class="btn-detailed" onclick="openDetailedDTRModal({{ $record['employee_id'] }}, '{{ $record['name'] }}', '{{ $record['id'] }}')">Detailed DTR</button>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <div class="table-footer">
-        <p>Showing <strong>{{ count($attendanceRecords) }}</strong> records</p>
-    </div>
-</section>
-
+@include('admin.attendance.partials.attendance-summary-tab')
+@include('admin.attendance.partials.detailed-time-record-tab')
 @include('admin.attendance.modals.dtrDetailModal')
 @include('admin.attendance.modals.detailedDtrModal')
 @include('admin.attendance.modals.editDtrModal')
 @include('admin.attendance.modals.correctAttendanceModal')
 @include('admin.attendance.modals.successModal')
 
-@push('styles')
-@vite('resources/css/adminAttendance.css')
-@endpush
-
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
     window.periodDisplay = '{{ $periodDisplay }}';
     window.periodDisplayFile = '{{ str_replace([' ', ',', '-'], '_', $periodDisplay) }}';
+
+    // Tab switching functionality
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('[id$="-tab"]').forEach(tab => tab.style.display = 'none');
+
+        event.target.classList.add('active');
+        document.getElementById(tabName + '-tab').style.display = 'block';
+    }
+
+    // Check URL parameter and switch to correct tab on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get('tab');
+
+        if (activeTab === 'detailed') {
+            // Switch to detailed tab
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('[id$="-tab"]').forEach(tab => tab.style.display = 'none');
+
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('detailed-tab').style.display = 'block';
+        }
+    });
 
     // Search functionality
     function searchAttendance(query) {
@@ -238,6 +144,83 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
             filtered.forEach(row => tbody.appendChild(row.cloneNode(true)));
         }
     }
+
+    // Attendance Summary Pagination
+    window._attendanceCurrentPage = 1;
+    window._attendanceRowsPerPage = 10;
+
+    window.filterAttendanceSummary = function () {
+        const allRows = document.querySelectorAll('#attendanceSummaryBody tr[data-id]');
+        const filtered = [];
+
+        allRows.forEach(row => {
+            filtered.push(row);
+        });
+
+        window._attendanceFilteredRows = filtered;
+        window._attendanceCurrentPage = 1;
+        updateAttendancePagination();
+    };
+
+    window.updateAttendancePagination = function () {
+        const rows = window._attendanceFilteredRows || [];
+        const total = rows.length;
+        const perPage = window._attendanceRowsPerPage;
+        const totalPages = Math.ceil(total / perPage) || 1;
+        const page = Math.min(window._attendanceCurrentPage, totalPages);
+        window._attendanceCurrentPage = page;
+
+        const start = (page - 1) * perPage;
+        const end = Math.min(start + perPage, total);
+
+        document.querySelectorAll('#attendanceSummaryBody tr[data-id]').forEach(row => row.style.display = 'none');
+        rows.forEach((row, i) => { if (i >= start && i < end) row.style.display = ''; });
+
+        document.getElementById('attendanceRowStart').textContent = total ? start + 1 : 0;
+        document.getElementById('attendanceRowEnd').textContent = end;
+        document.getElementById('attendanceRowTotal').textContent = total;
+
+        const controls = document.getElementById('attendancePaginationControls');
+        if (totalPages <= 1) { controls.innerHTML = ''; return; }
+
+        let html = '';
+        const maxVisible = 5;
+        let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+        if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
+
+        if (page > 1) html += '<button class="page-btn" onclick="goToAttendancePage(' + (page - 1) + ')">‹</button>';
+        if (startPage > 1) {
+            html += '<button class="page-btn" onclick="goToAttendancePage(1)">1</button>';
+            if (startPage > 2) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+        }
+        for (let i = startPage; i <= endPage; i++) {
+            html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToAttendancePage(' + i + ')">' + i + '</button>';
+        }
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+            html += '<button class="page-btn" onclick="goToAttendancePage(' + totalPages + ')">' + totalPages + '</button>';
+        }
+        if (page < totalPages) html += '<button class="page-btn" onclick="goToAttendancePage(' + (page + 1) + ')">›</button>';
+
+        controls.innerHTML = html;
+    };
+
+    window.goToAttendancePage = function (page) {
+        window._attendanceCurrentPage = page;
+        updateAttendancePagination();
+    };
+
+    window.changeAttendanceRowsPerPage = function () {
+        window._attendanceRowsPerPage = parseInt(document.getElementById('attendanceRowsPerPage').value) || 10;
+        window._attendanceCurrentPage = 1;
+        updateAttendancePagination();
+    };
+
+    // Initialize pagination on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        filterAttendanceSummary();
+    });
 </script>
 @vite('resources/js/adminAttendance.js')
 @endpush

@@ -932,5 +932,235 @@ window.addEventListener('resize', debounce(updateResponsivePagination, 250));
 
 // Export to global scope
 window.toggleActionMenu = toggleActionMenu;
-window.initResponsiveTableActions = initResponsiveTableActions;
 window.updateResponsivePagination = updateResponsivePagination;
+
+
+// Bulk Import Functions
+function openBulkImportModal() {
+    document.getElementById('bulkImportModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeBulkImportModal() {
+    document.getElementById('bulkImportModal').style.display = 'none';
+    document.body.style.overflow = '';
+    document.getElementById('bulkImportForm').reset();
+    document.getElementById('fileInfo').style.display = 'none';
+    document.getElementById('dropZone').style.borderColor = '#dddcf0';
+    document.getElementById('dropZone').style.background = '#fafafe';
+}
+
+function downloadTemplate() {
+    const headers = [
+        'employee_id',
+        'first_name',
+        'middle_name',
+        'last_name',
+        'suffix',
+        'birth_date',
+        'place_of_birth',
+        'sex',
+        'civil_status',
+        'citizenship',
+        'blood_type',
+        'email',
+        'mobile_number',
+        'landline_number',
+        'house_no',
+        'street',
+        'barangay',
+        'city',
+        'province',
+        'zip_code',
+        'gsis_no',
+        'philhealth_no',
+        'pagibig_no',
+        'tin_no',
+        'license_no',
+        'department',
+        'designation',
+        'employment_status',
+        'appointment_date',
+        'salary_grade',
+        'step_increment'
+    ];
+
+    const sampleData = [
+        'EMP-2024-001',
+        'Juan',
+        'Santos',
+        'Dela Cruz',
+        'Jr.',
+        '1990-01-15',
+        'Manila',
+        'Male',
+        'Single',
+        'Filipino',
+        'O+',
+        'juan.delacruz@lgu.gov.ph',
+        '09171234567',
+        '(02) 1234-5678',
+        '123',
+        'Main Street',
+        'Barangay 1',
+        'Pagsanjan',
+        'Laguna',
+        '4008',
+        '1234567890',
+        '12-345678901-2',
+        '1234-5678-9012',
+        '123-456-789-000',
+        'N12-34-567890',
+        'Administration',
+        'Administrative Officer II',
+        'Permanent',
+        '2020-01-01',
+        '15',
+        '1'
+    ];
+
+    const csv = [headers.join(','), sampleData.join(',')].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'Employee_Import_Template.csv');
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Drag and drop functionality
+const dropZone = document.getElementById('dropZone');
+if (dropZone) {
+    dropZone.addEventListener('click', () => {
+        document.getElementById('csvFile').click();
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#0b044d';
+        dropZone.style.background = '#f0effe';
+    });
+
+    dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#dddcf0';
+        dropZone.style.background = '#fafafe';
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#dddcf0';
+        dropZone.style.background = '#fafafe';
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                document.getElementById('csvFile').files = files;
+                handleFileSelect({ target: { files: files } });
+            } else {
+                alert('Please upload a CSV file only.');
+            }
+        }
+    });
+}
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv')) {
+        alert('Please select a CSV file.');
+        return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+        alert('File size exceeds 5MB limit.');
+        return;
+    }
+
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
+    document.getElementById('fileInfo').style.display = 'block';
+    document.getElementById('dropZone').style.borderColor = '#15803d';
+    document.getElementById('dropZone').style.background = '#e8f9ef';
+}
+
+function removeFile() {
+    document.getElementById('csvFile').value = '';
+    document.getElementById('fileInfo').style.display = 'none';
+    document.getElementById('dropZone').style.borderColor = '#dddcf0';
+    document.getElementById('dropZone').style.background = '#fafafe';
+}
+
+function submitBulkImport() {
+    const fileInput = document.getElementById('csvFile');
+    if (!fileInput.files.length) {
+        alert('Please select a CSV file to upload.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('csv_file', fileInput.files[0]);
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+
+    // Show loading state
+    const submitBtn = event.target;
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Importing...';
+
+    fetch('/admin/personnel/bulk-import', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+
+        if (data.success) {
+            closeBulkImportModal();
+            document.getElementById('successMessage').textContent = data.message || 'Employees imported successfully!';
+            document.getElementById('successModal').style.display = 'flex';
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        } else {
+            document.getElementById('errorMessage').textContent = data.message || 'Failed to import employees. Please check your CSV file.';
+            document.getElementById('errorModal').style.display = 'flex';
+        }
+    })
+    .catch(error => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+        document.getElementById('errorMessage').textContent = 'An error occurred during import. Please try again.';
+        document.getElementById('errorModal').style.display = 'flex';
+    });
+}
+
+// Add spin animation for loading
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
+
+// Export to global scope
+window.openBulkImportModal = openBulkImportModal;
+window.closeBulkImportModal = closeBulkImportModal;
+window.downloadTemplate = downloadTemplate;
+window.handleFileSelect = handleFileSelect;
+window.removeFile = removeFile;
+window.submitBulkImport = submitBulkImport;

@@ -65,12 +65,12 @@ $currentRoute = Route::currentRouteName();
 
     <div class="sidebar-footer" id="sidebar-footer">
         <div class="user-avatar-wrap">
-            <div class="user-avatar">AR</div>
+            <div class="user-avatar">{{ $authInitials ?? 'PE' }}</div>
             <span class="user-status-dot"></span>
         </div>
         <div class="user-info" id="user-info">
-            <p class="user-name">Ana R. Reyes</p>
-            <p class="user-role">Permanent Employee</p>
+            <p class="user-name">{{ $authFullName ?? 'Permanent Employee' }}</p>
+            <p class="user-role">{{ $authRole ?? 'Permanent Employee' }}</p>
         </div>
         <form method="POST" action="{{ route('logout') }}" id="logout-form" style="margin: 0;">
             @csrf

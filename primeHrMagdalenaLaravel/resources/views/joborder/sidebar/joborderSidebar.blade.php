@@ -91,12 +91,12 @@ $currentPath = request()->path();
 
     <div class="sidebar-footer" id="sidebar-footer">
         <div class="user-avatar-wrap">
-            <div class="user-avatar">{{ strtoupper(substr(Auth::user()->username ?? 'JO', 0, 2)) }}</div>
+            <div class="user-avatar">{{ $authInitials ?? 'JO' }}</div>
             <span class="user-status-dot"></span>
         </div>
         <div class="user-info" id="user-info">
-            <p class="user-name">{{ Auth::user()->username ?? 'Job Order' }}</p>
-            <p class="user-role">Job Order Employee</p>
+            <p class="user-name">{{ $authFullName ?? 'Job Order Employee' }}</p>
+            <p class="user-role">{{ $authRole ?? 'Job Order Employee' }}</p>
         </div>
         <form method="POST" action="{{ route('logout') }}" style="margin:0">
             @csrf

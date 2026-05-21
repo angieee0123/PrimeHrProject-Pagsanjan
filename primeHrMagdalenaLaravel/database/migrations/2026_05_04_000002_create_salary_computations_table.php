@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
             $table->date('period_start');
             $table->date('period_end');
-            $table->enum('payroll_type', ['monthly', 'semi-monthly', 'weekly'])->default('monthly');
+            $table->enum('payroll_type', ['regular', '13th_month', 'bonus', 'special', 'monthly', 'semi-monthly', 'weekly'])->default('regular');
             $table->decimal('monthly_rate', 12, 2);
             $table->decimal('daily_rate', 12, 2);
             $table->decimal('hourly_rate', 12, 2);

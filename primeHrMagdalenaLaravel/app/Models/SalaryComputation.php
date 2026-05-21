@@ -11,6 +11,7 @@ class SalaryComputation extends Model
         'employee_id',
         'period_start',
         'period_end',
+        'pay_date',
         'payroll_type',
         'monthly_rate',
         'daily_rate',
@@ -27,6 +28,7 @@ class SalaryComputation extends Model
         'late_deduction',
         'undertime_deduction',
         'other_deductions',
+        'deduction_breakdown',
         'gross_pay',
         'net_pay',
         'status',
@@ -38,6 +40,7 @@ class SalaryComputation extends Model
     protected $casts = [
         'period_start' => 'date',
         'period_end' => 'date',
+        'pay_date' => 'date',
         'monthly_rate' => 'decimal:2',
         'daily_rate' => 'decimal:2',
         'hourly_rate' => 'decimal:2',
@@ -50,6 +53,7 @@ class SalaryComputation extends Model
         'other_deductions' => 'decimal:2',
         'gross_pay' => 'decimal:2',
         'net_pay' => 'decimal:2',
+        'deduction_breakdown' => 'array',
     ];
 
     public function employee(): BelongsTo

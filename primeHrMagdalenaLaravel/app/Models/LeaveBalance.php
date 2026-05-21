@@ -20,11 +20,11 @@ class LeaveBalance extends Model
 
     protected $casts = [
         'year' => 'integer',
-        'total_credits' => 'decimal:2',
-        'used_credits' => 'decimal:2',
-        'pending_credits' => 'decimal:2',
-        'available_credits' => 'decimal:2',
-        'carried_over' => 'decimal:2',
+        'total_credits' => 'decimal:6',
+        'used_credits' => 'decimal:6',
+        'pending_credits' => 'decimal:6',
+        'available_credits' => 'decimal:6',
+        'carried_over' => 'decimal:6',
     ];
 
     public function employee(): BelongsTo

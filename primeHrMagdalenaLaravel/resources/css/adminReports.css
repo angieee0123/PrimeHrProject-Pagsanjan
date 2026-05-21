@@ -1,0 +1,158 @@
+/* ── adminReports.css ── */
+
+/* Report type tab buttons */
+.report-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    border: 1.5px solid #e4e3f0;
+    background: #fff;
+    color: #5a5888;
+    transition: all 0.18s;
+    white-space: nowrap;
+}
+.report-tab:hover:not(.active) { border-color: #0b044d; background: #f0effe; }
+.report-tab.active { border: 2px solid #0b044d; background: #0b044d; color: #fff; }
+.report-tab.active svg { stroke: #fff; }
+
+.report-tabs-wrap {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+/* Search box */
+.rp-search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 12px;
+    border: 1.5px solid #e4e3f0;
+    border-radius: 8px;
+    background: #fafafe;
+    transition: border-color 0.2s;
+}
+.rp-search-box:focus-within { border-color: #0b044d; background: #fff; }
+.rp-search-box input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 12.5px;
+    font-family: 'Poppins', sans-serif;
+    color: #0b044d;
+    width: 160px;
+}
+.rp-search-box input::placeholder { color: #c0bedd; }
+
+/* Stat icon colours */
+.rp-icon-primary { background: #f0effe; }
+.rp-icon-success { background: #e8f9ef; }
+.rp-icon-danger  { background: #fdf0ef; }
+.rp-icon-warning { background: #fefce8; }
+
+/* Stat dot colours */
+.rp-dot-primary { background: #0b044d; }
+.rp-dot-success { background: #22c55e; }
+.rp-dot-danger  { background: #8e1e18; }
+.rp-dot-warning { background: #f59e0b; }
+
+/* Stat value compact */
+.stat-value-compact { font-size: 20px; }
+
+/* Table footer row */
+.rp-tfoot-row { font-weight: 700; background: #f7f6ff; }
+.rp-tfoot-label { padding: 10px 14px; font-size: 13px; }
+.rp-tfoot-pct   { padding: 10px 14px; font-size: 13px; color: #6b6a8a; }
+
+/* Table cell helpers */
+.rp-headcount-cell { font-weight: 600; color: #0b044d; }
+.rp-center-cell    { text-align: center; }
+.rp-date-cell      { font-size: 12.5px; color: #6b6a8a; white-space: nowrap; }
+.rp-rating-cell    { font-weight: 700; color: #15803d; text-align: center; }
+.rp-not-rated      { font-size: 12.5px; color: #9999bb; }
+
+/* Department % bar */
+.rp-pct-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.rp-pct-track {
+    flex: 1;
+    height: 6px;
+    background: #eceaf8;
+    border-radius: 4px;
+    overflow: hidden;
+    min-width: 40px;
+}
+.rp-pct-fill { height: 100%; background: #0b044d; border-radius: 4px; }
+.rp-pct-label { font-size: 12px; color: #6b6a8a; min-width: 32px; }
+
+/* Summary mini-cards (deductions / headcount / recruitment / training / performance) */
+.rp-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    padding: 0 0 20px;
+}
+.rp-mini-card {
+    background: #fff;
+    border: 1.5px solid #eceaf8;
+    border-radius: 12px;
+    padding: 16px 18px;
+}
+.rp-mini-label { font-size: 11.5px; color: #9999bb; font-weight: 600; margin: 0 0 6px; }
+.rp-mini-value { font-size: 28px; font-weight: 800; margin: 0 0 8px; }
+.rp-mini-value-sm { font-size: 17px; font-weight: 800; margin: 0 0 8px; }
+.rp-mini-track {
+    height: 5px;
+    background: #eceaf8;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+.rp-mini-fill { height: 100%; border-radius: 4px; }
+.rp-mini-sub  { font-size: 11px; color: #aaa8cc; margin: 0; }
+
+.rp-color-primary { color: #0b044d; }
+.rp-color-success { color: #15803d; }
+.rp-color-danger  { color: #8e1e18; }
+.rp-color-warning { color: #d9bb00; }
+.rp-color-hired   { color: #1a6e3c; }
+
+.rp-fill-primary { background: #0b044d; }
+.rp-fill-danger  { background: #8e1e18; }
+.rp-fill-warning { background: #d9bb00; }
+.rp-fill-success { background: #15803d; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .rp-mini-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+    .report-tabs-wrap { gap: 8px; }
+    .report-tab { padding: 8px 14px; font-size: 12px; }
+    .rp-search-box input { width: 120px; }
+}
+
+@media (max-width: 640px) {
+    .report-tab { padding: 7px 12px; font-size: 11.5px; gap: 6px; }
+    .report-tab svg { display: none; }
+    .rp-mini-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+    .report-tabs-wrap { gap: 6px; }
+    .report-tab { padding: 7px 10px; font-size: 11px; }
+    .rp-mini-grid { grid-template-columns: 1fr 1fr; }
+    .rp-search-box input { width: 100px; }
+}

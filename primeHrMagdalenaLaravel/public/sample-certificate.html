@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificate of Completion – Leadership and Governance Seminar</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #e8e4d9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .print-hint {
+    background: #0b044d;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border: none;
+  }
+  .print-hint:hover { background: #1a0f6e; }
+
+  /* ── Certificate wrapper ── */
+  .cert-page {
+    width: 900px;
+    min-height: 636px;
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+
+  /* ── Decorative border frame ── */
+  .cert-frame {
+    position: absolute;
+    inset: 14px;
+    border: 2px solid #0b044d;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .cert-frame::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 1px solid #c9a84c;
+  }
+
+  /* Corner ornaments */
+  .cert-corner {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    z-index: 3;
+  }
+  .cert-corner svg { width: 48px; height: 48px; }
+  .cert-corner.tl { top: 10px; left: 10px; }
+  .cert-corner.tr { top: 10px; right: 10px; transform: scaleX(-1); }
+  .cert-corner.bl { bottom: 10px; left: 10px; transform: scaleY(-1); }
+  .cert-corner.br { bottom: 10px; right: 10px; transform: scale(-1); }
+
+  /* ── Background watermark ── */
+  .cert-watermark {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .cert-watermark svg {
+    width: 340px;
+    height: 340px;
+    opacity: 0.04;
+  }
+
+  /* ── Gold top bar ── */
+  .cert-topbar {
+    position: relative;
+    z-index: 4;
+    background: linear-gradient(135deg, #0b044d 0%, #1a0f6e 60%, #2d1a8e 100%);
+    padding: 18px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .cert-topbar-logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(201,168,76,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .cert-topbar-logo svg { width: 30px; height: 30px; }
+  .cert-topbar-text { flex: 1; text-align: center; }
+  .cert-topbar-republic {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    color: rgba(255,255,255,0.65);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .cert-topbar-lgu {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+  .cert-topbar-office {
+    font-size: 10px;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+  .cert-topbar-certno {
+    font-size: 10px;
+    color: rgba(201,168,76,0.9);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── Gold divider ── */
+  .cert-gold-bar {
+    height: 5px;
+    background: linear-gradient(90deg, #c9a84c, #f0d080, #c9a84c);
+    position: relative;
+    z-index: 4;
+  }
+
+  /* ── Body ── */
+  .cert-body {
+    position: relative;
+    z-index: 4;
+    padding: 32px 72px 28px;
+    text-align: center;
+  }
+
+  .cert-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #c9a84c;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .cert-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: #0b044d;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .cert-headline-sub {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-style: italic;
+    color: #6b6a8a;
+    margin-bottom: 20px;
+  }
+
+  .cert-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 auto 20px;
+    max-width: 400px;
+  }
+  .cert-divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #c9a84c, transparent); }
+  .cert-divider-diamond {
+    width: 8px; height: 8px;
+    background: #c9a84c;
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  .cert-presented {
+    font-size: 12px;
+    color: #9999bb;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .cert-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 34px;
+    font-weight: 600;
+    font-style: italic;
+    color: #0b044d;
+    border-bottom: 2px solid #c9a84c;
+    display: inline-block;
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+    min-width: 320px;
+  }
+
+  .cert-position {
+    font-size: 11px;
+    color: #6b6a8a;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  .cert-body-text {
+    font-size: 12.5px;
+    color: #4a4a6a;
+    line-height: 1.8;
+    max-width: 620px;
+    margin: 0 auto 18px;
+  }
+
+  .cert-training-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0b044d;
+    background: #f7f6ff;
+    border-left: 4px solid #c9a84c;
+    border-right: 4px solid #c9a84c;
+    padding: 10px 24px;
+    margin: 0 auto 18px;
+    display: inline-block;
+    max-width: 680px;
+    line-height: 1.4;
+  }
+
+  /* ── Details grid ── */
+  .cert-details {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin: 0 auto 24px;
+    max-width: 680px;
+    border: 1px solid #e5e3f8;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .cert-detail-item {
+    flex: 1;
+    padding: 12px 16px;
+    border-right: 1px solid #e5e3f8;
+    text-align: center;
+  }
+  .cert-detail-item:last-child { border-right: none; }
+  .cert-detail-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #9999bb;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .cert-detail-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0b044d;
+    line-height: 1.3;
+  }
+  .cert-detail-value.gold { color: #a07820; }
+
+  /* ── Venue & organizer row ── */
+  .cert-meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 24px;
+    font-size: 11.5px;
+    color: #6b6a8a;
+  }
+  .cert-meta-item { display: flex; align-items: center; gap: 6px; }
+  .cert-meta-item svg { flex-shrink: 0; }
+
+  /* ── Signatures ── */
+  .cert-signatures {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 20px;
+    margin-bottom: 8px;
+  }
+  .cert-sig {
+    text-align: center;
+    min-width: 160px;
+  }
+  .cert-sig-line {
+    width: 160px;
+    height: 1px;
+    background: #0b044d;
+    margin: 0 auto 6px;
+  }
+  .cert-sig-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0b044d;
+    margin-bottom: 2px;
+  }
+  .cert-sig-title {
+    font-size: 10px;
+    color: #9999bb;
+    letter-spacing: 0.5px;
+  }
+  .cert-sig-img {
+    height: 44px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+
+  /* Seal */
+  .cert-seal {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #c9a84c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, #fff9ee, #fff);
+    box-shadow: 0 0 0 2px #f0d080, 0 0 0 4px #c9a84c33;
+    margin: 0 auto;
+  }
+  .cert-seal-text {
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #a07820;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* ── Bottom bar ── */
+  .cert-bottombar {
+    position: relative;
+    z-index: 4;
+    background: linear-gradient(135deg, #0b044d, #1a0f6e);
+    padding: 8px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cert-bottombar-text {
+    font-size: 9px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1px;
+  }
+  .cert-bottombar-certno {
+    font-size: 9px;
+    color: rgba(201,168,76,0.8);
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .print-hint { display: none; }
+    .cert-page { box-shadow: none; width: 100%; }
+    #cert-meta { display: block !important; font-size: 1px !important; color: white !important; position: static !important; width: auto !important; height: auto !important; overflow: visible !important; }
+  }
+</style>
+</head>
+<body>
+
+<button class="print-hint" onclick="downloadCertPDF()">
+  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+  Download Certificate PDF
+</button>
+
+<div class="cert-page">
+
+  <!-- Watermark -->
+  <div class="cert-watermark">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="45" stroke="#0b044d" stroke-width="1.5"/>
+      <circle cx="50" cy="50" r="38" stroke="#0b044d" stroke-width="0.8"/>
+      <path d="M50 10 L53 40 L50 42 L47 40 Z" fill="#0b044d"/>
+      <path d="M50 90 L53 60 L50 58 L47 60 Z" fill="#0b044d"/>
+      <path d="M10 50 L40 47 L42 50 L40 53 Z" fill="#0b044d"/>
+      <path d="M90 50 L60 47 L58 50 L60 53 Z" fill="#0b044d"/>
+      <circle cx="50" cy="50" r="8" fill="#0b044d"/>
+      <text x="50" y="54" text-anchor="middle" font-size="6" font-weight="bold" fill="#fff" font-family="Arial">LGU</text>
+    </svg>
+  </div>
+
+  <!-- Border frame -->
+  <div class="cert-frame"></div>
+
+  <!-- Corner ornaments -->
+  <div class="cert-corner tl">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 20 M4 4 L20 4" stroke="#c9a84c" stroke-width="2" stroke-linecap="round"/>
+      <path d="M4 4 L16 16" stroke="#c9a84c" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="4" cy="4" r="2.5" fill="#c9a84c"/>
+      <circle cx="20" cy="4" r="1.5" fill="#c9a84c" opacity="0.5"/>
+      <circle cx="4" cy="20" r="1.5" fill="#c9a84c" opacity="0.5"/>
+    </svg>
+  </div>
+  <div class="cert-corner tr">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 20 M4 4 L20 4" stroke="#c9a84c" stroke-width="2" stroke-linecap="round"/>
+      <path d="M4 4 L16 16" stroke="#c9a84c" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="4" cy="4" r="2.5" fill="#c9a84c"/>
+      <circle cx="20" cy="4" r="1.5" fill="#c9a84c" opacity="0.5"/>
+      <circle cx="4" cy="20" r="1.5" fill="#c9a84c" opacity="0.5"/>
+    </svg>
+  </div>
+  <div class="cert-corner bl">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 20 M4 4 L20 4" stroke="#c9a84c" stroke-width="2" stroke-linecap="round"/>
+      <path d="M4 4 L16 16" stroke="#c9a84c" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="4" cy="4" r="2.5" fill="#c9a84c"/>
+      <circle cx="20" cy="4" r="1.5" fill="#c9a84c" opacity="0.5"/>
+      <circle cx="4" cy="20" r="1.5" fill="#c9a84c" opacity="0.5"/>
+    </svg>
+  </div>
+  <div class="cert-corner br">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 20 M4 4 L20 4" stroke="#c9a84c" stroke-width="2" stroke-linecap="round"/>
+      <path d="M4 4 L16 16" stroke="#c9a84c" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="4" cy="4" r="2.5" fill="#c9a84c"/>
+      <circle cx="20" cy="4" r="1.5" fill="#c9a84c" opacity="0.5"/>
+      <circle cx="4" cy="20" r="1.5" fill="#c9a84c" opacity="0.5"/>
+    </svg>
+  </div>
+
+  <!-- Top bar -->
+  <div class="cert-topbar">
+    <div class="cert-topbar-logo">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    </div>
+    <div class="cert-topbar-text">
+      <p class="cert-topbar-republic">Republic of the Philippines · Province of Laguna</p>
+      <p class="cert-topbar-lgu">Municipal Government of Pagsanjan</p>
+      <p class="cert-topbar-office">Human Resource Management Office</p>
+    </div>
+    <div class="cert-topbar-certno">
+      <div>Certificate No.</div>
+      <div style="font-size:13px; color:#f0d080; margin-top:2px;">CERT-2025-0047</div>
+    </div>
+  </div>
+
+  <!-- Gold bar -->
+  <div class="cert-gold-bar"></div>
+
+  <!-- Body -->
+  <div class="cert-body">
+
+    <p class="cert-label">Certificate of Completion</p>
+    <h1 class="cert-headline">This is to Certify</h1>
+    <p class="cert-headline-sub">that the following has successfully completed the training program</p>
+
+    <div class="cert-divider">
+      <div class="cert-divider-line"></div>
+      <div class="cert-divider-diamond"></div>
+      <div class="cert-divider-line"></div>
+    </div>
+
+    <p class="cert-presented">Presented to</p>
+    <div class="cert-name">Maria Santos Dela Cruz</div>
+    <p class="cert-position">Administrative Officer II &nbsp;·&nbsp; Office of the Municipal Mayor</p>
+
+    <p class="cert-body-text">
+      has successfully attended and completed the required hours of the training program entitled:
+    </p>
+
+    <div class="cert-training-title">
+      "Leadership and Governance Seminar for Local Government Units"
+    </div>
+
+    <!-- Details grid -->
+    <div class="cert-details">
+      <div class="cert-detail-item">
+        <p class="cert-detail-label">Inclusive Dates</p>
+        <p class="cert-detail-value">March 10–12, 2025</p>
+      </div>
+      <div class="cert-detail-item">
+        <p class="cert-detail-label">Training Hours</p>
+        <p class="cert-detail-value gold">24 Hours</p>
+      </div>
+      <div class="cert-detail-item">
+        <p class="cert-detail-label">Conducted By</p>
+        <p class="cert-detail-value">Civil Service Commission<br><span style="font-weight:400; font-size:10px; color:#6b6a8a;">Region IV-B (MIMAROPA)</span></p>
+      </div>
+    </div>
+
+    <!-- Venue & organizer -->
+    <div class="cert-meta-row">
+      <div class="cert-meta-item">
+        <svg width="12" height="12" fill="none" stroke="#c9a84c" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span><strong style="color:#0b044d;">Venue:</strong> Laguna Sports Complex, Sta. Cruz, Laguna</span>
+      </div>
+      <div class="cert-meta-item">
+        <svg width="12" height="12" fill="none" stroke="#c9a84c" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span><strong style="color:#0b044d;">Issued:</strong> March 12, 2025</span>
+      </div>
+    </div>
+
+    <!-- Signatures -->
+    <div class="cert-signatures">
+
+      <div class="cert-sig">
+        <div class="cert-sig-img">
+          <svg width="120" height="36" viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 28 C20 10, 30 32, 40 20 C50 8, 55 30, 65 22 C75 14, 80 28, 95 18 C105 12, 108 24, 112 20" stroke="#0b044d" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+            <path d="M15 30 C18 26, 22 32, 28 28" stroke="#0b044d" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="cert-sig-line"></div>
+        <p class="cert-sig-name">Atty. Ramon G. Villanueva</p>
+        <p class="cert-sig-title">Municipal Mayor</p>
+      </div>
+
+      <div class="cert-sig" style="text-align:center;">
+        <div class="cert-seal">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="14" stroke="#c9a84c" stroke-width="1"/>
+            <circle cx="16" cy="16" r="10" stroke="#c9a84c" stroke-width="0.5"/>
+            <path d="M16 6 L17.5 13 L16 14 L14.5 13 Z" fill="#c9a84c" opacity="0.7"/>
+            <path d="M16 26 L17.5 19 L16 18 L14.5 19 Z" fill="#c9a84c" opacity="0.7"/>
+            <path d="M6 16 L13 14.5 L14 16 L13 17.5 Z" fill="#c9a84c" opacity="0.7"/>
+            <path d="M26 16 L19 14.5 L18 16 L19 17.5 Z" fill="#c9a84c" opacity="0.7"/>
+            <circle cx="16" cy="16" r="3" fill="#c9a84c" opacity="0.3"/>
+          </svg>
+          <p class="cert-seal-text">OFFICIAL<br>SEAL</p>
+        </div>
+      </div>
+
+      <div class="cert-sig">
+        <div class="cert-sig-img">
+          <svg width="120" height="36" viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 24 C15 8, 25 30, 35 18 C42 10, 48 28, 58 20 C68 12, 72 26, 85 16 C95 8, 100 22, 112 18" stroke="#0b044d" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+            <path d="M12 28 C16 22, 20 30, 26 26" stroke="#0b044d" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="cert-sig-line"></div>
+        <p class="cert-sig-name">Ma. Lourdes T. Reyes, CESO V</p>
+        <p class="cert-sig-title">HRMO / Training Director</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="cert-gold-bar"></div>
+  <div class="cert-bottombar">
+    <span class="cert-bottombar-text">Municipal Government of Pagsanjan · Laguna · Philippines · hrmo@magdalena.gov.ph</span>
+    <span class="cert-bottombar-certno">CERT-2026-123 · Issued: April 12, 2026</span>
+  </div>
+
+</div>
+
+<p style="margin-top:16px; font-size:11px; color:#9999bb; text-align:center;">
+  Click <strong>Download Certificate PDF</strong> to save the file, then upload it to test the auto-fill feature.
+</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+async function downloadCertPDF() {
+  const btn = document.querySelector('.print-hint');
+  const origHTML = btn.innerHTML;
+  btn.textContent = 'Generating PDF...';
+  btn.disabled = true;
+  try {
+    const { jsPDF } = window.jspdf;
+    const certPage = document.querySelector('.cert-page');
+
+    // Render certificate as image
+    const canvas = await html2canvas(certPage, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false
+    });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const w = canvas.width / 2;
+    const h = canvas.height / 2;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [w, h] });
+
+    // Add certificate image
+    pdf.addImage(imgData, 'JPEG', 0, 0, w, h);
+
+    // Embed metadata as invisible text layer so PDF.js can extract it
+    const metaEl = document.getElementById('cert-meta');
+    if (metaEl) {
+      const lines = metaEl.innerText.trim().split('\n');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(0.1);
+      let y = 1;
+      for (const line of lines) {
+        if (line.trim()) {
+          pdf.text(line.trim(), 1, y);
+          y += 0.5;
+        }
+      }
+    }
+
+    const certNo = document.getElementById('cert-meta')?.innerText.match(/Certificate No\.?\s*([A-Z0-9\-]+)/i);
+    const filename = 'certificate-' + (certNo ? certNo[1] : 'sample') + '.pdf';
+    pdf.save(filename);
+
+  } catch (err) {
+    console.error('PDF generation error:', err);
+    alert('Could not generate PDF. Please use Print > Save as PDF instead.');
+    window.print();
+  } finally {
+    btn.innerHTML = origHTML;
+    btn.disabled = false;
+  }
+}
+</script>
+
+<!-- CERTIFICATE METADATA: structured text for PDF.js extraction -->
+<div id="cert-meta" style="position:absolute;left:-9999px;top:0;font-size:1px;color:rgba(255,255,255,0.01);line-height:1.4;pointer-events:none;white-space:pre;">
+CERTIFICATE OF COMPLETION
+Certificate No. CERT-2025-0047
+Reference Document No. OO-2025-014
+Training Title: Leadership and Governance Seminar for Local Government Units
+Participant: Maria Santos Dela Cruz
+Inclusive Dates: March 10-12, 2025
+Date From: March 10, 2025
+Date To: March 12, 2025
+Number of Hours: 24 Hours
+Conducted By: Civil Service Commission Region IV-B
+Venue: Laguna Sports Complex, Sta. Cruz, Laguna
+Issued: March 12, 2025
+</div>
+
+</body>
+</html>

@@ -7,89 +7,91 @@
     <title>Chatbot Test Suite</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #f5f5f5; 
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f7f6ff;
             padding: 20px;
+            color: #0b044d;
         }
         .container { max-width: 1200px; margin: 0 auto; }
         .header {
             background: linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 10px;
-            margin-bottom: 30px;
+            color: #fff;
+            padding: 26px;
+            border-radius: 14px;
+            margin-bottom: 22px;
+            box-shadow: 0 10px 30px rgba(11, 4, 77, 0.22);
         }
-        .header h1 { font-size: 28px; margin-bottom: 10px; }
-        .header p { opacity: 0.9; }
-        
+        .header h1 { font-size: 28px; margin-bottom: 8px; }
+        .header p { opacity: 0.9; font-size: 13.5px; }
+
         .controls {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: #fff;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            border: 1px solid #eceaf8;
+            box-shadow: 0 8px 24px rgba(11, 4, 77, 0.08);
         }
         .btn {
             background: #0b044d;
-            color: white;
+            color: #fff;
             border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
+            padding: 10px 16px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
-            margin-right: 10px;
+            margin-right: 8px;
+            transition: transform 0.2s ease, background-color 0.2s ease;
         }
-        .btn:hover { background: #1a0f6e; }
-        .btn-secondary { background: #6c757d; }
-        .btn-secondary:hover { background: #5a6268; }
-        
+        .btn:hover { background: #8e1e18; transform: translateY(-1px); }
+        .btn-secondary { background: #7b779d; }
+        .btn-secondary:hover { background: #5d597d; }
+
         .stats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 18px;
         }
         .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: #fff;
+            border: 1px solid #eceaf8;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(11, 4, 77, 0.07);
         }
-        .stat-label { font-size: 12px; color: #666; margin-bottom: 5px; }
-        .stat-value { font-size: 32px; font-weight: 700; }
-        .stat-value.success { color: #28a745; }
-        .stat-value.danger { color: #dc3545; }
-        .stat-value.warning { color: #ffc107; }
-        
+        .stat-label { font-size: 12px; color: #6f6b91; margin-bottom: 4px; }
+        .stat-value { font-size: 30px; font-weight: 800; line-height: 1.1; }
+        .stat-value.success { color: #15803d; }
+        .stat-value.danger { color: #b91c1c; }
+        .stat-value.warning { color: #d97706; }
+
         .test-results {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #eceaf8;
+            box-shadow: 0 8px 24px rgba(11, 4, 77, 0.07);
             overflow: hidden;
         }
-        .category {
-            border-bottom: 1px solid #eee;
-        }
+        .category { border-bottom: 1px solid #f0eefc; }
         .category-header {
-            background: #f8f9fa;
-            padding: 15px 20px;
-            font-weight: 600;
+            background: #f8f7ff;
+            padding: 14px 18px;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .category-header:hover { background: #e9ecef; }
-        .category-tests {
-            display: none;
-        }
+        .category-header:hover { background: #f2f0fd; }
+        .category-tests { display: none; }
         .category-tests.active { display: block; }
-        
+
         .test-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 14px 18px;
+            border-bottom: 1px solid #f6f5fd;
         }
         .test-item:last-child { border-bottom: none; }
         .test-question {
@@ -98,65 +100,82 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            color: #241d63;
         }
         .test-status {
             display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 10px;
             font-weight: 700;
+            letter-spacing: 0.2px;
         }
-        .test-status.pending { background: #ffc107; color: #000; }
-        .test-status.success { background: #28a745; color: white; }
-        .test-status.failed { background: #dc3545; color: white; }
-        .test-status.running { background: #17a2b8; color: white; }
-        
+        .test-status.pending { background: #fef3c7; color: #92400e; }
+        .test-status.success { background: #dcfce7; color: #166534; }
+        .test-status.failed { background: #fee2e2; color: #991b1b; }
+        .test-status.running { background: #dbeafe; color: #1e3a8a; }
+
         .test-details {
-            font-size: 13px;
-            color: #666;
+            font-size: 12.5px;
+            color: #6f6b91;
             margin-top: 5px;
         }
         .test-response {
-            background: #f8f9fa;
+            background: #f8f7ff;
+            border: 1px solid #eceaf8;
             padding: 10px;
-            border-radius: 4px;
+            border-radius: 8px;
             margin-top: 8px;
             font-size: 12px;
-            max-height: 100px;
+            color: #27214f;
+            max-height: 110px;
             overflow-y: auto;
         }
-        
+
         .progress-bar {
-            height: 4px;
-            background: #e9ecef;
-            border-radius: 2px;
+            height: 6px;
+            background: #eceaf8;
+            border-radius: 999px;
             overflow: hidden;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #0b044d, #1a0f6e);
+            background: linear-gradient(90deg, #0b044d, #8e1e18);
             width: 0%;
             transition: width 0.3s;
         }
-        
+
         .loading {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: #6f6b91;
+            font-size: 13px;
         }
         .spinner {
-            border: 3px solid #f3f3f3;
+            border: 3px solid #f1f0fd;
             border-top: 3px solid #0b044d;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            margin: 0 auto 12px;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 900px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 640px) {
+            body { padding: 12px; }
+            .header { padding: 18px; }
+            .header h1 { font-size: 22px; }
+            .controls { display: grid; gap: 8px; }
+            .btn { width: 100%; margin-right: 0; }
+            .stats { grid-template-columns: 1fr; }
         }
     </style>
 </head>

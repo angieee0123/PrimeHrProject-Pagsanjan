@@ -27,14 +27,14 @@ class DailySalaryComputation extends Model
 
     protected $casts = [
         'work_date' => 'date',
-        'monthly_rate' => 'decimal:2',
-        'daily_rate' => 'decimal:2',
-        'hourly_rate' => 'decimal:2',
-        'daily_basic_pay' => 'decimal:2',
-        'ot_pay' => 'decimal:2',
-        'late_deduction' => 'decimal:2',
-        'undertime_deduction' => 'decimal:2',
-        'daily_gross_pay' => 'decimal:2',
+        'monthly_rate' => 'decimal:4', // Changed from 2 to 4 for exact precision
+        'daily_rate' => 'decimal:4',
+        'hourly_rate' => 'decimal:4',
+        'daily_basic_pay' => 'decimal:4',
+        'ot_pay' => 'decimal:4',
+        'late_deduction' => 'decimal:4',
+        'undertime_deduction' => 'decimal:4',
+        'daily_gross_pay' => 'decimal:4',
         'is_holiday' => 'boolean',
         'is_rest_day' => 'boolean',
     ];
@@ -139,14 +139,14 @@ class DailySalaryComputation extends Model
             [
                 'employee_id' => $log->employee_id,
                 'work_date' => $attendance->date,
-                'monthly_rate' => round($monthlyRate, 2),
-                'daily_rate' => round($dailyRate, 2),
-                'hourly_rate' => round($hourlyRate, 2),
-                'daily_basic_pay' => round($dailyBasicPay, 2),
-                'ot_pay' => round($otPay, 2),
-                'late_deduction' => round($lateDeduction, 2),
-                'undertime_deduction' => round($undertimeDeduction, 2),
-                'daily_gross_pay' => round($dailyGrossPay, 2),
+                'monthly_rate' => $monthlyRate, // Exact value, no rounding
+                'daily_rate' => $dailyRate,
+                'hourly_rate' => $hourlyRate,
+                'daily_basic_pay' => $dailyBasicPay,
+                'ot_pay' => $otPay,
+                'late_deduction' => $lateDeduction,
+                'undertime_deduction' => $undertimeDeduction,
+                'daily_gross_pay' => $dailyGrossPay,
             ]
         );
     }

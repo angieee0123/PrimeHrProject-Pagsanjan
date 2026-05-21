@@ -1,1 +1,1 @@
-{{-- Theme Settings Removed --}}
+{{-- Theme settings removed --}}

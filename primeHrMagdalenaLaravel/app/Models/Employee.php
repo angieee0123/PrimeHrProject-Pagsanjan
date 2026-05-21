@@ -89,6 +89,21 @@ class Employee extends Model
         return $this->hasMany(LeaveBalance::class);
     }
 
+    public function leaveApplications()
+    {
+        return $this->hasMany(LeaveApplication::class);
+    }
+
+    public function leaveTransactions()
+    {
+        return $this->hasMany(LeaveTransaction::class);
+    }
+
+    public function deductions()
+    {
+        return $this->hasMany(EmployeeDeduction::class);
+    }
+
     public function getScheduleForDate($date)
     {
         return $this->schedule()
