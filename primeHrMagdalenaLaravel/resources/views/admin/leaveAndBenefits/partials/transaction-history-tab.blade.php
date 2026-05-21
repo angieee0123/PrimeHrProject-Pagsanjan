@@ -153,12 +153,16 @@
     </div>
 
     <div class="table-footer">
-        <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="display:flex;align-items:center;gap:12px;">
             <p style="margin: 0;" id="transactionFooter">
-                Showing <strong>{{ $leaveTransactions->firstItem() ?? 0 }}</strong> to 
-                <strong>{{ $leaveTransactions->lastItem() ?? 0 }}</strong> of 
-                <strong>{{ $leaveTransactions->total() ?? 0 }}</strong> transactions
+                Showing <strong id="transactionRowStart">{{ $leaveTransactions->firstItem() ?? 0 }}</strong>-<strong id="transactionRowEnd">{{ $leaveTransactions->lastItem() ?? 0 }}</strong> of <strong id="transactionRowTotal">{{ $leaveTransactions->total() ?? 0 }}</strong> records
             </p>
+            <select id="transactionRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changeTransactionRowsPerPage()">
+                <option value="10" {{ request('transaction_per_page', 10) == 10 ? 'selected' : '' }}>10 rows</option>
+                <option value="25" {{ request('transaction_per_page', 10) == 25 ? 'selected' : '' }}>25 rows</option>
+                <option value="50" {{ request('transaction_per_page', 10) == 50 ? 'selected' : '' }}>50 rows</option>
+                <option value="100" {{ request('transaction_per_page', 10) == 100 ? 'selected' : '' }}>100 rows</option>
+            </select>
         </div>
         <div class="pagination">
             @if(isset($leaveTransactions) && $leaveTransactions->hasPages())
@@ -224,6 +228,15 @@
 </div>
 
 <script>
+function changeTransactionRowsPerPage() {
+    const perPage = document.getElementById('transactionRowsPerPage').value;
+    const url = new URL(window.location.href);
+    url.searchParams.set('transaction_per_page', perPage);
+    url.searchParams.set('tab', 'transactions');
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+}
+
 function sortTransactionTable(column) {
     const currentSort = new URLSearchParams(window.location.search).get('sort_by');
     const currentOrder = new URLSearchParams(window.location.search).get('sort_order') || 'desc';

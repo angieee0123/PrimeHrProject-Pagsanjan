@@ -47,11 +47,15 @@ class LeaveController extends Controller
             ]);
 
         // Fetch accrual rates with leave type relationship
+        $accrualPerPage = request('accrual_per_page', 10);
+        $accrualPerPage = in_array($accrualPerPage, [10, 25, 50, 100]) ? $accrualPerPage : 10;
+        
         $accrualRates = LeaveAccrualRate::with('leaveType')
             ->orderBy('is_active', 'desc')
             ->orderBy('leave_type_id', 'asc')
             ->orderBy('effective_date', 'desc')
-            ->paginate(10);
+            ->paginate($accrualPerPage)
+            ->appends(['accrual_per_page' => $accrualPerPage]);
 
         // Get only accrued leave types for the modal dropdown
         $accruedLeaveTypes = LeaveType::where('is_accrued', true)
@@ -114,7 +118,10 @@ class LeaveController extends Controller
         
         $transactionQuery->orderBy('created_at', 'desc');
         
-        $leaveTransactions = $transactionQuery->paginate(15)->appends(request()->except('page'));
+        $transactionPerPage = request('transaction_per_page', 10);
+        $transactionPerPage = in_array($transactionPerPage, [10, 25, 50, 100]) ? $transactionPerPage : 10;
+        
+        $leaveTransactions = $transactionQuery->paginate($transactionPerPage)->appends(request()->except('page'));
 
         // Get unique employees who have transactions for filter
         $transactionEmployees = \App\Models\Employee::whereHas('leaveTransactions')

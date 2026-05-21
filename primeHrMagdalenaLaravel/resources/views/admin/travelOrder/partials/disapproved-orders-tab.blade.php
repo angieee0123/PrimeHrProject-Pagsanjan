@@ -1,0 +1,122 @@
+<section class="table-section" id="disapproved-tab" style="display: none;">
+    <div class="table-header">
+        <div>
+            <h3 class="table-title">Disapproved Travel Orders</h3>
+            <p class="table-sub">Rejected requests · {{ $disapprovedOrders->total() }} records</p>
+        </div>
+        <div class="table-actions">
+            <select class="filter-select" id="filterDisapprovedDept" onchange="filterDisapprovedOrders()">
+                <option value="all">All Departments</option>
+                @foreach($departments ?? [] as $dept)
+                    <option value="{{ $dept->name }}">{{ $dept->name }}</option>
+                @endforeach
+            </select>
+            <button class="btn-export">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export
+            </button>
+        </div>
+    </div>
+
+    @php
+        $sortIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;"><polyline points="18 15 12 9 6 15"></polyline></svg>';
+        $colors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
+    @endphp
+
+    <div class="table-wrapper">
+        <table class="payroll-table">
+            <thead>
+                <tr>
+                    <th onclick="sortDisapprovedOrders('employee')" style="cursor: pointer;">Employee {!! $sortIcon !!}</th>
+                    <th onclick="sortDisapprovedOrders('destination')" style="cursor: pointer;">Destination {!! $sortIcon !!}</th>
+                    <th onclick="sortDisapprovedOrders('travel_date')" style="cursor: pointer;">Travel Date {!! $sortIcon !!}</th>
+                    <th onclick="sortDisapprovedOrders('disapproved_by')" style="cursor: pointer;">Disapproved By {!! $sortIcon !!}</th>
+                    <th style="min-width: 200px;">Reason</th>
+                    <th style="text-align: center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($disapprovedOrders as $order)
+                <tr class="disapproved-order-row">
+                    <td data-label="Employee">
+                        <div class="emp-cell">
+                            <div class="emp-avatar" style="background: {{ $colors[$loop->index % 6] }};">{{ strtoupper(substr($order->employee_name, 0, 2)) }}</div>
+                            <div>
+                                <p class="emp-name">{{ $order->employee_name }}</p>
+                                <p class="emp-id">{{ $order->employee_id }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Destination" style="font-size: 13px; color: #0b044d; font-weight: 500;">{{ $order->destination }}</td>
+                    <td data-label="Travel Date" style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ \Carbon\Carbon::parse($order->travel_date)->format('M d, Y') }}</td>
+                    <td data-label="Disapproved By" style="font-size: 13px; color: #8e1e18; font-weight: 500;">{{ $order->disapproved_by }}</td>
+                    <td data-label="Reason" style="font-size: 13px; color: #6b6a8a;">{{ Str::limit($order->disapproval_reason, 50) }}</td>
+                    <td data-label="Actions">
+                        <div class="row-actions">
+                            <button class="btn-view" onclick="viewOrder({{ $order->id }})">View</button>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #6b6a8a;">No disapproved travel orders</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-footer">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <p id="disapprovedFooter">Showing <strong id="disapprovedRowStart">{{ $disapprovedOrders->firstItem() ?? 0 }}</strong>-<strong id="disapprovedRowEnd">{{ $disapprovedOrders->lastItem() ?? 0 }}</strong> of <strong id="disapprovedRowTotal">{{ $disapprovedOrders->total() }}</strong> records</p>
+            <select id="disapprovedRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changeDisapprovedRowsPerPage()">
+                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 rows</option>
+                <option value="25" {{ request('per_page', 10) == 25 ? 'selected' : '' }}>25 rows</option>
+                <option value="50" {{ request('per_page', 10) == 50 ? 'selected' : '' }}>50 rows</option>
+                <option value="100" {{ request('per_page', 10) == 100 ? 'selected' : '' }}>100 rows</option>
+            </select>
+        </div>
+        <div class="pagination" id="disapprovedPaginationControls">
+            @php $params = $disapprovedOrders->appends(request()->except('page')); @endphp
+            
+            {!! $disapprovedOrders->onFirstPage() 
+                ? '<button class="page-btn" disabled>‹</button>' 
+                : '<a href="' . $params->previousPageUrl() . '#disapproved-tab" class="page-btn" onclick="event.preventDefault(); navigateToPage(\'' . $params->previousPageUrl() . '\');">‹</a>' !!}
+
+            @foreach ($disapprovedOrders->getUrlRange(1, $disapprovedOrders->lastPage()) as $page => $url)
+                {!! $page == $disapprovedOrders->currentPage() 
+                    ? '<button class="page-btn active">' . $page . '</button>' 
+                    : '<a href="' . $params->url($page) . '#disapproved-tab" class="page-btn" onclick="event.preventDefault(); navigateToPage(\'' . $params->url($page) . '\');">' . $page . '</a>' !!}
+            @endforeach
+
+            {!! $disapprovedOrders->hasMorePages() 
+                ? '<a href="' . $params->nextPageUrl() . '#disapproved-tab" class="page-btn" onclick="event.preventDefault(); navigateToPage(\'' . $params->nextPageUrl() . '\');">›</a>' 
+                : '<button class="page-btn" disabled>›</button>' !!}
+        </div>
+    </div>
+</section>
+
+<script>
+function changeDisapprovedRowsPerPage() {
+    const perPage = document.getElementById('disapprovedRowsPerPage').value;
+    const url = new URL(window.location.href);
+    url.searchParams.set('per_page', perPage);
+    url.searchParams.set('tab', 'disapproved');
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+}
+
+function filterDisapprovedOrders() {
+    const deptFilter = document.getElementById('filterDisapprovedDept').value;
+    const rows = document.querySelectorAll('.disapproved-order-row');
+    
+    rows.forEach(row => {
+        const show = deptFilter === 'all' || row.dataset.department === deptFilter;
+        row.style.display = show ? '' : 'none';
+    });
+}
+
+function sortDisapprovedOrders(column) {
+    console.log('Sort by:', column);
+}
+</script>

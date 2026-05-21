@@ -373,6 +373,100 @@ Route::get('/permanent/chatbot', function () {
     return view('permanent.chatbot.permanentChatbot');
 })->middleware('auth')->name('permanent.chatbot');
 
+Route::get('/permanent/travelorder', function () {
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
+
+    if (!$employee) {
+        $travelOrders = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10, 1);
+        return view('permanent.travelOrder.permanentTravelOrder', compact('travelOrders'));
+    }
+
+    $employee->load('employmentDetail.designationRelation', 'employmentDetail.departmentRelation');
+
+    $perPage = request('per_page', 10);
+    $travelOrders = \App\Models\TravelOrder::where('employee_id', $employee->id)
+        ->orderBy('created_at', 'desc')
+        ->paginate($perPage);
+
+    return view('permanent.travelOrder.permanentTravelOrder', compact('employee', 'travelOrders'));
+})->middleware('auth')->name('permanent.travelorder');
+
+Route::post('/permanent/travelorder', function (\Illuminate\Http\Request $request) {
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
+    if (!$employee) {
+        return back()->with('error', 'No employee record found.');
+    }
+
+    $data = $request->validate([
+        'destination' => 'required|string|max:255',
+        'purpose' => 'required|string|max:300',
+        'travel_date' => 'required|date',
+        'return_date' => 'required|date|after_or_equal:travel_date',
+        'duration' => 'required|integer|min:1',
+        'transportation_mode' => 'nullable|string|max:100',
+        'estimated_budget' => 'nullable|numeric|min:0',
+        'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+    ]);
+
+    $attachmentPath = null;
+    if ($request->hasFile('attachment')) {
+        $attachmentPath = $request->file('attachment')->store('travel_orders', 'public');
+    }
+
+    \App\Models\TravelOrder::create([
+        'employee_id' => $employee->id,
+        'destination' => $data['destination'],
+        'purpose' => $data['purpose'],
+        'travel_date' => $data['travel_date'],
+        'return_date' => $data['return_date'],
+        'duration' => $data['duration'],
+        'transportation_mode' => $data['transportation_mode'] ?? null,
+        'estimated_budget' => $data['estimated_budget'] ?? null,
+        'attachment' => $attachmentPath,
+        'status' => 'pending',
+    ]);
+
+    return redirect()->route('permanent.travelorder')->with('success', 'Travel order submitted successfully.');
+})->middleware('auth')->name('travelorder.store');
+
+Route::get('/permanent/travelorder/{id}', function ($id) {
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
+    if (!$employee) {
+        abort(403, 'No employee record found.');
+    }
+
+    $travelOrder = \App\Models\TravelOrder::where('id', $id)
+        ->where('employee_id', $employee->id)
+        ->with('approver')
+        ->firstOrFail();
+
+    return response()->json($travelOrder);
+})->middleware('auth')->name('travelorder.show');
+
+Route::delete('/permanent/travelorder/{id}', function ($id) {
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
+    if (!$employee) {
+        return redirect()->route('permanent.travelorder')->with('error', 'No employee record found.');
+    }
+
+    $travelOrder = \App\Models\TravelOrder::where('id', $id)
+        ->where('employee_id', $employee->id)
+        ->where('status', 'pending')
+        ->firstOrFail();
+
+    if ($travelOrder->attachment) {
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($travelOrder->attachment);
+    }
+
+    $travelOrder->delete();
+
+    return redirect()->route('permanent.travelorder')->with('success', 'Travel order cancelled successfully.');
+})->middleware('auth')->name('travelorder.delete');
+
 // ── Job Order Employee Dashboard ──
 Route::get('/joborder/dashboard', function () {
     return view('joborder.dashboard.joborderDashboard');
@@ -863,9 +957,65 @@ Route::post('/admin/attendance/correct', [AttendanceController::class, 'correctA
 
 Route::get('/admin/leave', [LeaveController::class, 'index'])->middleware('auth')->name('admin.leave');
 
-Route::get('/admin/travelorder', function () {
-    return view('admin.travelOrder.travelOrder');
+Route::get('/admin/travelorder', function (\Illuminate\Http\Request $request) {
+    $perPage = $request->input('per_page', 10);
+    
+    $pendingOrders = \App\Models\TravelOrder::with(['employee.employmentDetail.departmentRelation'])
+        ->where('status', 'pending')
+        ->orderBy('created_at', 'desc')
+        ->paginate($perPage, ['*'], 'pending_page');
+    
+    $approvedOrders = \App\Models\TravelOrder::with(['employee.employmentDetail.departmentRelation', 'approver'])
+        ->where('status', 'approved')
+        ->orderBy('approved_at', 'desc')
+        ->paginate($perPage, ['*'], 'approved_page');
+    
+    $disapprovedOrders = \App\Models\TravelOrder::with(['employee.employmentDetail.departmentRelation', 'approver'])
+        ->where('status', 'rejected')
+        ->orderBy('updated_at', 'desc')
+        ->paginate($perPage, ['*'], 'disapproved_page');
+    
+    $departments = \App\Models\Department::where('status', 'Active')->orderBy('name')->get();
+    
+    return view('admin.travelOrder.travelOrder', compact('pendingOrders', 'approvedOrders', 'disapprovedOrders', 'departments'));
 })->middleware('auth')->name('admin.travelorder');
+
+Route::post('/admin/travelorder/{id}/approve', function ($id) {
+    $travelOrder = \App\Models\TravelOrder::findOrFail($id);
+    
+    $travelOrder->update([
+        'status' => 'approved',
+        'approved_by' => Auth::id(),
+        'approved_at' => now(),
+        'remarks' => null,
+    ]);
+    
+    return redirect()->route('admin.travelorder', ['tab' => 'approved'])
+        ->with('success', 'Travel order approved successfully.');
+})->middleware('auth')->name('admin.travelorder.approve');
+
+Route::post('/admin/travelorder/{id}/disapprove', function (\Illuminate\Http\Request $request, $id) {
+    $request->validate(['reason' => 'required|string|max:500']);
+    
+    $travelOrder = \App\Models\TravelOrder::findOrFail($id);
+    
+    $travelOrder->update([
+        'status' => 'rejected',
+        'approved_by' => Auth::id(),
+        'approved_at' => now(),
+        'remarks' => $request->reason,
+    ]);
+    
+    return redirect()->route('admin.travelorder', ['tab' => 'disapproved'])
+        ->with('success', 'Travel order disapproved.');
+})->middleware('auth')->name('admin.travelorder.disapprove');
+
+Route::get('/admin/travelorder/{id}', function ($id) {
+    $travelOrder = \App\Models\TravelOrder::with(['employee.employmentDetail.departmentRelation', 'approver'])
+        ->findOrFail($id);
+    
+    return response()->json($travelOrder);
+})->middleware('auth')->name('admin.travelorder.view');
 Route::post('/admin/leave/types', [LeaveController::class, 'storeLeaveType'])->middleware('auth')->name('admin.leave.types.store');
 Route::get('/admin/leave/types/{code}', [LeaveController::class, 'show'])->middleware('auth')->name('admin.leave.types.show');
 Route::put('/admin/leave/types/{code}', [LeaveController::class, 'update'])->middleware('auth')->name('admin.leave.types.update');

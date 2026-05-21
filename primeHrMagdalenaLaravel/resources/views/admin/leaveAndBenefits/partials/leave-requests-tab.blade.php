@@ -124,10 +124,16 @@
     </div>
 
     <div class="table-footer">
-        <p id="leaveRequestFooter">Showing <strong>{{ $leaveApplications->count() }}</strong> of <strong>{{ $leaveApplications->count() }}</strong> records</p>
-        <div class="pagination">
-            <button class="page-btn active">1</button>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <p id="leaveRequestFooter">Showing <strong id="leaveRequestRowStart">1</strong>-<strong id="leaveRequestRowEnd">{{ min(10, $leaveApplications->count()) }}</strong> of <strong id="leaveRequestRowTotal">{{ $leaveApplications->count() }}</strong> records</p>
+            <select id="leaveRequestRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changeLeaveRequestRowsPerPage()">
+                <option value="10">10 rows</option>
+                <option value="25">25 rows</option>
+                <option value="50">50 rows</option>
+                <option value="100">100 rows</option>
+            </select>
         </div>
+        <div class="pagination" id="leaveRequestPaginationControls"></div>
     </div>
 </section>
 
@@ -202,6 +208,63 @@
 </div>
 
 <script>
+<script>
+let leaveRequestCurrentPage = 1;
+let leaveRequestRowsPerPage = 10;
+let leaveRequestTotalRows = {{ $leaveApplications->count() }};
+
+function changeLeaveRequestRowsPerPage() {
+    leaveRequestRowsPerPage = parseInt(document.getElementById('leaveRequestRowsPerPage').value);
+    leaveRequestCurrentPage = 1;
+    renderLeaveRequestPagination();
+    paginateLeaveRequestTable();
+}
+
+function renderLeaveRequestPagination() {
+    const totalPages = Math.ceil(leaveRequestTotalRows / leaveRequestRowsPerPage);
+    const paginationControls = document.getElementById('leaveRequestPaginationControls');
+    let html = '';
+    
+    html += `<button class="page-btn" ${leaveRequestCurrentPage === 1 ? 'disabled' : ''} onclick="changeLeaveRequestPage(${leaveRequestCurrentPage - 1})">‹</button>`;
+    
+    for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="page-btn ${i === leaveRequestCurrentPage ? 'active' : ''}" onclick="changeLeaveRequestPage(${i})">${i}</button>`;
+    }
+    
+    html += `<button class="page-btn" ${leaveRequestCurrentPage === totalPages ? 'disabled' : ''} onclick="changeLeaveRequestPage(${leaveRequestCurrentPage + 1})">›</button>`;
+    
+    paginationControls.innerHTML = html;
+}
+
+function changeLeaveRequestPage(page) {
+    const totalPages = Math.ceil(leaveRequestTotalRows / leaveRequestRowsPerPage);
+    if (page < 1 || page > totalPages) return;
+    leaveRequestCurrentPage = page;
+    renderLeaveRequestPagination();
+    paginateLeaveRequestTable();
+}
+
+function paginateLeaveRequestTable() {
+    const rows = document.querySelectorAll('#leaveRequestsTableBody tr');
+    const start = (leaveRequestCurrentPage - 1) * leaveRequestRowsPerPage;
+    const end = start + leaveRequestRowsPerPage;
+    let visibleCount = 0;
+    
+    rows.forEach((row, index) => {
+        if (row.querySelector('.emp-cell')) {
+            if (index >= start && index < end && row.style.display !== 'none') {
+                row.style.display = '';
+                visibleCount++;
+            } else if (index < start || index >= end) {
+                row.style.display = 'none';
+            }
+        }
+    });
+    
+    document.getElementById('leaveRequestRowStart').textContent = visibleCount > 0 ? start + 1 : 0;
+    document.getElementById('leaveRequestRowEnd').textContent = start + visibleCount;
+}
+
 function applyAdminLeaveFilters() {
     const department = document.getElementById('filterDepartment').value;
     const type = document.getElementById('filterLeaveType').value;
@@ -221,9 +284,18 @@ function applyAdminLeaveFilters() {
     });
     
     const total = rows.length - (rows[0]?.querySelector('.emp-cell') ? 0 : 1);
-    document.getElementById('leaveRequestCount').textContent = visible;
-    document.getElementById('leaveRequestFooter').innerHTML = `Showing <strong>${visible}</strong> of <strong>${total}</strong> records`;
+    
+    leaveRequestTotalRows = visible;
+    leaveRequestCurrentPage = 1;
+    renderLeaveRequestPagination();
+    paginateLeaveRequestTable();
+    document.getElementById('leaveRequestRowTotal').textContent = total;
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    renderLeaveRequestPagination();
+    paginateLeaveRequestTable();
+});
 
 function openAdminLeaveDetailModal(id, name, empId, type, from, to, days, reason, status, appNumber, attachmentUrl, remarks) {
     document.getElementById('adminLeaveAppNumber').textContent = 'LEAVE REQUEST · ' + appNumber;

@@ -96,8 +96,16 @@
     </div>
 
     <div class="table-footer">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <p style="margin: 0;">Showing <strong>{{ $accrualRates->firstItem() ?? 0 }}</strong> to <strong>{{ $accrualRates->lastItem() ?? 0 }}</strong> of <strong>{{ $accrualRates->total() }}</strong> accrual rates</p>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <p style="margin: 0;" id="accrualFooter">
+                Showing <strong id="accrualRowStart">{{ $accrualRates->firstItem() ?? 0 }}</strong>-<strong id="accrualRowEnd">{{ $accrualRates->lastItem() ?? 0 }}</strong> of <strong id="accrualRowTotal">{{ $accrualRates->total() }}</strong> records
+            </p>
+            <select id="accrualRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changeAccrualRowsPerPage()">
+                <option value="10" {{ request('accrual_per_page', 10) == 10 ? 'selected' : '' }}>10 rows</option>
+                <option value="25" {{ request('accrual_per_page', 10) == 25 ? 'selected' : '' }}>25 rows</option>
+                <option value="50" {{ request('accrual_per_page', 10) == 50 ? 'selected' : '' }}>50 rows</option>
+                <option value="100" {{ request('accrual_per_page', 10) == 100 ? 'selected' : '' }}>100 rows</option>
+            </select>
         </div>
         <div class="pagination">
             @if ($accrualRates->onFirstPage())
@@ -144,6 +152,15 @@
 </section>
 
 <script>
+function changeAccrualRowsPerPage() {
+    const perPage = document.getElementById('accrualRowsPerPage').value;
+    const url = new URL(window.location.href);
+    url.searchParams.set('accrual_per_page', perPage);
+    url.searchParams.set('tab', 'accrual');
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+}
+
 function filterAccrualRates() {
     const statusFilter = document.getElementById('filterAccrualStatus').value;
     const frequencyFilter = document.getElementById('filterAccrualFrequency').value;
