@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Models\LeaveApplication;
+use App\Models\TravelOrder;
 use App\Models\Attendance;
 use App\Models\AccreditedHoursLog;
 use App\Models\DailySalaryComputation;
@@ -11,31 +11,31 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class LeaveApplicationObserver
+class TravelOrderObserver
 {
     /**
-     * Handle the LeaveApplication "updated" event.
-     * Automatically create attendance records when leave is approved.
+     * Handle the TravelOrder "updated" event.
+     * Automatically create attendance records when travel order is approved.
      */
-    public function updated(LeaveApplication $leaveApplication)
+    public function updated(TravelOrder $travelOrder)
     {
         // Check if status changed to 'approved'
-        if ($leaveApplication->isDirty('status') && $leaveApplication->status === 'approved') {
-            $this->createAttendanceRecordsForLeave($leaveApplication);
+        if ($travelOrder->isDirty('status') && $travelOrder->status === 'approved') {
+            $this->createAttendanceRecordsForTravelOrder($travelOrder);
         }
     }
 
     /**
-     * Create attendance records for approved leave
+     * Create attendance records for approved travel order
      */
-    private function createAttendanceRecordsForLeave(LeaveApplication $leaveApplication)
+    private function createAttendanceRecordsForTravelOrder(TravelOrder $travelOrder)
     {
         try {
             DB::beginTransaction();
 
-            $employee = $leaveApplication->employee;
-            $startDate = Carbon::parse($leaveApplication->start_date);
-            $endDate = Carbon::parse($leaveApplication->end_date);
+            $employee = $travelOrder->employee;
+            $startDate = Carbon::parse($travelOrder->travel_date);
+            $endDate = Carbon::parse($travelOrder->return_date);
             $current = $startDate->copy();
 
             $recordsCreated = 0;
@@ -54,7 +54,7 @@ class LeaveApplicationObserver
                         // Get employee schedule for this date
                         $schedule = $employee->getScheduleForDate($dateKey);
 
-                        // Create attendance record with NULL time values for leave
+                        // Create attendance record with null time values and TRAVEL_ORDER type (same as leave system)
                         $attendance = Attendance::create([
                             'employee_id' => $employee->id,
                             'date' => $dateKey,
@@ -66,8 +66,8 @@ class LeaveApplicationObserver
                             'ot_out' => null,
                             'accredited_hours' => CscTimeConversionService::MINUTES_PER_WORK_DAY, // 480 minutes = 8 hours
                             'total_hours' => CscTimeConversionService::MINUTES_PER_WORK_DAY,
-                            'attendance_type' => 'LEAVE',
-                            'remarks' => "Leave: {$leaveApplication->leaveType->leave_name} - {$leaveApplication->application_number}",
+                            'attendance_type' => 'TRAVEL_ORDER',
+                            'remarks' => "Travel Order: {$travelOrder->destination} - {$travelOrder->order_number}",
                         ]);
 
                         // Create accredited hours log with CSC standard values
@@ -85,10 +85,10 @@ class LeaveApplicationObserver
                             'am_grace_applied' => false,
                             'pm_grace_applied' => false,
                             'computation_notes' => sprintf(
-                                'On approved leave: %s - %s (%s)',
-                                $leaveApplication->leaveType->leave_name ?? 'Leave',
-                                $leaveApplication->application_number,
-                                $leaveApplication->leaveType->leave_code ?? 'N/A'
+                                'On approved travel order: %s - %s (%s)',
+                                $travelOrder->destination,
+                                $travelOrder->order_number,
+                                $travelOrder->purpose
                             ),
                         ]);
 
@@ -104,19 +104,20 @@ class LeaveApplicationObserver
 
             DB::commit();
 
-            Log::info("Created {$recordsCreated} attendance records for approved leave", [
-                'leave_application_id' => $leaveApplication->id,
-                'application_number' => $leaveApplication->application_number,
+            Log::info("Created {$recordsCreated} attendance records for approved travel order", [
+                'travel_order_id' => $travelOrder->id,
+                'order_number' => $travelOrder->order_number,
                 'employee_id' => $employee->id,
-                'start_date' => $startDate->format('Y-m-d'),
-                'end_date' => $endDate->format('Y-m-d'),
+                'destination' => $travelOrder->destination,
+                'travel_date' => $startDate->format('Y-m-d'),
+                'return_date' => $endDate->format('Y-m-d'),
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Failed to create attendance records for approved leave', [
-                'leave_application_id' => $leaveApplication->id,
+            Log::error('Failed to create attendance records for approved travel order', [
+                'travel_order_id' => $travelOrder->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -126,32 +127,33 @@ class LeaveApplicationObserver
     }
 
     /**
-     * Handle the LeaveApplication "deleted" event.
-     * Clean up attendance records if leave is deleted.
+     * Handle the TravelOrder "deleted" event.
+     * Clean up attendance records if travel order is deleted.
      */
-    public function deleted(LeaveApplication $leaveApplication)
+    public function deleted(TravelOrder $travelOrder)
     {
-        // Only clean up if leave was approved
-        if ($leaveApplication->status === 'approved') {
-            $this->removeAttendanceRecordsForLeave($leaveApplication);
+        // Only clean up if travel order was approved
+        if ($travelOrder->status === 'approved') {
+            $this->removeAttendanceRecordsForTravelOrder($travelOrder);
         }
     }
 
     /**
-     * Remove attendance records created for leave
+     * Remove attendance records created for travel order
      */
-    private function removeAttendanceRecordsForLeave(LeaveApplication $leaveApplication)
+    private function removeAttendanceRecordsForTravelOrder(TravelOrder $travelOrder)
     {
         try {
             DB::beginTransaction();
 
-            $employee = $leaveApplication->employee;
-            $startDate = Carbon::parse($leaveApplication->start_date);
-            $endDate = Carbon::parse($leaveApplication->end_date);
+            $employee = $travelOrder->employee;
+            $startDate = Carbon::parse($travelOrder->travel_date);
+            $endDate = Carbon::parse($travelOrder->return_date);
 
-            // Find and delete attendance records with NULL time values and full accredited hours
+            // Find and delete attendance records with TRAVEL_ORDER type and null time values
             $deletedCount = Attendance::where('employee_id', $employee->id)
                 ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+                ->where('attendance_type', 'TRAVEL_ORDER')
                 ->whereNull('am_in')
                 ->whereNull('am_out')
                 ->whereNull('pm_in')
@@ -163,17 +165,17 @@ class LeaveApplicationObserver
 
             DB::commit();
 
-            Log::info("Removed {$deletedCount} attendance records for deleted leave", [
-                'leave_application_id' => $leaveApplication->id,
-                'application_number' => $leaveApplication->application_number,
+            Log::info("Removed {$deletedCount} attendance records for deleted travel order", [
+                'travel_order_id' => $travelOrder->id,
+                'order_number' => $travelOrder->order_number,
                 'employee_id' => $employee->id,
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Failed to remove attendance records for deleted leave', [
-                'leave_application_id' => $leaveApplication->id,
+            Log::error('Failed to remove attendance records for deleted travel order', [
+                'travel_order_id' => $travelOrder->id,
                 'error' => $e->getMessage(),
             ]);
         }

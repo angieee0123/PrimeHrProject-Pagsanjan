@@ -9,6 +9,8 @@ use App\Models\AccreditedHoursLog;
 use App\Observers\AccreditedHoursLogObserver;
 use App\Models\LeaveApplication;
 use App\Observers\LeaveApplicationObserver;
+use App\Models\TravelOrder;
+use App\Observers\TravelOrderObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     {
         AccreditedHoursLog::observe(AccreditedHoursLogObserver::class);
         LeaveApplication::observe(LeaveApplicationObserver::class);
+        TravelOrder::observe(TravelOrderObserver::class);
         
         // Share authenticated user data with all views
         View::composer('*', function ($view) {
