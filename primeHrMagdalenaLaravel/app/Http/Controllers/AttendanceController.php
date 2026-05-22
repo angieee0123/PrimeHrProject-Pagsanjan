@@ -359,7 +359,20 @@ class AttendanceController extends Controller
             ->with('leaveType')
             ->get();
 
-        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee, $approvedLeaves);
+        // Get approved travel orders for this employee in the date range
+        $approvedTravelOrders = \App\Models\TravelOrder::where('employee_id', $employeeId)
+            ->where('status', 'approved')
+            ->where(function($query) use ($startDate, $endDate) {
+                $query->whereBetween('travel_date', [$startDate, $endDate])
+                      ->orWhereBetween('return_date', [$startDate, $endDate])
+                      ->orWhere(function($q) use ($startDate, $endDate) {
+                          $q->where('travel_date', '<=', $startDate)
+                            ->where('return_date', '>=', $endDate);
+                      });
+            })
+            ->get();
+
+        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee, $approvedLeaves, $approvedTravelOrders);
 
         return response()->json([
             'records' => $records,
@@ -453,7 +466,7 @@ class AttendanceController extends Controller
         return CscTimeConversionService::formatMinutes($minutes);
     }
 
-    private function generateDetailedRecords($startDate, $endDate, $attendances, $employee = null, $approvedLeaves = null)
+    private function generateDetailedRecords($startDate, $endDate, $attendances, $employee = null, $approvedLeaves = null, $approvedTravelOrders = null)
     {
         $graceMinutes = 5;
 
@@ -468,10 +481,33 @@ class AttendanceController extends Controller
                 while ($current->lte($leaveEnd)) {
                     $dateKey = $current->format('Y-m-d');
                     $leaveDatesMap[$dateKey] = [
+                        'type' => 'leave',
                         'leave_type' => $leave->leaveType->leave_name ?? 'Leave',
                         'leave_code' => $leave->leaveType->leave_code ?? 'N/A',
                         'application_number' => $leave->application_number,
                         'days' => $leave->number_of_days,
+                    ];
+                    $current->addDay();
+                }
+            }
+        }
+
+        // Build travel order dates map
+        $travelOrderDatesMap = [];
+        if ($approvedTravelOrders) {
+            foreach ($approvedTravelOrders as $travelOrder) {
+                $travelStart = Carbon::parse($travelOrder->travel_date);
+                $travelEnd = Carbon::parse($travelOrder->return_date);
+                $current = $travelStart->copy();
+                
+                while ($current->lte($travelEnd)) {
+                    $dateKey = $current->format('Y-m-d');
+                    $travelOrderDatesMap[$dateKey] = [
+                        'type' => 'travel_order',
+                        'destination' => $travelOrder->destination,
+                        'purpose' => $travelOrder->purpose,
+                        'order_number' => $travelOrder->order_number,
+                        'duration' => $travelOrder->duration,
                     ];
                     $current->addDay();
                 }
@@ -485,7 +521,9 @@ class AttendanceController extends Controller
             $dateKey = $current->format('Y-m-d');
             $attendance = $attendances->get($dateKey);
             $isOnLeave = isset($leaveDatesMap[$dateKey]);
+            $isOnTravelOrder = isset($travelOrderDatesMap[$dateKey]);
             $leaveInfo = $isOnLeave ? $leaveDatesMap[$dateKey] : null;
+            $travelOrderInfo = $isOnTravelOrder ? $travelOrderDatesMap[$dateKey] : null;
 
             // Get schedule for this specific date
             $schedule = $employee ? $employee->getScheduleForDate($dateKey) : null;
@@ -551,6 +589,46 @@ class AttendanceController extends Controller
                 }
             }
 
+            // If on travel order (takes priority over leave)
+            if ($isOnTravelOrder && !in_array($current->dayOfWeek, [0, 6])) {
+                $records[] = [
+                    'date' => $current->format('M d, Y'),
+                    'day' => $current->format('l'),
+                    'am_in' => 'ON TRAVEL',
+                    'am_out' => 'ON TRAVEL',
+                    'pm_in' => 'ON TRAVEL',
+                    'pm_out' => 'ON TRAVEL',
+                    'ot_in' => null,
+                    'ot_out' => null,
+                    'late_minutes' => 0,
+                    'late_display' => '-',
+                    'undertime' => 0,
+                    'undertime_display' => '-',
+                    'total_hours' => '8.0 hrs',
+                    'accredited_minutes' => 480, // 8 hours
+                    'am_accredited_minutes' => 240,
+                    'pm_accredited_minutes' => 240,
+                    'am_grace_applied' => false,
+                    'pm_grace_applied' => false,
+                    'schedule' => [
+                        'am_in' => $expectedAmIn->format('H:i'),
+                        'am_out' => $expectedAmOut->format('H:i'),
+                        'pm_in' => $expectedPmIn->format('H:i'),
+                        'pm_out' => $expectedPmOut->format('H:i'),
+                    ],
+                    'has_log' => false,
+                    'needs_review' => false,
+                    'is_incomplete' => false,
+                    'attendance_id' => null,
+                    'date_key' => $current->format('Y-m-d'),
+                    'is_on_leave' => false,
+                    'is_on_travel_order' => true,
+                    'travel_order_info' => $travelOrderInfo,
+                ];
+                $current->addDay();
+                continue;
+            }
+
             // If on approved leave, mark as present with leave indicator
             if ($isOnLeave && !in_array($current->dayOfWeek, [0, 6])) {
                 $records[] = [
@@ -584,6 +662,7 @@ class AttendanceController extends Controller
                     'attendance_id' => null,
                     'date_key' => $current->format('Y-m-d'),
                     'is_on_leave' => true,
+                    'is_on_travel_order' => false,
                     'leave_info' => $leaveInfo,
                 ];
                 $current->addDay();

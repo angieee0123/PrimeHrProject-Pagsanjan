@@ -254,47 +254,63 @@ function displayDetailedDTR(records) {
         const row = document.createElement('tr');
         
         const isOnLeave = record.is_on_leave;
-        const hasAmIn = record.am_in && record.am_in !== '-';
-        const hasAmOut = record.am_out && record.am_out !== '-';
-        const hasPmIn = record.pm_in && record.pm_in !== '-';
-        const hasPmOut = record.pm_out && record.pm_out !== '-';
+        const isOnTravelOrder = record.is_on_travel_order;
+        const hasAmIn = record.am_in && record.am_in !== '-' && record.am_in !== 'ON LEAVE' && record.am_in !== 'ON TRAVEL';
+        const hasAmOut = record.am_out && record.am_out !== '-' && record.am_out !== 'ON LEAVE' && record.am_out !== 'ON TRAVEL';
+        const hasPmIn = record.pm_in && record.pm_in !== '-' && record.pm_in !== 'ON LEAVE' && record.pm_in !== 'ON TRAVEL';
+        const hasPmOut = record.pm_out && record.pm_out !== '-' && record.pm_out !== 'ON LEAVE' && record.pm_out !== 'ON TRAVEL';
         
         // Determine attendance status
         let status = '';
         let statusColor = '';
         let statusBg = '';
+        let leaveDeductionCell = '';
         
-        if (isOnLeave) {
-            status = 'On Leave';
+        if (isOnTravelOrder) {
+            status = '✓ On Travel';
+            statusColor = '#0b044d';
+            statusBg = '#0b044d18';
+            const travelInfo = record.travel_order_info;
+            leaveDeductionCell = `<div style="font-size: 11px; color: #0b044d; font-weight: 600;">${travelInfo.order_number}</div>
+                                  <div style="font-size: 10px; color: #6b6a8a; margin-top: 2px;">${travelInfo.destination} (${travelInfo.duration} days)</div>`;
+        } else if (isOnLeave) {
+            status = '✓ On Leave';
             statusColor = '#6b6a8a';
             statusBg = '#6b6a8a18';
+            const leaveInfo = record.leave_info;
+            leaveDeductionCell = `<div style="font-size: 11px; color: #6b6a8a; font-weight: 600;">${leaveInfo.leave_code}</div>
+                                  <div style="font-size: 10px; color: #9999bb; margin-top: 2px;">${leaveInfo.leave_type} (${leaveInfo.days} days)</div>`;
         } else if (!hasAmIn && !hasPmIn) {
             // No clock in at all = Absent
             status = 'Absent';
             statusColor = '#8e1e18';
             statusBg = '#8e1e1818';
             totalAbsent++;
+            leaveDeductionCell = record.leave_deduction;
         } else if ((hasAmIn && !hasAmOut && !hasPmIn) || (hasPmIn && !hasPmOut && !hasAmIn)) {
             // Clocked in but never clocked out (single period only) = Abandoned
             status = 'Abandoned';
             statusColor = '#d97706';
             statusBg = '#d9770618';
             totalAbandoned++;
+            leaveDeductionCell = record.leave_deduction;
         } else if (hasAmIn && hasAmOut && hasPmIn && hasPmOut) {
             // All 4 logs complete = Present
             status = 'Present';
             statusColor = '#15803d';
             statusBg = '#15803d18';
             totalPresent++;
+            leaveDeductionCell = record.leave_deduction;
         } else {
             // Has some attendance but not complete = Incomplete
             status = 'Incomplete';
             statusColor = '#d9bb00';
             statusBg = '#d9bb0018';
             totalIncomplete++;
+            leaveDeductionCell = record.leave_deduction;
         }
         
-        if (!isOnLeave) totalDays++;
+        if (!isOnLeave && !isOnTravelOrder) totalDays++;
         if (record.late_minutes > 0) {
             totalLate++;
             totalLateMinutes += record.late_minutes;
@@ -304,18 +320,18 @@ function displayDetailedDTR(records) {
         row.innerHTML = `
             <td><strong>${record.date}</strong></td>
             <td style="color: #6b6a8a;">${record.day}</td>
-            <td><span style="font-family: 'Courier New', monospace; color: ${hasAmIn ? '#0b044d' : '#9999bb'};">${record.am_in || '--:--'}</span></td>
-            <td><span style="font-family: 'Courier New', monospace; color: ${hasAmOut ? '#0b044d' : '#9999bb'};">${record.am_out || '--:--'}</span></td>
-            <td><span style="font-family: 'Courier New', monospace; color: ${hasPmIn ? '#0b044d' : '#9999bb'};">${record.pm_in || '--:--'}</span></td>
-            <td><span style="font-family: 'Courier New', monospace; color: ${hasPmOut ? '#0b044d' : '#9999bb'};">${record.pm_out || '--:--'}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${hasAmIn || isOnLeave || isOnTravelOrder ? '#0b044d' : '#9999bb'};">${record.am_in || '--:--'}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${hasAmOut || isOnLeave || isOnTravelOrder ? '#0b044d' : '#9999bb'};">${record.am_out || '--:--'}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${hasPmIn || isOnLeave || isOnTravelOrder ? '#0b044d' : '#9999bb'};">${record.pm_in || '--:--'}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${hasPmOut || isOnLeave || isOnTravelOrder ? '#0b044d' : '#9999bb'};">${record.pm_out || '--:--'}</span></td>
             <td><span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: ${statusBg}; color: ${statusColor};">${status}</span></td>
             <td><span style="font-family: 'Courier New', monospace; color: ${record.ot_in ? '#0b044d' : '#9999bb'};">${record.ot_in || '--:--'}</span></td>
             <td><span style="font-family: 'Courier New', monospace; color: ${record.ot_out ? '#0b044d' : '#9999bb'};">${record.ot_out || '--:--'}</span></td>
-            <td>${record.undertime_display}</td>
-            <td>${record.late_display}</td>
+            <td>${isOnLeave || isOnTravelOrder ? '-' : record.undertime_display}</td>
+            <td>${isOnLeave || isOnTravelOrder ? '-' : record.late_display}</td>
             <td><strong>${record.total_hours}</strong></td>
             <td><strong style="color: #15803d;">${(record.accredited_minutes / 60).toFixed(1)} hrs</strong></td>
-            <td>${record.leave_deduction}</td>
+            <td>${leaveDeductionCell}</td>
         `;
         tbody.appendChild(row);
     });
