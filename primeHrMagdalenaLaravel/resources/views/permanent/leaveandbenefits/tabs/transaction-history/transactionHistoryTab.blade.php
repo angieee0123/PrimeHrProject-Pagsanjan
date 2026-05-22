@@ -87,9 +87,19 @@
                             $isLeaveApp = $transaction->reference_type === 'leave_application';
                             $isManual = $transaction->reference_type === 'manual_adjustment';
                             $isAccrual = $transaction->reference_type === 'accrual';
+                            $isAttendanceReversal = $transaction->reference_type === 'attendance_correction_reversal';
                         @endphp
                         
-                        @if($isLateDeduction)
+                        @if($isAttendanceReversal)
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2">
+                                    <polyline points="1 4 1 10 7 10"/>
+                                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                                </svg>
+                                <span style="color: #0891b2; font-weight: 600;">Attendance Correction Reversal</span>
+                            </div>
+                            <small style="color: #6b6a8a; display: block; margin-top: 2px; padding-left: 20px;">{{ $remarks }}</small>
+                        @elseif($isLateDeduction)
                             <div style="display: flex; align-items: center; gap: 6px;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a16207" stroke-width="2">
                                     <circle cx="12" cy="12" r="10"/>
@@ -187,6 +197,12 @@
                 <strong>{{ $employeeTransactions->lastItem() ?? 0 }}</strong> of 
                 <strong>{{ $employeeTransactions->total() ?? 0 }}</strong> transactions
             </p>
+            <select id="employeeTransactionRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changeEmployeeTransactionRowsPerPage()">
+                <option value="10" {{ request('employee_transaction_per_page', 10) == 10 ? 'selected' : '' }}>10 rows</option>
+                <option value="25" {{ request('employee_transaction_per_page', 10) == 25 ? 'selected' : '' }}>25 rows</option>
+                <option value="50" {{ request('employee_transaction_per_page', 10) == 50 ? 'selected' : '' }}>50 rows</option>
+                <option value="100" {{ request('employee_transaction_per_page', 10) == 100 ? 'selected' : '' }}>100 rows</option>
+            </select>
         </div>
         <div class="pagination">
             @if(isset($employeeTransactions) && $employeeTransactions->hasPages())
@@ -304,6 +320,15 @@ function applyEmployeeTransactionFilters() {
     window.location.href = url.toString();
 }
 
+function changeEmployeeTransactionRowsPerPage() {
+    const perPage = document.getElementById('employeeTransactionRowsPerPage')?.value || 10;
+    const url = new URL(window.location.href);
+    url.searchParams.set('employee_transaction_per_page', perPage);
+    url.searchParams.set('tab', 'transactions');
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+}
+
 function navigateToEmployeeTransactionPage(url) {
     const urlObj = new URL(url, window.location.origin);
     urlObj.searchParams.set('tab', 'transactions');
@@ -334,13 +359,19 @@ function viewEmployeeTransactionDetails(leaveType, type, amount, balanceBefore, 
     const sourceLabel = document.getElementById('empTransactionReference');
     const remarksEl = document.getElementById('empTransactionRemarks');
     
+    const isAttendanceReversal = reference.toLowerCase().includes('attendance correction reversal');
     const isLateDeduction = remarks.includes('Late deduction');
     const isUndertimeDeduction = remarks.includes('Undertime deduction');
     const isLeaveApp = reference.toLowerCase().includes('leave app');
     const isAccrual = reference.toLowerCase().includes('accrual');
     const isManual = reference.toLowerCase().includes('manual');
     
-    if (isLateDeduction) {
+    if (isAttendanceReversal) {
+        sourceIcon.innerHTML = '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>';
+        sourceIcon.setAttribute('stroke', '#0891b2');
+        sourceLabel.textContent = 'Attendance Correction Reversal';
+        sourceLabel.style.color = '#0891b2';
+    } else if (isLateDeduction) {
         sourceIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>';
         sourceIcon.setAttribute('stroke', '#a16207');
         sourceLabel.textContent = 'Late Deduction';

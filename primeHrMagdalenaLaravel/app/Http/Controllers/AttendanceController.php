@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceController extends Controller
 {
@@ -1258,6 +1259,9 @@ class AttendanceController extends Controller
         // Check if this is a new record or updating existing
         if ($validated['attendance_id']) {
             $attendance = Attendance::findOrFail($validated['attendance_id']);
+            
+            // Get the old accredited hours log before making changes
+            $oldLog = $attendance->accreditedHoursLogs()->latest()->first();
         } else {
             // Create new attendance record
             $attendance = Attendance::firstOrCreate(
@@ -1274,6 +1278,7 @@ class AttendanceController extends Controller
                     'ot_out' => null,
                 ]
             );
+            $oldLog = null;
         }
 
         $attachmentPaths = [];
@@ -1359,18 +1364,36 @@ class AttendanceController extends Controller
             // Trigger daily salary computation
             \App\Models\DailySalaryComputation::computeFromAccreditedLog($accreditedLog);
             
-            // Process late deduction from leave balances
-            $lateDeductionService = new LateDeductionService();
-            $lateDeductionService->processLateDeduction($accreditedLog);
-            
-            // Process undertime deduction from leave balances
-            $undertimeDeductionService = new UndertimeDeductionService();
-            $undertimeDeductionService->processUndertimeDeduction($accreditedLog);
+            // NEW: Handle leave balance recalculation if there was a previous log
+            $recalculationSummary = null;
+            if ($oldLog && $oldLog->id !== $accreditedLog->id) {
+                // There was a previous log, so we need to recalculate leave deductions
+                $recalculationService = new \App\Services\AttendanceCorrectionLeaveRecalculationService();
+                $recalculationSummary = $recalculationService->recalculateLeaveDeductions($oldLog, $accreditedLog);
+                $summaryMessage = $recalculationService->getSummaryMessage($recalculationSummary);
+                
+                Log::info('Leave balance recalculation completed', [
+                    'attendance_id' => $attendance->id,
+                    'employee_id' => $validated['employee_id'],
+                    'date' => $validated['date'],
+                    'summary' => $summaryMessage,
+                ]);
+            } else {
+                // No previous log, just process deductions normally
+                // Process late deduction from leave balances
+                $lateDeductionService = new LateDeductionService();
+                $lateDeductionService->processLateDeduction($accreditedLog);
+                
+                // Process undertime deduction from leave balances
+                $undertimeDeductionService = new UndertimeDeductionService();
+                $undertimeDeductionService->processUndertimeDeduction($accreditedLog);
+            }
         }
 
         return response()->json([
             'success' => true,
             'message' => 'Attendance record corrected successfully',
+            'recalculation_summary' => $recalculationSummary ?? null,
         ]);
     }
 }

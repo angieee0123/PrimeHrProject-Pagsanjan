@@ -181,7 +181,11 @@ Route::get('/permanent/leave', function () {
 
     $transactionQuery->orderBy('created_at', 'desc');
 
-    $employeeTransactions = $transactionQuery->paginate(15)->appends(request()->except('page'));
+    // Get per page value from request, default to 10
+    $perPage = request('employee_transaction_per_page', 10);
+    $perPage = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 10;
+
+    $employeeTransactions = $transactionQuery->paginate($perPage)->appends(request()->except('page'));
 
     return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions'));
 })->middleware('auth')->name('permanent.leave');

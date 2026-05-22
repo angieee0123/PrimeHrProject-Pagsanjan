@@ -1,281 +1,277 @@
-# Summary: Late Deduction with Full Hours Credit Implementation
+# Implementation Summary: Attendance Correction Leave Recalculation
 
-## 🎯 Objective
-When an employee is late and the late time is deducted from their leave balance (VL or SL), the system should:
-1. **Credit full 8 hours** as accredited hours (not reduced by late time)
-2. **Display a note** in the Detailed DTR showing the late was covered by leave
+## Overview
+Successfully implemented automatic leave balance recalculation when admin edits attendance records. The system now properly handles reversals and adjustments of leave deductions when attendance times are corrected.
 
-## ✅ Changes Implemented
+## Changes Made
 
-### 1. Backend Changes
+### 1. New Service Created
+**File:** `app/Services/AttendanceCorrectionLeaveRecalculationService.php`
 
-#### File: `app/Services/LateDeductionService.php`
-**What Changed:**
-- When late is deducted from leave, set `total_accredited_minutes` to 480 (full 8 hours)
-- Update the attendance record's `accredited_hours` to 480
-- Keep tracking which leave type was used (VL or SL)
+**Purpose:** Handles the complete recalculation logic for leave balances when attendance is corrected.
 
-**Impact:**
-- Employees get full day credit when late is covered by leave
-- Fair treatment - late time doesn't reduce their accredited hours
+**Key Methods:**
+- `recalculateLeaveDeductions()` - Main method that orchestrates the recalculation
+- `reversePreviousDeductions()` - Credits back previously deducted leave amounts
+- `calculateNetChange()` - Calculates the net impact on leave balances
+- `getSummaryMessage()` - Generates human-readable summary of changes
 
-#### File: `app/Http/Controllers/AttendanceController.php`
-**What Changed:**
-- Added `late_deducted_from_leave` field to API response
-- Added `late_deduction_leave_type` field to API response
+**Features:**
+- Finds all previous leave deduction transactions linked to the old attendance
+- Creates reversal transactions (credit) for each previous deduction
+- Resets flags on old log to prevent double processing
+- Applies new deductions based on corrected attendance times
+- Maintains complete audit trail with detailed remarks
 
-**Impact:**
-- Frontend can display which leave type covered the late time
+### 2. Controller Updated
+**File:** `app/Http/Controllers/AttendanceController.php`
 
-### 2. Frontend Changes
+**Changes:**
+- Added logic to capture old `AccreditedHoursLog` before making changes
+- Integrated `AttendanceCorrectionLeaveRecalculationService` into `correctAttendance()` method
+- Added conditional logic to determine if recalculation is needed
+- Added logging for recalculation events
+- Added `Log` facade import
 
-#### File: `resources/js/adminAttendance.js`
-**What Changed:**
-- Added display logic for late deduction note in Accredited Hours column
-- Shows leave type used (VL or SL)
-- Shows late minutes and days deducted
-
-**Impact:**
-- Clear visual indication when late is covered by leave
-- Transparency for employees and HR
-
-### 3. Modal View Update
-
-#### File: `resources/views/admin/attendance/modals/detailedDtrModal.blade.php`
-**What Changed:**
-- Added "Leave Deduction" column to show leave usage
-
-**Impact:**
-- Complete view of attendance and leave usage in one place
-
-## 📊 Example Scenario
-
-### Employee: Jeremy Pogi (jeremypogi@gmail.com)
-
-#### Before Implementation:
+**Flow:**
 ```
-Date: May 07, 2026
-Late: 60 minutes
-Accredited Hours: 7 hrs (reduced by late time)
-VL Balance: 7.95 days (unchanged)
+1. Capture old AccreditedHoursLog (if exists)
+2. Create attendance correction record
+3. Compute new accredited hours
+4. Update attendance record
+5. Create/update new AccreditedHoursLog
+6. IF old log exists AND is different from new log:
+   - Call recalculateLeaveDeductions()
+   - Log the summary
+   ELSE:
+   - Process deductions normally (first-time processing)
+7. Return success response with recalculation summary
 ```
 
-#### After Implementation:
+### 3. Database Migration
+**File:** `database/migrations/2026_05_22_125542_add_attendance_correction_reference_types_to_leave_transactions.php`
+
+**Purpose:** Documents the new reference type used for reversal transactions
+
+**New Reference Type:**
+- `attendance_correction_reversal` - Used for transactions that credit back leave due to attendance corrections
+
+**Note:** No actual schema changes needed as the `reference_type` column already exists and accepts string values.
+
+### 4. Frontend Updates
+**File:** `resources/views/permanent/leaveandbenefits/tabs/transaction-history/transactionHistoryTab.blade.php`
+
+**Changes:**
+- Added detection for `attendance_correction_reversal` reference type
+- Added distinct icon (circular arrow) and color (#0891b2 - cyan) for reversal transactions
+- Updated JavaScript `viewEmployeeTransactionDetails()` function to handle reversal type
+- Improved visual distinction between different transaction types
+
+**Visual Indicators:**
+- **Attendance Correction Reversal** - Cyan circular arrow icon
+- **Late Deduction** - Amber clock icon
+- **Undertime Deduction** - Red clock icon
+- **Leave Application** - Purple calendar icon
+- **Manual Adjustment** - Purple edit icon
+- **Monthly Accrual** - Green checkmark icon
+
+### 5. Pagination Enhancement
+**File:** `routes/web.php`
+
+**Changes:**
+- Updated permanent leave route to support dynamic rows per page
+- Added `employee_transaction_per_page` parameter handling
+- Default: 10 rows per page
+- Options: 10, 25, 50, 100 rows
+- Validation to ensure only allowed values are used
+
+### 6. Documentation
+**Files Created:**
+- `ATTENDANCE_CORRECTION_LEAVE_RECALCULATION.md` - Comprehensive feature documentation
+- `IMPLEMENTATION_SUMMARY.md` - This file
+
+## How It Works
+
+### Example Scenario
+
+**Initial State:**
+- Employee clocks in at 8:30 AM (30 minutes late)
+- System deducts 0.0625 days from VL
+- VL Balance: 15.000000 → 14.937500 days
+- Transaction created: Debit -0.0625 days
+
+**Admin Correction:**
+- Admin corrects clock-in to 8:00 AM (on time)
+- System automatically:
+  1. Finds previous deduction transaction
+  2. Creates reversal transaction: Credit +0.0625 days
+  3. VL Balance: 14.937500 → 15.000000 days
+  4. Recalculates: No late time, no new deduction needed
+
+**Transaction History Shows:**
+1. Original deduction (unchanged)
+2. Reversal credit with clear explanation
+3. New deduction (if any)
+
+### Transaction Flow
+
 ```
-Date: May 07, 2026
-Late: 60 minutes
-Accredited Hours: 8 hrs ✓ Late Covered by VL
-                  60 min late deducted (0.1250 days)
-VL Balance: 7.825 days (7.95 - 0.125)
-```
-
-## 🔍 How to Verify
-
-### Step 1: Check Database
-Run the verification script:
-```bash
-mysql -u root -p primehrismagdalena < verify_late_deductions_employee_8.sql
-```
-
-### Step 2: Check in Application
-1. Login as admin
-2. Go to Attendance module
-3. Click on Jeremy Pogi's detailed DTR
-4. Look for May 05 and May 07, 2026
-5. Should show "✓ Late Covered by VL" in Accredited Hours column
-
-### Step 3: Verify Leave Balance
-1. Go to Leave & Benefits module
-2. Check Jeremy Pogi's VL balance
-3. Should be 7.8125 days (if deductions processed)
-
-## 📁 Files Created
-
-1. **LATE_DEDUCTION_FULL_HOURS_CREDIT.md**
-   - Complete technical documentation
-   - Business logic explanation
-   - Testing scenarios
-
-2. **VISUAL_EXAMPLE_LATE_DEDUCTION_DISPLAY.md**
-   - Visual examples of the updated display
-   - Before/after comparisons
-   - Color and icon legend
-
-3. **LATE_DEDUCTION_ANALYSIS_EMPLOYEE_8.md**
-   - Analysis of employee 8's late deductions
-   - Current status and expected results
-   - Recommendations
-
-4. **verify_late_deductions_employee_8.sql**
-   - SQL queries to verify the implementation
-   - 10 comprehensive checks
-   - Interpretation guide
-
-5. **process_late_deductions_employee_8.sql**
-   - Manual processing script
-   - Step-by-step execution
-   - Rollback script included
-
-## 🚀 Next Steps
-
-### For Testing:
-1. **Run the manual processing script** (if deductions haven't been processed):
-   ```sql
-   source process_late_deductions_employee_8.sql
-   ```
-
-2. **Verify in the application**:
-   - Check the Detailed DTR display
-   - Verify leave balances
-   - Check leave transactions
-
-3. **Test with new attendance corrections**:
-   - Create a new late entry
-   - Correct the attendance
-   - Verify automatic processing
-
-### For Production:
-1. **Deploy the code changes**:
-   - LateDeductionService.php
-   - AttendanceController.php
-   - adminAttendance.js
-   - detailedDtrModal.blade.php
-
-2. **Process pending late deductions**:
-   - Run the manual script for existing records
-   - Or trigger re-correction for affected dates
-
-3. **Monitor the system**:
-   - Check logs for any errors
-   - Verify leave balances are updating correctly
-   - Ensure display is working as expected
-
-## 📋 Checklist
-
-### Code Changes:
-- [x] Updated LateDeductionService.php
-- [x] Updated AttendanceController.php
-- [x] Updated adminAttendance.js
-- [x] Updated detailedDtrModal.blade.php
-
-### Documentation:
-- [x] Technical documentation created
-- [x] Visual examples created
-- [x] Analysis document created
-- [x] Verification script created
-- [x] Processing script created
-
-### Testing:
-- [ ] Run verification script
-- [ ] Process pending deductions
-- [ ] Test in application
-- [ ] Verify leave balances
-- [ ] Check display formatting
-
-### Deployment:
-- [ ] Deploy code changes
-- [ ] Process existing records
-- [ ] Monitor system
-- [ ] Train HR staff
-- [ ] Update user documentation
-
-## 🎨 Display Format
-
-### In Detailed DTR:
-```
-Accredited Hours:
-8 hrs
-✓ Grace: PM
-📋 From Log
-✓ Late Covered by VL
-60 min late deducted (0.1250 days)
+Admin Corrects Attendance
+         ↓
+Retrieve Old AccreditedHoursLog
+         ↓
+Compute New Attendance Times
+         ↓
+Create New AccreditedHoursLog
+         ↓
+AttendanceCorrectionLeaveRecalculationService
+         ↓
+    ┌────────────────────────────────┐
+    │ Find Previous Deductions       │
+    │ (linked to old log)            │
+    └────────────────────────────────┘
+         ↓
+    ┌────────────────────────────────┐
+    │ For Each Previous Deduction:   │
+    │ - Credit back to leave balance │
+    │ - Create reversal transaction  │
+    │ - Add detailed remarks         │
+    └────────────────────────────────┘
+         ↓
+    ┌────────────────────────────────┐
+    │ Reset Flags on Old Log         │
+    └────────────────────────────────┘
+         ↓
+    ┌────────────────────────────────┐
+    │ Process New Deductions         │
+    │ - Late deduction (if any)      │
+    │ - Undertime deduction (if any) │
+    └────────────────────────────────┘
+         ↓
+    Return Summary
 ```
 
-### Colors:
-- **Green (#15803d):** Full hours, grace, on leave
-- **Purple (#0b044d):** Late covered by leave (bold)
-- **Gray (#6b6a8a):** Additional info
+## Key Features
 
-### Icons:
-- **✓:** Checkmark for grace and late coverage
-- **📋:** From log indicator
+### 1. Complete Audit Trail
+- All transactions are preserved (never deleted or updated)
+- Reversal transactions clearly reference the original deduction
+- Detailed remarks explain the reason for each adjustment
+- Timestamps track when corrections were made
 
-## 💡 Key Benefits
+### 2. Accurate Balance Tracking
+- `balance_before` and `balance_after` fields show exact state
+- Running balance is always accurate
+- Net change can be calculated from transaction history
 
-### For Employees:
-- Fair treatment - late covered by leave = full day credit
-- Transparency - can see exactly what was deducted
-- Accurate records - no confusion about hours
+### 3. Multiple Leave Type Support
+- Handles VL (Vacation Leave) and SL (Sick Leave)
+- Supports partial coverage scenarios
+- Correctly manages LWOP (Leave Without Pay) situations
 
-### For HR/Admin:
-- Automated processing - no manual calculations
-- Complete audit trail - all transactions recorded
-- Clear display - easy to verify and explain
+### 4. User-Friendly Display
+- Distinct icons and colors for each transaction type
+- Clear, human-readable remarks
+- Chronological ordering (newest first by default)
+- Sortable and filterable table
 
-### For Payroll:
-- Accurate calculations - full 8 hours when covered
-- No manual adjustments needed
-- Verifiable - can trace back to source
+### 5. Robust Error Handling
+- Database transactions ensure data consistency
+- Validation prevents invalid deductions
+- Logging captures all recalculation events
+- Graceful handling of edge cases
 
-## ⚠️ Important Notes
+## Testing Recommendations
 
-1. **Automatic Processing:**
-   - Late deductions are processed when attendance is corrected
-   - Requires the LateDeductionService to be called
-   - Check that auth()->id() is available
+### Test Cases to Verify
 
-2. **Leave Priority:**
-   - VL is deducted first
-   - SL is used if VL is insufficient
-   - Partial deduction if both are insufficient
+1. **Reduce Late Time**
+   - Original: 60 min late
+   - Corrected: 30 min late
+   - Expected: Partial credit back
 
-3. **Full Hours Credit:**
-   - Only applies when late is successfully deducted from leave
-   - If no leave balance, hours remain reduced
-   - Clear indicator shows which scenario applies
+2. **Increase Late Time**
+   - Original: 30 min late
+   - Corrected: 60 min late
+   - Expected: Additional deduction
 
-4. **Database Consistency:**
-   - Updates multiple tables (attendance, accredited_hours_log, leave_balances, leave_transactions)
-   - Uses database transactions for consistency
-   - Rollback available if needed
+3. **Remove Late Time**
+   - Original: 60 min late
+   - Corrected: On time
+   - Expected: Full credit back
 
-## 📞 Support
+4. **Add Late Time**
+   - Original: On time
+   - Corrected: 60 min late
+   - Expected: New deduction
 
-If you encounter any issues:
+5. **Multiple Corrections**
+   - Correct same attendance multiple times
+   - Expected: Each correction properly handled
 
-1. **Check the logs:**
-   ```bash
-   tail -f storage/logs/laravel.log
-   ```
+6. **Multiple Leave Types**
+   - Late time covered by VL + SL
+   - Correction affects both
+   - Expected: Both properly reversed and recalculated
 
-2. **Verify database state:**
-   ```sql
-   source verify_late_deductions_employee_8.sql
-   ```
+7. **Insufficient Leave Balance**
+   - Late time exceeds available leave
+   - Expected: Partial coverage + LWOP
 
-3. **Manual processing:**
-   ```sql
-   source process_late_deductions_employee_8.sql
-   ```
+8. **New Attendance Record**
+   - Admin creates new attendance (no previous log)
+   - Expected: Normal deduction processing (no reversal)
 
-4. **Rollback if needed:**
-   - Uncomment the rollback section in the processing script
-   - Run the rollback commands
+## Benefits
 
-## 🎉 Success Criteria
+1. **Accuracy** - Leave balances always reflect correct attendance
+2. **Transparency** - Complete history of all adjustments
+3. **Fairness** - Employees not penalized for admin corrections
+4. **Compliance** - Follows CSC leave credit management rules
+5. **Automation** - No manual calculation needed
+6. **Auditability** - Full trail for compliance and disputes
 
-The implementation is successful when:
+## Configuration
 
-1. ✅ Late deductions automatically process when attendance is corrected
-2. ✅ Full 8 hours are credited when late is covered by leave
-3. ✅ Display shows clear indication of late coverage
-4. ✅ Leave balances are accurately updated
-5. ✅ Leave transactions are properly recorded
-6. ✅ Employees can see their late deductions in the DTR
-7. ✅ HR can verify and audit all deductions
+### CSC Time Conversion
+- 1 work day = 480 minutes (8 hours)
+- Handled by `CscTimeConversionService`
+- Consistent across all calculations
 
----
+### Leave Deduction Priority
+1. VL (Vacation Leave) - deducted first
+2. SL (Sick Leave) - deducted if VL insufficient
+3. LWOP - applied if both VL and SL insufficient
 
-**Implementation Date:** 2026-05-14
-**Version:** 1.0
-**Status:** Ready for Testing
+## Files Modified/Created
+
+### Created:
+1. `app/Services/AttendanceCorrectionLeaveRecalculationService.php`
+2. `database/migrations/2026_05_22_125542_add_attendance_correction_reference_types_to_leave_transactions.php`
+3. `ATTENDANCE_CORRECTION_LEAVE_RECALCULATION.md`
+4. `IMPLEMENTATION_SUMMARY.md`
+
+### Modified:
+1. `app/Http/Controllers/AttendanceController.php`
+2. `resources/views/permanent/leaveandbenefits/tabs/transaction-history/transactionHistoryTab.blade.php`
+3. `routes/web.php`
+
+## Next Steps
+
+1. **Test thoroughly** - Verify all test cases work as expected
+2. **Monitor logs** - Check for any unexpected issues
+3. **User training** - Educate admins on the new behavior
+4. **Documentation** - Share feature documentation with stakeholders
+5. **Feedback** - Gather user feedback for improvements
+
+## Support
+
+For questions or issues:
+- Review `ATTENDANCE_CORRECTION_LEAVE_RECALCULATION.md` for detailed documentation
+- Check application logs for recalculation events
+- Contact development team for technical support
+
+## Version
+- Implementation Date: May 22, 2026
+- Laravel Version: Compatible with current project version
+- Database: MySQL/MariaDB compatible
