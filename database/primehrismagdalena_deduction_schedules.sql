@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `deduction_schedules`;
 CREATE TABLE `deduction_schedules` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `deduction_type_id` bigint unsigned NOT NULL,
-  `cutoff_schedule` enum('1ST_ONLY','2ND_ONLY','BOTH_SPLIT','BOTH_FULL') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `cutoff_schedule` enum('1ST_ONLY','2ND_ONLY','BOTH_SPLIT','BOTH_FULL') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `priority_order` int NOT NULL DEFAULT '0',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `effective_date` date DEFAULT NULL,
@@ -56,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-19  4:04:52
+-- Dump completed on 2026-05-22 21:54:33

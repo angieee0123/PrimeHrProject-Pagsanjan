@@ -27,7 +27,7 @@ CREATE TABLE `payroll_deductions` (
   `employee_id` bigint unsigned NOT NULL,
   `period_start` date NOT NULL,
   `period_end` date NOT NULL,
-  `cutoff` enum('1-15','16-31') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `cutoff` enum('1-15','16-31') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `basic_salary` decimal(10,2) NOT NULL,
   `gsis_personal` decimal(10,2) NOT NULL DEFAULT '0.00',
   `philhealth_personal` decimal(10,2) NOT NULL DEFAULT '0.00',
@@ -64,4 +64,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-19  4:04:50
+-- Dump completed on 2026-05-22 21:54:35

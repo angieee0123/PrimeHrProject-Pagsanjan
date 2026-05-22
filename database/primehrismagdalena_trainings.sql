@@ -29,14 +29,14 @@ CREATE TABLE `trainings` (
   `date_from` date DEFAULT NULL,
   `date_to` date DEFAULT NULL,
   `hours` int DEFAULT NULL,
-  `position_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `venue` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `cert_no` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `position_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `venue` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cert_no` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `conducted_by` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `ref_doc_no` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `certificate_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` enum('pending','verified','rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `rejected_reason` text COLLATE utf8mb4_unicode_ci,
+  `ref_doc_no` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `certificate_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('pending','verified','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `rejected_reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `verified_at` timestamp NULL DEFAULT NULL,
   `verified_by` bigint unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -68,4 +68,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-19  4:04:53
+-- Dump completed on 2026-05-22 21:54:33

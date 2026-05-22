@@ -25,12 +25,12 @@ DROP TABLE IF EXISTS `employee_loans`;
 CREATE TABLE `employee_loans` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `employee_id` bigint unsigned NOT NULL,
-  `loan_type` enum('GSIS_CONSO','GFAL','PAGIBIG_MPL','LBP','UCPB') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `loan_type` enum('GSIS_CONSO','GFAL','PAGIBIG_MPL','LBP','UCPB') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `principal_amount` decimal(12,2) NOT NULL,
   `monthly_amortization` decimal(10,2) NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
-  `status` enum('active','completed','suspended') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
+  `status` enum('active','completed','suspended') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -57,4 +57,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-19  4:04:56
+-- Dump completed on 2026-05-22 21:54:37

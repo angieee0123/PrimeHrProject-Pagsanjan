@@ -24,8 +24,8 @@ DROP TABLE IF EXISTS `loan_types`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `loan_types` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `deduction_type_id` bigint unsigned NOT NULL,
   `max_loanable_amount` decimal(12,2) DEFAULT NULL,
   `interest_rate` decimal(5,2) DEFAULT NULL,
@@ -59,4 +59,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-19  4:04:51
+-- Dump completed on 2026-05-22 21:54:37

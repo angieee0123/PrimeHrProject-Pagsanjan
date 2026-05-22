@@ -24,19 +24,19 @@ DROP TABLE IF EXISTS `leave_applications`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `leave_applications` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `application_number` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Auto-generated unique reference number',
+  `application_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Auto-generated unique reference number',
   `employee_id` bigint unsigned NOT NULL,
-  `leave_code` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `leave_code` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
   `number_of_days` decimal(5,2) NOT NULL,
-  `reason` text COLLATE utf8mb4_unicode_ci,
-  `status` enum('pending','approved','rejected','cancelled') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `attachment_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Path to uploaded document',
+  `reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `status` enum('pending','approved','rejected','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `attachment_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Path to uploaded document',
   `filed_by` bigint unsigned NOT NULL COMMENT 'User ID who filed the application',
   `approved_by` bigint unsigned DEFAULT NULL COMMENT 'User ID who approved/rejected',
   `approved_at` timestamp NULL DEFAULT NULL,
-  `approver_remarks` text COLLATE utf8mb4_unicode_ci,
+  `approver_remarks` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -50,7 +50,7 @@ CREATE TABLE `leave_applications` (
   CONSTRAINT `leave_applications_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE,
   CONSTRAINT `leave_applications_filed_by_foreign` FOREIGN KEY (`filed_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `leave_applications_leave_code_foreign` FOREIGN KEY (`leave_code`) REFERENCES `leave_types_config` (`leave_code`) ON DELETE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -59,7 +59,7 @@ CREATE TABLE `leave_applications` (
 
 LOCK TABLES `leave_applications` WRITE;
 /*!40000 ALTER TABLE `leave_applications` DISABLE KEYS */;
-INSERT INTO `leave_applications` VALUES (9,'LA-2026-0001',8,'SL','2026-09-18','2026-09-22',3.00,'wert','approved','leave_attachments/va09hOPN2GAK9tjMAasrCACAwwKp4GJ1QJ6iY5gc.pdf',6,1,'2026-05-17 22:01:25',NULL,'2026-05-17 21:55:59','2026-05-17 22:01:25'),(10,'LA-2026-0002',8,'VL','2026-05-20','2026-05-22',3.00,'afsdf','approved',NULL,6,1,'2026-05-17 22:34:35',NULL,'2026-05-17 22:34:30','2026-05-17 22:34:35'),(11,'LA-2026-0003',8,'SL','2026-11-02','2026-11-03',2.00,'ASDFASDF','approved','leave_attachments/xJy0Ekk8AOgQZuNTZbCL8szdaNXgSFUAEoT5IaAp.pdf',6,1,'2026-05-18 07:12:14',NULL,'2026-05-18 06:50:49','2026-05-18 07:12:14'),(12,'LA-2026-0004',8,'VL','2026-12-14','2026-12-15',2.00,'asdf','rejected',NULL,6,1,'2026-05-18 11:31:09','HAHHAHAHA','2026-05-18 07:24:02','2026-05-18 11:31:09');
+INSERT INTO `leave_applications` VALUES (9,'LA-2026-0001',8,'SL','2026-09-18','2026-09-22',3.00,'wert','approved','leave_attachments/va09hOPN2GAK9tjMAasrCACAwwKp4GJ1QJ6iY5gc.pdf',6,1,'2026-05-17 22:01:25',NULL,'2026-05-17 21:55:59','2026-05-17 22:01:25'),(10,'LA-2026-0002',8,'VL','2026-05-20','2026-05-22',3.00,'afsdf','approved',NULL,6,1,'2026-05-17 22:34:35',NULL,'2026-05-17 22:34:30','2026-05-17 22:34:35'),(11,'LA-2026-0003',8,'SL','2026-11-02','2026-11-03',2.00,'ASDFASDF','approved','leave_attachments/xJy0Ekk8AOgQZuNTZbCL8szdaNXgSFUAEoT5IaAp.pdf',6,1,'2026-05-18 07:12:14',NULL,'2026-05-18 06:50:49','2026-05-18 07:12:14'),(12,'LA-2026-0004',8,'VL','2026-12-14','2026-12-15',2.00,'asdf','rejected',NULL,6,1,'2026-05-18 11:31:09','HAHHAHAHA','2026-05-18 07:24:02','2026-05-18 11:31:09'),(13,'LA-2026-0005',8,'VL','2026-05-27','2026-05-28',2.00,'afadfadf','approved',NULL,6,1,'2026-05-21 21:35:32',NULL,'2026-05-21 21:27:45','2026-05-21 21:35:32');
 /*!40000 ALTER TABLE `leave_applications` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -72,4 +72,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-19  4:04:56
+-- Dump completed on 2026-05-22 21:54:36

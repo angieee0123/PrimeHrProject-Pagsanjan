@@ -24,12 +24,12 @@ DROP TABLE IF EXISTS `deduction_types`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `deduction_types` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `category` enum('MANDATORY','LOAN','OTHER') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `computation_type` enum('PERCENTAGE','FIXED','CUSTOM') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `category` enum('MANDATORY','LOAN','OTHER') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `computation_type` enum('PERCENTAGE','FIXED','CUSTOM') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `percentage_rate` decimal(5,2) DEFAULT NULL,
-  `base_salary_type` enum('BASIC','GROSS','MONTHLY','CUSTOM') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `base_salary_type` enum('BASIC','GROSS','MONTHLY','CUSTOM') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `max_amount` decimal(10,2) DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `deducted_from_employee` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'True if deducted from employee salary, False if employer/government share only (for record-keeping)',
@@ -59,4 +59,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-19  4:04:55
+-- Dump completed on 2026-05-22 21:54:33

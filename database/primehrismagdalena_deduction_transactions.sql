@@ -28,7 +28,7 @@ CREATE TABLE `deduction_transactions` (
   `employee_id` bigint unsigned NOT NULL,
   `employee_deduction_id` bigint unsigned DEFAULT NULL,
   `deduction_type_id` bigint unsigned NOT NULL,
-  `cutoff_period` enum('1ST','2ND') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `cutoff_period` enum('1ST','2ND') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `amount_deducted` decimal(10,2) NOT NULL,
   `computation_details` json DEFAULT NULL,
   `deduction_date` date NOT NULL,
@@ -62,4 +62,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-19  4:04:56
+-- Dump completed on 2026-05-22 21:54:34
