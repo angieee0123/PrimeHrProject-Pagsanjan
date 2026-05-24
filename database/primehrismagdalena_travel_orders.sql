@@ -54,7 +54,7 @@ CREATE TABLE `travel_orders` (
   CONSTRAINT `travel_orders_disapproved_by_foreign` FOREIGN KEY (`disapproved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `travel_orders_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE,
   CONSTRAINT `travel_orders_filed_by_foreign` FOREIGN KEY (`filed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -63,7 +63,7 @@ CREATE TABLE `travel_orders` (
 
 LOCK TABLES `travel_orders` WRITE;
 /*!40000 ALTER TABLE `travel_orders` DISABLE KEYS */;
-INSERT INTO `travel_orders` VALUES (6,'TO-202605-0001',8,'Manila City Hall','Gala lang HAHAHH','2026-05-25','2026-05-25',1,'Private Vehicle',24999.99,NULL,'approved',NULL,1,'2026-05-21 20:11:53','2026-05-21 20:11:18','2026-05-21 20:11:53',NULL,NULL,NULL,NULL),(7,'TO-202605-0002',8,'Bahay nila Ekay','adf','2027-05-26','2027-05-26',1,'Government Vehicle',NULL,NULL,'approved',NULL,1,'2026-05-21 21:26:46','2026-05-21 21:20:28','2026-05-21 21:26:46',NULL,NULL,NULL,NULL),(8,'TO-202605-0003',8,'Sa bahay namin','Tulog ahahahahah','2026-06-01','2026-06-05',5,'Private Vehicle',NULL,NULL,'approved',NULL,1,'2026-05-21 22:22:42','2026-05-21 22:22:24','2026-05-21 22:22:42',NULL,NULL,NULL,NULL);
+INSERT INTO `travel_orders` VALUES (6,'TO-202605-0001',8,'Manila City Hall','Gala lang HAHAHH','2026-05-25','2026-05-25',1,'Private Vehicle',24999.99,NULL,'approved',NULL,1,'2026-05-21 20:11:53','2026-05-21 20:11:18','2026-05-21 20:11:53',NULL,NULL,NULL,NULL),(7,'TO-202605-0002',8,'Bahay nila Ekay','adf','2027-05-26','2027-05-26',1,'Government Vehicle',NULL,NULL,'approved',NULL,1,'2026-05-21 21:26:46','2026-05-21 21:20:28','2026-05-21 21:26:46',NULL,NULL,NULL,NULL),(8,'TO-202605-0003',8,'Sa bahay namin','Tulog ahahahahah','2026-06-01','2026-06-05',5,'Private Vehicle',NULL,NULL,'approved',NULL,1,'2026-05-21 22:22:42','2026-05-21 22:22:24','2026-05-21 22:22:42',NULL,NULL,NULL,NULL),(9,'TO-202605-0004',8,'BAHAY NI RIZAL','WALA LANG HAHAAH','2026-09-23','2026-09-23',1,'Government Vehicle',20000.00,NULL,'approved',NULL,1,'2026-05-22 21:02:04','2026-05-22 21:01:20','2026-05-22 21:02:04',NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `travel_orders` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -76,4 +76,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-22 21:54:36
+-- Dump completed on 2026-05-24 13:06:26
