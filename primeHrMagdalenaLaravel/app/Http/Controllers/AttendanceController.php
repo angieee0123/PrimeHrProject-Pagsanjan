@@ -295,6 +295,9 @@ class AttendanceController extends Controller
             'to' => min($currentPage * $perPage, $totalDetailedRecords),
         ];
 
+        // Get attendance exemptions for settings tab
+        $exemptions = \App\Models\AttendanceExemption::with('creator')->orderBy('created_at', 'desc')->get();
+
         return view('admin.attendance.adminAttendance', compact(
             'attendanceRecords',
             'totalPresent',
@@ -306,7 +309,8 @@ class AttendanceController extends Controller
             'incompleteCount',
             'departments',
             'detailedRecords',
-            'detailedPagination'
+            'detailedPagination',
+            'exemptions'
         ));
     }
 
@@ -590,6 +594,37 @@ class AttendanceController extends Controller
                 }
             }
 
+            // Apply exemption auto-fill for display and status evaluation
+            $activeExemption = null;
+            $autoFilled = [];
+            if ($employee && !in_array($current->dayOfWeek, [0, 6])) {
+                $departmentId = null;
+                $designationId = null;
+                if ($employee->employmentDetail) {
+                    $departmentId = $employee->employmentDetail->department_id;
+                    $designationId = $employee->employmentDetail->designation_id;
+                }
+
+                $effective = \App\Models\AttendanceExemption::resolveEffectivePunches(
+                    $employee->id,
+                    $departmentId,
+                    $designationId,
+                    $dateKey,
+                    $amIn,
+                    $amOut,
+                    $pmIn,
+                    $pmOut,
+                    $schedule
+                );
+
+                $amIn = $effective['am_in'];
+                $amOut = $effective['am_out'];
+                $pmIn = $effective['pm_in'];
+                $pmOut = $effective['pm_out'];
+                $activeExemption = $effective['exemption'];
+                $autoFilled = $effective['auto_filled'] ?? [];
+            }
+
             // If on travel order (takes priority over leave)
             if ($isOnTravelOrder && !in_array($current->dayOfWeek, [0, 6])) {
                 $records[] = [
@@ -704,46 +739,63 @@ class AttendanceController extends Controller
                 }
             }
 
-            // Check if employee only timed in AM without returning (no AM out and no PM in)
-            // This means they left and never came back - mark as ABSENT
+            // Check if employee only timed in AM without returning (uses effective punches after auto-fill)
             $isAbandoned = false;
-            if ($attendance && $attendance->am_in && !$attendance->am_out && !$attendance->pm_in && !in_array($current->dayOfWeek, [0, 6])) {
+            if ($attendance && $amIn && !$amOut && !$pmIn && !in_array($current->dayOfWeek, [0, 6])) {
                 $isAbandoned = true;
             }
 
             // Check if truly absent (no time records at all)
             $isTrulyAbsent = !$attendance || (!$attendance->am_in && !$attendance->am_out && !$attendance->pm_in && !$attendance->pm_out);
 
-            // Determine if incomplete vs absent
-            // INCOMPLETE: Has substantial attendance but missing some entries
-            // ABSENT: No attendance, abandoned, or only single time-in without pair
+            // Get employee's department and designation for exemption checking
+            $departmentId = null;
+            $designationId = null;
+            if ($employee && $employee->employmentDetail) {
+                $departmentId = $employee->employmentDetail->department_id;
+                $designationId = $employee->employmentDetail->designation_id;
+            }
+
+            // Legacy flag exemptions (date-aware)
+            $isExemptFromAbandoned = $employee ? \App\Models\AttendanceExemption::isExemptFromAbandoned(
+                $employee->id,
+                $departmentId,
+                $designationId,
+                $dateKey
+            ) : false;
+
+            $isExemptFromIncomplete = $employee ? \App\Models\AttendanceExemption::isExemptFromIncomplete(
+                $employee->id,
+                $departmentId,
+                $designationId,
+                $dateKey
+            ) : false;
+
+            // Determine if incomplete vs absent (uses effective punches after exemption auto-fill)
             $isIncomplete = false;
             $isAbsent = false;
-            
+
             if ($attendance && !in_array($current->dayOfWeek, [0, 6])) {
-                $hasAmPair = $attendance->am_in && $attendance->am_out;
-                $hasPmPair = $attendance->pm_in && $attendance->pm_out;
+                $hasAmPair = $amIn && $amOut;
+                $hasPmPair = $pmIn && $pmOut;
                 $hasOnlyAmIn = $attendance->am_in && !$attendance->am_out && !$attendance->pm_in && !$attendance->pm_out;
                 $hasOnlyPmIn = !$attendance->am_in && !$attendance->am_out && $attendance->pm_in && !$attendance->pm_out;
-                
-                // ABSENT cases:
-                // 1. Abandoned (AM in only, no AM out, no PM in)
-                // 2. Only single time-in without any out (suspicious)
-                if ($isAbandoned || $hasOnlyAmIn || $hasOnlyPmIn) {
+
+                if ($isAbandoned && !$isExemptFromAbandoned) {
                     $isAbsent = true;
-                }
-                // INCOMPLETE cases:
-                // 1. Has AM pair but incomplete PM
-                // 2. Has PM pair but incomplete AM  
-                // 3. Has AM in, AM out, PM in but no PM out (worked but forgot to clock out)
-                else if (($hasAmPair && !$hasPmPair) || (!$hasAmPair && $hasPmPair) || 
-                         ($attendance->am_in && $attendance->am_out && $attendance->pm_in && !$attendance->pm_out)) {
+                } else if (($hasOnlyAmIn || $hasOnlyPmIn) && !$isExemptFromAbandoned) {
+                    $isAbsent = true;
+                } else if (!$isExemptFromIncomplete && (
+                    ($hasAmPair && !$hasPmPair) ||
+                    (!$hasAmPair && $hasPmPair) ||
+                    ($amIn && $amOut && $pmIn && !$pmOut)
+                )) {
                     $isIncomplete = true;
                 }
             }
 
-            // If abandoned or only single time-in, treat as ABSENT
-            if ($isAbandoned || $isAbsent) {
+            // If abandoned or only single time-in, treat as ABSENT (unless exempt)
+            if (($isAbandoned || $isAbsent) && !$isExemptFromAbandoned) {
                 $statusLabel = $isAbandoned ? 'ABANDONED' : 'ABSENT';
                 $records[] = [
                     'date' => $current->format('M d, Y'),
@@ -1022,6 +1074,27 @@ class AttendanceController extends Controller
         $employee = Employee::find($employeeId);
         $schedule = $employee ? $employee->getScheduleForDate($date) : null;
 
+        $departmentId = $employee?->employmentDetail?->department_id;
+        $designationId = $employee?->employmentDetail?->designation_id;
+
+        $effective = \App\Models\AttendanceExemption::resolveEffectivePunches(
+            $employeeId,
+            $departmentId,
+            $designationId,
+            $date,
+            $amIn,
+            $amOut,
+            $pmIn,
+            $pmOut,
+            $schedule
+        );
+
+        $amIn = $effective['am_in'];
+        $amOut = $effective['am_out'];
+        $pmIn = $effective['pm_in'];
+        $pmOut = $effective['pm_out'];
+        $exemption = $effective['exemption'];
+
         $toMin = fn($t) => $t ? (int)(explode(':', $t)[0]) * 60 + (int)(explode(':', $t)[1]) : null;
 
         // Use employee's schedule or defaults
@@ -1032,9 +1105,8 @@ class AttendanceController extends Controller
         $PM_END     = $schedule ? $toMin($schedule->pm_out) : 1020; // Default 17:00
         $PM_GRACE   = $PM_START + 5;  // 5 minutes grace
 
-        // Check if employee abandoned (only AM in, no AM out, no PM in)
-        // This means they left and never came back - treat as absent (0 accredited hours)
-        if ($amIn && !$amOut && !$pmIn) {
+        // Abandoned: AM in only with no AM out and no PM in (after exemption auto-fill)
+        if ($amIn && !$amOut && !$pmIn && !($exemption && $exemption->exempt_from_abandoned)) {
             return [
                 'accredited_minutes' => 0,
                 'log_data' => [
@@ -1395,5 +1467,206 @@ class AttendanceController extends Controller
             'message' => 'Attendance record corrected successfully',
             'recalculation_summary' => $recalculationSummary ?? null,
         ]);
+    }
+
+    /**
+     * Get options for exemption dropdown based on type
+     */
+    public function getExemptionOptions(Request $request)
+    {
+        $type = $request->get('type');
+        $options = [];
+
+        switch ($type) {
+            case 'employee':
+                $options = Employee::select('id', DB::raw("CONCAT(first_name, ' ', COALESCE(middle_name, ''), ' ', last_name, ' (', employee_id, ')') as name"))
+                    ->orderBy('first_name')
+                    ->get();
+                break;
+
+            case 'department':
+                $options = \App\Models\Department::select('id', 'name')
+                    ->orderBy('name')
+                    ->get();
+                break;
+
+            case 'designation':
+                $options = \App\Models\Designation::select('id', 'title as name')
+                    ->orderBy('title')
+                    ->get();
+                break;
+        }
+
+        return response()->json($options);
+    }
+
+    /**
+     * Get a single exemption
+     */
+    public function getExemption($id)
+    {
+        $exemption = \App\Models\AttendanceExemption::findOrFail($id);
+        return response()->json($exemption);
+    }
+
+    /**
+     * Store a new exemption
+     */
+    public function storeExemption(Request $request)
+    {
+        $validated = $request->validate([
+            'exemption_type' => 'required|in:employee,department,designation',
+            'reference_id' => 'required',
+            'exempt_from_abandoned' => 'boolean',
+            'exempt_from_incomplete' => 'boolean',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'am_in_not_required' => 'boolean',
+            'am_out_not_required' => 'boolean',
+            'pm_in_not_required' => 'boolean',
+            'pm_out_not_required' => 'boolean',
+            'auto_fill_am_out' => 'boolean',
+            'auto_fill_pm_in' => 'boolean',
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        // Get reference name based on type
+        $referenceName = $this->getReferenceName($validated['exemption_type'], $validated['reference_id']);
+
+        // Check if exemption already exists for the same type and reference
+        $existing = \App\Models\AttendanceExemption::where('exemption_type', $validated['exemption_type'])
+            ->where('reference_id', $validated['reference_id'])
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An exemption for this ' . $validated['exemption_type'] . ' already exists.'
+            ], 422);
+        }
+
+        $exemption = \App\Models\AttendanceExemption::create([
+            'exemption_type' => $validated['exemption_type'],
+            'reference_id' => $validated['reference_id'],
+            'reference_name' => $referenceName,
+            'exempt_from_abandoned' => $validated['exempt_from_abandoned'] ?? false,
+            'exempt_from_incomplete' => $validated['exempt_from_incomplete'] ?? false,
+            'start_date' => $validated['start_date'] ?? null,
+            'end_date' => $validated['end_date'] ?? null,
+            'am_in_not_required' => $validated['am_in_not_required'] ?? false,
+            'am_out_not_required' => $validated['am_out_not_required'] ?? false,
+            'pm_in_not_required' => $validated['pm_in_not_required'] ?? false,
+            'pm_out_not_required' => $validated['pm_out_not_required'] ?? false,
+            'auto_fill_am_out' => $validated['auto_fill_am_out'] ?? true,
+            'auto_fill_pm_in' => $validated['auto_fill_pm_in'] ?? true,
+            'reason' => $validated['reason'],
+            'created_by' => Auth::id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Exemption created successfully',
+            'exemption' => $exemption
+        ]);
+    }
+
+    /**
+     * Update an existing exemption
+     */
+    public function updateExemption(Request $request, $id)
+    {
+        $exemption = \App\Models\AttendanceExemption::findOrFail($id);
+
+        $validated = $request->validate([
+            'exemption_type' => 'required|in:employee,department,designation',
+            'reference_id' => 'required',
+            'exempt_from_abandoned' => 'boolean',
+            'exempt_from_incomplete' => 'boolean',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'am_in_not_required' => 'boolean',
+            'am_out_not_required' => 'boolean',
+            'pm_in_not_required' => 'boolean',
+            'pm_out_not_required' => 'boolean',
+            'auto_fill_am_out' => 'boolean',
+            'auto_fill_pm_in' => 'boolean',
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        // Get reference name based on type
+        $referenceName = $this->getReferenceName($validated['exemption_type'], $validated['reference_id']);
+
+        // Check if another exemption with same type and reference exists
+        $existing = \App\Models\AttendanceExemption::where('exemption_type', $validated['exemption_type'])
+            ->where('reference_id', $validated['reference_id'])
+            ->where('id', '!=', $id)
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An exemption for this ' . $validated['exemption_type'] . ' already exists.'
+            ], 422);
+        }
+
+        $exemption->update([
+            'exemption_type' => $validated['exemption_type'],
+            'reference_id' => $validated['reference_id'],
+            'reference_name' => $referenceName,
+            'exempt_from_abandoned' => $validated['exempt_from_abandoned'] ?? false,
+            'exempt_from_incomplete' => $validated['exempt_from_incomplete'] ?? false,
+            'start_date' => $validated['start_date'] ?? null,
+            'end_date' => $validated['end_date'] ?? null,
+            'am_in_not_required' => $validated['am_in_not_required'] ?? false,
+            'am_out_not_required' => $validated['am_out_not_required'] ?? false,
+            'pm_in_not_required' => $validated['pm_in_not_required'] ?? false,
+            'pm_out_not_required' => $validated['pm_out_not_required'] ?? false,
+            'auto_fill_am_out' => $validated['auto_fill_am_out'] ?? true,
+            'auto_fill_pm_in' => $validated['auto_fill_pm_in'] ?? true,
+            'reason' => $validated['reason'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Exemption updated successfully',
+            'exemption' => $exemption
+        ]);
+    }
+
+    /**
+     * Delete an exemption
+     */
+    public function destroyExemption($id)
+    {
+        $exemption = \App\Models\AttendanceExemption::findOrFail($id);
+        $exemption->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Exemption deleted successfully'
+        ]);
+    }
+
+    /**
+     * Helper method to get reference name
+     */
+    private function getReferenceName($type, $referenceId)
+    {
+        switch ($type) {
+            case 'employee':
+                $employee = Employee::find($referenceId);
+                return $employee ? trim($employee->first_name . ' ' . ($employee->middle_name ? $employee->middle_name . ' ' : '') . $employee->last_name) : 'Unknown';
+
+            case 'department':
+                $department = \App\Models\Department::find($referenceId);
+                return $department ? $department->name : 'Unknown';
+
+            case 'designation':
+                $designation = \App\Models\Designation::find($referenceId);
+                return $designation ? $designation->title : 'Unknown';
+
+            default:
+                return 'Unknown';
+        }
     }
 }

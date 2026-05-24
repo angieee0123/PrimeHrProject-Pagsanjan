@@ -959,6 +959,13 @@ Route::get('/admin/attendance/record/{attendanceId}', [AttendanceController::cla
 Route::get('/admin/attendance/{attendanceId}/accredited-log', [AttendanceController::class, 'getAccreditedHoursLog'])->middleware('auth')->name('admin.attendance.accredited-log');
 Route::post('/admin/attendance/correct', [AttendanceController::class, 'correctAttendance'])->middleware('auth')->name('admin.attendance.correct');
 
+// Attendance Exemption Routes
+Route::get('/admin/attendance/exemptions/options', [AttendanceController::class, 'getExemptionOptions'])->middleware('auth')->name('admin.attendance.exemptions.options');
+Route::get('/admin/attendance/exemptions/{id}', [AttendanceController::class, 'getExemption'])->middleware('auth')->name('admin.attendance.exemptions.show');
+Route::post('/admin/attendance/exemptions', [AttendanceController::class, 'storeExemption'])->middleware('auth')->name('admin.attendance.exemptions.store');
+Route::put('/admin/attendance/exemptions/{id}', [AttendanceController::class, 'updateExemption'])->middleware('auth')->name('admin.attendance.exemptions.update');
+Route::delete('/admin/attendance/exemptions/{id}', [AttendanceController::class, 'destroyExemption'])->middleware('auth')->name('admin.attendance.exemptions.destroy');
+
 Route::get('/admin/leave', [LeaveController::class, 'index'])->middleware('auth')->name('admin.leave');
 
 Route::get('/admin/travelorder', function (\Illuminate\Http\Request $request) {

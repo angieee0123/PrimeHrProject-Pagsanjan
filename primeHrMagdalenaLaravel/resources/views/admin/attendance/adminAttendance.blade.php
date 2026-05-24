@@ -80,10 +80,12 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 <div style="display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1.5px solid #eceaf8; padding-bottom: 0;">
     <button class="tab-btn active" onclick="switchTab('summary')">Attendance Summary</button>
     <button class="tab-btn" onclick="switchTab('detailed')">Detailed Time Record</button>
+    <button class="tab-btn" onclick="switchTab('settings')">Attendance Config</button>
 </div>
 
 @include('admin.attendance.partials.attendance-summary-tab')
 @include('admin.attendance.partials.detailed-time-record-tab')
+@include('admin.attendance.partials.attendance-settings-tab')
 @include('admin.attendance.modals.dtrDetailModal')
 @include('admin.attendance.modals.detailedDtrModal')
 @include('admin.attendance.modals.editDtrModal')
@@ -117,6 +119,13 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 
             document.querySelectorAll('.tab-btn')[1].classList.add('active');
             document.getElementById('detailed-tab').style.display = 'block';
+        } else if (activeTab === 'settings') {
+            // Switch to settings tab
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('[id$="-tab"]').forEach(tab => tab.style.display = 'none');
+
+            document.querySelectorAll('.tab-btn')[2].classList.add('active');
+            document.getElementById('settings-tab').style.display = 'block';
         }
     });
 
