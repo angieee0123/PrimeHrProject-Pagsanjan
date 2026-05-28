@@ -71,17 +71,26 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showFileLeaveDialog(context),
-        backgroundColor: const Color(0xFF1E3A8A),
-        child: const Icon(Icons.add),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 80),
+        child: FloatingActionButton(
+          onPressed: () => _showFileLeaveDialog(context),
+          backgroundColor: const Color(0xFF1E3A8A),
+          child: const Icon(Icons.add),
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
   Widget _buildRequestsTab() {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 12,
+        bottom: 88, // Extra padding for FAB
+      ),
       itemCount: MockData.leaveRequests.length,
       itemBuilder: (context, index) {
         final request = MockData.leaveRequests[index];
@@ -114,7 +123,12 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
 
   Widget _buildCreditsTab() {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 12,
+        bottom: 88, // Extra padding for FAB
+      ),
       itemCount: MockData.leaveCredits.length,
       itemBuilder: (context, index) {
         final credit = MockData.leaveCredits[index];

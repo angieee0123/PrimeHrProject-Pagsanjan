@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:ui';
 import 'package:prime_magdalena_mobile_application/screens/home/home_dashboard_screen.dart';
 import 'package:prime_magdalena_mobile_application/screens/payslip/payslip_list_screen.dart';
 import 'package:prime_magdalena_mobile_application/screens/attendance/attendance_screen.dart';
@@ -44,6 +46,8 @@ class _MainAppShellState extends State<MainAppShell> {
   }
 
   void _onItemTapped(int index) {
+    // Haptic feedback
+    HapticFeedback.lightImpact();
     setState(() {
       _selectedIndex = index;
     });
@@ -52,63 +56,214 @@ class _MainAppShellState extends State<MainAppShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: Container(
+      extendBody: true, // Extend body behind bottom nav bar
+      body: Stack(
+        children: [
+          _screens[_selectedIndex],
+          // Floating Chatbot Button
+          Positioned(
+            right: 20,
+            bottom: 100, // Above the bottom nav bar
+            child: _buildChatbotFAB(context),
+          ),
+        ],
+      ),
+      bottomNavigationBar: _buildModernBottomNavBar(),
+      drawer: _buildDrawer(context),
+    );
+  }
+
+  Widget _buildChatbotFAB(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const HrChatbotScreen()),
+        );
+      },
+      child: Container(
+        width: 56,
+        height: 56,
         decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF0B044D),
+              Color(0xFF1E3A8A),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: const Color(0xFF0B044D).withValues(alpha: 0.3),
               blurRadius: 12,
-              offset: const Offset(0, -2),
+              offset: const Offset(0, 4),
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: const Color(0xFF0B044D).withValues(alpha: 0.15),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+              spreadRadius: 0,
             ),
           ],
         ),
-        child: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
+        child: Stack(
+          children: [
+            Center(
+              child: Icon(
+                Icons.chat_bubble_rounded,
+                color: Colors.white,
+                size: 26,
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.receipt_outlined),
-              activeIcon: Icon(Icons.receipt),
-              label: 'Payslip',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today_outlined),
-              activeIcon: Icon(Icons.calendar_today),
-              label: 'Attendance',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.check_circle_outline),
-              activeIcon: Icon(Icons.check_circle),
-              label: 'Leave',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profile',
+            // Notification badge (optional - can show unread messages)
+            Positioned(
+              right: 8,
+              top: 8,
+              child: Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFF22C55E),
+                  border: Border.all(
+                    color: const Color(0xFF0B044D),
+                    width: 2,
+                  ),
+                ),
+              ),
             ),
           ],
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: const Color(0xFF1E3A8A),
-          unselectedItemColor: Colors.grey.shade400,
-          selectedLabelStyle: GoogleFonts.inter(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-          unselectedLabelStyle: GoogleFonts.inter(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-          elevation: 0,
         ),
       ),
-      drawer: _buildDrawer(context),
+    );
+  }
+
+  Widget _buildModernBottomNavBar() {
+    return Container(
+      margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0B044D).withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: const Color(0xFF0B044D).withValues(alpha: 0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            height: 65,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.95),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: Colors.grey.shade200.withValues(alpha: 0.5),
+                width: 0.5,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(
+                  icon: Icons.home_rounded,
+                  label: 'Home',
+                  index: 0,
+                ),
+                _buildNavItem(
+                  icon: Icons.receipt_long_rounded,
+                  label: 'Payslip',
+                  index: 1,
+                ),
+                _buildNavItem(
+                  icon: Icons.calendar_month_rounded,
+                  label: 'Attendance',
+                  index: 2,
+                ),
+                _buildNavItem(
+                  icon: Icons.event_available_rounded,
+                  label: 'Leave',
+                  index: 3,
+                ),
+                _buildNavItem(
+                  icon: Icons.person_rounded,
+                  label: 'Profile',
+                  index: 4,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required IconData icon,
+    required String label,
+    required int index,
+  }) {
+    final isSelected = _selectedIndex == index;
+    
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _onItemTapped(index),
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFF0B044D).withValues(alpha: 0.1)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  size: 22,
+                  color: isSelected
+                      ? const Color(0xFF0B044D)
+                      : Colors.grey.shade400,
+                ),
+              ),
+              const SizedBox(height: 2),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                style: GoogleFonts.poppins(
+                  fontSize: 10,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected
+                      ? const Color(0xFF0B044D)
+                      : Colors.grey.shade500,
+                  height: 1.2,
+                ),
+                child: Text(label),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

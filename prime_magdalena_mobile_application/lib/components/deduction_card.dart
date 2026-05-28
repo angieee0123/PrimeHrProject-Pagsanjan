@@ -34,103 +34,101 @@ class DeductionCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(
+            color: const Color(0xFFECEAF8),
+            width: 1.5,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Row
+            // Kicker Row: Category and Status Badges
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        deductionType,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF0F172A),
-                        ),
-                      ),
-                      if (code != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          code!,
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+                _buildCategoryBadge(),
+                const Spacer(),
                 _buildStatusBadge(),
               ],
             ),
-            const SizedBox(height: 12),
-            // Category Badge
-            _buildCategoryBadge(),
-            const SizedBox(height: 12),
-            // Amount Info
+            const SizedBox(height: 8),
+            // Title
+            Text(
+              deductionType,
+              style: GoogleFonts.poppins(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF0B044D),
+                height: 1.3,
+              ),
+            ),
+            if (code != null) ...[
+              const SizedBox(height: 2),
+              Text(
+                code!,
+                style: GoogleFonts.poppins(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF6B6A8A),
+                  height: 1.45,
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            // Metrics Row
             Row(
               children: [
                 Expanded(
-                  child: _buildInfoColumn(
-                    'Monthly Amount',
+                  child: _buildMetricBox(
+                    'MONTHLY AMOUNT',
                     '₱${NumberFormat('#,##0.00').format(monthlyAmount)}',
                     'per month',
                   ),
                 ),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: _buildInfoColumn(
-                    'Balance',
+                  child: _buildMetricBox(
+                    'BALANCE',
                     '₱${NumberFormat('#,##0.00').format(remainingBalance)}',
                     'of ₱${NumberFormat('#,##0.00').format(totalAmount)}',
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            // Date Range
+            const SizedBox(height: 8),
+            // Footer: Date Range
             Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
+              padding: const EdgeInsets.only(top: 8),
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: Color(0xFFF0EFFE),
+                    width: 1,
+                  ),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Current Month',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey.shade600,
+                    'CURRENT MONTH',
+                    style: GoogleFonts.poppins(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF9999BB),
+                      letterSpacing: 0.5,
                     ),
                   ),
                   Text(
                     _formatDateRange(),
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF0F172A),
+                    style: GoogleFonts.poppins(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF0B044D),
+                      height: 1.35,
                     ),
                   ),
                 ],
@@ -142,37 +140,54 @@ class DeductionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoColumn(String label, String value, String subtitle) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey.shade600,
-          ),
+  Widget _buildMetricBox(String label, String value, String subtitle) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAFAFE),
+        border: Border.all(
+          color: const Color(0xFFF0EFFE),
+          width: 1,
         ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF0F172A),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF9999BB),
+              letterSpacing: 0.5,
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          subtitle,
-          style: GoogleFonts.inter(
-            fontSize: 10,
-            fontWeight: FontWeight.w400,
-            color: Colors.grey.shade600,
+          const SizedBox(height: 3),
+          Text(
+            value,
+            style: GoogleFonts.poppins(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF0B044D),
+              height: 1.35,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
-      ],
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: GoogleFonts.poppins(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF9999BB),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 
@@ -199,16 +214,16 @@ class DeductionCard extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         category.toUpperCase(),
-        style: GoogleFonts.inter(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
+        style: GoogleFonts.poppins(
+          fontSize: 9.5,
+          fontWeight: FontWeight.w700,
           color: textColor,
           letterSpacing: 0.5,
         ),
@@ -239,7 +254,7 @@ class DeductionCard extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(6),
@@ -247,9 +262,9 @@ class DeductionCard extends StatelessWidget {
       ),
       child: Text(
         status,
-        style: GoogleFonts.inter(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
+        style: GoogleFonts.poppins(
+          fontSize: 9.5,
+          fontWeight: FontWeight.w700,
           color: textColor,
         ),
       ),
