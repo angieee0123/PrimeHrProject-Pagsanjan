@@ -214,3 +214,33 @@ class Notification {
     required this.type,
   });
 }
+
+class Deduction {
+  final String id;
+  final String deductionType;
+  final String? code;
+  final String category;
+  final double monthlyAmount;
+  final double perCutoff;
+  final double remainingBalance;
+  final double totalAmount;
+  final DateTime startDate;
+  final DateTime? endDate;
+  final String status;
+  final String? remarks;
+
+  Deduction({
+    required this.id,
+    required this.deductionType,
+    this.code,
+    required this.category,
+    required this.monthlyAmount,
+    required this.perCutoff,
+    required this.remainingBalance,
+    required this.totalAmount,
+    required this.startDate,
+    this.endDate,
+    required this.status,
+    this.remarks,
+  });
+}

@@ -66,6 +66,47 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 }
 .mobile-overlay.active { display: block; }
 
+.permanent-mobile-topbar {
+    display: none;
+}
+
+.permanent-mobile-topbar-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.permanent-mobile-topbar-copy span {
+    font-size: 10px;
+    font-weight: 700;
+    color: #9999bb;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.permanent-mobile-topbar-copy strong {
+    color: #0b044d;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.permanent-mobile-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #f0effe;
+    color: #0b044d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    border: 1px solid #e4e1f5;
+    flex: 0 0 auto;
+}
+
 /* ---------------------------------------------------------------------------
    Shared HRIS dashboard primitives — banner, stat cards, data tables
    Used by: permanentDashboard, permanentPayslip, permanentAttendance,
@@ -532,6 +573,120 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 }
 .permanent-dashboard .payroll-table {
     min-width: 680px;
+}
+
+.mobile-card-list {
+    display: none;
+}
+
+.mobile-data-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    background: #ffffff;
+    border: 1.5px solid #eceaf8;
+    border-radius: 12px;
+    text-align: left;
+    font-family: 'Poppins', sans-serif;
+    color: #0b044d;
+}
+
+.mobile-data-card + .mobile-data-card {
+    margin-top: 10px;
+}
+
+.mobile-data-card[type="button"] {
+    cursor: pointer;
+}
+
+.mobile-card-kicker,
+.mobile-card-metrics,
+.mobile-card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.mobile-card-kicker {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.mobile-card-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #0b044d;
+    line-height: 1.3;
+}
+
+.mobile-card-sub {
+    font-size: 11.5px;
+    color: #6b6a8a;
+    line-height: 1.45;
+}
+
+.mobile-card-metrics {
+    align-items: stretch;
+}
+
+.mobile-card-metrics > span {
+    flex: 1;
+    min-width: 0;
+    padding: 10px;
+    background: #fafafe;
+    border: 1px solid #f0effe;
+    border-radius: 10px;
+}
+
+.mobile-card-metrics small,
+.mobile-card-foot span {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #9999bb;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mobile-card-metrics strong,
+.mobile-card-foot strong {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #0b044d;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+.mobile-card-metrics em {
+    display: block;
+    margin-top: 2px;
+    font-style: normal;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: #9999bb;
+}
+
+.mobile-card-foot {
+    padding-top: 8px;
+    border-top: 1px solid #f0effe;
+}
+
+.mobile-card-foot span {
+    margin-bottom: 0;
+}
+
+.mobile-empty-card {
+    padding: 22px 14px;
+    border: 1.5px dashed #dddcf0;
+    border-radius: 12px;
+    color: #6b6a8a;
+    font-size: 12.5px;
+    text-align: center;
 }
 
 /* ---------------------------------------------------------------------------
@@ -1546,7 +1701,33 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 /* ≤768px — mobile sidebar drawer, main gutters, dashboard/payslip tables, attendance/training/
             performance/leave/profile/payslip modal & column hiding rules */
 @media (max-width: 768px) {
+    .permanent-mobile-topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 320;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 58px;
+        padding: 10px 14px;
+        background: rgba(255, 255, 255, 0.96);
+        border-bottom: 1px solid #eceaf8;
+        box-shadow: 0 8px 22px rgba(11, 4, 77, 0.08);
+        backdrop-filter: blur(12px);
+    }
     .mobile-menu-btn { display: flex; }
+    .permanent-mobile-topbar .mobile-menu-btn {
+        position: static;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        flex: 0 0 auto;
+    }
+    .permanent-mobile-topbar-copy {
+        flex: 1;
+    }
     .toggle-btn { display: none; }
     .sidebar {
         transform: translateX(-100%);
@@ -1563,8 +1744,8 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
     .sidebar.collapsed .nav-active-bar { display: initial; }
     .sidebar.collapsed .nav-item { justify-content: flex-start; padding: 10px 14px; }
     .sidebar.collapsed .sidebar-footer { justify-content: flex-start; }
-    /* Match joborder.css: 70px top clears fixed menu button */
-    .main-content { margin-left: 0 !important; padding: 70px 20px 24px; min-width: 0; box-sizing: border-box; }
+    /* Match joborder.css: 70px top clears fixed mobile topbar */
+    .main-content { margin-left: 0 !important; padding: 74px 20px 24px; min-width: 0; box-sizing: border-box; }
     .welcome-banner { flex-direction: column; align-items: flex-start; gap: 12px; }
     .banner-right { flex-wrap: wrap; }
     .stats-grid { grid-template-columns: 1fr; }
@@ -1627,6 +1808,25 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
     .permanent-dashboard .stats-grid-4 {
         grid-template-columns: repeat(2, 1fr);
     }
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    .chart-card {
+        padding: 16px;
+    }
+    .chart-header {
+        align-items: flex-start;
+    }
+    .chart-tabs {
+        width: 100%;
+    }
+    .chart-tab {
+        flex: 1;
+        padding: 7px 10px;
+    }
+    .chart-card canvas {
+        max-height: 230px !important;
+    }
     .permanent-dashboard .table-header {
         padding: 14px 16px;
     }
@@ -1643,6 +1843,31 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
     }
     .permanent-dashboard .payroll-table {
         min-width: 620px;
+    }
+    .dashboard-deductions-section .table-wrapper,
+    .dashboard-notifications-section .table-wrapper {
+        display: none;
+    }
+    .dashboard-deductions-section .mobile-card-list,
+    .dashboard-notifications-section .mobile-card-list {
+        display: block;
+        padding: 12px 14px 14px;
+        background: #ffffff;
+    }
+    .dashboard-deductions-section .table-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .dashboard-deductions-section .table-actions .chart-tabs {
+        width: 100%;
+        margin-right: 0 !important;
+    }
+    .dashboard-deductions-section .table-actions .btn-export,
+    .dashboard-deductions-section .table-actions .modal-btn-primary,
+    .dashboard-notifications-section .table-header .btn-export {
+        width: 100%;
+        flex: 1 1 100%;
+        justify-content: center;
     }
 
     /* Attendance table: reduce overflow on mobile/tablet */
@@ -1836,7 +2061,7 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 /* ≤480px — phone refinements: charts, training/performance tables, leave tables,
              payslip history, profile modals (#editModal / #saveSuccessModal), eval/goal modals */
 @media (max-width: 480px) {
-    .main-content { padding: 70px 12px 20px; }
+    .main-content { padding: 72px 12px 20px; }
     .side-col { flex-direction: column; }
     .side-col > * { min-width: unset; }
     .payroll-table th,
@@ -1849,6 +2074,11 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 
     .permanent-dashboard .stats-grid-4 {
         grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .permanent-dashboard .stat-card {
+        padding: 14px 12px;
+        border-radius: 12px;
     }
     .permanent-dashboard .stat-value,
     .permanent-dashboard .stat-value-compact {
@@ -1883,6 +2113,26 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
     }
     .permanent-dashboard .payroll-table {
         min-width: 0;
+    }
+    .permanent-dashboard .table-title {
+        font-size: 14px;
+    }
+    .mobile-card-metrics {
+        flex-direction: column;
+    }
+    .mobile-card-foot {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .dashboard-deductions-section .mobile-card-list,
+    .dashboard-notifications-section .mobile-card-list {
+        padding: 10px 12px 12px;
+    }
+    .chart-card {
+        padding: 14px;
+    }
+    .chart-card canvas {
+        max-height: 210px !important;
     }
     .permanent-attendance .attendance-history-table th:nth-child(2),
     .permanent-attendance .attendance-history-table td:nth-child(2),

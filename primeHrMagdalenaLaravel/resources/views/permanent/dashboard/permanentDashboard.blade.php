@@ -5,14 +5,10 @@
 @section('content')
 <div class="app-layout">
 
-    {{-- Mobile Menu Button --}}
-    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <line x1="3" y1="12" x2="21" y2="12"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-    </button>
+    @include('permanent.topbar.mobileTopbar', [
+        'mobileTopbarEyebrow' => 'Permanent Employee',
+        'mobileTopbarTitle' => 'Dashboard'
+    ])
 
     {{-- Mobile Overlay --}}
     <div class="mobile-overlay" id="mobile-overlay"></div>
@@ -121,7 +117,7 @@
         </div>
 
         {{-- Deductions & Loans Table --}}
-        <div class="table-section">
+        <div class="table-section dashboard-deductions-section">
             <div class="table-header">
                 <div>
                     <p class="table-title">My Deductions & Loans</p>
@@ -238,6 +234,83 @@
                 </table>
             </div>
 
+            <div class="mobile-card-list dashboard-deductions-list">
+                @forelse($deductions as $d)
+                    @php
+                        $categoryColors = [
+                            'mandatory' => 'background: #e8f9ef; color: #15803d;',
+                            'loan' => 'background: #fefce8; color: #a16207;',
+                            'voluntary' => 'background: #f0effe; color: #0b044d;',
+                        ];
+                        $style = $categoryColors[$d->deductionType->category] ?? 'background: #f7f6ff; color: #6b6a8a;';
+                        $perCutoff = $d->calculated_amount ?? ($d->installment_amount ?? $d->amount ?? 0);
+                        if ($perCutoff == 0 && $d->deductionType && strtoupper($d->deductionType->computation_type) === 'FIXED') {
+                            $perCutoff = ($d->deductionType->percentage_rate ?? 0) / 2;
+                        }
+                        $monthly = $perCutoff * 2;
+                        $now = \Carbon\Carbon::now();
+                        $monthStart = $now->copy()->startOfMonth();
+                        $monthEnd = $now->copy()->endOfMonth();
+                    @endphp
+                    <button type="button" class="mobile-data-card" onclick="showDeductionModal({{ $d->id }})" data-deduction-id="{{ $d->id }}">
+                        <span class="mobile-card-kicker">
+                            <span class="badge-status" style="{{ $style }}">{{ ucfirst($d->deductionType->category ?? 'Other') }}</span>
+                            @if($d->status === 'active')
+                                <span class="badge-status" style="background: #e8f9ef; color: #15803d; border: 1px solid #bbf7d0; text-transform: none;">Active</span>
+                            @elseif($d->status === 'pending')
+                                <span class="badge-status pending">Pending</span>
+                            @else
+                                <span class="badge-status on-hold">{{ ucfirst($d->status) }}</span>
+                            @endif
+                        </span>
+                        <span class="mobile-card-title">{{ $d->deductionType->name ?? 'N/A' }}</span>
+                        @if($d->deductionType->code)
+                            <span class="mobile-card-sub">{{ $d->deductionType->code }}</span>
+                        @endif
+                        <span class="mobile-card-metrics">
+                            <span>
+                                <small class="mobile-deduction-amount-label">Monthly Amount</small>
+                                <strong class="deduction-amount-cell" data-per-cutoff="{{ $perCutoff }}">
+                                    @if($monthly > 0)
+                                        <span class="deduction-amount">&#8369;{{ number_format($monthly, 2) }}</span>
+                                        <em class="deduction-period">per month</em>
+                                    @elseif($d->deductionType && strtoupper($d->deductionType->computation_type) === 'PERCENTAGE' && $d->deductionType->percentage_rate > 0)
+                                        <span>{{ $d->deductionType->percentage_rate }}% of salary</span>
+                                        <em>Pending computation</em>
+                                    @else
+                                        <span>To be computed</span>
+                                    @endif
+                                </strong>
+                            </span>
+                            <span>
+                                <small>Balance</small>
+                                <strong>
+                                    @if($d->remaining_balance !== null)
+                                        &#8369;{{ number_format($d->remaining_balance, 2) }}
+                                    @else
+                                        N/A
+                                    @endif
+                                </strong>
+                            </span>
+                        </span>
+                        <span class="mobile-card-foot">
+                            <span class="mobile-deduction-date-label">Current Month</span>
+                            <strong class="deduction-date-cell" data-start-date="{{ $d->start_date ? $d->start_date->format('Y-m-d') : '' }}">
+                                @if($d->start_date && $d->start_date <= $now)
+                                    {{ $monthStart->format('M d') }} - {{ $monthEnd->format('d, Y') }}
+                                @elseif($d->start_date && $d->start_date > $now)
+                                    Not yet started
+                                @else
+                                    N/A
+                                @endif
+                            </strong>
+                        </span>
+                    </button>
+                @empty
+                    <div class="mobile-empty-card">No active deductions or loans</div>
+                @endforelse
+            </div>
+
             <div class="table-footer">
                 <span>Showing <strong>{{ $deductions->count() }}</strong> active deduction(s)</span>
             </div>
@@ -246,7 +319,7 @@
         <div class="bottom-row">
 
             {{-- Notifications --}}
-            <div class="table-section mb-0">
+            <div class="table-section mb-0 dashboard-notifications-section">
                 <div class="table-header">
                     <div>
                         <p class="table-title">Notifications</p>
@@ -290,6 +363,26 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+                <div class="mobile-card-list dashboard-notifications-list">
+                    @foreach($notifs as $n)
+                        <div class="mobile-data-card mobile-notification-card">
+                            <span class="mobile-card-kicker">
+                                <span class="dashboard-notif-dot {{ $n['status']==='unread' ? 'dashboard-notif-dot-unread' : 'dashboard-notif-dot-read' }}"></span>
+                                @if($n['status']==='unread')
+                                    <span class="badge-status pending">Unread</span>
+                                @else
+                                    <span class="badge-status processed">Read</span>
+                                @endif
+                            </span>
+                            <span class="mobile-card-title">{{ $n['title'] }}</span>
+                            <span class="mobile-card-sub">{{ $n['desc'] }}</span>
+                            <span class="mobile-card-foot">
+                                <span>Date</span>
+                                <strong>{{ $n['time'] }}</strong>
+                            </span>
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
@@ -553,6 +646,8 @@ function switchDeductionView(view) {
     
     const amountHeader = document.getElementById('deductionAmountHeader');
     const dateHeader = document.getElementById('deductionDateHeader');
+    const mobileAmountLabels = document.querySelectorAll('.mobile-deduction-amount-label');
+    const mobileDateLabels = document.querySelectorAll('.mobile-deduction-date-label');
     const amountCells = document.querySelectorAll('.deduction-amount-cell');
     const dateCells = document.querySelectorAll('.deduction-date-cell');
     
@@ -561,6 +656,8 @@ function switchDeductionView(view) {
     if (view === 'daily') {
         amountHeader.textContent = 'Daily Amount';
         dateHeader.textContent = 'Today';
+        mobileAmountLabels.forEach(label => label.textContent = 'Daily Amount');
+        mobileDateLabels.forEach(label => label.textContent = 'Today');
         
         // Update amounts
         amountCells.forEach(cell => {
@@ -592,6 +689,8 @@ function switchDeductionView(view) {
     } else if (view === 'weekly') {
         amountHeader.textContent = 'Weekly Amount';
         dateHeader.textContent = 'Current Week';
+        mobileAmountLabels.forEach(label => label.textContent = 'Weekly Amount');
+        mobileDateLabels.forEach(label => label.textContent = 'Current Week');
         
         // Update amounts
         amountCells.forEach(cell => {
@@ -630,6 +729,8 @@ function switchDeductionView(view) {
     } else {
         amountHeader.textContent = 'Monthly Amount';
         dateHeader.textContent = 'Current Month';
+        mobileAmountLabels.forEach(label => label.textContent = 'Monthly Amount');
+        mobileDateLabels.forEach(label => label.textContent = 'Current Month');
         
         // Update amounts
         amountCells.forEach(cell => {

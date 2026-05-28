@@ -233,4 +233,95 @@ class MockData {
       type: 'Training',
     ),
   ];
+
+  // Deductions data
+  static final List<Deduction> deductions = [
+    Deduction(
+      id: 'D001',
+      deductionType: 'SSS Contribution',
+      code: 'SSS',
+      category: 'mandatory',
+      monthlyAmount: 2250.00,
+      perCutoff: 1125.00,
+      remainingBalance: 0,
+      totalAmount: 2250.00,
+      startDate: DateTime(2024, 1, 1),
+      status: 'active',
+    ),
+    Deduction(
+      id: 'D002',
+      deductionType: 'PhilHealth',
+      code: 'PHIC',
+      category: 'mandatory',
+      monthlyAmount: 2012.50,
+      perCutoff: 1006.25,
+      remainingBalance: 0,
+      totalAmount: 2012.50,
+      startDate: DateTime(2024, 1, 1),
+      status: 'active',
+    ),
+    Deduction(
+      id: 'D003',
+      deductionType: 'Pag-IBIG Contribution',
+      code: 'HDMF',
+      category: 'mandatory',
+      monthlyAmount: 200.00,
+      perCutoff: 100.00,
+      remainingBalance: 0,
+      totalAmount: 200.00,
+      startDate: DateTime(2024, 1, 1),
+      status: 'active',
+    ),
+    Deduction(
+      id: 'D004',
+      deductionType: 'Housing Loan',
+      code: 'LOAN-001',
+      category: 'loan',
+      monthlyAmount: 3000.00,
+      perCutoff: 1500.00,
+      remainingBalance: 45000.00,
+      totalAmount: 60000.00,
+      startDate: DateTime(2023, 6, 1),
+      endDate: DateTime(2025, 6, 1),
+      status: 'active',
+    ),
+    Deduction(
+      id: 'D005',
+      deductionType: 'Withholding Tax',
+      code: 'TAX',
+      category: 'mandatory',
+      monthlyAmount: 2837.50,
+      perCutoff: 1418.75,
+      remainingBalance: 0,
+      totalAmount: 2837.50,
+      startDate: DateTime(2024, 1, 1),
+      status: 'active',
+    ),
+  ];
+
+  // Chart data for attendance
+  static final Map<String, List<double>> attendanceChartData = {
+    'week': [95.0, 92.0, 98.0, 96.0, 94.0, 97.0, 96.5],
+    'month': [94.0, 95.5, 93.0, 96.0, 97.5, 95.0, 96.5, 94.5, 98.0, 96.0, 95.5, 97.0, 96.5, 95.0, 94.5, 96.0, 97.0, 95.5, 96.5, 98.0, 96.0, 95.0, 97.5, 96.5, 95.0, 96.0],
+    'year': [92.0, 93.5, 94.0, 95.0, 96.0, 95.5, 96.5, 97.0, 96.0, 95.5, 96.5, 97.5],
+  };
+
+  static final Map<String, List<String>> attendanceChartLabels = {
+    'week': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    'month': List.generate(26, (i) => '${i + 1}'),
+    'year': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  };
+
+  // Chart data for salary
+  static final Map<String, List<double>> salaryChartData = {
+    'week': [5428.57, 5428.57, 5428.57, 5428.57, 5428.57, 5428.57, 5428.57],
+    'month': [38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200, 38200],
+    'year': [36500, 37200, 37800, 38000, 38200, 38200, 38200, 38500, 38200, 38200, 38200, 38200],
+  };
+
+  static final Map<String, List<String>> salaryChartLabels = {
+    'week': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    'month': List.generate(26, (i) => '${i + 1}'),
+    'year': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  };
 }
