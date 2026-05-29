@@ -46,6 +46,12 @@ dependencies:
   
   # Intl for date formatting
   intl: ^0.19.0
+  
+  # HTTP client for API calls
+  http: ^1.2.0
+  
+  # Shared preferences for local storage
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

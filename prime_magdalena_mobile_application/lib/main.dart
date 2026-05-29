@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:prime_magdalena_mobile_application/services/auth_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_app_shell.dart';
 
@@ -15,7 +16,43 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final _authService = AuthService();
   bool _isLoggedIn = false;
+  bool _isChecking = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuthStatus();
+  }
+
+  Future<void> _checkAuthStatus() async {
+    try {
+      final isAuthenticated = await _authService.isAuthenticated();
+      if (mounted) {
+        setState(() {
+          _isLoggedIn = isAuthenticated;
+          _isChecking = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoggedIn = false;
+          _isChecking = false;
+        });
+      }
+    }
+  }
+
+  void _handleLogout() async {
+    await _authService.logout();
+    if (mounted) {
+      setState(() {
+        _isLoggedIn = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,15 +106,24 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
       ),
-      home: _isLoggedIn
-          ? const MainAppShell()
-          : LoginScreen(
-              onLoginSuccess: () {
-                setState(() {
-                  _isLoggedIn = true;
-                });
-              },
-            ),
+      home: _isChecking
+          ? const Scaffold(
+              backgroundColor: Color(0xFF1E3A8A),
+              body: Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            )
+          : _isLoggedIn
+              ? MainAppShell(onLogout: _handleLogout)
+              : LoginScreen(
+                  onLoginSuccess: () {
+                    setState(() {
+                      _isLoggedIn = true;
+                    });
+                  },
+                ),
     );
   }
 }

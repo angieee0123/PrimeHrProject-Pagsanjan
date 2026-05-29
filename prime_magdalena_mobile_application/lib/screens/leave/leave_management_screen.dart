@@ -73,10 +73,17 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 80),
-        child: FloatingActionButton(
+        child: FloatingActionButton.extended(
           onPressed: () => _showFileLeaveDialog(context),
           backgroundColor: const Color(0xFF1E3A8A),
-          child: const Icon(Icons.add),
+          icon: const Icon(Icons.add_rounded, size: 22),
+          label: Text(
+            'File Leave',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

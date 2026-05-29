@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:prime_magdalena_mobile_application/components/index.dart';
-import 'package:prime_magdalena_mobile_application/utils/mock_data.dart';
+import 'package:prime_magdalena_mobile_application/services/dashboard_service.dart';
+import 'package:prime_magdalena_mobile_application/models/dashboard_models.dart';
 
 class HomeDashboardScreen extends StatefulWidget {
   final VoidCallback? onOpenPayslip;
@@ -31,12 +32,25 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
   late TabController _chartTabController;
   late Animation<double> _fadeAnimation;
   bool _showAppBar = false;
+  String _deductionView = 'monthly'; // daily, weekly, monthly
+
+  // API Data
+  final DashboardService _dashboardService = DashboardService();
+  DashboardData? _dashboardData;
+  List<DeductionModel> _deductions = [];
+  List<LeaveBalanceModel> _leaveBalances = [];
+  ChartData? _chartData;
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_handleScroll);
+    
+    // Load data from API
+    _loadDashboardData();
 
     // Fade animation for app bar
     _fadeController = AnimationController(
@@ -62,6 +76,56 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
         setState(() {});
       }
     });
+  }
+
+  /// Load dashboard data from API
+  Future<void> _loadDashboardData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Load all data in parallel
+      final results = await Future.wait([
+        _dashboardService.getDashboardData(),
+        _dashboardService.getDeductions(),
+        _dashboardService.getLeaveBalances(),
+        _dashboardService.getChartData(),
+      ]);
+
+      setState(() {
+        _dashboardData = results[0] as DashboardData;
+        _deductions = results[1] as List<DeductionModel>;
+        _leaveBalances = results[2] as List<LeaveBalanceModel>;
+        _chartData = results[3] as ChartData;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+      // Show error snackbar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load dashboard: $e'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: _loadDashboardData,
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Refresh dashboard data
+  Future<void> _refreshData() async {
+    await _loadDashboardData();
   }
 
   @override
@@ -90,7 +154,97 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    final employee = MockData.currentEmployee;
+    // Show loading indicator
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF7F6FF),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0B044D)),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Loading dashboard...',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: const Color(0xFF6b6a8a),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Show error state
+    if (_errorMessage != null || _dashboardData == null) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF7F6FF),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.red.shade300,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to load dashboard',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _errorMessage ?? 'Unknown error occurred',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: const Color(0xFF6b6a8a),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _loadDashboardData,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0B044D),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    'Retry',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final employee = _dashboardData!.employee;
+    final salary = _dashboardData!.salary;
+    final leave = _dashboardData!.leave;
+    final attendance = _dashboardData!.attendance;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F6FF), // Light background
@@ -111,7 +265,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
               foregroundColor: const Color(0xFF1E3A8A),
             )
           : null,
-      body: CustomScrollView(
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        color: const Color(0xFF0B044D),
+        child: CustomScrollView(
         controller: _scrollController,
         physics: const BouncingScrollPhysics(
           parent: AlwaysScrollableScrollPhysics(),
@@ -183,7 +340,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                  Text(
                                   'Welcome back, ${employee.firstName}!',
                                   style: GoogleFonts.poppins(
                                     fontSize: 16,
@@ -359,12 +516,12 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                           delay: 100,
                           child: EnhancedStatCard(
                           label: 'Basic Pay',
-                          value: '₱45,000',
+                          value: '₱${salary.basicPay.toStringAsFixed(2)}',
                           icon: Icons.credit_card,
                           iconWrapColor: const Color(0xFFEFF6FF),
                           iconColor: const Color(0xFF0B044D),
                           dotColor: const Color(0xFF0B044D),
-                          subtitle: 'Jan 1-15, 2025',
+                          subtitle: salary.periodLabel,
                           isCompact: true,
                         ),
                         ),
@@ -375,7 +532,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                           delay: 150,
                           child: EnhancedStatCard(
                           label: 'Net Pay',
-                          value: '₱38,200',
+                          value: '₱${salary.netPay.toStringAsFixed(2)}',
                           icon: Icons.check_circle,
                           iconWrapColor: const Color(0xFFDCFCE7),
                           iconColor: const Color(0xFF15803D),
@@ -395,12 +552,12 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                           delay: 200,
                           child: EnhancedStatCard(
                           label: 'Leave Credits',
-                          value: '8 days',
+                          value: '${leave.totalAvailable.toStringAsFixed(1)} days',
                           icon: Icons.description,
                           iconWrapColor: const Color(0xFFFEF3C7),
                           iconColor: const Color(0xFFA16207),
                           dotColor: const Color(0xFFA16207),
-                          subtitle: '4 leave type(s)',
+                          subtitle: '${leave.leaveTypesCount} leave type(s)',
                           isCompact: true,
                         ),
                         ),
@@ -411,12 +568,12 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                           delay: 250,
                           child: EnhancedStatCard(
                           label: 'Attendance',
-                          value: '96.5%',
+                          value: '${attendance.rate.toStringAsFixed(1)}%',
                           icon: Icons.calendar_month,
                           iconWrapColor: const Color(0xFFFEE2E2),
                           iconColor: const Color(0xFF8E1E18),
                           dotColor: const Color(0xFF8E1E18),
-                          subtitle: '25 days present',
+                          subtitle: '${attendance.presentDays} days present',
                           isCompact: true,
                         ),
                         ),
@@ -497,8 +654,16 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                         ChartCard(
                           title: 'Attendance Trends',
                           subtitle: 'Track your attendance patterns',
-                          data: MockData.attendanceChartData,
-                          labels: MockData.attendanceChartLabels,
+                          data: _chartData != null ? {
+                            'week': _chartData!.attendance.week.data,
+                            'month': _chartData!.attendance.month.data,
+                            'year': _chartData!.attendance.year.data,
+                          } : {'week': [], 'month': [], 'year': []},
+                          labels: _chartData != null ? {
+                            'week': _chartData!.attendance.week.labels,
+                            'month': _chartData!.attendance.month.labels,
+                            'year': _chartData!.attendance.year.labels,
+                          } : {'week': [], 'month': [], 'year': []},
                           lineColor: const Color(0xFF15803D),
                           backgroundColor: const Color(0xFFDCFCE7),
                           valueSuffix: '%',
@@ -507,8 +672,16 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                         ChartCard(
                           title: 'Salary Overview',
                           subtitle: 'Your earnings over time',
-                          data: MockData.salaryChartData,
-                          labels: MockData.salaryChartLabels,
+                          data: _chartData != null ? {
+                            'week': _chartData!.salary.week.data,
+                            'month': _chartData!.salary.month.data,
+                            'year': _chartData!.salary.year.data,
+                          } : {'week': [], 'month': [], 'year': []},
+                          labels: _chartData != null ? {
+                            'week': _chartData!.salary.week.labels,
+                            'month': _chartData!.salary.month.labels,
+                            'year': _chartData!.salary.year.labels,
+                          } : {'week': [], 'month': [], 'year': []},
                           lineColor: const Color(0xFF0B044D),
                           backgroundColor: const Color(0xFFF0EFFE),
                           valuePrefix: '₱',
@@ -576,19 +749,47 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                 const SizedBox(height: 12),
                 _buildAnimatedItem(
                   delay: 550,
-                  child: SectionHeader(
-                    title: 'My Deductions & Loans',
-                    showViewAll: true,
-                    onViewAll: () {},
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'My Deductions & Loans',
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF0F172A),
+                          ),
+                        ),
+                        // iOS-style Segmented Control for View
+                        Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildDeductionViewButton('Daily', 'daily'),
+                              _buildDeductionViewButton('Weekly', 'weekly'),
+                              _buildDeductionViewButton('Monthly', 'monthly'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+                const SizedBox(height: 8),
               ],
             ),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
-                final deduction = MockData.deductions[index];
+                final deduction = _deductions[index];
                 return _buildAnimatedItem(
                   delay: 600 + (index * 50),
                   child: DeductionCard(
@@ -597,15 +798,16 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                     monthlyAmount: deduction.monthlyAmount,
                     remainingBalance: deduction.remainingBalance,
                     totalAmount: deduction.totalAmount,
-                    startDate: deduction.startDate,
-                    endDate: deduction.endDate,
+                    startDate: deduction.startDateTime ?? DateTime.now(),
+                    endDate: deduction.endDateTime,
                     status: deduction.status,
                     code: deduction.code,
+                    viewType: _deductionView,
                     onTap: () => _showDeductionDetails(deduction),
                   ),
                 );
               },
-              childCount: MockData.deductions.length,
+              childCount: _deductions.length,
             ),
           ),
 
@@ -640,7 +842,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ...MockData.leaveCredits.take(3).toList().asMap().entries.map((entry) {
+                  ..._leaveBalances.take(3).toList().asMap().entries.map((entry) {
                     final colors = [
                       const Color(0xFF0B044D),
                       const Color(0xFF8E1E18),
@@ -743,19 +945,30 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    itemCount: MockData.notifications.length,
+                    itemCount: 3, // TODO: Replace with actual notifications count
                     separatorBuilder: (context, index) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
-                      final notification = MockData.notifications[index];
+                      // TODO: Replace with actual notification data
+                      final mockNotifications = [
+                        {'title': 'Payslip Available', 'message': 'Your payslip for ${salary.periodLabel} is now available', 'type': 'Payslip', 'isRead': false},
+                        {'title': 'Leave Request', 'message': 'Your leave request has been approved', 'type': 'Leave', 'isRead': false},
+                        {'title': 'Training Schedule', 'message': 'Upcoming training session next week', 'type': 'Training', 'isRead': true},
+                      ];
+                      final notification = mockNotifications[index];
+                      final isRead = notification['isRead'] as bool;
+                      final type = notification['type'] as String;
+                      final title = notification['title'] as String;
+                      final message = notification['message'] as String;
+                      
                       return Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: notification.isRead
+                          color: isRead
                               ? Colors.grey.shade50
                               : const Color(0xFFF0F9FF),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: notification.isRead
+                            color: isRead
                                 ? Colors.grey.shade200
                                 : const Color(0xFF3B82F6).withValues(alpha: 0.2),
                             width: 1,
@@ -768,10 +981,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                               height: 44,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: notification.isRead
+                                color: isRead
                                     ? Colors.grey.shade200
                                     : const Color(0xFF3B82F6),
-                                boxShadow: notification.isRead
+                                boxShadow: isRead
                                     ? null
                                     : [
                                         BoxShadow(
@@ -784,8 +997,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                               ),
                               child: Center(
                                 child: Icon(
-                                  _getNotificationIcon(notification.type),
-                                  color: notification.isRead
+                                  _getNotificationIcon(type),
+                                  color: isRead
                                       ? Colors.grey.shade600
                                       : Colors.white,
                                   size: 20,
@@ -801,7 +1014,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          notification.title,
+                                          title,
                                           style: GoogleFonts.poppins(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
@@ -809,7 +1022,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                                           ),
                                         ),
                                       ),
-                                      if (!notification.isRead)
+                                      if (!isRead)
                                         Container(
                                           width: 8,
                                           height: 8,
@@ -822,7 +1035,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    notification.message,
+                                    message,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.poppins(
@@ -849,6 +1062,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
         ],
       ),
+        ),
     );
   }
 
@@ -876,6 +1090,45 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
           );
         },
         child: child,
+      ),
+    );
+  }
+
+  Widget _buildDeductionViewButton(String label, String view) {
+    final isSelected = _deductionView == view;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _deductionView = view;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected
+                ? const Color(0xFF0B044D)
+                : Colors.grey.shade600,
+          ),
+        ),
       ),
     );
   }
@@ -990,7 +1243,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
     }
   }
 
-  void _showDeductionDetails(deduction) {
+  void _showDeductionDetails(DeductionModel deduction) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1084,9 +1337,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildDetailRow('Start Date', '${deduction.startDate.year}-${deduction.startDate.month.toString().padLeft(2, '0')}-${deduction.startDate.day.toString().padLeft(2, '0')}'),
+                    if (deduction.startDate != null)
+                      _buildDetailRow('Start Date', deduction.startDate!),
                     if (deduction.endDate != null)
-                      _buildDetailRow('End Date', '${deduction.endDate!.year}-${deduction.endDate!.month.toString().padLeft(2, '0')}-${deduction.endDate!.day.toString().padLeft(2, '0')}'),
+                      _buildDetailRow('End Date', deduction.endDate!),
                   ],
                 ),
               ),

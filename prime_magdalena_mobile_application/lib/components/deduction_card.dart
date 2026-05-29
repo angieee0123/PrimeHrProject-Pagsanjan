@@ -13,6 +13,7 @@ class DeductionCard extends StatelessWidget {
   final String status;
   final String? code;
   final VoidCallback? onTap;
+  final String viewType; // 'daily', 'weekly', 'monthly'
 
   const DeductionCard({
     required this.deductionType,
@@ -25,6 +26,7 @@ class DeductionCard extends StatelessWidget {
     required this.status,
     this.code,
     this.onTap,
+    this.viewType = 'monthly',
     super.key,
   });
 
@@ -83,9 +85,9 @@ class DeductionCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _buildMetricBox(
-                    'MONTHLY AMOUNT',
-                    '₱${NumberFormat('#,##0.00').format(monthlyAmount)}',
-                    'per month',
+                    _getAmountLabel(),
+                    '₱${NumberFormat('#,##0.00').format(_getDisplayAmount())}',
+                    _getAmountPeriod(),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -114,7 +116,7 @@ class DeductionCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'CURRENT MONTH',
+                    _getDateLabel(),
                     style: GoogleFonts.poppins(
                       fontSize: 10.5,
                       fontWeight: FontWeight.w700,
@@ -279,9 +281,61 @@ class DeductionCard extends StatelessWidget {
       return 'Not yet started';
     }
 
-    final monthStart = DateTime(now.year, now.month, 1);
-    final monthEnd = DateTime(now.year, now.month + 1, 0);
+    switch (viewType) {
+      case 'daily':
+        return DateFormat('MMM d, y').format(now);
+      case 'weekly':
+        final weekStart = now.subtract(Duration(days: now.weekday % 7));
+        final weekEnd = weekStart.add(const Duration(days: 6));
+        return '${DateFormat('MMM d').format(weekStart)} - ${DateFormat('d, y').format(weekEnd)}';
+      default: // monthly
+        final monthStart = DateTime(now.year, now.month, 1);
+        final monthEnd = DateTime(now.year, now.month + 1, 0);
+        return '${DateFormat('MMM d').format(monthStart)} - ${DateFormat('d, y').format(monthEnd)}';
+    }
+  }
 
-    return '${DateFormat('MMM d').format(monthStart)} - ${DateFormat('d, y').format(monthEnd)}';
+  String _getAmountLabel() {
+    switch (viewType) {
+      case 'daily':
+        return 'DAILY AMOUNT';
+      case 'weekly':
+        return 'WEEKLY AMOUNT';
+      default:
+        return 'MONTHLY AMOUNT';
+    }
+  }
+
+  String _getAmountPeriod() {
+    switch (viewType) {
+      case 'daily':
+        return 'per day';
+      case 'weekly':
+        return 'per week';
+      default:
+        return 'per month';
+    }
+  }
+
+  String _getDateLabel() {
+    switch (viewType) {
+      case 'daily':
+        return 'TODAY';
+      case 'weekly':
+        return 'CURRENT WEEK';
+      default:
+        return 'CURRENT MONTH';
+    }
+  }
+
+  double _getDisplayAmount() {
+    switch (viewType) {
+      case 'daily':
+        return monthlyAmount / 30; // Approximate daily
+      case 'weekly':
+        return monthlyAmount / 4; // Approximate weekly
+      default:
+        return monthlyAmount;
+    }
   }
 }

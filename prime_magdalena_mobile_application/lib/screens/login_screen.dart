@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:prime_magdalena_mobile_application/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback? onLoginSuccess;
@@ -14,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final _authService = AuthService(); // Add AuthService
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -67,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen>
     });
   }
 
-  void _handleLogin() {
+  void _handleLogin() async {
     setState(() {
       _errorMessage = null;
     });
@@ -94,42 +96,49 @@ class _LoginScreenState extends State<LoginScreen>
       return;
     }
 
-    if (_passwordController.text.length < 6) {
-      setState(() {
-        _errorMessage = 'Password must be at least 6 characters';
-      });
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
 
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      // Call real API login
+      final loginResponse = await _authService.login(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+
+      if (!mounted) return;
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Welcome back, ${loginResponse.user.name}!',
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      // Call the onLoginSuccess callback
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          widget.onLoginSuccess?.call();
+        }
+      });
+    } catch (e) {
       if (mounted) {
         setState(() {
           _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Welcome back, ${_emailController.text.split('@')[0]}!',
-            ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-        // Call the onLoginSuccess callback
-        Future.delayed(const Duration(milliseconds: 500), () {
-          widget.onLoginSuccess?.call();
+          _errorMessage = e.toString().replaceAll('Exception: ', '').replaceAll('Login failed: ', '');
         });
       }
-    });
+    }
   }
 
   void _handleBiometricLogin() {
