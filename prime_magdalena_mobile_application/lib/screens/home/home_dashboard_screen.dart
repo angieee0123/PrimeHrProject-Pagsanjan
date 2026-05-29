@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:prime_magdalena_mobile_application/components/index.dart';
 import 'package:prime_magdalena_mobile_application/utils/mock_data.dart';
@@ -29,6 +28,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
   late ScrollController _scrollController;
   late AnimationController _fadeController;
   late AnimationController _staggerController;
+  late TabController _chartTabController;
   late Animation<double> _fadeAnimation;
   bool _showAppBar = false;
 
@@ -54,6 +54,14 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
       duration: const Duration(milliseconds: 1200),
     );
     _staggerController.forward();
+
+    // Tab controller for charts
+    _chartTabController = TabController(length: 2, vsync: this);
+    _chartTabController.addListener(() {
+      if (_chartTabController.indexIsChanging) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -62,6 +70,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
     _scrollController.dispose();
     _fadeController.dispose();
     _staggerController.dispose();
+    _chartTabController.dispose();
     super.dispose();
   }
 
@@ -419,43 +428,96 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
             ),
           ),
 
-          // Charts Section
+          // Charts Section with iOS-style Tabs
           SliverToBoxAdapter(
-            child: Column(
-              children: [
-                _buildAnimatedItem(
-                  delay: 300,
-                  child: SectionHeader(title: 'Performance Trends', showViewAll: false),
-                ),
-                const SizedBox(height: 8),
-                // Attendance Chart
-                _buildAnimatedItem(
-                  delay: 350,
-                  child: ChartCard(
-                  title: 'Attendance Trends',
-                  subtitle: 'Track your attendance patterns',
-                  data: MockData.attendanceChartData,
-                  labels: MockData.attendanceChartLabels,
-                  lineColor: const Color(0xFF15803D),
-                  backgroundColor: const Color(0xFFDCFCE7),
-                  valueSuffix: '%',
+            child: _buildAnimatedItem(
+              delay: 300,
+              child: Column(
+                children: [
+                  // Section Header
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Performance Trends',
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF0F172A),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                // Salary Chart
-                _buildAnimatedItem(
-                  delay: 400,
-                  child: ChartCard(
-                  title: 'Salary Overview',
-                  subtitle: 'Your earnings over time',
-                  data: MockData.salaryChartData,
-                  labels: MockData.salaryChartLabels,
-                  lineColor: const Color(0xFF0B044D),
-                  backgroundColor: const Color(0xFFF0EFFE),
-                  valuePrefix: '₱',
+                  const SizedBox(height: 16),
+                  // iOS-style Segmented Control
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _buildTabButton(
+                            label: 'Attendance',
+                            icon: Icons.calendar_month_rounded,
+                            isSelected: _chartTabController.index == 0,
+                            onTap: () {
+                              _chartTabController.animateTo(0);
+                            },
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildTabButton(
+                            label: 'Salary',
+                            icon: Icons.payments_rounded,
+                            isSelected: _chartTabController.index == 1,
+                            onTap: () {
+                              _chartTabController.animateTo(1);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  // Tab Content
+                  SizedBox(
+                    height: 320,
+                    child: TabBarView(
+                      controller: _chartTabController,
+                      physics: const BouncingScrollPhysics(),
+                      children: [
+                        // Attendance Chart
+                        ChartCard(
+                          title: 'Attendance Trends',
+                          subtitle: 'Track your attendance patterns',
+                          data: MockData.attendanceChartData,
+                          labels: MockData.attendanceChartLabels,
+                          lineColor: const Color(0xFF15803D),
+                          backgroundColor: const Color(0xFFDCFCE7),
+                          valueSuffix: '%',
+                        ),
+                        // Salary Chart
+                        ChartCard(
+                          title: 'Salary Overview',
+                          subtitle: 'Your earnings over time',
+                          data: MockData.salaryChartData,
+                          labels: MockData.salaryChartLabels,
+                          lineColor: const Color(0xFF0B044D),
+                          backgroundColor: const Color(0xFFF0EFFE),
+                          valuePrefix: '₱',
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           // Quick Actions Section
@@ -797,22 +859,76 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
   }) {
     final delayInSeconds = delay / 1000.0;
     
-    return AnimatedBuilder(
-      animation: _staggerController,
-      builder: (context, child) {
-        final animationProgress = Curves.easeOutCubic.transform(
-          (_staggerController.value - delayInSeconds).clamp(0.0, 1.0),
-        );
-        
-        return Transform.translate(
-          offset: Offset(0, 20 * (1 - animationProgress)),
-          child: Opacity(
-            opacity: animationProgress,
-            child: child,
-          ),
-        );
-      },
-      child: child,
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _staggerController,
+        builder: (context, child) {
+          final animationProgress = Curves.easeOutCubic.transform(
+            (_staggerController.value - delayInSeconds).clamp(0.0, 1.0),
+          );
+          
+          return Transform.translate(
+            offset: Offset(0, 20 * (1 - animationProgress)),
+            child: Opacity(
+              opacity: animationProgress,
+              child: child,
+            ),
+          );
+        },
+        child: child,
+      ),
+    );
+  }
+
+  Widget _buildTabButton({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isSelected
+                  ? const Color(0xFF0B044D)
+                  : Colors.grey.shade600,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected
+                    ? const Color(0xFF0B044D)
+                    : Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -821,41 +937,41 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
     required String label,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 20, color: const Color(0xFF1E3A8A)),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                label,
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF0F172A),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-            ),
-          ],
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: const Color(0xFF1E3A8A)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF0F172A),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
