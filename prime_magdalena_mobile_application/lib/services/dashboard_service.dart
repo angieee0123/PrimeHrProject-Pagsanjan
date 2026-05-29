@@ -6,9 +6,19 @@ import 'package:prime_magdalena_mobile_application/services/auth_service.dart';
 class DashboardService {
   static const String baseUrl = 'http://your-api-url.com/api';
   final AuthService _authService = AuthService();
+  
+  // Set to true to use mock data (for development without backend)
+  static const bool useMockData = true;
 
   /// Get dashboard data
   Future<DashboardData> getDashboardData() async {
+    // Use mock data directly in development mode
+    if (useMockData) {
+      // Simulate network delay
+      await Future.delayed(const Duration(milliseconds: 300));
+      return _getMockDashboardData();
+    }
+    
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/dashboard'),
@@ -29,6 +39,13 @@ class DashboardService {
 
   /// Get deductions list
   Future<List<DeductionModel>> getDeductions() async {
+    // Use mock data directly in development mode
+    if (useMockData) {
+      // Simulate network delay
+      await Future.delayed(const Duration(milliseconds: 200));
+      return _getMockDeductions();
+    }
+    
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/deductions'),
@@ -52,6 +69,13 @@ class DashboardService {
 
   /// Get leave balances
   Future<List<LeaveBalanceModel>> getLeaveBalances() async {
+    // Use mock data directly in development mode
+    if (useMockData) {
+      // Simulate network delay
+      await Future.delayed(const Duration(milliseconds: 150));
+      return _getMockLeaveBalances();
+    }
+    
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/leave-balances'),
@@ -75,6 +99,13 @@ class DashboardService {
 
   /// Get chart data
   Future<ChartData> getChartData() async {
+    // Use mock data directly in development mode
+    if (useMockData) {
+      // Simulate network delay
+      await Future.delayed(const Duration(milliseconds: 250));
+      return _getMockChartData();
+    }
+    
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/charts'),

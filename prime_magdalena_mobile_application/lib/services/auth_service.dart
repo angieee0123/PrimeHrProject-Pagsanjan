@@ -32,14 +32,14 @@ class AuthService {
     }
   }
 
-  /// Login with employee ID and password
-  Future<LoginResponse> login(String employeeId, String password) async {
+  /// Login with email and password
+  Future<LoginResponse> login(String email, String password) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/login'),
+        Uri.parse('$baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'employee_id': employeeId,
+          'email': email,
           'password': password,
         }),
       ).timeout(
@@ -53,8 +53,15 @@ class AuthService {
         final data = jsonDecode(response.body);
         final loginResponse = LoginResponse.fromJson(data);
         
-        // Save token and user data
-        await _saveAuthData(loginResponse.token, loginResponse.user);
+        // Save token, user data, and payroll data
+        await _saveAuthData(
+          loginResponse.token, 
+          loginResponse.user,
+          loginResponse.employee,
+          loginResponse.payroll,
+          loginResponse.isPermanent,
+          loginResponse.userType,
+        );
         
         _token = loginResponse.token;
         _currentUser = loginResponse.user;
@@ -66,12 +73,12 @@ class AuthService {
       }
     } catch (e) {
       // For development: Return mock login response when API is unavailable
-      return _getMockLoginResponse(employeeId);
+      return _getMockLoginResponse(email);
     }
   }
 
   /// Mock login response for development/offline mode
-  LoginResponse _getMockLoginResponse(String employeeId) {
+  LoginResponse _getMockLoginResponse(String email) {
     // Create mock token
     final mockToken = 'mock_token_${DateTime.now().millisecondsSinceEpoch}';
     
@@ -79,30 +86,61 @@ class AuthService {
     final mockUser = UserModel(
       id: 1,
       name: 'Juan Dela Cruz',
-      email: employeeId,
-      username: employeeId.split('@')[0],
+      email: email,
+      username: email.split('@')[0],
       role: 'employee',
       employeeId: 2024001,
     );
     
+    // Create mock employee
+    final mockEmployee = EmployeeModel(
+      id: 1,
+      employeeId: '2024001',
+      firstName: 'Juan',
+      middleName: 'Santos',
+      lastName: 'Dela Cruz',
+      fullName: 'Juan Santos Dela Cruz',
+      employmentStatus: 'Permanent',
+      department: 'IT Department',
+      designation: 'Software Developer',
+      monthlyRate: 25000.0,
+    );
+    
+    // Create mock payroll
+    final mockPayroll = PayrollModel(
+      periodStart: '2026-05-01',
+      periodEnd: '2026-05-15',
+      payDate: '2026-05-20',
+      monthlyRate: 25000.0,
+      dailyRate: 1136.36,
+      totalDaysPresent: 10,
+      basicPay: 11363.60,
+      otPay: 0.0,
+      grossPay: 11363.60,
+      lateDeduction: 0.0,
+      undertimeDeduction: 0.0,
+      otherDeductions: 1500.0,
+      deductionBreakdown: {
+        'GSIS PS': {'name': 'GSIS Personal Share', 'amount': 1000.0},
+        'PhilHealth PS': {'name': 'PhilHealth Personal Share', 'amount': 500.0},
+      },
+      totalDeductions: 1500.0,
+      netPay: 9863.60,
+      status: 'approved',
+    );
+    
     // Save mock data
-    _saveAuthData(mockToken, mockUser);
+    _saveAuthData(mockToken, mockUser, mockEmployee, mockPayroll, true, 'permanent');
     _token = mockToken;
     _currentUser = mockUser;
     
     return LoginResponse(
       token: mockToken,
+      userType: 'permanent',
+      isPermanent: true,
       user: mockUser,
-      employee: EmployeeModel(
-        id: 2024001,
-        firstName: 'Juan',
-        middleName: 'Santos',
-        lastName: 'Dela Cruz',
-        fullName: 'Juan Santos Dela Cruz',
-        employmentStatus: 'Permanent',
-        department: 'IT Department',
-        designation: 'Software Developer',
-      ),
+      employee: mockEmployee,
+      payroll: mockPayroll,
     );
   }
 
@@ -160,10 +198,27 @@ class AuthService {
   }
 
   /// Save authentication data to local storage
-  Future<void> _saveAuthData(String token, UserModel user) async {
+  Future<void> _saveAuthData(
+    String token, 
+    UserModel user,
+    EmployeeModel? employee,
+    PayrollModel? payroll,
+    bool isPermanent,
+    String userType,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('auth_token', token);
     await prefs.setString('user_data', jsonEncode(user.toJson()));
+    await prefs.setBool('is_permanent', isPermanent);
+    await prefs.setString('user_type', userType);
+    
+    if (employee != null) {
+      await prefs.setString('employee_data', jsonEncode(employee.toJson()));
+    }
+    
+    if (payroll != null) {
+      await prefs.setString('payroll_data', jsonEncode(payroll.toJson()));
+    }
   }
 
   /// Clear authentication data from local storage
@@ -171,6 +226,10 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
     await prefs.remove('user_data');
+    await prefs.remove('employee_data');
+    await prefs.remove('payroll_data');
+    await prefs.remove('is_permanent');
+    await prefs.remove('user_type');
   }
 
   /// Get authorization headers

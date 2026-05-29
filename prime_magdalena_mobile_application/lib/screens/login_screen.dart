@@ -128,21 +128,36 @@ class _LoginScreenState extends State<LoginScreen>
       // Check if using mock/offline mode
       final isOfflineMode = loginResponse.token.startsWith('mock_token_');
 
+      // Build success message based on user type
+      String successMessage = 'Welcome back, ${loginResponse.user.name}!';
+      
+      if (loginResponse.isPermanent && loginResponse.employee != null) {
+        successMessage += '\n✅ Permanent Employee';
+        if (loginResponse.employee!.department != null) {
+          successMessage += ' - ${loginResponse.employee!.department}';
+        }
+        if (loginResponse.payroll != null) {
+          successMessage += '\n💰 Latest Net Pay: ₱${loginResponse.payroll!.netPay.toStringAsFixed(2)}';
+        }
+      }
+      
+      if (isOfflineMode) {
+        successMessage += '\n🔌 Offline Mode: Using demo data (API unavailable)';
+      } else {
+        successMessage += '\nYour account is now saved and will auto-login.';
+      }
+
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            isOfflineMode
-                ? '🔌 Offline Mode: Welcome, ${loginResponse.user.name}!\nUsing demo data (API unavailable)'
-                : 'Welcome back, ${loginResponse.user.name}!\nYour account is now saved and will auto-login.',
-          ),
+          content: Text(successMessage),
           backgroundColor: isOfflineMode ? Colors.orange : Colors.green,
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          duration: const Duration(seconds: 4),
+          duration: const Duration(seconds: 5),
         ),
       );
 

@@ -25,7 +25,7 @@ class HomeDashboardScreen extends StatefulWidget {
 }
 
 class _HomeDashboardScreenState extends State<HomeDashboardScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late ScrollController _scrollController;
   late AnimationController _fadeController;
   late AnimationController _staggerController;
@@ -42,6 +42,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
   ChartData? _chartData;
   bool _isLoading = true;
   String? _errorMessage;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -71,11 +74,6 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
 
     // Tab controller for charts
     _chartTabController = TabController(length: 2, vsync: this);
-    _chartTabController.addListener(() {
-      if (_chartTabController.indexIsChanging) {
-        setState(() {});
-      }
-    });
   }
 
   /// Load dashboard data from API
@@ -154,6 +152,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    
     // Show loading indicator
     if (_isLoading) {
       return Scaffold(
@@ -597,116 +597,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
             SliverToBoxAdapter(
               child: _buildAnimatedItem(
                 delay: 300,
-                child: Column(
-                  children: [
-                    // Section Header
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Performance Trends',
-                            style: GoogleFonts.inter(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF0F172A),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // iOS-style Segmented Control
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 20),
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _buildTabButton(
-                              label: 'Attendance',
-                              icon: Icons.calendar_month_rounded,
-                              isSelected: _chartTabController.index == 0,
-                              onTap: () {
-                                _chartTabController.animateTo(0);
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            child: _buildTabButton(
-                              label: 'Salary',
-                              icon: Icons.payments_rounded,
-                              isSelected: _chartTabController.index == 1,
-                              onTap: () {
-                                _chartTabController.animateTo(1);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Tab Content
-                    SizedBox(
-                      height: 320,
-                      child: TabBarView(
-                        controller: _chartTabController,
-                        physics: const BouncingScrollPhysics(),
-                        children: [
-                          // Attendance Chart
-                          ChartCard(
-                            title: 'Attendance Trends',
-                            subtitle: 'Track your attendance patterns',
-                            data: _chartData != null
-                                ? {
-                                    'week': _chartData!.attendance.week.data,
-                                    'month': _chartData!.attendance.month.data,
-                                    'year': _chartData!.attendance.year.data,
-                                  }
-                                : {'week': [], 'month': [], 'year': []},
-                            labels: _chartData != null
-                                ? {
-                                    'week': _chartData!.attendance.week.labels,
-                                    'month':
-                                        _chartData!.attendance.month.labels,
-                                    'year': _chartData!.attendance.year.labels,
-                                  }
-                                : {'week': [], 'month': [], 'year': []},
-                            lineColor: const Color(0xFF15803D),
-                            backgroundColor: const Color(0xFFDCFCE7),
-                            valueSuffix: '%',
-                          ),
-                          // Salary Chart
-                          ChartCard(
-                            title: 'Salary Overview',
-                            subtitle: 'Your earnings over time',
-                            data: _chartData != null
-                                ? {
-                                    'week': _chartData!.salary.week.data,
-                                    'month': _chartData!.salary.month.data,
-                                    'year': _chartData!.salary.year.data,
-                                  }
-                                : {'week': [], 'month': [], 'year': []},
-                            labels: _chartData != null
-                                ? {
-                                    'week': _chartData!.salary.week.labels,
-                                    'month': _chartData!.salary.month.labels,
-                                    'year': _chartData!.salary.year.labels,
-                                  }
-                                : {'week': [], 'month': [], 'year': []},
-                            lineColor: const Color(0xFF0B044D),
-                            backgroundColor: const Color(0xFFF0EFFE),
-                            valuePrefix: '₱',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                child: _ChartsSection(
+                  chartData: _chartData,
+                  salary: salary,
                 ),
               ),
             ),
@@ -1138,9 +1031,11 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
     final isSelected = _deductionView == view;
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _deductionView = view;
-        });
+        if (_deductionView != view) {
+          setState(() {
+            _deductionView = view;
+          });
+        }
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -1459,6 +1354,211 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// Separate stateful widget for charts to prevent unnecessary rebuilds
+class _ChartsSection extends StatefulWidget {
+  final ChartData? chartData;
+  final SalaryInfo salary;
+
+  const _ChartsSection({
+    required this.chartData,
+    required this.salary,
+  });
+
+  @override
+  State<_ChartsSection> createState() => _ChartsSectionState();
+}
+
+class _ChartsSectionState extends State<_ChartsSection>
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+  late TabController _tabController;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    
+    return Column(
+      children: [
+        // Section Header
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Performance Trends',
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        // iOS-style Segmented Control
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: AnimatedBuilder(
+            animation: _tabController,
+            builder: (context, _) {
+              return Row(
+                children: [
+                  Expanded(
+                    child: _buildTabButton(
+                      label: 'Attendance',
+                      icon: Icons.calendar_month_rounded,
+                      isSelected: _tabController.index == 0,
+                      onTap: () => _tabController.animateTo(0),
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildTabButton(
+                      label: 'Salary',
+                      icon: Icons.payments_rounded,
+                      isSelected: _tabController.index == 1,
+                      onTap: () => _tabController.animateTo(1),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Tab Content
+        SizedBox(
+          height: 320,
+          child: TabBarView(
+            controller: _tabController,
+            physics: const BouncingScrollPhysics(),
+            children: [
+              // Attendance Chart
+              ChartCard(
+                key: const ValueKey('attendance_chart'),
+                title: 'Attendance Trends',
+                subtitle: 'Track your attendance patterns',
+                data: widget.chartData != null
+                    ? {
+                        'week': widget.chartData!.attendance.week.data,
+                        'month': widget.chartData!.attendance.month.data,
+                        'year': widget.chartData!.attendance.year.data,
+                      }
+                    : const {'week': [], 'month': [], 'year': []},
+                labels: widget.chartData != null
+                    ? {
+                        'week': widget.chartData!.attendance.week.labels,
+                        'month': widget.chartData!.attendance.month.labels,
+                        'year': widget.chartData!.attendance.year.labels,
+                      }
+                    : const {'week': [], 'month': [], 'year': []},
+                lineColor: const Color(0xFF15803D),
+                backgroundColor: const Color(0xFFDCFCE7),
+                valueSuffix: '%',
+              ),
+              // Salary Chart
+              ChartCard(
+                key: const ValueKey('salary_chart'),
+                title: 'Salary Overview',
+                subtitle: 'Your earnings over time',
+                data: widget.chartData != null
+                    ? {
+                        'week': widget.chartData!.salary.week.data,
+                        'month': widget.chartData!.salary.month.data,
+                        'year': widget.chartData!.salary.year.data,
+                      }
+                    : const {'week': [], 'month': [], 'year': []},
+                labels: widget.chartData != null
+                    ? {
+                        'week': widget.chartData!.salary.week.labels,
+                        'month': widget.chartData!.salary.month.labels,
+                        'year': widget.chartData!.salary.year.labels,
+                      }
+                    : const {'week': [], 'month': [], 'year': []},
+                lineColor: const Color(0xFF0B044D),
+                backgroundColor: const Color(0xFFF0EFFE),
+                valuePrefix: '₱',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabButton({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isSelected
+                  ? const Color(0xFF0B044D)
+                  : Colors.grey.shade600,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected
+                    ? const Color(0xFF0B044D)
+                    : Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

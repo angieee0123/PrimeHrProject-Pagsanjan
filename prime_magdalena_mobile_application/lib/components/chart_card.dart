@@ -28,11 +28,43 @@ class ChartCard extends StatefulWidget {
   State<ChartCard> createState() => _ChartCardState();
 }
 
-class _ChartCardState extends State<ChartCard> {
+class _ChartCardState extends State<ChartCard>
+    with AutomaticKeepAliveClientMixin {
   String _selectedPeriod = 'month';
+  
+  // Cache computed values
+  late Map<String, LineChartData> _cachedChartData;
+  
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _precomputeChartData();
+  }
+
+  @override
+  void didUpdateWidget(ChartCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only recompute if data actually changed
+    if (oldWidget.data != widget.data || oldWidget.labels != widget.labels) {
+      _precomputeChartData();
+    }
+  }
+
+  void _precomputeChartData() {
+    _cachedChartData = {
+      'week': _buildLineChartData('week'),
+      'month': _buildLineChartData('month'),
+      'year': _buildLineChartData('year'),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       padding: const EdgeInsets.all(16),
@@ -97,12 +129,14 @@ class _ChartCardState extends State<ChartCard> {
             ],
           ),
           const SizedBox(height: 20),
-          // Chart
+          // Chart - Use cached data
           SizedBox(
             height: 200,
-            child: LineChart(
-              _buildLineChartData(),
-              duration: const Duration(milliseconds: 250),
+            child: RepaintBoundary(
+              child: LineChart(
+                _cachedChartData[_selectedPeriod] ?? _buildLineChartData(_selectedPeriod),
+                duration: const Duration(milliseconds: 150),
+              ),
             ),
           ),
         ],
@@ -113,7 +147,11 @@ class _ChartCardState extends State<ChartCard> {
   Widget _buildPeriodTab(String label, String period) {
     final isSelected = _selectedPeriod == period;
     return GestureDetector(
-      onTap: () => setState(() => _selectedPeriod = period),
+      onTap: () {
+        if (_selectedPeriod != period) {
+          setState(() => _selectedPeriod = period);
+        }
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
@@ -132,18 +170,25 @@ class _ChartCardState extends State<ChartCard> {
     );
   }
 
-  LineChartData _buildLineChartData() {
-    final currentData = widget.data[_selectedPeriod] ?? [];
-    final currentLabels = widget.labels[_selectedPeriod] ?? [];
+  LineChartData _buildLineChartData(String period) {
+    final currentData = widget.data[period] ?? [];
+    final currentLabels = widget.labels[period] ?? [];
+
+    if (currentData.isEmpty) {
+      return _buildEmptyChartData();
+    }
+
+    final maxY = _calculateMaxY(currentData);
+    final interval = _calculateInterval(currentData);
 
     return LineChartData(
       gridData: FlGridData(
         show: true,
         drawVerticalLine: false,
-        horizontalInterval: 1,
+        horizontalInterval: interval,
         getDrawingHorizontalLine: (value) {
-          return FlLine(
-            color: const Color(0xFFF7F6FF),
+          return const FlLine(
+            color: Color(0xFFF7F6FF),
             strokeWidth: 1,
           );
         },
@@ -183,7 +228,7 @@ class _ChartCardState extends State<ChartCard> {
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            interval: _calculateInterval(currentData),
+            interval: interval,
             reservedSize: 40,
             getTitlesWidget: (double value, TitleMeta meta) {
               return Text(
@@ -202,7 +247,7 @@ class _ChartCardState extends State<ChartCard> {
       minX: 0,
       maxX: (currentData.length - 1).toDouble(),
       minY: 0,
-      maxY: _calculateMaxY(currentData),
+      maxY: maxY,
       lineBarsData: [
         LineChartBarData(
           spots: currentData
@@ -248,6 +293,15 @@ class _ChartCardState extends State<ChartCard> {
           },
         ),
       ),
+    );
+  }
+
+  LineChartData _buildEmptyChartData() {
+    return LineChartData(
+      gridData: const FlGridData(show: false),
+      titlesData: const FlTitlesData(show: false),
+      borderData: FlBorderData(show: false),
+      lineBarsData: [],
     );
   }
 
