@@ -1,4 +1,19 @@
 /// Dashboard Data Model
+library;
+
+double _parseDouble(dynamic value, [double fallback = 0]) {
+  if (value == null) return fallback;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString()) ?? fallback;
+}
+
+int _parseInt(dynamic value, [int fallback = 0]) {
+  if (value == null) return fallback;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value.toString()) ?? fallback;
+}
+
 class DashboardData {
   final EmployeeInfo employee;
   final SalaryInfo salary;
@@ -14,10 +29,10 @@ class DashboardData {
 
   factory DashboardData.fromJson(Map<String, dynamic> json) {
     return DashboardData(
-      employee: EmployeeInfo.fromJson(json['employee']),
-      salary: SalaryInfo.fromJson(json['salary']),
-      leave: LeaveInfo.fromJson(json['leave']),
-      attendance: AttendanceInfo.fromJson(json['attendance']),
+      employee: EmployeeInfo.fromJson(json['employee'] as Map<String, dynamic>),
+      salary: SalaryInfo.fromJson(json['salary'] as Map<String, dynamic>),
+      leave: LeaveInfo.fromJson(json['leave'] as Map<String, dynamic>),
+      attendance: AttendanceInfo.fromJson(json['attendance'] as Map<String, dynamic>),
     );
   }
 }
@@ -81,9 +96,9 @@ class SalaryInfo {
 
   factory SalaryInfo.fromJson(Map<String, dynamic> json) {
     return SalaryInfo(
-      basicPay: (json['basic_pay'] ?? 0).toDouble(),
-      netPay: (json['net_pay'] ?? 0).toDouble(),
-      totalDeductions: (json['total_deductions'] ?? 0).toDouble(),
+      basicPay: _parseDouble(json['basic_pay']),
+      netPay: _parseDouble(json['net_pay']),
+      totalDeductions: _parseDouble(json['total_deductions']),
       periodStart: json['period_start']?.toString() ?? '',
       periodEnd: json['period_end']?.toString() ?? '',
       periodLabel: json['period_label']?.toString() ?? '',
@@ -103,8 +118,8 @@ class LeaveInfo {
 
   factory LeaveInfo.fromJson(Map<String, dynamic> json) {
     return LeaveInfo(
-      totalAvailable: (json['total_available'] ?? 0).toDouble(),
-      leaveTypesCount: json['leave_types_count'] ?? 0,
+      totalAvailable: _parseDouble(json['total_available']),
+      leaveTypesCount: _parseInt(json['leave_types_count']),
     );
   }
 }
@@ -123,9 +138,9 @@ class AttendanceInfo {
 
   factory AttendanceInfo.fromJson(Map<String, dynamic> json) {
     return AttendanceInfo(
-      rate: (json['rate'] ?? 0).toDouble(),
-      presentDays: json['present_days'] ?? 0,
-      totalDays: json['total_days'] ?? 0,
+      rate: _parseDouble(json['rate']),
+      presentDays: _parseInt(json['present_days']),
+      totalDays: _parseInt(json['total_days']),
     );
   }
 }
@@ -160,27 +175,25 @@ class DeductionModel {
 
   factory DeductionModel.fromJson(Map<String, dynamic> json) {
     return DeductionModel(
-      id: json['id'] ?? 0,
+      id: _parseInt(json['id']),
       deductionType: json['deduction_type']?.toString() ?? 'Unknown',
       code: json['code']?.toString(),
       category: json['category']?.toString() ?? 'other',
-      monthlyAmount: (json['monthly_amount'] ?? 0).toDouble(),
-      perCutoff: (json['per_cutoff'] ?? 0).toDouble(),
-      remainingBalance: (json['remaining_balance'] ?? 0).toDouble(),
-      totalAmount: (json['total_amount'] ?? 0).toDouble(),
+      monthlyAmount: _parseDouble(json['monthly_amount']),
+      perCutoff: _parseDouble(json['per_cutoff']),
+      remainingBalance: _parseDouble(json['remaining_balance']),
+      totalAmount: _parseDouble(json['total_amount']),
       startDate: json['start_date']?.toString(),
       endDate: json['end_date']?.toString(),
       status: json['status']?.toString() ?? 'active',
     );
   }
 
-  // Helper to get start date as DateTime
   DateTime? get startDateTime {
     if (startDate == null) return null;
     return DateTime.tryParse(startDate!);
   }
 
-  // Helper to get end date as DateTime
   DateTime? get endDateTime {
     if (endDate == null) return null;
     return DateTime.tryParse(endDate!);
@@ -207,12 +220,12 @@ class LeaveBalanceModel {
 
   factory LeaveBalanceModel.fromJson(Map<String, dynamic> json) {
     return LeaveBalanceModel(
-      id: json['id'] ?? 0,
+      id: _parseInt(json['id']),
       leaveType: json['leave_type']?.toString() ?? 'Unknown',
-      available: (json['available'] ?? 0).toDouble(),
-      used: (json['used'] ?? 0).toDouble(),
-      earned: (json['earned'] ?? 0).toDouble(),
-      year: json['year'] ?? DateTime.now().year,
+      available: _parseDouble(json['available']),
+      used: _parseDouble(json['used']),
+      earned: _parseDouble(json['earned']),
+      year: _parseInt(json['year'], DateTime.now().year),
     );
   }
 }
@@ -229,8 +242,8 @@ class ChartData {
 
   factory ChartData.fromJson(Map<String, dynamic> json) {
     return ChartData(
-      attendance: ChartCategory.fromJson(json['attendance']),
-      salary: ChartCategory.fromJson(json['salary']),
+      attendance: ChartCategory.fromJson(json['attendance'] as Map<String, dynamic>),
+      salary: ChartCategory.fromJson(json['salary'] as Map<String, dynamic>),
     );
   }
 }
@@ -249,9 +262,9 @@ class ChartCategory {
 
   factory ChartCategory.fromJson(Map<String, dynamic> json) {
     return ChartCategory(
-      week: ChartPeriod.fromJson(json['week']),
-      month: ChartPeriod.fromJson(json['month']),
-      year: ChartPeriod.fromJson(json['year']),
+      week: ChartPeriod.fromJson(json['week'] as Map<String, dynamic>),
+      month: ChartPeriod.fromJson(json['month'] as Map<String, dynamic>),
+      year: ChartPeriod.fromJson(json['year'] as Map<String, dynamic>),
     );
   }
 }
@@ -268,12 +281,24 @@ class ChartPeriod {
 
   factory ChartPeriod.fromJson(Map<String, dynamic> json) {
     return ChartPeriod(
-      labels: List<String>.from(json['labels'] ?? []),
-      data: List<double>.from(
-        (json['data'] ?? []).map((e) => (e ?? 0).toDouble()),
-      ),
+      labels: _readStringList(json['labels']),
+      data: _readDoubleList(json['data']),
     );
   }
+}
+
+List<String> _readStringList(dynamic value) {
+  if (value is List) {
+    return value.map((e) => e.toString()).toList();
+  }
+  return [];
+}
+
+List<double> _readDoubleList(dynamic value) {
+  if (value is List) {
+    return value.map((e) => _parseDouble(e)).toList();
+  }
+  return [];
 }
 
 /// Notification Model (for future use)
@@ -296,12 +321,13 @@ class NotificationModel {
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
-      id: json['id'] ?? 0,
+      id: _parseInt(json['id']),
       title: json['title']?.toString() ?? '',
       message: json['message']?.toString() ?? '',
       type: json['type']?.toString() ?? 'general',
-      isRead: json['is_read'] ?? false,
-      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
+      isRead: json['is_read'] == true || json['is_read'] == 1,
+      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
     );
   }
 }

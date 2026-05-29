@@ -69,8 +69,8 @@ class MobileDashboardController extends Controller
     {
         // Eager load relationships in one query
         $employee->load([
-            'employmentDetail.designationRelation:id,designation_name',
-            'employmentDetail.departmentRelation:id,department_name'
+            'employmentDetail.designationRelation:id,title',
+            'employmentDetail.departmentRelation:id,name'
         ]);
 
         $currentDate = Carbon::now();
@@ -112,8 +112,8 @@ class MobileDashboardController extends Controller
             ')
             ->first();
 
-        $totalDays = $attendanceData->total_days ?? 0;
-        $presentDays = $attendanceData->present_days ?? 0;
+        $totalDays = (int) ($attendanceData->total_days ?? 0);
+        $presentDays = (int) ($attendanceData->present_days ?? 0);
         $attendanceRate = $totalDays > 0 ? round(($presentDays / $totalDays) * 100, 1) : 0;
 
         return [
@@ -123,8 +123,8 @@ class MobileDashboardController extends Controller
                 'last_name' => $employee->last_name,
                 'full_name' => $employee->first_name . ' ' . $employee->last_name,
                 'initials' => strtoupper(substr($employee->first_name, 0, 1) . substr($employee->last_name, 0, 1)),
-                'position' => $employee->employmentDetail->designationRelation->designation_name ?? 'N/A',
-                'department' => $employee->employmentDetail->departmentRelation->department_name ?? 'N/A',
+                'position' => $employee->employmentDetail->designationRelation->title ?? 'N/A',
+                'department' => $employee->employmentDetail->departmentRelation->name ?? 'N/A',
                 'employment_type' => $employee->employmentDetail->employment_type ?? 'Permanent',
                 'status' => $employee->status ?? 'active',
             ],
@@ -137,8 +137,8 @@ class MobileDashboardController extends Controller
                 'period_label' => $startDate->format('M d') . '-' . $endDate->format('d, Y'),
             ],
             'leave' => [
-                'total_available' => round($leaveData->total_available ?? 0, 1),
-                'leave_types_count' => $leaveData->leave_types_count ?? 0,
+                'total_available' => round((float) ($leaveData->total_available ?? 0), 1),
+                'leave_types_count' => (int) ($leaveData->leave_types_count ?? 0),
             ],
             'attendance' => [
                 'rate' => $attendanceRate,
@@ -178,7 +178,7 @@ class MobileDashboardController extends Controller
                 // Eager load deduction types
                 return EmployeeDeduction::where('employee_id', $employee->id)
                     ->with('deductionType:id,name,code,category,computation_type,percentage_rate,base_salary_type,max_amount')
-                    ->whereIn('status', ['active', 'pending'])
+                    ->whereIn('status', ['active', 'pending', 'ACTIVE', 'PENDING'])
                     ->select('id', 'employee_id', 'deduction_type_id', 'installment_amount', 'amount', 'remaining_balance', 'total_amount', 'start_date', 'end_date', 'status')
                     ->orderBy('start_date', 'desc')
                     ->get()
@@ -199,7 +199,9 @@ class MobileDashboardController extends Controller
                             'end_date' => $deduction->end_date ? $deduction->end_date->format('Y-m-d') : null,
                             'status' => $deduction->status,
                         ];
-                    });
+                    })
+                    ->values()
+                    ->all();
             });
 
             return response()->json([
@@ -284,8 +286,8 @@ class MobileDashboardController extends Controller
                 $currentYear = Carbon::now()->year;
                 return LeaveBalance::where('employee_id', $employee->id)
                     ->where('year', $currentYear)
-                    ->with('leaveType:id,leave_name')
-                    ->select('id', 'employee_id', 'leave_type_id', 'available_credits', 'used_credits', 'total_credits', 'year')
+                    ->with('leaveType:leave_code,leave_name')
+                    ->select('id', 'employee_id', 'leave_code', 'available_credits', 'used_credits', 'total_credits', 'year')
                     ->get()
                     ->map(function($balance) {
                         return [
@@ -296,7 +298,9 @@ class MobileDashboardController extends Controller
                             'earned' => round($balance->total_credits, 1),
                             'year' => $balance->year,
                         ];
-                    });
+                    })
+                    ->values()
+                    ->all();
             });
 
             return response()->json([
@@ -470,7 +474,7 @@ class MobileDashboardController extends Controller
             $weekEnd = $now->copy()->subWeeks($i)->endOfWeek();
             $weekStart = $weekEnd->copy()->startOfWeek();
             
-            $result = DB::table('attendances')
+            $result = DB::table('attendance')
                 ->where('employee_id', $employeeId)
                 ->whereBetween('date', [$weekStart, $weekEnd])
                 ->whereRaw('DAYOFWEEK(date) NOT IN (1, 7)')
@@ -497,7 +501,7 @@ class MobileDashboardController extends Controller
             $monthStart = $month->copy()->startOfMonth();
             $monthEnd = $month->copy()->endOfMonth();
             
-            $result = DB::table('attendances')
+            $result = DB::table('attendance')
                 ->where('employee_id', $employeeId)
                 ->whereBetween('date', [$monthStart, $monthEnd])
                 ->whereRaw('DAYOFWEEK(date) NOT IN (1, 7)')
@@ -598,104 +602,3 @@ class MobileDashboardController extends Controller
         return ['labels' => $labels, 'data' => $data];
     }
 }
-
-    {
-        try {
-            $user = Auth::user();
-            $employee = $user->employee;
-
-            if (!$employee) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Employee record not found'
-                ], 404);
-            }
-
-            // Load relationships
-            $employee->load('employmentDetail.designationRelation', 'employmentDetail.departmentRelation');
-
-            // Get current period (last 15 days)
-            $currentDate = Carbon::now();
-            $startDate = $currentDate->copy()->subDays(15);
-            $endDate = $currentDate;
-
-            // Calculate period totals
-            $periodComputations = DailySalaryComputation::where('employee_id', $employee->id)
-                ->whereBetween('work_date', [$startDate, $endDate])
-                ->get();
-
-            $basicPay = $periodComputations->sum('daily_basic_pay');
-            $totalDeductions = $periodComputations->sum('late_deduction') + $periodComputations->sum('undertime_deduction');
-            $netPay = $basicPay - $totalDeductions;
-
-            // Get leave balances for current year
-            $currentYear = $currentDate->year;
-            $leaveBalances = LeaveBalance::where('employee_id', $employee->id)
-                ->where('year', $currentYear)
-                ->with('leaveType')
-                ->get();
-
-            $totalAvailableLeave = $leaveBalances->sum('available_credits');
-            $leaveTypesCount = $leaveBalances->count();
-
-            // Get attendance for current month
-            $monthStart = $currentDate->copy()->startOfMonth();
-            $monthEnd = $currentDate->copy()->endOfMonth();
-            
-            $attendanceRecords = Attendance::where('employee_id', $employee->id)
-                ->whereBetween('date', [$monthStart, $monthEnd])
-                ->get();
-
-            $totalDays = $attendanceRecords->count();
-            $presentDays = $attendanceRecords->filter(function($record) {
-                return $record->am_in !== null || $record->pm_in !== null;
-            })->count();
-            $attendanceRate = $totalDays > 0 ? round(($presentDays / $totalDays) * 100, 1) : 0;
-
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'employee' => [
-                        'id' => $employee->employee_id,
-                        'first_name' => $employee->first_name,
-                        'last_name' => $employee->last_name,
-                        'full_name' => $employee->first_name . ' ' . $employee->last_name,
-                        'initials' => strtoupper(substr($employee->first_name, 0, 1) . substr($employee->last_name, 0, 1)),
-                        'position' => $employee->employmentDetail->designationRelation->designation_name ?? 'N/A',
-                        'department' => $employee->employmentDetail->departmentRelation->department_name ?? 'N/A',
-                        'employment_type' => $employee->employmentDetail->employment_type ?? 'Permanent',
-                        'status' => $employee->status ?? 'active',
-                    ],
-                    'salary' => [
-                        'basic_pay' => round($basicPay, 2),
-                        'net_pay' => round($netPay, 2),
-                        'total_deductions' => round($totalDeductions, 2),
-                        'period_start' => $startDate->format('Y-m-d'),
-                        'period_end' => $endDate->format('Y-m-d'),
-                        'period_label' => $startDate->format('M d') . '-' . $endDate->format('d, Y'),
-                    ],
-                    'leave' => [
-                        'total_available' => round($totalAvailableLeave, 1),
-                        'leave_types_count' => $leaveTypesCount,
-                    ],
-                    'attendance' => [
-                        'rate' => $attendanceRate,
-                        'present_days' => $presentDays,
-                        'total_days' => $totalDays,
-                    ],
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error fetching dashboard data',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Get deductions list
-     * 
-     * @return \Illuminate\Http\JsonResponse
-     */

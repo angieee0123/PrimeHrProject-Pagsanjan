@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:prime_magdalena_mobile_application/components/index.dart';
 import 'package:prime_magdalena_mobile_application/services/dashboard_service.dart';
 import 'package:prime_magdalena_mobile_application/models/dashboard_models.dart';
@@ -237,10 +238,11 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
       );
     }
 
-    final employee = _dashboardData!.employee;
     final salary = _dashboardData!.salary;
     final leave = _dashboardData!.leave;
     final attendance = _dashboardData!.attendance;
+    final payrollMonthLabel = _payrollMonthLabel(salary);
+    final nextPayLabel = _nextPayLabel(salary);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F6FF), // Light background
@@ -270,239 +272,14 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
             parent: AlwaysScrollableScrollPhysics(),
           ),
           slivers: [
-            // Floating Welcome Banner
             SliverToBoxAdapter(
               child: _buildAnimatedItem(
                 delay: 0,
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF0B044D), Color(0xFF1A0F6E)],
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF0B044D).withValues(alpha: 0.15),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        children: [
-                          // Top Row: Avatar, Info, Notification
-                          Row(
-                            children: [
-                              // Avatar with Clock Icon
-                              Stack(
-                                children: [
-                                  Container(
-                                    width: 46,
-                                    height: 46,
-                                    decoration: BoxDecoration(
-                                      color: const Color(
-                                        0xFFD9BB00,
-                                      ).withValues(alpha: 0.15),
-                                      border: Border.all(
-                                        color: const Color(
-                                          0xFFD9BB00,
-                                        ).withValues(alpha: 0.3),
-                                        width: 1.5,
-                                      ),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        employee.initials,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(width: 16),
-                              // Employee Info
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Welcome back, ${employee.firstName}!',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      '${employee.position} · ${employee.id}',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.white.withValues(
-                                          alpha: 0.5,
-                                        ),
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // Notification Button
-                              Stack(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                    ),
-                                    child: IconButton(
-                                      onPressed: widget.onOpenNotifications,
-                                      icon: const Icon(
-                                        Icons.notifications_none_rounded,
-                                        color: Colors.white,
-                                        size: 22,
-                                      ),
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(
-                                        minWidth: 40,
-                                        minHeight: 40,
-                                      ),
-                                    ),
-                                  ),
-                                  if (3 > 0)
-                                    Positioned(
-                                      right: 6,
-                                      top: 6,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: const Color(0xFFEF4444),
-                                          border: Border.all(
-                                            color: const Color(0xFF0B044D),
-                                            width: 2,
-                                          ),
-                                        ),
-                                        constraints: const BoxConstraints(
-                                          minWidth: 16,
-                                          minHeight: 16,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            '3',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 8,
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors.white,
-                                              height: 1,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 14),
-                          // Badges Row
-                          Row(
-                            children: [
-                              // Payroll Active Badge
-                              Flexible(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 13,
-                                    vertical: 5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.08),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 7,
-                                        height: 7,
-                                        decoration: const BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Color(0xFF22C55E),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 7),
-                                      Flexible(
-                                        child: Text(
-                                          'January 2025 Payroll Active',
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white.withValues(
-                                              alpha: 0.75,
-                                            ),
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              // Next Pay Badge
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 13,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  'Next Pay: Jan 31',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white.withValues(alpha: 0.75),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                child: DashboardTopbar(
+                  onNotifications: widget.onOpenNotifications,
+                  notificationCount: 3,
+                  payrollMonthLabel: payrollMonthLabel,
+                  nextPayLabel: nextPayLabel,
                 ),
               ),
             ),
@@ -1003,6 +780,35 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
         ),
       ),
     );
+  }
+
+  String _payrollMonthLabel(SalaryInfo salary) {
+    final end = DateTime.tryParse(salary.periodEnd);
+    if (end != null) {
+      return DateFormat('MMMM y').format(end);
+    }
+    return DateFormat('MMMM y').format(DateTime.now());
+  }
+
+  String _nextPayLabel(SalaryInfo salary) {
+    final end = DateTime.tryParse(salary.periodEnd);
+    if (end == null) return _calculateNextPayDate();
+
+    final day = end.day;
+    if (day <= 15) {
+      return DateFormat('MMM d').format(DateTime(end.year, end.month, 15));
+    }
+    final lastDay = DateTime(end.year, end.month + 1, 0);
+    return DateFormat('MMM d').format(lastDay);
+  }
+
+  String _calculateNextPayDate() {
+    final now = DateTime.now();
+    if (now.day <= 15) {
+      return DateFormat('MMM d').format(DateTime(now.year, now.month, 15));
+    }
+    final lastDay = DateTime(now.year, now.month + 1, 0);
+    return DateFormat('MMM d').format(lastDay);
   }
 
   // Animated item builder for staggered entrance animations

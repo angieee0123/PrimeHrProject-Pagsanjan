@@ -9,7 +9,7 @@
 // Configuration
 $apiUrl = 'http://localhost:8000/api/auth/login';
 $testEmail = 'permanent@gmail.com'; // Change to your test email
-$testPassword = 'password'; // Change to your test password
+$testPassword = 'asdf'; // Same as web admin seed / permanent test account
 
 echo "=== Testing API Login ===\n\n";
 echo "API URL: $apiUrl\n";

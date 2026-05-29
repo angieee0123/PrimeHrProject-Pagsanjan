@@ -37,33 +37,28 @@ class AuthController extends Controller
             ]);
         }
 
-        // Check if user is active (matching web login - uses 'Active' with capital A)
-        if ($user->status !== 'Active') {
-            Auth::logout();
-            throw ValidationException::withMessages([
-                'email' => ['Your account is not active. Please contact HR.'],
-            ]);
-        }
-
         // Load employee data with relationships (same as web login)
         $user->load('employee.employmentDetail.departmentRelation', 'employee.employmentDetail.designationRelation');
 
-        // Determine user type and role (same logic as web login)
-        $userType = 'joborder'; // default
+        // Determine user type (same logic as routes/web.php login.post)
+        $userType = 'joborder';
         $isPermanent = false;
-        
+
         if ($user->email === 'admin@gmail.com' || $user->role === 'admin') {
             $userType = 'admin';
         } elseif ($user->role === 'hr') {
             $userType = 'hr';
         } elseif ($user->employee && $user->employee->employmentDetail) {
             $employmentStatus = $user->employee->employmentDetail->employment_status;
-            
+
             if ($employmentStatus === 'Permanent') {
                 $userType = 'permanent';
                 $isPermanent = true;
             }
-        } elseif ($user->role === 'permanent' || $user->email === 'permanent@gmail.com') {
+        }
+
+        // Fallback for explicit permanent role or email (web.php lines 59-61)
+        if (!$isPermanent && ($user->role === 'permanent' || $user->email === 'permanent@gmail.com')) {
             $userType = 'permanent';
             $isPermanent = true;
         }
@@ -108,6 +103,11 @@ class AuthController extends Controller
         // Create token for mobile app
         $token = $user->createToken('mobile-app')->plainTextToken;
 
+        $displayName = $user->name;
+        if (!$displayName && $user->employee) {
+            $displayName = trim($user->employee->first_name . ' ' . $user->employee->last_name);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Login successful',
@@ -117,7 +117,7 @@ class AuthController extends Controller
                 'is_permanent' => $isPermanent,
                 'user' => [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'name' => $displayName,
                     'email' => $user->email,
                     'username' => $user->username,
                     'role' => $user->role,
@@ -145,7 +145,9 @@ class AuthController extends Controller
                     'salary_grade' => $user->employee->employmentDetail?->salary_grade,
                     'step_increment' => $user->employee->employmentDetail?->step_increment,
                     'appointment_date' => $user->employee->employmentDetail?->appointment_date,
-                    'monthly_rate' => $user->employee->employmentDetail?->designationRelation?->monthly_rate,
+                    'monthly_rate' => $user->employee->employmentDetail?->designationRelation?->monthly_rate !== null
+                        ? (float) $user->employee->employmentDetail->designationRelation->monthly_rate
+                        : null,
                 ] : null,
                 'payroll' => $payrollData,
             ],
@@ -172,11 +174,76 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         $user = $request->user();
+
+        if (!$user instanceof User) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated',
+            ], 401);
+        }
+
         $user->load('employee.employmentDetail.departmentRelation', 'employee.employmentDetail.designationRelation');
+
+        $userType = 'joborder';
+        $isPermanent = false;
+
+        if ($user->email === 'admin@gmail.com' || $user->role === 'admin') {
+            $userType = 'admin';
+        } elseif ($user->role === 'hr') {
+            $userType = 'hr';
+        } elseif ($user->employee && $user->employee->employmentDetail) {
+            if ($user->employee->employmentDetail->employment_status === 'Permanent') {
+                $userType = 'permanent';
+                $isPermanent = true;
+            }
+        }
+
+        if (!$isPermanent && ($user->role === 'permanent' || $user->email === 'permanent@gmail.com')) {
+            $userType = 'permanent';
+            $isPermanent = true;
+        }
+
+        $payrollData = null;
+        if ($isPermanent && $user->employee) {
+            $latestPayslip = \App\Models\SalaryComputation::where('employee_id', $user->employee->id)
+                ->where('status', 'approved')
+                ->orderBy('period_end', 'desc')
+                ->first();
+
+            if ($latestPayslip) {
+                $deductionBreakdown = $latestPayslip->deduction_breakdown;
+                if (is_string($deductionBreakdown)) {
+                    $deductionBreakdown = json_decode($deductionBreakdown, true) ?? [];
+                } elseif (!is_array($deductionBreakdown)) {
+                    $deductionBreakdown = [];
+                }
+
+                $payrollData = [
+                    'period_start' => $latestPayslip->period_start->format('Y-m-d'),
+                    'period_end' => $latestPayslip->period_end->format('Y-m-d'),
+                    'pay_date' => $latestPayslip->pay_date ? $latestPayslip->pay_date->format('Y-m-d') : null,
+                    'monthly_rate' => (float) $latestPayslip->monthly_rate,
+                    'daily_rate' => (float) $latestPayslip->daily_rate,
+                    'total_days_present' => $latestPayslip->total_days_present,
+                    'basic_pay' => (float) $latestPayslip->basic_pay,
+                    'ot_pay' => (float) $latestPayslip->ot_pay,
+                    'gross_pay' => (float) $latestPayslip->gross_pay,
+                    'late_deduction' => (float) $latestPayslip->late_deduction,
+                    'undertime_deduction' => (float) $latestPayslip->undertime_deduction,
+                    'other_deductions' => (float) $latestPayslip->other_deductions,
+                    'deduction_breakdown' => $deductionBreakdown,
+                    'total_deductions' => (float) ($latestPayslip->late_deduction + $latestPayslip->undertime_deduction + $latestPayslip->other_deductions),
+                    'net_pay' => (float) $latestPayslip->net_pay,
+                    'status' => $latestPayslip->status,
+                ];
+            }
+        }
 
         return response()->json([
             'success' => true,
             'data' => [
+                'user_type' => $userType,
+                'is_permanent' => $isPermanent,
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -184,21 +251,27 @@ class AuthController extends Controller
                     'username' => $user->username,
                     'role' => $user->role,
                     'employee_id' => $user->employee_id,
+                    'status' => $user->status,
                 ],
                 'employee' => $user->employee ? [
                     'id' => $user->employee->id,
+                    'employee_id' => $user->employee->employee_id,
                     'first_name' => $user->employee->first_name,
                     'middle_name' => $user->employee->middle_name,
                     'last_name' => $user->employee->last_name,
                     'suffix' => $user->employee->suffix,
-                    'full_name' => trim($user->employee->first_name . ' ' . 
-                                       ($user->employee->middle_name ? $user->employee->middle_name . ' ' : '') . 
-                                       $user->employee->last_name . 
+                    'full_name' => trim($user->employee->first_name . ' ' .
+                                       ($user->employee->middle_name ? $user->employee->middle_name . ' ' : '') .
+                                       $user->employee->last_name .
                                        ($user->employee->suffix ? ' ' . $user->employee->suffix : '')),
                     'employment_status' => $user->employee->employmentDetail?->employment_status,
-                    'department' => $user->employee->employmentDetail?->departmentRelation?->department_name,
-                    'designation' => $user->employee->employmentDetail?->designationRelation?->designation_name,
+                    'department' => $user->employee->employmentDetail?->departmentRelation?->name,
+                    'designation' => $user->employee->employmentDetail?->designationRelation?->title,
+                    'monthly_rate' => $user->employee->employmentDetail?->designationRelation?->monthly_rate !== null
+                        ? (float) $user->employee->employmentDetail->designationRelation->monthly_rate
+                        : null,
                 ] : null,
+                'payroll' => $payrollData,
             ],
         ], 200);
     }

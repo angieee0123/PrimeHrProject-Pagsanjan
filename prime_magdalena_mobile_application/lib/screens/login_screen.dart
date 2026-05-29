@@ -125,7 +125,6 @@ class _LoginScreenState extends State<LoginScreen>
 
       if (!mounted) return;
 
-      // Check if using mock/offline mode
       final isOfflineMode = loginResponse.token.startsWith('mock_token_');
 
       // Build success message based on user type
@@ -161,7 +160,8 @@ class _LoginScreenState extends State<LoginScreen>
         ),
       );
 
-      // Call the onLoginSuccess callback
+      setState(() => _isLoading = false);
+
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
           widget.onLoginSuccess?.call();

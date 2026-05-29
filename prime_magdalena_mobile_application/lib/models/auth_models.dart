@@ -1,6 +1,18 @@
 /// Authentication Models for Mobile App
 library;
 
+double? _parseDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString());
+}
+
+int _parseInt(dynamic value, {int fallback = 0}) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? fallback;
+}
+
 /// User Model
 class UserModel {
   final int id;
@@ -21,12 +33,16 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] as int,
-      name: json['name']?.toString() ?? '',
+      id: _parseInt(json['id']),
+      name: json['name']?.toString().trim().isNotEmpty == true
+          ? json['name'].toString()
+          : (json['email']?.toString() ?? 'User'),
       email: json['email']?.toString() ?? '',
       username: json['username']?.toString(),
       role: json['role']?.toString() ?? 'employee',
-      employeeId: json['employee_id'] as int?,
+      employeeId: json['employee_id'] == null
+          ? null
+          : _parseInt(json['employee_id']),
     );
   }
 
@@ -88,7 +104,7 @@ class EmployeeModel {
 
   factory EmployeeModel.fromJson(Map<String, dynamic> json) {
     return EmployeeModel(
-      id: json['id'] as int,
+      id: _parseInt(json['id']),
       employeeId: json['employee_id']?.toString(),
       firstName: json['first_name']?.toString() ?? '',
       middleName: json['middle_name']?.toString(),
@@ -105,9 +121,7 @@ class EmployeeModel {
       salaryGrade: json['salary_grade']?.toString(),
       stepIncrement: json['step_increment']?.toString(),
       appointmentDate: json['appointment_date']?.toString(),
-      monthlyRate: json['monthly_rate'] != null 
-          ? (json['monthly_rate'] as num).toDouble() 
-          : null,
+      monthlyRate: _parseDouble(json['monthly_rate']),
     );
   }
 
@@ -174,22 +188,24 @@ class PayrollModel {
   });
 
   factory PayrollModel.fromJson(Map<String, dynamic> json) {
+    final breakdown = json['deduction_breakdown'];
     return PayrollModel(
       periodStart: json['period_start']?.toString() ?? '',
       periodEnd: json['period_end']?.toString() ?? '',
       payDate: json['pay_date']?.toString(),
-      monthlyRate: (json['monthly_rate'] as num?)?.toDouble() ?? 0.0,
-      dailyRate: (json['daily_rate'] as num?)?.toDouble() ?? 0.0,
-      totalDaysPresent: json['total_days_present'] as int? ?? 0,
-      basicPay: (json['basic_pay'] as num?)?.toDouble() ?? 0.0,
-      otPay: (json['ot_pay'] as num?)?.toDouble() ?? 0.0,
-      grossPay: (json['gross_pay'] as num?)?.toDouble() ?? 0.0,
-      lateDeduction: (json['late_deduction'] as num?)?.toDouble() ?? 0.0,
-      undertimeDeduction: (json['undertime_deduction'] as num?)?.toDouble() ?? 0.0,
-      otherDeductions: (json['other_deductions'] as num?)?.toDouble() ?? 0.0,
-      deductionBreakdown: json['deduction_breakdown'] as Map<String, dynamic>? ?? {},
-      totalDeductions: (json['total_deductions'] as num?)?.toDouble() ?? 0.0,
-      netPay: (json['net_pay'] as num?)?.toDouble() ?? 0.0,
+      monthlyRate: _parseDouble(json['monthly_rate']) ?? 0.0,
+      dailyRate: _parseDouble(json['daily_rate']) ?? 0.0,
+      totalDaysPresent: _parseInt(json['total_days_present']),
+      basicPay: _parseDouble(json['basic_pay']) ?? 0.0,
+      otPay: _parseDouble(json['ot_pay']) ?? 0.0,
+      grossPay: _parseDouble(json['gross_pay']) ?? 0.0,
+      lateDeduction: _parseDouble(json['late_deduction']) ?? 0.0,
+      undertimeDeduction: _parseDouble(json['undertime_deduction']) ?? 0.0,
+      otherDeductions: _parseDouble(json['other_deductions']) ?? 0.0,
+      deductionBreakdown:
+          breakdown is Map ? Map<String, dynamic>.from(breakdown) : {},
+      totalDeductions: _parseDouble(json['total_deductions']) ?? 0.0,
+      netPay: _parseDouble(json['net_pay']) ?? 0.0,
       status: json['status']?.toString() ?? 'draft',
     );
   }
@@ -235,11 +251,20 @@ class LoginResponse {
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] as Map<String, dynamic>;
+    final data = json['data'];
+    if (data is! Map<String, dynamic>) {
+      throw const FormatException('Login response missing data object');
+    }
+
+    final isPermanentRaw = data['is_permanent'];
+    final isPermanent = isPermanentRaw == true ||
+        isPermanentRaw == 1 ||
+        isPermanentRaw?.toString() == '1';
+
     return LoginResponse(
       token: data['token']?.toString() ?? '',
       userType: data['user_type']?.toString() ?? 'joborder',
-      isPermanent: data['is_permanent'] as bool? ?? false,
+      isPermanent: isPermanent,
       user: UserModel.fromJson(data['user'] as Map<String, dynamic>),
       employee: data['employee'] != null
           ? EmployeeModel.fromJson(data['employee'] as Map<String, dynamic>)

@@ -13,7 +13,7 @@ import 'package:prime_magdalena_mobile_application/screens/performance/performan
 import 'package:prime_magdalena_mobile_application/screens/settings/settings_screen.dart';
 import 'package:prime_magdalena_mobile_application/screens/training/training_screen.dart';
 import 'package:prime_magdalena_mobile_application/screens/travel/travel_order_screen.dart';
-import 'package:prime_magdalena_mobile_application/utils/mock_data.dart';
+import 'package:prime_magdalena_mobile_application/services/auth_service.dart';
 
 class MainAppShell extends StatefulWidget {
   final VoidCallback? onLogout;
@@ -312,7 +312,12 @@ class _MainAppShellState extends State<MainAppShell> {
   }
 
   Widget _buildDrawer(BuildContext context) {
-    final employee = MockData.currentEmployee;
+    final auth = AuthService();
+    final stored = auth.currentEmployee;
+    final user = auth.currentUser;
+    final fullName = stored?.fullName ?? user?.name ?? 'Employee';
+    final position = stored?.designation ?? 'Position';
+    final initials = _drawerInitials(stored?.firstName, stored?.lastName, fullName);
 
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.85,
@@ -346,7 +351,7 @@ class _MainAppShellState extends State<MainAppShell> {
                     ),
                     child: Center(
                       child: Text(
-                        employee.initials,
+                        initials,
                         style: GoogleFonts.inter(
                           fontSize: 28,
                           fontWeight: FontWeight.w700,
@@ -357,7 +362,7 @@ class _MainAppShellState extends State<MainAppShell> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    employee.fullName,
+                    fullName,
                     style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -367,7 +372,7 @@ class _MainAppShellState extends State<MainAppShell> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    employee.position,
+                    position,
                     style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -671,5 +676,16 @@ class _MainAppShellState extends State<MainAppShell> {
   void _openDrawerScreen(BuildContext context, Widget screen) {
     Navigator.pop(context);
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+  }
+
+  String _drawerInitials(String? first, String? last, String fullName) {
+    if (first != null && first.isNotEmpty && last != null && last.isNotEmpty) {
+      return '${first[0]}${last[0]}'.toUpperCase();
+    }
+    final parts = fullName.trim().split(RegExp(r'\s+'));
+    if (parts.length >= 2) {
+      return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+    }
+    return fullName.isNotEmpty ? fullName[0].toUpperCase() : 'E';
   }
 }
