@@ -25,17 +25,23 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     try {
-      final isAuthenticated = await _authService.isAuthenticated();
+      await _authService.initialize();
+      final isAuthenticated = _authService.isAuthenticated;
 
       if (isAuthenticated) {
-        // Try to get current user to verify token is still valid
+        // Try to verify token is still valid
         try {
-          await _authService.getCurrentUser();
-          
+          final isValid = await _authService.checkAuth();
+
           if (!mounted) return;
-          
-          // Navigate to home
-          Navigator.of(context).pushReplacementNamed('/home');
+
+          if (isValid) {
+            // Navigate to home
+            Navigator.of(context).pushReplacementNamed('/home');
+          } else {
+            // Token invalid, go to login
+            Navigator.of(context).pushReplacementNamed('/login');
+          }
         } catch (e) {
           // Token invalid, go to login
           if (!mounted) return;
@@ -80,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // App Name
             Text(
               'PRIME HRIS',
@@ -101,7 +107,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 48),
-            
+
             // Loading Indicator
             const SizedBox(
               width: 40,

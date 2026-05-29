@@ -48,7 +48,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_handleScroll);
-    
+
     // Load data from API
     _loadDashboardData();
 
@@ -189,11 +189,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.red.shade300,
-                ),
+                Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
                 const SizedBox(height: 16),
                 Text(
                   'Failed to load dashboard',
@@ -269,526 +265,549 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
         onRefresh: _refreshData,
         color: const Color(0xFF0B044D),
         child: CustomScrollView(
-        controller: _scrollController,
-        physics: const BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
-        ),
-        slivers: [
-          // Floating Welcome Banner
-          SliverToBoxAdapter(
-            child: _buildAnimatedItem(
-              delay: 0,
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF0B044D),
-                      Color(0xFF1A0F6E),
+          controller: _scrollController,
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          slivers: [
+            // Floating Welcome Banner
+            SliverToBoxAdapter(
+              child: _buildAnimatedItem(
+                delay: 0,
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF0B044D), Color(0xFF1A0F6E)],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF0B044D).withValues(alpha: 0.15),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF0B044D).withValues(alpha: 0.15),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      // Top Row: Avatar, Info, Notification
-                      Row(
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
                         children: [
-                          // Avatar with Clock Icon
-                          Stack(
+                          // Top Row: Avatar, Info, Notification
+                          Row(
                             children: [
-                              Container(
-                                width: 46,
-                                height: 46,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFD9BB00).withValues(alpha: 0.15),
-                                  border: Border.all(
-                                    color: const Color(0xFFD9BB00).withValues(alpha: 0.3),
-                                    width: 1.5,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    employee.initials,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(width: 16),
-                          // Employee Info
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                  Text(
-                                  'Welcome back, ${employee.firstName}!',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 3),
-                                Text(
-                                  '${employee.position} · ${employee.id}',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.white.withValues(alpha: 0.5),
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                          // Notification Button
-                          Stack(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withValues(alpha: 0.1),
-                                ),
-                                child: IconButton(
-                                  onPressed: widget.onOpenNotifications,
-                                  icon: const Icon(
-                                    Icons.notifications_none_rounded,
-                                    color: Colors.white,
-                                    size: 22,
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 40,
-                                    minHeight: 40,
-                                  ),
-                                ),
-                              ),
-                              if (3 > 0)
-                                Positioned(
-                                  right: 6,
-                                  top: 6,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
+                              // Avatar with Clock Icon
+                              Stack(
+                                children: [
+                                  Container(
+                                    width: 46,
+                                    height: 46,
                                     decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: const Color(0xFFEF4444),
+                                      color: const Color(
+                                        0xFFD9BB00,
+                                      ).withValues(alpha: 0.15),
                                       border: Border.all(
-                                        color: const Color(0xFF0B044D),
-                                        width: 2,
+                                        color: const Color(
+                                          0xFFD9BB00,
+                                        ).withValues(alpha: 0.3),
+                                        width: 1.5,
                                       ),
-                                    ),
-                                    constraints: const BoxConstraints(
-                                      minWidth: 16,
-                                      minHeight: 16,
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Center(
                                       child: Text(
-                                        '3',
+                                        employee.initials,
                                         style: GoogleFonts.poppins(
-                                          fontSize: 8,
+                                          fontSize: 16,
                                           fontWeight: FontWeight.w700,
                                           color: Colors.white,
-                                          height: 1,
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      // Badges Row
-                      Row(
-                        children: [
-                          // Payroll Active Badge
-                          Flexible(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 13,
-                                vertical: 5,
+                                ],
                               ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.15),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 7,
-                                    height: 7,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Color(0xFF22C55E),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 7),
-                                  Flexible(
-                                    child: Text(
-                                      'January 2025 Payroll Active',
+                              const SizedBox(width: 16),
+                              // Employee Info
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Welcome back, ${employee.firstName}!',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white.withValues(alpha: 0.75),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      '${employee.position} · ${employee.id}',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // Notification Button
+                              Stack(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.1,
+                                      ),
+                                    ),
+                                    child: IconButton(
+                                      onPressed: widget.onOpenNotifications,
+                                      icon: const Icon(
+                                        Icons.notifications_none_rounded,
+                                        color: Colors.white,
+                                        size: 22,
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(
+                                        minWidth: 40,
+                                        minHeight: 40,
+                                      ),
+                                    ),
                                   ),
+                                  if (3 > 0)
+                                    Positioned(
+                                      right: 6,
+                                      top: 6,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: const Color(0xFFEF4444),
+                                          border: Border.all(
+                                            color: const Color(0xFF0B044D),
+                                            width: 2,
+                                          ),
+                                        ),
+                                        constraints: const BoxConstraints(
+                                          minWidth: 16,
+                                          minHeight: 16,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            '3',
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white,
+                                              height: 1,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          // Badges Row
+                          Row(
+                            children: [
+                              // Payroll Active Badge
+                              Flexible(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 13,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.15,
+                                      ),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 7,
+                                        height: 7,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Color(0xFF22C55E),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 7),
+                                      Flexible(
+                                        child: Text(
+                                          'January 2025 Payroll Active',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white.withValues(
+                                              alpha: 0.75,
+                                            ),
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              // Next Pay Badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 13,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  'Next Pay: Jan 31',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white.withValues(alpha: 0.75),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Summary Cards
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Stats Grid - 2x2 layout
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildAnimatedItem(
+                            delay: 100,
+                            child: EnhancedStatCard(
+                              label: 'Basic Pay',
+                              value: '₱${salary.basicPay.toStringAsFixed(2)}',
+                              icon: Icons.credit_card,
+                              iconWrapColor: const Color(0xFFEFF6FF),
+                              iconColor: const Color(0xFF0B044D),
+                              dotColor: const Color(0xFF0B044D),
+                              subtitle: salary.periodLabel,
+                              isCompact: true,
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          // Next Pay Badge
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 13,
-                              vertical: 5,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildAnimatedItem(
+                            delay: 150,
+                            child: EnhancedStatCard(
+                              label: 'Net Pay',
+                              value: '₱${salary.netPay.toStringAsFixed(2)}',
+                              icon: Icons.check_circle,
+                              iconWrapColor: const Color(0xFFDCFCE7),
+                              iconColor: const Color(0xFF15803D),
+                              dotColor: const Color(0xFF15803D),
+                              subtitle: 'After deductions',
+                              isCompact: true,
                             ),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                width: 1,
-                              ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildAnimatedItem(
+                            delay: 200,
+                            child: EnhancedStatCard(
+                              label: 'Leave Credits',
+                              value:
+                                  '${leave.totalAvailable.toStringAsFixed(1)} days',
+                              icon: Icons.description,
+                              iconWrapColor: const Color(0xFFFEF3C7),
+                              iconColor: const Color(0xFFA16207),
+                              dotColor: const Color(0xFFA16207),
+                              subtitle:
+                                  '${leave.leaveTypesCount} leave type(s)',
+                              isCompact: true,
                             ),
-                            child: Text(
-                              'Next Pay: Jan 31',
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white.withValues(alpha: 0.75),
-                              ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildAnimatedItem(
+                            delay: 250,
+                            child: EnhancedStatCard(
+                              label: 'Attendance',
+                              value: '${attendance.rate.toStringAsFixed(1)}%',
+                              icon: Icons.calendar_month,
+                              iconWrapColor: const Color(0xFFFEE2E2),
+                              iconColor: const Color(0xFF8E1E18),
+                              dotColor: const Color(0xFF8E1E18),
+                              subtitle:
+                                  '${attendance.presentDays} days present',
+                              isCompact: true,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Charts Section with iOS-style Tabs
+            SliverToBoxAdapter(
+              child: _buildAnimatedItem(
+                delay: 300,
+                child: Column(
+                  children: [
+                    // Section Header
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Performance Trends',
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF0F172A),
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 16),
+                    // iOS-style Segmented Control
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildTabButton(
+                              label: 'Attendance',
+                              icon: Icons.calendar_month_rounded,
+                              isSelected: _chartTabController.index == 0,
+                              onTap: () {
+                                _chartTabController.animateTo(0);
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildTabButton(
+                              label: 'Salary',
+                              icon: Icons.payments_rounded,
+                              isSelected: _chartTabController.index == 1,
+                              onTap: () {
+                                _chartTabController.animateTo(1);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Tab Content
+                    SizedBox(
+                      height: 320,
+                      child: TabBarView(
+                        controller: _chartTabController,
+                        physics: const BouncingScrollPhysics(),
+                        children: [
+                          // Attendance Chart
+                          ChartCard(
+                            title: 'Attendance Trends',
+                            subtitle: 'Track your attendance patterns',
+                            data: _chartData != null
+                                ? {
+                                    'week': _chartData!.attendance.week.data,
+                                    'month': _chartData!.attendance.month.data,
+                                    'year': _chartData!.attendance.year.data,
+                                  }
+                                : {'week': [], 'month': [], 'year': []},
+                            labels: _chartData != null
+                                ? {
+                                    'week': _chartData!.attendance.week.labels,
+                                    'month':
+                                        _chartData!.attendance.month.labels,
+                                    'year': _chartData!.attendance.year.labels,
+                                  }
+                                : {'week': [], 'month': [], 'year': []},
+                            lineColor: const Color(0xFF15803D),
+                            backgroundColor: const Color(0xFFDCFCE7),
+                            valueSuffix: '%',
+                          ),
+                          // Salary Chart
+                          ChartCard(
+                            title: 'Salary Overview',
+                            subtitle: 'Your earnings over time',
+                            data: _chartData != null
+                                ? {
+                                    'week': _chartData!.salary.week.data,
+                                    'month': _chartData!.salary.month.data,
+                                    'year': _chartData!.salary.year.data,
+                                  }
+                                : {'week': [], 'month': [], 'year': []},
+                            labels: _chartData != null
+                                ? {
+                                    'week': _chartData!.salary.week.labels,
+                                    'month': _chartData!.salary.month.labels,
+                                    'year': _chartData!.salary.year.labels,
+                                  }
+                                : {'week': [], 'month': [], 'year': []},
+                            lineColor: const Color(0xFF0B044D),
+                            backgroundColor: const Color(0xFFF0EFFE),
+                            valuePrefix: '₱',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            ),
-          ),
-          // Summary Cards
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
+            // Quick Actions Section
+            SliverToBoxAdapter(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Stats Grid - 2x2 layout
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildAnimatedItem(
-                          delay: 100,
-                          child: EnhancedStatCard(
-                          label: 'Basic Pay',
-                          value: '₱${salary.basicPay.toStringAsFixed(2)}',
-                          icon: Icons.credit_card,
-                          iconWrapColor: const Color(0xFFEFF6FF),
-                          iconColor: const Color(0xFF0B044D),
-                          dotColor: const Color(0xFF0B044D),
-                          subtitle: salary.periodLabel,
-                          isCompact: true,
-                        ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildAnimatedItem(
-                          delay: 150,
-                          child: EnhancedStatCard(
-                          label: 'Net Pay',
-                          value: '₱${salary.netPay.toStringAsFixed(2)}',
-                          icon: Icons.check_circle,
-                          iconWrapColor: const Color(0xFFDCFCE7),
-                          iconColor: const Color(0xFF15803D),
-                          dotColor: const Color(0xFF15803D),
-                          subtitle: 'After deductions',
-                          isCompact: true,
-                        ),
-                        ),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildAnimatedItem(
-                          delay: 200,
-                          child: EnhancedStatCard(
-                          label: 'Leave Credits',
-                          value: '${leave.totalAvailable.toStringAsFixed(1)} days',
-                          icon: Icons.description,
-                          iconWrapColor: const Color(0xFFFEF3C7),
-                          iconColor: const Color(0xFFA16207),
-                          dotColor: const Color(0xFFA16207),
-                          subtitle: '${leave.leaveTypesCount} leave type(s)',
-                          isCompact: true,
+                  _buildAnimatedItem(
+                    delay: 450,
+                    child: SectionHeader(
+                      title: 'Quick Actions',
+                      showViewAll: false,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 2.2,
+                      children: [
+                        _buildQuickActionButton(
+                          icon: Icons.receipt,
+                          label: 'View Payslip',
+                          onTap: widget.onOpenPayslip ?? () {},
                         ),
+                        _buildQuickActionButton(
+                          icon: Icons.check_circle_outline,
+                          label: 'File Leave',
+                          onTap: widget.onOpenLeave ?? () {},
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildAnimatedItem(
-                          delay: 250,
-                          child: EnhancedStatCard(
-                          label: 'Attendance',
-                          value: '${attendance.rate.toStringAsFixed(1)}%',
-                          icon: Icons.calendar_month,
-                          iconWrapColor: const Color(0xFFFEE2E2),
-                          iconColor: const Color(0xFF8E1E18),
-                          dotColor: const Color(0xFF8E1E18),
-                          subtitle: '${attendance.presentDays} days present',
-                          isCompact: true,
+                        _buildQuickActionButton(
+                          icon: Icons.calendar_today,
+                          label: 'Check DTR',
+                          onTap: widget.onOpenAttendance ?? () {},
                         ),
+                        _buildQuickActionButton(
+                          icon: Icons.flight_takeoff,
+                          label: 'Travel Order',
+                          onTap: widget.onOpenTravelOrder ?? () {},
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
 
-          // Charts Section with iOS-style Tabs
-          SliverToBoxAdapter(
-            child: _buildAnimatedItem(
-              delay: 300,
+            // Deductions & Loans Section
+            SliverToBoxAdapter(
               child: Column(
                 children: [
-                  // Section Header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Performance Trends',
-                          style: GoogleFonts.inter(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF0F172A),
+                  const SizedBox(height: 12),
+                  _buildAnimatedItem(
+                    delay: 550,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'My Deductions & Loans',
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF0F172A),
+                            ),
                           ),
-                        ),
-                      ],
+                          // iOS-style Segmented Control for View
+                          Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _buildDeductionViewButton('Daily', 'daily'),
+                                _buildDeductionViewButton('Weekly', 'weekly'),
+                                _buildDeductionViewButton('Monthly', 'monthly'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  // iOS-style Segmented Control
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _buildTabButton(
-                            label: 'Attendance',
-                            icon: Icons.calendar_month_rounded,
-                            isSelected: _chartTabController.index == 0,
-                            onTap: () {
-                              _chartTabController.animateTo(0);
-                            },
-                          ),
-                        ),
-                        Expanded(
-                          child: _buildTabButton(
-                            label: 'Salary',
-                            icon: Icons.payments_rounded,
-                            isSelected: _chartTabController.index == 1,
-                            onTap: () {
-                              _chartTabController.animateTo(1);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Tab Content
-                  SizedBox(
-                    height: 320,
-                    child: TabBarView(
-                      controller: _chartTabController,
-                      physics: const BouncingScrollPhysics(),
-                      children: [
-                        // Attendance Chart
-                        ChartCard(
-                          title: 'Attendance Trends',
-                          subtitle: 'Track your attendance patterns',
-                          data: _chartData != null ? {
-                            'week': _chartData!.attendance.week.data,
-                            'month': _chartData!.attendance.month.data,
-                            'year': _chartData!.attendance.year.data,
-                          } : {'week': [], 'month': [], 'year': []},
-                          labels: _chartData != null ? {
-                            'week': _chartData!.attendance.week.labels,
-                            'month': _chartData!.attendance.month.labels,
-                            'year': _chartData!.attendance.year.labels,
-                          } : {'week': [], 'month': [], 'year': []},
-                          lineColor: const Color(0xFF15803D),
-                          backgroundColor: const Color(0xFFDCFCE7),
-                          valueSuffix: '%',
-                        ),
-                        // Salary Chart
-                        ChartCard(
-                          title: 'Salary Overview',
-                          subtitle: 'Your earnings over time',
-                          data: _chartData != null ? {
-                            'week': _chartData!.salary.week.data,
-                            'month': _chartData!.salary.month.data,
-                            'year': _chartData!.salary.year.data,
-                          } : {'week': [], 'month': [], 'year': []},
-                          labels: _chartData != null ? {
-                            'week': _chartData!.salary.week.labels,
-                            'month': _chartData!.salary.month.labels,
-                            'year': _chartData!.salary.year.labels,
-                          } : {'week': [], 'month': [], 'year': []},
-                          lineColor: const Color(0xFF0B044D),
-                          backgroundColor: const Color(0xFFF0EFFE),
-                          valuePrefix: '₱',
-                        ),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
-          ),
-          // Quick Actions Section
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                const SizedBox(height: 12),
-                _buildAnimatedItem(
-                  delay: 450,
-                  child: SectionHeader(title: 'Quick Actions', showViewAll: false),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
-                  ),
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 2.2,
-                    children: [
-                      _buildQuickActionButton(
-                        icon: Icons.receipt,
-                        label: 'View Payslip',
-                        onTap: widget.onOpenPayslip ?? () {},
-                      ),
-                      _buildQuickActionButton(
-                        icon: Icons.check_circle_outline,
-                        label: 'File Leave',
-                        onTap: widget.onOpenLeave ?? () {},
-                      ),
-                      _buildQuickActionButton(
-                        icon: Icons.calendar_today,
-                        label: 'Check DTR',
-                        onTap: widget.onOpenAttendance ?? () {},
-                      ),
-                      _buildQuickActionButton(
-                        icon: Icons.flight_takeoff,
-                        label: 'Travel Order',
-                        onTap: widget.onOpenTravelOrder ?? () {},
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Deductions & Loans Section
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                const SizedBox(height: 12),
-                _buildAnimatedItem(
-                  delay: 550,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'My Deductions & Loans',
-                          style: GoogleFonts.inter(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF0F172A),
-                          ),
-                        ),
-                        // iOS-style Segmented Control for View
-                        Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _buildDeductionViewButton('Daily', 'daily'),
-                              _buildDeductionViewButton('Weekly', 'weekly'),
-                              _buildDeductionViewButton('Monthly', 'monthly'),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-              ],
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
+            SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
                 final deduction = _deductions[index];
                 return _buildAnimatedItem(
                   delay: 600 + (index * 50),
@@ -806,273 +825,297 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                     onTap: () => _showDeductionDetails(deduction),
                   ),
                 );
-              },
-              childCount: _deductions.length,
+              }, childCount: _deductions.length),
             ),
-          ),
 
-          // Leave Balance Section
-          SliverToBoxAdapter(
-            child: _buildAnimatedItem(
-              delay: 750,
-              child: Container(
-              margin: const EdgeInsets.all(20),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200, width: 1),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+            // Leave Balance Section
+            SliverToBoxAdapter(
+              child: _buildAnimatedItem(
+                delay: 750,
+                child: Container(
+                  margin: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade200, width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Leave Balance',
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF0F172A),
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Leave Balance',
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ..._leaveBalances.take(3).toList().asMap().entries.map((
+                        entry,
+                      ) {
+                        final colors = [
+                          const Color(0xFF0B044D),
+                          const Color(0xFF8E1E18),
+                          const Color(0xFFA16207),
+                        ];
+                        final balance = entry.value;
+                        return LeaveBalanceCard(
+                          leaveType: balance.leaveType,
+                          available: balance.available,
+                          total: balance.earned,
+                          progressColor: colors[entry.key % 3],
+                        );
+                      }),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  ..._leaveBalances.take(3).toList().asMap().entries.map((entry) {
-                    final colors = [
-                      const Color(0xFF0B044D),
-                      const Color(0xFF8E1E18),
-                      const Color(0xFFA16207),
-                    ];
-                    final balance = entry.value;
-                    return LeaveBalanceCard(
-                      leaveType: balance.leaveType,
-                      available: balance.available,
-                      total: balance.earned,
-                      progressColor: colors[entry.key % 3],
-                    );
-                  }),
-                ],
+                ),
               ),
             ),
-            ),
-          ),
-          // Recent Notifications - Floating Container
-          SliverToBoxAdapter(
-            child: _buildAnimatedItem(
-              delay: 800,
-              child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF0B044D).withValues(alpha: 0.08),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                    spreadRadius: 0,
+            // Recent Notifications - Floating Container
+            SliverToBoxAdapter(
+              child: _buildAnimatedItem(
+                delay: 800,
+                child: Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
                   ),
-                  BoxShadow(
-                    color: const Color(0xFF0B044D).withValues(alpha: 0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                    spreadRadius: 0,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF0B044D).withValues(alpha: 0.08),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                        spreadRadius: 0,
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFF0B044D).withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                        spreadRadius: 0,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  // Header
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF0B044D).withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Icon(
-                                Icons.notifications_active_rounded,
-                                color: Color(0xFF0B044D),
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              'Recent Notifications',
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF0F172A),
-                              ),
-                            ),
-                          ],
-                        ),
-                        TextButton(
-                          onPressed: widget.onOpenNotifications,
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(
-                            'View All',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF0B044D),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Notifications List
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    itemCount: 3, // TODO: Replace with actual notifications count
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      // TODO: Replace with actual notification data
-                      final mockNotifications = [
-                        {'title': 'Payslip Available', 'message': 'Your payslip for ${salary.periodLabel} is now available', 'type': 'Payslip', 'isRead': false},
-                        {'title': 'Leave Request', 'message': 'Your leave request has been approved', 'type': 'Leave', 'isRead': false},
-                        {'title': 'Training Schedule', 'message': 'Upcoming training session next week', 'type': 'Training', 'isRead': true},
-                      ];
-                      final notification = mockNotifications[index];
-                      final isRead = notification['isRead'] as bool;
-                      final type = notification['type'] as String;
-                      final title = notification['title'] as String;
-                      final message = notification['message'] as String;
-                      
-                      return Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: isRead
-                              ? Colors.grey.shade50
-                              : const Color(0xFFF0F9FF),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: isRead
-                                ? Colors.grey.shade200
-                                : const Color(0xFF3B82F6).withValues(alpha: 0.2),
-                            width: 1,
-                          ),
-                        ),
+                  child: Column(
+                    children: [
+                      // Header
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: isRead
-                                    ? Colors.grey.shade200
-                                    : const Color(0xFF3B82F6),
-                                boxShadow: isRead
-                                    ? null
-                                    : [
-                                        BoxShadow(
-                                          color: const Color(0xFF3B82F6)
-                                              .withValues(alpha: 0.3),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFF0B044D,
+                                    ).withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    Icons.notifications_active_rounded,
+                                    color: Color(0xFF0B044D),
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Recent Notifications',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF0F172A),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            TextButton(
+                              onPressed: widget.onOpenNotifications,
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              child: Center(
-                                child: Icon(
-                                  _getNotificationIcon(type),
-                                  color: isRead
-                                      ? Colors.grey.shade600
-                                      : Colors.white,
-                                  size: 20,
+                              child: Text(
+                                'View All',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF0B044D),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          title,
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: const Color(0xFF0F172A),
-                                          ),
-                                        ),
-                                      ),
-                                      if (!isRead)
-                                        Container(
-                                          width: 8,
-                                          height: 8,
-                                          decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Color(0xFF3B82F6),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    message,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.grey.shade600,
-                                      height: 1.4,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ],
                         ),
-                      );
-                    },
+                      ),
+                      // Notifications List
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                        itemCount:
+                            3, // TODO: Replace with actual notifications count
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          // TODO: Replace with actual notification data
+                          final mockNotifications = [
+                            {
+                              'title': 'Payslip Available',
+                              'message':
+                                  'Your payslip for ${salary.periodLabel} is now available',
+                              'type': 'Payslip',
+                              'isRead': false,
+                            },
+                            {
+                              'title': 'Leave Request',
+                              'message': 'Your leave request has been approved',
+                              'type': 'Leave',
+                              'isRead': false,
+                            },
+                            {
+                              'title': 'Training Schedule',
+                              'message': 'Upcoming training session next week',
+                              'type': 'Training',
+                              'isRead': true,
+                            },
+                          ];
+                          final notification = mockNotifications[index];
+                          final isRead = notification['isRead'] as bool;
+                          final type = notification['type'] as String;
+                          final title = notification['title'] as String;
+                          final message = notification['message'] as String;
+
+                          return Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: isRead
+                                  ? Colors.grey.shade50
+                                  : const Color(0xFFF0F9FF),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isRead
+                                    ? Colors.grey.shade200
+                                    : const Color(
+                                        0xFF3B82F6,
+                                      ).withValues(alpha: 0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isRead
+                                        ? Colors.grey.shade200
+                                        : const Color(0xFF3B82F6),
+                                    boxShadow: isRead
+                                        ? null
+                                        : [
+                                            BoxShadow(
+                                              color: const Color(
+                                                0xFF3B82F6,
+                                              ).withValues(alpha: 0.3),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                  ),
+                                  child: Center(
+                                    child: Icon(
+                                      _getNotificationIcon(type),
+                                      color: isRead
+                                          ? Colors.grey.shade600
+                                          : Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              title,
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: const Color(0xFF0F172A),
+                                              ),
+                                            ),
+                                          ),
+                                          if (!isRead)
+                                            Container(
+                                              width: 8,
+                                              height: 8,
+                                              decoration: const BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Color(0xFF3B82F6),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        message,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.grey.shade600,
+                                          height: 1.4,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-            ),
-          ),
-          // Bottom spacing
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        ],
-      ),
+            // Bottom spacing
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          ],
         ),
+      ),
     );
   }
 
   // Animated item builder for staggered entrance animations
-  Widget _buildAnimatedItem({
-    required int delay,
-    required Widget child,
-  }) {
+  Widget _buildAnimatedItem({required int delay, required Widget child}) {
     final delayInSeconds = delay / 1000.0;
-    
+
     return RepaintBoundary(
       child: AnimatedBuilder(
         animation: _staggerController,
@@ -1080,13 +1123,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
           final animationProgress = Curves.easeOutCubic.transform(
             (_staggerController.value - delayInSeconds).clamp(0.0, 1.0),
           );
-          
+
           return Transform.translate(
             offset: Offset(0, 20 * (1 - animationProgress)),
-            child: Opacity(
-              opacity: animationProgress,
-              child: child,
-            ),
+            child: Opacity(opacity: animationProgress, child: child),
           );
         },
         child: child,
@@ -1124,9 +1164,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
           style: GoogleFonts.inter(
             fontSize: 11,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected
-                ? const Color(0xFF0B044D)
-                : Colors.grey.shade600,
+            color: isSelected ? const Color(0xFF0B044D) : Colors.grey.shade600,
           ),
         ),
       ),
@@ -1322,10 +1360,23 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildDetailRow('Total Amount', '₱${deduction.totalAmount.toStringAsFixed(2)}'),
-                    _buildDetailRow('Monthly Deduction', '₱${deduction.monthlyAmount.toStringAsFixed(2)}'),
-                    _buildDetailRow('Per Cutoff', '₱${deduction.perCutoff.toStringAsFixed(2)}'),
-                    _buildDetailRow('Remaining Balance', '₱${deduction.remainingBalance.toStringAsFixed(2)}', isHighlight: true),
+                    _buildDetailRow(
+                      'Total Amount',
+                      '₱${deduction.totalAmount.toStringAsFixed(2)}',
+                    ),
+                    _buildDetailRow(
+                      'Monthly Deduction',
+                      '₱${deduction.monthlyAmount.toStringAsFixed(2)}',
+                    ),
+                    _buildDetailRow(
+                      'Per Cutoff',
+                      '₱${deduction.perCutoff.toStringAsFixed(2)}',
+                    ),
+                    _buildDetailRow(
+                      'Remaining Balance',
+                      '₱${deduction.remainingBalance.toStringAsFixed(2)}',
+                      isHighlight: true,
+                    ),
                     const SizedBox(height: 24),
                     Text(
                       'SCHEDULE',
@@ -1379,7 +1430,11 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
     );
   }
 
-  Widget _buildDetailRow(String label, String value, {bool isHighlight = false}) {
+  Widget _buildDetailRow(
+    String label,
+    String value, {
+    bool isHighlight = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -1398,7 +1453,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: isHighlight ? const Color(0xFF8E1E18) : const Color(0xFF0F172A),
+              color: isHighlight
+                  ? const Color(0xFF8E1E18)
+                  : const Color(0xFF0F172A),
             ),
           ),
         ],

@@ -1,4 +1,5 @@
 /// Authentication Models for Mobile App
+library;
 
 /// User Model
 class UserModel {
@@ -21,10 +22,10 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] as int,
-      name: json['name'] as String,
-      email: json['email'] as String,
-      username: json['username'] as String?,
-      role: json['role'] as String,
+      name: json['name']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      username: json['username']?.toString(),
+      role: json['role']?.toString() ?? 'employee',
       employeeId: json['employee_id'] as int?,
     );
   }
@@ -68,14 +69,14 @@ class EmployeeModel {
   factory EmployeeModel.fromJson(Map<String, dynamic> json) {
     return EmployeeModel(
       id: json['id'] as int,
-      firstName: json['first_name'] as String,
-      middleName: json['middle_name'] as String?,
-      lastName: json['last_name'] as String,
-      suffix: json['suffix'] as String?,
-      fullName: json['full_name'] as String,
-      employmentStatus: json['employment_status'] as String?,
-      department: json['department'] as String?,
-      designation: json['designation'] as String?,
+      firstName: json['first_name']?.toString() ?? '',
+      middleName: json['middle_name']?.toString(),
+      lastName: json['last_name']?.toString() ?? '',
+      suffix: json['suffix']?.toString(),
+      fullName: json['full_name']?.toString() ?? '',
+      employmentStatus: json['employment_status']?.toString(),
+      department: json['department']?.toString(),
+      designation: json['designation']?.toString(),
     );
   }
 
@@ -109,7 +110,7 @@ class LoginResponse {
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
     final data = json['data'] as Map<String, dynamic>;
     return LoginResponse(
-      token: data['token'] as String,
+      token: data['token']?.toString() ?? '',
       user: UserModel.fromJson(data['user'] as Map<String, dynamic>),
       employee: data['employee'] != null
           ? EmployeeModel.fromJson(data['employee'] as Map<String, dynamic>)

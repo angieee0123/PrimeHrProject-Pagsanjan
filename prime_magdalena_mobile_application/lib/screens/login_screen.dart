@@ -23,8 +23,6 @@ class _LoginScreenState extends State<LoginScreen>
   late FocusNode _passwordFocus;
 
   bool _obscurePassword = true;
-  bool _rememberMe = false;
-  bool _useBiometric = false;
   String? _errorMessage;
   bool _isLoading = false;
 
@@ -51,6 +49,24 @@ class _LoginScreenState extends State<LoginScreen>
         );
 
     _animationController.forward();
+
+    // Check if user is already authenticated (persistent login)
+    _checkExistingSession();
+  }
+
+  /// Check if user already has a valid session
+  Future<void> _checkExistingSession() async {
+    try {
+      await _authService.initialize();
+      final isAuth = _authService.isAuthenticated;
+
+      if (isAuth && mounted) {
+        // User already logged in - auto navigate
+        widget.onLoginSuccess?.call();
+      }
+    } catch (e) {
+      // Continue with login screen if session check fails
+    }
   }
 
   @override
@@ -101,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen>
     });
 
     try {
-      // Call real API login
+      // Call real API login (falls back to mock data if offline)
       final loginResponse = await _authService.login(
         _emailController.text.trim(),
         _passwordController.text,
@@ -109,19 +125,24 @@ class _LoginScreenState extends State<LoginScreen>
 
       if (!mounted) return;
 
+      // Check if using mock/offline mode
+      final isOfflineMode = loginResponse.token.startsWith('mock_token_');
+
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Welcome back, ${loginResponse.user.name}!',
+            isOfflineMode
+                ? '🔌 Offline Mode: Welcome, ${loginResponse.user.name}!\nUsing demo data (API unavailable)'
+                : 'Welcome back, ${loginResponse.user.name}!\nYour account is now saved and will auto-login.',
           ),
-          backgroundColor: Colors.green,
+          backgroundColor: isOfflineMode ? Colors.orange : Colors.green,
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          duration: const Duration(seconds: 2),
+          duration: const Duration(seconds: 4),
         ),
       );
 
@@ -135,16 +156,14 @@ class _LoginScreenState extends State<LoginScreen>
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = e.toString().replaceAll('Exception: ', '').replaceAll('Login failed: ', '');
+          _errorMessage = e
+              .toString()
+              .replaceAll('Exception: ', '')
+              .replaceAll('Login failed: ', '')
+              .replaceAll('Login error: ', '');
         });
       }
     }
-  }
-
-  void _handleBiometricLogin() {
-    setState(() {
-      _useBiometric = !_useBiometric;
-    });
   }
 
   InputDecoration _buildInputDecoration(String label, IconData icon) {
@@ -426,46 +445,31 @@ class _LoginScreenState extends State<LoginScreen>
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              GestureDetector(
-                                onTap: _isLoading
-                                    ? null
-                                    : () {
-                                        setState(() {
-                                          _rememberMe = !_rememberMe;
-                                        });
-                                      },
+                              Tooltip(
+                                message:
+                                    'Your account will remain logged in for future sessions',
                                 child: Row(
                                   children: [
                                     Container(
                                       width: 20,
                                       height: 20,
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(6),
-                                        border: Border.all(
-                                          color: _rememberMe
-                                              ? const Color(0xFF1E3A8A)
-                                              : const Color(0xFFE2E8F0),
-                                          width: 2,
-                                        ),
-                                        color: _rememberMe
-                                            ? const Color(0xFF1E3A8A)
-                                            : Colors.transparent,
+                                        shape: BoxShape.circle,
+                                        color: const Color(0xFF1E3A8A),
                                       ),
-                                      child: _rememberMe
-                                          ? const Icon(
-                                              Icons.check,
-                                              size: 14,
-                                              color: Colors.white,
-                                            )
-                                          : null,
+                                      child: const Icon(
+                                        Icons.check,
+                                        size: 14,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      'Remember me',
+                                      'Stay logged in',
                                       style: GoogleFonts.inter(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w500,
-                                        color: const Color(0xFF475569),
+                                        color: const Color(0xFF64748B),
                                       ),
                                     ),
                                   ],
@@ -571,29 +575,6 @@ class _LoginScreenState extends State<LoginScreen>
                                     ),
                             ),
                           ),
-
-                          const SizedBox(height: 24),
-
-                          // Biometric Login (Optional)
-                          if (!_useBiometric)
-                            Center(
-                              child: TextButton.icon(
-                                onPressed: _isLoading
-                                    ? null
-                                    : _handleBiometricLogin,
-                                icon: const Icon(Icons.fingerprint, size: 22),
-                                label: Text(
-                                  'Use biometric login',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: const Color(0xFF1E3A8A),
-                                ),
-                              ),
-                            ),
 
                           const SizedBox(height: 24),
 

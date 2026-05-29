@@ -48,15 +48,15 @@ class EmployeeInfo {
 
   factory EmployeeInfo.fromJson(Map<String, dynamic> json) {
     return EmployeeInfo(
-      id: json['id'] ?? '',
-      firstName: json['first_name'] ?? '',
-      lastName: json['last_name'] ?? '',
-      fullName: json['full_name'] ?? '',
-      initials: json['initials'] ?? '',
-      position: json['position'] ?? 'N/A',
-      department: json['department'] ?? 'N/A',
-      employmentType: json['employment_type'] ?? 'Permanent',
-      status: json['status'] ?? 'active',
+      id: json['id']?.toString() ?? '',
+      firstName: json['first_name']?.toString() ?? '',
+      lastName: json['last_name']?.toString() ?? '',
+      fullName: json['full_name']?.toString() ?? '',
+      initials: json['initials']?.toString() ?? '',
+      position: json['position']?.toString() ?? 'N/A',
+      department: json['department']?.toString() ?? 'N/A',
+      employmentType: json['employment_type']?.toString() ?? 'Permanent',
+      status: json['status']?.toString() ?? 'active',
     );
   }
 }
@@ -84,9 +84,9 @@ class SalaryInfo {
       basicPay: (json['basic_pay'] ?? 0).toDouble(),
       netPay: (json['net_pay'] ?? 0).toDouble(),
       totalDeductions: (json['total_deductions'] ?? 0).toDouble(),
-      periodStart: json['period_start'] ?? '',
-      periodEnd: json['period_end'] ?? '',
-      periodLabel: json['period_label'] ?? '',
+      periodStart: json['period_start']?.toString() ?? '',
+      periodEnd: json['period_end']?.toString() ?? '',
+      periodLabel: json['period_label']?.toString() ?? '',
     );
   }
 }
@@ -161,16 +161,16 @@ class DeductionModel {
   factory DeductionModel.fromJson(Map<String, dynamic> json) {
     return DeductionModel(
       id: json['id'] ?? 0,
-      deductionType: json['deduction_type'] ?? 'Unknown',
-      code: json['code'],
-      category: json['category'] ?? 'other',
+      deductionType: json['deduction_type']?.toString() ?? 'Unknown',
+      code: json['code']?.toString(),
+      category: json['category']?.toString() ?? 'other',
       monthlyAmount: (json['monthly_amount'] ?? 0).toDouble(),
       perCutoff: (json['per_cutoff'] ?? 0).toDouble(),
       remainingBalance: (json['remaining_balance'] ?? 0).toDouble(),
       totalAmount: (json['total_amount'] ?? 0).toDouble(),
-      startDate: json['start_date'],
-      endDate: json['end_date'],
-      status: json['status'] ?? 'active',
+      startDate: json['start_date']?.toString(),
+      endDate: json['end_date']?.toString(),
+      status: json['status']?.toString() ?? 'active',
     );
   }
 
@@ -208,7 +208,7 @@ class LeaveBalanceModel {
   factory LeaveBalanceModel.fromJson(Map<String, dynamic> json) {
     return LeaveBalanceModel(
       id: json['id'] ?? 0,
-      leaveType: json['leave_type'] ?? 'Unknown',
+      leaveType: json['leave_type']?.toString() ?? 'Unknown',
       available: (json['available'] ?? 0).toDouble(),
       used: (json['used'] ?? 0).toDouble(),
       earned: (json['earned'] ?? 0).toDouble(),
@@ -297,11 +297,11 @@ class NotificationModel {
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
       id: json['id'] ?? 0,
-      title: json['title'] ?? '',
-      message: json['message'] ?? '',
-      type: json['type'] ?? 'general',
+      title: json['title']?.toString() ?? '',
+      message: json['message']?.toString() ?? '',
+      type: json['type']?.toString() ?? 'general',
       isRead: json['is_read'] ?? false,
-      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
     );
   }
 }

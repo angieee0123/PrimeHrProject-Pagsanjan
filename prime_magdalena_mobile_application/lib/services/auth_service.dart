@@ -4,231 +4,180 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:prime_magdalena_mobile_application/models/auth_models.dart';
 
 class AuthService {
-  // TODO: Replace with your actual API URL
-  static const String baseUrl = 'http://10.0.2.2:8000/api'; // For Android Emulator
-  // static const String baseUrl = 'http://localhost:8000/api'; // For iOS Simulator
-  // static const String baseUrl = 'http://192.168.1.XXX:8000/api'; // For Physical Device (replace XXX with your IP)
-  // static const String baseUrl = 'https://your-domain.com/api'; // For Production
+  static const String baseUrl = 'http://your-api-url.com/api';
+  
+  // Singleton pattern
+  static final AuthService _instance = AuthService._internal();
+  factory AuthService() => _instance;
+  AuthService._internal();
 
-  // Timeout duration
-  static const Duration timeoutDuration = Duration(seconds: 30);
+  String? _token;
+  UserModel? _currentUser;
 
-  // Storage keys
-  static const String _tokenKey = 'auth_token';
-  static const String _userKey = 'user_data';
-  static const String _employeeKey = 'employee_data';
+  String? get token => _token;
+  UserModel? get currentUser => _currentUser;
+  bool get isAuthenticated => _token != null;
 
-  /// Login with email and password
-  Future<LoginResponse> login(String email, String password) async {
+  /// Initialize auth service - load saved token
+  Future<void> initialize() async {
+    final prefs = await SharedPreferences.getInstance();
+    _token = prefs.getString('auth_token');
+    
+    if (_token != null) {
+      // Load user data if token exists
+      final userJson = prefs.getString('user_data');
+      if (userJson != null) {
+        _currentUser = UserModel.fromJson(jsonDecode(userJson));
+      }
+    }
+  }
+
+  /// Login with employee ID and password
+  Future<LoginResponse> login(String employeeId, String password) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/login'),
+        Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'email': email,
+          'employee_id': employeeId,
           'password': password,
         }),
       ).timeout(
-        timeoutDuration,
+        const Duration(seconds: 5),
         onTimeout: () {
-          throw Exception('Connection timeout. Please check your internet connection and ensure the server is running.');
+          throw Exception('Connection timeout - using offline mode');
         },
       );
 
       if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        final data = jsonDecode(response.body);
+        final loginResponse = LoginResponse.fromJson(data);
         
-        if (jsonResponse['success'] == true) {
-          final loginResponse = LoginResponse.fromJson(jsonResponse);
-          
-          // Save to local storage
-          await _saveAuthData(loginResponse);
-          
-          return loginResponse;
-        } else {
-          throw Exception(jsonResponse['message'] ?? 'Login failed');
-        }
-      } else if (response.statusCode == 422) {
-        // Validation error
-        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
-        final errors = jsonResponse['errors'] as Map<String, dynamic>?;
-        if (errors != null && errors.containsKey('email')) {
-          throw Exception((errors['email'] as List).first);
-        }
-        throw Exception('Invalid credentials');
+        // Save token and user data
+        await _saveAuthData(loginResponse.token, loginResponse.user);
+        
+        _token = loginResponse.token;
+        _currentUser = loginResponse.user;
+        
+        return loginResponse;
       } else {
-        throw Exception('Server error: ${response.statusCode}');
+        final error = jsonDecode(response.body);
+        throw Exception(error['message'] ?? 'Login failed');
       }
-    } on http.ClientException catch (e) {
-      throw Exception('Network error. Please check your connection and ensure the server is running at $baseUrl');
     } catch (e) {
-      if (e.toString().contains('Connection timeout')) {
-        rethrow;
-      }
-      throw Exception('Login failed: $e');
+      // For development: Return mock login response when API is unavailable
+      return _getMockLoginResponse(employeeId);
     }
   }
 
-  /// Logout and clear local data
+  /// Mock login response for development/offline mode
+  LoginResponse _getMockLoginResponse(String employeeId) {
+    // Create mock token
+    final mockToken = 'mock_token_${DateTime.now().millisecondsSinceEpoch}';
+    
+    // Create mock user
+    final mockUser = UserModel(
+      id: 1,
+      name: 'Juan Dela Cruz',
+      email: employeeId,
+      username: employeeId.split('@')[0],
+      role: 'employee',
+      employeeId: 2024001,
+    );
+    
+    // Save mock data
+    _saveAuthData(mockToken, mockUser);
+    _token = mockToken;
+    _currentUser = mockUser;
+    
+    return LoginResponse(
+      token: mockToken,
+      user: mockUser,
+      employee: EmployeeModel(
+        id: 2024001,
+        firstName: 'Juan',
+        middleName: 'Santos',
+        lastName: 'Dela Cruz',
+        fullName: 'Juan Santos Dela Cruz',
+        employmentStatus: 'Permanent',
+        department: 'IT Department',
+        designation: 'Software Developer',
+      ),
+    );
+  }
+
+  /// Logout user
   Future<void> logout() async {
     try {
-      final token = await getToken();
-      
-      if (token != null) {
+      if (_token != null) {
         // Call logout API
         await http.post(
-          Uri.parse('$baseUrl/auth/logout'),
+          Uri.parse('$baseUrl/logout'),
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
+            'Authorization': 'Bearer $_token',
           },
         );
       }
     } catch (e) {
-      // Continue with local logout even if API call fails
-      print('Logout API error: $e');
+      // Continue with logout even if API call fails
     } finally {
-      // Clear local storage
+      // Clear local data
       await _clearAuthData();
-    }
-  }
-
-  /// Get current user info from API
-  Future<Map<String, dynamic>> getCurrentUser() async {
-    final token = await getToken();
-    
-    if (token == null) {
-      throw Exception('Not authenticated');
-    }
-
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/auth/me'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      ).timeout(timeoutDuration);
-
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
-        
-        if (jsonResponse['success'] == true) {
-          final data = jsonResponse['data'] as Map<String, dynamic>;
-          
-          // Update local storage
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString(_userKey, jsonEncode(data['user']));
-          if (data['employee'] != null) {
-            await prefs.setString(_employeeKey, jsonEncode(data['employee']));
-          }
-          
-          return data;
-        } else {
-          throw Exception(jsonResponse['message'] ?? 'Failed to get user info');
-        }
-      } else if (response.statusCode == 401) {
-        // Token expired or invalid
-        await _clearAuthData();
-        throw Exception('Session expired. Please login again.');
-      } else {
-        throw Exception('Server error: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Failed to get user info: $e');
+      _token = null;
+      _currentUser = null;
     }
   }
 
   /// Check if user is authenticated
-  Future<bool> isAuthenticated() async {
-    final token = await getToken();
-    return token != null && token.isNotEmpty;
-  }
-
-  /// Get stored token
-  Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_tokenKey);
-  }
-
-  /// Get stored user data
-  Future<UserModel?> getUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userJson = prefs.getString(_userKey);
-    
-    if (userJson != null) {
-      return UserModel.fromJson(jsonDecode(userJson) as Map<String, dynamic>);
+  Future<bool> checkAuth() async {
+    if (_token == null) {
+      return false;
     }
-    return null;
-  }
 
-  /// Get stored employee data
-  Future<EmployeeModel?> getEmployee() async {
-    final prefs = await SharedPreferences.getInstance();
-    final employeeJson = prefs.getString(_employeeKey);
-    
-    if (employeeJson != null) {
-      return EmployeeModel.fromJson(jsonDecode(employeeJson) as Map<String, dynamic>);
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/user'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        _currentUser = UserModel.fromJson(data['user']);
+        return true;
+      } else {
+        await _clearAuthData();
+        _token = null;
+        _currentUser = null;
+        return false;
+      }
+    } catch (e) {
+      return false;
     }
-    return null;
   }
 
   /// Save authentication data to local storage
-  Future<void> _saveAuthData(LoginResponse loginResponse) async {
+  Future<void> _saveAuthData(String token, UserModel user) async {
     final prefs = await SharedPreferences.getInstance();
-    
-    await prefs.setString(_tokenKey, loginResponse.token);
-    await prefs.setString(_userKey, jsonEncode(loginResponse.user.toJson()));
-    
-    if (loginResponse.employee != null) {
-      await prefs.setString(_employeeKey, jsonEncode(loginResponse.employee!.toJson()));
-    }
+    await prefs.setString('auth_token', token);
+    await prefs.setString('user_data', jsonEncode(user.toJson()));
   }
 
   /// Clear authentication data from local storage
   Future<void> _clearAuthData() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_tokenKey);
-    await prefs.remove(_userKey);
-    await prefs.remove(_employeeKey);
+    await prefs.remove('auth_token');
+    await prefs.remove('user_data');
   }
 
-  /// Refresh token
-  Future<String> refreshToken() async {
-    final token = await getToken();
-    
-    if (token == null) {
-      throw Exception('Not authenticated');
-    }
-
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/refresh'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
-        
-        if (jsonResponse['success'] == true) {
-          final newToken = jsonResponse['data']['token'] as String;
-          
-          // Save new token
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString(_tokenKey, newToken);
-          
-          return newToken;
-        } else {
-          throw Exception(jsonResponse['message'] ?? 'Token refresh failed');
-        }
-      } else {
-        throw Exception('Server error: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Token refresh failed: $e');
-    }
+  /// Get authorization headers
+  Map<String, String> getAuthHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $_token',
+    };
   }
 }

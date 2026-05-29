@@ -28,7 +28,8 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _checkAuthStatus() async {
     try {
-      final isAuthenticated = await _authService.isAuthenticated();
+      await _authService.initialize();
+      final isAuthenticated = _authService.isAuthenticated;
       if (mounted) {
         setState(() {
           _isLoggedIn = isAuthenticated;
@@ -116,14 +117,14 @@ class _MyAppState extends State<MyApp> {
               ),
             )
           : _isLoggedIn
-              ? MainAppShell(onLogout: _handleLogout)
-              : LoginScreen(
-                  onLoginSuccess: () {
-                    setState(() {
-                      _isLoggedIn = true;
-                    });
-                  },
-                ),
+          ? MainAppShell(onLogout: _handleLogout)
+          : LoginScreen(
+              onLoginSuccess: () {
+                setState(() {
+                  _isLoggedIn = true;
+                });
+              },
+            ),
     );
   }
 }

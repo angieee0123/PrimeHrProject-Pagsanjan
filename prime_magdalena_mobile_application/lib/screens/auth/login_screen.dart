@@ -14,7 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
-  
+
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
@@ -51,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // Navigate to home screen
       Navigator.of(context).pushReplacementNamed('/home');
-      
+
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -90,10 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF0B044D),
-                          Color(0xFF1A0F6E),
-                        ],
+                        colors: [Color(0xFF0B044D), Color(0xFF1A0F6E)],
                       ),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
@@ -111,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Title
                   Text(
                     'Welcome Back',
