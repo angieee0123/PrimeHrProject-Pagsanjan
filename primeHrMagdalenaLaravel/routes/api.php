@@ -6,6 +6,10 @@ use App\Http\Controllers\Api\MobileDashboardController;
 use App\Http\Controllers\Api\MobileProfileController;
 use App\Http\Controllers\Api\MobilePayslipController;
 use App\Http\Controllers\Api\MobileAttendanceController;
+use App\Http\Controllers\Api\MobileLeaveController;
+use App\Http\Controllers\Api\MobileTravelOrderController;
+use App\Http\Controllers\Api\MobileTrainingController;
+use App\Http\Controllers\Api\MobileChatbotController;
 use App\Http\Controllers\Api\AuthController;
 
 /*
@@ -74,5 +78,26 @@ Route::middleware('auth:sanctum')->group(function () {
         // Attendance
         Route::get('/attendance', [MobileAttendanceController::class, 'index']);
         Route::get('/attendance/detailed', [MobileAttendanceController::class, 'detailed']);
+
+        // Leave & benefits
+        Route::get('/leave', [MobileLeaveController::class, 'index']);
+        Route::post('/leave', [MobileLeaveController::class, 'store']);
+        Route::post('/leave/{id}/cancel', [MobileLeaveController::class, 'cancel']);
+
+        // Travel orders
+        Route::get('/travel-orders', [MobileTravelOrderController::class, 'index']);
+        Route::get('/travel-orders/{id}', [MobileTravelOrderController::class, 'show']);
+        Route::post('/travel-orders', [MobileTravelOrderController::class, 'store']);
+        Route::delete('/travel-orders/{id}', [MobileTravelOrderController::class, 'destroy']);
+
+        // Training / L&D
+        Route::get('/training', [MobileTrainingController::class, 'index']);
+        Route::get('/training/{id}', [MobileTrainingController::class, 'show']);
+        Route::post('/training', [MobileTrainingController::class, 'store']);
+        Route::delete('/training/{id}', [MobileTrainingController::class, 'destroy']);
+        Route::get('/training/{id}/certificate', [MobileTrainingController::class, 'certificate']);
+
+        // HR chatbot (employee-scoped)
+        Route::post('/chatbot', [MobileChatbotController::class, 'chat']);
     });
 });
