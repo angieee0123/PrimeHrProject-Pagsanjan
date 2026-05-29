@@ -20,9 +20,7 @@ class FloatingPageScaffold extends StatelessWidget {
     super.key,
   });
 
-  /// Space reserved for the shell hamburger button (16 + 44 + 8).
-  static const double menuButtonInset = 68;
-
+  /// Horizontal margin for the floating topbar.
   static const double horizontalMargin = 12;
 
   static const double topMargin = 8;
@@ -61,7 +59,7 @@ class FloatingPageScaffold extends StatelessWidget {
             ),
           ),
           Positioned(
-            left: menuButtonInset,
+            left: horizontalMargin,
             right: horizontalMargin,
             top: topOffset(context),
             child: Material(

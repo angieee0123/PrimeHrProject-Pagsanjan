@@ -148,17 +148,41 @@ class _DashboardTopbarState extends State<DashboardTopbar> {
       child: _topSafeWrapper(
         Column(
           children: [
-            // Top Row: Avatar, Info, Notification
+            // Top Row: Menu, Avatar, Info, Notification
             Padding(
-              padding: EdgeInsets.fromLTRB(20, widget.floating ? 12 : 16, 20, 12),
+              padding: EdgeInsets.fromLTRB(16, widget.floating ? 12 : 16, 16, 12),
               child: Row(
                 children: [
+                  // Hamburger Menu Button
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                      icon: const Icon(
+                        Icons.menu_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 44,
+                        minHeight: 44,
+                      ),
+                      tooltip: 'Open menu',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   // Avatar with Clock Icon
                   Stack(
                     children: [
                       Container(
-                        width: 56,
-                        height: 56,
+                        width: 48,
+                        height: 48,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white.withValues(alpha: 0.15),
@@ -171,7 +195,7 @@ class _DashboardTopbarState extends State<DashboardTopbar> {
                           child: Text(
                             _initials,
                             style: GoogleFonts.inter(
-                              fontSize: 20,
+                              fontSize: 18,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                             ),
@@ -182,11 +206,11 @@ class _DashboardTopbarState extends State<DashboardTopbar> {
                         right: 0,
                         bottom: 0,
                         child: Container(
-                          width: 20,
-                          height: 20,
+                          width: 18,
+                          height: 18,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: const Color(0xFFD9BB00),
+                            color: const Color(0xFF10B981),
                             border: Border.all(
                               color: const Color(0xFF0B044D),
                               width: 2,
@@ -194,30 +218,30 @@ class _DashboardTopbarState extends State<DashboardTopbar> {
                           ),
                           child: const Icon(
                             Icons.access_time,
-                            size: 10,
+                            size: 9,
                             color: Colors.white,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 12),
                   // Employee Info
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Welcome back, $_firstName!',
+                          'Welcome, $_firstName!',
                           style: GoogleFonts.poppins(
-                            fontSize: 16,
+                            fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 3),
                         Row(
                           children: [
                             Flexible(
@@ -263,6 +287,7 @@ class _DashboardTopbarState extends State<DashboardTopbar> {
                       ],
                     ),
                   ),
+                  const SizedBox(width: 8),
                   // Notification Button
                   Stack(
                     children: [
@@ -283,6 +308,7 @@ class _DashboardTopbarState extends State<DashboardTopbar> {
                             minWidth: 44,
                             minHeight: 44,
                           ),
+                          tooltip: 'Notifications',
                         ),
                       ),
                       if (widget.notificationCount != null && widget.notificationCount! > 0)
@@ -323,7 +349,7 @@ class _DashboardTopbarState extends State<DashboardTopbar> {
             ),
             // Date Time and Badges Row
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
