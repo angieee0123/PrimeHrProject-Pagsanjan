@@ -33,8 +33,13 @@ class _TravelOrderScreenState extends State<TravelOrderScreen> {
         .where((order) => order.status.toLowerCase() == 'rejected')
         .length;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Travel Orders')),
+    return FloatingPageScaffold(
+      topbarHeight: FloatingPageScaffold.compactTopbarHeight,
+      topbar: const FloatingScreenTopbar(
+        eyebrow: 'Official Travel',
+        title: 'Travel Orders',
+        subtitle: 'File & track travel requests',
+      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF1E3A8A),
         foregroundColor: Colors.white,

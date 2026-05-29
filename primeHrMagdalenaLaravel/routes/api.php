@@ -3,6 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\MobileDashboardController;
+use App\Http\Controllers\Api\MobileProfileController;
+use App\Http\Controllers\Api\MobilePayslipController;
+use App\Http\Controllers\Api\MobileAttendanceController;
 use App\Http\Controllers\Api\AuthController;
 
 /*
@@ -60,5 +63,16 @@ Route::middleware('auth:sanctum')->group(function () {
         
         // Clear cache
         Route::post('/clear-cache', [MobileDashboardController::class, 'clearCache']);
+
+        // Employee profile
+        Route::get('/profile', [MobileProfileController::class, 'show']);
+
+        // Payslips
+        Route::get('/payslips', [MobilePayslipController::class, 'index']);
+        Route::get('/payslips/{id}', [MobilePayslipController::class, 'show']);
+
+        // Attendance
+        Route::get('/attendance', [MobileAttendanceController::class, 'index']);
+        Route::get('/attendance/detailed', [MobileAttendanceController::class, 'detailed']);
     });
 });

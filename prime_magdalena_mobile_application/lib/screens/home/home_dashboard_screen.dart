@@ -28,11 +28,8 @@ class HomeDashboardScreen extends StatefulWidget {
 class _HomeDashboardScreenState extends State<HomeDashboardScreen>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late ScrollController _scrollController;
-  late AnimationController _fadeController;
   late AnimationController _staggerController;
   late TabController _chartTabController;
-  late Animation<double> _fadeAnimation;
-  bool _showAppBar = false;
   String _deductionView = 'monthly'; // daily, weekly, monthly
 
   // API Data
@@ -51,20 +48,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _scrollController.addListener(_handleScroll);
 
     // Load data from API
     _loadDashboardData();
-
-    // Fade animation for app bar
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    );
 
     // Stagger animation for initial load
     _staggerController = AnimationController(
@@ -129,26 +115,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
 
   @override
   void dispose() {
-    _scrollController.removeListener(_handleScroll);
     _scrollController.dispose();
-    _fadeController.dispose();
     _staggerController.dispose();
     _chartTabController.dispose();
     super.dispose();
-  }
-
-  void _handleScroll() {
-    if (_scrollController.offset > 50) {
-      if (!_showAppBar) {
-        setState(() => _showAppBar = true);
-        _fadeController.forward();
-      }
-    } else {
-      if (_showAppBar) {
-        setState(() => _showAppBar = false);
-        _fadeController.reverse();
-      }
-    }
   }
 
   @override
@@ -244,25 +214,15 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
     final payrollMonthLabel = _payrollMonthLabel(salary);
     final nextPayLabel = _nextPayLabel(salary);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F6FF), // Light background
-      appBar: _showAppBar
-          ? AppBar(
-              title: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Text(
-                  'Dashboard',
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0F172A),
-                  ),
-                ),
-              ),
-              backgroundColor: Colors.white,
-              elevation: 1,
-              foregroundColor: const Color(0xFF1E3A8A),
-            )
-          : null,
+    return FloatingPageScaffold(
+      topbarHeight: FloatingPageScaffold.dashboardTopbarHeight,
+      topbar: DashboardTopbar(
+        floating: true,
+        onNotifications: widget.onOpenNotifications,
+        notificationCount: 3,
+        payrollMonthLabel: payrollMonthLabel,
+        nextPayLabel: nextPayLabel,
+      ),
       body: RefreshIndicator(
         onRefresh: _refreshData,
         color: const Color(0xFF0B044D),
@@ -272,17 +232,6 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
             parent: AlwaysScrollableScrollPhysics(),
           ),
           slivers: [
-            SliverToBoxAdapter(
-              child: _buildAnimatedItem(
-                delay: 0,
-                child: DashboardTopbar(
-                  onNotifications: widget.onOpenNotifications,
-                  notificationCount: 3,
-                  payrollMonthLabel: payrollMonthLabel,
-                  nextPayLabel: nextPayLabel,
-                ),
-              ),
-            ),
             // Summary Cards
             SliverToBoxAdapter(
               child: Padding(

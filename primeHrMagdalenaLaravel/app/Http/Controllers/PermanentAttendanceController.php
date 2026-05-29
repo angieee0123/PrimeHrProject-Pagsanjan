@@ -20,6 +20,18 @@ class PermanentAttendanceController extends Controller
             return view('permanent.attendance.permanentAttendance')->with('error', 'Employee record not found.');
         }
 
+        $payload = $this->buildAttendancePayload($employee, $request);
+
+        return view('permanent.attendance.permanentAttendance', array_merge($payload, [
+            'employee' => $employee,
+        ]));
+    }
+
+    /**
+     * Attendance summary + DTR records for API consumers (mobile app).
+     */
+    public function buildAttendancePayload(Employee $employee, Request $request): array
+    {
         $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->get('end_date', now()->endOfMonth()->format('Y-m-d'));
 
@@ -27,7 +39,8 @@ class PermanentAttendanceController extends Controller
         $endDate = Carbon::parse($endDate)->endOfDay();
 
         // Get attendance records
-        $attendances = Attendance::where('employee_id', $employee->id)
+        $attendances = Attendance::with('accreditedHoursLogs')
+            ->where('employee_id', $employee->id)
             ->whereBetween('date', [$startDate, $endDate])
             ->orderBy('date', 'desc')
             ->get();
@@ -153,21 +166,29 @@ class PermanentAttendanceController extends Controller
 
         $periodDisplay = $startDate->format('F Y');
 
-        return view('permanent.attendance.permanentAttendance', compact(
-            'records',
-            'present',
-            'absent',
-            'late',
-            'halfday',
-            'overtime',
-            'onLeave',
-            'rate',
-            'workingDaysCount',
-            'periodDisplay',
-            'totalLateMinutes',
-            'totalUndertimeMinutes',
-            'employee'
-        ));
+        $detailedRecords = $this->fetchDetailedRecords(
+            $employee,
+            $startDate->copy(),
+            $endDate->copy()
+        );
+
+        return [
+            'records' => $records,
+            'present' => $present,
+            'absent' => $absent,
+            'late' => $late,
+            'halfday' => $halfday,
+            'overtime' => $overtime,
+            'onLeave' => $onLeave,
+            'rate' => $rate,
+            'workingDaysCount' => $workingDaysCount,
+            'periodDisplay' => $periodDisplay,
+            'totalLateMinutes' => $totalLateMinutes,
+            'totalUndertimeMinutes' => $totalUndertimeMinutes,
+            'period_start' => $startDate->format('Y-m-d'),
+            'period_end' => $endDate->format('Y-m-d'),
+            'dtr_records' => $detailedRecords,
+        ];
     }
 
     public function detailedDTR(Request $request)
@@ -179,66 +200,91 @@ class PermanentAttendanceController extends Controller
             return response()->json(['error' => 'Employee record not found'], 404);
         }
 
+        try {
+            $payload = $this->buildDetailedPayload($employee, $request);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+
+        return response()->json($payload);
+    }
+
+    /**
+     * @return array{records: array, employee: array, period_start: string, period_end: string}
+     */
+    public function buildDetailedPayload(Employee $employee, Request $request): array
+    {
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
 
         if (!$startDate || !$endDate) {
-            return response()->json(['error' => 'Start date and end date are required'], 400);
+            throw new \InvalidArgumentException('Start date and end date are required');
         }
 
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
 
         if ($startDate->gt($endDate)) {
-            return response()->json(['error' => 'Start date must be before end date'], 400);
+            throw new \InvalidArgumentException('Start date must be before end date');
         }
 
-        // Fetch attendance records
+        $records = $this->fetchDetailedRecords($employee, $startDate, $endDate);
+
+        return [
+            'records' => $records,
+            'employee' => [
+                'name' => trim($employee->first_name . ' ' . $employee->last_name),
+                'employee_id' => $employee->employee_id,
+            ],
+            'period_start' => $startDate->format('Y-m-d'),
+            'period_end' => $endDate->format('Y-m-d'),
+        ];
+    }
+
+    private function fetchDetailedRecords(Employee $employee, Carbon $startDate, Carbon $endDate): array
+    {
         $attendances = Attendance::with(['accreditedHoursLogs.schedule'])
             ->where('employee_id', $employee->id)
             ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->orderBy('date', 'asc')
             ->get()
-            ->keyBy(function($a) {
+            ->keyBy(function ($a) {
                 return Carbon::parse($a->date)->format('Y-m-d');
             });
 
-        // Get approved leaves
         $approvedLeaves = \App\Models\LeaveApplication::where('employee_id', $employee->id)
             ->where('status', 'approved')
-            ->where(function($query) use ($startDate, $endDate) {
+            ->where(function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('start_date', [$startDate, $endDate])
-                      ->orWhereBetween('end_date', [$startDate, $endDate])
-                      ->orWhere(function($q) use ($startDate, $endDate) {
-                          $q->where('start_date', '<=', $startDate)
+                    ->orWhereBetween('end_date', [$startDate, $endDate])
+                    ->orWhere(function ($q) use ($startDate, $endDate) {
+                        $q->where('start_date', '<=', $startDate)
                             ->where('end_date', '>=', $endDate);
-                      });
+                    });
             })
             ->with('leaveType')
             ->get();
 
-        // Get approved travel orders
         $approvedTravelOrders = \App\Models\TravelOrder::where('employee_id', $employee->id)
             ->where('status', 'approved')
-            ->where(function($query) use ($startDate, $endDate) {
+            ->where(function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('travel_date', [$startDate, $endDate])
-                      ->orWhereBetween('return_date', [$startDate, $endDate])
-                      ->orWhere(function($q) use ($startDate, $endDate) {
-                          $q->where('travel_date', '<=', $startDate)
+                    ->orWhereBetween('return_date', [$startDate, $endDate])
+                    ->orWhere(function ($q) use ($startDate, $endDate) {
+                        $q->where('travel_date', '<=', $startDate)
                             ->where('return_date', '>=', $endDate);
-                      });
+                    });
             })
             ->get();
 
-        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee, $approvedLeaves, $approvedTravelOrders);
-
-        return response()->json([
-            'records' => $records,
-            'employee' => [
-                'name' => $employee->first_name . ' ' . $employee->last_name,
-                'employee_id' => $employee->employee_id,
-            ],
-        ]);
+        return $this->generateDetailedRecords(
+            $startDate,
+            $endDate,
+            $attendances,
+            $employee,
+            $approvedLeaves,
+            $approvedTravelOrders
+        );
     }
 
     private function getWorkingDays($startDate, $endDate)

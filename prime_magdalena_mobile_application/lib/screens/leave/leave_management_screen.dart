@@ -28,19 +28,29 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Leave & Benefits',
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF0F172A),
+    return FloatingPageScaffold(
+      topbarHeight: FloatingPageScaffold.compactTopbarHeight,
+      topbar: const FloatingScreenTopbar(
+        eyebrow: 'Leave Management',
+        title: 'Leave & Benefits',
+        subtitle: 'Requests & leave credits',
+      ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 80),
+        child: FloatingActionButton.extended(
+          onPressed: () => _showFileLeaveDialog(context),
+          backgroundColor: const Color(0xFF1E3A8A),
+          icon: const Icon(Icons.add_rounded, size: 22),
+          label: Text(
+            'File Leave',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        backgroundColor: Colors.white,
-        elevation: 1,
-        foregroundColor: const Color(0xFF1E3A8A),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: Column(
         children: [
           // Tabs
@@ -71,22 +81,6 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
           ),
         ],
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80),
-        child: FloatingActionButton.extended(
-          onPressed: () => _showFileLeaveDialog(context),
-          backgroundColor: const Color(0xFF1E3A8A),
-          icon: const Icon(Icons.add_rounded, size: 22),
-          label: Text(
-            'File Leave',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 

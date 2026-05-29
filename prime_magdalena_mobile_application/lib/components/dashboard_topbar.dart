@@ -9,12 +9,14 @@ class DashboardTopbar extends StatefulWidget {
   final int? notificationCount;
   final String? payrollMonthLabel;
   final String? nextPayLabel;
+  final bool floating;
 
   const DashboardTopbar({
     this.onNotifications,
     this.notificationCount,
     this.payrollMonthLabel,
     this.nextPayLabel,
+    this.floating = false,
     super.key,
   });
 
@@ -111,9 +113,8 @@ class _DashboardTopbarState extends State<DashboardTopbar> {
             ],
           ),
         ),
-        child: SafeArea(
-          bottom: false,
-          child: const Center(
+        child: _topSafeWrapper(
+          const Center(
             child: Padding(
               padding: EdgeInsets.all(20.0),
               child: CircularProgressIndicator(
@@ -144,13 +145,12 @@ class _DashboardTopbarState extends State<DashboardTopbar> {
           ],
         ),
       ),
-      child: SafeArea(
-        bottom: false,
-        child: Column(
+      child: _topSafeWrapper(
+        Column(
           children: [
             // Top Row: Avatar, Info, Notification
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              padding: EdgeInsets.fromLTRB(20, widget.floating ? 12 : 16, 20, 12),
               child: Row(
                 children: [
                   // Avatar with Clock Icon
@@ -430,6 +430,13 @@ class _DashboardTopbarState extends State<DashboardTopbar> {
         ),
       ),
     );
+  }
+
+  Widget _topSafeWrapper(Widget child) {
+    if (widget.floating) {
+      return child;
+    }
+    return SafeArea(bottom: false, child: child);
   }
 
   String _calculateNextPayDate() {

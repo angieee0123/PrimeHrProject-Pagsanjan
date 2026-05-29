@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
+import 'package:prime_magdalena_mobile_application/models/auth_models.dart';
 import 'package:prime_magdalena_mobile_application/screens/home/home_dashboard_screen.dart';
 import 'package:prime_magdalena_mobile_application/screens/payslip/payslip_list_screen.dart';
 import 'package:prime_magdalena_mobile_application/screens/attendance/attendance_screen.dart';
@@ -14,6 +17,7 @@ import 'package:prime_magdalena_mobile_application/screens/settings/settings_scr
 import 'package:prime_magdalena_mobile_application/screens/training/training_screen.dart';
 import 'package:prime_magdalena_mobile_application/screens/travel/travel_order_screen.dart';
 import 'package:prime_magdalena_mobile_application/services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainAppShell extends StatefulWidget {
   final VoidCallback? onLogout;
@@ -27,12 +31,18 @@ class MainAppShell extends StatefulWidget {
 class _MainAppShellState extends State<MainAppShell> {
   int _selectedIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _authService = AuthService();
+
+  EmployeeModel? _profileEmployee;
+  bool _profileLoading = true;
 
   late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
+    _profileEmployee = _authService.currentEmployee;
+    _loadProfileData();
     _screens = [
       HomeDashboardScreen(
         onOpenPayslip: () => _onItemTapped(1),
@@ -47,6 +57,35 @@ class _MainAppShellState extends State<MainAppShell> {
       const TravelOrderScreen(),
       const ProfileScreen(),
     ];
+  }
+
+  Future<void> _loadProfileData() async {
+    var employee = _authService.currentEmployee;
+
+    if (employee == null) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final employeeJson = prefs.getString('employee_data');
+        if (employeeJson != null) {
+          employee = EmployeeModel.fromJson(
+            jsonDecode(employeeJson) as Map<String, dynamic>,
+          );
+        }
+      } catch (_) {
+        // Keep existing in-memory profile if prefs read fails.
+      }
+    }
+
+    if (_authService.isAuthenticated) {
+      await _authService.refreshSession();
+      employee = _authService.currentEmployee ?? employee;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _profileEmployee = employee;
+      _profileLoading = false;
+    });
   }
 
   void _onItemTapped(int index) {
@@ -88,12 +127,18 @@ class _MainAppShellState extends State<MainAppShell> {
     );
   }
 
+  void _openDrawer() {
+    HapticFeedback.lightImpact();
+    final latest = _authService.currentEmployee;
+    if (latest != null && latest != _profileEmployee) {
+      setState(() => _profileEmployee = latest);
+    }
+    _scaffoldKey.currentState?.openDrawer();
+  }
+
   Widget _buildMenuButton() {
     return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        _scaffoldKey.currentState?.openDrawer();
-      },
+      onTap: _openDrawer,
       child: Container(
         width: 44,
         height: 44,
@@ -312,11 +357,17 @@ class _MainAppShellState extends State<MainAppShell> {
   }
 
   Widget _buildDrawer(BuildContext context) {
-    final auth = AuthService();
-    final stored = auth.currentEmployee;
-    final user = auth.currentUser;
-    final fullName = stored?.fullName ?? user?.name ?? 'Employee';
-    final position = stored?.designation ?? 'Position';
+    final stored = _profileEmployee;
+    final user = _authService.currentUser;
+    final fullName = _profileDisplayName(stored, user);
+    final position = stored?.designation?.trim().isNotEmpty == true
+        ? stored!.designation!
+        : _formatRole(user?.role);
+    final department = stored?.department?.trim();
+    final employeeId = stored?.employeeId?.trim();
+    final employmentStatus = stored?.employmentStatus?.trim().isNotEmpty == true
+        ? stored!.employmentStatus!
+        : 'Active';
     final initials = _drawerInitials(stored?.firstName, stored?.lastName, fullName);
 
     return Drawer(
@@ -361,55 +412,64 @@ class _MainAppShellState extends State<MainAppShell> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    fullName,
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF0F172A),
+                  if (_profileLoading)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  else ...[
+                    Text(
+                      fullName,
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF0F172A),
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    position,
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey.shade600,
+                    const SizedBox(height: 4),
+                    Text(
+                      position,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade600,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF22C55E).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color(0xFF22C55E),
-                          ),
+                    if (department != null && department.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        department,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey.shade500,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Active',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF22C55E),
-                          ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    if (employeeId != null && employeeId.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'ID: $employeeId',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade500,
                         ),
-                      ],
-                    ),
-                  ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    _buildEmploymentStatusBadge(employmentStatus),
+                  ],
                 ],
               ),
             ),
@@ -676,6 +736,63 @@ class _MainAppShellState extends State<MainAppShell> {
   void _openDrawerScreen(BuildContext context, Widget screen) {
     Navigator.pop(context);
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+  }
+
+  String _profileDisplayName(EmployeeModel? employee, UserModel? user) {
+    if (employee != null) {
+      final full = employee.fullName.trim();
+      if (full.isNotEmpty) return full;
+      final built =
+          '${employee.firstName} ${employee.lastName}'.trim();
+      if (built.isNotEmpty) return built;
+    }
+    final userName = user?.name.trim();
+    if (userName != null && userName.isNotEmpty) return userName;
+    return 'Employee';
+  }
+
+  String _formatRole(String? role) {
+    if (role == null || role.trim().isEmpty) return 'Position';
+    final normalized = role.trim();
+    if (normalized.length == 1) return normalized.toUpperCase();
+    return normalized[0].toUpperCase() + normalized.substring(1).toLowerCase();
+  }
+
+  Widget _buildEmploymentStatusBadge(String status) {
+    final isActive = status.toLowerCase() == 'active' ||
+        status.toLowerCase() == 'permanent';
+    final color =
+        isActive ? const Color(0xFF22C55E) : const Color(0xFF64748B);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            status,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   String _drawerInitials(String? first, String? last, String fullName) {
