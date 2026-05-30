@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:prime_magdalena_mobile_application/config/api_config.dart';
 import 'package:prime_magdalena_mobile_application/models/leave_models.dart';
@@ -46,7 +45,7 @@ class LeaveService {
     required String endDate,
     required double numberOfDays,
     required String reason,
-    PlatformFile? attachment,
+    dynamic? attachment,
   }) async {
     final request = http.MultipartRequest(
       'POST',

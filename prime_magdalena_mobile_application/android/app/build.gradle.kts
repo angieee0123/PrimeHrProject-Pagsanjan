@@ -6,7 +6,8 @@ plugins {
 
 android {
     namespace = "com.example.prime_magdalena_mobile_application"
-    compileSdk = flutter.compileSdkVersion
+    // compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

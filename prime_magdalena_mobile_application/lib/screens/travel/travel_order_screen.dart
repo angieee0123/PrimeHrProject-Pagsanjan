@@ -1,4 +1,3 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -97,10 +96,7 @@ class _TravelOrderScreenState extends State<TravelOrderScreen> {
           icon: const Icon(Icons.add_rounded, size: 22),
           label: Text(
             'File Travel',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -323,7 +319,9 @@ class _TravelOrderScreenState extends State<TravelOrderScreen> {
     try {
       final message = await _travelService.cancelTravelOrder(order.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
       await _loadTravelOrders();
     } catch (e) {
       if (!mounted) return;
@@ -408,7 +406,10 @@ class _TravelOrderScreenState extends State<TravelOrderScreen> {
                 const SizedBox(height: 8),
                 _detailRow('Processed By', detail.processedBy!),
                 if (detail.processedAt != null)
-                  _detailRow('Date Processed', _formatDate(detail.processedAt!)),
+                  _detailRow(
+                    'Date Processed',
+                    _formatDate(detail.processedAt!),
+                  ),
               ],
               if (detail.disapprovalReason != null &&
                   detail.disapprovalReason!.isNotEmpty) ...[
@@ -421,7 +422,10 @@ class _TravelOrderScreenState extends State<TravelOrderScreen> {
                   onPressed: () async {
                     final uri = Uri.parse(detail.attachmentUrl!);
                     if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
                     }
                   },
                   icon: const Icon(Icons.attach_file),
@@ -456,7 +460,7 @@ class _TravelOrderScreenState extends State<TravelOrderScreen> {
     DateTime? travelDate;
     DateTime? returnDate;
     String? transportationMode;
-    PlatformFile? attachment;
+    dynamic? attachment;
     int duration = 1;
     String? formError;
     bool submitting = false;
@@ -503,6 +507,7 @@ class _TravelOrderScreenState extends State<TravelOrderScreen> {
             });
           }
 
+          /*
           Future<void> pickFile() async {
             final result = await FilePicker.platform.pickFiles(
               type: FileType.custom,
@@ -520,6 +525,7 @@ class _TravelOrderScreenState extends State<TravelOrderScreen> {
               });
             }
           }
+          */
 
           Future<void> submit() async {
             if (destinationController.text.trim().isEmpty ||
@@ -538,7 +544,9 @@ class _TravelOrderScreenState extends State<TravelOrderScreen> {
               return;
             }
             if (duration < 1) {
-              setSheetState(() => formError = 'Please select valid travel dates');
+              setSheetState(
+                () => formError = 'Please select valid travel dates',
+              );
               return;
             }
 
@@ -557,8 +565,9 @@ class _TravelOrderScreenState extends State<TravelOrderScreen> {
               if (!context.mounted) return;
               Navigator.pop(sheetContext);
               if (!mounted) return;
-              ScaffoldMessenger.of(this.context)
-                  .showSnackBar(SnackBar(content: Text(message)));
+              ScaffoldMessenger.of(
+                this.context,
+              ).showSnackBar(SnackBar(content: Text(message)));
               await _loadTravelOrders();
             } catch (e) {
               setSheetState(() {
@@ -672,10 +681,11 @@ class _TravelOrderScreenState extends State<TravelOrderScreen> {
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
-                    onPressed: pickFile,
+                    onPressed: null,
                     icon: const Icon(Icons.attach_file),
                     label: Text(
-                      attachment?.name ?? 'Attach Supporting Document (optional)',
+                      attachment?.name ??
+                          'Attach Supporting Document (optional)',
                     ),
                   ),
                   if (formError != null) ...[

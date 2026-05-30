@@ -1,4 +1,3 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -65,7 +64,8 @@ class _TrainingScreenState extends State<TrainingScreen> {
       final statusOk = _statusFilter == null || t.status == _statusFilter;
       final positionOk =
           _positionFilter == null || t.positionType == _positionFilter;
-      final searchOk = query.isEmpty ||
+      final searchOk =
+          query.isEmpty ||
           t.title.toLowerCase().contains(query) ||
           t.status.toLowerCase().contains(query) ||
           t.conductedBy.toLowerCase().contains(query) ||
@@ -100,10 +100,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
           icon: const Icon(Icons.add_rounded, size: 22),
           label: Text(
             'Add Training',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -304,10 +301,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'Showing ${trainings.length} training record(s)',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-            ),
+            style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade600),
           ),
         ),
         const SizedBox(height: 8),
@@ -316,8 +310,11 @@ class _TrainingScreenState extends State<TrainingScreen> {
             padding: const EdgeInsets.all(32),
             child: Column(
               children: [
-                Icon(Icons.school_outlined,
-                    size: 48, color: Colors.grey.shade400),
+                Icon(
+                  Icons.school_outlined,
+                  size: 48,
+                  color: Colors.grey.shade400,
+                ),
                 const SizedBox(height: 12),
                 Text(
                   'No training records found',
@@ -339,41 +336,43 @@ class _TrainingScreenState extends State<TrainingScreen> {
             ),
           )
         else
-          ...trainings.map((t) => RecordCard(
-                title: t.title,
-                subtitle: t.conductedBy,
-                details: [
-                  {
-                    'label': 'Dates',
-                    'value':
-                        '${_formatDate(t.dateFrom)} – ${_formatDate(t.dateTo)}',
-                  },
-                  {
-                    'label': 'Hours',
-                    'value':
-                        '${t.hours} hr${t.hours == 1 ? '' : 's'} · ${t.positionType}',
-                  },
-                  {'label': 'Ref Doc', 'value': t.refDocNo},
-                  {'label': 'L&D Category', 'value': t.ldCategoryLabel},
-                ],
-                badge: StatusBadgeData(
-                  label: t.statusLabel,
-                  status: t.badgeStatus,
-                ),
-                actions: [
-                  if (t.isPending)
-                    ActionButton(
-                      label: 'Delete',
-                      icon: Icons.delete_outline,
-                      onTap: () => _confirmDelete(t),
-                    ),
+          ...trainings.map(
+            (t) => RecordCard(
+              title: t.title,
+              subtitle: t.conductedBy,
+              details: [
+                {
+                  'label': 'Dates',
+                  'value':
+                      '${_formatDate(t.dateFrom)} – ${_formatDate(t.dateTo)}',
+                },
+                {
+                  'label': 'Hours',
+                  'value':
+                      '${t.hours} hr${t.hours == 1 ? '' : 's'} · ${t.positionType}',
+                },
+                {'label': 'Ref Doc', 'value': t.refDocNo},
+                {'label': 'L&D Category', 'value': t.ldCategoryLabel},
+              ],
+              badge: StatusBadgeData(
+                label: t.statusLabel,
+                status: t.badgeStatus,
+              ),
+              actions: [
+                if (t.isPending)
                   ActionButton(
-                    label: 'View',
-                    icon: Icons.visibility_outlined,
-                    onTap: () => _showTrainingDetails(t),
+                    label: 'Delete',
+                    icon: Icons.delete_outline,
+                    onTap: () => _confirmDelete(t),
                   ),
-                ],
-              )),
+                ActionButton(
+                  label: 'View',
+                  icon: Icons.visibility_outlined,
+                  onTap: () => _showTrainingDetails(t),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -407,17 +406,11 @@ class _TrainingScreenState extends State<TrainingScreen> {
         children: [
           Text(
             'Breakdown by L&D Category',
-            style: GoogleFonts.inter(
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
-            ),
+            style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 14),
           ),
           Text(
             'Verified L&D hours only · FY ${_data!.fiscalYear}',
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              color: Colors.grey.shade600,
-            ),
+            style: GoogleFonts.inter(fontSize: 11, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 12),
           _breakdownRow(
@@ -445,12 +438,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
     );
   }
 
-  Widget _breakdownRow(
-    String label,
-    int hours,
-    int maxHours,
-    Color color,
-  ) {
+  Widget _breakdownRow(String label, int hours, int maxHours, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -486,9 +474,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete training record?'),
-        content: Text(
-          'Delete "${record.title}"? This cannot be undone.',
-        ),
+        content: Text('Delete "${record.title}"? This cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -507,7 +493,9 @@ class _TrainingScreenState extends State<TrainingScreen> {
     try {
       final message = await _trainingService.deleteTraining(record.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
       await _loadTraining();
     } catch (e) {
       if (!mounted) return;
@@ -589,7 +577,10 @@ class _TrainingScreenState extends State<TrainingScreen> {
                   onPressed: () async {
                     final uri = Uri.parse(detail.certificateUrl!);
                     if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
                     }
                   },
                   icon: const Icon(Icons.picture_as_pdf_outlined),
@@ -618,7 +609,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
   }
 
   Future<void> _showAddTrainingSheet() async {
-    PlatformFile? certificate;
+    dynamic? certificate;
     int step = 1;
     String? formError;
     bool submitting = false;
@@ -639,6 +630,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
       showDragHandle: true,
       builder: (sheetContext) => StatefulBuilder(
         builder: (context, setSheetState) {
+          /*
           Future<void> pickCertificate() async {
             final result = await FilePicker.platform.pickFiles(
               type: FileType.custom,
@@ -657,6 +649,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
               });
             }
           }
+          */
 
           Future<void> pickDate({required bool isFrom}) async {
             final picked = await showDatePicker(
@@ -720,8 +713,9 @@ class _TrainingScreenState extends State<TrainingScreen> {
               if (!context.mounted) return;
               Navigator.pop(sheetContext);
               if (!mounted) return;
-              ScaffoldMessenger.of(this.context)
-                  .showSnackBar(SnackBar(content: Text(message)));
+              ScaffoldMessenger.of(
+                this.context,
+              ).showSnackBar(SnackBar(content: Text(message)));
               await _loadTraining();
             } catch (e) {
               setSheetState(() {
@@ -777,7 +771,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
                   const SizedBox(height: 16),
                   if (step == 1) ...[
                     OutlinedButton.icon(
-                      onPressed: pickCertificate,
+                      onPressed: null,
                       icon: const Icon(Icons.upload_file),
                       label: Text(
                         certificate?.name ?? 'Upload Certificate (required)',
@@ -851,8 +845,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
                             child: Text(
                               dateFrom == null
                                   ? 'Date From'
-                                  : DateFormat('yyyy-MM-dd')
-                                      .format(dateFrom!),
+                                  : DateFormat('yyyy-MM-dd').format(dateFrom!),
                             ),
                           ),
                         ),
@@ -883,7 +876,9 @@ class _TrainingScreenState extends State<TrainingScreen> {
                     const SizedBox(height: 12),
                     TextField(
                       controller: certNoController,
-                      decoration: _inputDecoration('Certificate No. (optional)'),
+                      decoration: _inputDecoration(
+                        'Certificate No. (optional)',
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -915,8 +910,9 @@ class _TrainingScreenState extends State<TrainingScreen> {
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Text('Submit for Verification'),
                       ),

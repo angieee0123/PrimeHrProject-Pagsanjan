@@ -1,4 +1,3 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -103,7 +102,8 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
     return apps.where((app) {
       final typeOk =
           _requestTypeFilter == null || app.leaveType == _requestTypeFilter;
-      final statusOk = _requestStatusFilter == null ||
+      final statusOk =
+          _requestStatusFilter == null ||
           app.status.toLowerCase() == _requestStatusFilter!.toLowerCase();
       return typeOk && statusOk;
     }).toList();
@@ -151,10 +151,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
           icon: const Icon(Icons.add_rounded, size: 22),
           label: Text(
             'File Leave',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -183,10 +180,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
                 style: GoogleFonts.inter(color: Colors.grey.shade700),
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _loadLeave,
-                child: const Text('Retry'),
-              ),
+              ElevatedButton(onPressed: _loadLeave, child: const Text('Retry')),
             ],
           ),
         ),
@@ -414,17 +408,17 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
             items: const [
               DropdownMenuItem(value: 'accrued', child: Text('Accrued Only')),
               DropdownMenuItem(value: 'fixed', child: Text('Fixed Only')),
-              DropdownMenuItem(
-                value: 'available',
-                child: Text('With Balance'),
-              ),
+              DropdownMenuItem(value: 'available', child: Text('With Balance')),
             ],
             onChanged: (v) => setState(() => _creditCategoryFilter = v),
           ),
         ]),
         Expanded(
           child: credits.isEmpty
-              ? _emptyState('No leave credits found', 'Assigned leave types will appear here')
+              ? _emptyState(
+                  'No leave credits found',
+                  'Assigned leave types will appear here',
+                )
               : ListView.builder(
                   padding: const EdgeInsets.only(
                     left: 16,
@@ -436,7 +430,10 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
                   itemBuilder: (context, index) {
                     final credit = credits[index];
                     final progress = credit.totalCredits > 0
-                        ? (credit.usedCredits / credit.totalCredits).clamp(0.0, 1.0)
+                        ? (credit.usedCredits / credit.totalCredits).clamp(
+                            0.0,
+                            1.0,
+                          )
                         : 0.0;
 
                     return Padding(
@@ -551,9 +548,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
             hint: 'All Leave Types',
             value: _txLeaveFilter,
             items: codes
-                .map(
-                  (c) => DropdownMenuItem(value: c, child: Text(c)),
-                )
+                .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                 .toList(),
             onChanged: (v) {
               setState(() => _txLeaveFilter = v);
@@ -567,10 +562,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
               DropdownMenuItem(value: 'credit', child: Text('Credit')),
               DropdownMenuItem(value: 'debit', child: Text('Debit')),
               DropdownMenuItem(value: 'pending', child: Text('Pending')),
-              DropdownMenuItem(
-                value: 'adjustment',
-                child: Text('Adjustment'),
-              ),
+              DropdownMenuItem(value: 'adjustment', child: Text('Adjustment')),
             ],
             onChanged: (v) {
               setState(() => _txTypeFilter = v);
@@ -650,7 +642,8 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
                                 ),
                               ],
                             ),
-                            if (tx.remarks != null && tx.remarks!.isNotEmpty) ...[
+                            if (tx.remarks != null &&
+                                tx.remarks!.isNotEmpty) ...[
                               const SizedBox(height: 6),
                               Text(
                                 tx.remarks!,
@@ -806,7 +799,10 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
       decoration: InputDecoration(
         hintText: hint,
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 10,
+        ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       ),
       items: [
@@ -854,17 +850,11 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 10,
-            color: Colors.grey.shade600,
-          ),
+          style: GoogleFonts.inter(fontSize: 10, color: Colors.grey.shade600),
         ),
         Text(
           value,
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-          ),
+          style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700),
         ),
       ],
     );
@@ -917,7 +907,9 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
     try {
       final message = await _leaveService.cancelLeave(request.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
       await _loadLeave();
     } catch (e) {
       if (!mounted) return;
@@ -991,7 +983,10 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
                   onPressed: () async {
                     final uri = Uri.parse(request.attachmentUrl!);
                     if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
                     }
                   },
                   icon: const Icon(Icons.attach_file),
@@ -1062,7 +1057,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
     DateTime? startDate;
     DateTime? endDate;
     final reasonController = TextEditingController();
-    PlatformFile? attachment;
+    dynamic? attachment;
     double computedDays = 0;
     String? formError;
     bool submitting = false;
@@ -1112,6 +1107,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
             });
           }
 
+          /*
           Future<void> pickFile() async {
             final result = await FilePicker.platform.pickFiles(
               type: FileType.custom,
@@ -1129,13 +1125,16 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
               });
             }
           }
+          */
 
           Future<void> submit() async {
             if (selectedType == null ||
                 startDate == null ||
                 endDate == null ||
                 reasonController.text.trim().isEmpty) {
-              setSheetState(() => formError = 'Please complete all required fields');
+              setSheetState(
+                () => formError = 'Please complete all required fields',
+              );
               return;
             }
             if (selectedType!.requiresAttachment && attachment == null) {
@@ -1145,7 +1144,9 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
               return;
             }
             if (computedDays <= 0) {
-              setSheetState(() => formError = 'Please select valid leave dates');
+              setSheetState(
+                () => formError = 'Please select valid leave dates',
+              );
               return;
             }
             if (computedDays > selectedType!.availableCredits) {
@@ -1165,8 +1166,9 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
               );
               if (!context.mounted) return;
               Navigator.pop(sheetContext);
-              ScaffoldMessenger.of(this.context)
-                  .showSnackBar(SnackBar(content: Text(message)));
+              ScaffoldMessenger.of(
+                this.context,
+              ).showSnackBar(SnackBar(content: Text(message)));
               await _loadLeave();
             } catch (e) {
               setSheetState(() {
@@ -1298,7 +1300,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
                       attachment != null) ...[
                     const SizedBox(height: 8),
                     OutlinedButton.icon(
-                      onPressed: pickFile,
+                      onPressed: null,
                       icon: const Icon(Icons.attach_file),
                       label: Text(
                         attachment?.name ?? 'Attach Supporting Document',

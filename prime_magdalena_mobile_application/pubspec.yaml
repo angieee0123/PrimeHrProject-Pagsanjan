@@ -53,9 +53,6 @@ dependencies:
   # Shared preferences for local storage
   shared_preferences: ^2.3.3
 
-  # File picker for leave attachments
-  file_picker: ^8.0.0
-
   # Open attachment URLs
   url_launcher: ^6.3.1
 

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:prime_magdalena_mobile_application/config/api_config.dart';
 import 'package:prime_magdalena_mobile_application/models/travel_models.dart';
@@ -49,7 +48,7 @@ class TravelService {
     required int duration,
     String? transportationMode,
     double? estimatedBudget,
-    PlatformFile? attachment,
+    dynamic? attachment,
   }) async {
     final request = http.MultipartRequest(
       'POST',
