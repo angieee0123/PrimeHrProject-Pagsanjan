@@ -537,6 +537,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Text(
@@ -547,9 +548,19 @@ class _TrainingScreenState extends State<TrainingScreen> {
                       ),
                     ),
                   ),
-                  StatusBadge(
-                    label: detail.statusLabel,
-                    status: detail.badgeStatus,
+                  Row(
+                    children: [
+                      StatusBadge(
+                        label: detail.statusLabel,
+                        status: detail.badgeStatus,
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(sheetContext),
+                        tooltip: 'Close',
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -732,21 +743,36 @@ class _TrainingScreenState extends State<TrainingScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Add New Training',
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    step == 1
-                        ? 'Step 1 of 2 — Upload your certificate'
-                        : 'Step 2 of 2 — Review & submit',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Add New Training',
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Text(
+                            step == 1
+                                ? 'Step 1 of 2 — Upload your certificate'
+                                : 'Step 2 of 2 — Review & submit',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(sheetContext),
+                        tooltip: 'Close',
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   if (step == 1) ...[
