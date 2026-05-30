@@ -112,7 +112,7 @@ class TravelOrderController extends Controller
                 'duration' => $duration,
                 'transportation_mode' => $validated['transportation_mode'],
                 'estimated_budget' => $validated['estimated_budget'],
-                'attachment_path' => $attachmentPath,
+                'attachment' => $attachmentPath,
                 'status' => 'pending',
                 'filed_by' => auth()->id(),
             ]);

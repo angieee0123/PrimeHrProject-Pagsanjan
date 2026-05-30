@@ -107,7 +107,7 @@ class MobileTravelOrderController extends Controller
             'duration' => $data['duration'],
             'transportation_mode' => $data['transportation_mode'] ?? null,
             'estimated_budget' => $data['estimated_budget'] ?? null,
-            'attachment_path' => $attachmentPath,
+            'attachment' => $attachmentPath,
             'status' => 'pending',
             'filed_by' => Auth::id(),
         ]);
@@ -142,7 +142,7 @@ class MobileTravelOrderController extends Controller
             ], 422);
         }
 
-        $path = $order->attachment_path;
+        $path = $order->attachment;
         if ($path) {
             Storage::disk('public')->delete($path);
         }
@@ -157,7 +157,7 @@ class MobileTravelOrderController extends Controller
 
     private function formatOrder(TravelOrder $order, bool $detailed = false): array
     {
-        $attachmentPath = $order->attachment_path;
+        $attachmentPath = $order->attachment;
         $approver = $order->relationLoaded('approver') ? $order->approver : null;
         $disapprover = $order->relationLoaded('disapprover') ? $order->disapprover : null;
 

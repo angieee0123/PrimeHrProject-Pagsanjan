@@ -21,7 +21,7 @@ class TravelOrder extends Model
         'duration',
         'transportation_mode',
         'estimated_budget',
-        'attachment_path',
+        'attachment',
         'status',
         'approved_by',
         'approved_at',
