@@ -20,7 +20,20 @@
                 </div>
             </div>
 
-            <div class="modal-section-label">ATTENDANCE SUMMARY</div>
+            <div class="modal-section-label" style="margin-bottom: 12px;">SELECT DATE RANGE</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                <div>
+                    <label style="font-size: 12px; color: #6b6a8a; font-weight: 600; display: block; margin-bottom: 6px;">Start Date</label>
+                    <input type="date" id="dtrStartDate" style="width: 100%; padding: 8px; border: 1px solid #e8e7f5; border-radius: 6px; font-size: 13px;">
+                </div>
+                <div>
+                    <label style="font-size: 12px; color: #6b6a8a; font-weight: 600; display: block; margin-bottom: 6px;">End Date</label>
+                    <input type="date" id="dtrEndDate" style="width: 100%; padding: 8px; border: 1px solid #e8e7f5; border-radius: 6px; font-size: 13px;">
+                </div>
+            </div>
+            <button onclick="loadDTRSummary()" style="width: 100%; padding: 8px; background: #0b044d; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 20px; font-size: 13px;">Load Data</button>
+
+            <div class="modal-section-label" style="margin-top: 20px; margin-bottom: 12px;">ATTENDANCE SUMMARY</div>
             <div class="modal-row"><span>Working Days</span><strong id="dtrWorkingDays"></strong></div>
             <div class="modal-row"><span>Days Present</span><strong style="color: #15803d;" id="dtrPresent"></strong></div>
             <div class="modal-row"><span>Days Absent</span><strong style="color: #8e1e18;" id="dtrAbsent"></strong></div>

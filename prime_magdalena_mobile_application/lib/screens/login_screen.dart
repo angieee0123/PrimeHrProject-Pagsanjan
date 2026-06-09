@@ -129,19 +129,21 @@ class _LoginScreenState extends State<LoginScreen>
 
       // Build success message based on user type
       String successMessage = 'Welcome back, ${loginResponse.user.name}!';
-      
+
       if (loginResponse.isPermanent && loginResponse.employee != null) {
         successMessage += '\n✅ Permanent Employee';
         if (loginResponse.employee!.department != null) {
           successMessage += ' - ${loginResponse.employee!.department}';
         }
         if (loginResponse.payroll != null) {
-          successMessage += '\n💰 Latest Net Pay: ₱${loginResponse.payroll!.netPay.toStringAsFixed(2)}';
+          successMessage +=
+              '\n💰 Latest Net Pay: ₱${loginResponse.payroll!.netPay.toStringAsFixed(2)}';
         }
       }
-      
+
       if (isOfflineMode) {
-        successMessage += '\n🔌 Offline Mode: Using demo data (API unavailable)';
+        successMessage +=
+            '\n🔌 Offline Mode: Using demo data (API unavailable)';
       } else {
         successMessage += '\nYour account is now saved and will auto-login.';
       }

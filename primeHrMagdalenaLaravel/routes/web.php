@@ -956,6 +956,8 @@ Route::get('/admin/attendance', [AttendanceController::class, 'index'])->middlew
 Route::get('/admin/attendance/detailed/{employeeId}', [AttendanceController::class, 'detailedDTR'])->middleware('auth')->name('admin.attendance.detailed');
 Route::get('/admin/attendance/detailed/{employeeId}/export', [AttendanceController::class, 'exportDetailedDTR'])->middleware('auth')->name('admin.attendance.detailed.export');
 Route::get('/admin/attendance/record/{attendanceId}', [AttendanceController::class, 'getAttendanceRecord'])->middleware('auth')->name('admin.attendance.record');
+Route::get('/admin/attendance/employee-appointment/{employeeId}', [AttendanceController::class, 'employeeAppointment'])->middleware('auth')->name('admin.attendance.employee-appointment');
+Route::get('/admin/attendance/dtr-summary/{employeeId}', [AttendanceController::class, 'dtrSummary'])->middleware('auth')->name('admin.attendance.dtr-summary');
 Route::get('/admin/attendance/{attendanceId}/accredited-log', [AttendanceController::class, 'getAccreditedHoursLog'])->middleware('auth')->name('admin.attendance.accredited-log');
 Route::post('/admin/attendance/correct', [AttendanceController::class, 'correctAttendance'])->middleware('auth')->name('admin.attendance.correct');
 

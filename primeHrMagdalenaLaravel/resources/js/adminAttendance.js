@@ -6,12 +6,13 @@ let currentDTRRecord = null;
 let currentDetailedEmployeeId = null;
 let currentDetailedEmployeeName = null;
 let currentDetailedEmployeeEmpId = null;
+let currentDTREmployeeId = null;
+let currentDTRAppointmentDate = null;
 
 window.openDTRModal = function(record, index) {
     currentDTRRecord = record;
-    const workingDays = record.present + record.absent + record.halfday;
-    const rate = workingDays > 0 ? Math.round((record.present / workingDays) * 100) : 0;
-
+    currentDTREmployeeId = record.employee_id;
+    
     document.getElementById('dtrPeriod').textContent = window.periodDisplay.toUpperCase();
     document.getElementById('dtrName').textContent = record.name;
     document.getElementById('dtrPosition').textContent = record.position;
@@ -26,20 +27,66 @@ window.openDTRModal = function(record, index) {
     statusBadge.textContent = record.status;
     statusBadge.className = 'badge-status ' + (record.status === 'Complete' ? 'processed' : 'pending');
 
-    document.getElementById('dtrWorkingDays').textContent = workingDays + ' days';
-    document.getElementById('dtrPresent').textContent = record.present + ' days';
-    document.getElementById('dtrAbsent').textContent = record.absent + ' days';
-    document.getElementById('dtrLate').textContent = record.late + ' times';
-    document.getElementById('dtrHalfday').textContent = record.halfday + ' days';
-    document.getElementById('dtrOT').textContent = record.overtime + ' hrs';
-    document.getElementById('dtrRate').textContent = rate + '%';
+    fetch(`/admin/attendance/employee-appointment/${currentDTREmployeeId}`)
+        .then(response => response.json())
+        .then(data => {
+            currentDTRAppointmentDate = data.appointment_date;
+            const today = new Date();
+            
+            document.getElementById('dtrStartDate').min = data.appointment_date;
+            document.getElementById('dtrStartDate').value = data.appointment_date;
+            document.getElementById('dtrEndDate').min = data.appointment_date;
+            document.getElementById('dtrEndDate').value = today.toISOString().split('T')[0];
+        })
+        .catch(error => console.error('Error fetching appointment date:', error));
 
     document.getElementById('dtrModal').style.display = 'flex';
+    loadDTRSummary();
 }
 
 window.closeDTRModal = function() {
     document.getElementById('dtrModal').style.display = 'none';
     currentDTRRecord = null;
+    currentDTREmployeeId = null;
+    currentDTRAppointmentDate = null;
+}
+
+window.loadDTRSummary = function() {
+    if (!currentDTRRecord || !currentDTREmployeeId) return;
+
+    const startDate = document.getElementById('dtrStartDate').value;
+    const endDate = document.getElementById('dtrEndDate').value;
+
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates');
+        return;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+        alert('Start date must be before end date');
+        return;
+    }
+
+    if (new Date(startDate) < new Date(currentDTRAppointmentDate)) {
+        alert('Start date cannot be before appointment date: ' + currentDTRAppointmentDate);
+        return;
+    }
+
+    fetch(`/admin/attendance/dtr-summary/${currentDTREmployeeId}?start_date=${startDate}&end_date=${endDate}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('dtrWorkingDays').textContent = data.working_days + ' days';
+            document.getElementById('dtrPresent').textContent = data.present + ' days';
+            document.getElementById('dtrAbsent').textContent = data.absent + ' days';
+            document.getElementById('dtrLate').textContent = data.late + ' times';
+            document.getElementById('dtrHalfday').textContent = data.halfday + ' days';
+            document.getElementById('dtrOT').textContent = data.overtime + ' hrs';
+            document.getElementById('dtrRate').textContent = data.rate + '%';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading DTR summary');
+        });
 }
 
 window.downloadDTR = function() {
