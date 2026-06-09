@@ -1047,6 +1047,11 @@ Route::delete('/admin/leave/accrual-rates/{id}', [LeaveController::class, 'destr
 Route::get('/admin/leave/employee/{employeeId}/balances', [LeaveController::class, 'getEmployeeBalances'])->middleware('auth')->name('admin.leave.employee.balances');
 Route::post('/admin/leave/manual-credit/store', [LeaveController::class, 'storeManualCredit'])->middleware('auth')->name('admin.leave.manual-credit.store');
 
+// Leave Form Routes (CS Form No. 6)
+Route::get('/admin/leave/{id}/view-form', [LeaveController::class, 'viewLeaveForm'])->middleware('auth')->name('admin.leave.view-form');
+Route::get('/admin/leave/{id}/print-form', [LeaveController::class, 'generateLeaveForm'])->middleware('auth')->name('admin.leave.print-form');
+Route::get('/admin/leave/{id}/download-form', [LeaveController::class, 'generateLeaveForm'])->middleware('auth')->name('admin.leave.download-form');
+
 Route::get('/admin/payroll', function (\Illuminate\Http\Request $request) {
     $activeTab = $request->input('tab', 'register');
     

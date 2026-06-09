@@ -16,19 +16,31 @@ class LeaveApplication extends Model
         'end_date',
         'number_of_days',
         'reason',
+        'commutation_requested',
+        'leave_location',
+        'leave_location_specify',
+        'sick_leave_type',
+        'illness_specify',
+        'study_leave_purpose',
         'status',
         'attachment_path',
         'filed_by',
         'approved_by',
         'approved_at',
         'approver_remarks',
+        'approved_days_with_pay',
+        'approved_days_without_pay',
+        'approved_other_specify',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
         'number_of_days' => 'decimal:2',
+        'commutation_requested' => 'boolean',
         'approved_at' => 'datetime',
+        'approved_days_with_pay' => 'decimal:2',
+        'approved_days_without_pay' => 'decimal:2',
     ];
 
     public function employee(): BelongsTo

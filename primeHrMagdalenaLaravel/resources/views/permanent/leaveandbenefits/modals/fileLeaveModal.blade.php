@@ -89,6 +89,54 @@
                     </div>
                 </div>
 
+                {{-- CS Form 6.B — Leave Details (conditional) --}}
+                <div id="leaveDetailsSection" style="display: none; background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e5e7eb;">
+                    <label style="display: block; font-weight: 600; color: #0b044d; margin-bottom: 12px; font-size: 13px;">
+                        Leave Details <span style="font-weight: 400; color: #6b7280;">(CS Form 6.B)</span>
+                    </label>
+
+                    <div id="vlSplDetails" style="display: none; margin-bottom: 14px;">
+                        <p style="font-size: 12px; color: #374151; margin-bottom: 8px;">For Vacation / Special Privilege Leave:</p>
+                        <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px;">
+                            <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="radio" name="leave_location" value="ph" onchange="toggleAbroadSpecify()"> Within the Philippines
+                            </label>
+                            <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="radio" name="leave_location" value="abroad" onchange="toggleAbroadSpecify()"> Abroad
+                            </label>
+                        </div>
+                        <input type="text" name="leave_location_specify" id="leaveLocationSpecify" placeholder="Specify destination (if abroad)" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px; display: none;">
+                    </div>
+
+                    <div id="sickDetails" style="display: none; margin-bottom: 14px;">
+                        <p style="font-size: 12px; color: #374151; margin-bottom: 8px;">For Sick Leave:</p>
+                        <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px;">
+                            <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="radio" name="sick_leave_type" value="in_hospital"> In Hospital
+                            </label>
+                            <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="radio" name="sick_leave_type" value="out_patient"> Out Patient
+                            </label>
+                        </div>
+                        <input type="text" name="illness_specify" id="sickIllnessSpecify" placeholder="Specify illness" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px;">
+                    </div>
+
+                    <div id="slbwDetails" style="display: none; margin-bottom: 14px;">
+                        <p style="font-size: 12px; color: #374151; margin-bottom: 8px;">For Special Leave Benefits for Women:</p>
+                        <input type="text" name="illness_specify" id="slbwIllnessSpecify" placeholder="Specify illness" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px;">
+                    </div>
+
+                    <div id="studyDetails" style="display: none;">
+                        <p style="font-size: 12px; color: #374151; margin-bottom: 8px;">For Study Leave:</p>
+                        <select name="study_leave_purpose" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px;">
+                            <option value="">Select purpose...</option>
+                            <option value="masters">Completion of Master's Degree</option>
+                            <option value="bar_review">BAR/Board Examination Review</option>
+                            <option value="other">Other purpose</option>
+                        </select>
+                    </div>
+                </div>
+
                 {{-- Reason --}}
                 <div class="form-field" style="margin-bottom: 20px;">
                     <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; color: #0b044d; margin-bottom: 8px;">
@@ -96,12 +144,27 @@
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                         </svg>
-                        Reason for Leave <span style="color: #8e1e18;">*</span>
+                        Reason / Other Purpose <span style="color: #8e1e18;">*</span>
                     </label>
                     <textarea name="reason" id="leaveReason" rows="4" placeholder="Please provide a brief reason for your leave request..." required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical; line-height: 1.6;"></textarea>
                     <div style="display: flex; justify-content: space-between; margin-top: 4px;">
                         <small style="color: #9ca3af; font-size: 11px;">Be specific and concise</small>
                         <small id="reasonCounter" style="color: #9ca3af; font-size: 11px;">0 / 500</small>
+                    </div>
+                </div>
+
+                {{-- CS Form 6.D — Commutation --}}
+                <div class="form-field" style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; color: #0b044d; margin-bottom: 8px; font-size: 13px;">
+                        Commutation <span style="font-weight: 400; color: #6b7280;">(CS Form 6.D)</span>
+                    </label>
+                    <div style="display: flex; gap: 20px;">
+                        <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="radio" name="commutation_requested" value="0" checked> Not Requested
+                        </label>
+                        <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="radio" name="commutation_requested" value="1"> Requested
+                        </label>
                     </div>
                 </div>
 

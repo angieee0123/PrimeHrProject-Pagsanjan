@@ -13,6 +13,8 @@ use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\LeaveFormDataService;
 
 class LeaveController extends Controller
 {
@@ -363,6 +365,12 @@ class LeaveController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'number_of_days' => 'required|numeric|min:0.5',
             'reason' => 'required|string|max:500',
+            'commutation_requested' => 'nullable|boolean',
+            'leave_location' => 'nullable|in:ph,abroad',
+            'leave_location_specify' => 'nullable|string|max:255',
+            'sick_leave_type' => 'nullable|in:in_hospital,out_patient',
+            'illness_specify' => 'nullable|string|max:255',
+            'study_leave_purpose' => 'nullable|in:masters,bar_review,other',
             'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
@@ -450,6 +458,12 @@ class LeaveController extends Controller
                 'end_date' => $validated['end_date'],
                 'number_of_days' => $validated['number_of_days'],
                 'reason' => $validated['reason'],
+                'commutation_requested' => $request->boolean('commutation_requested'),
+                'leave_location' => $validated['leave_location'] ?? null,
+                'leave_location_specify' => $validated['leave_location_specify'] ?? null,
+                'sick_leave_type' => $validated['sick_leave_type'] ?? null,
+                'illness_specify' => $validated['illness_specify'] ?? null,
+                'study_leave_purpose' => $validated['study_leave_purpose'] ?? null,
                 'status' => 'pending',
                 'attachment_path' => $attachmentPath,
                 'filed_by' => auth()->id(),
@@ -622,6 +636,8 @@ class LeaveController extends Controller
             $leaveApplication->status = 'approved';
             $leaveApplication->approved_by = auth()->id();
             $leaveApplication->approved_at = now();
+            $leaveApplication->approved_days_with_pay = $leaveApplication->number_of_days;
+            $leaveApplication->approved_days_without_pay = 0;
             $leaveApplication->save();
 
             // Send notification to employee
@@ -837,6 +853,45 @@ class LeaveController extends Controller
             
             return redirect()->route('admin.leave')
                 ->with('error', 'Failed to adjust leave credits: ' . $e->getMessage());
+        }
+    }
+
+    public function viewLeaveForm($id, LeaveFormDataService $formService)
+    {
+        try {
+            return view('admin.leaveAndBenefits.leave-form-view', $formService->build($id));
+        } catch (\Exception $e) {
+            \Log::error('Failed to load leave form: ' . $e->getMessage());
+            abort(404, 'Leave application not found.');
+        }
+    }
+
+    public function generateLeaveForm($id, LeaveFormDataService $formService)
+    {
+        try {
+            $data = $formService->build($id);
+            $application = $data['application'];
+
+            $pdf = Pdf::loadView('admin.leaveAndBenefits.leave-form-pdf', $data)
+                ->setPaper('a4', 'portrait')
+                ->setOption('margin-top', 8)
+                ->setOption('margin-bottom', 8)
+                ->setOption('margin-left', 8)
+                ->setOption('margin-right', 8);
+
+            $filename = 'CS-Form-6-' . $application->application_number . '.pdf';
+
+            if (request()->routeIs('admin.leave.print-form')) {
+                return $pdf->stream($filename);
+            }
+
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            \Log::error('Failed to generate leave form: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate leave form: ' . $e->getMessage(),
+            ], 500);
         }
     }
 }

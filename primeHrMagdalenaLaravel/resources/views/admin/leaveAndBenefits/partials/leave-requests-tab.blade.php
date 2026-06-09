@@ -21,7 +21,7 @@
                 <option value="">All Status</option>
                 <option value="Approved">Approved</option>
                 <option value="Pending">Pending</option>
-                <option value="Rejected">Rejected</option>
+                <option value="Disapproved">Disapproved</option>
                 <option value="Cancelled">Cancelled</option>
             </select>
             <button class="btn-export" style="background: #0b044d; color: #fff; border-color: #0b044d;" onclick="openManualCreditModal('add')">
@@ -55,8 +55,8 @@
             </thead>
             <tbody id="leaveRequestsTableBody">
                 @forelse($leaveApplications as $application)
-                <tr data-department="{{ $application->employee->employmentDetail->departmentRelation->name ?? 'N/A' }}" 
-                    data-type="{{ $application->leaveType->leave_name ?? 'N/A' }}" 
+                <tr data-department="{{ $application->employee->employmentDetail->departmentRelation->name ?? 'N/A' }}"
+                    data-type="{{ $application->leaveType->leave_name ?? 'N/A' }}"
                     data-status="{{ ucfirst($application->status) }}">
                     <td>
                         <div class="emp-cell">
@@ -80,7 +80,7 @@
                         @elseif($application->status === 'pending')
                             <span class="badge-status pending">Pending</span>
                         @elseif($application->status === 'rejected')
-                            <span class="badge-status on-hold">Rejected</span>
+                            <span class="badge-status on-hold">Disapproved</span>
                         @else
                             <span class="badge-status cancelled">Cancelled</span>
                         @endif
@@ -103,7 +103,7 @@
                             )">View</button>
                             @if($application->status === 'pending')
                                 <button class="btn-approve" onclick="approveLeaveRequest({{ $application->id }}, '{{ $application->application_number }}')">Approve</button>
-                                <button class="btn-reject" onclick="openRejectModal({{ $application->id }}, '{{ $application->application_number }}')">Reject</button>
+                                <button class="btn-reject" onclick="openRejectModal({{ $application->id }}, '{{ $application->application_number }}')">Disapprove</button>
                             @endif
                         </div>
                     </td>
@@ -137,39 +137,45 @@
     </div>
 </section>
 
-{{-- Admin Leave Detail Modal --}}
+{{-- Admin Leave Detail Modal — CS Form No. 6 Preview --}}
 <div class="modal-overlay" id="adminLeaveDetailModal" onclick="closeAdminLeaveDetailModal()" style="display: none;">
-    <div class="modal-box" onclick="event.stopPropagation()" style="max-width: 600px;">
+    <div class="modal-box" onclick="event.stopPropagation()" style="max-width: 920px; width: 95vw;">
         <div class="modal-header">
             <div>
-                <span class="modal-eyebrow" id="adminLeaveAppNumber">LEAVE REQUEST · LV-2025-001</span>
+                <span class="modal-eyebrow" id="adminLeaveAppNumber">CS FORM NO. 6 · LV-2025-001</span>
                 <h3 class="modal-title" id="adminLeaveEmployeeName">Employee Name</h3>
-                <p class="modal-sub" id="adminLeaveEmployeeId">PGS-0115</p>
+                <p class="modal-sub">
+                    <span id="adminLeaveEmployeeId">PGS-0115</span>
+                    · <span id="adminLeaveType">Vacation Leave</span>
+                    · <span id="adminLeaveStatus" class="badge-status pending" style="font-size: 11px;">Pending</span>
+                </p>
             </div>
             <button class="modal-close" onclick="closeAdminLeaveDetailModal()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
-        <div class="modal-body">
-            <span class="modal-section-label">LEAVE DETAILS</span>
-            <div class="modal-row"><span>Leave Type</span><strong id="adminLeaveType">Vacation Leave</strong></div>
-            <div class="modal-row"><span>Date From</span><strong id="adminLeaveFrom">Jun 15, 2025</strong></div>
-            <div class="modal-row"><span>Date To</span><strong id="adminLeaveTo">Jun 16, 2025</strong></div>
-            <div class="modal-row"><span>No. of Days</span><strong id="adminLeaveDays">2 days</strong></div>
-            <div class="modal-row"><span>Status</span><span class="badge-status pending" id="adminLeaveStatus">Pending</span></div>
-            <span class="modal-section-label modal-section-deductions">REASON</span>
-            <div class="modal-row"><span id="adminLeaveReason" style="color: #6b7280;">Medical consultation</span></div>
-            <div id="adminRemarksSection" style="display: none;">
-                <span class="modal-section-label modal-section-deductions">APPROVER REMARKS</span>
-                <div class="modal-row"><span id="adminRemarksText" style="color: #6b7280; font-style: italic;"></span></div>
-            </div>
+        <div class="modal-body" style="padding: 0; background: #e8e8f0;">
+            <iframe id="adminLeaveFormFrame"
+                title="CS Form No. 6 — Application for Leave"
+                style="width: 100%; height: 65vh; border: none; display: block; background: #fff;"
+                src="about:blank"></iframe>
         </div>
         <div class="modal-footer">
             <button class="modal-btn-ghost" onclick="closeAdminLeaveDetailModal()">Close</button>
-            <button class="modal-btn-primary" id="adminDownloadBtn" style="display: none;">
+            <button class="modal-btn-primary" id="adminDownloadBtn" style="display: none; background: #6b7280;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Download Attachment
+                Attachment
             </button>
+            <div style="display: flex; gap: 8px; margin-left: auto;">
+                <button class="modal-btn-primary" id="adminPrintFormBtn" onclick="printLeaveForm()" style="background: #6366f1;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    Print Form
+                </button>
+                <button class="modal-btn-primary" id="adminDownloadFormBtn" onclick="downloadLeaveForm()" style="background: #10b981;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download PDF
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -179,9 +185,9 @@
     <div class="modal-box" onclick="event.stopPropagation()" style="max-width: 500px;">
         <div class="modal-header">
             <div>
-                <span class="modal-eyebrow">REJECT LEAVE REQUEST</span>
-                <h3 class="modal-title" id="rejectModalTitle">Confirm Rejection</h3>
-                <p class="modal-sub">Please provide a reason for rejecting this leave request</p>
+                <span class="modal-eyebrow">DISAPPROVE LEAVE REQUEST</span>
+                <h3 class="modal-title" id="rejectModalTitle">Confirm Disapproval</h3>
+                <p class="modal-sub">Please provide a reason for disapproving this leave request</p>
             </div>
             <button class="modal-close" onclick="closeRejectModal()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -189,8 +195,8 @@
         </div>
         <div class="modal-body">
             <div class="form-field">
-                <label style="display: block; font-weight: 600; color: #0b044d; margin-bottom: 8px;">Rejection Reason <span style="color: #8e1e18;">*</span></label>
-                <textarea id="rejectionReason" rows="4" placeholder="Explain why this leave request is being rejected..." required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical;"></textarea>
+                <label style="display: block; font-weight: 600; color: #0b044d; margin-bottom: 8px;">Disapproval Reason <span style="color: #8e1e18;">*</span></label>
+                <textarea id="rejectionReason" rows="4" placeholder="Explain why this leave request is being disapproved..." required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical;"></textarea>
             </div>
         </div>
         <div class="modal-footer">
@@ -201,7 +207,7 @@
                     <line x1="15" y1="9" x2="9" y2="15"/>
                     <line x1="9" y1="9" x2="15" y2="15"/>
                 </svg>
-                Reject Request
+                Disapprove Request
             </button>
         </div>
     </div>
@@ -223,15 +229,15 @@ function renderLeaveRequestPagination() {
     const totalPages = Math.ceil(leaveRequestTotalRows / leaveRequestRowsPerPage);
     const paginationControls = document.getElementById('leaveRequestPaginationControls');
     let html = '';
-    
+
     html += `<button class="page-btn" ${leaveRequestCurrentPage === 1 ? 'disabled' : ''} onclick="changeLeaveRequestPage(${leaveRequestCurrentPage - 1})">‹</button>`;
-    
+
     for (let i = 1; i <= totalPages; i++) {
         html += `<button class="page-btn ${i === leaveRequestCurrentPage ? 'active' : ''}" onclick="changeLeaveRequestPage(${i})">${i}</button>`;
     }
-    
+
     html += `<button class="page-btn" ${leaveRequestCurrentPage === totalPages ? 'disabled' : ''} onclick="changeLeaveRequestPage(${leaveRequestCurrentPage + 1})">›</button>`;
-    
+
     paginationControls.innerHTML = html;
 }
 
@@ -248,7 +254,7 @@ function paginateLeaveRequestTable() {
     const start = (leaveRequestCurrentPage - 1) * leaveRequestRowsPerPage;
     const end = start + leaveRequestRowsPerPage;
     let visibleCount = 0;
-    
+
     rows.forEach((row, index) => {
         if (row.querySelector('.emp-cell')) {
             if (index >= start && index < end && row.style.display !== 'none') {
@@ -259,7 +265,7 @@ function paginateLeaveRequestTable() {
             }
         }
     });
-    
+
     document.getElementById('leaveRequestRowStart').textContent = visibleCount > 0 ? start + 1 : 0;
     document.getElementById('leaveRequestRowEnd').textContent = start + visibleCount;
 }
@@ -270,7 +276,7 @@ function applyAdminLeaveFilters() {
     const status = document.getElementById('filterLeaveStatus').value;
     const rows = document.querySelectorAll('#leaveRequestsTableBody tr');
     let visible = 0;
-    
+
     rows.forEach(row => {
         if (row.querySelector('.emp-cell')) {
             const matchDept = !department || row.dataset.department === department;
@@ -281,9 +287,9 @@ function applyAdminLeaveFilters() {
             if (show) visible++;
         }
     });
-    
+
     const total = rows.length - (rows[0]?.querySelector('.emp-cell') ? 0 : 1);
-    
+
     leaveRequestTotalRows = visible;
     leaveRequestCurrentPage = 1;
     renderLeaveRequestPagination();

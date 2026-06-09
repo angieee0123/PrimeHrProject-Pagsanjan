@@ -419,6 +419,47 @@
         document.getElementById('leaveApplicationForm').reset();
         document.getElementById('errorMessage').style.display = 'none';
         document.getElementById('attachmentField').style.display = 'none';
+        document.getElementById('leaveDetailsSection').style.display = 'none';
+        document.getElementById('leaveLocationSpecify').style.display = 'none';
+    }
+
+    function toggleAbroadSpecify() {
+        const abroad = document.querySelector('input[name="leave_location"][value="abroad"]')?.checked;
+        const field = document.getElementById('leaveLocationSpecify');
+        if (field) {
+            field.style.display = abroad ? 'block' : 'none';
+            field.required = !!abroad;
+        }
+    }
+
+    function updateLeaveDetailsFields(code) {
+        const section = document.getElementById('leaveDetailsSection');
+        const vlSpl = document.getElementById('vlSplDetails');
+        const sick = document.getElementById('sickDetails');
+        const slbw = document.getElementById('slbwDetails');
+        const study = document.getElementById('studyDetails');
+
+        const showVlSpl = ['VL', 'SPL'].includes(code);
+        const showSick = code === 'SL';
+        const showSlbw = ['SLBW', 'MCL'].includes(code);
+        const showStudy = code === 'STL';
+        const any = showVlSpl || showSick || showSlbw || showStudy;
+
+        section.style.display = any ? 'block' : 'none';
+        vlSpl.style.display = showVlSpl ? 'block' : 'none';
+        sick.style.display = showSick ? 'block' : 'none';
+        slbw.style.display = showSlbw ? 'block' : 'none';
+        study.style.display = showStudy ? 'block' : 'none';
+
+        document.getElementById('sickIllnessSpecify').disabled = !showSick;
+        document.getElementById('slbwIllnessSpecify').disabled = !showSlbw;
+        if (!showSick) document.getElementById('sickIllnessSpecify').value = '';
+        if (!showSlbw) document.getElementById('slbwIllnessSpecify').value = '';
+        if (!showVlSpl) {
+            document.querySelectorAll('input[name="leave_location"]').forEach(r => r.checked = false);
+            document.getElementById('leaveLocationSpecify').value = '';
+            document.getElementById('leaveLocationSpecify').style.display = 'none';
+        }
     }
 
     function calculateDays() {
@@ -492,6 +533,8 @@
             attachmentField.style.display = 'none';
             attachmentInput.required = false;
         }
+
+        updateLeaveDetailsFields(select.value);
 
         if (select.value) {
             let infoText = '';
