@@ -54,8 +54,12 @@
                     <th>Date</th>
                     <th>Day</th>
                     <th>Employee</th>
-                    <th>Time In</th>
-                    <th>Time Out</th>
+                    <th>AM In</th>
+                    <th>AM Out</th>
+                    <th>PM In</th>
+                    <th>PM Out</th>
+                    <th>OT In</th>
+                    <th>OT Out</th>
                     <th>Late</th>
                     <th>Undertime</th>
                     <th>Hours Worked</th>
@@ -78,8 +82,7 @@
                     }
                 @endphp
                 <tr class="{{ $rowClass }}">
-                    <td>
-                        <strong>{{ $record['date'] }}</strong>
+                    <td><strong>{{ $record['date'] }}</strong>
                         @if($record['is_absent'])
                             <span class="badge-absent" style="display: inline-block; margin-left: 6px; padding: 2px 6px; background: #fee; color: #8e1e18; font-size: 10px; font-weight: 600; border-radius: 3px;">ABSENT</span>
                         @elseif(!$record['am_in'] && !$record['am_out'] && !$record['pm_in'] && !$record['pm_out'] && !$record['is_on_leave'] && $record['day'] !== 'Saturday' && $record['day'] !== 'Sunday')
@@ -89,45 +92,71 @@
                         @endif
                     </td>
                     <td>{{ $record['day'] }}</td>
-                    <td>
-                        <p class="emp-name" style="font-size: 13.5px; font-weight: 600; color: #0b044d; margin: 0;">{{ $record['employee_name'] }}</p>
-                    </td>
+                    <td><p class="emp-name" style="font-size: 13.5px; font-weight: 600; color: #0b044d; margin: 0;">{{ $record['employee_name'] }}</p></td>
                     <td>
                         @if($record['is_on_leave'])
                             <span style="color: #0369a1; font-weight: 600; font-size: 12px;">ON LEAVE</span>
                         @elseif($record['is_absent'])
-                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">No Record</span>
+                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">—</span>
+                        @elseif($record['am_in'])
+                            {{ $record['am_in'] }}
                         @else
-                            <div style="line-height: 1.6;">
-                                @if($record['am_in'])
-                                    <div style="font-weight: 600; color: #0b044d;">{{ $record['am_in'] }}</div>
-                                @endif
-                                @if($record['pm_in'])
-                                    <div style="font-size: 11px; color: #6b6a8a;">{{ $record['pm_in'] }}</div>
-                                @endif
-                                @if(!$record['am_in'] && !$record['pm_in'])
-                                    <span class="log-missing" style="color: #9999bb; font-size: 12px;">No Record</span>
-                                @endif
-                            </div>
+                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">—</span>
                         @endif
                     </td>
                     <td>
                         @if($record['is_on_leave'])
                             <span style="color: #0369a1; font-weight: 600; font-size: 12px;">ON LEAVE</span>
                         @elseif($record['is_absent'])
-                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">No Record</span>
+                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">—</span>
+                        @elseif($record['am_out'])
+                            {{ $record['am_out'] }}
                         @else
-                            <div style="line-height: 1.6;">
-                                @if($record['am_out'])
-                                    <div style="font-size: 11px; color: #6b6a8a;">{{ $record['am_out'] }}</div>
-                                @endif
-                                @if($record['pm_out'])
-                                    <div style="font-weight: 600; color: #0b044d;">{{ $record['pm_out'] }}</div>
-                                @endif
-                                @if(!$record['am_out'] && !$record['pm_out'])
-                                    <span class="log-missing" style="color: #9999bb; font-size: 12px;">No Record</span>
-                                @endif
-                            </div>
+                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">—</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($record['is_on_leave'])
+                            <span style="color: #0369a1; font-weight: 600; font-size: 12px;">ON LEAVE</span>
+                        @elseif($record['is_absent'])
+                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">—</span>
+                        @elseif($record['pm_in'])
+                            {{ $record['pm_in'] }}
+                        @else
+                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">—</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($record['is_on_leave'])
+                            <span style="color: #0369a1; font-weight: 600; font-size: 12px;">ON LEAVE</span>
+                        @elseif($record['is_absent'])
+                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">—</span>
+                        @elseif($record['pm_out'])
+                            {{ $record['pm_out'] }}
+                        @else
+                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">—</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($record['is_on_leave'])
+                            <span style="color: #0369a1; font-weight: 600; font-size: 12px;">ON LEAVE</span>
+                        @elseif($record['is_absent'])
+                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">—</span>
+                        @elseif(isset($record['ot_in']) && $record['ot_in'])
+                            {{ $record['ot_in'] }}
+                        @else
+                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">—</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($record['is_on_leave'])
+                            <span style="color: #0369a1; font-weight: 600; font-size: 12px;">ON LEAVE</span>
+                        @elseif($record['is_absent'])
+                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">—</span>
+                        @elseif(isset($record['ot_out']) && $record['ot_out'])
+                            {{ $record['ot_out'] }}
+                        @else
+                            <span class="log-missing" style="color: #9999bb; font-size: 12px;">—</span>
                         @endif
                     </td>
                     <td>
@@ -204,7 +233,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="10" style="text-align: center; padding: 40px; color: #6b6a8a;">
+                    <td colspan="14" style="text-align: center; padding: 40px; color: #6b6a8a;">
                         No attendance records found for the selected period.
                     </td>
                 </tr>

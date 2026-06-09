@@ -220,9 +220,13 @@
                 <tr>
                     <td>
                         <div class="emp-cell">
-                            <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
-                                {{ getInitials($fullName) }}
-                            </div>
+                            @if($employee->photo)
+                                <img src="{{ $employee->photo }}" alt="{{ $fullName }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                            @else
+                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
+                                    {{ getInitials($fullName) }}
+                                </div>
+                            @endif
                             <div>
                                 <p class="emp-name">{{ $fullName }}</p>
                                 <p class="emp-id">{{ $employee->employee_id }}</p>
@@ -429,9 +433,13 @@
                 <tr>
                     <td>
                         <div class="emp-cell">
-                            <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
-                                {{ getInitials($fullName) }}
-                            </div>
+                            @if($employee->photo)
+                                <img src="{{ $employee->photo }}" alt="{{ $fullName }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                            @else
+                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
+                                    {{ getInitials($fullName) }}
+                                </div>
+                            @endif
                             <div>
                                 <p class="emp-name">{{ $fullName }}</p>
                                 <p class="emp-id">{{ $employee->employee_id }}</p>

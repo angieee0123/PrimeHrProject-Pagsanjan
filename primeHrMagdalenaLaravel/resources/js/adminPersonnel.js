@@ -502,6 +502,7 @@ window.generateQRCode = generateQRCode;
 window.closeQRModal = closeQRModal;
 window.downloadQRCode = downloadQRCode;
 window.printQRCode = printQRCode;
+window.editEmployee = editEmployee;
 
 // QR Code Functions
 let currentQRData = null;

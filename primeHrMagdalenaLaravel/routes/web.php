@@ -818,15 +818,21 @@ Route::post('/admin/personnel/{id}/status', function (\Illuminate\Http\Request $
 })->middleware('auth')->name('admin.personnel.updateStatus');
 
 Route::get('/admin/personnel/{id}/edit', function ($id) {
-    $employee = \App\Models\Employee::with(['employmentDetail', 'addresses', 'contacts', 'governmentIds'])
-        ->findOrFail($id);
+    $employee = \App\Models\Employee::with([
+        'employmentDetail.departmentRelation',
+        'employmentDetail.designationRelation',
+        'addresses',
+        'contacts',
+        'governmentIds',
+        'user'
+    ])->findOrFail($id);
     return response()->json($employee);
 })->middleware('auth')->name('admin.personnel.edit');
 
 Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $request, $id) {
     $employee = \App\Models\Employee::with(['employmentDetail', 'addresses', 'contacts', 'governmentIds'])->findOrFail($id);
 
-    $employee->update([
+    $updateData = [
         'first_name'     => $request->first_name,
         'middle_name'    => $request->middle_name,
         'last_name'      => $request->last_name,
@@ -839,7 +845,16 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
         'weight'         => $request->weight,
         'blood_type'     => $request->blood_type,
         'citizenship'    => $request->citizenship,
-    ]);
+    ];
+
+    // Handle photo upload if provided
+    if ($request->hasFile('photo')) {
+        $filename = time() . '_' . $request->file('photo')->getClientOriginalName();
+        $path = $request->file('photo')->storeAs('employees/photos', $filename, 'public');
+        $updateData['photo'] = '/storage/' . $path;
+    }
+
+    $employee->update($updateData);
 
     if ($employee->employmentDetail) {
         $employee->employmentDetail->update([

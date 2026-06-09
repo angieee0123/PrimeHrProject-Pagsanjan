@@ -418,17 +418,17 @@ function editEmployee(id) {
             // Step 3 — Employment
             const emp = d.employment_detail || {};
             const deptSelect = document.getElementById('wizard-department');
-            deptSelect.value = emp.department || '';
+            deptSelect.value = emp.department_id || '';
             // Load designations then set position
-            if (emp.department) {
-                fetch(`/admin/departments/${emp.department}/designations`)
+            if (emp.department_id) {
+                fetch(`/admin/departments/${emp.department_id}/designations`)
                     .then(r => r.json())
                     .then(desigs => {
                         const pos = document.getElementById('wizard-position');
                         pos.innerHTML = '<option value="">Select Position</option>';
                         desigs.forEach(dg => {
                             const opt = document.createElement('option');
-                            opt.value = dg.title;
+                            opt.value = dg.id;
                             opt.textContent = dg.title;
                             opt.dataset.employmentType = dg.employment_type || '';
                             opt.dataset.salaryGrade    = dg.salary_grade    || '';
@@ -436,6 +436,7 @@ function editEmployee(id) {
                         });
                         pos.disabled = false;
                         pos.value = emp.designation_id || '';
+                        fillFromDesignation(pos);
                     });
             }
             const empStatusEl = document.getElementById('wizard-employment-status');
@@ -448,13 +449,19 @@ function editEmployee(id) {
             setVal('step_increment',    emp.step_increment);
 
             // Step 4 — Contact
-            const mobile    = (d.contacts || []).find(c => c.type === 'mobile');
-            const landline  = (d.contacts || []).find(c => c.type === 'landline');
-            const emergency = (d.contacts || []).find(c => c.type === 'emergency');
-            setVal('mobile_number',             mobile?.number);
-            setVal('landline_number',           landline?.number);
-            setVal('emergency_contact_person',  emergency?.contact_person);
-            setVal('emergency_contact_number',  emergency?.number);
+            const contactsByType = {};
+            if (d.contacts && Array.isArray(d.contacts)) {
+                d.contacts.forEach(c => {
+                    contactsByType[c.type] = c;
+                });
+            }
+            const mobile    = contactsByType.mobile;
+            const landline  = contactsByType.landline;
+            const emergency = contactsByType.emergency;
+            setVal('mobile_number',             mobile?.mobile_number || mobile?.number);
+            setVal('landline_number',           landline?.landline_number || landline?.number);
+            setVal('emergency_contact_person',  emergency?.emergency_contact_person || emergency?.contact_person);
+            setVal('emergency_contact_number',  emergency?.emergency_contact_number || emergency?.number);
             const addr = (d.addresses || [])[0] || {};
             setVal('house_no',  addr.house_no);
             setVal('street',    addr.street);
