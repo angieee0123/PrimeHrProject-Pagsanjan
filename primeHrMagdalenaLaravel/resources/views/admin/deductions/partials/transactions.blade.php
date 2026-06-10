@@ -45,7 +45,6 @@
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody>
             <tr>
                 <td colspan="6" style="text-align: center; padding: 40px; color: #9999bb;">
                     No transactions found. Transactions will appear here after processing payroll.

@@ -112,9 +112,13 @@
                     data-status="{{ $loan->status }}">
                     <td>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <div class="avatar" style="background: {{ $avatarColors[($loan->employee_id ?? 0) % count($avatarColors)] }};">
-                                {{ getInitials($loan->employee->first_name . ' ' . $loan->employee->last_name) }}
-                            </div>
+                            @if($loan->employee->photo)
+                                <img src="{{ $loan->employee->photo }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                            @else
+                                <div class="avatar" style="background: {{ $avatarColors[($loan->employee_id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #e8e7f5;">
+                                    {{ getInitials($loan->employee->first_name . ' ' . $loan->employee->last_name) }}
+                                </div>
+                            @endif
                             <div>
                                 <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">
                                     {{ $loan->employee->first_name }} {{ $loan->employee->last_name }}

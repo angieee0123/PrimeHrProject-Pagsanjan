@@ -52,9 +52,13 @@
                 <tr data-employee="{{ strtolower($emp['name']) }}" data-department="{{ $emp['department'] }}">
                     <td>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <div class="avatar" style="background: {{ $avatarColors[($emp['id'] ?? 0) % count($avatarColors)] }};">
-                                {{ getInitials($emp['name']) }}
-                            </div>
+                            @if($emp['photo'] ?? null)
+                                <img src="{{ $emp['photo'] }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                            @else
+                                <div class="avatar" style="background: {{ $avatarColors[($emp['id'] ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #e8e7f5;">
+                                    {{ getInitials($emp['name']) }}
+                                </div>
+                            @endif
                             <div>
                                 <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">{{ $emp['name'] }}</p>
                                 <p style="color: #9999bb; margin: 0; font-size: 11px;">ID: {{ $emp['employee_id'] }}</p>

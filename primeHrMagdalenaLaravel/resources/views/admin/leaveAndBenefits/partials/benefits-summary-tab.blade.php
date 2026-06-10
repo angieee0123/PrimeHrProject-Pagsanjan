@@ -29,9 +29,13 @@
                 <tr>
                     <td>
                         <div class="emp-cell">
-                            <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
-                                {{ getInitials($benefit['name']) }}
-                            </div>
+                            @if(isset($benefit['photo']) && $benefit['photo'])
+                                <img src="{{ $benefit['photo'] }}" alt="{{ $benefit['name'] }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                            @else
+                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">
+                                    {{ getInitials($benefit['name']) }}
+                                </div>
+                            @endif
                             <div>
                                 <p class="emp-name">{{ $benefit['name'] }}</p>
                                 <p class="emp-id">{{ $benefit['empId'] }}</p>

@@ -57,6 +57,7 @@ class AdminDashboardController extends Controller
                     'id' => $emp->id,
                     'initials' => $initials,
                     'color' => $color,
+                    'photo' => $emp->photo,
                     'name' => $emp->first_name . ' ' . $emp->last_name,
                     'employee_id' => $emp->employee_id,
                     'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
@@ -83,6 +84,7 @@ class AdminDashboardController extends Controller
                 return [
                     'initials' => $initials,
                     'color' => $color,
+                    'photo' => $emp->photo,
                     'name' => $emp->first_name . ' ' . $emp->last_name,
                     'type' => $leave->leaveType->leave_name ?? 'Leave',
                     'days' => $days . ' day' . ($days > 1 ? 's' : ''),

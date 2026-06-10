@@ -60,9 +60,13 @@
                     data-status="{{ ucfirst($application->status) }}">
                     <td>
                         <div class="emp-cell">
-                            <div class="emp-avatar" style="background: {{ $avatarColors[($application->employee->id ?? 0) % count($avatarColors)] }};">
-                                {{ strtoupper(substr($application->employee->first_name ?? 'N', 0, 1) . substr($application->employee->last_name ?? 'A', 0, 1)) }}
-                            </div>
+                            @if($application->employee->photo)
+                                <img src="{{ $application->employee->photo }}" alt="{{ $application->employee->first_name }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                            @else
+                                <div class="emp-avatar" style="background: {{ $avatarColors[($application->employee->id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">
+                                    {{ strtoupper(substr($application->employee->first_name ?? 'N', 0, 1) . substr($application->employee->last_name ?? 'A', 0, 1)) }}
+                                </div>
+                            @endif
                             <div>
                                 <p class="emp-name">{{ $application->employee->first_name ?? 'N/A' }} {{ $application->employee->last_name ?? '' }}</p>
                                 <p class="emp-id">{{ $application->employee->employee_id ?? 'N/A' }}</p>

@@ -80,12 +80,22 @@ $currentRoute = Route::currentRouteName();
 
     <div class="sidebar-footer" id="sidebar-footer">
         <div class="user-avatar-wrap">
-            <div class="user-avatar">{{ $authInitials ?? 'AD' }}</div>
+            @if(Auth::check() && Auth::user()->employee && Auth::user()->employee->photo)
+                <img src="{{ Auth::user()->employee->photo }}" class="user-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+            @else
+                <div class="user-avatar" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#0b044d; color:white; font-weight:600; font-size:13px; border:2px solid #e8e7f5;">
+                    @if(Auth::check())
+                        {{ strtoupper(substr(Auth::user()->employee->first_name ?? 'A', 0, 1) . substr(Auth::user()->employee->last_name ?? 'D', 0, 1)) }}
+                    @else
+                        AD
+                    @endif
+                </div>
+            @endif
             <span class="user-status-dot"></span>
         </div>
         <div class="user-info" id="user-info">
-            <p class="user-name">{{ $authFullName ?? 'Admin User' }}</p>
-            <p class="user-role">{{ $authRole ?? 'HR Staff' }}</p>
+            <p class="user-name">{{ Auth::check() ? (Auth::user()->employee->first_name ?? 'Admin') . ' ' . (Auth::user()->employee->last_name ?? 'User') : 'Admin User' }}</p>
+            <p class="user-role">{{ Auth::check() ? (Auth::user()->role === 'admin' ? 'Administrator' : 'HR Staff') : 'HR Staff' }}</p>
         </div>
         <form action="{{ route('logout') }}" method="POST" style="margin:0;">
             @csrf

@@ -223,7 +223,7 @@
                             @if($employee->photo)
                                 <img src="{{ $employee->photo }}" alt="{{ $fullName }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
                             @else
-                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
+                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">
                                     {{ getInitials($fullName) }}
                                 </div>
                             @endif
@@ -284,7 +284,7 @@
                                 </button>
                                 @endif
                             </div>
-                            
+
                             <!-- Mobile/Tablet: 3-Dot Menu -->
                             <div class="action-menu-wrapper">
                                 <button class="action-menu-btn" onclick="toggleActionMenu(event, {{ $employee->id }})" title="Actions">
@@ -436,7 +436,7 @@
                             @if($employee->photo)
                                 <img src="{{ $employee->photo }}" alt="{{ $fullName }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
                             @else
-                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
+                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">
                                     {{ getInitials($fullName) }}
                                 </div>
                             @endif
@@ -481,7 +481,7 @@
                                     <span>Add New</span>
                                 </button>
                             </div>
-                            
+
                             <!-- Mobile/Tablet: 3-Dot Menu -->
                             <div class="action-menu-wrapper">
                                 <button class="action-menu-btn" onclick="toggleActionMenu(event, 'schedule{{ $employee->id }}')" title="Actions">
@@ -699,7 +699,7 @@
                 <button onclick="closeBulkImportModal()" style="background:none; border:none; font-size:28px; color:#6b6a8a; cursor:pointer; width:32px; height:32px; display:flex; align-items:center; justify-content:center;">&times;</button>
             </div>
         </div>
-        
+
         <div style="padding:24px;">
             <div style="background:#f0effe; border:1.5px solid #dddcf0; border-radius:10px; padding:16px; margin-bottom:20px;">
                 <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">

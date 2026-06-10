@@ -86,9 +86,13 @@
                 <tr data-department="{{ $record['dept'] }}" data-status="{{ $record['status'] }}" data-name="{{ $record['name'] }}" data-id="{{ $record['id'] }}">
                     <td>
                         <div class="emp-cell">
-                            <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
-                                {{ getInitials($record['name']) }}
-                            </div>
+                            @if(isset($record['photo']) && $record['photo'])
+                                <img src="{{ $record['photo'] }}" alt="{{ $record['name'] }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                            @else
+                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">
+                                    {{ getInitials($record['name']) }}
+                                </div>
+                            @endif
                             <div>
                                 <p class="emp-name">{{ $record['name'] }}</p>
                                 <p class="emp-id">{{ $record['id'] }}</p>

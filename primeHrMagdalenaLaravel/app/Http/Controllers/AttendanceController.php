@@ -223,6 +223,7 @@ class AttendanceController extends Controller
             'on_leave' => $onLeave,
             'rate' => $rate,
             'status' => $status,
+            'photo' => $employee->photo,
         ];
     }
 

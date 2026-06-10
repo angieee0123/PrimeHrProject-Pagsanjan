@@ -145,7 +145,11 @@
                 <tr data-dept="{{ $emp['dept'] }}" data-type="{{ $emp['type'] }}">
                     <td>
                         <div class="emp-cell">
-                            <div class="emp-avatar emp-avatar-dynamic" data-bg="{{ $emp['color'] }}">{{ $emp['initials'] }}</div>
+                            @if($emp['photo'])
+                                <img src="{{ $emp['photo'] }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                            @else
+                                <div class="emp-avatar emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #e8e7f5;">{{ $emp['initials'] }}</div>
+                            @endif
                             <div>
                                 <p class="emp-name">{{ $emp['name'] }}</p>
                                 <p class="emp-id">{{ $emp['employee_id'] }}</p>
@@ -221,7 +225,11 @@
                     <tr>
                         <td>
                             <div class="emp-cell">
-                                <div class="emp-avatar emp-avatar-sm emp-avatar-dynamic" data-bg="{{ $l['color'] }}">{{ $l['initials'] }}</div>
+                                @if($l['photo'])
+                                    <img src="{{ $l['photo'] }}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                                @else
+                                    <div class="emp-avatar emp-avatar-sm emp-avatar-dynamic" data-bg="{{ $l['color'] }}" style="width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">{{ $l['initials'] }}</div>
+                                @endif
                                 <p class="emp-name" style="margin:0">{{ $l['name'] }}</p>
                             </div>
                         </td>

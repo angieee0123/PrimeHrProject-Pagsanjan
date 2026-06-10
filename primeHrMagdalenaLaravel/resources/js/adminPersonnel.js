@@ -407,6 +407,9 @@ function closeViewModal() {
 
 function generateEmployeeView(data) {
     return `
+        <div style="margin-bottom:24px;">
+            ${data.photo ? `<div style="margin-bottom:24px;"><img src="${data.photo}" alt="${data.first_name} ${data.last_name}" style="width:100%; max-width:300px; height:auto; border-radius:12px; border:3px solid #e8e7f5; object-fit:cover; display:block; margin:0 auto;"></div>` : ''}
+        </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;">
             <div>
                 <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f0effe;">👤 Personal Information</h4>

@@ -40,7 +40,11 @@
                 <tr class="disapproved-order-row">
                     <td data-label="Employee">
                         <div class="emp-cell">
-                            <div class="emp-avatar" style="background: {{ $colors[$loop->index % 6] }};">{{ strtoupper(substr($order->employee->first_name, 0, 2)) }}</div>
+                            @if($order->employee->photo)
+                                <img src="{{ $order->employee->photo }}" alt="{{ $order->employee->first_name }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                            @else
+                                <div class="emp-avatar" style="width:40px; height:40px; background: {{ $colors[$loop->index % 6] }}; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border-radius:50%; border:2px solid #e8e7f5;">{{ strtoupper(substr($order->employee->first_name, 0, 1)) }}{{ strtoupper(substr($order->employee->last_name, 0, 1)) }}</div>
+                            @endif
                             <div>
                                 <p class="emp-name">{{ $order->employee->first_name }} {{ $order->employee->last_name }}</p>
                                 <p class="emp-id">{{ $order->employee->employee_id }}</p>

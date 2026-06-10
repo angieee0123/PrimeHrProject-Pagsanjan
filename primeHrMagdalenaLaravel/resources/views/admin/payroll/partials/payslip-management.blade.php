@@ -22,7 +22,7 @@
         <thead>
             <tr>
                 <th>Employee ID</th>
-                <th>Employee Name</th>
+                <th>Employee</th>
                 <th>Department</th>
                 <th>Period</th>
                 <th>Basic Pay</th>
@@ -36,7 +36,25 @@
             @forelse($salaryComputations ?? [] as $computation)
             <tr data-status="{{ $computation->status }}">
                 <td>{{ $computation->employee->employee_id ?? 'N/A' }}</td>
-                <td>{{ $computation->employee->first_name ?? '' }} {{ $computation->employee->last_name ?? '' }}</td>
+                <td>
+                    <div class="emp-cell">
+                        @if($computation->employee->photo ?? false)
+                            <img src="{{ $computation->employee->photo }}" alt="{{ $computation->employee->first_name }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                        @else
+                            @php
+                                $colors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
+                                $empIndex = $loop->index % 6;
+                            @endphp
+                            <div style="width:40px; height:40px; background: {{ $colors[$empIndex] }}; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">
+                                {{ strtoupper(substr($computation->employee->first_name ?? 'N', 0, 1)) }}{{ strtoupper(substr($computation->employee->last_name ?? 'A', 0, 1)) }}
+                            </div>
+                        @endif
+                        <div>
+                            <p class="emp-name">{{ $computation->employee->first_name ?? '' }} {{ $computation->employee->last_name ?? '' }}</p>
+                            <p class="emp-id">{{ $computation->employee->employee_id ?? 'N/A' }}</p>
+                        </div>
+                    </div>
+                </td>
                 <td>{{ $computation->employee->employmentDetail->departmentRelation->name ?? 'N/A' }}</td>
                 <td class="table-cell-period">{{ $computation->period_start->format('M d') }}-{{ $computation->period_end->format('d, Y') }}</td>
                 <td class="pay-cell">₱{{ number_format($computation->basic_pay ?? 0, 2) }}</td>
