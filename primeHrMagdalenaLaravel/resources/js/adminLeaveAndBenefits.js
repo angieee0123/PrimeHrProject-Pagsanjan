@@ -168,7 +168,8 @@ window.switchTab = function(tab) {
             (tab === 'transactions' && btn.textContent.includes('Transaction History')) ||
             (tab === 'benefits' && btn.textContent.includes('Benefits Summary')) ||
             (tab === 'types' && btn.textContent.includes('Leave Types')) ||
-            (tab === 'accrual' && btn.textContent.includes('CSC Daily Accrual'))) {
+            (tab === 'accrual' && btn.textContent.includes('CSC Daily Accrual')) ||
+            (tab === 'import' && btn.textContent.includes('Import Records'))) {
             btn.classList.add('active');
         }
     });
@@ -178,6 +179,7 @@ window.switchTab = function(tab) {
     document.getElementById('benefits-tab').style.display = 'none';
     document.getElementById('types-tab').style.display = 'none';
     document.getElementById('accrual-tab').style.display = 'none';
+    document.getElementById('import-tab').style.display = 'none';
 
     if (tab === 'leave') {
         document.getElementById('leave-tab').style.display = 'block';
@@ -189,6 +191,8 @@ window.switchTab = function(tab) {
         document.getElementById('types-tab').style.display = 'block';
     } else if (tab === 'accrual') {
         document.getElementById('accrual-tab').style.display = 'block';
+    } else if (tab === 'import') {
+        document.getElementById('import-tab').style.display = 'block';
     }
 }
 
@@ -606,3 +610,141 @@ window.applyAdminLeaveFilters = function() {
     const totalEl = document.getElementById('leaveRequestRowTotal');
     if (totalEl) totalEl.textContent = total;
 };
+
+window.openImportLeaveRecordsModal = function() {
+    const modal = document.getElementById('importLeaveRecordsModal');
+    if (!modal) {
+        return;
+    }
+
+    const form = document.getElementById('importLeaveRecordsForm');
+    if (form) {
+        form.reset();
+    }
+
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeImportLeaveRecordsModal = function(event) {
+    if (event && event.target && event.target.id !== 'importLeaveRecordsModal' && event.type === 'click') {
+        return;
+    }
+
+    const modal = document.getElementById('importLeaveRecordsModal');
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+
+    const form = document.getElementById('importLeaveRecordsForm');
+    if (form) {
+        form.reset();
+    }
+
+    const submitBtn = document.getElementById('importSubmitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnLoader = submitBtn.querySelector('.btn-loader');
+        if (btnText) btnText.style.display = 'inline';
+        if (btnLoader) btnLoader.style.display = 'none';
+    }
+};
+
+window.submitImportLeaveRecords = function() {
+    const modal = document.getElementById('importLeaveRecordsModal');
+    const employeeId = document.getElementById('importEmployeeId')?.value;
+    const excelFile = document.getElementById('importExcelFile')?.files?.[0];
+    const submitBtn = document.getElementById('importSubmitBtn');
+    const csrfToken = document.querySelector('#importLeaveRecordsForm input[name="_token"]')?.value
+        || document.querySelector('meta[name="csrf-token"]')?.content;
+
+    if (!employeeId) {
+        openErrorModal('Please select an employee.');
+        return;
+    }
+
+    if (!excelFile) {
+        openErrorModal('Please select an Excel file.');
+        return;
+    }
+
+    if (excelFile.size > 5 * 1024 * 1024) {
+        openErrorModal('File size exceeds 5MB limit.');
+        return;
+    }
+
+    if (!modal?.dataset.importUrl) {
+        openErrorModal('Import URL is not configured.');
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.querySelector('.btn-text').style.display = 'none';
+    submitBtn.querySelector('.btn-loader').style.display = 'inline';
+
+    const formData = new FormData();
+    formData.append('employee_id', employeeId);
+    formData.append('excel_file', excelFile);
+    formData.append('_token', csrfToken);
+
+    fetch(modal.dataset.importUrl, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw data;
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        closeImportLeaveRecordsModal();
+        window.successModalRedirectUrl = modal.dataset.redirectUrl || null;
+        openSuccessModal(data.message || 'Leave records imported successfully!');
+
+        if (window.successModalRedirectUrl) {
+            setTimeout(() => {
+                window.location.href = window.successModalRedirectUrl;
+            }, 2000);
+        }
+    })
+    .catch(error => {
+        console.error('Import error:', error);
+
+        submitBtn.disabled = false;
+        submitBtn.querySelector('.btn-text').style.display = 'inline';
+        submitBtn.querySelector('.btn-loader').style.display = 'none';
+
+        let errorMessage = 'Failed to import leave records. Please try again.';
+        if (error.message) {
+            errorMessage = error.message;
+        } else if (error.errors) {
+            errorMessage = Object.values(error.errors).flat()[0];
+        }
+
+        openErrorModal(errorMessage);
+    });
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const importModal = document.getElementById('importLeaveRecordsModal');
+    if (importModal) {
+        importModal.addEventListener('click', function(event) {
+            if (event.target === importModal) {
+                closeImportLeaveRecordsModal(event);
+            }
+        });
+    }
+});

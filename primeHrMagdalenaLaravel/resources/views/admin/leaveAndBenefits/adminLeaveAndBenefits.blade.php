@@ -84,6 +84,7 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
     <button class="tab-btn" onclick="switchTab('benefits')">Benefits Summary</button>
     <button class="tab-btn" onclick="switchTab('types')">Leave Types</button>
     <button class="tab-btn" onclick="switchTab('accrual')">CSC Daily Accrual</button>
+    <button class="tab-btn" onclick="switchTab('import')">Import Records</button>
 </div>
 
 @include('admin.leaveAndBenefits.partials.leave-requests-tab')
@@ -95,6 +96,36 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 @include('admin.leaveAndBenefits.partials.leave-types-tab')
 
 @include('admin.leaveAndBenefits.partials.csc-daily-accrual-tab')
+
+<!-- Import Tab -->
+<div id="import-tab" style="display: none;">
+    <div style="padding: 20px; background: white; border-radius: 8px; border: 1px solid #eceaf8;">
+        <div style="margin-bottom: 20px;">
+            <h4 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #1a1a1a;">Migrate Leave Records</h4>
+            <p style="margin: 0; color: #6b6a8a; font-size: 14px;">Import historical leave records from Excel files for your employees. This feature allows you to migrate old leave balance data into the system.</p>
+        </div>
+        
+        <button class="btn btn-primary" onclick="openImportLeaveRecordsModal()" style="margin-bottom: 20px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 8px; vertical-align: -2px;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Import Leave Records
+        </button>
+        
+        <div style="background: #f5f5f5; border-left: 3px solid #2196F3; padding: 15px; border-radius: 3px;">
+            <p style="font-weight: 500; margin: 0 0 10px 0; color: #333;">How to use:</p>
+            <ol style="margin: 0; padding-left: 20px; color: #666; font-size: 14px;">
+                <li>Click "Import Leave Records" button</li>
+                <li>Select the employee to import records for</li>
+                <li>Upload their Excel file (format: .xlsx or .xls)</li>
+                <li>Review the import summary and confirm</li>
+                <li>Records will be added to Transaction History</li>
+            </ol>
+        </div>
+    </div>
+</div>
 
 @include('admin.leaveAndBenefits.modals.add-leave-type-modal')
 
@@ -108,18 +139,26 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 
 @include('admin.leaveAndBenefits.modals.error-modal')
 
+@include('admin.leaveAndBenefits.modals.import-leave-records-modal')
+
 @vite(['resources/css/adminLeaveAndBenefits.css', 'resources/js/adminLeaveAndBenefits.js'])
 
 <script>
 // Success Modal Functions
-window.openSuccessModal = function(message) {
+window.successModalRedirectUrl = null;
+
+window.openSuccessModal = function(message, redirectUrl) {
     const modal = document.getElementById('successModal');
     const messageEl = document.getElementById('successMessage');
-    
+
+    if (redirectUrl !== undefined) {
+        window.successModalRedirectUrl = redirectUrl;
+    }
+
     if (messageEl && message) {
         messageEl.textContent = message;
     }
-    
+
     if (modal) {
         modal.classList.add('active');
         modal.style.display = 'flex';
@@ -134,9 +173,11 @@ window.closeSuccessModal = function(event) {
             modal.classList.remove('active');
             modal.style.display = 'none';
             document.body.style.overflow = '';
-            
-            // Reload page to show new leave type
-            window.location.href = '{{ route('admin.leave', ['tab' => 'types']) }}';
+
+            const redirectUrl = window.successModalRedirectUrl
+                || '{{ route('admin.leave', ['tab' => 'types']) }}';
+            window.successModalRedirectUrl = null;
+            window.location.href = redirectUrl;
         }
     }
 };
@@ -208,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 closeAddLeaveTypeModal();
                 
                 // Show success modal
-                openSuccessModal(data.message || 'Leave type registered successfully!');
+                openSuccessModal(data.message || 'Leave type registered successfully!', '{{ route('admin.leave', ['tab' => 'types']) }}');
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -250,6 +291,8 @@ document.addEventListener('DOMContentLoaded', function() {
         switchTab('accrual');
     } else if (activeTab === 'transactions') {
         switchTab('transactions');
+    } else if (activeTab === 'import') {
+        switchTab('import');
     }
 });
 </script>

@@ -2968,3 +2968,6 @@ Route::delete('/admin/deductions/loan-types/{id}', function ($id) {
     return redirect()->route('admin.deductions')
         ->with('success', "Loan type \"{$deductionType->name}\" deleted successfully.");
 })->middleware('auth')->name('admin.deductions.loan-types.delete');
+
+// Leave Records Import Route
+Route::post('/admin/leave/import', [LeaveController::class, 'importLeaveRecords'])->middleware('auth')->name('admin.leave.import');

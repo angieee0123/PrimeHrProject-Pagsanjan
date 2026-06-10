@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\LeaveFormDataService;
+use App\Services\LeaveImportService;
 
 class LeaveController extends Controller
 {
@@ -891,6 +892,67 @@ class LeaveController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to generate leave form: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function importLeaveRecords(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'employee_id' => 'required|exists:employees,id',
+                'excel_file' => 'required|file|mimes:xlsx,xls|max:5120',
+            ]);
+
+            $file = $request->file('excel_file');
+            $filePath = $file->store('temp_leave_imports');
+            $fullPath = Storage::path($filePath);
+
+            // Parse Excel file
+            $parseResult = LeaveImportService::parseExcelFile($fullPath);
+            
+            if (!$parseResult['success']) {
+                Storage::delete($filePath);
+                return response()->json([
+                    'success' => false,
+                    'message' => $parseResult['message'],
+                ], 422);
+            }
+
+            // Import records into database
+            $importResult = LeaveImportService::importLeaveRecords(
+                $validated['employee_id'],
+                $parseResult['records']
+            );
+
+            // Clean up temp file
+            Storage::delete($filePath);
+
+            if (!$importResult['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $importResult['message'],
+                ], 422);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $importResult['message'],
+                'imported_count' => $importResult['imported_count'],
+                'errors' => $importResult['errors'],
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Leave import failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Import failed: ' . $e->getMessage(),
             ], 500);
         }
     }
