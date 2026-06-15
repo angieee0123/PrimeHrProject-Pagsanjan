@@ -97,35 +97,7 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 
 @include('admin.leaveAndBenefits.partials.csc-daily-accrual-tab')
 
-<!-- Import Tab -->
-<div id="import-tab" style="display: none;">
-    <div style="padding: 20px; background: white; border-radius: 8px; border: 1px solid #eceaf8;">
-        <div style="margin-bottom: 20px;">
-            <h4 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #1a1a1a;">Migrate Leave Records</h4>
-            <p style="margin: 0; color: #6b6a8a; font-size: 14px;">Import historical leave records from Excel files for your employees. This feature allows you to migrate old leave balance data into the system.</p>
-        </div>
-        
-        <button class="btn btn-primary" onclick="openImportLeaveRecordsModal()" style="margin-bottom: 20px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 8px; vertical-align: -2px;">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-            Import Leave Records
-        </button>
-        
-        <div style="background: #f5f5f5; border-left: 3px solid #2196F3; padding: 15px; border-radius: 3px;">
-            <p style="font-weight: 500; margin: 0 0 10px 0; color: #333;">How to use:</p>
-            <ol style="margin: 0; padding-left: 20px; color: #666; font-size: 14px;">
-                <li>Click "Import Leave Records" button</li>
-                <li>Select the employee to import records for</li>
-                <li>Upload their Excel file (format: .xlsx or .xls)</li>
-                <li>Review the import summary and confirm</li>
-                <li>Records will be added to Transaction History</li>
-            </ol>
-        </div>
-    </div>
-</div>
+@include('admin.leaveAndBenefits.partials.migrate-leave-records-tab')
 
 @include('admin.leaveAndBenefits.modals.add-leave-type-modal')
 
@@ -186,11 +158,11 @@ window.closeSuccessModal = function(event) {
 window.openErrorModal = function(message) {
     const modal = document.getElementById('errorModal');
     const messageEl = document.getElementById('errorMessage');
-    
+
     if (messageEl && message) {
         messageEl.textContent = message;
     }
-    
+
     if (modal) {
         modal.classList.add('active');
         modal.style.display = 'flex';
@@ -212,21 +184,21 @@ window.closeErrorModal = function(event) {
 // Handle form submission with AJAX
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('addLeaveTypeForm');
-    
+
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const submitBtn = form.querySelector('.btn-submit');
             const originalText = submitBtn.textContent;
-            
+
             // Disable submit button and show loading
             submitBtn.disabled = true;
             submitBtn.textContent = 'Saving...';
-            
+
             // Create FormData object
             const formData = new FormData(form);
-            
+
             // Send AJAX request
             fetch(form.action, {
                 method: 'POST',
@@ -247,23 +219,23 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 // Close add modal
                 closeAddLeaveTypeModal();
-                
+
                 // Show success modal
                 openSuccessModal(data.message || 'Leave type registered successfully!', '{{ route('admin.leave', ['tab' => 'types']) }}');
             })
             .catch(error => {
                 console.error('Error:', error);
-                
+
                 // Re-enable submit button
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
-                
+
                 // Close add modal
                 closeAddLeaveTypeModal();
-                
+
                 // Show error modal
                 let errorMessage = 'Failed to register leave type. Please try again.';
-                
+
                 if (error.errors) {
                     // Laravel validation errors
                     const firstError = Object.values(error.errors)[0];
@@ -271,16 +243,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (error.message) {
                     errorMessage = error.message;
                 }
-                
+
                 openErrorModal(errorMessage);
             });
         });
     }
-    
+
     // Check URL parameter and switch to correct tab on page load
     const urlParams = new URLSearchParams(window.location.search);
     const activeTab = urlParams.get('tab');
-    
+
     if (activeTab === 'types') {
         switchTab('types');
     } else if (activeTab === 'benefits') {

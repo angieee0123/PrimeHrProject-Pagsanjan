@@ -118,5 +118,3 @@ function changeLeaveTypesRowsPerPage() {
 }
 </script>
 </section>
-
-

@@ -1,4 +1,4 @@
-<section class="table-section" id="leave-tab">
+<section class="table-section" id="leave-tab" style="display: block;">
     <div class="table-header">
         <div>
             <h3 class="table-title">Leave Requests — {{ now()->format('F Y') }}</h3>

@@ -144,7 +144,17 @@ class LeaveController extends Controller
             ['empId' => 'PGS-0310', 'name' => 'Roberto T. Flores', 'gsis' => '₱2,748', 'philhealth' => '₱775', 'pagibig' => '₱100', 'vlBalance' => 8, 'slBalance' => 10],
         ];
 
-        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact('leaveTypes', 'leaveApplications', 'benefitsData', 'accrualRates', 'accruedLeaveTypes', 'departments', 'employees', 'leaveTransactions', 'transactionEmployees'));
+        return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact(
+            'leaveTypes', 
+            'leaveApplications', 
+            'benefitsData', 
+            'accrualRates', 
+            'accruedLeaveTypes', 
+            'departments', 
+            'employees', 
+            'leaveTransactions', 
+            'transactionEmployees'
+        ));
     }
 
     public function storeLeaveType(Request $request)

@@ -39,7 +39,7 @@ CREATE TABLE `notifications` (
   KEY `notifications_user_id_is_read_index` (`user_id`,`is_read`),
   KEY `notifications_created_at_index` (`created_at`),
   CONSTRAINT `notifications_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -48,7 +48,7 @@ CREATE TABLE `notifications` (
 
 LOCK TABLES `notifications` WRITE;
 /*!40000 ALTER TABLE `notifications` DISABLE KEYS */;
-INSERT INTO `notifications` VALUES (1,6,'leave_request','Leave Request Rejected','Your Vacation Leave request has been Rejected.','http://127.0.0.1:8000/permanent/leave',12,'App\\Models\\LeaveApplication',0,NULL,'2026-05-18 11:31:09','2026-05-18 11:31:09'),(2,6,'leave_request','Leave Request Approved','Your Vacation Leave request has been Approved.','http://127.0.0.1:8000/permanent/leave',13,'App\\Models\\LeaveApplication',0,NULL,'2026-05-21 21:35:32','2026-05-21 21:35:32');
+INSERT INTO `notifications` VALUES (1,6,'leave_request','Leave Request Rejected','Your Vacation Leave request has been Rejected.','http://127.0.0.1:8000/permanent/leave',12,'App\\Models\\LeaveApplication',0,NULL,'2026-05-18 11:31:09','2026-05-18 11:31:09'),(2,6,'leave_request','Leave Request Approved','Your Vacation Leave request has been Approved.','http://127.0.0.1:8000/permanent/leave',13,'App\\Models\\LeaveApplication',0,NULL,'2026-05-21 21:35:32','2026-05-21 21:35:32'),(3,6,'leave_request','Leave Request Approved','Your Sick Leave request has been Approved.','http://127.0.0.1:8000/permanent/leave',14,'App\\Models\\LeaveApplication',0,NULL,'2026-05-29 06:19:51','2026-05-29 06:19:51'),(4,6,'leave_request','Leave Request Approved','Your Parental Leave for Solo Parents request has been Approved.','http://127.0.0.1:8000/permanent/leave',15,'App\\Models\\LeaveApplication',0,NULL,'2026-05-29 19:39:40','2026-05-29 19:39:40'),(5,6,'leave_request','Leave Request Approved','Your Rehabilitation Leave request has been Approved.','http://127.0.0.1:8000/permanent/leave',16,'App\\Models\\LeaveApplication',0,NULL,'2026-06-09 07:10:02','2026-06-09 07:10:02');
 /*!40000 ALTER TABLE `notifications` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -61,4 +61,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-24 13:06:20
+-- Dump completed on 2026-06-15  0:58:55

@@ -37,7 +37,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `users_username_unique` (`username`),
   KEY `users_employee_id_foreign` (`employee_id`),
   CONSTRAINT `users_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -46,7 +46,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'admin@gmail.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active','2026-04-13 07:09:46','2026-04-24 10:00:26',6,'admin'),(6,'jeremypogi@gmail.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,8,'maria.cruz'),(7,'permanent@gmail.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,'2026-04-27 06:51:40',9,'juan.delacruz'),(8,'ana.ramos@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,'2026-05-03 18:14:57',10,'ana.ramos'),(9,'pedro.santos@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,11,'pedro.santos'),(10,'rosa.bautista@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,12,'rosa.bautista'),(11,'carlos.gonzales@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,13,'carlos.gonzales'),(12,'luz.villanueva@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,14,'luz.villanueva'),(13,'miguel.rivera@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,15,'miguel.rivera'),(14,'elena.fernandez@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,16,'elena.fernandez'),(15,'roberto.mercado@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,17,'roberto.mercado');
+INSERT INTO `users` VALUES (1,'admin@gmail.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active','2026-04-13 07:09:46','2026-04-24 10:00:26',6,'admin'),(6,'jeremypogi@gmail.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,8,'maria.cruz'),(7,'permanent@gmail.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,'2026-04-27 06:51:40',9,'juan.delacruz'),(8,'ana.ramos@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,'2026-05-03 18:14:57',10,'ana.ramos'),(9,'pedro.santos@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,11,'pedro.santos'),(10,'rosa.bautista@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,12,'rosa.bautista'),(11,'carlos.gonzales@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,13,'carlos.gonzales'),(12,'luz.villanueva@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,14,'luz.villanueva'),(13,'miguel.rivera@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,15,'miguel.rivera'),(14,'elena.fernandez@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,16,'elena.fernandez'),(15,'roberto.mercado@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,17,'roberto.mercado'),(16,'basha@gmail.com','$2y$12$OHLJ2AllcsbhDlY3PzG9e.EsZgXYivQEBiqAI7UMB773mX1hzdGv6','employee','Active','2026-05-23 21:22:09','2026-05-23 21:30:41',18,'admin@gmail.com');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -59,4 +59,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-24 13:06:19
+-- Dump completed on 2026-06-15  0:58:56
