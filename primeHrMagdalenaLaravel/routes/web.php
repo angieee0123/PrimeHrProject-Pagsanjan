@@ -2971,3 +2971,6 @@ Route::delete('/admin/deductions/loan-types/{id}', function ($id) {
 
 // Leave Records Import Route
 Route::post('/admin/leave/import', [LeaveController::class, 'importLeaveRecords'])->middleware('auth')->name('admin.leave.import');
+
+// Leave Template Download Route
+Route::get('/admin/leave/download-template', [LeaveController::class, 'downloadTemplate'])->middleware('auth')->name('admin.leave.download-template');

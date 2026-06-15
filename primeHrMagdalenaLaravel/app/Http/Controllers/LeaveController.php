@@ -19,28 +19,127 @@ use App\Services\LeaveImportService;
 
 class LeaveController extends Controller
 {
+    public function downloadTemplate()
+    {
+        try {
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            
+            // Header section (Rows 1-5)
+            $sheet->setCellValue('A1', 'Employee Name:');
+            $sheet->setCellValue('B1', 'Juan Dela Cruz');
+            $sheet->setCellValue('A2', 'Position:');
+            $sheet->setCellValue('B2', 'Administrative Officer II');
+            $sheet->setCellValue('A3', 'Department:');
+            $sheet->setCellValue('B3', 'Municipal Engineering Office');
+            $sheet->setCellValue('A4', 'Date Range:');
+            $sheet->setCellValue('B4', 'January 2012 - May 2024');
+            $sheet->setCellValue('A5', 'Notes:');
+            $sheet->setCellValue('B5', 'Sample data for reference');
+            
+            // Column headers (Row 6)
+            $headers = ['Month/Year', 'Notes', 'VL Earned', 'VL Used', 'VL Balance', 'SL Earned', 'SL Used', 'SL Balance'];
+            $columns = ['A', 'B', 'D', 'F', 'M', 'H', 'J', 'N'];
+            
+            foreach ($columns as $index => $col) {
+                $sheet->setCellValue($col . '6', $headers[$index]);
+            }
+            
+            // Style headers
+            $headerStyle = [
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '0B044D'],
+                ],
+                'font' => [
+                    'bold' => true,
+                    'color' => ['rgb' => 'FFFFFF'],
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ],
+            ];
+            
+            foreach ($columns as $col) {
+                $sheet->getStyle($col . '6')->applyFromArray($headerStyle);
+            }
+            
+            // Add sample rows with sample data (7-14)
+            $sampleData = [
+                ['Jun-19', 'VL1', 2.5, 1.0, 1.5, 0.5, 1.5, 1.0],
+                ['Jul-19', 'FL1', 2.5, 2.5, 1.5, 0.0, 0.0, 1.5],
+                ['Aug-19', 'T(0-2-10)', 2.5, 0.0, 1.5, 1.0, 2.5, 0.5],
+                ['Sep-19', '', 2.5, 0.5, 1.5, 0.5, 2.0, 1.0],
+                ['Oct-19', 'VL1', 2.5, 2.0, 1.5, 1.5, 0.5, 0.0],
+                ['Nov-19', '', 2.5, 1.5, 1.5, 0.0, 1.5, 1.5],
+                ['Dec-19', 'SL1', 2.5, 0.0, 1.5, 1.0, 2.5, 0.5],
+                ['Jan-20', '', 2.5, 0.5, 1.5, 0.5, 2.0, 1.0],
+            ];
+            
+            for ($row = 7; $row <= 14; $row++) {
+                $dataIndex = $row - 7;
+                $data = $sampleData[$dataIndex] ?? [];
+                
+                if (!empty($data)) {
+                    $sheet->setCellValue('A' . $row, $data[0] ?? '');
+                    $sheet->setCellValue('B' . $row, $data[1] ?? '');
+                    $sheet->setCellValue('D' . $row, $data[2] ?? '');
+                    $sheet->setCellValue('F' . $row, $data[3] ?? '');
+                    $sheet->setCellValue('H' . $row, $data[4] ?? '');
+                    $sheet->setCellValue('J' . $row, $data[5] ?? '');
+                    $sheet->setCellValue('M' . $row, $data[6] ?? '');
+                    $sheet->setCellValue('N' . $row, $data[7] ?? '');
+                }
+            }
+            
+            // Set column widths
+            $sheet->getColumnDimension('A')->setWidth(20);
+            $sheet->getColumnDimension('B')->setWidth(30);
+            $sheet->getColumnDimension('D')->setWidth(15);
+            $sheet->getColumnDimension('F')->setWidth(15);
+            $sheet->getColumnDimension('M')->setWidth(15);
+            $sheet->getColumnDimension('H')->setWidth(15);
+            $sheet->getColumnDimension('J')->setWidth(15);
+            $sheet->getColumnDimension('N')->setWidth(15);
+            
+            // Generate file
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $filename = 'Leave_Records_Template_' . now()->format('Y-m-d_His') . '.xlsx';
+            
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+            
+            $writer->save('php://output');
+            exit;
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to generate template: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate template: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function index()
     {
-        // Get query parameters
         $sortBy = request('sort_by', 'leave_code');
         $sortOrder = request('sort_order', 'asc');
         $perPage = request('per_page', 10);
 
-        // Validate sort column
         $allowedSortColumns = ['leave_code', 'leave_name', 'annual_limit', 'is_accrued', 'is_active'];
         if (!in_array($sortBy, $allowedSortColumns)) {
             $sortBy = 'leave_code';
         }
 
-        // Validate sort order
         if (!in_array($sortOrder, ['asc', 'desc'])) {
             $sortOrder = 'asc';
         }
 
-        // Validate per page
         $perPage = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 10;
 
-        // Fetch leave types from database with pagination and sorting
         $leaveTypes = LeaveType::orderBy($sortBy, $sortOrder)
             ->paginate($perPage)
             ->appends([
@@ -49,7 +148,6 @@ class LeaveController extends Controller
                 'per_page' => $perPage
             ]);
 
-        // Fetch accrual rates with leave type relationship
         $accrualPerPage = request('accrual_per_page', 10);
         $accrualPerPage = in_array($accrualPerPage, [10, 25, 50, 100]) ? $accrualPerPage : 10;
         
@@ -60,13 +158,11 @@ class LeaveController extends Controller
             ->paginate($accrualPerPage)
             ->appends(['accrual_per_page' => $accrualPerPage]);
 
-        // Get only accrued leave types for the modal dropdown
         $accruedLeaveTypes = LeaveType::where('is_accrued', true)
             ->where('is_active', true)
             ->orderBy('leave_name')
             ->get();
 
-        // Fetch all leave applications with relationships
         $leaveApplications = LeaveApplication::with([
             'employee.employmentDetail.departmentRelation',
             'employee.employmentDetail.designationRelation',
@@ -75,7 +171,6 @@ class LeaveController extends Controller
         ->orderBy('created_at', 'desc')
         ->get();
 
-        // Get unique departments for filter
         $departments = $leaveApplications
             ->pluck('employee.employmentDetail.departmentRelation.name')
             ->filter()
@@ -83,18 +178,15 @@ class LeaveController extends Controller
             ->sort()
             ->values();
 
-        // Get all employees for manual credit modal
         $employees = \App\Models\Employee::with('employmentDetail.departmentRelation')
             ->orderBy('employee_id')
             ->get();
 
-        // Fetch leave transactions with pagination, filtering, and sorting
         $transactionQuery = LeaveTransaction::with([
             'employee',
             'processedBy.employee'
         ]);
 
-        // Apply filters
         if (request('filter_employee')) {
             $transactionQuery->where('employee_id', request('filter_employee'));
         }
@@ -108,7 +200,6 @@ class LeaveController extends Controller
             $transactionQuery->whereDate('transaction_date', request('filter_date'));
         }
 
-        // Apply sorting
         $sortBy = request('sort_by', 'transaction_date');
         $sortOrder = request('sort_order', 'desc');
         $allowedSortColumns = ['transaction_date', 'employee_id', 'leave_code', 'transaction_type', 'amount', 'balance_before', 'balance_after'];
@@ -126,15 +217,12 @@ class LeaveController extends Controller
         
         $leaveTransactions = $transactionQuery->paginate($transactionPerPage)->appends(request()->except('page'));
 
-        // Get unique employees who have transactions for filter
         $transactionEmployees = \App\Models\Employee::whereHas('leaveTransactions')
             ->orderBy('employee_id')
             ->get();
 
-        // Debug: Log transaction count
         \Log::info('Leave Transactions Count: ' . $leaveTransactions->total());
 
-        // Sample benefits data (you can create a table for this later)
         $benefitsData = [
             ['empId' => 'PGS-0041', 'name' => 'Maria B. Santos', 'gsis' => '₱3,794', 'philhealth' => '₱1,050', 'pagibig' => '₱100', 'vlBalance' => 15, 'slBalance' => 15],
             ['empId' => 'PGS-0082', 'name' => 'Juan P. dela Cruz', 'gsis' => '₱3,428', 'philhealth' => '₱950', 'pagibig' => '₱100', 'vlBalance' => 12, 'slBalance' => 13],
@@ -188,7 +276,6 @@ class LeaveController extends Controller
                 'is_active' => $validated['is_active'],
             ]);
 
-            // Check if request is AJAX
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => true,
@@ -228,7 +315,6 @@ class LeaveController extends Controller
     {
         $leaveType = LeaveType::where('leave_code', $code)->firstOrFail();
         
-        // Ensure all boolean fields are properly cast
         return response()->json([
             'id' => $leaveType->id,
             'leave_code' => $leaveType->leave_code,
@@ -260,7 +346,6 @@ class LeaveController extends Controller
 
             $documentPath = $leaveType->document_path;
             if ($request->hasFile('document')) {
-                // Delete old document if exists
                 if ($documentPath && \Storage::disk('public')->exists($documentPath)) {
                     \Storage::disk('public')->delete($documentPath);
                 }
@@ -280,7 +365,6 @@ class LeaveController extends Controller
                 'is_active' => $validated['is_active'],
             ]);
 
-            // Check if request is AJAX
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => true,
@@ -399,7 +483,6 @@ class LeaveController extends Controller
 
             $leaveType = LeaveType::where('leave_code', $validated['leave_code'])->first();
             
-            // Check if attachment is required
             if ($leaveType->requires_attachment && !$request->hasFile('attachment')) {
                 return response()->json([
                     'success' => false,
@@ -407,7 +490,6 @@ class LeaveController extends Controller
                 ], 422);
             }
 
-            // Validate working days using CSC service (excludes weekends automatically)
             $validation = CscTimeConversionService::validateLeaveDays(
                 $validated['start_date'],
                 $validated['end_date'],
@@ -421,7 +503,6 @@ class LeaveController extends Controller
                 ], 422);
             }
 
-            // Check for overlapping leave requests (pending or approved)
             $hasOverlap = LeaveApplication::where('employee_id', $employee->id)
                 ->whereIn('status', ['pending', 'approved'])
                 ->where(function($query) use ($validated) {
@@ -441,7 +522,6 @@ class LeaveController extends Controller
                 ], 422);
             }
 
-            // Check leave balance
             $year = Carbon::parse($validated['start_date'])->year;
             $leaveBalance = LeaveBalance::where('employee_id', $employee->id)
                 ->where('leave_code', $validated['leave_code'])
@@ -455,13 +535,11 @@ class LeaveController extends Controller
                 ], 422);
             }
 
-            // Handle file upload
             $attachmentPath = null;
             if ($request->hasFile('attachment')) {
                 $attachmentPath = $request->file('attachment')->store('leave_attachments', 'public');
             }
 
-            // Create leave application
             $leaveApplication = LeaveApplication::create([
                 'employee_id' => $employee->id,
                 'leave_code' => $validated['leave_code'],
@@ -480,29 +558,27 @@ class LeaveController extends Controller
                 'filed_by' => auth()->id(),
             ]);
 
-            // Send notification to admin
             NotificationService::leaveRequestSubmitted($leaveApplication);
 
-            // Create pending transaction
             $balanceBefore = $leaveBalance->available_credits;
             $leaveBalance->pending_credits += $validated['number_of_days'];
             $leaveBalance->available_credits -= $validated['number_of_days'];
             $leaveBalance->save();
 
-                LeaveTransaction::create([
-                    'employee_id' => $employee->id,
-                    'leave_code' => $validated['leave_code'],
-                    'year' => $year,
-                    'transaction_type' => 'pending',
-                    'amount' => -$validated['number_of_days'],
-                    'balance_before' => $balanceBefore,
-                    'balance_after' => $leaveBalance->available_credits,
-                    'reference_type' => 'leave_application',
-                    'reference_id' => $leaveApplication->id,
-                    'transaction_date' => now(),
-                    'processed_by' => auth()->id(),
-                    'remarks' => "Pending leave application {$leaveApplication->application_number}",
-                ]);
+            LeaveTransaction::create([
+                'employee_id' => $employee->id,
+                'leave_code' => $validated['leave_code'],
+                'year' => $year,
+                'transaction_type' => 'pending',
+                'amount' => -$validated['number_of_days'],
+                'balance_before' => $balanceBefore,
+                'balance_after' => $leaveBalance->available_credits,
+                'reference_type' => 'leave_application',
+                'reference_id' => $leaveApplication->id,
+                'transaction_date' => now(),
+                'processed_by' => auth()->id(),
+                'remarks' => "Pending leave application {$leaveApplication->application_number}",
+            ]);
 
             DB::commit();
 
@@ -651,7 +727,6 @@ class LeaveController extends Controller
             $leaveApplication->approved_days_without_pay = 0;
             $leaveApplication->save();
 
-            // Send notification to employee
             NotificationService::leaveRequestStatusChanged($leaveApplication, 'approved');
 
             DB::commit();
@@ -723,7 +798,6 @@ class LeaveController extends Controller
             $leaveApplication->approver_remarks = $validated['remarks'];
             $leaveApplication->save();
 
-            // Send notification to employee
             NotificationService::leaveRequestStatusChanged($leaveApplication, 'rejected');
 
             DB::commit();
@@ -748,12 +822,10 @@ class LeaveController extends Controller
         try {
             $year = now()->year;
             
-            // Get all leave balances for the employee
             $balances = LeaveBalance::where('employee_id', $employeeId)
                 ->where('year', $year)
                 ->pluck('available_credits', 'leave_code');
 
-            // Get all active leave types
             $leaveTypes = LeaveType::where('is_active', true)
                 ->orderBy('leave_name')
                 ->get(['leave_code', 'leave_name']);
@@ -789,7 +861,6 @@ class LeaveController extends Controller
             $year = Carbon::parse($validated['transaction_date'])->year;
             $isDeduction = $validated['transaction_type'] === 'deduct';
             
-            // Get or create leave balance for the employee
             $leaveBalance = LeaveBalance::firstOrCreate(
                 [
                     'employee_id' => $validated['employee_id'],
@@ -807,9 +878,7 @@ class LeaveController extends Controller
 
             $balanceBefore = $leaveBalance->available_credits;
             
-            // Check if deduction would result in negative balance (warning only, still allow)
             if ($isDeduction && $balanceBefore < $validated['amount']) {
-                // Log warning but proceed
                 \Log::warning('Manual deduction results in negative balance', [
                     'employee_id' => $validated['employee_id'],
                     'leave_code' => $validated['leave_code'],
@@ -819,22 +888,18 @@ class LeaveController extends Controller
                 ]);
             }
             
-            // Apply adjustment
             if ($isDeduction) {
                 $leaveBalance->total_credits -= $validated['amount'];
                 $leaveBalance->available_credits -= $validated['amount'];
                 $transactionAmount = -$validated['amount'];
-                $transactionType = 'debit';
             } else {
                 $leaveBalance->total_credits += $validated['amount'];
                 $leaveBalance->available_credits += $validated['amount'];
                 $transactionAmount = $validated['amount'];
-                $transactionType = 'credit';
             }
             
             $leaveBalance->save();
 
-            // Create transaction record
             LeaveTransaction::create([
                 'employee_id' => $validated['employee_id'],
                 'leave_code' => $validated['leave_code'],
@@ -918,7 +983,6 @@ class LeaveController extends Controller
             $filePath = $file->store('temp_leave_imports');
             $fullPath = Storage::path($filePath);
 
-            // Parse Excel file
             $parseResult = LeaveImportService::parseExcelFile($fullPath);
             
             if (!$parseResult['success']) {
@@ -929,13 +993,11 @@ class LeaveController extends Controller
                 ], 422);
             }
 
-            // Import records into database
             $importResult = LeaveImportService::importLeaveRecords(
                 $validated['employee_id'],
                 $parseResult['records']
             );
 
-            // Clean up temp file
             Storage::delete($filePath);
 
             if (!$importResult['success']) {

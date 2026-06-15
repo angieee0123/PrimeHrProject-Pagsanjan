@@ -111,7 +111,7 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 
 @include('admin.leaveAndBenefits.modals.error-modal')
 
-@include('admin.leaveAndBenefits.modals.import-leave-records-modal')
+@include('admin.leaveAndBenefits.modals.migrate-leave-records-modal')
 
 @vite(['resources/css/adminLeaveAndBenefits.css', 'resources/js/adminLeaveAndBenefits.js'])
 

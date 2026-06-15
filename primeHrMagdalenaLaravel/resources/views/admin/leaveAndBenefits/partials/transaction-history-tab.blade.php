@@ -166,31 +166,33 @@
                 <option value="25" {{ request('transaction_per_page', 10) == 25 ? 'selected' : '' }}>25 rows</option>
                 <option value="50" {{ request('transaction_per_page', 10) == 50 ? 'selected' : '' }}>50 rows</option>
                 <option value="100" {{ request('transaction_per_page', 10) == 100 ? 'selected' : '' }}>100 rows</option>
+                <option value="all" {{ request('transaction_per_page') == 'all' ? 'selected' : '' }}>Show All</option>
             </select>
         </div>
-        <div class="pagination">
-            @if(isset($leaveTransactions) && $leaveTransactions->hasPages())
-                @if ($leaveTransactions->onFirstPage())
-                    <button class="page-btn" disabled>‹</button>
-                @else
-                    <button class="page-btn" onclick="navigateToTransactionPage('{{ $leaveTransactions->previousPageUrl() }}')">‹</button>
-                @endif
+        <div class="pagination" id="transactionPaginationControls">
+            @php
+                $currentPage = $leaveTransactions->currentPage();
+                $lastPage = $leaveTransactions->lastPage();
+            @endphp
 
-                @foreach ($leaveTransactions->getUrlRange(1, $leaveTransactions->lastPage()) as $page => $url)
-                    @if ($page == $leaveTransactions->currentPage())
-                        <button class="page-btn active">{{ $page }}</button>
-                    @else
-                        <button class="page-btn" onclick="navigateToTransactionPage('{{ $url }}')">{{ $page }}</button>
-                    @endif
-                @endforeach
-
-                @if ($leaveTransactions->hasMorePages())
-                    <button class="page-btn" onclick="navigateToTransactionPage('{{ $leaveTransactions->nextPageUrl() }}')">›</button>
-                @else
-                    <button class="page-btn" disabled>›</button>
-                @endif
+            @if($currentPage > 1)
+                <button class="page-btn" onclick="navigateToTransactionPage({{ $currentPage - 1 }})">‹</button>
             @else
-                <button class="page-btn active">1</button>
+                <button class="page-btn" disabled>‹</button>
+            @endif
+
+            @foreach ($leaveTransactions->getUrlRange(1, $lastPage) as $page => $url)
+                @if ($page == $currentPage)
+                    <button class="page-btn active">{{ $page }}</button>
+                @else
+                    <button class="page-btn" onclick="navigateToTransactionPage({{ $page }})">{{ $page }}</button>
+                @endif
+            @endforeach
+
+            @if($currentPage < $lastPage)
+                <button class="page-btn" onclick="navigateToTransactionPage({{ $currentPage + 1 }})">›</button>
+            @else
+                <button class="page-btn" disabled>›</button>
             @endif
         </div>
     </div>
@@ -290,10 +292,11 @@ function applyTransactionFilters() {
     window.location.href = url.toString();
 }
 
-function navigateToTransactionPage(url) {
-    const urlObj = new URL(url, window.location.origin);
-    urlObj.searchParams.set('tab', 'transactions');
-    window.location.href = urlObj.toString();
+function navigateToTransactionPage(page) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', page);
+    url.searchParams.set('tab', 'transactions');
+    window.location.href = url.toString();
 }
 
 function viewTransactionDetails(employeeName, employeeId, leaveType, type, amount, balanceBefore, balanceAfter, date, reference, remarks, processedBy) {

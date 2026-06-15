@@ -890,3 +890,10 @@ window.submitMigrateLeaveRecords = function() {
         openErrorModal(errorMessage);
     });
 };
+
+
+window.downloadLeaveTemplate = function() {
+    const link = document.createElement('a');
+    link.href = '/admin/leave/download-template';
+    link.click();
+};

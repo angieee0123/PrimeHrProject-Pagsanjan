@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class LeaveImportService
@@ -28,109 +29,79 @@ class LeaveImportService
         'december' => 12, 'dec' => 12,
     ];
 
-    /**
-     * Parse Pagsanjan leave records in Notes column (Column B)
-     * Format examples:
-     * - "VL1" = 1 day vacation leave used
-     * - "SL1" = 1 day sick leave used
-     * - "FL1" or "FL2" = 1-2 days forced leave
-     * - "T(0-2-10)" = Tardiness: 0 hours, 2 minutes, 10 seconds
-     * - "VL1/T(0-1-2)" = 1 day VL + Tardiness combined
-     * - "ML1" = Maternity leave
-     * - "PL1" = Paternity leave
-     */
-
-    /**
-     * Parse Pagsanjan-style leave ledger Excel files.
-     * Structure:
-     * Row 1-5: Header info (Name, Position, etc.)
-     * Row 6+: Data rows
-     * Columns: A=Month/Year, B=Notes, D=VL Earned, F=VL Used, H=SL Earned, J=SL Used, M=VL Balance, N=SL Balance
-     */
     public static function parseExcelFile(string $filePath): array
     {
         try {
             $worksheet = IOFactory::load($filePath)->getActiveSheet();
-            $startRow = self::detectDataStartRow($worksheet);
             $baseYear = self::detectBaseYear($worksheet) ?? (int) date('Y');
 
             $records = [];
-            $lastMonthNum = null;
             $year = $baseYear;
             $highestRow = $worksheet->getHighestDataRow();
-            $emptyRowStreak = 0;
 
-            for ($row = $startRow; $row <= $highestRow; $row++) {
-                $monthYear = trim((string) self::getCellValue($worksheet, 'A', $row));
-
-                if ($monthYear === '') {
-                    if (!empty($records)) {
-                        $emptyRowStreak++;
-                        if ($emptyRowStreak >= 3) {
-                            break;
-                        }
-                    }
-                    continue;
-                }
-
-                $emptyRowStreak = 0;
-
-                // Check if this is a year header
-                if (self::isYearHeader($monthYear)) {
-                    $year = (int) $monthYear;
-                    $lastMonthNum = null;
-                    continue;
-                }
-
-                if (is_numeric($monthYear)) {
-                    continue;
-                }
-
-                // Parse month name
-                $parsedDate = self::parseMonthYear($monthYear);
-                if ($parsedDate) {
-                    $year = (int) $parsedDate->year;
-                    $monthNum = (int) $parsedDate->month;
-                    $lastMonthNum = $monthNum;
-                } else {
-                    $monthNum = self::parseMonthName($monthYear);
-                    if (!$monthNum) {
-                        continue;
-                    }
-
-                    // If month number is less than last month, increment year
-                    if ($lastMonthNum !== null && $monthNum <= $lastMonthNum) {
-                        $year++;
-                    }
-
-                    $lastMonthNum = $monthNum;
-                }
-
-                // Parse notes column to extract leave types and tardiness
+            for ($row = 6; $row <= $highestRow; $row++) {
+                $cellA = $worksheet->getCell('A' . $row);
+                $monthYear = self::getCellDateString($cellA);
+                
+                $vlEarned = self::toFloat(self::getCellValue($worksheet, 'D', $row));
+                $vlUsed = self::toFloat(self::getCellValue($worksheet, 'F', $row));
+                $slEarned = self::toFloat(self::getCellValue($worksheet, 'H', $row));
+                $slUsed = self::toFloat(self::getCellValue($worksheet, 'J', $row));
+                $vlBalance = self::toFloat(self::getCellValue($worksheet, 'M', $row));
+                $slBalance = self::toFloat(self::getCellValue($worksheet, 'N', $row));
                 $notesRaw = trim((string) self::getCellValue($worksheet, 'B', $row));
                 $parsedNotes = self::parseNotesColumn($notesRaw);
 
+                if ($monthYear === '' && $vlEarned == 0 && $vlUsed == 0 && $slEarned == 0 && $slUsed == 0 && $vlBalance == 0 && $slBalance == 0 && empty($parsedNotes['leave_types']) && $parsedNotes['tardiness'] == 0) {
+                    continue;
+                }
+
+                if (self::isYearHeader($monthYear)) {
+                    $year = (int) $monthYear;
+                    continue;
+                }
+
+                $monthNum = null;
+                $recordYear = $year;
+
+                if ($monthYear !== '') {
+                    $parsedDate = self::parseMonthYear($monthYear);
+                    if ($parsedDate) {
+                        $recordYear = (int) $parsedDate->year;
+                        $monthNum = (int) $parsedDate->month;
+                    } else {
+                        $parsed = self::parseMonthName($monthYear);
+                        if ($parsed) {
+                            $monthNum = $parsed;
+                        }
+                    }
+                }
+
+                if ($monthNum === null) {
+                    continue;
+                }
+
                 $records[] = [
                     'month_year' => $monthYear,
-                    'year' => $year,
+                    'year' => $recordYear,
                     'month' => $monthNum,
-                    'transaction_date' => Carbon::create($year, $monthNum, 1)->toDateString(),
+                    'transaction_date' => Carbon::create($recordYear, $monthNum, 1)->toDateString(),
                     'notes_raw' => $notesRaw,
-                    'leave_types' => $parsedNotes['leave_types'],  // Array of leave type deductions
-                    'tardiness' => $parsedNotes['tardiness'],      // Tardiness in minutes
-                    'vacation_leave_earned' => self::toFloat(self::getCellValue($worksheet, 'D', $row)),
-                    'vacation_leave_used' => self::toFloat(self::getCellValue($worksheet, 'F', $row)),
-                    'sick_leave_earned' => self::toFloat(self::getCellValue($worksheet, 'H', $row)),
-                    'sick_leave_used' => self::toFloat(self::getCellValue($worksheet, 'J', $row)),
-                    'vl_balance' => self::toFloat(self::getCellValue($worksheet, 'M', $row)),
-                    'sl_balance' => self::toFloat(self::getCellValue($worksheet, 'N', $row)),
+                    'leave_types' => $parsedNotes['leave_types'],
+                    'tardiness' => $parsedNotes['tardiness'],
+                    'vacation_leave_earned' => $vlEarned,
+                    'vacation_leave_used' => $vlUsed,
+                    'sick_leave_earned' => $slEarned,
+                    'sick_leave_used' => $slUsed,
+                    'vl_balance' => $vlBalance,
+                    'sl_balance' => $slBalance,
                 ];
             }
 
             if (empty($records)) {
                 return [
                     'success' => false,
-                    'message' => 'No leave records found in the Excel file. Please check that data starts from row 6 with month names in column A.',
+                    'message' => 'No leave records found in the Excel file. Ensure: (1) Data rows start from row 6 or later, (2) Column A contains month dates (e.g., "8/1/2012") or month names, (3) At least one data row has valid leave values.',
                 ];
             }
 
@@ -147,10 +118,34 @@ class LeaveImportService
         }
     }
 
-    /**
-     * Parse Notes column for leave types and tardiness
-     * Returns: ['leave_types' => [...], 'tardiness' => minutes]
-     */
+    private static function getCellDateString($cell): string
+    {
+        try {
+            $value = $cell->getValue();
+            
+            if ($value === null || $value === '') {
+                return '';
+            }
+
+            $dataType = $cell->getDataType();
+            
+            if ($dataType === 'd' || ($dataType === 'n' && is_numeric($value) && $value > 0 && $value < 60000)) {
+                try {
+                    if (is_numeric($value)) {
+                        $dateTime = ExcelDate::excelToDateTimeObject($value);
+                        return $dateTime->format('m/d/Y');
+                    }
+                } catch (\Exception $e) {
+                    // Fall through to return raw value
+                }
+            }
+            
+            return trim((string) $value);
+        } catch (\Exception $e) {
+            return '';
+        }
+    }
+
     private static function parseNotesColumn(string $notes): array
     {
         $result = [
@@ -162,29 +157,24 @@ class LeaveImportService
             return $result;
         }
 
-        // Split by forward slash for combined entries (e.g., "VL1/T(0-1-2)")
         $parts = explode('/', trim($notes));
 
         foreach ($parts as $part) {
             $part = trim($part);
 
-            // Check for Tardiness pattern: T(hours-minutes-seconds)
             if (preg_match('/^T\((\d+)-(\d+)-(\d+)\)$/', $part, $matches)) {
                 $hours = (int) $matches[1];
                 $minutes = (int) $matches[2];
                 $seconds = (int) $matches[3];
 
-                // Convert to total minutes: hours*60 + minutes + seconds/60
                 $totalMinutes = ($hours * 60) + $minutes + ($seconds / 60);
                 $result['tardiness'] += $totalMinutes;
             }
 
-            // Check for Leave patterns: VL1, SL1, FL1, FL2, ML1, PL1, etc.
             elseif (preg_match('/^([A-Z]+)(\d+)$/', $part, $matches)) {
                 $leaveCode = $matches[1];
                 $days = (int) $matches[2];
 
-                // Map codes to system leave types
                 $mappedCode = self::mapLeaveCode($leaveCode);
                 if ($mappedCode) {
                     $result['leave_types'][] = [
@@ -199,28 +189,21 @@ class LeaveImportService
         return $result;
     }
 
-    /**
-     * Map Pagsanjan leave codes to system leave codes
-     */
     private static function mapLeaveCode(string $code): ?string
     {
         $mapping = [
-            'VL' => 'VL',  // Vacation Leave
-            'SL' => 'SL',  // Sick Leave
-            'FL' => 'FL',  // Forced Leave
-            'ML' => 'ML',  // Maternity Leave
-            'PL' => 'PL',  // Paternity Leave
-            'BL' => 'BL',  // Birthday Leave
-            'AL' => 'AL',  // Annual Leave
+            'VL' => 'VL',
+            'SL' => 'SL',
+            'FL' => 'FL',
+            'ML' => 'ML',
+            'PL' => 'PL',
+            'BL' => 'BL',
+            'AL' => 'AL',
         ];
 
         return $mapping[$code] ?? null;
     }
 
-    /**
-     * Import parsed records: monthly transactions + final balances per year.
-     * Records are set to first day of month for consistent date tracking.
-     */
     public static function importLeaveRecords(int $employeeId, array $records): array
     {
         DB::beginTransaction();
@@ -241,10 +224,8 @@ class LeaveImportService
             $recordsByYear = collect($records)->groupBy('year');
 
             foreach ($recordsByYear as $year => $yearRecords) {
-                /** @var Collection $yearRecords */
                 $year = (int) $year;
 
-                // Import VL and SL from earned/used columns (existing logic)
                 foreach (['VL' => 'vacation', 'SL' => 'sick'] as $leaveCode => $prefix) {
                     if (!isset($leaveTypes[$leaveCode])) {
                         continue;
@@ -255,9 +236,9 @@ class LeaveImportService
                     $balanceKey = $leaveCode === 'VL' ? 'vl_balance' : 'sl_balance';
 
                     $hasData = $yearRecords->contains(function (array $record) use ($earnedKey, $usedKey, $balanceKey) {
-                        return ($record[$earnedKey] ?? 0) != 0
-                            || ($record[$usedKey] ?? 0) != 0
-                            || ($record[$balanceKey] ?? 0) != 0;
+                        return ($record[$earnedKey] ?? 0) > 0
+                            || ($record[$usedKey] ?? 0) > 0
+                            || ($record[$balanceKey] ?? 0) > 0;
                     });
 
                     if (!$hasData) {
@@ -279,7 +260,6 @@ class LeaveImportService
                     }
                 }
 
-                // Import leave types and tardiness from Notes column (NEW)
                 try {
                     $importedCount += self::importNotesColumnData(
                         $employeeId,
@@ -327,9 +307,6 @@ class LeaveImportService
         }
     }
 
-    /**
-     * Import leave types and tardiness from Notes column (Column B)
-     */
     private static function importNotesColumnData(
         int $employeeId,
         int $year,
@@ -341,10 +318,11 @@ class LeaveImportService
         foreach ($yearRecords as $record) {
             $leaveTypesData = $record['leave_types'] ?? [];
             $tardiness = (int) ($record['tardiness'] ?? 0);
-            $transactionDate = $record['transaction_date'] ?? now()->toDateString();
+            $recordYear = (int) ($record['year'] ?? $year);
+            $recordMonth = (int) ($record['month'] ?? 1);
+            $transactionDate = Carbon::create($recordYear, $recordMonth, 1)->toDateString();
             $monthLabel = $record['month_year'] ?? '';
 
-            // Import leave types used from notes (VL1, SL1, FL1, etc.)
             foreach ($leaveTypesData as $leaveTypeData) {
                 $code = $leaveTypeData['code'];
                 $days = $leaveTypeData['days'];
@@ -354,7 +332,6 @@ class LeaveImportService
                     continue;
                 }
 
-                // Get or create leave balance
                 $leaveBalance = LeaveBalance::firstOrCreate(
                     [
                         'employee_id' => $employeeId,
@@ -395,19 +372,15 @@ class LeaveImportService
                 }
             }
 
-            // Import tardiness if present
             if ($tardiness > 0) {
-                // Tardiness is typically deducted from VL first, then SL
                 $remainingTardiness = $tardiness;
 
-                // Try VL first
                 $vlBalance = LeaveBalance::where('employee_id', $employeeId)
                     ->where('leave_code', 'VL')
                     ->where('year', $year)
                     ->first();
 
                 if ($vlBalance && $vlBalance->available_credits > 0) {
-                    // Convert minutes to days: tardiness / 480
                     $tardinessDays = round($remainingTardiness / 480, 6);
                     $deductAmount = min($vlBalance->available_credits, $tardinessDays);
 
@@ -435,7 +408,6 @@ class LeaveImportService
                     $remainingTardiness -= ($deductAmount * 480);
                 }
 
-                // Try SL if remaining tardiness
                 if ($remainingTardiness > 0) {
                     $slBalance = LeaveBalance::where('employee_id', $employeeId)
                         ->where('leave_code', 'SL')
@@ -511,7 +483,9 @@ class LeaveImportService
             $earned = (float) ($record[$earnedKey] ?? 0);
             $used = (float) ($record[$usedKey] ?? 0);
             $monthLabel = trim($record['month_year'] ?? '');
-            $transactionDate = $record['transaction_date'] ?? now()->toDateString();
+            $recordYear = (int) ($record['year'] ?? $year);
+            $recordMonth = (int) ($record['month'] ?? 1);
+            $transactionDate = Carbon::create($recordYear, $recordMonth, 1)->toDateString();
 
             if ($earned > 0) {
                 $balanceBefore = $runningBalance;
@@ -582,23 +556,6 @@ class LeaveImportService
         return $importedCount;
     }
 
-    private static function detectDataStartRow(Worksheet $worksheet): int
-    {
-        for ($row = 1; $row <= 20; $row++) {
-            $value = trim((string) self::getCellValue($worksheet, 'A', $row));
-
-            if (self::isYearHeader($value)) {
-                return $row + 1;
-            }
-
-            if ($value !== '' && (self::parseMonthName($value) || self::parseMonthYear($value))) {
-                return $row;
-            }
-        }
-
-        return 6;
-    }
-
     private static function isYearHeader(string $value): bool
     {
         return (bool) preg_match('/^(19|20)\d{2}$/', trim($value));
@@ -620,7 +577,8 @@ class LeaveImportService
 
     private static function getCellValue(Worksheet $worksheet, string $column, int $row): mixed
     {
-        return $worksheet->getCell($column . $row)->getCalculatedValue();
+        $cell = $worksheet->getCell($column . $row);
+        return $cell->getCalculatedValue();
     }
 
     private static function toFloat(mixed $value): float
@@ -635,14 +593,38 @@ class LeaveImportService
     private static function parseMonthName(string $monthYear): ?int
     {
         $normalized = strtolower(trim(preg_replace('/\s+/', ' ', $monthYear)));
+        
+        if (isset(self::MONTH_NAMES[$normalized])) {
+            return self::MONTH_NAMES[$normalized];
+        }
 
-        return self::MONTH_NAMES[$normalized] ?? null;
+        foreach (self::MONTH_NAMES as $name => $num) {
+            if (strpos($normalized, $name) === 0) {
+                return $num;
+            }
+        }
+
+        return null;
     }
 
     private static function parseMonthYear(string $monthYear): ?Carbon
     {
         $monthYear = trim($monthYear);
-        $formats = ['F Y', 'M Y', 'F', 'M', 'Y'];
+        $formats = [
+            'm/d/Y',
+            'm/d/y',
+            'd/m/Y',
+            'd/m/y',
+            'M-y',
+            'm-y',
+            'M/y',
+            'm/y',
+            'F Y',
+            'M Y',
+            'F',
+            'M',
+            'Y',
+        ];
 
         foreach ($formats as $format) {
             try {
