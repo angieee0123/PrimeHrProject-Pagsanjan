@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\LeaveBalance;
 use App\Models\LeaveTransaction;
 use App\Models\LeaveType;
+use App\Services\LeaveCreditsComputationService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,8 @@ class LeaveImportService
         'december' => 12, 'dec' => 12,
     ];
 
+    private const BALANCE_TOLERANCE = 0.001;
+
     public static function parseExcelFile(string $filePath): array
     {
         try {
@@ -43,12 +46,12 @@ class LeaveImportService
                 $cellA = $worksheet->getCell('A' . $row);
                 $monthYear = self::getCellDateString($cellA);
                 
-                $vlEarned = self::toFloat(self::getCellValue($worksheet, 'D', $row));
-                $vlUsed = self::toFloat(self::getCellValue($worksheet, 'F', $row));
-                $slEarned = self::toFloat(self::getCellValue($worksheet, 'H', $row));
-                $slUsed = self::toFloat(self::getCellValue($worksheet, 'J', $row));
-                $vlBalance = self::toFloat(self::getCellValue($worksheet, 'M', $row));
-                $slBalance = self::toFloat(self::getCellValue($worksheet, 'N', $row));
+                $vlEarned = self::toFloat(self::getCellValue($worksheet, 'C', $row));
+                $vlUsed = self::toFloat(self::getCellValue($worksheet, 'D', $row));
+                $slEarned = self::toFloat(self::getCellValue($worksheet, 'E', $row));
+                $slUsed = self::toFloat(self::getCellValue($worksheet, 'F', $row));
+                $vlBalance = self::toFloat(self::getCellValue($worksheet, 'G', $row));
+                $slBalance = self::toFloat(self::getCellValue($worksheet, 'H', $row));
                 $notesRaw = trim((string) self::getCellValue($worksheet, 'B', $row));
                 $parsedNotes = self::parseNotesColumn($notesRaw);
 
@@ -211,95 +214,227 @@ class LeaveImportService
         try {
             \App\Models\Employee::findOrFail($employeeId);
 
-            $leaveTypes = LeaveType::whereIn('leave_code', ['VL', 'SL', 'FL', 'ML', 'PL', 'BL', 'AL'])
+            $leaveTypes = LeaveType::whereIn('leave_code', ['VL', 'SL'])
                 ->get()
                 ->keyBy('leave_code');
 
             if ($leaveTypes->isEmpty()) {
-                throw new \RuntimeException('At least VL and SL leave types must exist before importing records.');
+                throw new \RuntimeException('VL and SL leave types must exist before importing records.');
             }
 
             $importedCount = 0;
-            $errors = [];
             $recordsByYear = collect($records)->groupBy('year');
+            $validationReport = [];
+            $criticalAnomalies = [];
 
             foreach ($recordsByYear as $year => $yearRecords) {
                 $year = (int) $year;
+                $yearRecords = $yearRecords->sortBy('month')->values();
 
-                foreach (['VL' => 'vacation', 'SL' => 'sick'] as $leaveCode => $prefix) {
-                    if (!isset($leaveTypes[$leaveCode])) {
-                        continue;
-                    }
-
-                    $earnedKey = "{$prefix}_leave_earned";
-                    $usedKey = "{$prefix}_leave_used";
-                    $balanceKey = $leaveCode === 'VL' ? 'vl_balance' : 'sl_balance';
-
-                    $hasData = $yearRecords->contains(function (array $record) use ($earnedKey, $usedKey, $balanceKey) {
-                        return ($record[$earnedKey] ?? 0) > 0
-                            || ($record[$usedKey] ?? 0) > 0
-                            || ($record[$balanceKey] ?? 0) > 0;
-                    });
-
-                    if (!$hasData) {
-                        continue;
-                    }
-
-                    try {
-                        $importedCount += self::importLeaveTypeForYear(
-                            $employeeId,
-                            $leaveCode,
-                            $year,
-                            $yearRecords,
-                            $earnedKey,
-                            $usedKey,
-                            $balanceKey
-                        );
-                    } catch (\Exception $e) {
-                        $errors[] = "Error importing {$leaveCode} for {$year}: " . $e->getMessage();
-                    }
+                // Validate cross-month balance continuity
+                $continuityIssues = self::validateBalanceContinuity($yearRecords);
+                if (!empty($continuityIssues)) {
+                    $validationReport = array_merge($validationReport, $continuityIssues);
                 }
 
-                try {
-                    $importedCount += self::importNotesColumnData(
-                        $employeeId,
-                        $year,
-                        $yearRecords,
-                        $leaveTypes
-                    );
-                } catch (\Exception $e) {
-                    $errors[] = "Error importing notes data for {$year}: " . $e->getMessage();
+                foreach ($yearRecords as $index => $record) {
+                    $recordYear = (int) ($record['year'] ?? $year);
+                    $recordMonth = (int) ($record['month'] ?? 1);
+                    $transactionDate = Carbon::create($recordYear, $recordMonth, 1)->toDateString();
+                    $monthLabel = $record['month_year'] ?? '';
+
+                    $vlEarned = round((float) ($record['vacation_leave_earned'] ?? 0), 6);
+                    $vlUsed = round((float) ($record['vacation_leave_used'] ?? 0), 6);
+                    $vlBalance = round((float) ($record['vl_balance'] ?? 0), 6);
+
+                    $slEarned = round((float) ($record['sick_leave_earned'] ?? 0), 6);
+                    $slUsed = round((float) ($record['sick_leave_used'] ?? 0), 6);
+                    $slBalance = round((float) ($record['sl_balance'] ?? 0), 6);
+
+                    $notesRaw = trim($record['notes_raw'] ?? '');
+                    $parsedNotes = $record['leave_types'] ?? [];
+                    $tardinessMinutes = $record['tardiness'] ?? 0;
+
+                    // Get previous month's balance
+                    $previousVlBalance = 0;
+                    $previousSlBalance = 0;
+
+                    if ($index > 0) {
+                        $previousRecord = $yearRecords[$index - 1];
+                        $previousVlBalance = round((float) ($previousRecord['vl_balance'] ?? 0), 6);
+                        $previousSlBalance = round((float) ($previousRecord['sl_balance'] ?? 0), 6);
+                    }
+
+                    // ====== CRITICAL: TREAT EXCEL AS SOURCE OF TRUTH ======
+                    // Compute expected balance and compare with Excel balance
+                    $expectedVlBalance = round($previousVlBalance + $vlEarned - $vlUsed, 6);
+                    $expectedSlBalance = round($previousSlBalance + $slEarned - $slUsed, 6);
+
+                    // VL Balance Validation
+                    $vlAnomaly = self::validateBalance($expectedVlBalance, $vlBalance, self::BALANCE_TOLERANCE);
+                    if (!$vlAnomaly['valid']) {
+                        $criticalAnomaly = [
+                            'type' => 'critical_balance_mismatch',
+                            'severity' => 'CRITICAL',
+                            'month' => $monthLabel,
+                            'leave_code' => 'VL',
+                            'computed_balance' => $expectedVlBalance,
+                            'excel_balance' => $vlBalance,
+                            'difference' => $vlAnomaly['difference'],
+                            'previous_balance' => $previousVlBalance,
+                            'earned' => $vlEarned,
+                            'used' => $vlUsed,
+                            'message' => "VL: Excel balance {$vlBalance} doesn't match computed {$expectedVlBalance} (diff: {$vlAnomaly['difference']}). " .
+                                       "Previous: {$previousVlBalance} + Earned: {$vlEarned} - Used: {$vlUsed} = {$expectedVlBalance}",
+                        ];
+                        $criticalAnomalies[] = $criticalAnomaly;
+                        
+                        // Use Excel balance as source of truth
+                        \Log::warning('VL Balance Anomaly', $criticalAnomaly);
+                    }
+
+                    // SL Balance Validation
+                    $slAnomaly = self::validateBalance($expectedSlBalance, $slBalance, self::BALANCE_TOLERANCE);
+                    if (!$slAnomaly['valid']) {
+                        $criticalAnomaly = [
+                            'type' => 'critical_balance_mismatch',
+                            'severity' => 'CRITICAL',
+                            'month' => $monthLabel,
+                            'leave_code' => 'SL',
+                            'computed_balance' => $expectedSlBalance,
+                            'excel_balance' => $slBalance,
+                            'difference' => $slAnomaly['difference'],
+                            'previous_balance' => $previousSlBalance,
+                            'earned' => $slEarned,
+                            'used' => $slUsed,
+                            'message' => "SL: Excel balance {$slBalance} doesn't match computed {$expectedSlBalance} (diff: {$slAnomaly['difference']}). " .
+                                       "Previous: {$previousSlBalance} + Earned: {$slEarned} - Used: {$slUsed} = {$expectedSlBalance}",
+                        ];
+                        $criticalAnomalies[] = $criticalAnomaly;
+                        
+                        // Use Excel balance as source of truth
+                        \Log::warning('SL Balance Anomaly', $criticalAnomaly);
+                    }
+
+                    // Process VL transactions - USING EXCEL BALANCE AS SOURCE OF TRUTH
+                    if ($vlEarned > 0 || $vlUsed > 0 || ($index === 0 && $vlBalance > 0)) {
+                        $importedCount += self::createLeaveTransactions(
+                            $employeeId,
+                            'VL',
+                            $year,
+                            $vlEarned,
+                            $vlUsed,
+                            $previousVlBalance,
+                            $vlBalance,  // ← EXCEL BALANCE IS SOURCE OF TRUTH
+                            $transactionDate,
+                            $monthLabel,
+                            $notesRaw,
+                            $parsedNotes,
+                            $tardinessMinutes,
+                            !$vlAnomaly['valid']  // Flag if anomaly detected
+                        );
+
+                        // Update VL balance
+                        $leaveBalance = LeaveBalance::firstOrCreate(
+                            [
+                                'employee_id' => $employeeId,
+                                'leave_code' => 'VL',
+                                'year' => $year,
+                            ],
+                            [
+                                'total_credits' => 0,
+                                'used_credits' => 0,
+                                'pending_credits' => 0,
+                                'available_credits' => 0,
+                                'carried_over' => 0,
+                            ]
+                        );
+
+                        $leaveBalance->total_credits += $vlEarned;
+                        $leaveBalance->used_credits += $vlUsed;
+                        $leaveBalance->available_credits = $vlBalance;  // ← EXCEL VALUE
+                        $leaveBalance->save();
+                    }
+
+                    // Process SL transactions - USING EXCEL BALANCE AS SOURCE OF TRUTH
+                    if ($slEarned > 0 || $slUsed > 0 || ($index === 0 && $slBalance > 0)) {
+                        $importedCount += self::createLeaveTransactions(
+                            $employeeId,
+                            'SL',
+                            $year,
+                            $slEarned,
+                            $slUsed,
+                            $previousSlBalance,
+                            $slBalance,  // ← EXCEL BALANCE IS SOURCE OF TRUTH
+                            $transactionDate,
+                            $monthLabel,
+                            $notesRaw,
+                            $parsedNotes,
+                            $tardinessMinutes,
+                            !$slAnomaly['valid']  // Flag if anomaly detected
+                        );
+
+                        // Update SL balance
+                        $leaveBalance = LeaveBalance::firstOrCreate(
+                            [
+                                'employee_id' => $employeeId,
+                                'leave_code' => 'SL',
+                                'year' => $year,
+                            ],
+                            [
+                                'total_credits' => 0,
+                                'used_credits' => 0,
+                                'pending_credits' => 0,
+                                'available_credits' => 0,
+                                'carried_over' => 0,
+                            ]
+                        );
+
+                        $leaveBalance->total_credits += $slEarned;
+                        $leaveBalance->used_credits += $slUsed;
+                        $leaveBalance->available_credits = $slBalance;  // ← EXCEL VALUE
+                        $leaveBalance->save();
+                    }
                 }
             }
 
             if ($importedCount === 0) {
                 DB::rollBack();
-
                 return [
                     'success' => false,
-                    'message' => empty($errors)
-                        ? 'No leave data could be imported from the file.'
-                        : implode(' ', $errors),
+                    'message' => 'No leave data could be imported from the file.',
                 ];
             }
 
             DB::commit();
 
+            // Sync leave balances from imported transactions
+            foreach ($recordsByYear as $year => $yearRecords) {
+                LeaveCreditsComputationService::syncLeaveCreditsForYear($employeeId, (int) $year, 'VL');
+                LeaveCreditsComputationService::syncLeaveCreditsForYear($employeeId, (int) $year, 'SL');
+            }
+
             $years = $recordsByYear->keys()->sort()->implode(', ');
-            $message = "Successfully imported {$importedCount} leave record(s) for year(s): {$years}.";
-            if (!empty($errors)) {
-                $message .= ' ' . count($errors) . ' warning(s) occurred.';
+            $message = "Successfully imported {$importedCount} transactions for year(s): {$years}.";
+
+            if (!empty($criticalAnomalies)) {
+                $message .= " ⚠️ CRITICAL: " . count($criticalAnomalies) . " balance anomalies detected (using Excel values as source of truth).";
+            }
+
+            if (!empty($validationReport)) {
+                $message .= " Warning: " . count($validationReport) . " entries had continuity issues.";
             }
 
             return [
                 'success' => true,
                 'message' => $message,
                 'imported_count' => $importedCount,
-                'errors' => $errors,
+                'critical_anomalies' => $criticalAnomalies,
+                'validation_report' => $validationReport,
             ];
+
         } catch (\Exception $e) {
             DB::rollBack();
-
             return [
                 'success' => false,
                 'message' => 'Import failed: ' . $e->getMessage(),
@@ -307,253 +442,164 @@ class LeaveImportService
         }
     }
 
-    private static function importNotesColumnData(
+    private static function createLeaveTransactions(
         int $employeeId,
+        string $leaveCode,
         int $year,
-        Collection $yearRecords,
-        Collection $leaveTypes
+        float $earned,
+        float $used,
+        float $previousBalance,
+        float $finalBalance,
+        string $transactionDate,
+        string $monthLabel,
+        string $notesRaw,
+        array $parsedNotes,
+        float $tardinessMinutes,
+        bool $hasAnomalies = false
     ): int {
-        $importedCount = 0;
+        $transactionCount = 0;
+        $currentBalance = $previousBalance;
+        $deductionReasons = self::buildDeductionReasons($leaveCode, $parsedNotes, $tardinessMinutes);
+        
+        // Flag anomalies in remarks
+        $anomalyFlag = $hasAnomalies ? '[⚠️ ANOMALY] ' : '';
 
-        foreach ($yearRecords as $record) {
-            $leaveTypesData = $record['leave_types'] ?? [];
-            $tardiness = (int) ($record['tardiness'] ?? 0);
-            $recordYear = (int) ($record['year'] ?? $year);
-            $recordMonth = (int) ($record['month'] ?? 1);
-            $transactionDate = Carbon::create($recordYear, $recordMonth, 1)->toDateString();
-            $monthLabel = $record['month_year'] ?? '';
+        // Create CREDIT transaction if earned
+        if ($earned > 0) {
+            LeaveTransaction::create([
+                'employee_id' => $employeeId,
+                'leave_code' => $leaveCode,
+                'year' => $year,
+                'transaction_type' => 'credit',
+                'amount' => $earned,
+                'balance_before' => $currentBalance,
+                'balance_after' => round($currentBalance + $earned, 6),
+                'reference_type' => 'leave_import',
+                'reference_id' => null,
+                'transaction_date' => $transactionDate,
+                'processed_by' => auth()->id(),
+                'remarks' => "{$anomalyFlag}[IMPORT] {$monthLabel} | Earned: {$earned} days | Notes: {$notesRaw}",
+            ]);
+            $currentBalance = round($currentBalance + $earned, 6);
+            $transactionCount++;
+        }
 
-            foreach ($leaveTypesData as $leaveTypeData) {
-                $code = $leaveTypeData['code'];
-                $days = $leaveTypeData['days'];
-                $original = $leaveTypeData['original'];
-
-                if (!isset($leaveTypes[$code])) {
-                    continue;
-                }
-
-                $leaveBalance = LeaveBalance::firstOrCreate(
-                    [
-                        'employee_id' => $employeeId,
-                        'leave_code' => $code,
-                        'year' => $year,
-                    ],
-                    [
-                        'total_credits' => 0,
-                        'used_credits' => 0,
-                        'pending_credits' => 0,
-                        'available_credits' => 0,
-                        'carried_over' => 0,
-                    ]
-                );
-
-                if ($days > 0) {
-                    $balanceBefore = $leaveBalance->available_credits;
-                    $leaveBalance->used_credits += $days;
-                    $leaveBalance->available_credits -= $days;
-                    $leaveBalance->save();
-
-                    LeaveTransaction::create([
-                        'employee_id' => $employeeId,
-                        'leave_code' => $code,
-                        'year' => $year,
-                        'transaction_type' => 'debit',
-                        'amount' => $days,
-                        'balance_before' => $balanceBefore,
-                        'balance_after' => $leaveBalance->available_credits,
-                        'reference_type' => 'leave_import',
-                        'reference_id' => null,
-                        'transaction_date' => $transactionDate,
-                        'processed_by' => auth()->id(),
-                        'remarks' => "[IMPORT] Used {$days} {$code} ({$original}) - {$monthLabel}",
-                    ]);
-
-                    $importedCount++;
-                }
+        // Create DEBIT transaction if used
+        if ($used > 0) {
+            $debitRemarks = "{$anomalyFlag}[IMPORT] {$monthLabel} | Deducted: {$used} days";
+            if (!empty($deductionReasons)) {
+                $debitRemarks .= " | Reasons: {$deductionReasons}";
             }
+            $debitRemarks .= " | Notes: {$notesRaw}";
 
-            if ($tardiness > 0) {
-                $remainingTardiness = $tardiness;
+            LeaveTransaction::create([
+                'employee_id' => $employeeId,
+                'leave_code' => $leaveCode,
+                'year' => $year,
+                'transaction_type' => 'debit',
+                'amount' => -$used,
+                'balance_before' => $currentBalance,
+                'balance_after' => round($currentBalance - $used, 6),
+                'reference_type' => 'leave_import',
+                'reference_id' => null,
+                'transaction_date' => $transactionDate,
+                'processed_by' => auth()->id(),
+                'remarks' => $debitRemarks,
+            ]);
+            $currentBalance = round($currentBalance - $used, 6);
+            $transactionCount++;
+        }
 
-                $vlBalance = LeaveBalance::where('employee_id', $employeeId)
-                    ->where('leave_code', 'VL')
-                    ->where('year', $year)
-                    ->first();
+        // Create single balance entry if first row with no earned/used but has balance
+        if ($transactionCount === 0 && $finalBalance > 0) {
+            LeaveTransaction::create([
+                'employee_id' => $employeeId,
+                'leave_code' => $leaveCode,
+                'year' => $year,
+                'transaction_type' => 'credit',
+                'amount' => $finalBalance,
+                'balance_before' => 0,
+                'balance_after' => $finalBalance,
+                'reference_type' => 'leave_import',
+                'reference_id' => null,
+                'transaction_date' => $transactionDate,
+                'processed_by' => auth()->id(),
+                'remarks' => "{$anomalyFlag}[IMPORT] {$monthLabel} | Initial Balance: {$finalBalance} days | Notes: {$notesRaw}",
+            ]);
+            $transactionCount++;
+        }
 
-                if ($vlBalance && $vlBalance->available_credits > 0) {
-                    $tardinessDays = round($remainingTardiness / 480, 6);
-                    $deductAmount = min($vlBalance->available_credits, $tardinessDays);
+        return $transactionCount;
+    }
 
-                    $balanceBefore = $vlBalance->available_credits;
-                    $vlBalance->used_credits += $deductAmount;
-                    $vlBalance->available_credits -= $deductAmount;
-                    $vlBalance->save();
+    private static function buildDeductionReasons(string $leaveCode, array $parsedNotes, float $tardinessMinutes): string
+    {
+        $reasons = [];
 
-                    LeaveTransaction::create([
-                        'employee_id' => $employeeId,
-                        'leave_code' => 'VL',
-                        'year' => $year,
-                        'transaction_type' => 'debit',
-                        'amount' => $deductAmount,
-                        'balance_before' => $balanceBefore,
-                        'balance_after' => $vlBalance->available_credits,
-                        'reference_type' => 'leave_import',
-                        'reference_id' => null,
-                        'transaction_date' => $transactionDate,
-                        'processed_by' => auth()->id(),
-                        'remarks' => "[IMPORT] Tardiness deduction: {$remainingTardiness} minutes ({$deductAmount} days) from VL - {$monthLabel}",
-                    ]);
+        foreach ($parsedNotes as $note) {
+            if ($note['code'] === $leaveCode) {
+                $reasons[] = "{$note['code']}: {$note['days']} day(s)";
+            }
+        }
 
-                    $importedCount++;
-                    $remainingTardiness -= ($deductAmount * 480);
-                }
+        if ($tardinessMinutes > 0) {
+            $hours = (int) ($tardinessMinutes / 60);
+            $mins = (int) ($tardinessMinutes % 60);
+            $reasons[] = "Tardiness: {$hours}h {$mins}m";
+        }
 
-                if ($remainingTardiness > 0) {
-                    $slBalance = LeaveBalance::where('employee_id', $employeeId)
-                        ->where('leave_code', 'SL')
-                        ->where('year', $year)
-                        ->first();
+        return implode('; ', $reasons);
+    }
 
-                    if ($slBalance && $slBalance->available_credits > 0) {
-                        $tardinessDays = round($remainingTardiness / 480, 6);
-                        $deductAmount = min($slBalance->available_credits, $tardinessDays);
+    private static function validateBalanceContinuity(Collection $yearRecords): array
+    {
+        $issues = [];
+        $vlLeaveTypes = ['VL', 'SL'];
 
-                        $balanceBefore = $slBalance->available_credits;
-                        $slBalance->used_credits += $deductAmount;
-                        $slBalance->available_credits -= $deductAmount;
-                        $slBalance->save();
+        foreach ($vlLeaveTypes as $leaveCode) {
+            for ($i = 0; $i < $yearRecords->count() - 1; $i++) {
+                $currentRecord = $yearRecords[$i];
+                $nextRecord = $yearRecords[$i + 1];
 
-                        LeaveTransaction::create([
-                            'employee_id' => $employeeId,
-                            'leave_code' => 'SL',
-                            'year' => $year,
-                            'transaction_type' => 'debit',
-                            'amount' => $deductAmount,
-                            'balance_before' => $balanceBefore,
-                            'balance_after' => $slBalance->available_credits,
-                            'reference_type' => 'leave_import',
-                            'reference_id' => null,
-                            'transaction_date' => $transactionDate,
-                            'processed_by' => auth()->id(),
-                            'remarks' => "[IMPORT] Tardiness deduction: {$remainingTardiness} minutes ({$deductAmount} days) from SL - {$monthLabel}",
-                        ]);
+                $currentBalance = $leaveCode === 'VL' 
+                    ? round((float) ($currentRecord['vl_balance'] ?? 0), 6)
+                    : round((float) ($currentRecord['sl_balance'] ?? 0), 6);
 
-                        $importedCount++;
+                $nextBalance = $leaveCode === 'VL'
+                    ? round((float) ($nextRecord['vl_balance'] ?? 0), 6)
+                    : round((float) ($nextRecord['sl_balance'] ?? 0), 6);
+
+                if ($currentBalance !== $nextBalance) {
+                    $gap = abs($currentBalance - $nextBalance);
+                    if ($gap > 0.001) {
+                        $issues[] = [
+                            'type' => 'balance_gap',
+                            'leave_code' => $leaveCode,
+                            'from_month' => $currentRecord['month_year'] ?? '',
+                            'to_month' => $nextRecord['month_year'] ?? '',
+                            'gap' => $gap,
+                            'message' => "{$leaveCode}: Gap between {$currentRecord['month_year']} and {$nextRecord['month_year']}: {$gap} days",
+                        ];
                     }
                 }
             }
         }
 
-        return $importedCount;
+        return $issues;
     }
 
-    private static function importLeaveTypeForYear(
-        int $employeeId,
-        string $leaveCode,
-        int $year,
-        Collection $yearRecords,
-        string $earnedKey,
-        string $usedKey,
-        string $balanceKey
-    ): int {
-        $importedCount = 0;
-        $totalEarned = round((float) $yearRecords->sum($earnedKey), 6);
-        $totalUsed = round((float) $yearRecords->sum($usedKey), 6);
-        $lastRecord = $yearRecords->last();
-        $finalBalance = round((float) ($lastRecord[$balanceKey] ?? 0), 6);
+    private static function validateBalance(float $expected, float $actual, float $tolerance): array
+    {
+        $difference = abs($expected - $actual);
+        $valid = $difference <= $tolerance;
 
-        $leaveBalance = LeaveBalance::firstOrCreate(
-            [
-                'employee_id' => $employeeId,
-                'leave_code' => $leaveCode,
-                'year' => $year,
-            ],
-            [
-                'total_credits' => 0,
-                'used_credits' => 0,
-                'pending_credits' => 0,
-                'available_credits' => 0,
-                'carried_over' => 0,
-            ]
-        );
-
-        $runningBalance = (float) $leaveBalance->available_credits;
-
-        foreach ($yearRecords as $record) {
-            $earned = (float) ($record[$earnedKey] ?? 0);
-            $used = (float) ($record[$usedKey] ?? 0);
-            $monthLabel = trim($record['month_year'] ?? '');
-            $recordYear = (int) ($record['year'] ?? $year);
-            $recordMonth = (int) ($record['month'] ?? 1);
-            $transactionDate = Carbon::create($recordYear, $recordMonth, 1)->toDateString();
-
-            if ($earned > 0) {
-                $balanceBefore = $runningBalance;
-                $runningBalance = round($runningBalance + $earned, 6);
-
-                LeaveTransaction::create([
-                    'employee_id' => $employeeId,
-                    'leave_code' => $leaveCode,
-                    'year' => $year,
-                    'transaction_type' => 'credit',
-                    'amount' => $earned,
-                    'balance_before' => $balanceBefore,
-                    'balance_after' => $runningBalance,
-                    'reference_type' => 'leave_import',
-                    'reference_id' => null,
-                    'transaction_date' => $transactionDate,
-                    'processed_by' => auth()->id(),
-                    'remarks' => "[IMPORT] Earned {$earned} credits ({$monthLabel})",
-                ]);
-                $importedCount++;
-            }
-
-            if ($used > 0) {
-                $balanceBefore = $runningBalance;
-                $runningBalance = round($runningBalance - $used, 6);
-
-                LeaveTransaction::create([
-                    'employee_id' => $employeeId,
-                    'leave_code' => $leaveCode,
-                    'year' => $year,
-                    'transaction_type' => 'debit',
-                    'amount' => $used,
-                    'balance_before' => $balanceBefore,
-                    'balance_after' => $runningBalance,
-                    'reference_type' => 'leave_import',
-                    'reference_id' => null,
-                    'transaction_date' => $transactionDate,
-                    'processed_by' => auth()->id(),
-                    'remarks' => "[IMPORT] Used {$used} credits ({$monthLabel})",
-                ]);
-                $importedCount++;
-            }
-        }
-
-        $leaveBalance->update([
-            'total_credits' => $totalEarned,
-            'used_credits' => $totalUsed,
-            'available_credits' => $finalBalance,
-            'carried_over' => 0,
-        ]);
-
-        LeaveTransaction::create([
-            'employee_id' => $employeeId,
-            'leave_code' => $leaveCode,
-            'year' => $year,
-            'transaction_type' => 'adjustment',
-            'amount' => $finalBalance,
-            'balance_before' => $runningBalance,
-            'balance_after' => $finalBalance,
-            'reference_type' => 'leave_import',
-            'reference_id' => null,
-            'transaction_date' => now()->toDateString(),
-            'processed_by' => auth()->id(),
-            'remarks' => "[IMPORT] Final {$leaveCode} balance for {$year} set to {$finalBalance}",
-        ]);
-        $importedCount++;
-
-        return $importedCount;
+        return [
+            'valid' => $valid,
+            'expected' => $expected,
+            'actual' => $actual,
+            'difference' => $difference,
+            'message' => $valid ? 'OK' : "Mismatch: expected {$expected}, got {$actual} (diff: {$difference})",
+        ];
     }
 
     private static function isYearHeader(string $value): bool

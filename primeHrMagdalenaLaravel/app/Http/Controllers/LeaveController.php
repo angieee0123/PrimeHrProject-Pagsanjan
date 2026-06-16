@@ -34,12 +34,12 @@ class LeaveController extends Controller
             $sheet->setCellValue('B3', 'Municipal Engineering Office');
             $sheet->setCellValue('A4', 'Date Range:');
             $sheet->setCellValue('B4', 'January 2012 - May 2024');
-            $sheet->setCellValue('A5', 'Notes:');
-            $sheet->setCellValue('B5', 'Sample data for reference');
+            $sheet->setCellValue('A5', 'Instructions:');
+            $sheet->setCellValue('B5', 'Fill data starting from row 6. Notes format: VL1, FL1, T(0-1-2), etc.');
             
-            // Column headers (Row 6)
-            $headers = ['Month/Year', 'Notes', 'VL Earned', 'VL Used', 'VL Balance', 'SL Earned', 'SL Used', 'SL Balance'];
-            $columns = ['A', 'B', 'D', 'F', 'M', 'H', 'J', 'N'];
+            // Column headers (Row 6) - Only necessary columns
+            $headers = ['Month/Year', 'Notes', 'VL Earned', 'VL Used', 'SL Earned', 'SL Used', 'VL Balance', 'SL Balance'];
+            $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
             
             foreach ($columns as $index => $col) {
                 $sheet->setCellValue($col . '6', $headers[$index]);
@@ -67,14 +67,14 @@ class LeaveController extends Controller
             
             // Add sample rows with sample data (7-14)
             $sampleData = [
-                ['Jun-19', 'VL1', 2.5, 1.0, 1.5, 0.5, 1.5, 1.0],
-                ['Jul-19', 'FL1', 2.5, 2.5, 1.5, 0.0, 0.0, 1.5],
-                ['Aug-19', 'T(0-2-10)', 2.5, 0.0, 1.5, 1.0, 2.5, 0.5],
-                ['Sep-19', '', 2.5, 0.5, 1.5, 0.5, 2.0, 1.0],
-                ['Oct-19', 'VL1', 2.5, 2.0, 1.5, 1.5, 0.5, 0.0],
-                ['Nov-19', '', 2.5, 1.5, 1.5, 0.0, 1.5, 1.5],
-                ['Dec-19', 'SL1', 2.5, 0.0, 1.5, 1.0, 2.5, 0.5],
-                ['Jan-20', '', 2.5, 0.5, 1.5, 0.5, 2.0, 1.0],
+                ['Jun-19', 'VL1', 2.5, 1.0, 0.5, 1.5, 1.5, 1.0],
+                ['Jul-19', 'FL1', 2.5, 2.5, 0.0, 0.0, 1.5, 1.5],
+                ['Aug-19', 'T(0-2-10)', 2.5, 0.0, 1.0, 2.5, 1.5, 0.5],
+                ['Sep-19', '', 2.5, 0.5, 0.5, 2.0, 1.5, 1.0],
+                ['Oct-19', 'VL1/T(0-1-2)', 2.5, 2.0, 1.5, 0.5, 1.5, 0.0],
+                ['Nov-19', '', 2.5, 1.5, 0.0, 1.5, 1.5, 1.5],
+                ['Dec-19', 'SL1', 2.5, 0.0, 1.0, 2.5, 1.5, 0.5],
+                ['Jan-20', '', 2.5, 0.5, 0.5, 2.0, 1.5, 1.0],
             ];
             
             for ($row = 7; $row <= 14; $row++) {
@@ -84,24 +84,29 @@ class LeaveController extends Controller
                 if (!empty($data)) {
                     $sheet->setCellValue('A' . $row, $data[0] ?? '');
                     $sheet->setCellValue('B' . $row, $data[1] ?? '');
-                    $sheet->setCellValue('D' . $row, $data[2] ?? '');
-                    $sheet->setCellValue('F' . $row, $data[3] ?? '');
-                    $sheet->setCellValue('H' . $row, $data[4] ?? '');
-                    $sheet->setCellValue('J' . $row, $data[5] ?? '');
-                    $sheet->setCellValue('M' . $row, $data[6] ?? '');
-                    $sheet->setCellValue('N' . $row, $data[7] ?? '');
+                    $sheet->setCellValue('C' . $row, $data[2] ?? '');
+                    $sheet->setCellValue('D' . $row, $data[3] ?? '');
+                    $sheet->setCellValue('E' . $row, $data[4] ?? '');
+                    $sheet->setCellValue('F' . $row, $data[5] ?? '');
+                    $sheet->setCellValue('G' . $row, $data[6] ?? '');
+                    $sheet->setCellValue('H' . $row, $data[7] ?? '');
                 }
             }
             
             // Set column widths
-            $sheet->getColumnDimension('A')->setWidth(20);
-            $sheet->getColumnDimension('B')->setWidth(30);
-            $sheet->getColumnDimension('D')->setWidth(15);
-            $sheet->getColumnDimension('F')->setWidth(15);
-            $sheet->getColumnDimension('M')->setWidth(15);
-            $sheet->getColumnDimension('H')->setWidth(15);
-            $sheet->getColumnDimension('J')->setWidth(15);
-            $sheet->getColumnDimension('N')->setWidth(15);
+            $sheet->getColumnDimension('A')->setWidth(15);
+            $sheet->getColumnDimension('B')->setWidth(20);
+            $sheet->getColumnDimension('C')->setWidth(12);
+            $sheet->getColumnDimension('D')->setWidth(12);
+            $sheet->getColumnDimension('E')->setWidth(12);
+            $sheet->getColumnDimension('F')->setWidth(12);
+            $sheet->getColumnDimension('G')->setWidth(12);
+            $sheet->getColumnDimension('H')->setWidth(12);
+            
+            // Hide unused columns to prevent empty spaces
+            for ($col = 'I'; $col <= 'Z'; $col++) {
+                $sheet->getColumnDimension($col)->setVisible(false);
+            }
             
             // Generate file
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
@@ -221,6 +226,10 @@ class LeaveController extends Controller
             ->orderBy('employee_id')
             ->get();
 
+        $allLeaveTypes = LeaveType::where('is_active', true)
+            ->orderBy('leave_code')
+            ->get();
+
         \Log::info('Leave Transactions Count: ' . $leaveTransactions->total());
 
         $benefitsData = [
@@ -241,7 +250,8 @@ class LeaveController extends Controller
             'departments', 
             'employees', 
             'leaveTransactions', 
-            'transactionEmployees'
+            'transactionEmployees', 
+            'allLeaveTypes'
         ));
     }
 
@@ -1011,17 +1021,15 @@ class LeaveController extends Controller
                 'success' => true,
                 'message' => $importResult['message'],
                 'imported_count' => $importResult['imported_count'],
-                'errors' => $importResult['errors'],
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
-            \Log::error('Leave import failed: ' . $e->getMessage());
+            \Log::error('Leave import failed: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json([
                 'success' => false,
                 'message' => 'Import failed: ' . $e->getMessage(),

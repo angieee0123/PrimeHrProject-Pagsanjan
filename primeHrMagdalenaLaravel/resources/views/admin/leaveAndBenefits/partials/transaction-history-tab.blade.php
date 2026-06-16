@@ -21,7 +21,7 @@
             </select>
             <select class="filter-select" id="filterTransactionLeaveType" onchange="applyTransactionFilters()">
                 <option value="">All Leave Types</option>
-                @foreach($leaveTypes ?? [] as $type)
+                @foreach($allLeaveTypes ?? [] as $type)
                     <option value="{{ $type->leave_code }}" {{ request('filter_leave_code') == $type->leave_code ? 'selected' : '' }}>{{ $type->leave_code }} - {{ $type->leave_name }}</option>
                 @endforeach
             </select>
@@ -98,8 +98,8 @@
                             <span class="badge-status cancelled">{{ ucfirst($transaction->transaction_type) }}</span>
                         @endif
                     </td>
-                    <td data-label="Amount" style="text-align: center; font-weight: 600; color: {{ $transaction->amount >= 0 ? '#15803d' : '#dc2626' }};">
-                        {{ $transaction->amount >= 0 ? '+' : '' }}{{ number_format($transaction->amount, 6) }} days
+                    <td data-label="Amount" style="text-align: center; font-weight: 600; color: {{ $transaction->transaction_type === 'credit' || $transaction->transaction_type === 'adjustment' ? '#15803d' : '#dc2626' }};">
+                        {{ $transaction->transaction_type === 'debit' ? '-' : '+' }}{{ number_format(abs($transaction->amount), 6) }} days
                     </td>
                     <td data-label="Before" style="text-align: center; color: #6b6a8a;">
                         {{ number_format($transaction->balance_before, 6) }}
@@ -119,6 +119,8 @@
                             <span style="color: #15803d; font-weight: 500;">Accrual</span>
                         @elseif($transaction->reference_type === 'initialization')
                             <span style="color: #6b3fa0; font-weight: 500;">Initialization</span>
+                        @elseif($transaction->reference_type === 'leave_import')
+                            <span style="color: #0284c7; font-weight: 500;">Import</span>
                         @else
                             <span style="color: #6b6a8a;">{{ ucfirst(str_replace('_', ' ', $transaction->reference_type ?? 'N/A')) }}</span>
                         @endif
@@ -219,11 +221,11 @@
             <div class="modal-row"><span>Balance Before</span><strong id="transactionBalanceBefore">10.00 days</strong></div>
             <div class="modal-row"><span>Balance After</span><strong id="transactionBalanceAfter">15.00 days</strong></div>
             <div class="modal-row"><span>Transaction Date</span><strong id="transactionDate">Jan 15, 2026</strong></div>
-            
+
             <span class="modal-section-label modal-section-deductions">REFERENCE & AUDIT</span>
             <div class="modal-row"><span>Reference Type</span><strong id="transactionReference">Manual Adjustment</strong></div>
             <div class="modal-row"><span>Processed By</span><strong id="transactionProcessedBy">Admin User</strong></div>
-            
+
             <span class="modal-section-label modal-section-deductions">REMARKS</span>
             <div class="modal-row"><span id="transactionRemarks" style="color: #6b7280; font-style: italic;">No remarks provided</span></div>
         </div>
@@ -247,7 +249,7 @@ function sortTransactionTable(column) {
     const currentSort = new URLSearchParams(window.location.search).get('sort_by');
     const currentOrder = new URLSearchParams(window.location.search).get('sort_order') || 'desc';
     const newOrder = (currentSort === column && currentOrder === 'asc') ? 'desc' : 'asc';
-    
+
     const url = new URL(window.location.href);
     url.searchParams.set('sort_by', column);
     url.searchParams.set('sort_order', newOrder);
@@ -260,35 +262,35 @@ function applyTransactionFilters() {
     const type = document.getElementById('filterTransactionType').value;
     const leaveCode = document.getElementById('filterTransactionLeaveType').value;
     const date = document.getElementById('filterTransactionDate').value;
-    
+
     const url = new URL(window.location.href);
     url.searchParams.set('tab', 'transactions');
     url.searchParams.delete('page');
-    
+
     if (employeeId) {
         url.searchParams.set('filter_employee', employeeId);
     } else {
         url.searchParams.delete('filter_employee');
     }
-    
+
     if (type) {
         url.searchParams.set('filter_type', type);
     } else {
         url.searchParams.delete('filter_type');
     }
-    
+
     if (leaveCode) {
         url.searchParams.set('filter_leave_code', leaveCode);
     } else {
         url.searchParams.delete('filter_leave_code');
     }
-    
+
     if (date) {
         url.searchParams.set('filter_date', date);
     } else {
         url.searchParams.delete('filter_date');
     }
-    
+
     window.location.href = url.toString();
 }
 
@@ -303,27 +305,28 @@ function viewTransactionDetails(employeeName, employeeId, leaveType, type, amoun
     document.getElementById('transactionEmployeeName').textContent = employeeName;
     document.getElementById('transactionEmployeeId').textContent = employeeId;
     document.getElementById('transactionLeaveType').textContent = leaveType;
-    
+
     const typeBadge = document.getElementById('transactionType');
     typeBadge.textContent = type;
-    typeBadge.className = 'badge-status ' + 
-        (type === 'Credit' ? 'processed' : 
-         type === 'Debit' ? 'on-hold' : 
+    typeBadge.className = 'badge-status ' +
+        (type === 'Credit' ? 'processed' :
+         type === 'Debit' ? 'on-hold' :
          type === 'Pending' ? 'pending' :
          type === 'Reversal' ? 'cancelled' :
          type === 'Adjustment' ? 'pending' : 'cancelled');
-    
+
     const amountEl = document.getElementById('transactionAmount');
-    amountEl.textContent = (amount >= 0 ? '+' : '') + parseFloat(amount).toFixed(6) + ' days';
-    amountEl.style.color = amount >= 0 ? '#15803d' : '#dc2626';
-    
+    const sign = (type === 'Debit') ? '-' : '+';
+    amountEl.textContent = sign + parseFloat(Math.abs(amount)).toFixed(6) + ' days';
+    amountEl.style.color = (type === 'Debit') ? '#dc2626' : '#15803d';
+
     document.getElementById('transactionBalanceBefore').textContent = parseFloat(balanceBefore).toFixed(6) + ' days';
     document.getElementById('transactionBalanceAfter').textContent = parseFloat(balanceAfter).toFixed(6) + ' days';
     document.getElementById('transactionDate').textContent = date;
     document.getElementById('transactionReference').textContent = reference;
     document.getElementById('transactionProcessedBy').textContent = processedBy || 'System';
     document.getElementById('transactionRemarks').textContent = remarks || 'No remarks provided';
-    
+
     document.getElementById('transactionDetailModal').style.display = 'flex';
 }
 

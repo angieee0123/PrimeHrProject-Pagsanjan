@@ -75,18 +75,18 @@
                         <div style="flex: 1;">
                             <h4 style="margin: 0 0 8px 0; color: #0369a1; font-size: 13px; font-weight: 600;">Expected Excel Format</h4>
                             <div style="font-size: 12px; color: #075985; line-height: 1.6;">
-                                <p style="margin: 0 0 8px 0;"><strong>Structure:</strong></p>
+                                <p style="margin: 0 0 8px 0;"><strong>Columns (A-H):</strong></p>
                                 <ul style="margin: 0 0 8px 0; padding-left: 20px;">
-                                    <li>Rows 1-5: Header info (Name, Position, etc.)</li>
-                                    <li>Row 6+: Data rows with months</li>
-                                    <li>Column A: Month/Year (2012, August, etc.)</li>
-                                    <li>Column B: Notes (VL1, FL1, T(0-2-10), etc.)</li>
+                                    <li>A: Month/Year (e.g., "Jun-19", "8/1/2012")</li>
+                                    <li>B: Notes (e.g., "VL1", "FL1", "T(0-1-2)", "VL1/T(0-1-2)")</li>
+                                    <li>C: VL Earned | D: VL Used | E: SL Earned | F: SL Used</li>
+                                    <li>G: VL Balance | H: SL Balance</li>
                                 </ul>
-                                <p style="margin: 0 0 8px 0;"><strong>Leave Columns:</strong></p>
-                                <ul style="margin: 0; padding-left: 20px;">
-                                    <li>D: VL Earned | F: VL Used | M: VL Balance</li>
-                                    <li>H: SL Earned | J: SL Used | N: SL Balance</li>
-                                </ul>
+                                <p style="margin: 0; color: #0369a1; font-weight: 600;">
+                                    <a href="{{ route('admin.leave.download-template') }}" style="color: #0369a1; text-decoration: none; border-bottom: 1px solid #0369a1;">
+                                        Download Template
+                                    </a>
+                                </p>
                             </div>
                         </div>
                     </div>

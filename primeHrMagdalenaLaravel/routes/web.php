@@ -139,16 +139,35 @@ Route::get('/permanent/leave', function () {
     $leaveTypes = \App\Models\LeaveType::where('is_active', true)
         ->with(['leaveBalances' => function($query) use ($employee, $currentYear) {
             $query->where('employee_id', $employee->id)
-                  ->where('year', $currentYear)
-                  ->where('total_credits', '>', 0); // Only show assigned leaves
+                  ->where('year', $currentYear);
         }])
         ->orderBy('leave_name')
         ->get()
-        ->filter(function($leaveType) {
-            // Filter out leave types that don't have any balance records
-            return $leaveType->leaveBalances->isNotEmpty();
+        ->map(function($leaveType) use ($employee, $currentYear) {
+            // Get or compute the balance for this leave type
+            $balance = $leaveType->leaveBalances->first();
+            
+            // If no balance found or balance values are zeros, try to compute from transactions
+            if (!$balance || ($balance->total_credits == 0 && $balance->available_credits == 0)) {
+                // Compute balance from ledger entries
+                \App\Services\LeaveCreditsComputationService::syncLeaveCreditsForYear($employee->id, $currentYear, $leaveType->leave_code);
+                
+                // Refresh the balance
+                $balance = \App\Models\LeaveBalance::where('employee_id', $employee->id)
+                    ->where('leave_code', $leaveType->leave_code)
+                    ->where('year', $currentYear)
+                    ->first();
+            }
+            
+            if ($balance && ($balance->total_credits > 0 || $balance->available_credits > 0)) {
+                $leaveType->leaveBalances = collect([$balance]);
+                return $leaveType;
+            }
+            
+            return null;
         })
-        ->values(); // Reset array keys
+        ->filter(fn($lt) => $lt !== null)
+        ->values();
 
     $leaveApplications = \App\Models\LeaveApplication::where('employee_id', $employee->id)
         ->with('leaveType')
