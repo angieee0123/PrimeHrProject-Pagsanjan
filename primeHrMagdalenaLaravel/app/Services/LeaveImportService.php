@@ -334,8 +334,8 @@ class LeaveImportService
                         \Log::warning('SL Balance Anomaly', $criticalAnomaly);
                     }
 
-                    // Process VL transactions - USING EXCEL BALANCE AS SOURCE OF TRUTH
-                    if ($vlEarned > 0 || $vlUsed > 0 || ($index === 0 && $vlBalance > 0)) {
+                    // Process VL transactions ONLY if VL has earned or used
+                    if ($vlEarned > 0 || $vlUsed > 0) {
                         $importedCount += self::createLeaveTransactions(
                             $employeeId,
                             'VL',
@@ -374,8 +374,8 @@ class LeaveImportService
                         $leaveBalance->save();
                     }
 
-                    // Process SL transactions - USING EXCEL BALANCE AS SOURCE OF TRUTH
-                    if ($slEarned > 0 || $slUsed > 0 || ($index === 0 && $slBalance > 0)) {
+                    // Process SL transactions ONLY if SL has earned or used
+                    if ($slEarned > 0 || $slUsed > 0) {
                         $importedCount += self::createLeaveTransactions(
                             $employeeId,
                             'SL',

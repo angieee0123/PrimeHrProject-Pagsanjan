@@ -41,6 +41,39 @@ class PermanentLeaveController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Build leave statistics history directly from database
+        $leaveStatsHistory = [];
+        $allDebits = LeaveTransaction::where('employee_id', $employee->id)
+            ->where('transaction_type', 'debit')
+            ->selectRaw('YEAR(transaction_date) as trans_year, MONTH(transaction_date) as trans_month, leave_code, reference_type, COUNT(*) as count')
+            ->groupBy('YEAR(transaction_date)', 'MONTH(transaction_date)', 'leave_code', 'reference_type')
+            ->get();
+
+        foreach ($allDebits as $row) {
+            $monthYear = sprintf('%04d-%02d', $row->trans_year, $row->trans_month);
+            if (!isset($leaveStatsHistory[$monthYear])) {
+                $leaveStatsHistory[$monthYear] = ['leaves_by_type' => [], 'tardiness_count' => 0];
+            }
+            if ($row->reference_type === 'tardiness_deduction') {
+                $leaveStatsHistory[$monthYear]['tardiness_count'] += $row->count;
+            } else {
+                $code = $row->leave_code;
+                $leaveStatsHistory[$monthYear]['leaves_by_type'][$code] = ($leaveStatsHistory[$monthYear]['leaves_by_type'][$code] ?? 0) + $row->count;
+            }
+        }
+
+        // Get leave history by type
+        $leaveHistory = [];
+        foreach ($leaveTypes as $type) {
+            $history = LeaveBalance::where('employee_id', $employee->id)
+                ->where('leave_code', $type->leave_code)
+                ->orderBy('year')
+                ->get();
+            $leaveHistory[$type->leave_code] = $history;
+        }
+
+        $selectedYear = $currentYear;
+
         $transactionQuery = LeaveTransaction::where('employee_id', $employee->id)
             ->with('processedBy.employee');
 
@@ -70,6 +103,6 @@ class PermanentLeaveController extends Controller
 
         $employeeTransactions = $transactionQuery->paginate($perPage)->appends(request()->except('page'));
 
-        return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions'));
+        return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions', 'leaveStatsHistory', 'leaveHistory', 'selectedYear'));
     }
 }
