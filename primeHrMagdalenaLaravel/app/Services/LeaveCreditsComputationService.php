@@ -11,14 +11,15 @@ class LeaveCreditsComputationService
 {
     /**
      * Compute and sync leave credits for an employee for a specific year based on transactions
-     * This aggregates all ledger_entry transactions to get totals, used, and available credits
+     * This aggregates credit/debit transactions (from migration) and ledger entries
      */
     public static function syncLeaveCreditsForYear(int $employeeId, int $year, string $leaveCode): void
     {
+        // Get all credit and debit transactions (from migrations)
         $transactions = LeaveTransaction::where('employee_id', $employeeId)
             ->where('leave_code', $leaveCode)
             ->where('year', $year)
-            ->where('transaction_type', 'ledger_entry')
+            ->whereIn('transaction_type', ['credit', 'debit'])
             ->orderBy('transaction_date')
             ->get();
 
@@ -26,39 +27,39 @@ class LeaveCreditsComputationService
             return;
         }
 
-        // Get the last ledger entry to determine the final balances
-        $lastTransaction = $transactions->last();
-
         $totalCredits = 0;
         $usedCredits = 0;
+        $availableCredits = 0;
 
-        // Process each transaction to accumulate earned and used amounts
+        // Aggregate amounts from transactions
         foreach ($transactions as $transaction) {
-            // Parse remarks to extract earned and used amounts
-            // Format: "[LEDGER] 08/01/2012 | Earned: 1.25, Used: 0, Balance: 1.25 | Notes: "
-            if (preg_match('/Earned:\s*([\d.]+),\s*Used:\s*([\d.]+)/', $transaction->remarks, $matches)) {
-                $earned = (float) $matches[1];
-                $used = (float) $matches[2];
-                $totalCredits += $earned;
-                $usedCredits += $used;
+            if ($transaction->transaction_type === 'credit') {
+                $totalCredits += $transaction->amount;
+                $availableCredits += $transaction->amount;
+            } elseif ($transaction->transaction_type === 'debit') {
+                $usedCredits += abs($transaction->amount);
+                $availableCredits += $transaction->amount; // amount is negative
             }
         }
 
-        // Available credits is the final balance from the last ledger entry
-        $availableCredits = (float) $lastTransaction->balance_after;
+        // Use the last transaction's balance_after as the final available credits (most accurate)
+        $lastTransaction = $transactions->last();
+        if ($lastTransaction) {
+            $availableCredits = (float) $lastTransaction->balance_after;
+        }
 
         // Update or create the leave balance record
-        $leaveBalance = LeaveBalance::updateOrCreate(
+        LeaveBalance::updateOrCreate(
             [
                 'employee_id' => $employeeId,
                 'leave_code' => $leaveCode,
                 'year' => $year,
             ],
             [
-                'total_credits' => $totalCredits,
-                'used_credits' => $usedCredits,
+                'total_credits' => max(0, $totalCredits),
+                'used_credits' => max(0, $usedCredits),
                 'pending_credits' => 0,
-                'available_credits' => $availableCredits,
+                'available_credits' => max(0, $availableCredits),
                 'carried_over' => 0,
             ]
         );
@@ -69,9 +70,9 @@ class LeaveCreditsComputationService
      */
     public static function syncAllLeaveCreditsForEmployee(int $employeeId): void
     {
-        // Get all unique (year, leave_code) combinations from transactions
+        // Get all unique (year, leave_code) combinations from credit/debit transactions
         $transactions = LeaveTransaction::where('employee_id', $employeeId)
-            ->where('transaction_type', 'ledger_entry')
+            ->whereIn('transaction_type', ['credit', 'debit'])
             ->select('year', 'leave_code')
             ->distinct()
             ->get();
