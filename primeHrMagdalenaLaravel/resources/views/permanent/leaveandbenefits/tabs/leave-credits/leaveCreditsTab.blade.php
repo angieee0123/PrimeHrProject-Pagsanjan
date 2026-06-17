@@ -150,6 +150,68 @@
     <!-- YEARLY HISTORY VIEW -->
     @else
     <div class="table-wrapper">
+        <!-- Leave Filing Statistics Section -->
+        @if($leaveStatsHistory && count($leaveStatsHistory) > 0)
+        <div style="margin-bottom: 32px;">
+            <div style="background: linear-gradient(135deg, #f0f9ff 0%, transparent 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #0284c7; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; background: #0284c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">
+                        📊
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: #1f2937;">Leave Filing & Tardiness Statistics</h4>
+                        <p style="margin: 4px 0 0 0; font-size: 12px; color: #6b7280;">Monthly breakdown of leave filings by type and tardiness incidents</p>
+                    </div>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+                        <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: #4b5563;">Month</th>
+                        <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: #4b5563;">Leave Filings by Type</th>
+                        <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: 600; color: #4b5563;">Total Leaves</th>
+                        <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: 600; color: #4b5563;">Tardiness Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($leaveStatsHistory as $monthYear => $stat)
+                    @php
+                        $totalLeaves = collect($stat['leaves_by_type'])->sum();
+                        $dateObj = DateTime::createFromFormat('Y-m', $monthYear);
+                        $monthName = $dateObj->format('F Y');
+                    @endphp
+                    <tr style="border-bottom: 1px solid #e5e7eb; transition: background 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background=''">
+                        <td style="padding: 14px 12px; font-weight: 600; color: #1f2937;">{{ $monthName }}</td>
+                        <td style="padding: 14px 12px;">
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                @foreach($stat['leaves_by_type'] as $leaveCode => $count)
+                                <span style="background: #dbeafe; color: #0284c7; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                    {{ $leaveCode }}: <strong>{{ $count }}</strong>
+                                </span>
+                                @endforeach
+                            </div>
+                        </td>
+                        <td style="padding: 14px 12px; text-align: center;">
+                            <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-weight: 600; display: inline-block;">
+                                {{ $totalLeaves }}
+                            </span>
+                        </td>
+                        <td style="padding: 14px 12px; text-align: center;">
+                            @if($stat['tardiness_count'] > 0)
+                            <span style="background: #fee2e2; color: #dc2626; padding: 4px 10px; border-radius: 6px; font-weight: 600; display: inline-block;">
+                                ⚠️ {{ $stat['tardiness_count'] }}
+                            </span>
+                            @else
+                            <span style="color: #6b7280; font-size: 12px;">-</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
         @forelse($leaveTypes ?? [] as $type)
         @php
             $history = $leaveHistory[$type->leave_code] ?? [];

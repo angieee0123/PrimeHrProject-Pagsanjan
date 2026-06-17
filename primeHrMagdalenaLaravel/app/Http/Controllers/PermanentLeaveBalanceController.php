@@ -71,6 +71,7 @@ class PermanentLeaveBalanceController extends Controller
 
         // Load yearly history for all leave types if in history view
         $leaveHistory = [];
+        $leaveStatsHistory = [];
         if ($viewMode === 'history') {
             foreach ($leaveTypes as $leaveType) {
                 $leaveHistory[$leaveType->leave_code] = DB::table('leave_balances')
@@ -80,6 +81,9 @@ class PermanentLeaveBalanceController extends Controller
                     ->get()
                     ->toArray();
             }
+            
+            // Get leave filings and tardiness stats
+            $leaveStatsHistory = $this->getLeaveFilingStats($employee->id);
         }
 
         // Apply filters
@@ -142,6 +146,43 @@ class PermanentLeaveBalanceController extends Controller
 
         $employeeTransactions = $transactionQuery->paginate($perPage)->appends(request()->except('page'));
 
-        return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions', 'selectedYear', 'availableYears', 'leaveHistory', 'viewMode'));
+        return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions', 'selectedYear', 'availableYears', 'leaveHistory', 'leaveStatsHistory', 'viewMode'));
+    }
+
+    private function getLeaveFilingStats($employeeId)
+    {
+        $transactions = DB::table('leave_transactions')
+            ->where('employee_id', $employeeId)
+            ->whereIn('reference_type', ['leave_application', 'leave_import', 'ledger_entry'])
+            ->select('leave_code', 'transaction_date', 'reference_type')
+            ->orderBy('transaction_date')
+            ->get();
+
+        $tardiness = DB::table('leave_transactions')
+            ->where('employee_id', $employeeId)
+            ->where('reference_type', 'tardiness_deduction')
+            ->select('transaction_date')
+            ->orderBy('transaction_date')
+            ->get();
+
+        $stats = [];
+        foreach ($transactions as $trans) {
+            $monthYear = date('Y-m', strtotime($trans->transaction_date));
+            if (!isset($stats[$monthYear])) {
+                $stats[$monthYear] = ['leaves_by_type' => [], 'tardiness_count' => 0];
+            }
+            $stats[$monthYear]['leaves_by_type'][$trans->leave_code] = ($stats[$monthYear]['leaves_by_type'][$trans->leave_code] ?? 0) + 1;
+        }
+
+        foreach ($tardiness as $tard) {
+            $monthYear = date('Y-m', strtotime($tard->transaction_date));
+            if (!isset($stats[$monthYear])) {
+                $stats[$monthYear] = ['leaves_by_type' => [], 'tardiness_count' => 0];
+            }
+            $stats[$monthYear]['tardiness_count']++;
+        }
+
+        krsort($stats);
+        return $stats;
     }
 }

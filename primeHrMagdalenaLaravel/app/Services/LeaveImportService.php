@@ -165,16 +165,34 @@ class LeaveImportService
         foreach ($parts as $part) {
             $part = trim($part);
 
-            if (preg_match('/^T\((\d+)-(\d+)-(\d+)\)$/', $part, $matches)) {
-                $hours = (int) $matches[1];
-                $minutes = (int) $matches[2];
-                $seconds = (int) $matches[3];
+            // Pattern 1: T(#-#-#) - Tardiness (days-hours-minutes)
+            if (preg_match('/^T\s*\((\d+)-(\d+)-(\d+)\)$/', $part, $matches)) {
+                $days = (int) $matches[1];
+                $hours = (int) $matches[2];
+                $minutes = (int) $matches[3];
 
-                $totalMinutes = ($hours * 60) + $minutes + ($seconds / 60);
-                $result['tardiness'] += $totalMinutes;
+                // Convert to total hours
+                $totalHours = ($days * 24) + $hours + ($minutes / 60);
+                // Convert to days (1 day = 8 working hours for leave calculation)
+                $daysDeduction = $totalHours / 8;
+                $result['tardiness'] += round($daysDeduction, 6);
             }
+            // Pattern 2: [A-Z]+(#-#-#) - Leave code with time format (with optional space)
+            elseif (preg_match('/^([A-Z]+)\s*\((\d+)-(\d+)-(\d+)\)$/', $part, $matches)) {
+                $leaveCode = $matches[1];
+                $days = (int) $matches[2];
 
-            elseif (preg_match('/^([A-Z]+)(\d+)$/', $part, $matches)) {
+                $mappedCode = self::mapLeaveCode($leaveCode);
+                if ($mappedCode) {
+                    $result['leave_types'][] = [
+                        'code' => $mappedCode,
+                        'days' => $days,
+                        'original' => $part,
+                    ];
+                }
+            }
+            // Pattern 3: [A-Z]+# - Leave code with digit (old format)
+            elseif (preg_match('/^([A-Z]+)\s*(\d+)$/', $part, $matches)) {
                 $leaveCode = $matches[1];
                 $days = (int) $matches[2];
 
@@ -214,11 +232,11 @@ class LeaveImportService
         try {
             \App\Models\Employee::findOrFail($employeeId);
 
-            $leaveTypes = LeaveType::whereIn('leave_code', ['VL', 'SL'])
+            $leaveTypes = LeaveType::whereIn('leave_code', ['VL', 'SL', 'FL', 'ML', 'PL', 'BL', 'AL'])
                 ->get()
                 ->keyBy('leave_code');
 
-            if ($leaveTypes->isEmpty()) {
+            if ($leaveTypes->filter(function($lt) { return in_array($lt->leave_code, ['VL', 'SL']); })->isEmpty()) {
                 throw new \RuntimeException('VL and SL leave types must exist before importing records.');
             }
 
@@ -395,6 +413,31 @@ class LeaveImportService
                         $leaveBalance->available_credits = $slBalance;  // ← EXCEL VALUE
                         $leaveBalance->save();
                     }
+
+                    // Process other leave types (FL, ML, PL, BL, AL) from parsed notes
+                    $otherLeaveCodes = collect($parsedNotes)
+                        ->pluck('code')
+                        ->unique()
+                        ->filter(fn($code) => !in_array($code, ['VL', 'SL']))
+                        ->values();
+
+                    foreach ($otherLeaveCodes as $otherLeaveCode) {
+                        $importedCount += self::createLeaveTransactions(
+                            $employeeId,
+                            $otherLeaveCode,
+                            $year,
+                            0,
+                            0,
+                            0,
+                            0,
+                            $transactionDate,
+                            $monthLabel,
+                            $notesRaw,
+                            $parsedNotes,
+                            0,
+                            false
+                        );
+                    }
                 }
             }
 
@@ -459,9 +502,6 @@ class LeaveImportService
     ): int {
         $transactionCount = 0;
         $currentBalance = $previousBalance;
-        $deductionReasons = self::buildDeductionReasons($leaveCode, $parsedNotes, $tardinessMinutes);
-        
-        // Flag anomalies in remarks
         $anomalyFlag = $hasAnomalies ? '[⚠️ ANOMALY] ' : '';
 
         // Create CREDIT transaction if earned
@@ -484,14 +524,66 @@ class LeaveImportService
             $transactionCount++;
         }
 
-        // Create DEBIT transaction if used
-        if ($used > 0) {
-            $debitRemarks = "{$anomalyFlag}[IMPORT] {$monthLabel} | Deducted: {$used} days";
-            if (!empty($deductionReasons)) {
-                $debitRemarks .= " | Reasons: {$deductionReasons}";
+        // Calculate leaves from parsed notes for this leave code
+        $leaveDaysFromNotes = 0;
+        foreach ($parsedNotes as $note) {
+            if ($note['code'] === $leaveCode) {
+                $leaveDaysFromNotes += (float) $note['days'];
             }
-            $debitRemarks .= " | Notes: {$notesRaw}";
+        }
 
+        // Calculate tardiness deduction
+        $tardinessDeduction = 0;
+        if ($leaveDaysFromNotes > 0 && $used > $leaveDaysFromNotes) {
+            $tardinessDeduction = round($used - $leaveDaysFromNotes, 6);
+        }
+
+        // Create separate DEBIT transaction for leave
+        if ($leaveDaysFromNotes > 0) {
+            LeaveTransaction::create([
+                'employee_id' => $employeeId,
+                'leave_code' => $leaveCode,
+                'year' => $year,
+                'transaction_type' => 'debit',
+                'amount' => -$leaveDaysFromNotes,
+                'balance_before' => $currentBalance,
+                'balance_after' => round($currentBalance - $leaveDaysFromNotes, 6),
+                'reference_type' => 'leave_import',
+                'reference_id' => null,
+                'transaction_date' => $transactionDate,
+                'processed_by' => auth()->id(),
+                'remarks' => "{$anomalyFlag}[IMPORT] {$monthLabel} | Leave: {$leaveDaysFromNotes} days | Notes: {$notesRaw}",
+            ]);
+            $currentBalance = round($currentBalance - $leaveDaysFromNotes, 6);
+            $transactionCount++;
+        }
+
+        // Create separate DEBIT transaction for tardiness
+        if ($tardinessDeduction > 0) {
+            $hours = (int) ($tardinessDeduction * 8);
+            $mins = (int) (($tardinessDeduction * 8 - $hours) * 60);
+            $tardinessDisplay = "{$hours}h {$mins}m";
+
+            LeaveTransaction::create([
+                'employee_id' => $employeeId,
+                'leave_code' => $leaveCode,
+                'year' => $year,
+                'transaction_type' => 'debit',
+                'amount' => -$tardinessDeduction,
+                'balance_before' => $currentBalance,
+                'balance_after' => round($currentBalance - $tardinessDeduction, 6),
+                'reference_type' => 'tardiness_deduction',
+                'reference_id' => null,
+                'transaction_date' => $transactionDate,
+                'processed_by' => auth()->id(),
+                'remarks' => "{$anomalyFlag}[IMPORT] {$monthLabel} | Tardiness: {$tardinessDeduction} days ({$tardinessDisplay}) | Notes: {$notesRaw}",
+            ]);
+            $currentBalance = round($currentBalance - $tardinessDeduction, 6);
+            $transactionCount++;
+        }
+
+        // If no parsed notes but used > 0, treat entire used as debit (no tardiness info)
+        if ($leaveDaysFromNotes === 0 && $used > 0) {
             LeaveTransaction::create([
                 'employee_id' => $employeeId,
                 'leave_code' => $leaveCode,
@@ -504,7 +596,7 @@ class LeaveImportService
                 'reference_id' => null,
                 'transaction_date' => $transactionDate,
                 'processed_by' => auth()->id(),
-                'remarks' => $debitRemarks,
+                'remarks' => "{$anomalyFlag}[IMPORT] {$monthLabel} | Used: {$used} days | Notes: {$notesRaw}",
             ]);
             $currentBalance = round($currentBalance - $used, 6);
             $transactionCount++;
@@ -530,25 +622,6 @@ class LeaveImportService
         }
 
         return $transactionCount;
-    }
-
-    private static function buildDeductionReasons(string $leaveCode, array $parsedNotes, float $tardinessMinutes): string
-    {
-        $reasons = [];
-
-        foreach ($parsedNotes as $note) {
-            if ($note['code'] === $leaveCode) {
-                $reasons[] = "{$note['code']}: {$note['days']} day(s)";
-            }
-        }
-
-        if ($tardinessMinutes > 0) {
-            $hours = (int) ($tardinessMinutes / 60);
-            $mins = (int) ($tardinessMinutes % 60);
-            $reasons[] = "Tardiness: {$hours}h {$mins}m";
-        }
-
-        return implode('; ', $reasons);
     }
 
     private static function validateBalanceContinuity(Collection $yearRecords): array
