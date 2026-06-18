@@ -45,20 +45,19 @@ class PermanentLeaveController extends Controller
         $leaveStatsHistory = [];
         $allDebits = LeaveTransaction::where('employee_id', $employee->id)
             ->where('transaction_type', 'debit')
-            ->selectRaw('YEAR(transaction_date) as trans_year, MONTH(transaction_date) as trans_month, leave_code, reference_type, COUNT(*) as count')
-            ->groupBy('YEAR(transaction_date)', 'MONTH(transaction_date)', 'leave_code', 'reference_type')
+            ->selectRaw('DATE_FORMAT(transaction_date, "%Y-%m") as month_year, leave_code, reference_type, COUNT(*) as count')
+            ->groupByRaw('DATE_FORMAT(transaction_date, "%Y-%m"), leave_code, reference_type')
             ->get();
 
         foreach ($allDebits as $row) {
-            $monthYear = sprintf('%04d-%02d', $row->trans_year, $row->trans_month);
-            if (!isset($leaveStatsHistory[$monthYear])) {
-                $leaveStatsHistory[$monthYear] = ['leaves_by_type' => [], 'tardiness_count' => 0];
+            if (!isset($leaveStatsHistory[$row->month_year])) {
+                $leaveStatsHistory[$row->month_year] = ['leaves_by_type' => [], 'tardiness_count' => 0];
             }
             if ($row->reference_type === 'tardiness_deduction') {
-                $leaveStatsHistory[$monthYear]['tardiness_count'] += $row->count;
+                $leaveStatsHistory[$row->month_year]['tardiness_count'] += $row->count;
             } else {
                 $code = $row->leave_code;
-                $leaveStatsHistory[$monthYear]['leaves_by_type'][$code] = ($leaveStatsHistory[$monthYear]['leaves_by_type'][$code] ?? 0) + $row->count;
+                $leaveStatsHistory[$row->month_year]['leaves_by_type'][$code] = ($leaveStatsHistory[$row->month_year]['leaves_by_type'][$code] ?? 0) + $row->count;
             }
         }
 

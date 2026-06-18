@@ -95,5 +95,38 @@ Route::get('/permanent/leave', function () {
 
     $employeeTransactions = $transactionQuery->paginate($perPage)->appends(request()->except('page'));
 
-    return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions'));
+    // Build leave statistics history directly from database
+    $leaveStatsHistory = [];
+    $allDebits = \App\Models\LeaveTransaction::where('employee_id', $employee->id)
+        ->where('transaction_type', 'debit')
+        ->selectRaw('DATE_FORMAT(transaction_date, "%Y-%m") as month_year, leave_code, reference_type, COUNT(*) as count')
+        ->groupByRaw('DATE_FORMAT(transaction_date, "%Y-%m"), leave_code, reference_type')
+        ->get();
+
+    foreach ($allDebits as $row) {
+        if (!isset($leaveStatsHistory[$row->month_year])) {
+            $leaveStatsHistory[$row->month_year] = ['leaves_by_type' => [], 'tardiness_count' => 0];
+        }
+        if ($row->reference_type === 'tardiness_deduction') {
+            $leaveStatsHistory[$row->month_year]['tardiness_count'] += $row->count;
+        } else {
+            $code = $row->leave_code;
+            $leaveStatsHistory[$row->month_year]['leaves_by_type'][$code] = ($leaveStatsHistory[$row->month_year]['leaves_by_type'][$code] ?? 0) + $row->count;
+        }
+    }
+
+    // Get leave history by type
+    $leaveHistory = [];
+    foreach ($leaveTypes as $type) {
+        $history = \App\Models\LeaveBalance::where('employee_id', $employee->id)
+            ->where('leave_code', $type->leave_code)
+            ->orderBy('year')
+            ->get();
+        $leaveHistory[$type->leave_code] = $history;
+    }
+
+    $selectedYear = $targetYear;
+    $viewMode = request('view_mode', 'current');
+
+    return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions', 'leaveStatsHistory', 'leaveHistory', 'selectedYear', 'viewMode'));
 })->middleware('auth')->name('permanent.leave');
