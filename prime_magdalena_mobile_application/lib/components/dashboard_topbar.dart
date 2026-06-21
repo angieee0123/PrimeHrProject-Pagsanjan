@@ -153,30 +153,7 @@ class _DashboardTopbarState extends State<DashboardTopbar> {
               padding: EdgeInsets.fromLTRB(16, widget.floating ? 12 : 16, 16, 12),
               child: Row(
                 children: [
-                  // Hamburger Menu Button
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.1),
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        Scaffold.of(context).openDrawer();
-                      },
-                      icon: const Icon(
-                        Icons.menu_rounded,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 44,
-                        minHeight: 44,
-                      ),
-                      tooltip: 'Open menu',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 4),
                   // Avatar with Clock Icon
                   Stack(
                     children: [

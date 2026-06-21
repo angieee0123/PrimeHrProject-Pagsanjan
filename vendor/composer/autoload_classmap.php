@@ -13,6 +13,7 @@ return array(
     'Filter\\FilterException' => $vendorDir . '/symfony/polyfill-php85/Resources/stubs/Filter/FilterException.php',
     'Filter\\FilterFailedException' => $vendorDir . '/symfony/polyfill-php85/Resources/stubs/Filter/FilterFailedException.php',
     'NoDiscard' => $vendorDir . '/symfony/polyfill-php85/Resources/stubs/NoDiscard.php',
+    'Normalizer' => $vendorDir . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
     'Pdo\\Dblib' => $vendorDir . '/symfony/polyfill-php84/Resources/stubs/Pdo/Dblib.php',
     'Pdo\\Firebird' => $vendorDir . '/symfony/polyfill-php84/Resources/stubs/Pdo/Firebird.php',
     'Pdo\\Mysql' => $vendorDir . '/symfony/polyfill-php84/Resources/stubs/Pdo/Mysql.php',

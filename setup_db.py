@@ -4,11 +4,11 @@ import sys
 
 HOST = "localhost"
 USER = "root"
-PASSWORD = "admin"
+PASSWORD = ""
 DATABASE = "primehrismagdalena"
 
 SQL_FOLDER = os.path.join(os.path.dirname(__file__), "database")
-MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"
+MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe" if sys.platform == "win32" else "mysql"
 
 ORDER = [
     "primehrismagdalena_migrations.sql",
@@ -18,9 +18,13 @@ ORDER = [
     "primehrismagdalena_jobs.sql",
     "primehrismagdalena_job_batches.sql",
     "primehrismagdalena_password_reset_tokens.sql",
+    "primehrismagdalena_personal_access_tokens.sql",
     "primehrismagdalena_departments.sql",
     "primehrismagdalena_designations.sql",
     "primehrismagdalena_employees.sql",
+    "primehrismagdalena_notifications.sql",
+    "primehrismagdalena_employee_requests.sql",
+    "primehrismagdalena_travel_orders.sql",
     "primehrismagdalena_users.sql",
     "primehrismagdalena_addresses.sql",
     "primehrismagdalena_contacts.sql",
@@ -36,24 +40,23 @@ ORDER = [
     "primehrismagdalena_schedules.sql",
     "primehrismagdalena_attendance.sql",
     "primehrismagdalena_attendance_corrections.sql",
+    "primehrismagdalena_attendance_exemptions.sql",
     "primehrismagdalena_accredited_hours_log.sql",
     "primehrismagdalena_daily_salary_computations.sql",
+    "primehrismagdalena_salary_computations.sql",
     "primehrismagdalena_leave_types_config.sql",
     "primehrismagdalena_leave_accrual_rates.sql",
-    "primehrismagdalena_leave_balances.sql",
     "primehrismagdalena_leave_applications.sql",
+    "primehrismagdalena_leave_balances.sql",
     "primehrismagdalena_leave_transactions.sql",
     "primehrismagdalena_deduction_types.sql",
-    "primehrismagdalena_loan_types.sql",
     "primehrismagdalena_deduction_schedules.sql",
-    "primehrismagdalena_employee_deductions.sql",
-    "primehrismagdalena_employee_loans.sql",
-    "primehrismagdalena_payroll_deductions.sql",
     "primehrismagdalena_deduction_loan_items.sql",
+    "primehrismagdalena_loan_types.sql",
+    "primehrismagdalena_employee_loans.sql",
+    "primehrismagdalena_employee_deductions.sql",
     "primehrismagdalena_deduction_transactions.sql",
-    "primehrismagdalena_salary_computations.sql",
-    "primehrismagdalena_notifications.sql",
-    "primehrismagdalena_employee_requests.sql",
+    "primehrismagdalena_payroll_deductions.sql",
     "primehrismagdalena_sessions.sql",
     "primehrismagdalena_chat_history.sql",
 ]

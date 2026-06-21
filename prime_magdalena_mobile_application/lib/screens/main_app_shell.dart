@@ -103,130 +103,26 @@ class _MainAppShellState extends State<MainAppShell> {
 
     return Scaffold(
       key: _scaffoldKey,
-      extendBody: true, // Extend body behind bottom nav bar
-      body: Stack(
-        children: [
-          _screens[_selectedIndex],
-          // Hamburger Menu Button (Top-Left) - Above everything
-          Positioned(
-            left: 16,
-            top: MediaQuery.of(context).padding.top + 8,
-            child: _buildMenuButton(),
-          ),
-          // Floating Chatbot Button (hidden on Leave screen)
-          if (showChatbotFAB)
-            Positioned(
-              right: 20,
-              bottom: 100, // Above the bottom nav bar
-              child: _buildChatbotFAB(context),
-            ),
-        ],
-      ),
+      extendBody: false,
+      body: _screens[_selectedIndex],
       bottomNavigationBar: _buildModernBottomNavBar(),
       drawer: _buildDrawer(context),
-    );
-  }
-
-  void _openDrawer() {
-    HapticFeedback.lightImpact();
-    final latest = _authService.currentEmployee;
-    if (latest != null && latest != _profileEmployee) {
-      setState(() => _profileEmployee = latest);
-    }
-    _scaffoldKey.currentState?.openDrawer();
-  }
-
-  Widget _buildMenuButton() {
-    return GestureDetector(
-      onTap: _openDrawer,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF0B044D).withValues(alpha: 0.12),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: const Icon(
-          Icons.menu_rounded,
-          size: 24,
-          color: Color(0xFF0B044D),
-        ),
-      ),
+      floatingActionButton: showChatbotFAB ? _buildChatbotFAB(context) : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
   Widget _buildChatbotFAB(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
+    return FloatingActionButton(
+      onPressed: () {
         HapticFeedback.mediumImpact();
         Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const HrChatbotScreen()),
         );
       },
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0B044D),
-              Color(0xFF1E3A8A),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF0B044D).withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-              spreadRadius: 0,
-            ),
-            BoxShadow(
-              color: const Color(0xFF0B044D).withValues(alpha: 0.15),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            Center(
-              child: Icon(
-                Icons.chat_bubble_rounded,
-                color: Colors.white,
-                size: 26,
-              ),
-            ),
-            // Notification badge (optional - can show unread messages)
-            Positioned(
-              right: 8,
-              top: 8,
-              child: Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFF22C55E),
-                  border: Border.all(
-                    color: const Color(0xFF0B044D),
-                    width: 2,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      backgroundColor: const Color(0xFF0B044D),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: const Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 26),
     );
   }
 

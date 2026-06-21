@@ -54,7 +54,10 @@ class FloatingPageScaffold extends StatelessWidget {
         children: [
           Positioned.fill(
             child: Padding(
-              padding: EdgeInsets.only(top: contentTop),
+              padding: EdgeInsets.only(
+                top: contentTop,
+                bottom: MediaQuery.paddingOf(context).bottom,
+              ),
               child: body,
             ),
           ),
