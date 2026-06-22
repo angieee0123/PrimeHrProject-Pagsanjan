@@ -48,7 +48,7 @@ class TravelService {
     required int duration,
     String? transportationMode,
     double? estimatedBudget,
-    dynamic? attachment,
+    dynamic attachment,
   }) async {
     final request = http.MultipartRequest(
       'POST',

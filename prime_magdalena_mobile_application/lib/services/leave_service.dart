@@ -45,7 +45,7 @@ class LeaveService {
     required String endDate,
     required double numberOfDays,
     required String reason,
-    dynamic? attachment,
+    dynamic attachment,
   }) async {
     final request = http.MultipartRequest(
       'POST',

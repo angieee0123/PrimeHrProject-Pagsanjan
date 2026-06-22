@@ -609,7 +609,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
   }
 
   Future<void> _showAddTrainingSheet() async {
-    dynamic? certificate;
+    dynamic certificate;
     int step = 1;
     String? formError;
     bool submitting = false;
@@ -671,10 +671,8 @@ class _TrainingScreenState extends State<TrainingScreen> {
           }
 
           Future<void> submit() async {
-            if (certificate == null) {
-              setSheetState(() => formError = 'Certificate is required');
-              return;
-            }
+            setSheetState(() => formError = 'Certificate is required');
+            return;
             final hours = int.tryParse(hoursController.text.trim());
             if (titleController.text.trim().isEmpty ||
                 conductedByController.text.trim().isEmpty ||
@@ -785,16 +783,6 @@ class _TrainingScreenState extends State<TrainingScreen> {
                         color: Colors.grey.shade600,
                       ),
                     ),
-                    if (certificate != null) ...[
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () => setSheetState(() => step = 2),
-                          child: const Text('Continue to Details'),
-                        ),
-                      ),
-                    ],
                   ] else ...[
                     TextField(
                       controller: titleController,

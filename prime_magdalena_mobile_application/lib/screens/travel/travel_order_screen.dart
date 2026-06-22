@@ -460,7 +460,7 @@ class _TravelOrderScreenState extends State<TravelOrderScreen> {
     DateTime? travelDate;
     DateTime? returnDate;
     String? transportationMode;
-    dynamic? attachment;
+    dynamic attachment;
     int duration = 1;
     String? formError;
     bool submitting = false;

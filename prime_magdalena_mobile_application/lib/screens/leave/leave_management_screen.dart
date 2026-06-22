@@ -510,19 +510,19 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
                               children: [
                                 _creditStat(
                                   'Available',
-                                  '${credit.availableCredits.toStringAsFixed(1)}',
+                                  credit.availableCredits.toStringAsFixed(1),
                                 ),
                                 _creditStat(
                                   'Used',
-                                  '${credit.usedCredits.toStringAsFixed(1)}',
+                                  credit.usedCredits.toStringAsFixed(1),
                                 ),
                                 _creditStat(
                                   'Pending',
-                                  '${credit.pendingCredits.toStringAsFixed(1)}',
+                                  credit.pendingCredits.toStringAsFixed(1),
                                 ),
                                 _creditStat(
                                   'Total',
-                                  '${credit.totalCredits.toStringAsFixed(1)}',
+                                  credit.totalCredits.toStringAsFixed(1),
                                 ),
                               ],
                             ),
@@ -1057,7 +1057,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
     DateTime? startDate;
     DateTime? endDate;
     final reasonController = TextEditingController();
-    dynamic? attachment;
+    dynamic attachment;
     double computedDays = 0;
     String? formError;
     bool submitting = false;
@@ -1137,7 +1137,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
               );
               return;
             }
-            if (selectedType!.requiresAttachment && attachment == null) {
+            if (selectedType!.requiresAttachment) {
               setSheetState(
                 () => formError = 'Attachment is required for this leave type',
               );
@@ -1296,8 +1296,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
                     maxLength: 500,
                     decoration: _inputDecoration('Reason'),
                   ),
-                  if (selectedType?.requiresAttachment == true ||
-                      attachment != null) ...[
+                  if (selectedType?.requiresAttachment == true) ...[
                     const SizedBox(height: 8),
                     OutlinedButton.icon(
                       onPressed: null,

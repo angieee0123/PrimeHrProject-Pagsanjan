@@ -32,7 +32,7 @@ class PayslipService {
   Future<PayslipDetail> getPayslipDetail(int id) async {
     if (ApiConfig.useOfflineMock) {
       await Future.delayed(const Duration(milliseconds: 200));
-      final list = await _mockPayslipList();
+      final list = _mockPayslipList();
       if (list.payslips.isEmpty) {
         throw Exception('No payslip records available');
       }

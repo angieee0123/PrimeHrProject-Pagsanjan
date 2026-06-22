@@ -78,7 +78,7 @@ class FloatingScreenTopbar extends StatelessWidget {
               ],
             ),
           ),
-          if (actions != null) ...actions!,
+          ...?actions,
         ],
       ),
     );
