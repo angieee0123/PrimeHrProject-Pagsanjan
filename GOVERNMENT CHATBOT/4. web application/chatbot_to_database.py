@@ -18,6 +18,8 @@ DB_CONFIG = {
     'auth_plugin': 'mysql_native_password'
 }
 
+#wwwwwwww
+
 # Groq client
 groq_client = Groq(api_key="***REMOVED-GROQ-KEY***")
 
