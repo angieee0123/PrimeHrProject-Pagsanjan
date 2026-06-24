@@ -62,12 +62,19 @@ class PermanentLeaveBalanceController extends Controller
         // Load only leave types with data for this employee
         $leaveTypes = LeaveType::where('is_active', true)
             ->whereIn('leave_code', $leaveCodesWithData)
-            ->with(['leaveBalances' => function($query) use ($employee, $selectedYear) {
-                $query->where('employee_id', $employee->id)
-                      ->where('year', $selectedYear);
-            }])
             ->orderBy('leave_name')
             ->get();
+        
+        // Manually attach the latest balance for each leave type (not filtered by year)
+        foreach ($leaveTypes as $leaveType) {
+            $latestBalance = \App\Models\LeaveBalance::where('employee_id', $employee->id)
+                ->where('leave_code', $leaveType->leave_code)
+                ->orderBy('year', 'desc')
+                ->first();
+            
+            // Attach as collection for consistency with blade template
+            $leaveType->setRelation('leaveBalances', $latestBalance ? collect([$latestBalance]) : collect());
+        }
 
         // Load yearly history for all leave types if in history view
         $leaveHistory = [];

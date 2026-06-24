@@ -28,13 +28,21 @@ class PermanentLeaveController extends Controller
         $employee->load('employmentDetail.designationRelation', 'employmentDetail.departmentRelation');
         $currentYear = now()->year;
 
-        // Load all active leave types with balances
+        // Load all active leave types
         $leaveTypes = LeaveType::where('is_active', true)
-            ->with(['leaveBalances' => function($q) use ($employee, $currentYear) {
-                $q->where('employee_id', $employee->id)->where('year', $currentYear);
-            }])
             ->orderBy('leave_name')
             ->get();
+        
+        // Manually attach the latest balance for each leave type
+        foreach ($leaveTypes as $leaveType) {
+            $latestBalance = LeaveBalance::where('employee_id', $employee->id)
+                ->where('leave_code', $leaveType->leave_code)
+                ->orderBy('year', 'desc')
+                ->first();
+            
+            // Create a collection with just this balance for consistency with blade template
+            $leaveType->setRelation('leaveBalances', $latestBalance ? collect([$latestBalance]) : collect());
+        }
 
         $leaveApplications = LeaveApplication::where('employee_id', $employee->id)
             ->with('leaveType')

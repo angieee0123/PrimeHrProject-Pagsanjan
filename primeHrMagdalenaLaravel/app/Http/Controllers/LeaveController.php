@@ -538,10 +538,18 @@ class LeaveController extends Controller
                 ->where('year', $year)
                 ->first();
 
+            // If no balance found for target year, use the latest available year
+            if (!$leaveBalance) {
+                $leaveBalance = LeaveBalance::where('employee_id', $employee->id)
+                    ->where('leave_code', $validated['leave_code'])
+                    ->orderBy('year', 'desc')
+                    ->first();
+            }
+
             if (!$leaveBalance || $leaveBalance->available_credits < $validated['number_of_days']) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Insufficient leave balance'
+                    'message' => 'Insufficient leave balance. You have ' . ($leaveBalance ? number_format($leaveBalance->available_credits, 1) : '0') . ' days available.'
                 ], 422);
             }
 

@@ -492,17 +492,17 @@
                 currentDate.setDate(currentDate.getDate() + 1);
             }
 
-            // Check if calculated days exceed available balance
-            if (days > available && select.value) {
-                document.getElementById('errorMessageText').textContent = `The selected date range requires ${days.toFixed(1)} days, but you only have ${available.toFixed(1)} days available. Please adjust your dates.`;
+            document.getElementById('leaveDays').value = days;
+
+            // Only check balance if a leave type is selected
+            if (select.value && days > available) {
+                document.getElementById('errorMessageText').textContent = `Insufficient leave balance. You have ${available.toFixed(1)} days available but requested ${days.toFixed(1)} days.`;
                 document.getElementById('errorMessage').style.display = 'block';
-                document.getElementById('leaveDays').value = days;
                 document.getElementById('leaveDays').style.color = '#dc2626';
                 document.getElementById('leaveDays').style.borderColor = '#dc2626';
                 return;
             }
 
-            document.getElementById('leaveDays').value = days;
             document.getElementById('leaveDays').style.color = '#0b044d';
             document.getElementById('leaveDays').style.borderColor = '#e5e7eb';
             document.getElementById('errorMessage').style.display = 'none';

@@ -128,43 +128,153 @@
 
 <script>
 let recognition = null;
+let wakeWordRecognition = null;
 let isListening = false;
+let isWakeWordListening = false;
 let isSpeaking = false;
 let speechSynthesis = window.speechSynthesis;
 let currentUtterance = null;
 
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    // Wake word recognition (always listening)
+    wakeWordRecognition = new SpeechRecognition();
+    wakeWordRecognition.continuous = true;
+    wakeWordRecognition.interimResults = true;
+    wakeWordRecognition.lang = 'fil-PH';
+
+    wakeWordRecognition.onresult = function(event) {
+        const last = event.results.length - 1;
+        const transcript = event.results[last][0].transcript.toLowerCase().trim();
+        console.log('Wake word detection:', transcript);
+
+        if (transcript.includes('hey anna') || transcript.includes('ei anna') || transcript.includes('ey anna') || transcript.includes('hay anna')) {
+            console.log('Wake word detected: Hey Anna!');
+            playWakeSound();
+
+            // Open chatbot if closed
+            const chatWindow = document.getElementById('chatbotWindow');
+            if (chatWindow.style.display === 'none') {
+                toggleChatbot();
+            }
+
+            stopWakeWordListening();
+            setTimeout(() => {
+                startVoiceInput();
+            }, 300); // Small delay after sound
+        }
+    };
+
+    wakeWordRecognition.onerror = function(event) {
+        if (event.error !== 'no-speech') {
+            console.error('Wake word error:', event.error);
+        }
+    };
+
+    wakeWordRecognition.onend = function() {
+        if (isWakeWordListening) {
+            setTimeout(() => {
+                try { wakeWordRecognition.start(); } catch(e) {}
+            }, 100);
+        }
+    };
+
+    // Normal recognition
     recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.continuous = true; // Keep listening continuously
+    recognition.interimResults = true; // Show interim results
     recognition.lang = 'fil-PH'; // Filipino language
 
     recognition.onresult = function(event) {
-        const transcript = event.results[0][0].transcript;
+        const last = event.results.length - 1;
+        const transcript = event.results[last][0].transcript;
+        const isFinal = event.results[last].isFinal;
+
         document.getElementById('chatInput').value = transcript;
-        stopVoiceInput();
-        // Automatically submit the message after voice input
-        setTimeout(() => {
-            sendChatMessage();
-        }, 500); // Small delay to show the transcribed text
+
+        // Auto-send when speech is final and there's a pause
+        if (isFinal && transcript.trim()) {
+            setTimeout(() => {
+                if (isListening) {
+                    stopVoiceInput();
+                    sendChatMessage();
+                }
+            }, 1000); // 1 second pause before auto-sending
+        }
     };
 
     recognition.onerror = function(event) {
         console.error('Speech recognition error:', event.error);
-        stopVoiceInput();
         if (event.error === 'no-speech') {
-            addChatMessage('bot', 'Hindi ko narinig ang iyong sinabi. Subukan ulit.');
-            speakText('Hindi ko narinig ang iyong sinabi. Subukan ulit.');
+            // Don't stop on no-speech, just continue
+            console.log('No speech detected, continuing...');
         } else if (event.error === 'not-allowed') {
+            stopVoiceInput();
             addChatMessage('bot', 'Microphone access denied. Please enable microphone permissions.');
             speakText('Microphone access denied. Please enable microphone permissions.');
+        } else {
+            // For other errors, try to restart
+            if (isListening) {
+                setTimeout(() => {
+                    try { recognition.start(); } catch(e) {}
+                }, 100);
+            }
         }
     };
 
     recognition.onend = function() {
-        stopVoiceInput();
+        if (isListening) {
+            // Restart recognition if still in listening mode
+            setTimeout(() => {
+                try { recognition.start(); } catch(e) {}
+            }, 100);
+        } else {
+            startWakeWordListening(); // Resume wake word listening
+        }
     };
+}
+
+function startWakeWordListening() {
+    if (!wakeWordRecognition || isWakeWordListening) return;
+
+    isWakeWordListening = true;
+    try {
+        wakeWordRecognition.start();
+        console.log('Wake word listening started - say "Hey PRIME"');
+    } catch(e) {
+        console.error('Wake word start error:', e);
+    }
+}
+
+function stopWakeWordListening() {
+    if (!wakeWordRecognition || !isWakeWordListening) return;
+
+    isWakeWordListening = false;
+    try {
+        wakeWordRecognition.stop();
+        console.log('Wake word listening stopped');
+    } catch(e) {}
+}
+
+function playWakeSound() {
+    // Create Siri-like activation sound using Web Audio API
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Siri-like double beep
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
 }
 
 function speakText(text) {
@@ -306,6 +416,14 @@ window.addEventListener('beforeunload', function() {
     stopSpeaking();
 });
 
+// Start wake word listening when page loads
+window.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        startWakeWordListening();
+        console.log('🎤 Ready! Say "Hey Anna" to activate chatbot');
+    }, 2000);
+});
+
 let isFullscreen = false;
 
 function toggleFullscreen() {
@@ -345,6 +463,7 @@ function toggleChatbot() {
         openIcon.style.display = 'block';
         closeIcon.style.display = 'none';
         badge.style.display = 'block';
+        stopVoiceInput();
     }
 }
 
