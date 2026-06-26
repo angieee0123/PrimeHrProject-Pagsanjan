@@ -69,15 +69,21 @@
     {{-- Left: Charts --}}
     <div style="display:flex; flex-direction:column; gap:20px;">
         
-        {{-- Top 10 Early Birds - Moved to top left --}}
+        {{-- Top 10 Early Birds / Late Birds --}}
         <div class="table-section" style="margin-bottom:0">
             <div class="table-header" style="padding:16px 20px">
                 <div>
-                    <p class="table-title" style="font-size:14px">🌅 Top 10 Early Birds Today</p>
-                    <p class="table-sub" style="font-size:11px;margin-top:2px">Earliest arrivals - {{ now()->format('F d, Y') }}</p>
+                    <p class="table-title" id="birdsTabTitle" style="font-size:14px">🌅 Top 10 Early Birds Today</p>
+                    <p class="table-sub" style="font-size:11px;margin-top:2px">{{ now()->format('F d, Y') }}</p>
+                </div>
+                <div style="display:flex;gap:6px">
+                    <button id="tabEarly" onclick="switchBirdsTab('early')" style="font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #0b044d;background:#0b044d;color:#fff;cursor:pointer;font-weight:600">🌅 Early Birds</button>
+                    <button id="tabLate" onclick="switchBirdsTab('late')" style="font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600">🐦 Late Birds</button>
                 </div>
             </div>
-            <div style="padding:8px 20px 16px; display:grid; grid-template-columns:repeat(5, 1fr); gap:12px;">
+
+            {{-- Early Birds Panel --}}
+            <div id="panelEarly" style="padding:8px 20px 16px; display:grid; grid-template-columns:repeat(5, 1fr); gap:12px;">
                 @forelse($earlyBirds as $bird)
                 <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;background:#fafafe;border-radius:8px;border:1px solid #f0effe">
                     <div style="position:relative">
@@ -99,6 +105,34 @@
                 @empty
                 <div style="grid-column:1/-1;text-align:center;padding:30px;color:#9999bb;font-size:12px">
                     No attendance records today
+                </div>
+                @endforelse
+            </div>
+
+            {{-- Late Birds Panel --}}
+            <div id="panelLate" style="display:none; padding:8px 20px 16px; display:none; grid-template-columns:repeat(5, 1fr); gap:12px;">
+                @forelse($lateBirds as $bird)
+                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;background:#fff8f8;border-radius:8px;border:1px solid #fde8e8">
+                    <div style="position:relative">
+                        @if($bird['photo'])
+                            <img src="{{ $bird['photo'] }}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2.5px solid #fde8e8">
+                        @else
+                            <div class="emp-avatar-dynamic" data-bg="{{ $bird['color'] }}" style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:14px;border:2.5px solid #fde8e8">{{ $bird['initials'] }}</div>
+                        @endif
+                        <div style="position:absolute;top:-4px;right:-4px;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#f87171,#dc2626);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.15)">
+                            {{ $bird['rank'] }}
+                        </div>
+                    </div>
+                    <div style="text-align:center;width:100%">
+                        <p style="font-size:11.5px;font-weight:600;color:#0b044d;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ $bird['name'] }}">{{ $bird['name'] }}</p>
+                        <p style="font-size:10px;color:#9999bb;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ $bird['position'] }}">{{ $bird['position'] }}</p>
+                        <p style="font-size:12px;font-weight:700;color:#dc2626;margin:0;background:#fde8e8;padding:3px 8px;border-radius:4px;display:inline-block">{{ $bird['time_in'] }}</p>
+                        <p style="font-size:10px;color:#dc2626;margin:4px 0 0;font-weight:600">+{{ $bird['late_minutes'] }} min late</p>
+                    </div>
+                </div>
+                @empty
+                <div style="grid-column:1/-1;text-align:center;padding:30px;color:#9999bb;font-size:12px">
+                    No late records today 🎉
                 </div>
                 @endforelse
             </div>
@@ -240,6 +274,166 @@
     </div>
 </div>
 
+{{-- Attendance Leaderboard --}}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+    {{-- Top Performers --}}
+    <div class="table-section" style="margin:0">
+        <div class="table-header" style="padding:16px 20px">
+            <div>
+                <p class="table-title" style="font-size:14px">🏆 Top 5 Performers</p>
+                <p class="table-sub" style="font-size:11px;margin-top:2px">Excellent attendance records</p>
+            </div>
+            <div style="display:flex;gap:6px">
+                <button id="perfTabMonth" onclick="switchPerfTab('month')" style="font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #0b044d;background:#0b044d;color:#fff;cursor:pointer;font-weight:600;transition:all .2s">This Month</button>
+                <button id="perfTabWeek"  onclick="switchPerfTab('week')"  style="font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600;transition:all .2s">This Week</button>
+            </div>
+        </div>
+
+        @php
+            $top5Month = $attendancePerformanceMonth->whereIn('tier', ['excellent','good'])->take(5)->values();
+            $top5Week  = $attendancePerformanceWeek->whereIn('tier',  ['excellent','good'])->take(5)->values();
+        @endphp
+
+        <div style="padding:0 20px 20px">
+            <div id="perfPanelMonth">
+                @forelse($top5Month as $i => $emp)
+                @php
+                    $borderColor = $i === 0 ? '#fbbf24' : ($i === 1 ? '#94a3b8' : ($i === 2 ? '#fb923c' : '#e8f9ef'));
+                    $gradients = [
+                        'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                        'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
+                        'linear-gradient(135deg, #fb923c 0%, #ea580c 100%)'
+                    ];
+                @endphp
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:#fff;margin-bottom:6px;border:1.5px solid {{ $borderColor }};transition:all .15s;{{ $i < 3 ? 'box-shadow:0 2px 8px rgba(0,0,0,0.06);' : '' }}" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform='translateX(0)'">
+                    <span style="font-size:18px;font-weight:800;color:{{ $i < 3 ? ($i === 0 ? '#fbbf24' : ($i === 1 ? '#94a3b8' : '#fb923c')) : '#9999bb' }};width:28px;text-align:center;flex-shrink:0">{{ $i < 3 ? ['🥇','🥈','🥉'][$i] : ($i + 1) }}</span>
+                    @if($emp['photo'])
+                        <img src="{{ $emp['photo'] }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid {{ $borderColor }};flex-shrink:0">
+                    @else
+                        <div class="emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;border:2px solid {{ $borderColor }}">{{ $emp['initials'] }}</div>
+                    @endif
+                    <div style="flex:1;min-width:0">
+                        <p style="font-size:12.5px;font-weight:700;color:#0b044d;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $emp['name'] }}</p>
+                        <p style="font-size:10px;color:#9999bb;margin:0">{{ $emp['position'] }}</p>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;min-width:70px">
+                        <p style="font-size:18px;font-weight:900;color:#15803d;margin:0;line-height:1;{{ $i < 3 ? 'background:'.$gradients[$i].';-webkit-background-clip:text;-webkit-text-fill-color:transparent;' : '' }}">{{ $emp['rate'] }}%</p>
+                        <p style="font-size:9px;color:#15803d;margin:2px 0 0;background:#e8f9ef;padding:2px 6px;border-radius:4px;display:inline-block">✓ {{ $emp['present_days'] }}d</p>
+                    </div>
+                </div>
+                @empty
+                <div style="text-align:center;padding:40px 20px;color:#9999bb">
+                    <div style="font-size:36px;margin-bottom:8px">📅</div>
+                    <p style="font-size:12px;font-weight:600;color:#5a5888;margin:0">No top performers yet</p>
+                </div>
+                @endforelse
+            </div>
+
+            <div id="perfPanelWeek" style="display:none">
+                @forelse($top5Week as $i => $emp)
+                @php
+                    $borderColor = $i === 0 ? '#fbbf24' : ($i === 1 ? '#94a3b8' : ($i === 2 ? '#fb923c' : '#e8f9ef'));
+                    $gradients = [
+                        'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                        'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
+                        'linear-gradient(135deg, #fb923c 0%, #ea580c 100%)'
+                    ];
+                @endphp
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:#fff;margin-bottom:6px;border:1.5px solid {{ $borderColor }};transition:all .15s;{{ $i < 3 ? 'box-shadow:0 2px 8px rgba(0,0,0,0.06);' : '' }}" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform='translateX(0)'">
+                    <span style="font-size:18px;font-weight:800;color:{{ $i < 3 ? ($i === 0 ? '#fbbf24' : ($i === 1 ? '#94a3b8' : '#fb923c')) : '#9999bb' }};width:28px;text-align:center;flex-shrink:0">{{ $i < 3 ? ['🥇','🥈','🥉'][$i] : ($i + 1) }}</span>
+                    @if($emp['photo'])
+                        <img src="{{ $emp['photo'] }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid {{ $borderColor }};flex-shrink:0">
+                    @else
+                        <div class="emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;border:2px solid {{ $borderColor }}">{{ $emp['initials'] }}</div>
+                    @endif
+                    <div style="flex:1;min-width:0">
+                        <p style="font-size:12.5px;font-weight:700;color:#0b044d;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $emp['name'] }}</p>
+                        <p style="font-size:10px;color:#9999bb;margin:0">{{ $emp['position'] }}</p>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;min-width:70px">
+                        <p style="font-size:18px;font-weight:900;color:#15803d;margin:0;line-height:1;{{ $i < 3 ? 'background:'.$gradients[$i].';-webkit-background-clip:text;-webkit-text-fill-color:transparent;' : '' }}">{{ $emp['rate'] }}%</p>
+                        <p style="font-size:9px;color:#15803d;margin:2px 0 0;background:#e8f9ef;padding:2px 6px;border-radius:4px;display:inline-block">✓ {{ $emp['present_days'] }}d</p>
+                    </div>
+                </div>
+                @empty
+                <div style="text-align:center;padding:40px 20px;color:#9999bb">
+                    <div style="font-size:36px;margin-bottom:8px">📅</div>
+                    <p style="font-size:12px;font-weight:600;color:#5a5888;margin:0">No top performers yet</p>
+                </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    {{-- Needs Attention --}}
+    <div class="table-section" style="margin:0">
+        <div class="table-header" style="padding:16px 20px">
+            <div>
+                <p class="table-title" style="font-size:14px">⚠️ Needs Attention</p>
+                <p class="table-sub" style="font-size:11px;margin-top:2px">Employees with attendance concerns</p>
+            </div>
+        </div>
+
+        @php
+            $bottom5Month = $attendancePerformanceMonth->whereIn('tier', ['needs_improvement','poor'])->sortBy('rate')->take(5)->values();
+            $bottom5Week  = $attendancePerformanceWeek->whereIn('tier',  ['needs_improvement','poor'])->sortBy('rate')->take(5)->values();
+        @endphp
+
+        <div style="padding:0 20px 20px">
+            <div class="perf-bottom-month">
+                @forelse($bottom5Month as $i => $emp)
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:#fff;margin-bottom:6px;border:1.5px solid {{ $emp['tier'] === 'poor' ? '#fde8e8' : '#fefce8' }};transition:all .15s" onmouseover="this.style.borderColor='{{ $emp['tier'] === 'poor' ? '#dc2626' : '#a16207' }}'" onmouseout="this.style.borderColor='{{ $emp['tier'] === 'poor' ? '#fde8e8' : '#fefce8' }}'">
+                    <span style="font-size:16px;width:28px;text-align:center;flex-shrink:0">{{ $emp['tier'] === 'poor' ? '🔴' : '🟡' }}</span>
+                    @if($emp['photo'])
+                        <img src="{{ $emp['photo'] }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid {{ $emp['tier'] === 'poor' ? '#fde8e8' : '#fefce8' }};flex-shrink:0">
+                    @else
+                        <div class="emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;border:2px solid {{ $emp['tier'] === 'poor' ? '#fde8e8' : '#fefce8' }}">{{ $emp['initials'] }}</div>
+                    @endif
+                    <div style="flex:1;min-width:0">
+                        <p style="font-size:12.5px;font-weight:700;color:#0b044d;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $emp['name'] }}</p>
+                        <p style="font-size:10px;color:#9999bb;margin:0">{{ $emp['position'] }}</p>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;min-width:70px">
+                        <p style="font-size:18px;font-weight:900;color:{{ $emp['tier'] === 'poor' ? '#dc2626' : '#a16207' }};margin:0;line-height:1">{{ $emp['rate'] }}%</p>
+                        <p style="font-size:9px;color:{{ $emp['tier'] === 'poor' ? '#dc2626' : '#a16207' }};margin:2px 0 0;background:{{ $emp['tier'] === 'poor' ? '#fde8e8' : '#fefce8' }};padding:2px 6px;border-radius:4px;display:inline-block">✗ {{ $emp['absent_days'] }}d absent</p>
+                    </div>
+                </div>
+                @empty
+                <div style="text-align:center;padding:40px 20px;color:#9999bb">
+                    <div style="font-size:36px;margin-bottom:8px">✅</div>
+                    <p style="font-size:12px;font-weight:600;color:#15803d;margin:0">All employees doing great!</p>
+                </div>
+                @endforelse
+            </div>
+
+            <div class="perf-bottom-week" style="display:none">
+                @forelse($bottom5Week as $i => $emp)
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:#fff;margin-bottom:6px;border:1.5px solid {{ $emp['tier'] === 'poor' ? '#fde8e8' : '#fefce8' }};transition:all .15s" onmouseover="this.style.borderColor='{{ $emp['tier'] === 'poor' ? '#dc2626' : '#a16207' }}'" onmouseout="this.style.borderColor='{{ $emp['tier'] === 'poor' ? '#fde8e8' : '#fefce8' }}'">
+                    <span style="font-size:16px;width:28px;text-align:center;flex-shrink:0">{{ $emp['tier'] === 'poor' ? '🔴' : '🟡' }}</span>
+                    @if($emp['photo'])
+                        <img src="{{ $emp['photo'] }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid {{ $emp['tier'] === 'poor' ? '#fde8e8' : '#fefce8' }};flex-shrink:0">
+                    @else
+                        <div class="emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;border:2px solid {{ $emp['tier'] === 'poor' ? '#fde8e8' : '#fefce8' }}">{{ $emp['initials'] }}</div>
+                    @endif
+                    <div style="flex:1;min-width:0">
+                        <p style="font-size:12.5px;font-weight:700;color:#0b044d;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $emp['name'] }}</p>
+                        <p style="font-size:10px;color:#9999bb;margin:0">{{ $emp['position'] }}</p>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;min-width:70px">
+                        <p style="font-size:18px;font-weight:900;color:{{ $emp['tier'] === 'poor' ? '#dc2626' : '#a16207' }};margin:0;line-height:1">{{ $emp['rate'] }}%</p>
+                        <p style="font-size:9px;color:{{ $emp['tier'] === 'poor' ? '#dc2626' : '#a16207' }};margin:2px 0 0;background:{{ $emp['tier'] === 'poor' ? '#fde8e8' : '#fefce8' }};padding:2px 6px;border-radius:4px;display:inline-block">✗ {{ $emp['absent_days'] }}d absent</p>
+                    </div>
+                </div>
+                @empty
+                <div style="text-align:center;padding:40px 20px;color:#9999bb">
+                    <div style="font-size:36px;margin-bottom:8px">✅</div>
+                    <p style="font-size:12px;font-weight:600;color:#15803d;margin:0">All employees doing great!</p>
+                </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+</div>
 {{-- Employee Directory Table - Full Width --}}
 <div class="table-section">
     <div class="table-header">
@@ -463,7 +657,34 @@
 </div>
 
 <script>
-let employeeChart, attendanceChart;
+function switchPerfTab(tab) {
+    const isMonth = tab === 'month';
+    document.getElementById('perfPanelMonth').style.display = isMonth ? 'block' : 'none';
+    document.getElementById('perfPanelWeek').style.display  = isMonth ? 'none'  : 'block';
+    document.querySelector('.perf-bottom-month').style.display = isMonth ? 'block' : 'none';
+    document.querySelector('.perf-bottom-week').style.display  = isMonth ? 'none'  : 'block';
+    document.getElementById('perfTabMonth').style.cssText = isMonth
+        ? 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #0b044d;background:#0b044d;color:#fff;cursor:pointer;font-weight:600;transition:all .2s'
+        : 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600;transition:all .2s';
+    document.getElementById('perfTabWeek').style.cssText = isMonth
+        ? 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600;transition:all .2s'
+        : 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #0b044d;background:#0b044d;color:#fff;cursor:pointer;font-weight:600;transition:all .2s';
+}
+
+
+function switchBirdsTab(tab) {
+    const isEarly = tab === 'early';
+    document.getElementById('panelEarly').style.display = isEarly ? 'grid' : 'none';
+    document.getElementById('panelLate').style.display = isEarly ? 'none' : 'grid';
+    document.getElementById('birdsTabTitle').textContent = isEarly ? '🌅 Top 10 Early Birds Today' : '🐦 Top 10 Late Birds Today';
+    document.getElementById('tabEarly').style.cssText = isEarly
+        ? 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #0b044d;background:#0b044d;color:#fff;cursor:pointer;font-weight:600'
+        : 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600';
+    document.getElementById('tabLate').style.cssText = isEarly
+        ? 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600'
+        : 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #dc2626;background:#dc2626;color:#fff;cursor:pointer;font-weight:600';
+}
+
 const employeeData = @json($chartData['employees']);
 const attendanceData = @json($chartData['attendance']);
 

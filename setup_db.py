@@ -4,7 +4,7 @@ import sys
 
 HOST = "localhost"
 USER = "root"
-PASSWORD = ""
+PASSWORD = "admin"
 DATABASE = "primehrismagdalena"
 
 SQL_FOLDER = os.path.join(os.path.dirname(__file__), "database")
