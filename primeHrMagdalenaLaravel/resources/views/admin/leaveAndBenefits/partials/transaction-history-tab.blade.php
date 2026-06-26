@@ -4,14 +4,34 @@
             <h3 class="table-title">Leave Transaction History</h3>
             <p class="table-sub">Complete audit trail of all leave credit adjustments · {{ $leaveTransactions->total() ?? 0 }} records</p>
         </div>
-        <div class="table-actions">
-            <select class="filter-select" id="filterTransactionEmployee" onchange="applyTransactionFilters()">
+        <div class="table-actions" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <label style="font-size: 13px; font-weight: 600; color: #6b6a8a; white-space: nowrap;">Date Range:</label>
+                <input type="date" class="filter-select" id="filterTransactionDateFrom" value="{{ request('filter_transaction_date_from') }}" style="width: 140px;">
+                <span style="color: #9ca3af; font-size: 13px;">to</span>
+                <input type="date" class="filter-select" id="filterTransactionDateTo" value="{{ request('filter_transaction_date_to') }}" style="width: 140px;">
+                <button type="button" onclick="applyTransactionDateRangeFilter()" style="background: #0b044d; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap;">
+                    Apply
+                </button>
+                @if(request('filter_transaction_date_from') || request('filter_transaction_date_to'))
+                    <button type="button" onclick="clearTransactionDateRangeFilter()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap;">
+                        Clear
+                    </button>
+                @endif
+            </div>
+            <select class="filter-select" id="filterTransactionYear" onchange="applyTransactionYearFilter()" {{ request('filter_transaction_date_from') || request('filter_transaction_date_to') ? 'disabled' : '' }} style="min-width: 140px;">
+                <option value="">Most Recent</option>
+                @foreach($transactionYears ?? [] as $year)
+                    <option value="{{ $year }}" {{ request('filter_transaction_year') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                @endforeach
+            </select>
+            <select class="filter-select" id="filterTransactionEmployee" onchange="applyTransactionFilters()" style="min-width: 180px;">
                 <option value="">All Employees</option>
                 @foreach($transactionEmployees ?? [] as $emp)
                     <option value="{{ $emp->id }}" {{ request('filter_employee') == $emp->id ? 'selected' : '' }}>{{ $emp->employee_id }} - {{ $emp->first_name }} {{ $emp->last_name }}</option>
                 @endforeach
             </select>
-            <select class="filter-select" id="filterTransactionType" onchange="applyTransactionFilters()">
+            <select class="filter-select" id="filterTransactionType" onchange="applyTransactionFilters()" style="min-width: 150px;">
                 <option value="">All Types</option>
                 <option value="credit" {{ request('filter_type') == 'credit' ? 'selected' : '' }}>Credit (Added)</option>
                 <option value="debit" {{ request('filter_type') == 'debit' ? 'selected' : '' }}>Debit (Used)</option>
@@ -19,13 +39,17 @@
                 <option value="reversal" {{ request('filter_type') == 'reversal' ? 'selected' : '' }}>Reversal</option>
                 <option value="adjustment" {{ request('filter_type') == 'adjustment' ? 'selected' : '' }}>Manual Adjustment</option>
             </select>
-            <select class="filter-select" id="filterTransactionLeaveType" onchange="applyTransactionFilters()">
+            <select class="filter-select" id="filterTransactionLeaveType" onchange="applyTransactionFilters()" style="min-width: 150px;">
                 <option value="">All Leave Types</option>
                 @foreach($allLeaveTypes ?? [] as $type)
                     <option value="{{ $type->leave_code }}" {{ request('filter_leave_code') == $type->leave_code ? 'selected' : '' }}>{{ $type->leave_code }} - {{ $type->leave_name }}</option>
                 @endforeach
             </select>
-            <input type="date" class="filter-select" id="filterTransactionDate" onchange="applyTransactionFilters()" value="{{ request('filter_date') }}" placeholder="Filter by date" style="width: 150px;">
+            @if(request('filter_transaction_date_from') || request('filter_transaction_date_to') || request('filter_transaction_year') || request('filter_employee') || request('filter_type') || request('filter_leave_code'))
+                <button type="button" onclick="clearAllTransactionFilters()" style="background: #dc2626; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap;">
+                    Clear All
+                </button>
+            @endif
             <button class="btn-export">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
@@ -257,11 +281,74 @@ function sortTransactionTable(column) {
     window.location.href = url.toString();
 }
 
+function applyTransactionDateRangeFilter() {
+    const dateFrom = document.getElementById('filterTransactionDateFrom').value;
+    const dateTo = document.getElementById('filterTransactionDateTo').value;
+    const url = new URL(window.location.href);
+    
+    if (!dateFrom || !dateTo) {
+        alert('Please select both start and end dates');
+        return;
+    }
+    
+    if (new Date(dateFrom) > new Date(dateTo)) {
+        alert('Start date must be before or equal to end date');
+        return;
+    }
+    
+    url.searchParams.set('filter_transaction_date_from', dateFrom);
+    url.searchParams.set('filter_transaction_date_to', dateTo);
+    url.searchParams.delete('filter_transaction_year');
+    url.searchParams.set('tab', 'transactions');
+    url.searchParams.delete('page');
+    
+    window.location.href = url.toString();
+}
+
+function clearTransactionDateRangeFilter() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('filter_transaction_date_from');
+    url.searchParams.delete('filter_transaction_date_to');
+    url.searchParams.set('tab', 'transactions');
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+}
+
+function clearAllTransactionFilters() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('filter_transaction_date_from');
+    url.searchParams.delete('filter_transaction_date_to');
+    url.searchParams.delete('filter_transaction_year');
+    url.searchParams.delete('filter_employee');
+    url.searchParams.delete('filter_type');
+    url.searchParams.delete('filter_leave_code');
+    url.searchParams.set('tab', 'transactions');
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+}
+
+function applyTransactionYearFilter() {
+    const year = document.getElementById('filterTransactionYear').value;
+    const url = new URL(window.location.href);
+    
+    url.searchParams.delete('filter_transaction_date_from');
+    url.searchParams.delete('filter_transaction_date_to');
+    url.searchParams.set('tab', 'transactions');
+    url.searchParams.delete('page');
+    
+    if (year) {
+        url.searchParams.set('filter_transaction_year', year);
+    } else {
+        url.searchParams.delete('filter_transaction_year');
+    }
+    
+    window.location.href = url.toString();
+}
+
 function applyTransactionFilters() {
     const employeeId = document.getElementById('filterTransactionEmployee').value;
     const type = document.getElementById('filterTransactionType').value;
     const leaveCode = document.getElementById('filterTransactionLeaveType').value;
-    const date = document.getElementById('filterTransactionDate').value;
 
     const url = new URL(window.location.href);
     url.searchParams.set('tab', 'transactions');
@@ -283,12 +370,6 @@ function applyTransactionFilters() {
         url.searchParams.set('filter_leave_code', leaveCode);
     } else {
         url.searchParams.delete('filter_leave_code');
-    }
-
-    if (date) {
-        url.searchParams.set('filter_date', date);
-    } else {
-        url.searchParams.delete('filter_date');
     }
 
     window.location.href = url.toString();

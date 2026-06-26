@@ -47,7 +47,7 @@ CREATE TABLE `employment_details` (
 
 LOCK TABLES `employment_details` WRITE;
 /*!40000 ALTER TABLE `employment_details` DISABLE KEYS */;
-INSERT INTO `employment_details` VALUES (5,6,NULL,5,'Permanent','2026-01-01',NULL,'1'),(6,8,2,1,'Permanent','2026-01-01',NULL,NULL),(7,9,6,1,'Permanent','2026-01-01',NULL,NULL),(8,10,5,1,'Permanent','2026-01-01',NULL,NULL),(9,11,NULL,1,'Permanent','2026-01-01',NULL,NULL),(10,12,94,18,'Permanent','2026-01-01',NULL,NULL),(11,13,NULL,1,'Permanent','2026-01-01',NULL,NULL),(12,14,NULL,1,'Permanent','2026-01-01',NULL,NULL),(13,15,NULL,4,'Permanent','2026-01-01',NULL,NULL),(14,16,NULL,5,'Permanent','2026-01-01',NULL,NULL),(15,17,NULL,3,NULL,'2026-01-01',NULL,NULL),(16,18,92,17,'Permanent','2026-05-24',NULL,NULL);
+INSERT INTO `employment_details` VALUES (5,6,73,14,'Permanent','2026-01-01',NULL,'1'),(6,8,2,1,'Permanent','2026-01-01',NULL,NULL),(7,9,6,1,'Permanent','2026-01-01',NULL,NULL),(8,10,5,1,'Permanent','2026-01-01',NULL,NULL),(9,11,4,1,'Permanent','2026-01-01',NULL,NULL),(10,12,94,18,'Permanent','2026-01-01',NULL,NULL),(11,13,112,21,'Permanent','2026-01-01',NULL,NULL),(12,14,105,19,'Permanent','2026-01-01',NULL,NULL),(13,15,96,18,'Permanent','2026-01-01',NULL,NULL),(14,16,64,13,'Permanent','2026-01-01',NULL,NULL),(15,17,140,3,'Permanent','2026-01-01',NULL,NULL),(16,18,92,17,'Permanent','2026-05-24',NULL,NULL);
 /*!40000 ALTER TABLE `employment_details` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -60,4 +60,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-23 15:42:28
+-- Dump completed on 2026-06-26  9:30:13

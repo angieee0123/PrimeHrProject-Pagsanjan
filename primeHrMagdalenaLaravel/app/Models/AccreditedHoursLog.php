@@ -57,6 +57,11 @@ class AccreditedHoursLog extends Model
         return $this->belongsTo(Schedule::class);
     }
 
+    public function dailySalaryComputation()
+    {
+        return $this->hasOne(DailySalaryComputation::class);
+    }
+
     /**
      * Get total accredited hours (CSC standard: minutes / 60)
      * 

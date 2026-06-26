@@ -166,6 +166,7 @@ window.switchTab = function(tab) {
     buttons.forEach(btn => {
         if ((tab === 'leave' && btn.textContent.includes('Leave Requests')) ||
             (tab === 'transactions' && btn.textContent.includes('Transaction History')) ||
+            (tab === 'leave-credits' && btn.textContent.includes('Leave Credits')) ||
             (tab === 'benefits' && btn.textContent.includes('Benefits Summary')) ||
             (tab === 'types' && btn.textContent.includes('Leave Types')) ||
             (tab === 'accrual' && btn.textContent.includes('CSC Daily Accrual')) ||
@@ -174,7 +175,7 @@ window.switchTab = function(tab) {
         }
     });
 
-    const tabs = ['leave-tab', 'transactions-tab', 'benefits-tab', 'types-tab', 'accrual-tab', 'migrate-tab'];
+    const tabs = ['leave-tab', 'transactions-tab', 'leave-credits-tab', 'benefits-tab', 'types-tab', 'accrual-tab', 'migrate-tab'];
     tabs.forEach(tabId => {
         const element = document.getElementById(tabId);
         if (element) element.style.display = 'none';
@@ -185,6 +186,9 @@ window.switchTab = function(tab) {
         if (el) el.style.display = 'block';
     } else if (tab === 'transactions') {
         const el = document.getElementById('transactions-tab');
+        if (el) el.style.display = 'block';
+    } else if (tab === 'leave-credits') {
+        const el = document.getElementById('leave-credits-tab');
         if (el) el.style.display = 'block';
     } else if (tab === 'benefits') {
         const el = document.getElementById('benefits-tab');

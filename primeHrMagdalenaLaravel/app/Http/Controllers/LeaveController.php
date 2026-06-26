@@ -192,6 +192,20 @@ class LeaveController extends Controller
             'processedBy.employee'
         ]);
 
+        // Date range filter for transactions
+        $filterTransactionDateFrom = request('filter_transaction_date_from');
+        $filterTransactionDateTo = request('filter_transaction_date_to');
+        $filterTransactionYear = request('filter_transaction_year');
+        
+        if ($filterTransactionDateFrom && $filterTransactionDateTo) {
+            // Date range filter
+            $transactionQuery->whereBetween('transaction_date', [$filterTransactionDateFrom, $filterTransactionDateTo]);
+        } elseif ($filterTransactionYear) {
+            // Specific year filter
+            $transactionQuery->whereYear('transaction_date', $filterTransactionYear);
+        }
+        // If neither, show most recent (all) transactions
+
         if (request('filter_employee')) {
             $transactionQuery->where('employee_id', request('filter_employee'));
         }
@@ -200,9 +214,6 @@ class LeaveController extends Controller
         }
         if (request('filter_leave_code')) {
             $transactionQuery->where('leave_code', request('filter_leave_code'));
-        }
-        if (request('filter_date')) {
-            $transactionQuery->whereDate('transaction_date', request('filter_date'));
         }
 
         $sortBy = request('sort_by', 'transaction_date');
@@ -226,6 +237,12 @@ class LeaveController extends Controller
             ->orderBy('employee_id')
             ->get();
 
+        // Get available years for transaction filter dropdown
+        $transactionYears = LeaveTransaction::select(DB::raw('YEAR(transaction_date) as year'))
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
         $allLeaveTypes = LeaveType::where('is_active', true)
             ->orderBy('leave_code')
             ->get();
@@ -241,6 +258,60 @@ class LeaveController extends Controller
             ['empId' => 'PGS-0310', 'name' => 'Roberto T. Flores', 'gsis' => '₱2,748', 'philhealth' => '₱775', 'pagibig' => '₱100', 'vlBalance' => 8, 'slBalance' => 10],
         ];
 
+        // Fetch employee leave balances for leave credits tab
+        $filterYear = request('filter_credits_year');
+        $filterDateFrom = request('filter_credits_date_from');
+        $filterDateTo = request('filter_credits_date_to');
+        
+        if ($filterDateFrom && $filterDateTo) {
+            // Date range filter: get balances as of the end date
+            // For each employee-leave_code, find the balance record closest to (but not after) the end date
+            $endYear = Carbon::parse($filterDateTo)->year;
+            $employeeLeaveBalances = LeaveBalance::with(['employee'])
+                ->whereIn('id', function($query) use ($filterDateTo) {
+                    $query->select(DB::raw('MAX(id)'))
+                        ->from('leave_balances')
+                        ->where('year', '<=', Carbon::parse($filterDateTo)->year)
+                        ->groupBy('employee_id', 'leave_code');
+                })
+                ->orderBy('employee_id', 'asc')
+                ->orderBy('leave_code', 'asc')
+                ->get();
+        } elseif ($filterYear) {
+            // If year filter is applied, get balances for that specific year
+            $employeeLeaveBalances = LeaveBalance::with(['employee'])
+                ->where('year', $filterYear)
+                ->orderBy('employee_id', 'asc')
+                ->orderBy('leave_code', 'asc')
+                ->get();
+        } else {
+            // Get the most recent year's balance for each employee-leave_code combination
+            $employeeLeaveBalances = LeaveBalance::with(['employee'])
+                ->whereIn('id', function($query) {
+                    $query->select(DB::raw('MAX(id)'))
+                        ->from('leave_balances')
+                        ->groupBy('employee_id', 'leave_code');
+                })
+                ->orderBy('employee_id', 'asc')
+                ->orderBy('leave_code', 'asc')
+                ->get();
+        }
+
+        // Get available years for filter dropdown
+        $availableYears = LeaveBalance::select('year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        \Log::info('Admin Leave Credits Data', [
+            'filter_year' => $filterYear,
+            'filter_date_from' => $filterDateFrom,
+            'filter_date_to' => $filterDateTo,
+            'total_balances' => $employeeLeaveBalances->count(),
+            'unique_employees' => $employeeLeaveBalances->pluck('employee_id')->unique()->count(),
+            'available_years' => $availableYears->toArray()
+        ]);
+
         return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact(
             'leaveTypes', 
             'leaveApplications', 
@@ -251,7 +322,10 @@ class LeaveController extends Controller
             'employees', 
             'leaveTransactions', 
             'transactionEmployees', 
-            'allLeaveTypes'
+            'transactionYears',
+            'allLeaveTypes',
+            'employeeLeaveBalances',
+            'availableYears'
         ));
     }
 
@@ -788,6 +862,14 @@ class LeaveController extends Controller
                 ->where('year', $year)
                 ->first();
 
+            // If no balance found for that year, find the most recent one
+            if (!$leaveBalance) {
+                $leaveBalance = LeaveBalance::where('employee_id', $leaveApplication->employee_id)
+                    ->where('leave_code', $leaveApplication->leave_code)
+                    ->orderBy('year', 'desc')
+                    ->first();
+            }
+
             if ($leaveBalance) {
                 $balanceBefore = $leaveBalance->available_credits;
                 $leaveBalance->pending_credits -= $leaveApplication->number_of_days;
@@ -797,7 +879,7 @@ class LeaveController extends Controller
                 LeaveTransaction::create([
                     'employee_id' => $leaveApplication->employee_id,
                     'leave_code' => $leaveApplication->leave_code,
-                    'year' => $year,
+                    'year' => $leaveBalance->year,
                     'transaction_type' => 'credit',
                     'amount' => $leaveApplication->number_of_days,
                     'balance_before' => $balanceBefore,
@@ -807,6 +889,12 @@ class LeaveController extends Controller
                     'transaction_date' => now(),
                     'processed_by' => auth()->id(),
                     'remarks' => "Rejected leave application {$leaveApplication->application_number}: {$validated['remarks']}",
+                ]);
+            } else {
+                \Log::error('Leave balance not found for rejection', [
+                    'employee_id' => $leaveApplication->employee_id,
+                    'leave_code' => $leaveApplication->leave_code,
+                    'year' => $year
                 ]);
             }
 

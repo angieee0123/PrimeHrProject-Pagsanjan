@@ -77,10 +77,29 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
     </div>
 </div>
 
+<!-- Global Filters -->
+<div style="margin-bottom: 20px; padding: 16px; background: #f8f9fa; border-radius: 8px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+    <div style="display: flex; gap: 8px; align-items: center;">
+        <label style="font-size: 13px; font-weight: 600; color: #6b6a8a; white-space: nowrap;">Date Range:</label>
+        <input type="date" class="filter-select" id="globalFilterDateFrom" value="{{ request('date_from') }}" style="width: 150px;">
+        <span style="color: #9ca3af;">to</span>
+        <input type="date" class="filter-select" id="globalFilterDateTo" value="{{ request('date_to') }}" style="width: 150px;">
+        <button type="button" onclick="applyGlobalDateFilter()" style="background: #0b044d; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500;">
+            Apply
+        </button>
+        @if(request('date_from') || request('date_to'))
+            <button type="button" onclick="clearGlobalDateFilter()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500;">
+                Clear
+            </button>
+        @endif
+    </div>
+</div>
+
 <!-- Tabs -->
 <div style="display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1.5px solid #eceaf8; padding-bottom: 0;">
     <button class="tab-btn active" onclick="switchTab('leave')">Leave Requests</button>
     <button class="tab-btn" onclick="switchTab('transactions')">Transaction History</button>
+    <button class="tab-btn" onclick="switchTab('leave-credits')">Leave Credits</button>
     <button class="tab-btn" onclick="switchTab('benefits')">Benefits Summary</button>
     <button class="tab-btn" onclick="switchTab('types')">Leave Types</button>
     <button class="tab-btn" onclick="switchTab('accrual')">CSC Daily Accrual</button>
@@ -90,6 +109,8 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 @include('admin.leaveAndBenefits.partials.leave-requests-tab')
 
 @include('admin.leaveAndBenefits.partials.transaction-history-tab')
+
+@include('admin.leaveAndBenefits.partials.leave-credits-tab')
 
 @include('admin.leaveAndBenefits.partials.benefits-summary-tab')
 
@@ -116,6 +137,35 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 @vite(['resources/css/adminLeaveAndBenefits.css', 'resources/js/adminLeaveAndBenefits.js'])
 
 <script>
+// Global Date Filter Functions
+function applyGlobalDateFilter() {
+    const dateFrom = document.getElementById('globalFilterDateFrom').value;
+    const dateTo = document.getElementById('globalFilterDateTo').value;
+    const url = new URL(window.location.href);
+    
+    if (!dateFrom || !dateTo) {
+        alert('Please select both start and end dates');
+        return;
+    }
+    
+    if (new Date(dateFrom) > new Date(dateTo)) {
+        alert('Start date must be before or equal to end date');
+        return;
+    }
+    
+    url.searchParams.set('date_from', dateFrom);
+    url.searchParams.set('date_to', dateTo);
+    
+    window.location.href = url.toString();
+}
+
+function clearGlobalDateFilter() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('date_from');
+    url.searchParams.delete('date_to');
+    window.location.href = url.toString();
+}
+
 // Success Modal Functions
 window.successModalRedirectUrl = null;
 
@@ -265,6 +315,8 @@ document.addEventListener('DOMContentLoaded', function() {
         switchTab('transactions');
     } else if (activeTab === 'import') {
         switchTab('import');
+    } else if (activeTab === 'leave-credits') {
+        switchTab('leave-credits');
     }
 });
 </script>

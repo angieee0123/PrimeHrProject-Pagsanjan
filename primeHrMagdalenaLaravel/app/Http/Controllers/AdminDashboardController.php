@@ -107,6 +107,32 @@ class AdminDashboardController extends Controller
                 ];
             });
         
+        // Top 10 Early Birds (earliest time-in today)
+        $earlyBirds = Attendance::with(['employee.employmentDetail.designationRelation'])
+            ->whereDate('date', $today)
+            ->whereNotNull('am_in')
+            ->orderBy('am_in', 'asc')
+            ->limit(10)
+            ->get()
+            ->map(function($attendance, $index) {
+                $emp = $attendance->employee;
+                if (!$emp) return null;
+                
+                $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
+                $colors = ['#0b044d', '#8e1e18', '#15803d', '#a16207', '#7c3aed'];
+                
+                return [
+                    'rank' => $index + 1,
+                    'initials' => $initials,
+                    'color' => $colors[$index % count($colors)],
+                    'photo' => $emp->photo,
+                    'name' => $emp->first_name . ' ' . $emp->last_name,
+                    'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
+                    'time_in' => Carbon::parse($attendance->am_in)->format('h:i A'),
+                ];
+            })
+            ->filter();
+        
         $stats = [
             'total_employees' => $totalEmployees,
             'new_this_month' => $newThisMonth,
@@ -117,7 +143,7 @@ class AdminDashboardController extends Controller
             'monthly_payroll' => $monthlyPayroll,
         ];
         
-        return view('admin.dashboard.adminDashboard', compact('stats', 'employees', 'leaveRequests', 'departments', 'chartData'));
+        return view('admin.dashboard.adminDashboard', compact('stats', 'employees', 'leaveRequests', 'departments', 'chartData', 'earlyBirds'));
     }
     
     private function getChartData()

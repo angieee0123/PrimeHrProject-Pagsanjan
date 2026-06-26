@@ -59,7 +59,7 @@ CREATE TABLE `leave_applications` (
   CONSTRAINT `leave_applications_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE,
   CONSTRAINT `leave_applications_filed_by_foreign` FOREIGN KEY (`filed_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `leave_applications_leave_code_foreign` FOREIGN KEY (`leave_code`) REFERENCES `leave_types_config` (`leave_code`) ON DELETE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -68,7 +68,7 @@ CREATE TABLE `leave_applications` (
 
 LOCK TABLES `leave_applications` WRITE;
 /*!40000 ALTER TABLE `leave_applications` DISABLE KEYS */;
-INSERT INTO `leave_applications` VALUES (18,'LA-2026-0001',8,'ML','2026-11-18','2026-11-19',2.00,'manganganak yung lamok ng kapitbahay namin hahahahaha',0,NULL,NULL,NULL,NULL,NULL,'approved','leave_attachments/dqcBJjyJouxIrZU4oHapkmsxylX5xlEZwGHSikQY.pdf',6,1,'2026-06-18 23:46:08',NULL,2.00,0.00,NULL,'2026-06-18 23:45:51','2026-06-18 23:46:08');
+INSERT INTO `leave_applications` VALUES (21,'LA-2026-0001',8,'VL','2027-12-01','2027-12-03',3.00,'hahaha',0,'ph',NULL,NULL,NULL,NULL,'rejected',NULL,6,1,'2026-06-25 08:00:15','haha',NULL,NULL,NULL,'2026-06-25 08:00:05','2026-06-25 08:00:15');
 /*!40000 ALTER TABLE `leave_applications` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -81,4 +81,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-23 15:42:31
+-- Dump completed on 2026-06-26  9:30:09

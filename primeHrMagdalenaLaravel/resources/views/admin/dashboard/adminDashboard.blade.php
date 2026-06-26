@@ -63,40 +63,184 @@
     </div>
 </div>
 
-{{-- Charts Section --}}
-<div class="charts-grid">
-    <div class="chart-card">
-        <div class="chart-header">
-            <div>
-                <p class="chart-title">Employee Growth</p>
-                <p class="chart-sub">Total employees over time</p>
+{{-- Main Content Grid: Charts + Sidebar --}}
+<div style="display:grid; grid-template-columns:1fr 380px; gap:20px; margin-bottom:20px;">
+    
+    {{-- Left: Charts --}}
+    <div style="display:flex; flex-direction:column; gap:20px;">
+        
+        {{-- Top 10 Early Birds - Moved to top left --}}
+        <div class="table-section" style="margin-bottom:0">
+            <div class="table-header" style="padding:16px 20px">
+                <div>
+                    <p class="table-title" style="font-size:14px">🌅 Top 10 Early Birds Today</p>
+                    <p class="table-sub" style="font-size:11px;margin-top:2px">Earliest arrivals - {{ now()->format('F d, Y') }}</p>
+                </div>
             </div>
-            <div class="chart-tabs">
-                <button class="chart-tab" onclick="switchEmployeeChart('week')">Week</button>
-                <button class="chart-tab active" onclick="switchEmployeeChart('month')">Month</button>
-                <button class="chart-tab" onclick="switchEmployeeChart('year')">Year</button>
+            <div style="padding:8px 20px 16px; display:grid; grid-template-columns:repeat(5, 1fr); gap:12px;">
+                @forelse($earlyBirds as $bird)
+                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;background:#fafafe;border-radius:8px;border:1px solid #f0effe">
+                    <div style="position:relative">
+                        @if($bird['photo'])
+                            <img src="{{ $bird['photo'] }}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2.5px solid #e8e7f5">
+                        @else
+                            <div class="emp-avatar-dynamic" data-bg="{{ $bird['color'] }}" style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:14px;border:2.5px solid #e8e7f5">{{ $bird['initials'] }}</div>
+                        @endif
+                        <div style="position:absolute;top:-4px;right:-4px;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#fbbf24,#f59e0b);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.15)">
+                            {{ $bird['rank'] }}
+                        </div>
+                    </div>
+                    <div style="text-align:center;width:100%">
+                        <p style="font-size:11.5px;font-weight:600;color:#0b044d;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ $bird['name'] }}">{{ $bird['name'] }}</p>
+                        <p style="font-size:10px;color:#9999bb;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ $bird['position'] }}">{{ $bird['position'] }}</p>
+                        <p style="font-size:12px;font-weight:700;color:#15803d;margin:0;background:#e8f9ef;padding:3px 8px;border-radius:4px;display:inline-block">{{ $bird['time_in'] }}</p>
+                    </div>
+                </div>
+                @empty
+                <div style="grid-column:1/-1;text-align:center;padding:30px;color:#9999bb;font-size:12px">
+                    No attendance records today
+                </div>
+                @endforelse
             </div>
         </div>
-        <canvas id="employeeChart" style="max-height:280px"></canvas>
+
+        {{-- Charts Row --}}
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <p class="chart-title">Employee Growth</p>
+                        <p class="chart-sub">Total employees over time</p>
+                    </div>
+                    <div class="chart-tabs">
+                        <button class="chart-tab" onclick="switchEmployeeChart('week')">Week</button>
+                        <button class="chart-tab active" onclick="switchEmployeeChart('month')">Month</button>
+                        <button class="chart-tab" onclick="switchEmployeeChart('year')">Year</button>
+                    </div>
+                </div>
+                <canvas id="employeeChart" style="max-height:280px"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <p class="chart-title">Attendance Trends</p>
+                        <p class="chart-sub">Daily attendance rate</p>
+                    </div>
+                    <div class="chart-tabs">
+                        <button class="chart-tab" onclick="switchAttendanceChart('week')">Week</button>
+                        <button class="chart-tab active" onclick="switchAttendanceChart('month')">Month</button>
+                        <button class="chart-tab" onclick="switchAttendanceChart('year')">Year</button>
+                    </div>
+                </div>
+                <canvas id="attendanceChart" style="max-height:280px"></canvas>
+            </div>
+        </div>
+
     </div>
 
-    <div class="chart-card">
-        <div class="chart-header">
-            <div>
-                <p class="chart-title">Attendance Trends</p>
-                <p class="chart-sub">Daily attendance rate</p>
+    {{-- Right Sidebar --}}
+    <div style="display:flex; flex-direction:column; gap:20px;">
+        
+        {{-- Pending Leave Requests --}}
+        <div class="table-section" style="margin-bottom:0">
+            <div class="table-header">
+                <div>
+                    <p class="table-title">Pending Leave Requests</p>
+                    <p class="table-sub">Requires approval</p>
+                </div>
+                <button class="btn-export" style="font-size:11px;padding:6px 12px">View All</button>
             </div>
-            <div class="chart-tabs">
-                <button class="chart-tab" onclick="switchAttendanceChart('week')">Week</button>
-                <button class="chart-tab active" onclick="switchAttendanceChart('month')">Month</button>
-                <button class="chart-tab" onclick="switchAttendanceChart('year')">Year</button>
+            <div class="table-wrapper">
+                <table class="payroll-table">
+                    <thead>
+                        <tr><th>Employee</th><th>Type</th><th>Days</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        @forelse($leaveRequests as $l)
+                        <tr>
+                            <td>
+                                <div class="emp-cell">
+                                    @if($l['photo'])
+                                        <img src="{{ $l['photo'] }}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                                    @else
+                                        <div class="emp-avatar emp-avatar-sm emp-avatar-dynamic" data-bg="{{ $l['color'] }}" style="width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">{{ $l['initials'] }}</div>
+                                    @endif
+                                    <p class="emp-name" style="margin:0">{{ $l['name'] }}</p>
+                                </div>
+                            </td>
+                            <td><span class="dept-tag" style="font-size:11px">{{ $l['type'] }}</span></td>
+                            <td style="font-size:12px;color:#5a5888">{{ $l['days'] }}</td>
+                            <td>
+                                <div style="display:flex;gap:4px">
+                                    <form method="POST" action="{{ route('admin.leave.approve', $l['id']) }}" style="margin:0;">
+                                        @csrf
+                                        <button type="submit" class="btn-activate" style="font-size:10px;padding:4px 8px">✓</button>
+                                    </form>
+                                    <button class="btn-deactivate" onclick="alert('Reject functionality')" style="font-size:10px;padding:4px 8px">✕</button>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" style="text-align:center;padding:20px;color:#9999bb;font-size:12px">No pending requests</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
-        <canvas id="attendanceChart" style="max-height:280px"></canvas>
+
+        {{-- Department Breakdown --}}
+        <div class="table-section" style="margin-bottom:0">
+            <div class="table-header" style="padding:16px 20px">
+                <p class="table-title" style="font-size:13px">Department Breakdown</p>
+            </div>
+            @php
+            $total = $stats['total_employees'];
+            @endphp
+            <div style="padding:4px 20px 16px">
+                @foreach($departments as $d)
+                <div style="margin-bottom:10px">
+                    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                        <span style="font-weight:600;color:#0b044d">{{ $d['name'] }}</span>
+                        <span style="color:#9999bb">{{ $d['count'] }}</span>
+                    </div>
+                    <div style="height:6px;background:#f0effe;border-radius:99px;overflow:hidden">
+                        <div class="dept-fill" data-w="{{ $total > 0 ? round($d['count']/$total*100) : 0 }}%" data-bg="{{ $d['color'] }}"></div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Upcoming Events --}}
+        <div class="stat-card" style="margin:0">
+            <p class="stat-label" style="margin-bottom:12px">Upcoming Events</p>
+            @php
+            $events = [
+                ['label'=>'Payroll Release','date'=>'Jun 15','color'=>'#0b044d'],
+                ['label'=>'CSC Training','date'=>'Jun 18','color'=>'#8e1e18'],
+                ['label'=>'Performance Review','date'=>'Jun 25','color'=>'#15803d'],
+            ];
+            @endphp
+            @foreach($events as $ev)
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f7f6ff">
+                <div class="event-icon event-icon-dynamic" data-bg="{{ $ev['color'] }}">
+                    <svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div style="flex:1">
+                    <p style="font-size:12.5px;font-weight:600;color:#0b044d;margin:0 0 2px">{{ $ev['label'] }}</p>
+                    <p style="font-size:11px;color:#9999bb;margin:0">{{ $ev['date'] }}, {{ now()->year }}</p>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
     </div>
 </div>
 
-{{-- Recent Employees Table --}}
+{{-- Employee Directory Table - Full Width --}}
 <div class="table-section">
     <div class="table-header">
         <div>
@@ -200,108 +344,6 @@
                 <button class="page-btn" disabled>›</button>
             @endif
         </div>
-    </div>
-</div>
-
-{{-- Bottom Row: Leave Requests + Quick Stats --}}
-<div class="bottom-row">
-
-    {{-- Leave Requests --}}
-    <div class="table-section mb-0">
-        <div class="table-header">
-            <div>
-                <p class="table-title">Pending Leave Requests</p>
-                <p class="table-sub">Requires your approval</p>
-            </div>
-            <button class="btn-export">View All</button>
-        </div>
-        <div class="table-wrapper">
-            <table class="payroll-table">
-                <thead>
-                    <tr><th>Employee</th><th>Type</th><th>Duration</th><th>Action</th></tr>
-                </thead>
-                <tbody>
-                    @forelse($leaveRequests as $l)
-                    <tr>
-                        <td>
-                            <div class="emp-cell">
-                                @if($l['photo'])
-                                    <img src="{{ $l['photo'] }}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
-                                @else
-                                    <div class="emp-avatar emp-avatar-sm emp-avatar-dynamic" data-bg="{{ $l['color'] }}" style="width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">{{ $l['initials'] }}</div>
-                                @endif
-                                <p class="emp-name" style="margin:0">{{ $l['name'] }}</p>
-                            </div>
-                        </td>
-                        <td><span class="dept-tag">{{ $l['type'] }}</span></td>
-                        <td style="font-size:12.5px;color:#5a5888">{{ $l['days'] }}</td>
-                        <td>
-                            <div style="display:flex;gap:6px">
-                                <form method="POST" action="{{ route('admin.leave.approve', $l['id']) }}" style="margin:0;">
-                                    @csrf
-                                    <button type="submit" class="btn-activate">Approve</button>
-                                </form>
-                                <button class="btn-deactivate" onclick="alert('Reject functionality')">Deny</button>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" style="text-align:center;padding:20px;color:#9999bb;">No pending leave requests</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    {{-- Quick Overview --}}
-    <div class="side-col">
-
-        <div class="table-section mb-0">
-            <div class="table-header" style="padding:16px 20px">
-                <p class="table-title" style="font-size:13px">Department Breakdown</p>
-            </div>
-            @php
-            $total = $stats['total_employees'];
-            @endphp
-            <div style="padding:4px 20px 16px">
-                @foreach($departments as $d)
-                <div style="margin-bottom:10px">
-                    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-                        <span style="font-weight:600;color:#0b044d">{{ $d['name'] }}</span>
-                        <span style="color:#9999bb">{{ $d['count'] }}</span>
-                    </div>
-                    <div style="height:6px;background:#f0effe;border-radius:99px;overflow:hidden">
-                        <div class="dept-fill" data-w="{{ $total > 0 ? round($d['count']/$total*100) : 0 }}%" data-bg="{{ $d['color'] }}"></div>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
-
-        <div class="stat-card no-margin">
-            <p class="stat-label" style="margin-bottom:12px">Upcoming Events</p>
-            @php
-            $events = [
-                ['label'=>'Payroll Release','date'=>'Jun 15','color'=>'#0b044d'],
-                ['label'=>'CSC Training','date'=>'Jun 18','color'=>'#8e1e18'],
-                ['label'=>'Performance Review','date'=>'Jun 25','color'=>'#15803d'],
-            ];
-            @endphp
-            @foreach($events as $ev)
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f7f6ff">
-                <div class="event-icon event-icon-dynamic" data-bg="{{ $ev['color'] }}">
-                    <svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </div>
-                <div style="flex:1">
-                    <p style="font-size:12.5px;font-weight:600;color:#0b044d;margin:0 0 2px">{{ $ev['label'] }}</p>
-                    <p style="font-size:11px;color:#9999bb;margin:0">{{ $ev['date'] }}, {{ now()->year }}</p>
-                </div>
-            </div>
-            @endforeach
-        </div>
-
     </div>
 </div>
 
@@ -516,7 +558,7 @@ function initCharts() {
             scales: {
                 y: { 
                     beginAtZero: true, 
-                    max: 100, 
+                    max: 120, 
                     grid: { color: '#f7f6ff', drawBorder: false },
                     ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' } }
                 },
