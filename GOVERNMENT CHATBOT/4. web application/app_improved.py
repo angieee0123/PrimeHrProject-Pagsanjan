@@ -14,7 +14,8 @@ from groq import Groq
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-CORS(app, resources={r"/chat": {"origins": ["http://localhost:8000", "http://127.0.0.1:8000"]}})
+# Allow all origins for production (or specify Railway domains)
+CORS(app, resources={r"/chat": {"origins": "*"}})
 
 # Load models and data
 print("Loading models and data...")
@@ -723,4 +724,5 @@ Answer in a friendly, conversational tone in 2-3 sentences. Include the mayor's 
         }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.getenv('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)

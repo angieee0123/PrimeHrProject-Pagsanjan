@@ -7,14 +7,17 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-CORS(app, resources={r"/chat": {"origins": ["http://localhost:8000", "http://127.0.0.1:8000"]}})
+# Allow all origins for production (or specify Railway domains)
+CORS(app, resources={r"/chat": {"origins": "*"}})
 
-# MySQL config
+# MySQL config - Using environment variables for production
+import os
+
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'admin',
-    'database': 'primehrismagdalena',
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'user': os.getenv('DB_USER', 'root'),
+    'password': os.getenv('DB_PASSWORD', 'admin'),
+    'database': os.getenv('DB_DATABASE', 'primehrismagdalena'),
     'auth_plugin': 'mysql_native_password'
 }
 
@@ -404,4 +407,5 @@ Provide a clear, friendly answer in 2-4 sentences. Match the user's language (Ta
         }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    port = int(os.getenv('PORT', 5001))
+    app.run(debug=False, host='0.0.0.0', port=port)
