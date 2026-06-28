@@ -291,9 +291,17 @@ function speakText(text) {
     // Create speech utterance
     currentUtterance = new SpeechSynthesisUtterance(cleanText);
 
-    // Use Filipino/Tagalog voice - prefer Google voices
+    // Use Filipino/Tagalog voice - prefer macOS native voices
     const voices = speechSynthesis.getVoices();
+    
+    // Priority order for voices:
+    // 1. macOS native Filipino voices (Amelie, Lekha)
+    // 2. Google Filipino voices
+    // 3. Any Filipino voice
     const filipinoVoice = voices.find(voice =>
+        (voice.lang.includes('fil') || voice.lang.includes('tl')) && 
+        (voice.name.includes('Amelie') || voice.name.includes('Lekha'))
+    ) || voices.find(voice =>
         (voice.lang.includes('fil') || voice.lang.includes('tl')) && voice.name.includes('Google')
     ) || voices.find(voice =>
         voice.lang.includes('fil') || voice.lang.includes('tl')

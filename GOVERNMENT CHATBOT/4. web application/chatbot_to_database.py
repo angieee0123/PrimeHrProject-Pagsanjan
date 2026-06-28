@@ -17,8 +17,7 @@ DB_CONFIG = {
     'host': os.getenv('DB_HOST', 'localhost'),
     'user': os.getenv('DB_USER', 'root'),
     'password': os.getenv('DB_PASSWORD', 'admin'),
-    'database': os.getenv('DB_DATABASE', 'primehrismagdalena'),
-    'auth_plugin': 'mysql_native_password'
+    'database': os.getenv('DB_DATABASE', 'primehrismagdalena')
 }
 
 #wwwwwwww
