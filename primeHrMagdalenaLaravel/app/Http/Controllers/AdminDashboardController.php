@@ -88,24 +88,33 @@ class AdminDashboardController extends Controller
                     'name' => $emp->first_name . ' ' . $emp->last_name,
                     'type' => $leave->leaveType->leave_name ?? 'Leave',
                     'days' => $days . ' day' . ($days > 1 ? 's' : ''),
+                    'start_date' => Carbon::parse($leave->start_date)->format('M d, Y'),
+                    'end_date' => Carbon::parse($leave->end_date)->format('M d, Y'),
                     'id' => $leave->id,
                 ];
             });
         
-        // Department breakdown
+        // Department breakdown - ordered by member count (most to least)
         $departments = Department::where('status', 'Active')
             ->withCount(['employmentDetails as employee_count'])
-            ->orderBy('name')
+            ->orderByDesc('employee_count')
             ->limit(5)
             ->get()
-            ->map(function($dept) {
-                $colors = ['#0b044d', '#8e1e18', '#15803d', '#a16207', '#7c3aed'];
+            ->map(function($dept, $index) {
+                $colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#6366f1', '#14b8a6'];
                 return [
                     'name' => $dept->name,
                     'count' => $dept->employee_count,
-                    'color' => $colors[array_rand($colors)],
+                    'color' => $colors[$index % count($colors)],
                 ];
             });
+        
+        // Calculate percentage for each department
+        $totalInDepts = $departments->sum('count');
+        $departments = $departments->map(function($dept) use ($totalInDepts) {
+            $dept['percentage'] = $totalInDepts > 0 ? round(($dept['count'] / $totalInDepts) * 100) : 0;
+            return $dept;
+        });
         
         // Attendance Performance Rating (this month)
         $monthStart = Carbon::now()->startOfMonth();
@@ -169,11 +178,11 @@ class AdminDashboardController extends Controller
 
         $attendancePerformanceMonth = $buildPerformance($monthStart, Carbon::now(), $workingDaysMonth);
         $attendancePerformanceWeek  = $buildPerformance($weekStart, Carbon::now(), $workingDaysWeek);
-        $earlyBirds = Attendance::with(['employee.employmentDetail.designationRelation'])
+        $earlyBirds = Attendance::with(['employee.employmentDetail.designationRelation', 'employee.employmentDetail.departmentRelation'])
             ->whereDate('date', $today)
             ->whereNotNull('am_in')
             ->orderBy('am_in', 'asc')
-            ->limit(10)
+            ->limit(5)
             ->get()
             ->map(function($attendance, $index) {
                 $emp = $attendance->employee;
@@ -182,6 +191,11 @@ class AdminDashboardController extends Controller
                 $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
                 $colors = ['#0b044d', '#8e1e18', '#15803d', '#a16207', '#7c3aed'];
                 
+                // Calculate early minutes (assuming 8:00 AM is the start time)
+                $amIn = Carbon::parse($attendance->am_in);
+                $startTime = Carbon::parse('08:00:00');
+                $earlyMinutes = $startTime->diffInMinutes($amIn);
+                
                 return [
                     'rank' => $index + 1,
                     'initials' => $initials,
@@ -189,18 +203,20 @@ class AdminDashboardController extends Controller
                     'photo' => $emp->photo,
                     'name' => $emp->first_name . ' ' . $emp->last_name,
                     'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
-                    'time_in' => Carbon::parse($attendance->am_in)->format('h:i A'),
+                    'department' => $emp->employmentDetail->departmentRelation->name ?? 'N/A',
+                    'time_in' => $amIn->format('h:i A'),
+                    'early_minutes' => $earlyMinutes,
                 ];
             })
             ->filter();
 
         // Top 10 Late Birds (latest time-in today, must be after 8:05 AM grace period)
-        $lateBirds = Attendance::with(['employee.employmentDetail.designationRelation'])
+        $lateBirds = Attendance::with(['employee.employmentDetail.designationRelation', 'employee.employmentDetail.departmentRelation'])
             ->whereDate('date', $today)
             ->whereNotNull('am_in')
             ->whereTime('am_in', '>', '08:05:00')
             ->orderBy('am_in', 'desc')
-            ->limit(10)
+            ->limit(5)
             ->get()
             ->map(function($attendance, $index) {
                 $emp = $attendance->employee;
@@ -218,6 +234,7 @@ class AdminDashboardController extends Controller
                     'photo' => $emp->photo,
                     'name' => $emp->first_name . ' ' . $emp->last_name,
                     'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
+                    'department' => $emp->employmentDetail->departmentRelation->name ?? 'N/A',
                     'time_in' => $amIn->format('h:i A'),
                     'late_minutes' => $lateMinutes,
                 ];

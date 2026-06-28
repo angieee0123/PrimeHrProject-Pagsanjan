@@ -4,6 +4,35 @@
 @include('admin.topbar.adminTopbar')
 @include('admin.notification.adminNotification')
 
+@php
+    $adminName = optional(Auth::user())->name ?? 'Admin';
+    $adminInitials = collect(explode(' ', trim($adminName)))->filter()->map(fn($part) => strtoupper(substr($part, 0, 1)))->take(2)->join('') ?: 'AD';
+@endphp
+
+<main class="enterprise-hr-dashboard">
+    <header class="enterprise-header">
+        <div>
+            <span class="enterprise-kicker">PRIME HRIS</span>
+            <h1>Welcome back, {{ $adminName }}</h1>
+            <p>{{ now()->format('l, F j, Y') }} · Executive workforce overview</p>
+        </div>
+        <div class="enterprise-header-actions">
+            <button class="enterprise-icon-btn" onclick="toggleNotif()" title="Notifications" type="button">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                @if(($unreadCount ?? 0) > 0)
+                    <span class="enterprise-dot"></span>
+                @endif
+            </button>
+            <div class="enterprise-profile">
+                <div class="enterprise-avatar">{{ $adminInitials }}</div>
+                <div>
+                    <strong>{{ $adminName }}</strong>
+                    <span>HR Administrator</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
 {{-- Enhanced Stats Grid with Trends --}}
 <div class="stats-grid stats-grid-4">
     <div class="stat-card" style="cursor:pointer;transition:all 0.3s" onclick="window.location.href='#employee-directory'" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
@@ -71,412 +100,813 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.7; }
 }
+
+.welcome-banner {
+    display: none !important;
+}
+
+.notif-wrap > .notif-btn {
+    display: none !important;
+}
+
+.enterprise-hr-dashboard {
+    --eh-blue: #0b044d;
+    --eh-blue-2: #1b1464;
+    --eh-bg: #f6f8fb;
+    --eh-card: #ffffff;
+    --eh-ink: #111827;
+    --eh-muted: #667085;
+    --eh-soft: #f2f4f7;
+    --eh-line: #e5e7eb;
+    --eh-green: #15803d;
+    --eh-red: #b42318;
+    --eh-amber: #b7791f;
+    color: var(--eh-ink);
+    min-height: 100vh;
+    padding: 0 0 28px;
+}
+
+.enterprise-hr-dashboard,
+.enterprise-hr-dashboard * {
+    letter-spacing: 0;
+}
+
+.enterprise-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 22px;
+    padding: 22px 24px;
+    border: 1px solid var(--eh-line);
+    border-radius: 18px;
+    background: var(--eh-card);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .03);
+}
+
+.enterprise-kicker {
+    display: inline-flex;
+    margin-bottom: 7px;
+    color: var(--eh-blue);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.enterprise-header h1 {
+    margin: 0;
+    color: var(--eh-ink);
+    font-size: clamp(24px, 3vw, 34px);
+    line-height: 1.1;
+    font-weight: 800;
+}
+
+.enterprise-header p {
+    margin: 8px 0 0;
+    color: var(--eh-muted);
+    font-size: 13px;
+}
+
+.enterprise-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.enterprise-icon-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--eh-line);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--eh-blue);
+    cursor: pointer;
+    transition: all .18s ease;
+}
+
+.enterprise-icon-btn:hover {
+    border-color: #cfd4dc;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, .06);
+    transform: translateY(-1px);
+}
+
+.enterprise-dot {
+    position: absolute;
+    top: 9px;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: #ef4444;
+}
+
+.enterprise-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 188px;
+    padding: 8px 12px 8px 8px;
+    border: 1px solid var(--eh-line);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.enterprise-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: var(--eh-blue);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.enterprise-profile strong,
+.enterprise-profile span {
+    display: block;
+    white-space: nowrap;
+}
+
+.enterprise-profile strong {
+    color: var(--eh-ink);
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.enterprise-profile span {
+    color: var(--eh-muted);
+    font-size: 11px;
+}
+
+.enterprise-hr-dashboard .stats-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.enterprise-hr-dashboard .stat-card,
+.enterprise-hr-dashboard .table-section,
+.enterprise-hr-dashboard .chart-card,
+.enterprise-card {
+    border: 1px solid var(--eh-line) !important;
+    border-radius: 16px !important;
+    background: var(--eh-card) !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .03) !important;
+}
+
+.enterprise-hr-dashboard .stat-card {
+    min-height: 132px;
+    padding: 20px !important;
+    overflow: hidden;
+}
+
+.enterprise-hr-dashboard .stat-card:hover,
+.enterprise-hr-dashboard .table-section:hover,
+.enterprise-hr-dashboard .chart-card:hover {
+    border-color: #cfd4dc !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, .08), 0 2px 4px rgba(15, 23, 42, .06) !important;
+}
+
+.enterprise-hr-dashboard .stat-top {
+    margin-bottom: 16px;
+}
+
+.enterprise-hr-dashboard .stat-label,
+.enterprise-hr-dashboard .table-sub,
+.enterprise-hr-dashboard .chart-sub {
+    color: var(--eh-muted) !important;
+}
+
+.enterprise-hr-dashboard .stat-label {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+}
+
+.enterprise-hr-dashboard .stat-value {
+    color: var(--eh-ink) !important;
+    font-size: 30px !important;
+    line-height: 1.05;
+}
+
+.enterprise-hr-dashboard .stat-value span {
+    color: var(--eh-muted) !important;
+}
+
+.enterprise-hr-dashboard .stat-icon-wrap {
+    width: 40px !important;
+    height: 40px !important;
+    border: 1px solid #dbe0ea;
+    border-radius: 12px !important;
+    background: #f8fafc !important;
+}
+
+.enterprise-hr-dashboard .stat-sub {
+    color: var(--eh-muted) !important;
+    font-size: 12px !important;
+}
+
+.enterprise-action-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    border: 1px solid var(--eh-line) !important;
+    border-radius: 16px !important;
+    background: #fff !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .03);
+}
+
+.enterprise-action-spacer {
+    margin-right: auto;
+}
+
+.enterprise-overview-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 18px;
+    align-items: stretch;
+    margin-bottom: 18px;
+}
+
+.enterprise-secondary-grid {
+    display: grid;
+    grid-template-columns: .78fr 1fr 320px;
+    gap: 18px;
+    align-items: stretch;
+    margin-bottom: 18px;
+}
+
+.enterprise-compact-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 520px;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.enterprise-card-body {
+    padding: 16px 20px 20px;
+}
+
+.enterprise-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.enterprise-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eef2f6;
+}
+
+.enterprise-list-item:last-child {
+    border-bottom: 0;
+}
+
+.enterprise-rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 9px;
+    background: #f2f4f7;
+    color: var(--eh-blue);
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.enterprise-person {
+    min-width: 0;
+    flex: 1;
+}
+
+.enterprise-person strong,
+.enterprise-person span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.enterprise-person strong {
+    color: var(--eh-ink);
+    font-size: 12.5px;
+    font-weight: 800;
+}
+
+.enterprise-person span {
+    color: var(--eh-muted);
+    font-size: 10.5px;
+}
+
+.enterprise-metric {
+    color: var(--eh-blue);
+    font-size: 12px;
+    font-weight: 850;
+    white-space: nowrap;
+}
+
+.enterprise-progress {
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #eef2f6;
+}
+
+.enterprise-progress > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--eh-blue);
+}
+
+.enterprise-sidebar-card .payroll-table th,
+.enterprise-sidebar-card .payroll-table td {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.enterprise-hr-dashboard .table-header,
+.enterprise-hr-dashboard .chart-header {
+    align-items: center;
+    padding: 18px 20px !important;
+    border-bottom: 1px solid var(--eh-line) !important;
+    background: #fff !important;
+}
+
+.enterprise-hr-dashboard .table-title,
+.enterprise-hr-dashboard .chart-title {
+    color: var(--eh-ink) !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+}
+
+.enterprise-hr-dashboard .charts-grid {
+    gap: 18px;
+}
+
+.enterprise-hr-dashboard .chart-card {
+    padding: 0 !important;
+}
+
+.enterprise-hr-dashboard .chart-card canvas {
+    padding: 0 16px 16px;
+}
+
+.enterprise-hr-dashboard .chart-tab,
+.enterprise-hr-dashboard .btn-export,
+.enterprise-hr-dashboard .modal-btn-primary,
+.enterprise-hr-dashboard .filter-select,
+.enterprise-hr-dashboard .btn-view,
+.enterprise-hr-dashboard input[type="text"] {
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    transition: all .18s ease !important;
+}
+
+.enterprise-hr-dashboard .chart-tab.active,
+.enterprise-hr-dashboard .modal-btn-primary {
+    border-color: var(--eh-blue) !important;
+    background: var(--eh-blue) !important;
+    color: #fff !important;
+    box-shadow: 0 8px 18px rgba(11, 4, 77, .18) !important;
+}
+
+.enterprise-hr-dashboard .btn-export,
+.enterprise-hr-dashboard .filter-select,
+.enterprise-hr-dashboard input[type="text"] {
+    border-color: var(--eh-line) !important;
+    background: #fff !important;
+    color: #344054 !important;
+}
+
+.enterprise-hr-dashboard .payroll-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.enterprise-hr-dashboard .table-wrapper {
+    max-width: 100%;
+    overflow: auto;
+}
+
+.enterprise-hr-dashboard .payroll-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8fafc;
+    color: #667085;
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.enterprise-hr-dashboard .payroll-table td {
+    border-bottom: 1px solid #eef2f6;
+}
+
+.enterprise-hr-dashboard .payroll-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.enterprise-hr-dashboard .dept-tag,
+.enterprise-hr-dashboard .badge-status {
+    border-radius: 999px !important;
+    font-weight: 800 !important;
+}
+
+.enterprise-hr-dashboard #panelEarly > div,
+.enterprise-hr-dashboard #panelLate > div {
+    border-color: var(--eh-line) !important;
+    border-radius: 14px !important;
+    background: #fff !important;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, .03);
+    transition: all .18s ease;
+}
+
+.enterprise-hr-dashboard #panelEarly > div:hover,
+.enterprise-hr-dashboard #panelLate > div:hover {
+    border-color: #cfd4dc !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, .06);
+    transform: translateY(-2px);
+}
+
+.enterprise-hr-dashboard .event-icon {
+    border-radius: 10px !important;
+}
+
+#employee-directory {
+    overflow: hidden;
+}
+
+#employee-directory .table-header {
+    gap: 16px;
+}
+
+@media (max-width: 1200px) {
+    .enterprise-hr-dashboard .stats-grid-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .enterprise-overview-grid,
+    .enterprise-secondary-grid,
+    .enterprise-compact-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .enterprise-header,
+    .enterprise-header-actions,
+    .enterprise-hr-dashboard .table-header,
+    .enterprise-hr-dashboard .table-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .enterprise-header {
+        padding: 18px;
+    }
+
+    .enterprise-profile {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .enterprise-icon-btn {
+        width: 100%;
+    }
+
+    .enterprise-action-bar,
+    .enterprise-hr-dashboard .stats-grid-4,
+    .enterprise-hr-dashboard .charts-grid,
+    #panelEarly,
+    #panelLate {
+        grid-template-columns: 1fr !important;
+    }
+
+    .enterprise-hr-dashboard .table-actions > *,
+    .enterprise-hr-dashboard .table-actions input,
+    .enterprise-hr-dashboard .table-actions select,
+    .enterprise-hr-dashboard .table-actions button {
+        width: 100% !important;
+    }
+}
 </style>
 
-{{-- Main Content Grid: Charts + Sidebar --}}
-<div style="display:grid; grid-template-columns:1fr 380px; gap:20px; margin-bottom:20px;">
-    
-    {{-- Left: Charts --}}
-    <div style="display:flex; flex-direction:column; gap:20px;">
-        
-        {{-- Quick Actions Bar --}}
-        <div style="background:#fff;border-radius:12px;padding:16px 20px;border:1.5px solid #e5e4f0;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-            <div style="display:flex;align-items:center;gap:8px;margin-right:auto">
-                <div style="width:32px;height:32px;border-radius:8px;background:#0b044d;display:flex;align-items:center;justify-content:center">
-                    <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                </div>
-                <div>
-                    <p style="font-size:13px;font-weight:700;color:#0b044d;margin:0">Quick Actions</p>
-                    <p style="font-size:10px;color:#9999bb;margin:0">Common tasks & shortcuts</p>
-                </div>
-            </div>
-            <button onclick="openAddEmployee()" style="font-size:11px;padding:6px 14px;border-radius:6px;border:none;background:#0b044d;color:#fff;cursor:pointer;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:6px" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                Add Employee
-            </button>
-            <button onclick="window.location.href='/admin/attendance'" style="font-size:11px;padding:6px 14px;border-radius:6px;border:1px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:6px" onmouseover="this.style.borderColor='#0b044d';this.style.color='#0b044d'" onmouseout="this.style.borderColor='#e5e4f0';this.style.color='#5a5888'">
-                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                Attendance
-            </button>
-            <button onclick="window.location.href='/admin/payroll'" style="font-size:11px;padding:6px 14px;border-radius:6px;border:1px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:6px" onmouseover="this.style.borderColor='#0b044d';this.style.color='#0b044d'" onmouseout="this.style.borderColor='#e5e4f0';this.style.color='#5a5888'">
-                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><text x="2" y="18" font-size="14" font-weight="bold">₱</text></svg>
-                Payroll
-            </button>
-            <button class="btn-export" style="font-size:11px;padding:6px 14px;display:flex;align-items:center;gap:6px">
-                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
+{{-- Quick Actions Bar --}}
+<div class="enterprise-action-bar">
+    <div style="display:flex;align-items:center;gap:10px" class="enterprise-action-spacer">
+        <div style="width:34px;height:34px;border-radius:10px;background:#eef2ff;display:flex;align-items:center;justify-content:center;color:#0b044d">
+            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </div>
-        
-        {{-- Top 10 Early Birds / Late Birds --}}
-        <div class="table-section" style="margin-bottom:0">
-            <div class="table-header" style="padding:16px 20px">
-                <div>
-                    <p class="table-title" id="birdsTabTitle" style="font-size:14px">🌅 Top 10 Early Birds Today</p>
-                    <p class="table-sub" style="font-size:11px;margin-top:2px">{{ now()->format('F d, Y') }}</p>
-                </div>
-                <div style="display:flex;gap:6px">
-                    <button id="tabEarly" onclick="switchBirdsTab('early')" style="font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #0b044d;background:#0b044d;color:#fff;cursor:pointer;font-weight:600">🌅 Early Birds</button>
-                    <button id="tabLate" onclick="switchBirdsTab('late')" style="font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600">🐦 Late Birds</button>
-                </div>
-            </div>
+        <div>
+            <p style="font-size:13px;font-weight:800;color:#111827;margin:0">Quick Actions</p>
+            <p style="font-size:11px;color:#667085;margin:0">Frequently used HR workflows</p>
+        </div>
+    </div>
+    <button class="modal-btn-primary" onclick="openAddEmployee()" style="font-size:11px;padding:0 14px;height:34px;display:flex;align-items:center;gap:6px">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        Add Employee
+    </button>
+    <button class="btn-export" onclick="window.location.href='/admin/attendance'" style="font-size:11px;padding:0 14px;height:34px">Attendance</button>
+    <button class="btn-export" onclick="window.location.href='/admin/leave'" style="font-size:11px;padding:0 14px;height:34px">Leave Request</button>
+    <button class="btn-export" onclick="window.location.href='/admin/payroll'" style="font-size:11px;padding:0 14px;height:34px">Payroll</button>
+    <button class="btn-export" style="font-size:11px;padding:0 14px;height:34px">Report</button>
+</div>
 
-            {{-- Early Birds Panel --}}
-            <div id="panelEarly" style="padding:8px 20px 16px; display:grid; grid-template-columns:repeat(5, 1fr); gap:12px;">
-                @forelse($earlyBirds as $bird)
-                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;background:#fafafe;border-radius:8px;border:1px solid #e5e4f0">
-                    <div style="position:relative">
-                        @if($bird['photo'])
-                            <img src="{{ $bird['photo'] }}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid #d9bb00">
-                        @else
-                            <div class="emp-avatar-dynamic" data-bg="{{ $bird['color'] }}" style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:14px;border:2px solid #d9bb00">{{ $bird['initials'] }}</div>
-                        @endif
-                        <div style="position:absolute;top:-4px;right:-4px;width:22px;height:22px;border-radius:50%;background:#d9bb00;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#0b044d;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.15)">
-                            {{ $bird['rank'] }}
-                        </div>
-                    </div>
-                    <div style="text-align:center;width:100%">
-                        <p style="font-size:11.5px;font-weight:600;color:#0b044d;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ $bird['name'] }}">{{ $bird['name'] }}</p>
-                        <p style="font-size:10px;color:#9999bb;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ $bird['position'] }}">{{ $bird['position'] }}</p>
-                        <p style="font-size:12px;font-weight:700;color:#22c55e;margin:0;background:#f0f9ff;padding:3px 8px;border-radius:4px;display:inline-block">{{ $bird['time_in'] }}</p>
-                    </div>
-                </div>
-                @empty
-                <div style="grid-column:1/-1;text-align:center;padding:30px;color:#9999bb;font-size:12px">
-                    No attendance records today
-                </div>
-                @endforelse
+{{-- Main reference layout: wide chart + right requests --}}
+<div class="enterprise-overview-grid">
+    <div class="chart-card">
+        <div class="chart-header">
+            <div>
+                <p class="chart-title">Employee Growth</p>
+                <p class="chart-sub">Total employees over time</p>
             </div>
-
-            {{-- Late Birds Panel --}}
-            <div id="panelLate" style="display:none; padding:8px 20px 16px; display:none; grid-template-columns:repeat(5, 1fr); gap:12px;">
-                @forelse($lateBirds as $bird)
-                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;background:#fafafe;border-radius:8px;border:1px solid #e5e4f0">
-                    <div style="position:relative">
-                        @if($bird['photo'])
-                            <img src="{{ $bird['photo'] }}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid #8e1e18">
-                        @else
-                            <div class="emp-avatar-dynamic" data-bg="{{ $bird['color'] }}" style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:14px;border:2px solid #8e1e18">{{ $bird['initials'] }}</div>
-                        @endif
-                        <div style="position:absolute;top:-4px;right:-4px;width:22px;height:22px;border-radius:50%;background:#8e1e18;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.15)">
-                            {{ $bird['rank'] }}
-                        </div>
-                    </div>
-                    <div style="text-align:center;width:100%">
-                        <p style="font-size:11.5px;font-weight:600;color:#0b044d;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ $bird['name'] }}">{{ $bird['name'] }}</p>
-                        <p style="font-size:10px;color:#9999bb;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ $bird['position'] }}">{{ $bird['position'] }}</p>
-                        <p style="font-size:12px;font-weight:700;color:#8e1e18;margin:0;background:#fff4f4;padding:3px 8px;border-radius:4px;display:inline-block">{{ $bird['time_in'] }}</p>
-                        <p style="font-size:10px;color:#8e1e18;margin:4px 0 0;font-weight:600">+{{ $bird['late_minutes'] }} min late</p>
-                    </div>
-                </div>
-                @empty
-                <div style="grid-column:1/-1;text-align:center;padding:30px;color:#9999bb;font-size:12px">
-                    No late records today 🎉
-                </div>
-                @endforelse
+            <div class="chart-tabs">
+                <button class="chart-tab" onclick="switchEmployeeChart('week')">Week</button>
+                <button class="chart-tab active" onclick="switchEmployeeChart('month')">Month</button>
+                <button class="chart-tab" onclick="switchEmployeeChart('year')">Year</button>
             </div>
         </div>
-
-        {{-- Charts Row --}}
-        <div class="charts-grid">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div>
-                        <p class="chart-title">Employee Growth</p>
-                        <p class="chart-sub">Total employees over time</p>
-                    </div>
-                    <div class="chart-tabs">
-                        <button class="chart-tab" onclick="switchEmployeeChart('week')">Week</button>
-                        <button class="chart-tab active" onclick="switchEmployeeChart('month')">Month</button>
-                        <button class="chart-tab" onclick="switchEmployeeChart('year')">Year</button>
-                    </div>
-                </div>
-                <canvas id="employeeChart" style="max-height:280px"></canvas>
-            </div>
-
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div>
-                        <p class="chart-title">Attendance Trends</p>
-                        <p class="chart-sub">Daily attendance rate</p>
-                    </div>
-                    <div class="chart-tabs">
-                        <button class="chart-tab" onclick="switchAttendanceChart('week')">Week</button>
-                        <button class="chart-tab active" onclick="switchAttendanceChart('month')">Month</button>
-                        <button class="chart-tab" onclick="switchAttendanceChart('year')">Year</button>
-                    </div>
-                </div>
-                <canvas id="attendanceChart" style="max-height:280px"></canvas>
-            </div>
-        </div>
-
+        <canvas id="employeeChart" style="max-height:310px"></canvas>
     </div>
 
-    {{-- Right Sidebar --}}
-    <div style="display:flex; flex-direction:column; gap:20px;">
-        
-        {{-- Pending Leave Requests --}}
-        <div class="table-section" style="margin-bottom:0">
-            <div class="table-header" style="background:#f7f6ff">
-                <div>
-                    <p class="table-title" style="display:flex;align-items:center;gap:8px">
-                        <span style="font-size:18px">📝</span> Pending Leave Requests
-                        @if($leaveRequests->count() > 0)
-                        <span style="font-size:10px;font-weight:700;color:#fff;background:#8e1e18;padding:2px 8px;border-radius:4px">{{ $leaveRequests->count() }}</span>
-                        @endif
-                    </p>
-                    <p class="table-sub">Requires immediate approval</p>
-                </div>
-                <button class="btn-export" style="font-size:11px;padding:6px 12px" onclick="window.location.href='/admin/leave'">View All</button>
+    <div class="table-section enterprise-sidebar-card" style="margin-bottom:0">
+        <div class="table-header">
+            <div>
+                <p class="table-title">Pending Leave Requests</p>
+                <p class="table-sub">Requires immediate approval</p>
             </div>
-            <div class="table-wrapper">
-                <table class="payroll-table">
-                    <thead>
-                        <tr><th>Employee</th><th>Type</th><th>Days</th><th>Action</th></tr>
-                    </thead>
-                    <tbody>
-                        @forelse($leaveRequests as $l)
-                        <tr>
-                            <td>
-                                <div class="emp-cell">
-                                    @if($l['photo'])
-                                        <img src="{{ $l['photo'] }}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
-                                    @else
-                                        <div class="emp-avatar emp-avatar-sm emp-avatar-dynamic" data-bg="{{ $l['color'] }}" style="width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">{{ $l['initials'] }}</div>
-                                    @endif
-                                    <p class="emp-name" style="margin:0">{{ $l['name'] }}</p>
-                                </div>
-                            </td>
-                            <td><span class="dept-tag" style="font-size:11px">{{ $l['type'] }}</span></td>
-                            <td style="font-size:12px;color:#5a5888">{{ $l['days'] }}</td>
-                            <td>
-                                <div style="display:flex;gap:4px">
-                                    <form method="POST" action="{{ route('admin.leave.approve', $l['id']) }}" style="margin:0;">
-                                        @csrf
-                                        <button type="submit" class="btn-activate" style="font-size:10px;padding:4px 8px">✓</button>
-                                    </form>
-                                    <button class="btn-deactivate" onclick="alert('Reject functionality')" style="font-size:10px;padding:4px 8px">✕</button>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" style="text-align:center;padding:20px;color:#9999bb;font-size:12px">No pending requests</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+            <button class="btn-export" style="font-size:11px;padding:6px 12px" onclick="window.location.href='/admin/leave'">View All</button>
         </div>
-
-        {{-- Department Breakdown --}}
-        <div class="table-section" style="margin-bottom:0">
-            <div class="table-header" style="padding:16px 20px;background:linear-gradient(135deg,#f0effe 0%,#fff 100%)">
-                <div>
-                    <p class="table-title" style="font-size:13px;display:flex;align-items:center;gap:8px">
-                        <span style="font-size:16px">🏛️</span> Department Distribution
-                    </p>
-                    <p class="table-sub" style="font-size:10px;margin-top:2px">Headcount by department</p>
-                </div>
-            </div>
-            @php
-            $total = $stats['total_employees'];
-            @endphp
-            <div style="padding:4px 20px 16px">
-                @foreach($departments as $d)
-                <div style="margin-bottom:10px">
-                    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-                        <span style="font-weight:600;color:#0b044d">{{ $d['name'] }}</span>
-                        <span style="color:#9999bb">{{ $d['count'] }}</span>
-                    </div>
-                    <div style="height:6px;background:#f0effe;border-radius:99px;overflow:hidden">
-                        <div class="dept-fill" data-w="{{ $total > 0 ? round($d['count']/$total*100) : 0 }}%" data-bg="{{ $d['color'] }}"></div>
+        <div class="enterprise-card-body">
+            <div class="enterprise-list">
+                @forelse($leaveRequests as $l)
+                <div class="enterprise-list-item" style="cursor:pointer;padding:12px 0" onclick="window.location.href='/admin/leave'">
+                    @if($l['photo'])
+                        <img src="{{ $l['photo'] }}" style="width:38px;height:38px;border-radius:50%;object-fit:cover">
+                    @else
+                        <div class="emp-avatar-dynamic" data-bg="{{ $l['color'] }}" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px">{{ $l['initials'] }}</div>
+                    @endif
+                    <div class="enterprise-person">
+                        <strong>{{ $l['name'] }}</strong>
+                        <span>{{ $l['type'] }} · {{ $l['days'] }}</span>
                     </div>
                 </div>
-                @endforeach
+                @empty
+                <p class="table-sub" style="text-align:center;padding:28px 0;margin:0">No pending requests</p>
+                @endforelse
             </div>
         </div>
-
-        {{-- Upcoming Events & Alerts --}}
-        <div class="stat-card" style="margin:0;background:#fff">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-                <p class="stat-label" style="margin:0;display:flex;align-items:center;gap:8px">
-                    <span style="font-size:16px">📅</span> Upcoming Events
-                </p>
-                <button style="font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600" onclick="alert('Manage events feature coming soon!')">Manage</button>
-            </div>
-            @php
-            $events = [
-                ['label'=>'Payroll Release','date'=>'Jun 15','color'=>'#0b044d','icon'=>'₱'],
-                ['label'=>'CSC Training','date'=>'Jun 18','color'=>'#d9bb00','icon'=>'🎯'],
-                ['label'=>'Performance Review','date'=>'Jun 25','color'=>'#22c55e','icon'=>'⭐'],
-                ['label'=>'Town Hall Meeting','date'=>'Jun 28','color'=>'#0b044d','icon'=>'🎬'],
-            ];
-            @endphp
-            @foreach($events as $ev)
-            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #f7f6ff;transition:all .2s;border-radius:6px;cursor:pointer" onmouseover="this.style.background='#f7f6ff'" onmouseout="this.style.background='transparent'">
-                <div class="event-icon event-icon-dynamic" data-bg="{{ $ev['color'] }}" style="font-size:14px">
-                    {{ $ev['icon'] }}
-                </div>
-                <div style="flex:1">
-                    <p style="font-size:12.5px;font-weight:600;color:#0b044d;margin:0 0 2px">{{ $ev['label'] }}</p>
-                    <p style="font-size:11px;color:#9999bb;margin:0">{{ $ev['date'] }}, {{ now()->year }}</p>
-                </div>
-                <svg width="14" height="14" fill="none" stroke="#9999bb" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-            @endforeach
-        </div>
-
     </div>
 </div>
 
-{{-- Attendance Leaderboard --}}
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
-    {{-- Top Performers --}}
+@php
+    $top5Month = $attendancePerformanceMonth->whereIn('tier', ['excellent','good'])->take(5)->values();
+    $top5Week  = $attendancePerformanceWeek->whereIn('tier',  ['excellent','good'])->take(5)->values();
+    $bottom5Month = $attendancePerformanceMonth->whereIn('tier', ['needs_improvement','poor'])->sortBy('rate')->take(5)->values();
+    $bottom5Week  = $attendancePerformanceWeek->whereIn('tier',  ['needs_improvement','poor'])->sortBy('rate')->take(5)->values();
+@endphp
+
+<div class="enterprise-secondary-grid">
     <div class="table-section" style="margin:0">
-        <div class="table-header" style="padding:16px 20px">
+        <div class="table-header">
             <div>
-                <p class="table-title" style="font-size:14px">🏆 Top 5 Performers</p>
-                <p class="table-sub" style="font-size:11px;margin-top:2px">Excellent attendance records</p>
+                <p class="table-title">Top Performers</p>
+                <p class="table-sub">Best attendance records</p>
             </div>
             <div style="display:flex;gap:6px">
-                <button id="perfTabMonth" onclick="switchPerfTab('month')" style="font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #0b044d;background:#0b044d;color:#fff;cursor:pointer;font-weight:600;transition:all .2s">This Month</button>
-                <button id="perfTabWeek"  onclick="switchPerfTab('week')"  style="font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600;transition:all .2s">This Week</button>
+                <button id="perfTabMonth" onclick="switchPerfTab('month')" class="chart-tab active">This Month</button>
+                <button id="perfTabWeek" onclick="switchPerfTab('week')" class="chart-tab">This Week</button>
             </div>
         </div>
-
-        @php
-            $top5Month = $attendancePerformanceMonth->whereIn('tier', ['excellent','good'])->take(5)->values();
-            $top5Week  = $attendancePerformanceWeek->whereIn('tier',  ['excellent','good'])->take(5)->values();
-        @endphp
-
-        <div style="padding:0 20px 20px">
-            <div id="perfPanelMonth">
+        <div class="enterprise-card-body">
+            <div id="perfPanelMonth" class="enterprise-list">
                 @forelse($top5Month as $i => $emp)
-                @php
-                    $borderColor = $i === 0 ? '#d9bb00' : ($i === 1 ? '#9999bb' : ($i === 2 ? '#d9bb00' : '#e5e4f0'));
-                @endphp
-                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:#fff;margin-bottom:6px;border:1.5px solid {{ $borderColor }};transition:all .15s;{{ $i < 3 ? 'box-shadow:0 2px 8px rgba(0,0,0,0.06);' : '' }};cursor:pointer" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform='translateX(0)'" onclick='showPerformerDetails(@json($emp), "month", {{ $i + 1 }})'>
-                    <span style="font-size:18px;font-weight:800;width:28px;text-align:center;flex-shrink:0">{{ $i < 3 ? ['🥇','🥈','🥉'][$i] : ($i + 1) }}</span>
+                <div class="enterprise-list-item" onclick='showPerformerDetails(@json($emp), "month", {{ $i + 1 }})' style="cursor:pointer">
+                    <span class="enterprise-rank">{{ $i + 1 }}</span>
                     @if($emp['photo'])
-                        <img src="{{ $emp['photo'] }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid {{ $borderColor }};flex-shrink:0">
+                        <img src="{{ $emp['photo'] }}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">
                     @else
-                        <div class="emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;border:2px solid {{ $borderColor }}">{{ $emp['initials'] }}</div>
+                        <div class="emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px">{{ $emp['initials'] }}</div>
                     @endif
-                    <div style="flex:1;min-width:0">
-                        <p style="font-size:12.5px;font-weight:700;color:#0b044d;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $emp['name'] }}</p>
-                        <p style="font-size:10px;color:#9999bb;margin:0">{{ $emp['position'] }}</p>
-                    </div>
-                    <div style="text-align:right;flex-shrink:0;min-width:70px">
-                        <p style="font-size:18px;font-weight:900;color:#22c55e;margin:0;line-height:1">{{ $emp['rate'] }}%</p>
-                        <p style="font-size:9px;color:#22c55e;margin:2px 0 0;background:#f0f9ff;padding:2px 6px;border-radius:4px;display:inline-block">✓ {{ $emp['present_days'] }}d</p>
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div class="enterprise-person" style="margin:0">
+                                <strong>{{ $emp['name'] }}</strong>
+                                <span>{{ $emp['position'] }}</span>
+                            </div>
+                            <span class="enterprise-metric">{{ $emp['rate'] }}%</span>
+                        </div>
+                        <div style="width:100%;height:6px;background:#eef2f6;border-radius:3px;overflow:hidden">
+                            <div style="width:{{ $emp['rate'] }}%;height:100%;background:linear-gradient(90deg,#3b82f6,#2563eb);border-radius:3px;transition:width 0.3s ease"></div>
+                        </div>
                     </div>
                 </div>
                 @empty
-                <div style="text-align:center;padding:40px 20px;color:#9999bb">
-                    <div style="font-size:36px;margin-bottom:8px">📅</div>
-                    <p style="font-size:12px;font-weight:600;color:#5a5888;margin:0">No top performers yet</p>
-                </div>
+                <p class="table-sub" style="text-align:center;padding:28px 0;margin:0">No top performers yet</p>
                 @endforelse
             </div>
-
-            <div id="perfPanelWeek" style="display:none">
+            <div id="perfPanelWeek" class="enterprise-list" style="display:none">
                 @forelse($top5Week as $i => $emp)
-                @php
-                    $borderColor = $i === 0 ? '#d9bb00' : ($i === 1 ? '#9999bb' : ($i === 2 ? '#d9bb00' : '#e5e4f0'));
-                @endphp
-                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:#fff;margin-bottom:6px;border:1.5px solid {{ $borderColor }};transition:all .15s;{{ $i < 3 ? 'box-shadow:0 2px 8px rgba(0,0,0,0.06);' : '' }};cursor:pointer" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform='translateX(0)'" onclick='showPerformerDetails(@json($emp), "week", {{ $i + 1 }})'>
-                    <span style="font-size:18px;font-weight:800;width:28px;text-align:center;flex-shrink:0">{{ $i < 3 ? ['🥇','🥈','🥉'][$i] : ($i + 1) }}</span>
+                <div class="enterprise-list-item" onclick='showPerformerDetails(@json($emp), "week", {{ $i + 1 }})' style="cursor:pointer">
+                    <span class="enterprise-rank">{{ $i + 1 }}</span>
                     @if($emp['photo'])
-                        <img src="{{ $emp['photo'] }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid {{ $borderColor }};flex-shrink:0">
+                        <img src="{{ $emp['photo'] }}" style="width:34px;height:34px;border-radius:50%;object-fit:cover">
                     @else
-                        <div class="emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;border:2px solid {{ $borderColor }}">{{ $emp['initials'] }}</div>
+                        <div class="emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px">{{ $emp['initials'] }}</div>
                     @endif
-                    <div style="flex:1;min-width:0">
-                        <p style="font-size:12.5px;font-weight:700;color:#0b044d;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $emp['name'] }}</p>
-                        <p style="font-size:10px;color:#9999bb;margin:0">{{ $emp['position'] }}</p>
-                    </div>
-                    <div style="text-align:right;flex-shrink:0;min-width:70px">
-                        <p style="font-size:18px;font-weight:900;color:#22c55e;margin:0;line-height:1">{{ $emp['rate'] }}%</p>
-                        <p style="font-size:9px;color:#22c55e;margin:2px 0 0;background:#f0f9ff;padding:2px 6px;border-radius:4px;display:inline-block">✓ {{ $emp['present_days'] }}d</p>
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div class="enterprise-person" style="margin:0">
+                                <strong>{{ $emp['name'] }}</strong>
+                                <span>{{ $emp['position'] }}</span>
+                            </div>
+                            <span class="enterprise-metric">{{ $emp['rate'] }}%</span>
+                        </div>
+                        <div style="width:100%;height:6px;background:#eef2f6;border-radius:3px;overflow:hidden">
+                            <div style="width:{{ $emp['rate'] }}%;height:100%;background:linear-gradient(90deg,#3b82f6,#2563eb);border-radius:3px;transition:width 0.3s ease"></div>
+                        </div>
                     </div>
                 </div>
                 @empty
-                <div style="text-align:center;padding:40px 20px;color:#9999bb">
-                    <div style="font-size:36px;margin-bottom:8px">📅</div>
-                    <p style="font-size:12px;font-weight:600;color:#5a5888;margin:0">No top performers yet</p>
-                </div>
+                <p class="table-sub" style="text-align:center;padding:28px 0;margin:0">No top performers yet</p>
                 @endforelse
             </div>
         </div>
     </div>
 
-    {{-- Needs Attention --}}
-    <div class="table-section" style="margin:0">
-        <div class="table-header" style="padding:16px 20px">
+    <div class="chart-card" style="display:flex;flex-direction:column">
+        <div class="chart-header">
             <div>
-                <p class="table-title" style="font-size:14px">⚠️ Needs Attention</p>
-                <p class="table-sub" style="font-size:11px;margin-top:2px">Employees with attendance concerns</p>
+                <p class="chart-title">Attendance Trend</p>
+                <p class="chart-sub">Daily attendance rate</p>
+            </div>
+            <div class="chart-tabs">
+                <button class="chart-tab" onclick="switchAttendanceChart('week')">Week</button>
+                <button class="chart-tab active" onclick="switchAttendanceChart('month')">Month</button>
+                <button class="chart-tab" onclick="switchAttendanceChart('year')">Year</button>
             </div>
         </div>
+        <div style="flex:1;padding:0 16px 16px 16px;display:flex;align-items:stretch">
+            <canvas id="attendanceChart" style="width:100%;height:100%"></canvas>
+        </div>
+    </div>
 
-        @php
-            $bottom5Month = $attendancePerformanceMonth->whereIn('tier', ['needs_improvement','poor'])->sortBy('rate')->take(5)->values();
-            $bottom5Week  = $attendancePerformanceWeek->whereIn('tier',  ['needs_improvement','poor'])->sortBy('rate')->take(5)->values();
-        @endphp
-
-        <div style="padding:0 20px 20px">
-            <div class="perf-bottom-month">
-                @forelse($bottom5Month as $i => $emp)
-                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:#fff;margin-bottom:6px;border:1.5px solid #e5e4f0;transition:all .15s" onmouseover="this.style.borderColor='#8e1e18'" onmouseout="this.style.borderColor='#e5e4f0'">
-                    <span style="font-size:16px;width:28px;text-align:center;flex-shrink:0">{{ $emp['tier'] === 'poor' ? '🔴' : '🟡' }}</span>
-                    @if($emp['photo'])
-                        <img src="{{ $emp['photo'] }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e5e4f0;flex-shrink:0">
-                    @else
-                        <div class="emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;border:2px solid #e5e4f0">{{ $emp['initials'] }}</div>
-                    @endif
-                    <div style="flex:1;min-width:0">
-                        <p style="font-size:12.5px;font-weight:700;color:#0b044d;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $emp['name'] }}</p>
-                        <p style="font-size:10px;color:#9999bb;margin:0">{{ $emp['position'] }}</p>
-                    </div>
-                    <div style="text-align:right;flex-shrink:0;min-width:70px">
-                        <p style="font-size:18px;font-weight:900;color:#8e1e18;margin:0;line-height:1">{{ $emp['rate'] }}%</p>
-                        <p style="font-size:9px;color:#8e1e18;margin:2px 0 0;background:#fff4f4;padding:2px 6px;border-radius:4px;display:inline-block">✗ {{ $emp['absent_days'] }}d absent</p>
-                    </div>
+    <div class="table-section" style="margin:0">
+        <div class="table-header">
+            <div>
+                <p class="table-title">Announcements</p>
+                <p class="table-sub">Upcoming HR events</p>
+            </div>
+            <button class="btn-export" style="font-size:11px;padding:6px 12px" onclick="alert('Manage events feature coming soon!')">Manage</button>
+        </div>
+        <div class="enterprise-card-body enterprise-list">
+            @php
+            $events = [
+                ['label'=>'Payroll Release','date'=>'Jun 15','color'=>'#0b044d','icon'=>'₱'],
+                ['label'=>'CSC Training','date'=>'Jun 18','color'=>'#d9bb00','icon'=>'T'],
+                ['label'=>'Performance Review','date'=>'Jun 25','color'=>'#22c55e','icon'=>'R'],
+                ['label'=>'Town Hall Meeting','date'=>'Jun 28','color'=>'#0b044d','icon'=>'M'],
+            ];
+            @endphp
+            @foreach($events as $ev)
+            <div class="enterprise-list-item">
+                <div class="event-icon event-icon-dynamic" data-bg="{{ $ev['color'] }}" style="font-size:12px">{{ $ev['icon'] }}</div>
+                <div class="enterprise-person">
+                    <strong>{{ $ev['label'] }}</strong>
+                    <span>{{ $ev['date'] }}, {{ now()->year }}</span>
                 </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+
+<div class="enterprise-compact-grid">
+    <div class="table-section" style="margin:0">
+        <div class="table-header">
+            <div>
+                <p class="table-title" id="birdsTabTitle">Top 5 Early Birds Today</p>
+                <p class="table-sub">{{ now()->format('F d, Y') }} · Earliest clock-ins</p>
+            </div>
+            <div style="display:flex;gap:6px">
+                <button id="tabEarly" onclick="switchBirdsTab('early')" class="chart-tab active">Earliest</button>
+                <button id="tabLate" onclick="switchBirdsTab('late')" class="chart-tab">Late arrivals</button>
+            </div>
+        </div>
+        <div id="panelEarly" style="padding:16px 20px 20px">
+            <div style="display:flex;flex-direction:column;gap:12px">
+                @forelse($earlyBirds as $index => $bird)
+                    @php
+                        $rank = $index + 1;
+                        $avatarSize = $rank === 1 ? 48 : ($rank === 2 ? 44 : ($rank === 3 ? 40 : ($rank === 4 ? 38 : 36)));
+                        $nameSize = $rank === 1 ? '13.5px' : ($rank === 2 ? '13px' : '12.5px');
+                        $positionSize = $rank === 1 ? '11.5px' : '11px';
+                        $timeSize = $rank === 1 ? '13px' : ($rank === 2 ? '12.5px' : '12px');
+                        $padding = $rank === 1 ? '12px 0' : ($rank === 2 ? '10px 0' : '8px 0');
+                    @endphp
+                    <div style="display:flex;align-items:center;gap:12px;padding:{{ $padding }};border-bottom:{{ $rank < 5 ? '1px solid #f1f5f9' : 'none' }}">
+                        <div style="min-width:26px;text-align:center;font-size:{{ $rank <= 3 ? '13px' : '12px' }};font-weight:{{ $rank === 1 ? '800' : '700' }};color:{{ $rank === 1 ? '#fbbf24' : ($rank === 2 ? '#94a3b8' : ($rank === 3 ? '#fb923c' : '#94a3b8')) }}">{{ $rank }}</div>
+                        @if($bird['photo'])
+                            <img src="{{ $bird['photo'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0">
+                        @else
+                            <div class="emp-avatar-dynamic" data-bg="{{ $bird['color'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:{{ $rank === 1 ? '18px' : ($rank === 2 ? '16px' : '14px') }};border:2px solid #e2e8f0;flex-shrink:0">{{ $bird['initials'] }}</div>
+                        @endif
+                        <div style="flex:1;min-width:0">
+                            <p style="font-size:{{ $nameSize }};font-weight:{{ $rank === 1 ? '700' : '600' }};color:#1e293b;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $bird['name'] }}</p>
+                            <p style="font-size:{{ $positionSize }};color:#64748b;margin:0;font-weight:500">{{ $bird['position'] }}</p>
+                        </div>
+                        <div style="text-align:right;flex-shrink:0">
+                            <p style="font-size:{{ $timeSize }};font-weight:700;color:#0b044d;margin:0">{{ $bird['time_in'] }}</p>
+                        </div>
+                    </div>
                 @empty
-                <div style="text-align:center;padding:40px 20px;color:#9999bb">
-                    <div style="font-size:36px;margin-bottom:8px">✅</div>
-                    <p style="font-size:12px;font-weight:600;color:#15803d;margin:0">All employees doing great!</p>
-                </div>
+                    <div style="text-align:center;padding:32px 24px">
+                        <div style="width:48px;height:48px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+                            <svg width="22" height="22" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 4px">No Attendance Records Today</p>
+                        <p style="font-size:12px;color:#94a3b8;margin:0">Check back later as employees clock in</p>
+                    </div>
                 @endforelse
             </div>
-
-            <div class="perf-bottom-week" style="display:none">
-                @forelse($bottom5Week as $i => $emp)
-                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:#fff;margin-bottom:6px;border:1.5px solid #e5e4f0;transition:all .15s" onmouseover="this.style.borderColor='#8e1e18'" onmouseout="this.style.borderColor='#e5e4f0'">
-                    <span style="font-size:16px;width:28px;text-align:center;flex-shrink:0">{{ $emp['tier'] === 'poor' ? '🔴' : '🟡' }}</span>
-                    @if($emp['photo'])
-                        <img src="{{ $emp['photo'] }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e5e4f0;flex-shrink:0">
-                    @else
-                        <div class="emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;border:2px solid #e5e4f0">{{ $emp['initials'] }}</div>
-                    @endif
-                    <div style="flex:1;min-width:0">
-                        <p style="font-size:12.5px;font-weight:700;color:#0b044d;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $emp['name'] }}</p>
-                        <p style="font-size:10px;color:#9999bb;margin:0">{{ $emp['position'] }}</p>
+        </div>
+        <div id="panelLate" style="display:none;padding:16px 20px 20px">
+            <div style="display:flex;flex-direction:column;gap:12px">
+                @forelse($lateBirds as $index => $bird)
+                    @php
+                        $rank = $index + 1;
+                        $avatarSize = $rank === 1 ? 48 : ($rank === 2 ? 44 : ($rank === 3 ? 40 : ($rank === 4 ? 38 : 36)));
+                        $nameSize = $rank === 1 ? '13.5px' : ($rank === 2 ? '13px' : '12.5px');
+                        $positionSize = $rank === 1 ? '11.5px' : '11px';
+                        $timeSize = $rank === 1 ? '13px' : ($rank === 2 ? '12.5px' : '12px');
+                        $padding = $rank === 1 ? '12px 0' : ($rank === 2 ? '10px 0' : '8px 0');
+                    @endphp
+                    <div style="display:flex;align-items:center;gap:12px;padding:{{ $padding }};border-bottom:{{ $rank < 5 ? '1px solid #fee2e2' : 'none' }}">
+                        <div style="min-width:26px;text-align:center;font-size:{{ $rank <= 3 ? '13px' : '12px' }};font-weight:700;color:#dc2626">{{ $rank }}</div>
+                        @if($bird['photo'])
+                            <img src="{{ $bird['photo'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:50%;object-fit:cover;border:2px solid #fecaca;flex-shrink:0">
+                        @else
+                            <div class="emp-avatar-dynamic" data-bg="{{ $bird['color'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:{{ $rank === 1 ? '18px' : ($rank === 2 ? '16px' : '14px') }};border:2px solid #fecaca;flex-shrink:0">{{ $bird['initials'] }}</div>
+                        @endif
+                        <div style="flex:1;min-width:0">
+                            <p style="font-size:{{ $nameSize }};font-weight:{{ $rank === 1 ? '700' : '600' }};color:#1e293b;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $bird['name'] }}</p>
+                            <p style="font-size:{{ $positionSize }};color:#64748b;margin:0;font-weight:500">{{ $bird['position'] }}</p>
+                        </div>
+                        <div style="text-align:right;flex-shrink:0">
+                            <p style="font-size:{{ $timeSize }};font-weight:700;color:#0b044d;margin:0 0 3px">{{ $bird['time_in'] }}</p>
+                            <p style="font-size:10px;color:#dc2626;font-weight:600;margin:0">+{{ $bird['late_minutes'] }}m</p>
+                        </div>
                     </div>
-                    <div style="text-align:right;flex-shrink:0;min-width:70px">
-                        <p style="font-size:18px;font-weight:900;color:#8e1e18;margin:0;line-height:1">{{ $emp['rate'] }}%</p>
-                        <p style="font-size:9px;color:#8e1e18;margin:2px 0 0;background:#fff4f4;padding:2px 6px;border-radius:4px;display:inline-block">✗ {{ $emp['absent_days'] }}d absent</p>
-                    </div>
-                </div>
                 @empty
-                <div style="text-align:center;padding:40px 20px;color:#9999bb">
-                    <div style="font-size:36px;margin-bottom:8px">✅</div>
-                    <p style="font-size:12px;font-weight:600;color:#15803d;margin:0">All employees doing great!</p>
-                </div>
+                    <div style="text-align:center;padding:32px 24px">
+                        <div style="width:48px;height:48px;border-radius:50%;background:#f0fdf4;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+                            <svg width="22" height="22" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 4px">No Late Arrivals Today</p>
+                        <p style="font-size:12px;color:#94a3b8;margin:0">All employees arrived on time! 🎉</p>
+                    </div>
                 @endforelse
             </div>
+        </div>
+    </div>
+
+    <div class="table-section" style="margin:0">
+        <div class="table-header">
+            <div>
+                <p class="table-title">Department Distribution</p>
+                <p class="table-sub">Headcount by department</p>
+            </div>
+        </div>
+        @php $total = $stats['total_employees']; $maxCount = $departments->max('count') ?? 1; @endphp
+        <div class="enterprise-card-body" style="padding:20px 24px">
+            @foreach($departments as $d)
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+                <div style="min-width:110px;font-weight:700;color:#111827;font-size:12px">{{ $d['name'] }}</div>
+                <div style="flex:1;height:32px;background:#f3f4f6;border-radius:6px;position:relative;overflow:hidden">
+                    <div style="height:100%;background:{{ $d['color'] }};border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;transition:width 0.3s ease;width:{{ $maxCount > 0 ? round($d['count']/$maxCount*100) : 0 }}%">
+                        <span style="color:#fff;font-weight:800;font-size:11px;text-shadow:0 1px 2px rgba(0,0,0,0.15)">{{ $d['count'] }}</span>
+                    </div>
+                </div>
+                <div style="min-width:60px;text-align:right;color:#667085;font-weight:600;font-size:11px">{{ $d['percentage'] }}%</div>
+            </div>
+            @endforeach
         </div>
     </div>
 </div>
@@ -485,7 +915,7 @@
     <div class="table-header" style="background:linear-gradient(135deg,#f0effe 0%,#fff 100%)">
         <div>
             <p class="table-title" style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:18px">📂</span> Employee Directory
+                Employee Directory
             </p>
             <p class="table-sub">All active government personnel | Real-time data</p>
         </div>
@@ -495,7 +925,7 @@
                 <input type="text" id="searchEmployee" placeholder="Search employees..." style="font-size:11px;padding:6px 12px 6px 32px;border-radius:6px;border:1.5px solid #e5e4f0;width:200px;font-family:inherit" oninput="searchEmployees(this.value)">
             </div>
             <select class="filter-select" id="filterDept" onchange="applyFilters()" style="font-size:11px">
-                <option value="">🏛️ All Departments</option>
+                <option value="">All Departments</option>
                 <option>Administration</option>
                 <option>Engineering</option>
                 <option>Health</option>
@@ -503,7 +933,7 @@
                 <option>HRMO</option>
             </select>
             <select class="filter-select" id="filterType" onchange="applyFilters()" style="font-size:11px">
-                <option value="">💼 All Types</option>
+                <option value="">All Types</option>
                 <option>Permanent</option>
                 <option>Job Order</option>
             </select>
@@ -593,92 +1023,90 @@
     </div>
 </div>
 
+</main>
+
 {{-- Performer Details Modal --}}
-<div id="performerDetailsModal" style="display:none;position:fixed;inset:0;background:rgba(11,4,77,0.6);backdrop-filter:blur(4px);z-index:2000;align-items:center;justify-content:center;padding:20px">
-    <div style="background:#fff;border-radius:16px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,0.25)">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:24px;border-bottom:1.5px solid #f0effe;background:linear-gradient(135deg,#f0effe 0%,#fff 100%)">
-            <div style="display:flex;align-items:center;gap:16px">
-                <div id="modalPerformerAvatar" style="width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fbbf24;box-shadow:0 4px 12px rgba(251,191,36,0.3)"></div>
+<div id="performerDetailsModal" style="display:none;position:fixed;inset:0;background:rgba(11,4,77,0.5);backdrop-filter:blur(6px);z-index:2000;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#fff;border-radius:20px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 2px 8px rgba(15,23,42,.04)">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:28px 32px;border-bottom:1px solid #f1f5f9">
+            <div style="display:flex;align-items:center;gap:20px">
+                <div id="modalPerformerAvatar" style="width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(15,23,42,.04)"></div>
                 <div>
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-                        <h3 id="modalPerformerName" style="margin:0;font-size:20px;font-weight:700;color:#0b044d"></h3>
-                        <span id="modalPerformerRank" style="font-size:24px"></span>
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                        <h3 id="modalPerformerName" style="margin:0;font-size:22px;font-weight:700;color:#0b044d"></h3>
+                        <span id="modalPerformerRank" style="font-size:22px"></span>
                     </div>
-                    <p id="modalPerformerPosition" style="margin:0;font-size:13px;color:#6b6a8a;font-weight:500"></p>
-                    <p id="modalPerformerDept" style="margin:0;font-size:12px;color:#9999bb"></p>
+                    <p id="modalPerformerPosition" style="margin:0 0 2px;font-size:14px;color:#64748b;font-weight:500"></p>
+                    <p id="modalPerformerDept" style="margin:0;font-size:13px;color:#94a3b8"></p>
                 </div>
             </div>
-            <button onclick="closePerformerModal()" style="background:none;border:none;font-size:28px;color:#6b6a8a;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;transition:all .2s" onmouseover="this.style.color='#0b044d'" onmouseout="this.style.color='#6b6a8a'">&times;</button>
+            <button onclick="closePerformerModal()" style="background:#f8fafc;border:none;font-size:20px;color:#64748b;cursor:pointer;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all .2s" onmouseover="this.style.background='#f1f5f9';this.style.color='#0b044d'" onmouseout="this.style.background='#f8fafc';this.style.color='#64748b'">&times;</button>
         </div>
-        <div style="padding:24px">
-            <div style="background:#f0f9ff;border-radius:12px;padding:20px;margin-bottom:24px;border:1.5px solid #22c55e">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="padding:32px">
+            <div style="background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(15,23,42,.04)">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
                     <div>
-                        <p style="font-size:12px;color:#22c55e;font-weight:600;margin:0 0 4px">⭐ ATTENDANCE PERFORMANCE</p>
-                        <p id="modalPeriodLabel" style="font-size:11px;color:#9999bb;margin:0"></p>
+                        <p style="font-size:11px;color:#3b82f6;font-weight:700;letter-spacing:0.5px;margin:0 0 4px">ATTENDANCE PERFORMANCE</p>
+                        <p id="modalPeriodLabel" style="font-size:12px;color:#64748b;margin:0"></p>
                     </div>
                     <div style="text-align:right">
-                        <p id="modalAttendanceRate" style="font-size:36px;font-weight:900;color:#22c55e;margin:0;line-height:1"></p>
-                        <p style="font-size:11px;color:#22c55e;margin:4px 0 0;font-weight:600">Attendance Rate</p>
+                        <p id="modalAttendanceRate" style="font-size:42px;font-weight:800;color:#3b82f6;margin:0;line-height:1"></p>
+                        <p style="font-size:11px;color:#3b82f6;margin:6px 0 0;font-weight:600">Attendance Rate</p>
                     </div>
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-                    <div style="background:#fff;border-radius:8px;padding:12px;text-align:center">
-                        <p style="font-size:24px;font-weight:800;color:#22c55e;margin:0" id="modalPresentDays"></p>
-                        <p style="font-size:11px;color:#9999bb;margin:4px 0 0;font-weight:600">✓ Days Present</p>
+                    <div style="background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(15,23,42,.04)">
+                        <p style="font-size:28px;font-weight:800;color:#22c55e;margin:0" id="modalPresentDays"></p>
+                        <p style="font-size:11px;color:#64748b;margin:6px 0 0;font-weight:600">Days Present</p>
                     </div>
-                    <div style="background:#fff;border-radius:8px;padding:12px;text-align:center">
-                        <p style="font-size:24px;font-weight:800;color:#8e1e18;margin:0" id="modalAbsentDays"></p>
-                        <p style="font-size:11px;color:#9999bb;margin:4px 0 0;font-weight:600">✕ Days Absent</p>
+                    <div style="background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(15,23,42,.04)">
+                        <p style="font-size:28px;font-weight:800;color:#ef4444;margin:0" id="modalAbsentDays"></p>
+                        <p style="font-size:11px;color:#64748b;margin:6px 0 0;font-weight:600">Days Absent</p>
                     </div>
-                    <div style="background:#fff;border-radius:8px;padding:12px;text-align:center">
-                        <p style="font-size:24px;font-weight:800;color:#d9bb00;margin:0" id="modalLateDays"></p>
-                        <p style="font-size:11px;color:#9999bb;margin:4px 0 0;font-weight:600">⏰ Late Arrivals</p>
-                    </div>
-                </div>
-            </div>
-
-            <div style="background:#fafafe;border-radius:12px;padding:20px;margin-bottom:24px;border:1.5px solid #f0effe">
-                <p style="font-size:13px;color:#0b044d;font-weight:700;margin:0 0 16px;display:flex;align-items:center;gap:8px">
-                    <span style="font-size:16px">📊</span> Performance Breakdown
-                </p>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-                    <div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                            <span style="font-size:12px;color:#5a5888;font-weight:600">Total Working Days</span>
-                            <span id="modalWorkingDays" style="font-size:14px;color:#0b044d;font-weight:700"></span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                            <span style="font-size:12px;color:#5a5888;font-weight:600">Present Days</span>
-                            <span id="modalPresentDays2" style="font-size:14px;color:#15803d;font-weight:700"></span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;align-items:center">
-                            <span style="font-size:12px;color:#5a5888;font-weight:600">Absent Days</span>
-                            <span id="modalAbsentDays2" style="font-size:14px;color:#dc2626;font-weight:700"></span>
-                        </div>
-                    </div>
-                    <div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                            <span style="font-size:12px;color:#5a5888;font-weight:600">Late Instances</span>
-                            <span id="modalLateDays2" style="font-size:14px;color:#f59e0b;font-weight:700"></span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                            <span style="font-size:12px;color:#5a5888;font-weight:600">Performance Tier</span>
-                            <span id="modalTier" style="font-size:12px;padding:4px 10px;border-radius:6px;font-weight:700"></span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;align-items:center">
-                            <span style="font-size:12px;color:#5a5888;font-weight:600">Attendance Rate</span>
-                            <span id="modalRate2" style="font-size:14px;color:#15803d;font-weight:700"></span>
-                        </div>
+                    <div style="background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(15,23,42,.04)">
+                        <p style="font-size:28px;font-weight:800;color:#f59e0b;margin:0" id="modalLateDays"></p>
+                        <p style="font-size:11px;color:#64748b;margin:6px 0 0;font-weight:600">Late Arrivals</p>
                     </div>
                 </div>
             </div>
 
-            <div style="background:linear-gradient(135deg,#fefce8 0%,#fff 100%);border-radius:12px;padding:20px;border:1.5px solid #f59e0b">
-                <p style="font-size:13px;color:#0b044d;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:8px">
-                    <span style="font-size:16px">🏆</span> Why Top Performer?
-                </p>
-                <div id="modalReason" style="font-size:12px;color:#5a5888;line-height:1.6"></div>
+            <div style="background:#f8fafc;border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(15,23,42,.04)">
+                <p style="font-size:13px;color:#0b044d;font-weight:700;margin:0 0 18px">Performance Breakdown</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+                    <div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                            <span style="font-size:13px;color:#64748b;font-weight:500">Total Working Days</span>
+                            <span id="modalWorkingDays" style="font-size:15px;color:#0b044d;font-weight:700"></span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                            <span style="font-size:13px;color:#64748b;font-weight:500">Present Days</span>
+                            <span id="modalPresentDays2" style="font-size:15px;color:#22c55e;font-weight:700"></span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <span style="font-size:13px;color:#64748b;font-weight:500">Absent Days</span>
+                            <span id="modalAbsentDays2" style="font-size:15px;color:#ef4444;font-weight:700"></span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                            <span style="font-size:13px;color:#64748b;font-weight:500">Late Instances</span>
+                            <span id="modalLateDays2" style="font-size:15px;color:#f59e0b;font-weight:700"></span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                            <span style="font-size:13px;color:#64748b;font-weight:500">Performance Tier</span>
+                            <span id="modalTier" style="font-size:11px;padding:5px 12px;border-radius:8px;font-weight:700"></span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <span style="font-size:13px;color:#64748b;font-weight:500">Attendance Rate</span>
+                            <span id="modalRate2" style="font-size:15px;color:#3b82f6;font-weight:700"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background:#fffbeb;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(15,23,42,.04)">
+                <p style="font-size:13px;color:#0b044d;font-weight:700;margin:0 0 14px">🏆 Why Top Performer?</p>
+                <div id="modalReason" style="font-size:13px;color:#64748b;line-height:1.7"></div>
             </div>
         </div>
     </div>
@@ -802,16 +1230,10 @@
 <script>
 function switchPerfTab(tab) {
     const isMonth = tab === 'month';
-    document.getElementById('perfPanelMonth').style.display = isMonth ? 'block' : 'none';
-    document.getElementById('perfPanelWeek').style.display  = isMonth ? 'none'  : 'block';
-    document.querySelector('.perf-bottom-month').style.display = isMonth ? 'block' : 'none';
-    document.querySelector('.perf-bottom-week').style.display  = isMonth ? 'none'  : 'block';
-    document.getElementById('perfTabMonth').style.cssText = isMonth
-        ? 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #0b044d;background:#0b044d;color:#fff;cursor:pointer;font-weight:600;transition:all .2s'
-        : 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600;transition:all .2s';
-    document.getElementById('perfTabWeek').style.cssText = isMonth
-        ? 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600;transition:all .2s'
-        : 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #0b044d;background:#0b044d;color:#fff;cursor:pointer;font-weight:600;transition:all .2s';
+    document.getElementById('perfPanelMonth').style.display = isMonth ? 'flex' : 'none';
+    document.getElementById('perfPanelWeek').style.display  = isMonth ? 'none'  : 'flex';
+    document.getElementById('perfTabMonth').classList.toggle('active', isMonth);
+    document.getElementById('perfTabWeek').classList.toggle('active', !isMonth);
 }
 
 
@@ -819,13 +1241,9 @@ function switchBirdsTab(tab) {
     const isEarly = tab === 'early';
     document.getElementById('panelEarly').style.display = isEarly ? 'grid' : 'none';
     document.getElementById('panelLate').style.display = isEarly ? 'none' : 'grid';
-    document.getElementById('birdsTabTitle').textContent = isEarly ? '🌅 Top 10 Early Birds Today' : '🐦 Top 10 Late Birds Today';
-    document.getElementById('tabEarly').style.cssText = isEarly
-        ? 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #0b044d;background:#0b044d;color:#fff;cursor:pointer;font-weight:600'
-        : 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600';
-    document.getElementById('tabLate').style.cssText = isEarly
-        ? 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #e5e4f0;background:#fff;color:#5a5888;cursor:pointer;font-weight:600'
-        : 'font-size:11px;padding:5px 14px;border-radius:6px;border:1.5px solid #8e1e18;background:#8e1e18;color:#fff;cursor:pointer;font-weight:600';
+    document.getElementById('birdsTabTitle').textContent = isEarly ? 'Earliest Time-ins Today' : 'Late Arrivals Today';
+    document.getElementById('tabEarly').classList.toggle('active', isEarly);
+    document.getElementById('tabLate').classList.toggle('active', !isEarly);
 }
 
 const employeeData = @json($chartData['employees']);
@@ -835,6 +1253,16 @@ function initCharts() {
     const ctx1 = document.getElementById('employeeChart').getContext('2d');
     const ctx2 = document.getElementById('attendanceChart').getContext('2d');
 
+    // Create gradient for Employee Chart
+    const gradientEmp = ctx1.createLinearGradient(0, 0, 0, 400);
+    gradientEmp.addColorStop(0, 'rgba(11, 4, 77, 0.2)');
+    gradientEmp.addColorStop(1, 'rgba(11, 4, 77, 0.01)');
+
+    // Create gradient for Attendance Chart
+    const gradientAtt = ctx2.createLinearGradient(0, 0, 0, 400);
+    gradientAtt.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+    gradientAtt.addColorStop(1, 'rgba(59, 130, 246, 0.01)');
+
     employeeChart = new Chart(ctx1, {
         type: 'line',
         data: {
@@ -843,7 +1271,8 @@ function initCharts() {
                 label: 'Total Employees',
                 data: employeeData.month.data,
                 borderColor: '#0b044d',
-                backgroundColor: 'rgba(11, 4, 77, 0.1)',
+                backgroundColor: gradientEmp,
+                borderWidth: 2.5,
                 tension: 0.4,
                 fill: true,
                 pointRadius: 4,
@@ -891,20 +1320,21 @@ function initCharts() {
             datasets: [{
                 label: 'Attendance Rate (%)',
                 data: attendanceData.month.data,
-                borderColor: '#15803d',
-                backgroundColor: 'rgba(21, 128, 61, 0.1)',
+                borderColor: '#3b82f6',
+                backgroundColor: gradientAtt,
+                borderWidth: 2.5,
                 tension: 0.4,
                 fill: true,
                 pointRadius: 4,
                 pointHoverRadius: 6,
-                pointBackgroundColor: '#15803d',
+                pointBackgroundColor: '#3b82f6',
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
                 tooltip: { 
@@ -924,11 +1354,23 @@ function initCharts() {
                     beginAtZero: true, 
                     max: 120, 
                     grid: { color: '#f7f6ff', drawBorder: false },
-                    ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' } }
+                    ticks: { 
+                        color: '#9999bb', 
+                        font: { size: 11, family: 'Poppins' },
+                        padding: 8
+                    }
                 },
                 x: { 
-                    grid: { display: false, drawBorder: false },
-                    ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' } }
+                    offset: false,
+                    grid: { display: false, drawBorder: false, offset: false },
+                    ticks: { 
+                        color: '#9999bb', 
+                        font: { size: 11, family: 'Poppins' },
+                        padding: 2,
+                        autoSkip: true,
+                        maxRotation: 0,
+                        minRotation: 0
+                    }
                 }
             }
         }
@@ -1224,3 +1666,4 @@ document.addEventListener('keydown', e => {
 });
 </script>
 @endsection
+    

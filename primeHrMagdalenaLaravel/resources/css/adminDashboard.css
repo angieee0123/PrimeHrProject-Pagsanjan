@@ -161,8 +161,9 @@
 .stat-card {
   background: #ffffff; border: 1.5px solid #eceaf8; border-radius: 13px;
   padding: 18px 20px; transition: box-shadow 0.2s, border-color 0.2s;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 1px 2px rgba(15, 23, 42, 0.02);
 }
-.stat-card:hover { box-shadow: 0 6px 22px rgba(11,4,77,0.08); border-color: #dddcf0; }
+.stat-card:hover { box-shadow: 0 6px 22px rgba(11,4,77,0.08), 0 2px 6px rgba(11,4,77,0.04); border-color: #dddcf0; }
 .stat-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
 .stat-label { font-size: 12px; font-weight: 600; color: #9999bb; margin: 0; }
 .stat-icon-wrap {
@@ -295,10 +296,11 @@
   border-bottom: 1.5px solid #f0effe; white-space: nowrap;
 }
 .payroll-table td {
-  padding: 13px 16px; border-bottom: 1px solid #f7f6ff;
-  font-size: 13px; color: #0b044d; vertical-align: middle;
+  padding: 14px 16px; border-bottom: 1px solid #f1f5f9;
+  font-size: 13px; color: #334155; vertical-align: middle;
 }
-.payroll-table tbody tr:hover { background: #fafafe; }
+.payroll-table tbody tr { transition: background 0.15s ease; }
+.payroll-table tbody tr:hover { background: #f8fafc; }
 .payroll-table tbody tr:last-child td { border-bottom: none; }
 
 .emp-cell { display: flex; align-items: center; gap: 10px; }
@@ -308,26 +310,26 @@
   font-size: 11px; font-weight: 700; color: #ffffff; flex-shrink: 0;
 }
 .emp-avatar.lg { width: 44px; height: 44px; border-radius: 11px; font-size: 14px; }
-.emp-name { font-size: 13px; font-weight: 600; color: #0b044d; margin: 0 0 2px; }
-.emp-id   { font-size: 11px; color: #aaa8cc; margin: 0; }
+.emp-name { font-size: 13px; font-weight: 600; color: #1e293b; margin: 0 0 2px; }
+.emp-id   { font-size: 11px; color: #94a3b8; margin: 0; font-weight: 500; }
 
-.position-cell { font-size: 12.5px; color: #5a5888; max-width: 180px; }
+.position-cell { font-size: 12.5px; color: #475569; font-weight: 500; max-width: 180px; }
 .dept-tag {
-  display: inline-block; background: #f0effe; color: #0b044d;
-  font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 6px;
-  border: 1px solid #dddcf0; white-space: nowrap;
+  display: inline-block; background: #f1f5f9; color: #475569;
+  font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px;
+  border: 1px solid #e2e8f0; white-space: nowrap;
 }
 .pay-cell    { font-size: 13px; font-weight: 600; color: #0b044d; }
 .deduction   { font-size: 13px; font-weight: 600; color: #8e1e18; }
 .net-pay     { font-size: 13px; font-weight: 700; color: #15803d; }
 
 .badge-status {
-  display: inline-block; font-size: 11px; font-weight: 700;
-  padding: 3px 10px; border-radius: 20px;
+  display: inline-block; font-size: 11px; font-weight: 600;
+  padding: 4px 12px; border-radius: 20px;
 }
-.badge-status.processed { background: #e8f9ef; color: #15803d; }
-.badge-status.pending   { background: #fefce8; color: #a16207; }
-.badge-status.on-hold   { background: #fdf0ef; color: #8e1e18; }
+.badge-status.processed { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.badge-status.pending   { background: #fef9c3; color: #ca8a04; border: 1px solid #fde047; }
+.badge-status.on-hold   { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
 
 .btn-view {
   padding: 5px 14px; border: 1.5px solid #e4e3f0; border-radius: 7px;
@@ -422,9 +424,9 @@
 .mb-0 { margin-bottom: 0 !important; }
 .no-margin { margin: 0 !important; }
 
-.emp-type-tag { border: 1.5px solid transparent; }
-.emp-type-tag.is-permanent { background: #e8f9ef; color: #15803d; border-color: #bbf7d0; }
-.emp-type-tag.is-joborder { background: #fefce8; color: #a16207; border-color: #fde68a; }
+.emp-type-tag { border: 1px solid transparent; }
+.emp-type-tag.is-permanent { background: #dbeafe; color: #1e40af; border-color: #93c5fd; font-weight: 600; }
+.emp-type-tag.is-joborder { background: #fce7f3; color: #be185d; border-color: #fbcfe8; font-weight: 600; }
 .emp-avatar-sm { width: 30px !important; height: 30px !important; font-size: 10px !important; }
 .dept-fill { height: 100%; border-radius: 99px; }
 .event-icon {
