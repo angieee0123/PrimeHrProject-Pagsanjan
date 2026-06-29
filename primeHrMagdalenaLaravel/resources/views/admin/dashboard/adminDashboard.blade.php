@@ -139,7 +139,7 @@
     margin-bottom: 22px;
     padding: 22px 24px;
     border: 1px solid var(--eh-line);
-    border-radius: 18px;
+    border-radius: 12px;
     background: var(--eh-card);
     box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .03);
 }
@@ -181,7 +181,7 @@
     width: 42px;
     height: 42px;
     border: 1px solid var(--eh-line);
-    border-radius: 12px;
+    border-radius: 10px;
     background: #fff;
     color: var(--eh-blue);
     cursor: pointer;
@@ -212,7 +212,7 @@
     min-width: 188px;
     padding: 8px 12px 8px 8px;
     border: 1px solid var(--eh-line);
-    border-radius: 14px;
+    border-radius: 10px;
     background: #fff;
 }
 
@@ -222,7 +222,7 @@
     justify-content: center;
     width: 38px;
     height: 38px;
-    border-radius: 11px;
+    border-radius: 10px;
     background: var(--eh-blue);
     color: #fff;
     font-size: 12px;
@@ -257,7 +257,7 @@
 .enterprise-hr-dashboard .chart-card,
 .enterprise-card {
     border: 1px solid var(--eh-line) !important;
-    border-radius: 16px !important;
+    border-radius: 12px !important;
     background: var(--eh-card) !important;
     box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .03) !important;
 }
@@ -304,7 +304,7 @@
     width: 40px !important;
     height: 40px !important;
     border: 1px solid #dbe0ea;
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     background: #f8fafc !important;
 }
 
@@ -321,7 +321,7 @@
     margin-bottom: 18px;
     padding: 14px 16px;
     border: 1px solid var(--eh-line) !important;
-    border-radius: 16px !important;
+    border-radius: 12px !important;
     background: #fff !important;
     box-shadow: 0 2px 8px rgba(15, 23, 42, .03);
 }
@@ -340,7 +340,7 @@
 
 .enterprise-secondary-grid {
     display: grid;
-    grid-template-columns: .78fr 1fr 320px;
+    grid-template-columns: .78fr 1fr 360px;
     gap: 18px;
     align-items: stretch;
     margin-bottom: 18px;
@@ -348,7 +348,7 @@
 
 .enterprise-compact-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 520px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 18px;
     margin-bottom: 18px;
 }
@@ -381,7 +381,7 @@
     justify-content: center;
     width: 26px;
     height: 26px;
-    border-radius: 9px;
+    border-radius: 8px;
     background: #f2f4f7;
     color: var(--eh-blue);
     font-size: 12px;
@@ -473,7 +473,7 @@
 .enterprise-hr-dashboard .filter-select,
 .enterprise-hr-dashboard .btn-view,
 .enterprise-hr-dashboard input[type="text"] {
-    border-radius: 10px !important;
+    border-radius: 8px !important;
     font-weight: 700 !important;
     transition: all .18s ease !important;
 }
@@ -532,7 +532,7 @@
 .enterprise-hr-dashboard #panelEarly > div,
 .enterprise-hr-dashboard #panelLate > div {
     border-color: var(--eh-line) !important;
-    border-radius: 14px !important;
+    border-radius: 10px !important;
     background: #fff !important;
     box-shadow: 0 2px 6px rgba(15, 23, 42, .03);
     transition: all .18s ease;
@@ -546,7 +546,7 @@
 }
 
 .enterprise-hr-dashboard .event-icon {
-    border-radius: 10px !important;
+    border-radius: 8px !important;
 }
 
 #employee-directory {
@@ -634,16 +634,22 @@
     <div class="chart-card">
         <div class="chart-header">
             <div>
-                <p class="chart-title">Employee Growth</p>
-                <p class="chart-sub">Total employees over time</p>
+                <p class="chart-title" id="dynamicChartTitle">Employee Growth</p>
+                <p class="chart-sub" id="dynamicChartSub">Total employees over time</p>
             </div>
-            <div class="chart-tabs">
-                <button class="chart-tab" onclick="switchEmployeeChart('week')">Week</button>
-                <button class="chart-tab active" onclick="switchEmployeeChart('month')">Month</button>
-                <button class="chart-tab" onclick="switchEmployeeChart('year')">Year</button>
+            <div style="display:flex;gap:8px;align-items:center">
+                <div style="display:flex;gap:6px">
+                    <button id="tabEmployees" class="chart-tab active" onclick="switchMainChart('employees')" style="font-size:11px">Employees</button>
+                    <button id="tabSalary" class="chart-tab" onclick="switchMainChart('salary')" style="font-size:11px">Payroll by Designation</button>
+                </div>
+                <div class="chart-tabs" id="periodTabs" style="border-left:1px solid #e2e8f0;padding-left:8px">
+                    <button class="chart-tab" onclick="switchPeriodChart('week')">Week</button>
+                    <button class="chart-tab active" onclick="switchPeriodChart('month')">Month</button>
+                    <button class="chart-tab" onclick="switchPeriodChart('year')">Year</button>
+                </div>
             </div>
         </div>
-        <canvas id="employeeChart" style="max-height:310px"></canvas>
+        <canvas id="dynamicChart" style="max-height:310px"></canvas>
     </div>
 
     <div class="table-section enterprise-sidebar-card" style="margin-bottom:0">
@@ -768,32 +774,42 @@
         </div>
     </div>
 
-    <div class="table-section" style="margin:0">
+    <div class="table-section enterprise-sidebar-card" style="margin:0">
         <div class="table-header">
             <div>
-                <p class="table-title">Announcements</p>
-                <p class="table-sub">Upcoming HR events</p>
+                <p class="table-title">Top 5 Highest Earners</p>
+                <p class="table-sub">Based on average daily earnings this month</p>
             </div>
-            <button class="btn-export" style="font-size:11px;padding:6px 12px" onclick="alert('Manage events feature coming soon!')">Manage</button>
         </div>
-        <div class="enterprise-card-body enterprise-list">
-            @php
-            $events = [
-                ['label'=>'Payroll Release','date'=>'Jun 15','color'=>'#0b044d','icon'=>'₱'],
-                ['label'=>'CSC Training','date'=>'Jun 18','color'=>'#d9bb00','icon'=>'T'],
-                ['label'=>'Performance Review','date'=>'Jun 25','color'=>'#22c55e','icon'=>'R'],
-                ['label'=>'Town Hall Meeting','date'=>'Jun 28','color'=>'#0b044d','icon'=>'M'],
-            ];
-            @endphp
-            @foreach($events as $ev)
-            <div class="enterprise-list-item">
-                <div class="event-icon event-icon-dynamic" data-bg="{{ $ev['color'] }}" style="font-size:12px">{{ $ev['icon'] }}</div>
-                <div class="enterprise-person">
-                    <strong>{{ $ev['label'] }}</strong>
-                    <span>{{ $ev['date'] }}, {{ now()->year }}</span>
-                </div>
+        <div style="padding:16px 20px 20px">
+            <div style="display:flex;flex-direction:column;gap:12px">
+                @forelse($topEarners as $earner)
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:{{ $earner['rank'] < 5 ? '1px solid #f1f5f9' : 'none' }}">
+                        <div style="min-width:26px;height:26px;border-radius:9px;text-align:center;display:inline-flex;align-items:center;justify-content:center;font-size:{{ $earner['rank'] <= 3 ? '13px' : '12px' }};font-weight:{{ $earner['rank'] === 1 ? '800' : '700' }};background:{{ $earner['rank'] <= 3 ? '#fef3c7' : '#f1f5f9' }};color:{{ $earner['rank'] <= 3 ? '#f59e0b' : '#94a3b8' }}">{{ $earner['rank'] }}</div>
+                        @if($earner['photo'])
+                            <img src="{{ $earner['photo'] }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0">
+                        @else
+                            <div class="emp-avatar-dynamic" data-bg="{{ $earner['color'] }}" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;border:2px solid #e2e8f0;flex-shrink:0">{{ $earner['initials'] }}</div>
+                        @endif
+                        <div style="flex:1;min-width:0">
+                            <p style="font-size:13px;font-weight:600;color:#1e293b;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $earner['name'] }}</p>
+                            <p style="font-size:11px;color:#64748b;margin:0;font-weight:500">{{ $earner['designation'] }}</p>
+                        </div>
+                        <div style="text-align:right;flex-shrink:0">
+                            <p style="font-size:14px;font-weight:700;color:#0b044d;margin:0">₱{{ number_format($earner['avg_earnings'], 2) }}</p>
+                            <p style="font-size:10px;color:#94a3b8;margin:2px 0 0;font-weight:500">avg/day</p>
+                        </div>
+                    </div>
+                @empty
+                    <div style="text-align:center;padding:32px 24px">
+                        <div style="width:48px;height:48px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+                            <svg width="22" height="22" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        </div>
+                        <p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 4px">No Salary Data Available</p>
+                        <p style="font-size:12px;color:#94a3b8;margin:0">Salary computations will appear here</p>
+                    </div>
+                @endforelse
             </div>
-            @endforeach
         </div>
     </div>
 </div>
@@ -824,15 +840,15 @@
                     <div style="display:flex;align-items:center;gap:12px;padding:{{ $padding }};border-bottom:{{ $rank < 5 ? '1px solid #f1f5f9' : 'none' }}">
                         <div style="min-width:26px;text-align:center;font-size:{{ $rank <= 3 ? '13px' : '12px' }};font-weight:{{ $rank === 1 ? '800' : '700' }};color:{{ $rank === 1 ? '#fbbf24' : ($rank === 2 ? '#94a3b8' : ($rank === 3 ? '#fb923c' : '#94a3b8')) }}">{{ $rank }}</div>
                         @if($bird['photo'])
-                            <img src="{{ $bird['photo'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0">
+                            <img src="{{ $bird['photo'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:10px;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0">
                         @else
-                            <div class="emp-avatar-dynamic" data-bg="{{ $bird['color'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:{{ $rank === 1 ? '18px' : ($rank === 2 ? '16px' : '14px') }};border:2px solid #e2e8f0;flex-shrink:0">{{ $bird['initials'] }}</div>
+                            <div class="emp-avatar-dynamic" data-bg="{{ $bird['color'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:{{ $rank === 1 ? '18px' : ($rank === 2 ? '16px' : '14px') }};border:2px solid #e2e8f0;flex-shrink:0">{{ $bird['initials'] }}</div>
                         @endif
                         <div style="flex:1;min-width:0">
                             <p style="font-size:{{ $nameSize }};font-weight:{{ $rank === 1 ? '700' : '600' }};color:#1e293b;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $bird['name'] }}</p>
                             <p style="font-size:{{ $positionSize }};color:#64748b;margin:0;font-weight:500">{{ $bird['position'] }}</p>
                         </div>
-                        <div style="text-align:right;flex-shrink:0">
+                        <div style="text-align:right;flex-shrink:0;margin-right:16px">
                             <p style="font-size:{{ $timeSize }};font-weight:700;color:#0b044d;margin:0">{{ $bird['time_in'] }}</p>
                         </div>
                     </div>
@@ -861,15 +877,15 @@
                     <div style="display:flex;align-items:center;gap:12px;padding:{{ $padding }};border-bottom:{{ $rank < 5 ? '1px solid #fee2e2' : 'none' }}">
                         <div style="min-width:26px;text-align:center;font-size:{{ $rank <= 3 ? '13px' : '12px' }};font-weight:700;color:#dc2626">{{ $rank }}</div>
                         @if($bird['photo'])
-                            <img src="{{ $bird['photo'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:50%;object-fit:cover;border:2px solid #fecaca;flex-shrink:0">
+                            <img src="{{ $bird['photo'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:10px;object-fit:cover;border:2px solid #fecaca;flex-shrink:0">
                         @else
-                            <div class="emp-avatar-dynamic" data-bg="{{ $bird['color'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:{{ $rank === 1 ? '18px' : ($rank === 2 ? '16px' : '14px') }};border:2px solid #fecaca;flex-shrink:0">{{ $bird['initials'] }}</div>
+                            <div class="emp-avatar-dynamic" data-bg="{{ $bird['color'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:{{ $rank === 1 ? '18px' : ($rank === 2 ? '16px' : '14px') }};border:2px solid #fecaca;flex-shrink:0">{{ $bird['initials'] }}</div>
                         @endif
                         <div style="flex:1;min-width:0">
                             <p style="font-size:{{ $nameSize }};font-weight:{{ $rank === 1 ? '700' : '600' }};color:#1e293b;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $bird['name'] }}</p>
                             <p style="font-size:{{ $positionSize }};color:#64748b;margin:0;font-weight:500">{{ $bird['position'] }}</p>
                         </div>
-                        <div style="text-align:right;flex-shrink:0">
+                        <div style="text-align:right;flex-shrink:0;margin-right:16px">
                             <p style="font-size:{{ $timeSize }};font-weight:700;color:#0b044d;margin:0 0 3px">{{ $bird['time_in'] }}</p>
                             <p style="font-size:10px;color:#dc2626;font-weight:600;margin:0">+{{ $bird['late_minutes'] }}m</p>
                         </div>
@@ -881,6 +897,47 @@
                         </div>
                         <p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 4px">No Late Arrivals Today</p>
                         <p style="font-size:12px;color:#94a3b8;margin:0">All employees arrived on time! 🎉</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    <div class="table-section" style="margin:0">
+        <div class="table-header">
+            <div>
+                <p class="table-title">Recent Leave Filers</p>
+                <p class="table-sub">Latest 5 leave applications filed</p>
+            </div>
+            <button class="btn-export" style="font-size:11px;padding:6px 12px" onclick="window.location.href='/admin/leave'">View All</button>
+        </div>
+        <div style="padding:16px 20px 20px">
+            <div style="display:flex;flex-direction:column;gap:12px">
+                @forelse($recentLeaveFilers as $filer)
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:{{ $filer['rank'] < 5 ? '1px solid #f1f5f9' : 'none' }}">
+                        <div style="min-width:26px;height:26px;border-radius:8px;text-align:center;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:#f1f5f9;color:#64748b">{{ $filer['rank'] }}</div>
+                        @if($filer['photo'])
+                            <img src="{{ $filer['photo'] }}" style="width:40px;height:40px;border-radius:10px;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0">
+                        @else
+                            <div class="emp-avatar-dynamic" data-bg="{{ $filer['color'] }}" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;border:2px solid #e2e8f0;flex-shrink:0">{{ $filer['initials'] }}</div>
+                        @endif
+                        <div style="flex:1;min-width:0">
+                            <p style="font-size:13px;font-weight:600;color:#1e293b;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $filer['name'] }}</p>
+                            <p style="font-size:11px;color:#64748b;margin:0 0 3px;font-weight:500">{{ $filer['position'] }}</p>
+                            <p style="font-size:10px;color:#94a3b8;margin:0">{{ $filer['leave_type'] }} · {{ $filer['days'] }} day{{ $filer['days'] > 1 ? 's' : '' }}</p>
+                        </div>
+                        <div style="text-align:right;flex-shrink:0">
+                            <div style="font-size:10px;padding:4px 8px;border-radius:6px;font-weight:700;background:{{ $filer['status_bg'] }};color:{{ $filer['status_color'] }};margin-bottom:4px">{{ $filer['status'] }}</div>
+                            <p style="font-size:10px;color:#94a3b8;margin:0;font-weight:500">{{ $filer['start_date'] }} - {{ $filer['end_date'] }}</p>
+                        </div>
+                    </div>
+                @empty
+                    <div style="text-align:center;padding:32px 24px">
+                        <div style="width:48px;height:48px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+                            <svg width="22" height="22" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        </div>
+                        <p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 4px">No Recent Leave Applications</p>
+                        <p style="font-size:12px;color:#94a3b8;margin:0">Leave applications will appear here</p>
                     </div>
                 @endforelse
             </div>
@@ -1247,23 +1304,24 @@ function switchBirdsTab(tab) {
 }
 
 const employeeData = @json($chartData['employees']);
+const salaryData = @json($chartData['salaryTrends']);
 const attendanceData = @json($chartData['attendance']);
 
-function initCharts() {
-    const ctx1 = document.getElementById('employeeChart').getContext('2d');
-    const ctx2 = document.getElementById('attendanceChart').getContext('2d');
+let currentChartType = 'employees';
+let currentPeriod = 'month';
+let dynamicChart;
 
-    // Create gradient for Employee Chart
-    const gradientEmp = ctx1.createLinearGradient(0, 0, 0, 400);
-    gradientEmp.addColorStop(0, 'rgba(11, 4, 77, 0.2)');
-    gradientEmp.addColorStop(1, 'rgba(11, 4, 77, 0.01)');
+function initCharts() {
+    const ctx1 = document.getElementById('dynamicChart').getContext('2d');
+    const ctx2 = document.getElementById('attendanceChart').getContext('2d');
 
     // Create gradient for Attendance Chart
     const gradientAtt = ctx2.createLinearGradient(0, 0, 0, 400);
     gradientAtt.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
     gradientAtt.addColorStop(1, 'rgba(59, 130, 246, 0.01)');
 
-    employeeChart = new Chart(ctx1, {
+    // Initialize with employee growth
+    dynamicChart = new Chart(ctx1, {
         type: 'line',
         data: {
             labels: employeeData.month.labels,
@@ -1271,7 +1329,7 @@ function initCharts() {
                 label: 'Total Employees',
                 data: employeeData.month.data,
                 borderColor: '#0b044d',
-                backgroundColor: gradientEmp,
+                backgroundColor: 'rgba(11, 4, 77, 0.1)',
                 borderWidth: 2.5,
                 tension: 0.4,
                 fill: true,
@@ -1286,7 +1344,9 @@ function initCharts() {
             responsive: true,
             maintainAspectRatio: true,
             plugins: {
-                legend: { display: false },
+                legend: { 
+                    display: false
+                },
                 tooltip: { 
                     mode: 'index', 
                     intersect: false,
@@ -1301,7 +1361,7 @@ function initCharts() {
             },
             scales: {
                 y: { 
-                    beginAtZero: true, 
+                    beginAtZero: true,
                     grid: { color: '#f7f6ff', drawBorder: false },
                     ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' } }
                 },
@@ -1317,26 +1377,57 @@ function initCharts() {
         type: 'line',
         data: {
             labels: attendanceData.month.labels,
-            datasets: [{
-                label: 'Attendance Rate (%)',
-                data: attendanceData.month.data,
-                borderColor: '#3b82f6',
-                backgroundColor: gradientAtt,
-                borderWidth: 2.5,
-                tension: 0.4,
-                fill: true,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                pointBackgroundColor: '#3b82f6',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2
-            }]
+            datasets: [
+                {
+                    label: 'Attendance Rate (%)',
+                    data: attendanceData.month.data,
+                    borderColor: '#3b82f6',
+                    backgroundColor: gradientAtt,
+                    borderWidth: 2.5,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    order: 2
+                },
+                {
+                    label: 'Late Arrivals (%)',
+                    data: attendanceData.month.lateData,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    order: 1
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false },
+                legend: { 
+                    display: true,
+                    position: 'top',
+                    align: 'end',
+                    labels: {
+                        boxWidth: 12,
+                        boxHeight: 12,
+                        padding: 12,
+                        font: { size: 11, family: 'Poppins', weight: '600' },
+                        color: '#64748b',
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
                 tooltip: { 
                     mode: 'index', 
                     intersect: false,
@@ -1346,7 +1437,7 @@ function initCharts() {
                     borderColor: '#eceaf8',
                     borderWidth: 1.5,
                     padding: 12,
-                    displayColors: false
+                    displayColors: true
                 }
             },
             scales: {
@@ -1377,13 +1468,93 @@ function initCharts() {
     });
 }
 
-function switchEmployeeChart(period) {
-    const chartCard = document.getElementById('employeeChart').closest('.chart-card');
-    chartCard.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
-    employeeChart.data.labels = employeeData[period].labels;
-    employeeChart.data.datasets[0].data = employeeData[period].data;
-    employeeChart.update();
+function switchMainChart(type) {
+    currentChartType = type;
+    document.getElementById('tabEmployees').classList.toggle('active', type === 'employees');
+    document.getElementById('tabSalary').classList.toggle('active', type === 'salary');
+    
+    if (type === 'employees') {
+        document.getElementById('dynamicChartTitle').textContent = 'Employee Growth';
+        document.getElementById('dynamicChartSub').textContent = 'Total employees over time';
+        // Keep current period for employees
+        switchPeriodChart(currentPeriod);
+    } else {
+        document.getElementById('dynamicChartTitle').textContent = 'Payroll by Designation';
+        document.getElementById('dynamicChartSub').textContent = 'Total payroll amounts per designation';
+        // Default to year for payroll
+        switchPeriodChart('year');
+    }
+}
+
+function switchPeriodChart(period) {
+    currentPeriod = period;
+    const chartCard = document.getElementById('dynamicChart').closest('.chart-card');
+    chartCard.querySelectorAll('#periodTabs .chart-tab').forEach(t => {
+        t.classList.remove('active');
+        if (t.textContent.toLowerCase() === period) {
+            t.classList.add('active');
+        }
+    });
+    
+    if (currentChartType === 'employees') {
+        dynamicChart.config.type = 'line';
+        dynamicChart.data.labels = employeeData[period].labels;
+        dynamicChart.data.datasets = [{
+            label: 'Total Employees',
+            data: employeeData[period].data,
+            borderColor: '#0b044d',
+            backgroundColor: 'rgba(11, 4, 77, 0.1)',
+            borderWidth: 2.5,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#0b044d',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
+        }];
+        dynamicChart.options.plugins.legend.display = false;
+        dynamicChart.options.scales.y.ticks.callback = function(value) {
+            return value;
+        };
+    } else {
+        // Payroll by designation
+        dynamicChart.config.type = 'line';
+        dynamicChart.data.labels = salaryData[period].labels;
+        dynamicChart.data.datasets = salaryData[period].datasets.map(ds => ({
+            label: ds.label,
+            data: ds.data,
+            borderColor: ds.color,
+            backgroundColor: ds.color + '20',
+            borderWidth: 2.5,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            pointBackgroundColor: ds.color,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
+        }));
+        dynamicChart.options.plugins.legend.display = true;
+        dynamicChart.options.plugins.legend.position = 'top';
+        dynamicChart.options.plugins.legend.align = 'end';
+        dynamicChart.options.plugins.legend.labels = {
+            boxWidth: 12,
+            boxHeight: 12,
+            padding: 12,
+            font: { size: 11, family: 'Poppins', weight: '600' },
+            color: '#64748b',
+            usePointStyle: true,
+            pointStyle: 'circle'
+        };
+        dynamicChart.options.scales.y.ticks.callback = function(value) {
+            if (value >= 1000000) return '₱' + (value / 1000000).toFixed(1) + 'M';
+            if (value >= 1000) return '₱' + (value / 1000).toFixed(1) + 'K';
+            return '₱' + value.toLocaleString();
+        };
+    }
+    
+    dynamicChart.update();
 }
 
 function switchAttendanceChart(period) {
@@ -1392,6 +1563,7 @@ function switchAttendanceChart(period) {
     event.target.classList.add('active');
     attendanceChart.data.labels = attendanceData[period].labels;
     attendanceChart.data.datasets[0].data = attendanceData[period].data;
+    attendanceChart.data.datasets[1].data = attendanceData[period].lateData;
     attendanceChart.update();
 }
 

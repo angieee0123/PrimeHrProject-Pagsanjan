@@ -71,7 +71,7 @@ class AdminDashboardController extends Controller
         $leaveRequests = LeaveApplication::with(['employee', 'leaveType'])
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
-            ->limit(3)
+            ->limit(5)
             ->get()
             ->map(function($leave) {
                 $emp = $leave->employee;
@@ -93,6 +93,44 @@ class AdminDashboardController extends Controller
                     'id' => $leave->id,
                 ];
             });
+        
+        // Top 5 Recent Leave Filers
+        $recentLeaveFilers = LeaveApplication::with(['employee.employmentDetail.designationRelation', 'leaveType'])
+            ->whereIn('status', ['pending', 'approved'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function($leave, $index) {
+                $emp = $leave->employee;
+                if (!$emp) return null;
+                
+                $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
+                $colors = ['#0b044d', '#8e1e18', '#15803d', '#a16207', '#7c3aed'];
+                
+                $days = Carbon::parse($leave->start_date)->diffInDays(Carbon::parse($leave->end_date)) + 1;
+                
+                // Status badge
+                $statusColor = $leave->status === 'approved' ? '#22c55e' : ($leave->status === 'pending' ? '#f59e0b' : '#ef4444');
+                $statusBg = $leave->status === 'approved' ? '#f0fdf4' : ($leave->status === 'pending' ? '#fffbeb' : '#fef2f2');
+                
+                return [
+                    'rank' => $index + 1,
+                    'initials' => $initials,
+                    'color' => $colors[$index % count($colors)],
+                    'photo' => $emp->photo,
+                    'name' => $emp->first_name . ' ' . $emp->last_name,
+                    'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
+                    'leave_type' => $leave->leaveType->leave_name ?? 'Leave',
+                    'days' => $days,
+                    'start_date' => Carbon::parse($leave->start_date)->format('M d'),
+                    'end_date' => Carbon::parse($leave->end_date)->format('M d'),
+                    'status' => ucfirst($leave->status),
+                    'status_color' => $statusColor,
+                    'status_bg' => $statusBg,
+                    'filed_date' => Carbon::parse($leave->created_at)->diffForHumans(),
+                ];
+            })
+            ->filter();
         
         // Department breakdown - ordered by member count (most to least)
         $departments = Department::where('status', 'Active')
@@ -241,6 +279,32 @@ class AdminDashboardController extends Controller
             })
             ->filter();
         
+        // Top 5 Highest Earners
+        $topEarners = DB::table('daily_salary_computations')
+            ->join('employees', 'daily_salary_computations.employee_id', '=', 'employees.id')
+            ->join('employment_details', 'employees.id', '=', 'employment_details.employee_id')
+            ->join('designations', 'employment_details.designation_id', '=', 'designations.id')
+            ->selectRaw('employees.id, employees.first_name, employees.last_name, employees.photo, designations.title as designation, AVG(daily_salary_computations.daily_basic_pay + daily_salary_computations.ot_pay) as avg_earnings')
+            ->whereMonth('daily_salary_computations.work_date', now()->month)
+            ->whereYear('daily_salary_computations.work_date', now()->year)
+            ->groupBy('employees.id', 'employees.first_name', 'employees.last_name', 'employees.photo', 'designations.title')
+            ->orderByDesc('avg_earnings')
+            ->limit(5)
+            ->get()
+            ->map(function($earner, $index) {
+                $initials = strtoupper(substr($earner->first_name, 0, 1) . substr($earner->last_name, 0, 1));
+                $colors = ['#0b044d', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#8e1e18', '#a16207'];
+                return [
+                    'rank' => $index + 1,
+                    'name' => $earner->first_name . ' ' . $earner->last_name,
+                    'initials' => $initials,
+                    'color' => $colors[$index % count($colors)],
+                    'photo' => $earner->photo,
+                    'designation' => $earner->designation,
+                    'avg_earnings' => round($earner->avg_earnings, 2),
+                ];
+            });
+        
         $stats = [
             'total_employees' => $totalEmployees,
             'new_this_month' => $newThisMonth,
@@ -251,7 +315,7 @@ class AdminDashboardController extends Controller
             'monthly_payroll' => $monthlyPayroll,
         ];
         
-        return view('admin.dashboard.adminDashboard', compact('stats', 'employees', 'leaveRequests', 'departments', 'chartData', 'earlyBirds', 'lateBirds', 'attendancePerformanceMonth', 'attendancePerformanceWeek'));
+        return view('admin.dashboard.adminDashboard', compact('stats', 'employees', 'leaveRequests', 'departments', 'chartData', 'earlyBirds', 'lateBirds', 'attendancePerformanceMonth', 'attendancePerformanceWeek', 'topEarners', 'recentLeaveFilers'));
     }
     
     private function getChartData()
@@ -300,18 +364,24 @@ class AdminDashboardController extends Controller
         for ($i = 6; $i >= 0; $i--) {
             $date = $now->copy()->subDays($i);
             $present = Attendance::whereDate('date', $date)->whereNotNull('am_in')->distinct('employee_id')->count();
+            $late = Attendance::whereDate('date', $date)->whereTime('am_in', '>', '08:05:00')->distinct('employee_id')->count();
             $rate = $totalEmp > 0 ? round(($present / $totalEmp) * 100, 1) : 0;
+            $lateRate = $totalEmp > 0 ? round(($late / $totalEmp) * 100, 1) : 0;
             $attendanceWeek['labels'][] = $date->format('D');
             $attendanceWeek['data'][] = $rate;
+            $attendanceWeek['lateData'][] = $lateRate;
         }
         
         // Month data
         for ($i = 29; $i >= 0; $i--) {
             $date = $now->copy()->subDays($i);
             $present = Attendance::whereDate('date', $date)->whereNotNull('am_in')->distinct('employee_id')->count();
+            $late = Attendance::whereDate('date', $date)->whereTime('am_in', '>', '08:05:00')->distinct('employee_id')->count();
             $rate = $totalEmp > 0 ? round(($present / $totalEmp) * 100, 1) : 0;
+            $lateRate = $totalEmp > 0 ? round(($late / $totalEmp) * 100, 1) : 0;
             $attendanceMonth['labels'][] = $date->format('M j');
             $attendanceMonth['data'][] = $rate;
+            $attendanceMonth['lateData'][] = $lateRate;
         }
         
         // Year data (monthly average)
@@ -322,10 +392,104 @@ class AdminDashboardController extends Controller
                 ->whereNotNull('am_in')
                 ->distinct('employee_id')
                 ->count();
+            $avgLate = Attendance::whereYear('date', $date->year)
+                ->whereMonth('date', $date->month)
+                ->whereTime('am_in', '>', '08:05:00')
+                ->distinct('employee_id')
+                ->count();
             $daysInMonth = $date->daysInMonth;
             $rate = $totalEmp > 0 ? round(($avgPresent / ($totalEmp * $daysInMonth)) * 100, 1) : 0;
+            $lateRate = $totalEmp > 0 ? round(($avgLate / ($totalEmp * $daysInMonth)) * 100, 1) : 0;
             $attendanceYear['labels'][] = $date->format('M');
             $attendanceYear['data'][] = min($rate, 100);
+            $attendanceYear['lateData'][] = min($lateRate, 100);
+        }
+        
+        
+        // Payroll by designation trends
+        $salaryWeek = [];
+        $salaryMonth = [];
+        $salaryYear = [];
+        
+        $topDesignations = DB::table('daily_salary_computations')
+            ->join('employees', 'daily_salary_computations.employee_id', '=', 'employees.id')
+            ->join('employment_details', 'employees.id', '=', 'employment_details.employee_id')
+            ->join('designations', 'employment_details.designation_id', '=', 'designations.id')
+            ->selectRaw('designations.id, designations.title, SUM(daily_salary_computations.daily_basic_pay + daily_salary_computations.ot_pay) as total_payroll')
+            ->whereMonth('daily_salary_computations.work_date', now()->month)
+            ->whereYear('daily_salary_computations.work_date', now()->year)
+            ->groupBy('designations.id', 'designations.title')
+            ->orderByDesc('total_payroll')
+            ->limit(5)
+            ->get();
+        
+        $colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+        
+        // Week data - cumulative payroll per day
+        $salaryWeek['labels'] = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = $now->copy()->subDays($i);
+            $salaryWeek['labels'][] = $date->format('D');
+        }
+        $salaryWeek['datasets'] = [];
+        foreach ($topDesignations as $index => $designation) {
+            $data = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $date = $now->copy()->subDays($i);
+                $totalPayroll = DB::table('daily_salary_computations')
+                    ->join('employees', 'daily_salary_computations.employee_id', '=', 'employees.id')
+                    ->join('employment_details', 'employees.id', '=', 'employment_details.employee_id')
+                    ->where('employment_details.designation_id', $designation->id)
+                    ->whereDate('daily_salary_computations.work_date', $date)
+                    ->sum(DB::raw('daily_basic_pay + ot_pay'));
+                $data[] = round($totalPayroll ?? 0, 2);
+            }
+            $salaryWeek['datasets'][] = ['label' => $designation->title, 'data' => $data, 'color' => $colors[$index]];
+        }
+        
+        // Month data - cumulative payroll per day
+        $salaryMonth['labels'] = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = $now->copy()->subDays($i);
+            $salaryMonth['labels'][] = $date->format('M j');
+        }
+        $salaryMonth['datasets'] = [];
+        foreach ($topDesignations as $index => $designation) {
+            $data = [];
+            for ($i = 29; $i >= 0; $i--) {
+                $date = $now->copy()->subDays($i);
+                $totalPayroll = DB::table('daily_salary_computations')
+                    ->join('employees', 'daily_salary_computations.employee_id', '=', 'employees.id')
+                    ->join('employment_details', 'employees.id', '=', 'employment_details.employee_id')
+                    ->where('employment_details.designation_id', $designation->id)
+                    ->whereDate('daily_salary_computations.work_date', $date)
+                    ->sum(DB::raw('daily_basic_pay + ot_pay'));
+                $data[] = round($totalPayroll ?? 0, 2);
+            }
+            $salaryMonth['datasets'][] = ['label' => $designation->title, 'data' => $data, 'color' => $colors[$index]];
+        }
+        
+        // Year data - monthly total payroll
+        $salaryYear['labels'] = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $date = $now->copy()->subMonths($i);
+            $salaryYear['labels'][] = $date->format('M');
+        }
+        $salaryYear['datasets'] = [];
+        foreach ($topDesignations as $index => $designation) {
+            $data = [];
+            for ($i = 11; $i >= 0; $i--) {
+                $date = $now->copy()->subMonths($i);
+                $totalPayroll = DB::table('daily_salary_computations')
+                    ->join('employees', 'daily_salary_computations.employee_id', '=', 'employees.id')
+                    ->join('employment_details', 'employees.id', '=', 'employment_details.employee_id')
+                    ->where('employment_details.designation_id', $designation->id)
+                    ->whereYear('daily_salary_computations.work_date', $date->year)
+                    ->whereMonth('daily_salary_computations.work_date', $date->month)
+                    ->sum(DB::raw('daily_basic_pay + ot_pay'));
+                $data[] = round($totalPayroll ?? 0, 2);
+            }
+            $salaryYear['datasets'][] = ['label' => $designation->title, 'data' => $data, 'color' => $colors[$index]];
         }
         
         return [
@@ -333,6 +497,11 @@ class AdminDashboardController extends Controller
                 'week' => $employeeWeek,
                 'month' => $employeeMonth,
                 'year' => $employeeYear,
+            ],
+            'salaryTrends' => [
+                'week' => $salaryWeek,
+                'month' => $salaryMonth,
+                'year' => $salaryYear,
             ],
             'attendance' => [
                 'week' => $attendanceWeek,
