@@ -800,9 +800,9 @@
                     <button id="tabEmployees" class="chart-tab" onclick="switchMainChart('employees')" style="font-size:11px">Employees</button>
                 </div>
                 <div class="chart-tabs" id="periodTabs" style="border-left:1px solid #e2e8f0;padding-left:8px">
-                    <button class="chart-tab" onclick="switchPeriodChart('week')">Week</button>
+                    <button class="chart-tab active" onclick="switchPeriodChart('week')">Week</button>
                     <button class="chart-tab" onclick="switchPeriodChart('month')">Month</button>
-                    <button class="chart-tab active" onclick="switchPeriodChart('year')">Year</button>
+                    <button class="chart-tab" onclick="switchPeriodChart('year')">Year</button>
                 </div>
             </div>
         </div>
@@ -921,8 +921,8 @@
                 <p class="chart-sub">Daily attendance rate</p>
             </div>
             <div class="chart-tabs">
-                <button class="chart-tab" onclick="switchAttendanceChart('week')">Week</button>
-                <button class="chart-tab active" onclick="switchAttendanceChart('month')">Month</button>
+                <button class="chart-tab active" onclick="switchAttendanceChart('week')">Week</button>
+                <button class="chart-tab" onclick="switchAttendanceChart('month')">Month</button>
                 <button class="chart-tab" onclick="switchAttendanceChart('year')">Year</button>
             </div>
         </div>
@@ -1109,9 +1109,9 @@
             </div>
         </div>
         @php $total = $stats['total_employees']; $maxCount = $departments->max('count') ?? 1; @endphp
-        <div class="enterprise-card-body" style="padding:20px 24px">
+        <div class="enterprise-card-body" style="padding:20px 24px;max-height:100%;overflow-y:auto" id="deptDistContainer">
             @foreach($departments as $d)
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;height:46px">
                 <div style="min-width:110px;font-weight:700;color:#111827;font-size:12px">{{ $d['name'] }}</div>
                 <div style="flex:1;height:32px;background:#f3f4f6;border-radius:6px;position:relative;overflow:hidden">
                     <div style="height:100%;background:{{ $d['color'] }};border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;transition:width 0.3s ease;width:{{ $maxCount > 0 ? round($d['count']/$maxCount*100) : 0 }}%">
@@ -1450,6 +1450,20 @@ function switchPerfTab(tab) {
     document.getElementById('perfTabWeek').classList.toggle('active', !isMonth);
 }
 
+// Initialize with week view by default
+document.addEventListener('DOMContentLoaded', function() {
+    switchPeriodChart('week');
+    // Set week as active for attendance chart
+    const attendanceChartCard = document.getElementById('attendanceChart').closest('.chart-card');
+    attendanceChartCard.querySelectorAll('.chart-tab').forEach((t, idx) => {
+        t.classList.toggle('active', idx === 0);
+    });
+    attendanceChart.data.labels = attendanceData['week'].labels;
+    attendanceChart.data.datasets[0].data = attendanceData['week'].data;
+    attendanceChart.data.datasets[1].data = attendanceData['week'].lateData;
+    attendanceChart.update();
+});
+
 
 function switchBirdsTab(tab) {
     const isEarly = tab === 'early';
@@ -1465,12 +1479,17 @@ const salaryData = @json($chartData['salaryTrends']);
 const attendanceData = @json($chartData['attendance']);
 
 let currentChartType = 'salary';
-let currentPeriod = 'year';
+let currentPeriod = 'week';
 let dynamicChart;
+let gradientPayroll;
 
 function initCharts() {
     const ctx1 = document.getElementById('dynamicChart').getContext('2d');
     const ctx2 = document.getElementById('attendanceChart').getContext('2d');
+
+    gradientPayroll = ctx1.createLinearGradient(0, 0, 0, 300);
+    gradientPayroll.addColorStop(0, 'rgba(59, 130, 246, 0.25)');
+    gradientPayroll.addColorStop(1, 'rgba(59, 130, 246, 0.01)');
 
     // Create gradient for Attendance Chart
     const gradientAtt = ctx2.createLinearGradient(0, 0, 0, 400);
@@ -1479,16 +1498,16 @@ function initCharts() {
 
     const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
 
-    // Initialize with payroll by designation (year view)
+    // Initialize with payroll by designation (week view)
     dynamicChart = new Chart(ctx1, {
         type: 'line',
         data: {
-            labels: salaryData.year.labels,
-            datasets: salaryData.year.datasets.map(ds => ({
+            labels: salaryData.week.labels,
+            datasets: salaryData.week.datasets.map((ds, index) => ({
                 label: ds.label,
                 data: ds.data,
                 borderColor: ds.color,
-                backgroundColor: ds.color + '20',
+                backgroundColor: index === 0 ? gradientPayroll : ds.color + '20',
                 borderWidth: 2.5,
                 tension: 0.4,
                 fill: true,
@@ -1545,7 +1564,14 @@ function initCharts() {
                 },
                 x: {
                     grid: { display: false, drawBorder: false },
-                    ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' } }
+                    ticks: { 
+                        color: '#9999bb', 
+                        font: { size: 11, family: 'Poppins' },
+                        callback: function(value, index) {
+                            const labels = this.getLabelForValue(value);
+                            return labels;
+                        }
+                    }
                 }
             }
         }
@@ -1554,11 +1580,11 @@ function initCharts() {
     attendanceChart = new Chart(ctx2, {
         type: 'line',
         data: {
-            labels: attendanceData.month.labels,
+            labels: attendanceData.week.labels,
             datasets: [
                 {
                     label: 'Attendance Rate (%)',
-                    data: attendanceData.month.data,
+                    data: attendanceData.week.data,
                     borderColor: '#3b82f6',
                     backgroundColor: gradientAtt,
                     borderWidth: 2.5,
@@ -1569,11 +1595,11 @@ function initCharts() {
                     pointBackgroundColor: '#3b82f6',
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
-                    order: 2
+                    order: 3
                 },
                 {
                     label: 'Late Arrivals (%)',
-                    data: attendanceData.month.lateData,
+                    data: attendanceData.week.lateData,
                     borderColor: '#ef4444',
                     backgroundColor: 'rgba(239, 68, 68, 0.1)',
                     borderWidth: 2,
@@ -1582,6 +1608,21 @@ function initCharts() {
                     pointRadius: 3,
                     pointHoverRadius: 5,
                     pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    order: 2
+                },
+                {
+                    label: 'Absent (%)',
+                    data: attendanceData.week.absentData,
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    pointBackgroundColor: '#8b5cf6',
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     order: 1
@@ -1659,8 +1700,8 @@ function switchMainChart(type) {
     } else {
         document.getElementById('dynamicChartTitle').textContent = 'Payroll by Designation';
         document.getElementById('dynamicChartSub').textContent = 'Total payroll amounts per designation';
-        // Default to year for payroll
-        switchPeriodChart('year');
+        // Default to week for payroll
+        switchPeriodChart('week');
     }
 }
 
@@ -1699,11 +1740,11 @@ function switchPeriodChart(period) {
         // Payroll by designation
         dynamicChart.config.type = 'line';
         dynamicChart.data.labels = salaryData[period].labels;
-        dynamicChart.data.datasets = salaryData[period].datasets.map(ds => ({
+        dynamicChart.data.datasets = salaryData[period].datasets.map((ds, index) => ({
             label: ds.label,
             data: ds.data,
             borderColor: ds.color,
-            backgroundColor: ds.color + '20',
+            backgroundColor: index === 0 ? gradientPayroll : ds.color + '20',
             borderWidth: 2.5,
             tension: 0.4,
             fill: true,
@@ -1713,6 +1754,9 @@ function switchPeriodChart(period) {
             pointBorderColor: '#fff',
             pointBorderWidth: 2
         }));
+        if (dynamicChart.data.datasets.length > 0) {
+            dynamicChart.data.datasets[0].backgroundColor = gradientPayroll;
+        }
         dynamicChart.options.plugins.legend.display = true;
         dynamicChart.options.plugins.legend.position = 'top';
         dynamicChart.options.plugins.legend.align = 'end';
@@ -1737,15 +1781,42 @@ function switchPeriodChart(period) {
 
 function switchAttendanceChart(period) {
     const chartCard = document.getElementById('attendanceChart').closest('.chart-card');
-    chartCard.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
+    const buttons = chartCard.querySelectorAll('.chart-tab');
+    buttons.forEach(t => t.classList.remove('active'));
+    
+    // Find and activate the correct button
+    buttons.forEach((btn, idx) => {
+        if ((period === 'week' && idx === 0) || (period === 'month' && idx === 1) || (period === 'year' && idx === 2)) {
+            btn.classList.add('active');
+        }
+    });
+    
     attendanceChart.data.labels = attendanceData[period].labels;
     attendanceChart.data.datasets[0].data = attendanceData[period].data;
     attendanceChart.data.datasets[1].data = attendanceData[period].lateData;
+    attendanceChart.data.datasets[2].data = attendanceData[period].absentData;
     attendanceChart.update();
 }
 
-window.addEventListener('load', initCharts);
+function adjustDeptDistribution() {
+    const container = document.getElementById('deptDistContainer');
+    if (!container) return;
+    
+    const containerHeight = container.parentElement.offsetHeight - 70;
+    const itemHeight = 46;
+    const visibleRows = Math.max(3, Math.floor(containerHeight / itemHeight));
+    
+    const items = container.querySelectorAll('[style*="height:46px"]');
+    items.forEach((item, idx) => {
+        item.style.display = idx < visibleRows ? 'flex' : 'none';
+    });
+}
+
+window.addEventListener('load', () => {
+    initCharts();
+    adjustDeptDistribution();
+});
+window.addEventListener('resize', adjustDeptDistribution);
 
 function viewEmployeeDashboard(employeeId) {
     document.getElementById('viewEmployeeDashboardModal').style.display = 'flex';
