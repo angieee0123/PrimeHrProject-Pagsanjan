@@ -562,7 +562,27 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .enterprise-overview-grid,
+    .enterprise-overview-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 1024px) {
+    .enterprise-secondary-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .enterprise-compact-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .enterprise-hr-dashboard .chart-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 860px) {
     .enterprise-secondary-grid,
     .enterprise-compact-grid {
         grid-template-columns: 1fr;
@@ -584,6 +604,7 @@
 
     .enterprise-profile {
         width: 100%;
+        min-width: 0;
         box-sizing: border-box;
     }
 
@@ -591,9 +612,26 @@
         width: 100%;
     }
 
-    .enterprise-action-bar,
+    .enterprise-action-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .enterprise-action-bar button {
+        width: 100% !important;
+        justify-content: center;
+    }
+
+    .enterprise-action-spacer {
+        margin-right: 0;
+        margin-bottom: 4px;
+    }
+
     .enterprise-hr-dashboard .stats-grid-4,
-    .enterprise-hr-dashboard .charts-grid,
+    .enterprise-hr-dashboard .charts-grid {
+        grid-template-columns: 1fr !important;
+    }
+
     #panelEarly,
     #panelLate {
         grid-template-columns: 1fr !important;
@@ -605,7 +643,126 @@
     .enterprise-hr-dashboard .table-actions button {
         width: 100% !important;
     }
+
+    .enterprise-hr-dashboard .chart-header > div:last-child {
+        flex-wrap: wrap;
+        gap: 6px;
+        border-left: none !important;
+        padding-left: 0 !important;
+    }
+
+    #employee-directory .table-header {
+        gap: 12px;
+    }
 }
+
+@media (max-width: 540px) {
+    .enterprise-hr-dashboard .stats-grid-4 {
+        grid-template-columns: 1fr !important;
+    }
+
+    .enterprise-hr-dashboard .stat-value {
+        font-size: 24px !important;
+    }
+
+    #viewEmployeeDashboardContent > div {
+        grid-template-columns: 1fr !important;
+        display: grid !important;
+    }
+
+    #performerDetailsModal > div {
+        margin: 0 8px;
+        border-radius: 14px;
+    }
+
+    #performerDetailsModal [style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    .enterprise-hr-dashboard .chart-header {
+        padding: 14px 16px !important;
+    }
+}
+
+#birdScheduleTooltip {
+    position: fixed;
+    z-index: 9999;
+    background: #0b044d;
+    color: #fff;
+    border-radius: 12px;
+    min-width: 220px;
+    box-shadow: 0 12px 32px rgba(11,4,77,0.3), 0 4px 8px rgba(0,0,0,0.15);
+    pointer-events: none;
+    font-family: inherit;
+    overflow: hidden;
+}
+
+#birdScheduleTooltip::after {
+    content: '';
+    position: absolute;
+    border: 7px solid transparent;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+#birdScheduleTooltip.bst-arrow-down::after { top: 100%; border-top-color: #0b044d; }
+#birdScheduleTooltip.bst-arrow-up::after   { bottom: 100%; border-bottom-color: #0b044d; }
+
+.bst-header {
+    padding: 10px 14px 8px;
+    font-size: 10px;
+    font-weight: 800;
+    color: #a5b4fc;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.bst-body {
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bst-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bst-period {
+    font-size: 10px;
+    font-weight: 800;
+    color: #818cf8;
+    min-width: 22px;
+    text-transform: uppercase;
+}
+
+.bst-time {
+    font-size: 12px;
+    font-weight: 600;
+    color: #e0e7ff;
+}
+
+.bst-sep { font-size: 10px; color: #6366f1; }
+
+.bst-dates {
+    padding: 6px 14px 10px;
+    font-size: 10px;
+    color: #94a3b8;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.bst-no-schedule {
+    padding: 14px;
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+.bird-item { position: relative; }
 </style>
 
 {{-- Quick Actions Bar --}}
@@ -634,18 +791,18 @@
     <div class="chart-card">
         <div class="chart-header">
             <div>
-                <p class="chart-title" id="dynamicChartTitle">Employee Growth</p>
-                <p class="chart-sub" id="dynamicChartSub">Total employees over time</p>
+                <p class="chart-title" id="dynamicChartTitle">Payroll by Designation</p>
+                <p class="chart-sub" id="dynamicChartSub">Total payroll amounts per designation</p>
             </div>
             <div style="display:flex;gap:8px;align-items:center">
                 <div style="display:flex;gap:6px">
-                    <button id="tabEmployees" class="chart-tab active" onclick="switchMainChart('employees')" style="font-size:11px">Employees</button>
-                    <button id="tabSalary" class="chart-tab" onclick="switchMainChart('salary')" style="font-size:11px">Payroll by Designation</button>
+                    <button id="tabSalary" class="chart-tab active" onclick="switchMainChart('salary')" style="font-size:11px">Payroll by Designation</button>
+                    <button id="tabEmployees" class="chart-tab" onclick="switchMainChart('employees')" style="font-size:11px">Employees</button>
                 </div>
                 <div class="chart-tabs" id="periodTabs" style="border-left:1px solid #e2e8f0;padding-left:8px">
                     <button class="chart-tab" onclick="switchPeriodChart('week')">Week</button>
-                    <button class="chart-tab active" onclick="switchPeriodChart('month')">Month</button>
-                    <button class="chart-tab" onclick="switchPeriodChart('year')">Year</button>
+                    <button class="chart-tab" onclick="switchPeriodChart('month')">Month</button>
+                    <button class="chart-tab active" onclick="switchPeriodChart('year')">Year</button>
                 </div>
             </div>
         </div>
@@ -837,7 +994,7 @@
                         $timeSize = $rank === 1 ? '13px' : ($rank === 2 ? '12.5px' : '12px');
                         $padding = $rank === 1 ? '12px 0' : ($rank === 2 ? '10px 0' : '8px 0');
                     @endphp
-                    <div style="display:flex;align-items:center;gap:12px;padding:{{ $padding }};border-bottom:{{ $rank < 5 ? '1px solid #f1f5f9' : 'none' }}">
+                    <div class="bird-item" data-schedule='@json($bird['schedule'])' style="display:flex;align-items:center;gap:12px;padding:{{ $padding }};border-bottom:{{ $rank < 5 ? '1px solid #f1f5f9' : 'none' }}">
                         <div style="min-width:26px;text-align:center;font-size:{{ $rank <= 3 ? '13px' : '12px' }};font-weight:{{ $rank === 1 ? '800' : '700' }};color:{{ $rank === 1 ? '#fbbf24' : ($rank === 2 ? '#94a3b8' : ($rank === 3 ? '#fb923c' : '#94a3b8')) }}">{{ $rank }}</div>
                         @if($bird['photo'])
                             <img src="{{ $bird['photo'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:10px;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0">
@@ -874,7 +1031,7 @@
                         $timeSize = $rank === 1 ? '13px' : ($rank === 2 ? '12.5px' : '12px');
                         $padding = $rank === 1 ? '12px 0' : ($rank === 2 ? '10px 0' : '8px 0');
                     @endphp
-                    <div style="display:flex;align-items:center;gap:12px;padding:{{ $padding }};border-bottom:{{ $rank < 5 ? '1px solid #fee2e2' : 'none' }}">
+                    <div class="bird-item" data-schedule='@json($bird['schedule'])' style="display:flex;align-items:center;gap:12px;padding:{{ $padding }};border-bottom:{{ $rank < 5 ? '1px solid #fee2e2' : 'none' }}">
                         <div style="min-width:26px;text-align:center;font-size:{{ $rank <= 3 ? '13px' : '12px' }};font-weight:700;color:#dc2626">{{ $rank }}</div>
                         @if($bird['photo'])
                             <img src="{{ $bird['photo'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:10px;object-fit:cover;border:2px solid #fecaca;flex-shrink:0">
@@ -1307,8 +1464,8 @@ const employeeData = @json($chartData['employees']);
 const salaryData = @json($chartData['salaryTrends']);
 const attendanceData = @json($chartData['attendance']);
 
-let currentChartType = 'employees';
-let currentPeriod = 'month';
+let currentChartType = 'salary';
+let currentPeriod = 'year';
 let dynamicChart;
 
 function initCharts() {
@@ -1320,35 +1477,48 @@ function initCharts() {
     gradientAtt.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
     gradientAtt.addColorStop(1, 'rgba(59, 130, 246, 0.01)');
 
-    // Initialize with employee growth
+    const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+
+    // Initialize with payroll by designation (year view)
     dynamicChart = new Chart(ctx1, {
         type: 'line',
         data: {
-            labels: employeeData.month.labels,
-            datasets: [{
-                label: 'Total Employees',
-                data: employeeData.month.data,
-                borderColor: '#0b044d',
-                backgroundColor: 'rgba(11, 4, 77, 0.1)',
+            labels: salaryData.year.labels,
+            datasets: salaryData.year.datasets.map(ds => ({
+                label: ds.label,
+                data: ds.data,
+                borderColor: ds.color,
+                backgroundColor: ds.color + '20',
                 borderWidth: 2.5,
                 tension: 0.4,
                 fill: true,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                pointBackgroundColor: '#0b044d',
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                pointBackgroundColor: ds.color,
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2
-            }]
+            }))
         },
         options: {
             responsive: true,
             maintainAspectRatio: true,
             plugins: {
-                legend: { 
-                    display: false
+                legend: {
+                    display: true,
+                    position: 'top',
+                    align: 'end',
+                    labels: {
+                        boxWidth: 12,
+                        boxHeight: 12,
+                        padding: 12,
+                        font: { size: 11, family: 'Poppins', weight: '600' },
+                        color: '#64748b',
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
                 },
-                tooltip: { 
-                    mode: 'index', 
+                tooltip: {
+                    mode: 'index',
                     intersect: false,
                     backgroundColor: '#fff',
                     titleColor: '#0b044d',
@@ -1356,16 +1526,24 @@ function initCharts() {
                     borderColor: '#eceaf8',
                     borderWidth: 1.5,
                     padding: 12,
-                    displayColors: false
+                    displayColors: true
                 }
             },
             scales: {
-                y: { 
+                y: {
                     beginAtZero: true,
                     grid: { color: '#f7f6ff', drawBorder: false },
-                    ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' } }
+                    ticks: {
+                        color: '#9999bb',
+                        font: { size: 11, family: 'Poppins' },
+                        callback: function(value) {
+                            if (value >= 1000000) return '₱' + (value / 1000000).toFixed(1) + 'M';
+                            if (value >= 1000) return '₱' + (value / 1000).toFixed(1) + 'K';
+                            return '₱' + value.toLocaleString();
+                        }
+                    }
                 },
-                x: { 
+                x: {
                     grid: { display: false, drawBorder: false },
                     ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' } }
                 }
@@ -1836,6 +2014,100 @@ document.addEventListener('keydown', e => {
         closePerformerModal();
     }
 });
+</script>
+
+{{-- Bird Schedule Tooltip --}}
+<div id="birdScheduleTooltip" style="display:none" aria-hidden="true">
+    <div class="bst-header">&#128197; Work Schedule</div>
+    <div class="bst-body">
+        <div class="bst-row">
+            <span class="bst-period">AM</span>
+            <span class="bst-time" id="bstAmIn">—</span>
+            <span class="bst-sep">→</span>
+            <span class="bst-time" id="bstAmOut">—</span>
+        </div>
+        <div class="bst-row">
+            <span class="bst-period">PM</span>
+            <span class="bst-time" id="bstPmIn">—</span>
+            <span class="bst-sep">→</span>
+            <span class="bst-time" id="bstPmOut">—</span>
+        </div>
+    </div>
+    <div class="bst-dates" id="bstDates" style="display:none"></div>
+</div>
+
+<script>
+(function () {
+    const tooltip   = document.getElementById('birdScheduleTooltip');
+    const elAmIn    = document.getElementById('bstAmIn');
+    const elAmOut   = document.getElementById('bstAmOut');
+    const elPmIn    = document.getElementById('bstPmIn');
+    const elPmOut   = document.getElementById('bstPmOut');
+    const elDates   = document.getElementById('bstDates');
+    const elBody    = tooltip.querySelector('.bst-body');
+    const elNoSched = document.createElement('div');
+    elNoSched.className = 'bst-no-schedule';
+    elNoSched.textContent = 'No schedule assigned';
+
+    function positionTooltip(rect) {
+        requestAnimationFrame(() => {
+            const tw  = tooltip.offsetWidth;
+            const th  = tooltip.offsetHeight;
+            const gap = 10;
+            let left  = rect.left + rect.width / 2 - tw / 2;
+            let top   = rect.top - th - gap;
+            let arrow = 'bst-arrow-down';
+
+            if (top < gap) {
+                top   = rect.bottom + gap;
+                arrow = 'bst-arrow-up';
+            }
+            left = Math.max(gap, Math.min(left, window.innerWidth - tw - gap));
+
+            tooltip.style.left  = left + 'px';
+            tooltip.style.top   = top  + 'px';
+            tooltip.className   = arrow;
+        });
+    }
+
+    function showTooltip(el) {
+        const raw = el.dataset.schedule;
+        elNoSched.remove();
+
+        if (!raw || raw === 'null') {
+            elBody.style.display  = 'none';
+            elDates.style.display = 'none';
+            tooltip.appendChild(elNoSched);
+        } else {
+            const s = JSON.parse(raw);
+            elBody.style.display = '';
+            elAmIn.textContent  = s.am_in;
+            elAmOut.textContent = s.am_out;
+            elPmIn.textContent  = s.pm_in;
+            elPmOut.textContent = s.pm_out;
+
+            if (s.start_date || s.end_date) {
+                elDates.textContent   = 'Effective: ' + (s.start_date || 'Open') + ' – ' + (s.end_date || 'Ongoing');
+                elDates.style.display = '';
+            } else {
+                elDates.style.display = 'none';
+            }
+        }
+
+        tooltip.style.display = 'block';
+        positionTooltip(el.getBoundingClientRect());
+    }
+
+    function hideTooltip() {
+        tooltip.style.display = 'none';
+    }
+
+    document.querySelectorAll('.bird-item').forEach(el => {
+        el.addEventListener('mouseenter', function () { showTooltip(this); });
+        el.addEventListener('mouseleave', hideTooltip);
+        el.addEventListener('touchstart', function () { showTooltip(this); }, { passive: true });
+    });
+})();
 </script>
 @endsection
     

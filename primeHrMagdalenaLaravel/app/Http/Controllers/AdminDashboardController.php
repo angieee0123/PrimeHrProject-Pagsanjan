@@ -216,47 +216,61 @@ class AdminDashboardController extends Controller
 
         $attendancePerformanceMonth = $buildPerformance($monthStart, Carbon::now(), $workingDaysMonth);
         $attendancePerformanceWeek  = $buildPerformance($weekStart, Carbon::now(), $workingDaysWeek);
-        $earlyBirds = Attendance::with(['employee.employmentDetail.designationRelation', 'employee.employmentDetail.departmentRelation'])
+        $earlyBirds = Attendance::with(['employee.employmentDetail.designationRelation', 'employee.employmentDetail.departmentRelation', 'employee.schedule'])
             ->whereDate('date', $today)
             ->whereNotNull('am_in')
             ->orderBy('am_in', 'asc')
             ->limit(5)
             ->get()
-            ->map(function($attendance, $index) {
+            ->map(function($attendance, $index) use ($today) {
                 $emp = $attendance->employee;
                 if (!$emp) return null;
-                
+
                 $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
                 $colors = ['#0b044d', '#8e1e18', '#15803d', '#a16207', '#7c3aed'];
-                
-                // Calculate early minutes (assuming 8:00 AM is the start time)
+
                 $amIn = Carbon::parse($attendance->am_in);
                 $startTime = Carbon::parse('08:00:00');
                 $earlyMinutes = $startTime->diffInMinutes($amIn);
-                
+
+                $todayStr = $today->toDateString();
+                $activeSchedule = $emp->schedule->first(function($s) use ($todayStr) {
+                    $startOk = is_null($s->start_date) || $s->start_date <= $todayStr;
+                    $endOk   = is_null($s->end_date)   || $s->end_date   >= $todayStr;
+                    return $startOk && $endOk;
+                });
+
                 return [
-                    'rank' => $index + 1,
-                    'initials' => $initials,
-                    'color' => $colors[$index % count($colors)],
-                    'photo' => $emp->photo,
-                    'name' => $emp->first_name . ' ' . $emp->last_name,
-                    'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
-                    'department' => $emp->employmentDetail->departmentRelation->name ?? 'N/A',
-                    'time_in' => $amIn->format('h:i A'),
+                    'rank'          => $index + 1,
+                    'initials'      => $initials,
+                    'color'         => $colors[$index % count($colors)],
+                    'photo'         => $emp->photo,
+                    'name'          => $emp->first_name . ' ' . $emp->last_name,
+                    'position'      => $emp->employmentDetail->designationRelation->title ?? 'N/A',
+                    'department'    => $emp->employmentDetail->departmentRelation->name ?? 'N/A',
+                    'time_in'       => $amIn->format('h:i A'),
                     'early_minutes' => $earlyMinutes,
+                    'schedule'      => $activeSchedule ? [
+                        'am_in'      => Carbon::parse($activeSchedule->am_in)->format('h:i A'),
+                        'am_out'     => Carbon::parse($activeSchedule->am_out)->format('h:i A'),
+                        'pm_in'      => Carbon::parse($activeSchedule->pm_in)->format('h:i A'),
+                        'pm_out'     => Carbon::parse($activeSchedule->pm_out)->format('h:i A'),
+                        'start_date' => $activeSchedule->start_date ? Carbon::parse($activeSchedule->start_date)->format('M d, Y') : null,
+                        'end_date'   => $activeSchedule->end_date   ? Carbon::parse($activeSchedule->end_date)->format('M d, Y')   : null,
+                    ] : null,
                 ];
             })
             ->filter();
 
-        // Top 10 Late Birds (latest time-in today, must be after 8:05 AM grace period)
-        $lateBirds = Attendance::with(['employee.employmentDetail.designationRelation', 'employee.employmentDetail.departmentRelation'])
+        // Top 5 Late Birds (latest time-in today, must be after 8:05 AM grace period)
+        $lateBirds = Attendance::with(['employee.employmentDetail.designationRelation', 'employee.employmentDetail.departmentRelation', 'employee.schedule'])
             ->whereDate('date', $today)
             ->whereNotNull('am_in')
             ->whereTime('am_in', '>', '08:05:00')
             ->orderBy('am_in', 'desc')
             ->limit(5)
             ->get()
-            ->map(function($attendance, $index) {
+            ->map(function($attendance, $index) use ($today) {
                 $emp = $attendance->employee;
                 if (!$emp) return null;
 
@@ -265,16 +279,31 @@ class AdminDashboardController extends Controller
                 $amIn = Carbon::parse($attendance->am_in);
                 $lateMinutes = $amIn->diffInMinutes(Carbon::parse('08:05:00'));
 
+                $todayStr = $today->toDateString();
+                $activeSchedule = $emp->schedule->first(function($s) use ($todayStr) {
+                    $startOk = is_null($s->start_date) || $s->start_date <= $todayStr;
+                    $endOk   = is_null($s->end_date)   || $s->end_date   >= $todayStr;
+                    return $startOk && $endOk;
+                });
+
                 return [
-                    'rank' => $index + 1,
-                    'initials' => $initials,
-                    'color' => $colors[$index % count($colors)],
-                    'photo' => $emp->photo,
-                    'name' => $emp->first_name . ' ' . $emp->last_name,
-                    'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
-                    'department' => $emp->employmentDetail->departmentRelation->name ?? 'N/A',
-                    'time_in' => $amIn->format('h:i A'),
+                    'rank'         => $index + 1,
+                    'initials'     => $initials,
+                    'color'        => $colors[$index % count($colors)],
+                    'photo'        => $emp->photo,
+                    'name'         => $emp->first_name . ' ' . $emp->last_name,
+                    'position'     => $emp->employmentDetail->designationRelation->title ?? 'N/A',
+                    'department'   => $emp->employmentDetail->departmentRelation->name ?? 'N/A',
+                    'time_in'      => $amIn->format('h:i A'),
                     'late_minutes' => $lateMinutes,
+                    'schedule'     => $activeSchedule ? [
+                        'am_in'      => Carbon::parse($activeSchedule->am_in)->format('h:i A'),
+                        'am_out'     => Carbon::parse($activeSchedule->am_out)->format('h:i A'),
+                        'pm_in'      => Carbon::parse($activeSchedule->pm_in)->format('h:i A'),
+                        'pm_out'     => Carbon::parse($activeSchedule->pm_out)->format('h:i A'),
+                        'start_date' => $activeSchedule->start_date ? Carbon::parse($activeSchedule->start_date)->format('M d, Y') : null,
+                        'end_date'   => $activeSchedule->end_date   ? Carbon::parse($activeSchedule->end_date)->format('M d, Y')   : null,
+                    ] : null,
                 ];
             })
             ->filter();
