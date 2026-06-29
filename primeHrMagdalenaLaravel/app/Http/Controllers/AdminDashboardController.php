@@ -394,11 +394,14 @@ class AdminDashboardController extends Controller
             $date = $now->copy()->subDays($i);
             $present = Attendance::whereDate('date', $date)->whereNotNull('am_in')->distinct('employee_id')->count();
             $late = Attendance::whereDate('date', $date)->whereTime('am_in', '>', '08:05:00')->distinct('employee_id')->count();
+            $absent = $totalEmp - $present;
             $rate = $totalEmp > 0 ? round(($present / $totalEmp) * 100, 1) : 0;
             $lateRate = $totalEmp > 0 ? round(($late / $totalEmp) * 100, 1) : 0;
+            $absentRate = $totalEmp > 0 ? round(($absent / $totalEmp) * 100, 1) : 0;
             $attendanceWeek['labels'][] = $date->format('D');
             $attendanceWeek['data'][] = $rate;
             $attendanceWeek['lateData'][] = $lateRate;
+            $attendanceWeek['absentData'][] = $absentRate;
         }
         
         // Month data
@@ -406,11 +409,14 @@ class AdminDashboardController extends Controller
             $date = $now->copy()->subDays($i);
             $present = Attendance::whereDate('date', $date)->whereNotNull('am_in')->distinct('employee_id')->count();
             $late = Attendance::whereDate('date', $date)->whereTime('am_in', '>', '08:05:00')->distinct('employee_id')->count();
+            $absent = $totalEmp - $present;
             $rate = $totalEmp > 0 ? round(($present / $totalEmp) * 100, 1) : 0;
             $lateRate = $totalEmp > 0 ? round(($late / $totalEmp) * 100, 1) : 0;
+            $absentRate = $totalEmp > 0 ? round(($absent / $totalEmp) * 100, 1) : 0;
             $attendanceMonth['labels'][] = $date->format('M j');
             $attendanceMonth['data'][] = $rate;
             $attendanceMonth['lateData'][] = $lateRate;
+            $attendanceMonth['absentData'][] = $absentRate;
         }
         
         // Year data (monthly average)
@@ -427,11 +433,18 @@ class AdminDashboardController extends Controller
                 ->distinct('employee_id')
                 ->count();
             $daysInMonth = $date->daysInMonth;
+            $avgAbsent = ($totalEmp * $daysInMonth) - Attendance::whereYear('date', $date->year)
+                ->whereMonth('date', $date->month)
+                ->whereNotNull('am_in')
+                ->distinct('employee_id')
+                ->count() * $daysInMonth;
             $rate = $totalEmp > 0 ? round(($avgPresent / ($totalEmp * $daysInMonth)) * 100, 1) : 0;
             $lateRate = $totalEmp > 0 ? round(($avgLate / ($totalEmp * $daysInMonth)) * 100, 1) : 0;
+            $absentRate = ($totalEmp * $daysInMonth) > 0 ? round(($avgAbsent / ($totalEmp * $daysInMonth)) * 100, 1) : 0;
             $attendanceYear['labels'][] = $date->format('M');
             $attendanceYear['data'][] = min($rate, 100);
             $attendanceYear['lateData'][] = min($lateRate, 100);
+            $attendanceYear['absentData'][] = min($absentRate, 100);
         }
         
         
