@@ -1,66 +1,8 @@
 <section class="table-section" id="summary-tab">
     <div class="table-header">
         <div>
-            <h3 class="table-title">Daily Time Record — {{ $periodDisplay }}</h3>
-            <p class="table-sub">Municipal Government of Pagsanjan · {{ count($attendanceRecords) }} records</p>
-        </div>
-        <div class="table-actions">
-            <form method="GET" action="{{ route('admin.attendance') }}" id="filterForm" style="display: contents;">
-                <input type="date" class="filter-select" name="start_date" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}">
-                <span style="font-size: 12px; color: #9999bb;">to</span>
-                <input type="date" class="filter-select" name="end_date" value="{{ request('end_date', now()->endOfMonth()->format('Y-m-d')) }}">
-                <select class="filter-select" name="department">
-                    <option value="">All Departments</option>
-                    @foreach($departments as $dept)
-                        <option value="{{ $dept }}" {{ request('department') == $dept ? 'selected' : '' }}>{{ $dept }}</option>
-                    @endforeach
-                </select>
-                <select class="filter-select" name="status">
-                    <option value="">All Status</option>
-                    <option value="Complete" {{ request('status') == 'Complete' ? 'selected' : '' }}>Complete</option>
-                    <option value="Incomplete" {{ request('status') == 'Incomplete' ? 'selected' : '' }}>Incomplete</option>
-                </select>
-                <button type="submit" class="btn-filter-main">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                    Filter
-                </button>
-            </form>
-            <button class="btn-export">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
-        </div>
-    </div>
-
-    <div class="payroll-summary-bar" style="margin-top: 0; margin-bottom: 16px;">
-        <div class="psummary-item">
-            <span>Total Present</span>
-            <strong style="color: #15803d;">{{ $totalPresent }} days</strong>
-        </div>
-        <div class="psummary-divider"></div>
-        <div class="psummary-item">
-            <span>On Leave</span>
-            <strong style="color: #0369a1;">{{ $totalOnLeave ?? 0 }} days</strong>
-        </div>
-        <div class="psummary-divider"></div>
-        <div class="psummary-item">
-            <span>Total Absent</span>
-            <strong style="color: #8e1e18;">{{ $totalAbsent }} days</strong>
-        </div>
-        <div class="psummary-divider"></div>
-        <div class="psummary-item">
-            <span>Late Arrivals</span>
-            <strong style="color: #a16207;">{{ $totalLate }} times</strong>
-        </div>
-        <div class="psummary-divider"></div>
-        <div class="psummary-item">
-            <span>Overtime</span>
-            <strong>{{ $totalOT }} hrs</strong>
-        </div>
-        <div class="psummary-divider"></div>
-        <div class="psummary-item">
-            <span>Records</span>
-            <strong>{{ count($attendanceRecords) }}</strong>
+            <h3 class="table-title">Daily Time Record</h3>
+            <p class="table-sub">Municipal Government of Pagsanjan · {{ $periodDisplay }} · {{ count($attendanceRecords) }} records</p>
         </div>
     </div>
 
@@ -76,9 +18,9 @@
                     <th style="width: 5%; text-align: center;">Late</th>
                     <th style="width: 5%; text-align: center;">½ Day</th>
                     <th style="width: 5%; text-align: center;">OT</th>
-                    <th style="width: 10%;">Rate</th>
+                    <th style="width: 12%;">Rate</th>
                     <th style="width: 8%;">Status</th>
-                    <th style="width: 15%;">Actions</th>
+                    <th style="width: 13%; text-align: center;">Actions</th>
                 </tr>
             </thead>
             <tbody id="attendanceSummaryBody">
@@ -87,9 +29,9 @@
                     <td>
                         <div class="emp-cell">
                             @if(isset($record['photo']) && $record['photo'])
-                                <img src="{{ $record['photo'] }}" alt="{{ $record['name'] }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                                <img src="{{ $record['photo'] }}" alt="{{ $record['name'] }}" class="emp-avatar" style="width:42px; height:42px; border-radius:50%; object-fit:cover;">
                             @else
-                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">
+                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:13px;">
                                     {{ getInitials($record['name']) }}
                                 </div>
                             @endif
@@ -100,31 +42,46 @@
                         </div>
                     </td>
                     <td><span class="dept-tag">{{ $record['dept'] }}</span></td>
-                    <td style="color: #15803d; font-weight: 600; font-size: 13px; text-align: center;">{{ $record['present'] }}</td>
-                    <td style="text-align: center;">
+                    <td class="num-cell num-present">{{ $record['present'] }}</td>
+                    <td class="num-cell">
                         @if(isset($record['on_leave']) && $record['on_leave'] > 0)
-                            <span style="color: #0369a1; font-weight: 600; font-size: 13px;">{{ $record['on_leave'] }}</span>
+                            <span class="num-leave">{{ $record['on_leave'] }}</span>
                         @else
-                            <span style="color: #9999bb; font-size: 13px;">—</span>
+                            <span class="num-muted">—</span>
                         @endif
                     </td>
-                    <td style="color: {{ $record['absent'] > 0 ? '#8e1e18' : '#9999bb' }}; font-weight: {{ $record['absent'] > 0 ? '600' : '400' }}; font-size: 13px; text-align: center;">{{ $record['absent'] }}</td>
-                    <td style="color: {{ $record['late'] > 0 ? '#a16207' : '#9999bb' }}; font-weight: {{ $record['late'] > 0 ? '600' : '400' }}; font-size: 13px; text-align: center;">{{ $record['late'] }}</td>
-                    <td style="color: {{ $record['halfday'] > 0 ? '#a16207' : '#9999bb' }}; font-size: 13px; text-align: center;">{{ $record['halfday'] }}</td>
-                    <td style="color: {{ $record['overtime'] > 0 ? '#0b044d' : '#9999bb' }}; font-weight: {{ $record['overtime'] > 0 ? '600' : '400' }}; font-size: 12px; text-align: center;">{{ $record['overtime'] > 0 ? $record['overtime'] : '—' }}</td>
+                    <td class="num-cell {{ $record['absent'] > 0 ? 'num-absent' : 'num-muted' }}">{{ $record['absent'] }}</td>
+                    <td class="num-cell {{ $record['late'] > 0 ? 'num-late' : 'num-muted' }}">{{ $record['late'] }}</td>
+                    <td class="num-cell {{ $record['halfday'] > 0 ? 'num-late' : 'num-muted' }}">{{ $record['halfday'] }}</td>
+                    <td class="num-cell {{ $record['overtime'] > 0 ? 'num-ot' : 'num-muted' }}">{{ $record['overtime'] > 0 ? $record['overtime'] : '—' }}</td>
                     <td>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <div style="flex: 1; height: 6px; background: #f0effe; border-radius: 3px; min-width: 40px;">
-                                <div style="width: {{ $record['rate'] }}%; height: 100%; background: {{ $record['rate'] >= 90 ? '#15803d' : ($record['rate'] >= 75 ? '#d9bb00' : '#8e1e18') }}; border-radius: 3px;"></div>
+                        <div class="rate-cell">
+                            <div class="rate-track">
+                                <div class="rate-fill {{ $record['rate'] >= 90 ? 'good' : ($record['rate'] >= 75 ? 'mid' : 'low') }}" style="width: {{ $record['rate'] }}%;"></div>
                             </div>
-                            <span style="font-size: 11.5px; font-weight: 600; color: #0b044d; white-space: nowrap;">{{ $record['rate'] }}%</span>
+                            <span class="rate-pct">{{ $record['rate'] }}%</span>
                         </div>
                     </td>
                     <td><span class="badge-status {{ $record['status'] === 'Complete' ? 'processed' : 'pending' }}">{{ $record['status'] }}</span></td>
-                    <td>
-                        <div class="row-actions">
-                            <button class="btn-view" onclick='openDTRModal(@json($record), {{ $index }})'>DTR</button>
-                            <button class="btn-detailed" onclick="openDetailedDTRModal({{ $record['employee_id'] }}, '{{ addslashes($record['name']) }}', '{{ $record['id'] }}')">Detailed DTR</button>
+                    <td style="text-align: center;">
+                        <div class="row-actions" style="justify-content: center; position: relative;">
+                            <button class="act-btn" title="Actions" onclick="toggleActionMenu(event, 'action-menu-{{ $index }}')">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+                            </button>
+                            <div id="action-menu-{{ $index }}" class="action-dropdown" style="display:none;">
+                                <button class="action-dropdown-item" onclick='openDTRModal(@json($record), {{ $index }}); closeAllActionMenus()'>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    Quick View
+                                </button>
+                                <button class="action-dropdown-item" onclick="openDetailedDTRModal({{ $record['employee_id'] }}, '{{ addslashes($record['name']) }}', '{{ $record['id'] }}'); closeAllActionMenus()">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                    Detailed DTR
+                                </button>
+                                <button class="action-dropdown-item" onclick='openEditModal(@json($record)); closeAllActionMenus()'>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    Edit
+                                </button>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -136,11 +93,11 @@
     <div class="table-footer">
         <div style="display:flex;align-items:center;gap:12px;">
             <p id="attendanceSummaryFooter">Showing <strong id="attendanceRowStart">1</strong>-<strong id="attendanceRowEnd">{{ min(10, count($attendanceRecords)) }}</strong> of <strong id="attendanceRowTotal">{{ count($attendanceRecords) }}</strong> records</p>
-            <select id="attendanceRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changeAttendanceRowsPerPage()">
-                <option value="10">10 rows</option>
-                <option value="25">25 rows</option>
-                <option value="50">50 rows</option>
-                <option value="100">100 rows</option>
+            <select id="attendanceRowsPerPage" class="rows-select" onchange="changeAttendanceRowsPerPage()">
+                <option value="10">10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+                <option value="100">100 per page</option>
             </select>
         </div>
         <div class="pagination" id="attendancePaginationControls"></div>

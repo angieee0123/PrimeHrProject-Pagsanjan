@@ -10,28 +10,7 @@
 @endphp
 
 <main class="enterprise-hr-dashboard">
-    <header class="enterprise-header">
-        <div>
-            <span class="enterprise-kicker">PRIME HRIS</span>
-            <h1>Welcome back, {{ $adminName }}</h1>
-            <p>{{ now()->format('l, F j, Y') }} · Executive workforce overview</p>
-        </div>
-        <div class="enterprise-header-actions">
-            <button class="enterprise-icon-btn" onclick="toggleNotif()" title="Notifications" type="button">
-                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                @if(($unreadCount ?? 0) > 0)
-                    <span class="enterprise-dot"></span>
-                @endif
-            </button>
-            <div class="enterprise-profile">
-                <div class="enterprise-avatar">{{ $adminInitials }}</div>
-                <div>
-                    <strong>{{ $adminName }}</strong>
-                    <span>HR Administrator</span>
-                </div>
-            </div>
-        </div>
-    </header>
+
 
 {{-- Enhanced Stats Grid with Trends --}}
 <div class="stats-grid stats-grid-4">
@@ -99,14 +78,6 @@
 @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.7; }
-}
-
-.welcome-banner {
-    display: none !important;
-}
-
-.notif-wrap > .notif-btn {
-    display: none !important;
 }
 
 .enterprise-hr-dashboard {
@@ -1620,8 +1591,8 @@ function initCharts() {
                 },
                 x: {
                     grid: { display: false, drawBorder: false },
-                    ticks: { 
-                        color: '#9999bb', 
+                    ticks: {
+                        color: '#9999bb',
                         font: { size: 11, family: 'Poppins' },
                         callback: function(value, index) {
                             const labels = this.getLabelForValue(value);
@@ -1689,7 +1660,7 @@ function initCharts() {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { 
+                legend: {
                     display: true,
                     position: 'top',
                     align: 'end',
@@ -1703,8 +1674,8 @@ function initCharts() {
                         pointStyle: 'circle'
                     }
                 },
-                tooltip: { 
-                    mode: 'index', 
+                tooltip: {
+                    mode: 'index',
                     intersect: false,
                     backgroundColor: '#fff',
                     titleColor: '#0b044d',
@@ -1716,21 +1687,21 @@ function initCharts() {
                 }
             },
             scales: {
-                y: { 
-                    beginAtZero: true, 
-                    max: 120, 
+                y: {
+                    beginAtZero: true,
+                    max: 120,
                     grid: { color: '#f7f6ff', drawBorder: false },
-                    ticks: { 
-                        color: '#9999bb', 
+                    ticks: {
+                        color: '#9999bb',
                         font: { size: 11, family: 'Poppins' },
                         padding: 8
                     }
                 },
-                x: { 
+                x: {
                     offset: false,
                     grid: { display: false, drawBorder: false, offset: false },
-                    ticks: { 
-                        color: '#9999bb', 
+                    ticks: {
+                        color: '#9999bb',
                         font: { size: 11, family: 'Poppins' },
                         padding: 2,
                         autoSkip: true,
@@ -1747,7 +1718,7 @@ function switchMainChart(type) {
     currentChartType = type;
     document.getElementById('tabEmployees').classList.toggle('active', type === 'employees');
     document.getElementById('tabSalary').classList.toggle('active', type === 'salary');
-    
+
     if (type === 'employees') {
         document.getElementById('dynamicChartTitle').textContent = 'Employee Growth';
         document.getElementById('dynamicChartSub').textContent = 'Total employees over time';
@@ -1770,7 +1741,7 @@ function switchPeriodChart(period) {
             t.classList.add('active');
         }
     });
-    
+
     if (currentChartType === 'employees') {
         dynamicChart.config.type = 'line';
         dynamicChart.data.labels = employeeData[period].labels;
@@ -1831,7 +1802,7 @@ function switchPeriodChart(period) {
             return '₱' + value.toLocaleString();
         };
     }
-    
+
     dynamicChart.update();
 }
 
@@ -1839,14 +1810,14 @@ function switchAttendanceChart(period) {
     const chartCard = document.getElementById('attendanceChart').closest('.chart-card');
     const buttons = chartCard.querySelectorAll('.chart-tab');
     buttons.forEach(t => t.classList.remove('active'));
-    
+
     // Find and activate the correct button
     buttons.forEach((btn, idx) => {
         if ((period === 'week' && idx === 0) || (period === 'month' && idx === 1) || (period === 'year' && idx === 2)) {
             btn.classList.add('active');
         }
     });
-    
+
     attendanceChart.data.labels = attendanceData[period].labels;
     attendanceChart.data.datasets[0].data = attendanceData[period].data;
     attendanceChart.data.datasets[1].data = attendanceData[period].lateData;
@@ -1857,11 +1828,11 @@ function switchAttendanceChart(period) {
 function adjustDeptDistribution() {
     const container = document.getElementById('deptDistContainer');
     if (!container) return;
-    
+
     const containerHeight = container.parentElement.offsetHeight - 70;
     const itemHeight = 46;
     const visibleRows = Math.max(3, Math.floor(containerHeight / itemHeight));
-    
+
     const items = container.querySelectorAll('[style*="height:46px"]');
     items.forEach((item, idx) => {
         item.style.display = idx < visibleRows ? 'flex' : 'none';
@@ -1877,7 +1848,7 @@ window.addEventListener('resize', adjustDeptDistribution);
 function viewEmployeeDashboard(employeeId) {
     document.getElementById('viewEmployeeDashboardModal').style.display = 'flex';
     document.getElementById('viewEmployeeDashboardContent').innerHTML = '<p style="text-align:center; color:#6b6a8a;">Loading...</p>';
-    
+
     fetch(`/admin/personnel/${employeeId}`)
         .then(response => response.json())
         .then(data => {
@@ -2052,7 +2023,7 @@ function showPerformerDetails(emp, period, rank) {
         'month': 'This Month Performance',
         'week': 'This Week Performance'
     };
-    
+
     document.getElementById('modalPerformerName').textContent = emp.name;
     document.getElementById('modalPerformerRank').textContent = rankEmojis[rank - 1] || rank;
     document.getElementById('modalPerformerPosition').textContent = emp.position;
@@ -2067,7 +2038,7 @@ function showPerformerDetails(emp, period, rank) {
     document.getElementById('modalAbsentDays2').textContent = emp.absent_days;
     document.getElementById('modalLateDays2').textContent = emp.late_days;
     document.getElementById('modalRate2').textContent = emp.rate + '%';
-    
+
     const tierEl = document.getElementById('modalTier');
     const tierLabels = {
         'excellent': 'Excellent',
@@ -2083,7 +2054,7 @@ function showPerformerDetails(emp, period, rank) {
     };
     tierEl.textContent = tierLabels[emp.tier] || emp.tier;
     tierEl.style.cssText = 'font-size:12px;padding:4px 10px;border-radius:6px;font-weight:700;' + tierColors[emp.tier];
-    
+
     const avatar = document.getElementById('modalPerformerAvatar');
     if (emp.photo) {
         avatar.innerHTML = '<img src="' + emp.photo + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
@@ -2091,21 +2062,21 @@ function showPerformerDetails(emp, period, rank) {
         avatar.innerHTML = '<span style="color:#fff;font-weight:700;font-size:24px">' + emp.initials + '</span>';
         avatar.style.backgroundColor = emp.color;
     }
-    
+
     let reason = '<ul style="margin:0;padding-left:20px">';
-    
+
     if (emp.rate >= 95) {
         reason += '<li style="margin-bottom:8px"><strong>Outstanding attendance rate of ' + emp.rate + '%</strong> - Near perfect attendance record!</li>';
     } else if (emp.rate >= 80) {
         reason += '<li style="margin-bottom:8px"><strong>Excellent attendance rate of ' + emp.rate + '%</strong> - Consistently present at work.</li>';
     }
-    
+
     if (emp.absent_days === 0) {
         reason += '<li style="margin-bottom:8px"><strong>Zero absences</strong> during the evaluation period.</li>';
     } else if (emp.absent_days <= 2) {
         reason += '<li style="margin-bottom:8px">Only <strong>' + emp.absent_days + ' day(s) absent</strong> - Minimal absenteeism.</li>';
     }
-    
+
     if (emp.late_days === 0) {
         reason += '<li style="margin-bottom:8px"><strong>Always on time</strong> - Zero late arrivals recorded.</li>';
     } else if (emp.late_days <= 2) {
@@ -2113,9 +2084,9 @@ function showPerformerDetails(emp, period, rank) {
     } else {
         reason += '<li style="margin-bottom:8px">Recorded <strong>' + emp.late_days + ' late arrivals</strong> but maintained excellent overall attendance.</li>';
     }
-    
+
     reason += '<li style="margin-bottom:8px">Present for <strong>' + emp.present_days + ' out of ' + emp.working_days + ' working days</strong> in this period.</li>';
-    
+
     if (rank === 1) {
         reason += '<li><strong>🏆 #1 Top Performer</strong> - Leading by example with exceptional dedication!</li>';
     } else if (rank === 2) {
@@ -2125,10 +2096,10 @@ function showPerformerDetails(emp, period, rank) {
     } else {
         reason += '<li>Among the <strong>Top 5 Performers</strong> - Recognized for excellent attendance!</li>';
     }
-    
+
     reason += '</ul>';
     document.getElementById('modalReason').innerHTML = reason;
-    
+
     modal.style.display = 'flex';
 }
 
@@ -2237,4 +2208,3 @@ document.addEventListener('keydown', e => {
 })();
 </script>
 @endsection
-    

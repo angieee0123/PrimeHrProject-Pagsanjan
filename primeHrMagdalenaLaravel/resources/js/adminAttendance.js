@@ -522,6 +522,9 @@ window.openDetailedDTRModal = function(employeeId, name, empId) {
     document.getElementById('detailedName').textContent = name;
     document.getElementById('detailedEmpId').textContent = empId;
 
+    const initials = name.split(' ').filter(p => /^[A-Z]/i.test(p)).map(p => p[0].toUpperCase()).join('').slice(0, 2);
+    document.getElementById('detailedAvatar').textContent = initials;
+
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
     const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);

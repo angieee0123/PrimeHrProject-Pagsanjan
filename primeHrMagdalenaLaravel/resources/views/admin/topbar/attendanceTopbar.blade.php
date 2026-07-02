@@ -1,4 +1,4 @@
-{{-- Welcome Banner --}}
+{{-- Attendance Page Header --}}
 <div class="welcome-banner">
     <div class="banner-left">
         <div class="banner-icon">
@@ -8,13 +8,13 @@
         </div>
         <div>
             <h2>Attendance Management</h2>
-            <p>{{ now()->format('l, F j, Y') }} &nbsp;·&nbsp; Daily Time Records</p>
+            <p>{{ now()->format('l, F j, Y') }} &nbsp;·&nbsp; PRIME HRIS Admin Panel</p>
         </div>
     </div>
     <div class="banner-right">
         <div class="topbar-search-wrap">
             <svg class="topbar-search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="attendanceSearchInput" class="topbar-search-input" placeholder="Search by ID, name, or department..." oninput="searchAttendance(this.value)">
+            <input type="text" id="attendanceSearchInput" class="topbar-search-input" placeholder="Search employee, ID or department..." oninput="searchAttendance(this.value)">
         </div>
     </div>
 </div>
