@@ -251,7 +251,7 @@ class AttendanceController extends Controller
             return response()->json(['error' => 'Start date must be before end date'], 400);
         }
 
-        $employee = Employee::with('schedule')->findOrFail($employeeId);
+        $employee = Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'schedule'])->findOrFail($employeeId);
 
         // Fetch attendance records for the date range
         $attendances = Attendance::with(['accreditedHoursLogs.schedule'])
@@ -297,6 +297,10 @@ class AttendanceController extends Controller
             'employee' => [
                 'name' => $employee->first_name . ' ' . $employee->last_name,
                 'employee_id' => $employee->employee_id,
+                'department' => $employee->employmentDetail->departmentRelation->name ?? null,
+                'position' => $employee->employmentDetail->designationRelation->title
+                    ?? ($employee->employmentDetail->position ?? null),
+                'employment_status' => $employee->employmentDetail->employment_status ?? null,
             ],
         ]);
     }
@@ -389,12 +393,15 @@ class AttendanceController extends Controller
         $graceMinutes = 5;
         $today = Carbon::now()->startOfDay();
         
+        $effectiveStart = $startDate->copy();
         if ($employee && $employee->employmentDetail && $employee->employmentDetail->appointment_date) {
             $appointmentDate = Carbon::parse($employee->employmentDetail->appointment_date)->startOfDay();
-            if ($appointmentDate->gt($startDate)) {
-                $startDate = $appointmentDate;
+            // Only clamp if appointment date falls within the requested range
+            if ($appointmentDate->gt($effectiveStart) && $appointmentDate->lte($endDate)) {
+                $effectiveStart = $appointmentDate;
             }
         }
+        $startDate = $effectiveStart;
         
         if ($startDate->gt($today)) {
             if ((!$approvedLeaves || $approvedLeaves->isEmpty()) && (!$approvedTravelOrders || $approvedTravelOrders->isEmpty())) {
@@ -455,13 +462,6 @@ class AttendanceController extends Controller
         $current = $startDate->copy();
 
         while ($current->lte($endDate)) {
-            if ($employee && $employee->employmentDetail && $employee->employmentDetail->appointment_date) {
-                $appointmentDate = Carbon::parse($employee->employmentDetail->appointment_date)->startOfDay();
-                if ($current->lt($appointmentDate)) {
-                    $current->addDay();
-                    continue;
-                }
-            }
             $dateKey = $current->format('Y-m-d');
             $attendance = $attendances->get($dateKey);
             $isOnLeave = isset($leaveDatesMap[$dateKey]);
@@ -684,11 +684,56 @@ class AttendanceController extends Controller
                 $isAbandoned = true;
             }
 
+            // Always include weekends in the table
+            if (in_array($current->dayOfWeek, [0, 6])) {
+                $records[] = [
+                    'date'                => $current->format('M d, Y'),
+                    'day'                 => $current->format('l'),
+                    'am_in'               => $amIn,
+                    'am_out'              => $amOut,
+                    'pm_in'               => $pmIn,
+                    'pm_out'              => $pmOut,
+                    'ot_in'               => $otIn,
+                    'ot_out'              => $otOut,
+                    'late_minutes'        => 0,
+                    'late_display'        => null,
+                    'undertime'           => 0,
+                    'undertime_display'   => null,
+                    'total_hours'         => $attendance ? (function() use ($attendance) {
+                        $m = $attendance->total_hours ?? 0;
+                        $h = (int)($m / 60); $min = $m % 60;
+                        return $min > 0 ? "{$h}h {$min}m" : "{$h} hrs";
+                    })() : '0 hrs',
+                    'accredited_minutes'  => 0,
+                    'am_accredited_minutes' => 0,
+                    'pm_accredited_minutes' => 0,
+                    'am_grace_applied'    => false,
+                    'pm_grace_applied'    => false,
+                    'schedule'            => [
+                        'am_in'  => $expectedAmIn->format('H:i'),
+                        'am_out' => $expectedAmOut->format('H:i'),
+                        'pm_in'  => $expectedPmIn->format('H:i'),
+                        'pm_out' => $expectedPmOut->format('H:i'),
+                    ],
+                    'has_log'             => false,
+                    'needs_review'        => false,
+                    'is_incomplete'       => false,
+                    'is_absent'           => false,
+                    'is_abandoned'        => false,
+                    'attendance_id'       => $attendance ? $attendance->id : null,
+                    'date_key'            => $current->format('Y-m-d'),
+                    'is_on_leave'         => false,
+                    'leave_info'          => null,
+                ];
+                $current->addDay();
+                continue;
+            }
+
             // Check if truly absent (no time records at all)
             $isTrulyAbsent = !$attendance || (!$attendance->am_in && !$attendance->am_out && !$attendance->pm_in && !$attendance->pm_out);
 
-            // Skip only future dates that are before today AND have no records AND are not weekends
-            if ($isTrulyAbsent && $current->gt($today) && !in_array($current->dayOfWeek, [0, 6]) && !$isOnLeave && !$isOnTravelOrder) {
+            // Skip only future weekdays with no records, no leave, and no travel order
+            if ($isTrulyAbsent && $current->gt($today) && !$isOnLeave && !$isOnTravelOrder) {
                 $current->addDay();
                 continue;
             }

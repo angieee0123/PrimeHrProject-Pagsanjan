@@ -626,12 +626,30 @@ function renderDetailedDTR(data) {
     let totalLate = 0;
     let totalLateMinutes = 0;
     let totalUndertimeMinutes = 0;
+    let totalLeave = 0;
+    let totalOvertimeMinutes = 0;
+    let totalWorkedMinutes = 0;
 
     const startDate = document.getElementById('detailedStartDate').value;
     const endDate = document.getElementById('detailedEndDate').value;
-    const startFormatted = new Date(startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const endFormatted = new Date(endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const startFormatted = new Date(startDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const endFormatted = new Date(endDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     document.getElementById('detailedPeriod').textContent = startFormatted + ' - ' + endFormatted;
+
+    // Populate employee profile hero from payload (additive fields, gracefully optional)
+    if (data.employee) {
+        const setMeta = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val && String(val).trim() ? val : '—'; };
+        setMeta('detailedDept', data.employee.department);
+        setMeta('detailedPosition', data.employee.position);
+        setMeta('detailedStatus', data.employee.employment_status);
+    }
+
+    const todayKey = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
+    const otMinutes = (inT, outT) => {
+        if (!inT || !outT) return 0;
+        const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+        return Math.max(0, toMin(outT) - toMin(inT));
+    };
 
     data.records.forEach(record => {
         const tr = document.createElement('tr');
@@ -660,9 +678,23 @@ function renderDetailedDTR(data) {
             totalUndertimeMinutes += record.undertime;
         }
 
+        if (record.is_on_leave) {
+            totalLeave++;
+        }
+
+        totalOvertimeMinutes += otMinutes(record.ot_in, record.ot_out);
+        if (record.accredited_minutes > 0) {
+            totalWorkedMinutes += record.accredited_minutes;
+        }
+
         // Add class if needs review
         if (record.needs_review) {
             tr.className = 'day-needs-review';
+        }
+
+        // Highlight the current day
+        if (record.date_key === todayKey) {
+            tr.classList.add('day-today');
         }
 
         // Build status badge
@@ -781,18 +813,15 @@ function renderDetailedDTR(data) {
         tr.innerHTML = `
             <td><strong>${record.date}</strong>${statusBadge}</td>
             <td>${record.day}</td>
-            <td>${record.am_in || '<span class="log-missing">Log Missing</span>'}</td>
-            <td>${record.am_out || '<span class="log-missing">Log Missing</span>'}</td>
-            <td>${record.pm_in || '<span class="log-missing">Log Missing</span>'}</td>
-            <td>${record.pm_out || '<span class="log-missing">Log Missing</span>'}</td>
-            <td>${record.ot_in || '—'}</td>
-            <td>${record.ot_out || '—'}</td>
+            <td>${record.am_in ? record.am_in : '<span class="log-missing">Missing</span>'}<br><span style="color:#9aa1b5;font-size:11px;">${record.am_out ? record.am_out : '<span class="log-missing">Missing</span>'}</span></td>
+            <td>${record.pm_in ? record.pm_in : '<span class="log-missing">Missing</span>'}<br><span style="color:#9aa1b5;font-size:11px;">${record.pm_out ? record.pm_out : '<span class="log-missing">Missing</span>'}</span></td>
+            <td>${record.ot_in ? record.ot_in + '<br><span style="color:#9aa1b5;font-size:11px;">' + (record.ot_out || '—') + '</span>' : '—'}</td>
             <td>${record.undertime_display ? '<span class="log-late">' + record.undertime_display + '</span>' : (record.pm_out ? '0 min' : '—')}</td>
             <td>${record.late_display ? '<span class="log-late">' + record.late_display + '</span>' : (record.am_in ? '0 min' : '—')}</td>
             <td><strong>${record.total_hours}</strong></td>
             <td>${accreditedDisplay}</td>
             <td>${leaveDeductionDisplay}</td>
-            <td><button class="btn-edit-time" onclick="openCorrectModal(${record.attendance_id ? record.attendance_id : "'new_" + currentDetailedEmployeeId + "_" + record.date_key + "'"}, '${record.date}')" title="${record.attendance_id ? 'Edit time records' : 'Add time records'}">Edit</button></td>
+            <td><button class="btn-edit-time" onclick="openCorrectModal(${record.attendance_id ? record.attendance_id : "'new_" + currentDetailedEmployeeId + "_" + record.date_key + "'"}, '${record.date}')" title="${record.attendance_id ? 'Edit time records' : 'Add time records'}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></td>
         `;
 
         tbody.appendChild(tr);
@@ -816,9 +845,63 @@ function renderDetailedDTR(data) {
             return Math.round(mins) + ' min';
         }
     };
+    const formatHours = (minutes) => {
+        if (minutes <= 0) return '0h';
+        const hours = Math.floor(minutes / 60);
+        const mins = Math.round(minutes % 60);
+        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+    };
 
     document.getElementById('detailedTotalLateMinutes').textContent = formatTotalMinutes(totalLateMinutes);
     document.getElementById('detailedTotalUndertime').textContent = formatTotalMinutes(totalUndertimeMinutes);
+
+    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+    // Footer summary cards
+    setText('detailedTotalWorked', formatHours(totalWorkedMinutes));
+    setText('detailedTotalOvertime', formatHours(totalOvertimeMinutes));
+
+    // KPI cards
+    const workingDays = totalPresent + totalAbsent;
+    const presentPct = workingDays > 0 ? Math.round((totalPresent / workingDays) * 100) : 0;
+    setText('detailedKpiPresent', totalPresent);
+    setText('detailedKpiPresentSub', presentPct + '% of ' + workingDays + ' work days');
+    setText('detailedKpiAbsent', totalAbsent);
+    setText('detailedKpiLate', totalLate);
+    setText('detailedKpiLateSub', formatTotalMinutes(totalLateMinutes) + ' total');
+    setText('detailedKpiLeave', totalLeave);
+    setText('detailedKpiUndertime', formatTotalMinutes(totalUndertimeMinutes));
+    setText('detailedKpiOvertime', formatHours(totalOvertimeMinutes));
+
+    // Attendance score ring
+    const score = workingDays > 0 ? Math.round((totalPresent / workingDays) * 100) : (totalPresent > 0 ? 100 : 0);
+    const scoreCircle = document.getElementById('detailedScoreCircle');
+    const scoreVal = document.getElementById('detailedScore');
+    const scoreTag = document.getElementById('detailedScoreTag');
+    if (scoreVal) scoreVal.textContent = score + '%';
+    if (scoreCircle) {
+        const C = 2 * Math.PI * 52; // r = 52
+        scoreCircle.style.strokeDasharray = C.toFixed(1);
+        // reset then apply so the transition animates on each load
+        scoreCircle.style.strokeDashoffset = C.toFixed(1);
+        let color = '#22C55E';
+        if (score < 90) color = '#4F7CFF';
+        if (score < 75) color = '#F59E0B';
+        if (score < 50) color = '#EF4444';
+        scoreCircle.setAttribute('stroke', color);
+        requestAnimationFrame(() => {
+            scoreCircle.style.strokeDashoffset = (C * (1 - score / 100)).toFixed(1);
+        });
+    }
+    if (scoreTag) {
+        let tag = 'Excellent', bg = '#ecfdf3', fg = '#16a34a';
+        if (score < 90) { tag = 'Good';  bg = '#eef4ff'; fg = '#3a5bd9'; }
+        if (score < 75) { tag = 'Fair';  bg = '#fff7ed'; fg = '#d97706'; }
+        if (score < 50) { tag = 'Poor';  bg = '#fef2f2'; fg = '#dc2626'; }
+        scoreTag.textContent = tag;
+        scoreTag.style.background = bg;
+        scoreTag.style.color = fg;
+    }
 
     document.getElementById('detailedDTRLoading').style.display = 'none';
     document.getElementById('detailedDTRTable').style.display = 'table';
