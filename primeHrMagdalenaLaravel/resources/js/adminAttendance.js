@@ -752,7 +752,7 @@ function renderDetailedDTR(data) {
         }
 
         const fmt12 = (t) => {
-            if (!t) return null;
+            if (!t || t === 'undefined' || t === 'null' || !/^\d{1,2}:\d{2}/.test(t)) return null;
             const [h, m] = t.split(':').map(Number);
             const suffix = h >= 12 ? 'PM' : 'AM';
             const h12 = h % 12 || 12;
@@ -805,39 +805,29 @@ function renderDetailedDTR(data) {
         tr.innerHTML = `
             <td style="padding:0 8px;">${dateCellHtml}</td>
             <td>
-                <div class="time-slot">
-                    <div class="time-entry">
-                        <span class="time-lbl in">IN</span>
-                        <span class="time-val ${record.am_in ? '' : 'time-missing'}">${record.am_in ? fmt12(record.am_in) : '—'}</span>
-                    </div>
-                    <div class="time-divider"></div>
-                    <div class="time-entry">
-                        <span class="time-lbl out">OUT</span>
-                        <span class="time-val ${record.am_out ? '' : 'time-missing'}">${record.am_out ? fmt12(record.am_out) : '—'}</span>
-                    </div>
-                </div>
+                ${record.is_on_leave && !record.am_in && !record.am_out ? '' : (() => { const i = fmt12(record.am_in), o = fmt12(record.am_out); return (i || o) ? `<span class="time-val${i ? '' : ' time-missing'}">${i || ''}</span>${i && o ? '<span style="color:#c4c9d8;margin:0 4px;">–</span>' : ''}<span class="time-val${o ? '' : ' time-missing'}">${o || ''}</span>` : ''; })()}
             </td>
             <td>
-                <div class="time-slot">
-                    <div class="time-entry">
-                        <span class="time-lbl in">IN</span>
-                        <span class="time-val ${record.pm_in ? '' : 'time-missing'}">${record.pm_in ? fmt12(record.pm_in) : '—'}</span>
-                    </div>
-                    <div class="time-divider"></div>
-                    <div class="time-entry">
-                        <span class="time-lbl out">OUT</span>
-                        <span class="time-val ${record.pm_out ? '' : 'time-missing'}">${record.pm_out ? fmt12(record.pm_out) : '—'}</span>
-                    </div>
-                </div>
+                ${record.is_on_leave && !record.pm_in && !record.pm_out ? '' : (() => { const i = fmt12(record.pm_in), o = fmt12(record.pm_out); return (i || o) ? `<span class="time-val${i ? '' : ' time-missing'}">${i || ''}</span>${i && o ? '<span style="color:#c4c9d8;margin:0 4px;">–</span>' : ''}<span class="time-val${o ? '' : ' time-missing'}">${o || ''}</span>` : ''; })()}
             </td>
             <td>${record.ot_in ? record.ot_in + '<br><span style="color:#9aa1b5;font-size:11px;">' + (record.ot_out || '—') + '</span>' : '—'}</td>
-            <td>${record.undertime_display ? '<span class="log-late">' + record.undertime_display + '</span>' : (record.pm_out ? '0 min' : '—')}</td>
-            <td>${record.late_display ? '<span class="log-late">' + record.late_display + '</span>' : (record.am_in ? '0 min' : '—')}</td>
+            <td>${record.is_on_leave && !record.pm_out ? '' : (record.undertime_display ? '<span class="log-late">' + record.undertime_display + '</span>' : (record.pm_out ? '0 min' : '—'))}</td>
+            <td>${record.is_on_leave && !record.am_in ? '' : (record.late_display ? '<span class="log-late">' + record.late_display + '</span>' : (record.am_in ? '0 min' : '—'))}</td>
             <td><strong>${record.total_hours}</strong></td>
             <td>${accreditedDisplay}</td>
             <td>${leaveDeductionDisplay}</td>
             <td><button class="btn-edit-time" onclick="openCorrectModal(${record.attendance_id ? record.attendance_id : "'new_" + currentDetailedEmployeeId + "_" + record.date_key + "'"}, '${record.date}')" title="${record.attendance_id ? 'Edit time records' : 'Add time records'}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></td>
         `;
+
+        // stamp data attrs for chip filtering
+        tr.dataset.day = record.day;
+        const chipState = record.is_abandoned || record.is_absent || isAbsent ? 'absent'
+            : record.is_on_leave ? 'leave'
+            : isWeekend ? 'weekend'
+            : !record.am_in || !record.am_out || !record.pm_in || !record.pm_out ? 'incomplete'
+            : isLate ? 'late'
+            : 'present';
+        tr.dataset.state = chipState;
 
         tbody.appendChild(tr);
     });
@@ -910,6 +900,76 @@ function renderDetailedDTR(data) {
 
     document.getElementById('detailedDTRLoading').style.display = 'none';
     document.getElementById('detailedDTRTable').style.display = 'table';
+
+    // Reset view dropdown to "All" on fresh load
+    document.querySelectorAll('#ddtrDropdown .ddtr-dd-item').forEach(i => i.classList.remove('active'));
+    const allItem = document.querySelector('#ddtrDropdown [data-chip="all"]');
+    if (allItem) allItem.classList.add('active');
+    const lbl = document.getElementById('ddtrViewLabel');
+    if (lbl) lbl.textContent = 'All Records';
+}
+
+// ── Dropdown toggle ──
+window.toggleDdtrDropdown = function() {
+    const btn = document.getElementById('ddtrViewBtn');
+    const dd  = document.getElementById('ddtrDropdown');
+    const open = dd.classList.toggle('open');
+    btn.classList.toggle('open', open);
+};
+
+// ── Item click: delegated on the dropdown itself so it still fires even
+// though .ddtr-modal calls event.stopPropagation() on its own onclick (that
+// stopPropagation happens during the bubble phase at .ddtr-modal, which is
+// an ANCESTOR of #ddtrDropdown, so a listener bound here already ran) ──
+document.getElementById('ddtrDropdown')?.addEventListener('click', function(e) {
+    const item = e.target.closest('.ddtr-dd-item');
+    if (!item) return;
+    document.querySelectorAll('#ddtrDropdown .ddtr-dd-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    const lbl = document.getElementById('ddtrViewLabel');
+    if (lbl) lbl.textContent = item.textContent.trim();
+    document.getElementById('ddtrDropdown').classList.remove('open');
+    document.getElementById('ddtrViewBtn').classList.remove('open');
+    applyDtrChip(item.dataset.chip);
+});
+
+// ── Outside click closes the dropdown. Registered in the capture phase so
+// it still runs even when .ddtr-modal's stopPropagation() halts bubbling ──
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#ddtrViewWrap')) {
+        document.getElementById('ddtrDropdown')?.classList.remove('open');
+        document.getElementById('ddtrViewBtn')?.classList.remove('open');
+    }
+}, true);
+
+window.applyDtrChip = function applyDtrChip(chip) {
+    const dayMap = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
+    const rows = document.querySelectorAll('#detailedDTRBody tr:not(.week-sep)');
+    rows.forEach(tr => {
+        const day   = tr.dataset.day   || '';
+        const state = tr.dataset.state || '';
+        let show = true;
+        if      (chip === 'all')        show = true;
+        else if (dayMap[chip])          show = day === dayMap[chip];
+        else if (chip === 'weekdays')   show = ['Monday','Tuesday','Wednesday','Thursday','Friday'].includes(day);
+        else if (chip === 'weekend')    show = ['Saturday','Sunday'].includes(day);
+        else if (chip === 'present')    show = state === 'present';
+        else if (chip === 'absent')     show = state === 'absent';
+        else if (chip === 'late')       show = state === 'late';
+        else if (chip === 'leave')      show = state === 'leave';
+        else if (chip === 'incomplete') show = state === 'incomplete';
+        tr.style.display = show ? '' : 'none';
+    });
+    // hide week-sep rows that have no visible data rows
+    document.querySelectorAll('#detailedDTRBody tr.week-sep').forEach(sep => {
+        let next = sep.nextElementSibling;
+        let hasVisible = false;
+        while (next && !next.classList.contains('week-sep')) {
+            if (next.style.display !== 'none') { hasVisible = true; break; }
+            next = next.nextElementSibling;
+        }
+        sep.style.display = hasVisible ? '' : 'none';
+    });
 }
 
 window.exportDetailedDTR = function() {

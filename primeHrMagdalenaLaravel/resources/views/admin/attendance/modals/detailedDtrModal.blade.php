@@ -88,24 +88,62 @@
 
             {{-- ── FILTER TOOLBAR ── --}}
             <div class="ddtr-toolbar">
-                <div class="ddtr-toolbar-fields">
-                    <div class="ddtr-fld">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                        <input type="date" id="detailedStartDate" class="ddtr-input">
-                    </div>
-                    <span class="ddtr-sep">to</span>
-                    <div class="ddtr-fld">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                        <input type="date" id="detailedEndDate" class="ddtr-input">
+                <div class="ddtr-fld">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <input type="date" id="detailedStartDate" class="ddtr-input">
+                </div>
+                <span class="ddtr-sep">—</span>
+                <div class="ddtr-fld">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <input type="date" id="detailedEndDate" class="ddtr-input">
+                </div>
+
+                {{-- View dropdown --}}
+                <div class="ddtr-view-wrap" id="ddtrViewWrap">
+                    <button class="ddtr-view-btn" id="ddtrViewBtn" onclick="toggleDdtrDropdown()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                        <span id="ddtrViewLabel">All Records</span>
+                        <svg class="ddtr-caret" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="ddtr-dropdown" id="ddtrDropdown">
+                        <div class="ddtr-dd-section">Show</div>
+                        <button class="ddtr-dd-item active" data-chip="all">All Records</button>
+                        <div class="ddtr-dd-sep"></div>
+                        <div class="ddtr-dd-section">By Day</div>
+                        <button class="ddtr-dd-item" data-chip="mon">Mondays only</button>
+                        <button class="ddtr-dd-item" data-chip="tue">Tuesdays only</button>
+                        <button class="ddtr-dd-item" data-chip="wed">Wednesdays only</button>
+                        <button class="ddtr-dd-item" data-chip="thu">Thursdays only</button>
+                        <button class="ddtr-dd-item" data-chip="fri">Fridays only</button>
+                        <button class="ddtr-dd-item" data-chip="weekdays">Weekdays (Mon–Fri)</button>
+                        <button class="ddtr-dd-item" data-chip="weekend">Weekends only</button>
+                        <div class="ddtr-dd-sep"></div>
+                        <div class="ddtr-dd-section">By Status</div>
+                        <button class="ddtr-dd-item" data-chip="present">
+                            <span class="ddtr-dd-dot" style="background:#16a34a"></span>Present
+                        </button>
+                        <button class="ddtr-dd-item" data-chip="absent">
+                            <span class="ddtr-dd-dot" style="background:#dc2626"></span>Absent
+                        </button>
+                        <button class="ddtr-dd-item" data-chip="late">
+                            <span class="ddtr-dd-dot" style="background:#d97706"></span>Late
+                        </button>
+                        <button class="ddtr-dd-item" data-chip="leave">
+                            <span class="ddtr-dd-dot" style="background:#4F7CFF"></span>On Leave
+                        </button>
+                        <button class="ddtr-dd-item" data-chip="incomplete">
+                            <span class="ddtr-dd-dot" style="background:#7C5CFF"></span>Incomplete
+                        </button>
                     </div>
                 </div>
+
                 <div class="ddtr-toolbar-actions">
                     <button class="ddtr-btn-solid" onclick="loadDetailedDTR()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                        Filter
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                        Apply
                     </button>
                     <button class="ddtr-btn-ghost" onclick="exportDetailedDTR()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         Export
                     </button>
                 </div>
@@ -125,8 +163,8 @@
                         <thead>
                             <tr>
                                 <th>Date</th>
-                                <th>AM</th>
-                                <th>PM</th>
+                                <th>AM<br><span style="font-weight:400;color:#b0b7c9;font-size:9px;">8:00 – 12:00</span></th>
+                                <th>PM<br><span style="font-weight:400;color:#b0b7c9;font-size:9px;">1:00 – 5:00</span></th>
                                 <th>OT</th>
                                 <th>Undertime</th>
                                 <th>Late</th>
@@ -246,31 +284,66 @@
 
 /* ── TOOLBAR ── */
 .ddtr-toolbar {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
     background: #fff; border: 1px solid var(--line); border-radius: 14px;
     box-shadow: 0 1px 3px rgba(15,23,42,.03);
-    padding: 12px 16px; flex-wrap: wrap;
+    padding: 8px 12px;
 }
-.ddtr-toolbar-fields { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.ddtr-toolbar-actions { display: flex; align-items: center; gap: 10px; }
+.ddtr-toolbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .ddtr-fld { position: relative; display: flex; align-items: center; }
-.ddtr-fld > svg { position: absolute; left: 12px; color: #9aa1b5; pointer-events: none; }
+.ddtr-fld > svg { position: absolute; left: 9px; color: #9aa1b5; pointer-events: none; }
 .ddtr-input {
-    height: 44px; border: 1px solid var(--line); border-radius: 10px;
-    background: #f8fafc; color: var(--ink); font-size: 13px; font-family: 'Poppins', sans-serif;
-    outline: none; padding: 0 14px 0 36px; transition: all .2s ease;
+    height: 36px; border: 1px solid var(--line); border-radius: 9px;
+    background: #f8fafc; color: var(--ink); font-size: 12px; font-family: 'Poppins', sans-serif;
+    outline: none; padding: 0 10px 0 28px; transition: all .2s ease; width: 136px;
 }
 .ddtr-input:focus { border-color: var(--pri); background: #fff; box-shadow: 0 0 0 3px rgba(11,10,77,.07); }
-.ddtr-sep { font-size: 12px; font-weight: 600; color: var(--muted); }
+.ddtr-sep { font-size: 11px; font-weight: 600; color: var(--muted); }
 .ddtr-btn-solid, .ddtr-btn-ghost {
-    height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 0 20px;
-    border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'Poppins', sans-serif;
+    height: 36px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px;
+    border-radius: 9px; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif;
     cursor: pointer; transition: all .2s ease; white-space: nowrap;
 }
-.ddtr-btn-solid { background: var(--pri); color: #fff; border: 1px solid var(--pri); box-shadow: 0 6px 16px rgba(11,10,77,.20); }
-.ddtr-btn-solid:hover { background: #1a0f6e; transform: translateY(-2px); }
+.ddtr-btn-solid { background: var(--pri); color: #fff; border: 1px solid var(--pri); box-shadow: 0 4px 12px rgba(11,10,77,.18); }
+.ddtr-btn-solid:hover { background: #1a0f6e; }
 .ddtr-btn-ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
-.ddtr-btn-ghost:hover { background: #f6f7fc; border-color: #cdd4ea; transform: translateY(-2px); }
+.ddtr-btn-ghost:hover { background: #f6f7fc; border-color: #cdd4ea; }
+
+/* ── VIEW DROPDOWN ── */
+.ddtr-view-wrap { position: relative; }
+.ddtr-view-btn {
+    height: 36px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px;
+    border-radius: 9px; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif;
+    border: 1px solid var(--line); background: #f8fafc; color: var(--ink);
+    cursor: pointer; transition: all .2s ease; white-space: nowrap;
+}
+.ddtr-view-btn:hover { background: #f0f2fa; border-color: #c4c9e0; }
+.ddtr-view-btn.open  { border-color: var(--pri); background: #fff; box-shadow: 0 0 0 3px rgba(11,10,77,.07); }
+.ddtr-caret { transition: transform .2s ease; }
+.ddtr-view-btn.open .ddtr-caret { transform: rotate(180deg); }
+.ddtr-dropdown {
+    display: none; position: absolute; top: calc(100% + 6px); left: 0;
+    min-width: 200px; background: #fff; border: 1px solid var(--line);
+    border-radius: 12px; box-shadow: 0 8px 28px rgba(15,23,42,.12);
+    padding: 6px; z-index: 999; animation: ddFadeIn .15s ease;
+}
+.ddtr-dropdown.open { display: block; }
+@keyframes ddFadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
+.ddtr-dd-section {
+    font-size: 9.5px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .6px;
+    padding: 6px 10px 3px;
+}
+.ddtr-dd-sep { height: 1px; background: var(--line); margin: 4px 0; }
+.ddtr-dd-item {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    padding: 7px 10px; border-radius: 8px; border: none; background: none;
+    font-size: 12px; font-weight: 500; color: var(--ink); font-family: 'Poppins', sans-serif;
+    cursor: pointer; text-align: left; transition: background .15s ease;
+}
+.ddtr-dd-item:hover  { background: #f4f5fb; }
+.ddtr-dd-item.active { background: #eef0fb; color: var(--pri); font-weight: 700; }
+.ddtr-dd-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
 /* ── TABLE CARD ── */
 .ddtr-table-card {
@@ -362,8 +435,8 @@
     font-size: 8.5px; font-weight: 700; letter-spacing: .4px;
     padding: 1px 4px; border-radius: 4px; flex-shrink: 0;
 }
-.time-lbl.in  { background: #ecfdf3; color: #15803d; }
-.time-lbl.out { background: #fef2f2; color: #dc2626; }
+.time-lbl.in  { display: none; }
+.time-lbl.out { display: none; }
 .time-val {
     font-size: 11px; font-weight: 600; color: #1e2247; white-space: nowrap;
 }
@@ -381,7 +454,7 @@
 .acc-full       { background: #ecfdf3; color: #15803d; }
 .acc-partial    { background: #fff7ed; color: #a16207; }
 .acc-absent     { background: #fef2f2; color: #dc2626; }
-.acc-leave      { background: #eef4ff; color: #4F7CFF; }
+.acc-leave      { background: transparent; color: #4F7CFF; border: none; padding: 0; }
 .acc-incomplete { background: #f4f1ff; color: #7C5CFF; }
 .acc-info-ico   { opacity: .6; flex-shrink: 0; }
 
