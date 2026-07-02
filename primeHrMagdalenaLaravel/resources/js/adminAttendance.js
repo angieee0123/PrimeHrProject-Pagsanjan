@@ -519,12 +519,6 @@ window.openDetailedDTRModal = function(employeeId, name, empId) {
     currentDetailedEmployeeName = name;
     currentDetailedEmployeeEmpId = empId;
 
-    document.getElementById('detailedName').textContent = name;
-    document.getElementById('detailedEmpId').textContent = empId;
-
-    const initials = name.split(' ').filter(p => /^[A-Z]/i.test(p)).map(p => p[0].toUpperCase()).join('').slice(0, 2);
-    document.getElementById('detailedAvatar').textContent = initials;
-
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
     const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -617,6 +611,13 @@ function computeAccreditedHours(record) {
     return { display: `<strong style="color:${color};">${label}</strong>`, minutes: totalMins, incomplete: false };
 }
 
+function getWeekNumber(d) {
+    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+    return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+}
+
 function renderDetailedDTR(data) {
     const tbody = document.getElementById('detailedDTRBody');
     tbody.innerHTML = '';
@@ -629,20 +630,13 @@ function renderDetailedDTR(data) {
     let totalLeave = 0;
     let totalOvertimeMinutes = 0;
     let totalWorkedMinutes = 0;
+    let lastWeekNum = null;
 
     const startDate = document.getElementById('detailedStartDate').value;
     const endDate = document.getElementById('detailedEndDate').value;
     const startFormatted = new Date(startDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const endFormatted = new Date(endDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     document.getElementById('detailedPeriod').textContent = startFormatted + ' - ' + endFormatted;
-
-    // Populate employee profile hero from payload (additive fields, gracefully optional)
-    if (data.employee) {
-        const setMeta = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val && String(val).trim() ? val : '—'; };
-        setMeta('detailedDept', data.employee.department);
-        setMeta('detailedPosition', data.employee.position);
-        setMeta('detailedStatus', data.employee.employment_status);
-    }
 
     const todayKey = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
     const otMinutes = (inT, outT) => {
@@ -711,94 +705,41 @@ function renderDetailedDTR(data) {
             statusBadge = ' <span class="badge-needs-review">Needs Review</span>';
         }
 
-        // Format accredited hours from backend calculation
-        let accreditedDisplay = '<span class="badge-incomplete">Incomplete</span>';
-        
-        // Handle abandoned/absent cases
+        // Build accredited hours — clean pill + optional tooltip for annotations
+        let accreditedDisplay;
         if (record.is_abandoned || record.is_absent || isAbsent) {
-            accreditedDisplay = '<strong style="color:#8e1e18;">0 hrs</strong><br><small style="color: #8e1e18; font-size: 10px;">⚠️ Absent</small>';
+            accreditedDisplay = `<span class="acc-pill acc-absent">0 hrs</span>`;
         } else if (record.is_on_leave) {
-            // On approved leave - show full 8 hours
-            accreditedDisplay = '<strong style="color:#15803d;">8 hrs</strong><br><small style="color: #15803d; font-size: 10px;">✓ On Leave</small>';
+            accreditedDisplay = `<span class="acc-pill acc-leave">8 hrs</span>`;
         } else if (record.accredited_minutes > 0) {
-            const hrs = Math.floor(record.accredited_minutes / 60);
-            const mins = record.accredited_minutes % 60;
+            const hrs   = Math.floor(record.accredited_minutes / 60);
+            const mins  = record.accredited_minutes % 60;
             const label = hrs > 0 && mins > 0 ? `${hrs}h ${mins}m` : hrs > 0 ? `${hrs} hrs` : `${mins} min`;
+            const cls   = record.accredited_minutes >= 480 ? 'acc-full' : 'acc-partial';
 
-            let color = '#15803d';
-            if (record.accredited_minutes < 480) color = '#a16207';
-            if (record.accredited_minutes <= 0) color = '#8e1e18';
-
-            accreditedDisplay = `<strong style="color:${color};">${label}</strong>`;
-
-            // Add grace indicator if applied
-            if (record.am_grace_applied || record.pm_grace_applied) {
-                const graceText = [];
-                if (record.am_grace_applied) graceText.push('AM');
-                if (record.pm_grace_applied) graceText.push('PM');
-                accreditedDisplay += `<br><small style="color: #15803d; font-size: 10px;">✓ Grace: ${graceText.join(', ')}</small>`;
-            }
-
-            // Add indicator if from log
-            if (record.has_log) {
-                accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">📋 From Log</small>`;
-            }
-            
-            // Add late deduction indicator if late was deducted from leave
+            // Build tooltip lines
+            const tips = [];
+            if (record.has_log)                          tips.push('From biometric log');
+            if (record.am_grace_applied)                 tips.push('AM grace applied');
+            if (record.pm_grace_applied)                 tips.push('PM grace applied');
             if (record.late_deducted_from_leave && record.late_deduction_leave_type) {
-                const lateMinutes = record.late_minutes || 0;
-                const lateDays = (lateMinutes / 480).toFixed(6); // CSC standard: 480 minutes = 1 work day
-                const isPartial = record.late_deduction_leave_type.includes('partial');
-                const isFull = record.late_deduction_leave_type.includes('full');
-                
-                if (isFull) {
-                    accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Late Fully Covered by ${record.late_deduction_leave_type.replace(' (full)', '')}</small>`;
-                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${lateMinutes} min late → ${lateDays} days deducted</small>`;
-                } else if (isPartial) {
-                    const leaveTypes = record.late_deduction_leave_type.replace(' (partial)', '');
-                    accreditedDisplay += `<br><small style="color: #a16207; font-size: 10px; font-weight: 600;">⚠ Partial Coverage by ${leaveTypes}</small>`;
-                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${lateMinutes} min late, insufficient leave</small>`;
-                    
-                    // Show LWOP if available
-                    if (record.lwop_minutes && record.lwop_minutes > 0) {
-                        const lwopDays = (record.lwop_minutes / 480).toFixed(6);
-                        accreditedDisplay += `<br><small style="color: #8e1e18; font-size: 9px;">LWOP: ${record.lwop_minutes} min (${lwopDays} days) → Salary deduction</small>`;
-                    } else {
-                        accreditedDisplay += `<br><small style="color: #8e1e18; font-size: 9px;">Remaining deducted from hours</small>`;
-                    }
-                } else {
-                    accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Late Covered by ${record.late_deduction_leave_type}</small>`;
-                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${lateMinutes} min late → ${lateDays} days deducted</small>`;
-                }
+                const lm = record.late_minutes || 0;
+                const lt = record.late_deduction_leave_type.replace(/ \((full|partial)\)/, '');
+                tips.push(`Late ${lm}m → covered by ${lt}`);
             }
-            
-            // Add undertime deduction indicator if undertime was deducted from leave
             if (record.undertime_deducted_from_leave && record.undertime_deduction_leave_type) {
-                const undertimeMinutes = record.undertime || 0;
-                const undertimeDays = (undertimeMinutes / 480).toFixed(6); // CSC standard: 480 minutes = 1 work day
-                const isPartial = record.undertime_deduction_leave_type.includes('partial');
-                const isFull = record.undertime_deduction_leave_type.includes('full');
-                
-                if (isFull) {
-                    accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Undertime Fully Covered by ${record.undertime_deduction_leave_type.replace(' (full)', '')}</small>`;
-                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${undertimeMinutes} min undertime → ${undertimeDays} days deducted</small>`;
-                } else if (isPartial) {
-                    const leaveTypes = record.undertime_deduction_leave_type.replace(' (partial)', '');
-                    accreditedDisplay += `<br><small style="color: #a16207; font-size: 10px; font-weight: 600;">⚠ Partial Coverage by ${leaveTypes}</small>`;
-                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${undertimeMinutes} min undertime, insufficient leave</small>`;
-                    
-                    // Show LWOP if available
-                    if (record.lwop_minutes && record.lwop_minutes > 0) {
-                        const lwopDays = (record.lwop_minutes / 480).toFixed(6);
-                        accreditedDisplay += `<br><small style="color: #8e1e18; font-size: 9px;">LWOP: ${record.lwop_minutes} min (${lwopDays} days) → Salary deduction</small>`;
-                    } else {
-                        accreditedDisplay += `<br><small style="color: #8e1e18; font-size: 9px;">Remaining deducted from hours</small>`;
-                    }
-                } else {
-                    accreditedDisplay += `<br><small style="color: #0b044d; font-size: 10px; font-weight: 600;">✓ Undertime Covered by ${record.undertime_deduction_leave_type}</small>`;
-                    accreditedDisplay += `<br><small style="color: #6b6a8a; font-size: 9px;">${undertimeMinutes} min undertime → ${undertimeDays} days deducted</small>`;
-                }
+                const um = record.undertime || 0;
+                const ut = record.undertime_deduction_leave_type.replace(/ \((full|partial)\)/, '');
+                tips.push(`Undertime ${um}m → covered by ${ut}`);
             }
+            if (record.lwop_minutes > 0) {
+                tips.push(`LWOP ${record.lwop_minutes}m → salary deduction`);
+            }
+
+            const tipAttr = tips.length ? ` data-acc-tip="${tips.join(' · ')}"` : '';
+            accreditedDisplay = `<span class="acc-pill ${cls}"${tipAttr}>${label}${tips.length ? '<svg class="acc-info-ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' : ''}</span>`;
+        } else {
+            accreditedDisplay = `<span class="acc-pill acc-incomplete">Incomplete</span>`;
         }
 
         // Build leave deduction display
@@ -810,11 +751,85 @@ function renderDetailedDTR(data) {
             leaveDeductionDisplay = `<span style="color: #0b044d; font-weight: 600;">${leaveCode}</span><br><small style="color: #6b6a8a; font-size: 10px;">${leaveType} (${days} day${days > 1 ? 's' : ''})</small>`;
         }
 
+        const fmt12 = (t) => {
+            if (!t) return null;
+            const [h, m] = t.split(':').map(Number);
+            const suffix = h >= 12 ? 'PM' : 'AM';
+            const h12 = h % 12 || 12;
+            return `${h12}:${String(m).padStart(2,'0')} ${suffix}`;
+        };
+
+        // ── Timeline date cell ──
+        const dotState = record.is_abandoned || record.is_absent || isAbsent ? 'absent'
+            : record.is_on_leave ? 'leave'
+            : isWeekend ? 'weekend'
+            : isLate ? 'late'
+            : record.needs_review ? 'review'
+            : 'present';
+
+        const dateObj  = new Date(record.date_key + 'T00:00:00');
+        const dayNum   = dateObj.getDate();
+        const monthStr = dateObj.toLocaleDateString('en-US', { month: 'short' });
+        const dayStr   = record.day.substring(0, 3).toUpperCase();
+
+        // Week separator
+        const weekNum = getWeekNumber(dateObj);
+        if (weekNum !== lastWeekNum) {
+            const sepTr = document.createElement('tr');
+            sepTr.className = 'week-sep';
+            const weekStart = new Date(dateObj);
+            weekStart.setDate(dateObj.getDate() - ((dateObj.getDay() + 6) % 7)); // Monday
+            const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6);
+            const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            sepTr.innerHTML = `<td colspan="10">Week ${weekNum} &nbsp;·&nbsp; ${fmt(weekStart)} – ${fmt(weekEnd)}</td>`;
+            tbody.appendChild(sepTr);
+            lastWeekNum = weekNum;
+        }
+
+        const dateCellHtml = `
+            <div class="dtr-date-cell">
+                <div class="dtr-tl-track">
+                    <div class="dtr-tl-line tl-line-${dotState}"></div>
+                    <div class="dtr-tl-dot tl-${dotState}"></div>
+                    <div class="dtr-tl-line tl-line-${dotState}"></div>
+                </div>
+                <div class="dtr-date-info">
+                    <span class="dtr-date-num">${dayNum}</span>
+                    <div class="dtr-date-meta">
+                        <span class="dtr-date-sub">${monthStr} · ${dayStr}</span>
+                        ${statusBadge}
+                    </div>
+                </div>
+            </div>`;
+
         tr.innerHTML = `
-            <td><strong>${record.date}</strong>${statusBadge}</td>
-            <td>${record.day}</td>
-            <td>${record.am_in ? record.am_in : '<span class="log-missing">Missing</span>'}<br><span style="color:#9aa1b5;font-size:11px;">${record.am_out ? record.am_out : '<span class="log-missing">Missing</span>'}</span></td>
-            <td>${record.pm_in ? record.pm_in : '<span class="log-missing">Missing</span>'}<br><span style="color:#9aa1b5;font-size:11px;">${record.pm_out ? record.pm_out : '<span class="log-missing">Missing</span>'}</span></td>
+            <td style="padding:0 8px;">${dateCellHtml}</td>
+            <td>
+                <div class="time-slot">
+                    <div class="time-entry">
+                        <span class="time-lbl in">IN</span>
+                        <span class="time-val ${record.am_in ? '' : 'time-missing'}">${record.am_in ? fmt12(record.am_in) : '—'}</span>
+                    </div>
+                    <div class="time-divider"></div>
+                    <div class="time-entry">
+                        <span class="time-lbl out">OUT</span>
+                        <span class="time-val ${record.am_out ? '' : 'time-missing'}">${record.am_out ? fmt12(record.am_out) : '—'}</span>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="time-slot">
+                    <div class="time-entry">
+                        <span class="time-lbl in">IN</span>
+                        <span class="time-val ${record.pm_in ? '' : 'time-missing'}">${record.pm_in ? fmt12(record.pm_in) : '—'}</span>
+                    </div>
+                    <div class="time-divider"></div>
+                    <div class="time-entry">
+                        <span class="time-lbl out">OUT</span>
+                        <span class="time-val ${record.pm_out ? '' : 'time-missing'}">${record.pm_out ? fmt12(record.pm_out) : '—'}</span>
+                    </div>
+                </div>
+            </td>
             <td>${record.ot_in ? record.ot_in + '<br><span style="color:#9aa1b5;font-size:11px;">' + (record.ot_out || '—') + '</span>' : '—'}</td>
             <td>${record.undertime_display ? '<span class="log-late">' + record.undertime_display + '</span>' : (record.pm_out ? '0 min' : '—')}</td>
             <td>${record.late_display ? '<span class="log-late">' + record.late_display + '</span>' : (record.am_in ? '0 min' : '—')}</td>
@@ -827,10 +842,7 @@ function renderDetailedDTR(data) {
         tbody.appendChild(tr);
     });
 
-    document.getElementById('detailedTotalDays').textContent = data.records.length;
-    document.getElementById('detailedTotalPresent').textContent = totalPresent;
-    document.getElementById('detailedTotalAbsent').textContent = totalAbsent;
-    document.getElementById('detailedTotalLate').textContent = totalLate + ' times';
+    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
     // Format total minutes to hrs and min
     const formatTotalMinutes = (minutes) => {
@@ -852,14 +864,7 @@ function renderDetailedDTR(data) {
         return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
     };
 
-    document.getElementById('detailedTotalLateMinutes').textContent = formatTotalMinutes(totalLateMinutes);
-    document.getElementById('detailedTotalUndertime').textContent = formatTotalMinutes(totalUndertimeMinutes);
 
-    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-
-    // Footer summary cards
-    setText('detailedTotalWorked', formatHours(totalWorkedMinutes));
-    setText('detailedTotalOvertime', formatHours(totalOvertimeMinutes));
 
     // KPI cards
     const workingDays = totalPresent + totalAbsent;
