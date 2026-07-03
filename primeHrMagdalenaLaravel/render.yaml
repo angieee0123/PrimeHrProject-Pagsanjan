@@ -1,10 +1,9 @@
 services:
   - type: web
     name: primehr-laravel
-    runtime: php
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     plan: free
-    buildCommand: composer install --no-dev --optimize-autoloader && npm install && npm run build
-    startCommand: php artisan migrate --force && php artisan optimize && php artisan serve --host=0.0.0.0 --port=$PORT
     envVars:
       - key: APP_NAME
         value: PrimeHR
@@ -14,31 +13,17 @@ services:
         value: false
       - key: APP_KEY
         generateValue: true
+      - key: APP_URL
+        value: https://primehr-laravel.onrender.com
       - key: DB_CONNECTION
         value: mysql
       - key: DB_HOST
-        fromDatabase:
-          name: primehr-db
-          property: host
+        sync: false
       - key: DB_PORT
-        fromDatabase:
-          name: primehr-db
-          property: port
+        sync: false
       - key: DB_DATABASE
-        fromDatabase:
-          name: primehr-db
-          property: database
+        sync: false
       - key: DB_USERNAME
-        fromDatabase:
-          name: primehr-db
-          property: user
+        sync: false
       - key: DB_PASSWORD
-        fromDatabase:
-          name: primehr-db
-          property: password
-
-databases:
-  - name: primehr-db
-    plan: free
-    databaseName: primehris
-    user: primehr_user
+        sync: false
