@@ -1,21 +1,24 @@
 <!-- Detailed DTR Modal -->
 <div id="detailedDTRModal" class="modal-overlay ddtr-overlay" style="display: none;" onclick="closeDetailedDTRModal()">
-    <div class="ddtr-modal" onclick="event.stopPropagation()">
+    <div class="ddtr-modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="ddtrModalTitle">
 
-        {{-- ── HEADER TOOLBAR ── --}}
+        {{-- ── HEADER ── --}}
         <div class="ddtr-header">
             {{-- Left: branding --}}
             <div class="ddtr-header-brand">
                 <div class="ddtr-header-icon">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </div>
-                <span class="ddtr-title">Detailed Time Record</span>
+                <div class="ddtr-header-titles">
+                    <span class="ddtr-title" id="ddtrModalTitle">Detailed Time Record</span>
+                    <span class="ddtr-subtitle">PRIME HRIS · Attendance</span>
+                </div>
                 <span class="ddtr-period-pill" id="detailedPeriod">{{ $periodDisplay }}</span>
             </div>
 
             {{-- Right: close --}}
             <button class="ddtr-close" onclick="closeDetailedDTRModal()" aria-label="Close">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
 
@@ -26,7 +29,7 @@
             <section class="ddtr-kpis">
                 <div class="ddtr-kpi">
                     <div class="ddtr-kpi-icon green">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     </div>
                     <div class="ddtr-kpi-text">
                         <span class="ddtr-kpi-label">Present</span>
@@ -36,7 +39,7 @@
                 </div>
                 <div class="ddtr-kpi">
                     <div class="ddtr-kpi-icon red">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                     </div>
                     <div class="ddtr-kpi-text">
                         <span class="ddtr-kpi-label">Absent</span>
@@ -46,7 +49,7 @@
                 </div>
                 <div class="ddtr-kpi">
                     <div class="ddtr-kpi-icon amber">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </div>
                     <div class="ddtr-kpi-text">
                         <span class="ddtr-kpi-label">Late</span>
@@ -56,7 +59,7 @@
                 </div>
                 <div class="ddtr-kpi">
                     <div class="ddtr-kpi-icon blue">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                     </div>
                     <div class="ddtr-kpi-text">
                         <span class="ddtr-kpi-label">Leave</span>
@@ -66,7 +69,7 @@
                 </div>
                 <div class="ddtr-kpi">
                     <div class="ddtr-kpi-icon rose">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
                     </div>
                     <div class="ddtr-kpi-text">
                         <span class="ddtr-kpi-label">Undertime</span>
@@ -76,7 +79,7 @@
                 </div>
                 <div class="ddtr-kpi">
                     <div class="ddtr-kpi-icon purple">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><line x1="22" y1="2" x2="18" y2="6"/></svg>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><line x1="22" y1="2" x2="18" y2="6"/></svg>
                     </div>
                     <div class="ddtr-kpi-text">
                         <span class="ddtr-kpi-label">Overtime</span>
@@ -90,17 +93,19 @@
             <div class="ddtr-toolbar">
                 <div class="ddtr-fld">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    <input type="date" id="detailedStartDate" class="ddtr-input">
+                    <input type="date" id="detailedStartDate" class="ddtr-input" aria-label="Start date">
                 </div>
-                <span class="ddtr-sep">—</span>
+                <span class="ddtr-sep">to</span>
                 <div class="ddtr-fld">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    <input type="date" id="detailedEndDate" class="ddtr-input">
+                    <input type="date" id="detailedEndDate" class="ddtr-input" aria-label="End date">
                 </div>
+
+                <div class="ddtr-toolbar-divider"></div>
 
                 {{-- View dropdown --}}
                 <div class="ddtr-view-wrap" id="ddtrViewWrap">
-                    <button class="ddtr-view-btn" id="ddtrViewBtn" onclick="toggleDdtrDropdown()">
+                    <button class="ddtr-view-btn" id="ddtrViewBtn" onclick="toggleDdtrDropdown()" aria-haspopup="true">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                         <span id="ddtrViewLabel">All Records</span>
                         <svg class="ddtr-caret" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -152,7 +157,7 @@
             {{-- ── TABLE ── --}}
             <div class="ddtr-table-card">
                 <div id="detailedDTRLoading" class="ddtr-loading">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9aa1b5" stroke-width="2.5" style="animation:spin 1s linear infinite">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9aa1b5" stroke-width="2.5" style="animation:spin 1s linear infinite">
                         <circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" opacity=".75"/>
                     </svg>
                     <p>Loading attendance records…</p>
@@ -163,8 +168,8 @@
                         <thead>
                             <tr>
                                 <th>Date</th>
-                                <th>AM<br><span style="font-weight:400;color:#b0b7c9;font-size:9px;">8:00 – 12:00</span></th>
-                                <th>PM<br><span style="font-weight:400;color:#b0b7c9;font-size:9px;">1:00 – 5:00</span></th>
+                                <th>AM <span class="ddtr-th-hint">8:00 – 12:00</span></th>
+                                <th>PM <span class="ddtr-th-hint">1:00 – 5:00</span></th>
                                 <th>OT</th>
                                 <th>Undertime</th>
                                 <th>Late</th>
@@ -188,87 +193,106 @@
 </div>
 
 <style>
-/* ══════════════ DETAILED DTR MODAL — premium redesign ══════════════ */
+/* ══════════════ DETAILED DTR MODAL — premium refinement ══════════════
+   8px spacing system · light header · soft-badge status system
+   Every class emitted by adminAttendance.js is styled below. */
 .ddtr-overlay {
     --pri: #0B0A4D;
+    --pri-soft: #eef0fb;
     --card: #FFFFFF;
-    --line: #eceaf8;
-    --ink: #1E2247;
-    --muted: #7C839D;
-    padding: 24px;
+    --line: #e9eaf2;
+    --ink: #1a1f36;
+    --muted: #697086;
+    --faint: #9aa1b5;
+    --bg: #f8f9fc;
+    padding: 32px;
+    background: rgba(15, 18, 45, .42);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
 }
 .ddtr-modal {
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-width: 1440px;
+    max-width: 1400px;
     height: 90vh;
     background: #fff;
-    border-radius: 24px;
-    box-shadow: 0 30px 80px rgba(15, 23, 42, .18);
+    border-radius: 16px;
+    border: 1px solid rgba(15,23,42,.06);
+    box-shadow: 0 24px 64px rgba(15, 23, 42, .16), 0 4px 16px rgba(15, 23, 42, .06);
     overflow: hidden;
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    animation: ddtrIn .25s cubic-bezier(.22,.61,.36,1);
+    animation: ddtrIn .28s cubic-bezier(.22,.61,.36,1);
 }
-@keyframes ddtrIn { from { opacity: 0; transform: translateY(16px) scale(.99); } to { opacity: 1; transform: none; } }
+@keyframes ddtrIn { from { opacity: 0; transform: translateY(12px) scale(.99); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+    .ddtr-modal, .ddtr-dropdown { animation: none; }
+    .ddtr-overlay * { transition: none !important; }
+}
 
-/* ── HEADER TOOLBAR ── */
+/* ── HEADER · light, minimal ── */
 .ddtr-header {
     display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    padding: 0 20px;
-    height: 56px; flex-shrink: 0;
-    background: linear-gradient(90deg, #0B0A4D 0%, #1a1270 100%);
-    border-bottom: 1px solid rgba(255,255,255,.08);
+    padding: 0 24px;
+    height: 64px; flex-shrink: 0;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
 }
 .ddtr-header-brand {
-    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    display: flex; align-items: center; gap: 12px; min-width: 0;
 }
 .ddtr-header-icon {
-    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
-    background: rgba(255,255,255,.12); color: rgba(255,255,255,.85);
+    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+    background: var(--pri); color: #fff;
     display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(11,10,77,.22);
 }
+.ddtr-header-titles { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .ddtr-title {
-    font-size: 13px; font-weight: 700; color: #fff; margin: 0;
-    white-space: nowrap; letter-spacing: .1px;
+    font-size: 14px; font-weight: 600; color: var(--ink); margin: 0;
+    white-space: nowrap; letter-spacing: -.1px; line-height: 1.2;
+}
+.ddtr-subtitle {
+    font-size: 10.5px; font-weight: 500; color: var(--faint);
+    white-space: nowrap; letter-spacing: .2px; line-height: 1.2;
 }
 .ddtr-period-pill {
-    font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6);
-    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
-    border-radius: 999px; padding: 2px 10px; white-space: nowrap;
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    background: var(--bg); border: 1px solid var(--line);
+    border-radius: 999px; padding: 4px 12px; white-space: nowrap;
+    margin-left: 8px;
 }
 /* Close */
 .ddtr-close {
-    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08);
-    color: rgba(255,255,255,.7);
+    width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+    border: none; background: transparent;
+    color: var(--faint);
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all .2s ease;
+    cursor: pointer; transition: background .15s ease, color .15s ease;
 }
-.ddtr-close:hover { background: rgba(255,255,255,.18); color: #fff; transform: rotate(90deg); }
+.ddtr-close:hover { background: var(--bg); color: var(--ink); }
 
 /* ── BODY (scroll) ── */
 .ddtr-body {
     flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-x: hidden;
-    padding: 14px 20px;
-    background: #F7F8FC;
-    display: flex; flex-direction: column; gap: 10px;
+    padding: 24px;
+    background: var(--bg);
+    display: flex; flex-direction: column; gap: 16px;
 }
-
 
 /* ── KPI CARDS ── */
 .ddtr-kpis {
-    display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px;
 }
 .ddtr-kpi {
     background: #fff; border: 1px solid var(--line); border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(15,23,42,.03);
-    padding: 10px 12px; display: flex; flex-direction: row; align-items: center; gap: 10px;
-    transition: transform .2s ease, box-shadow .2s ease;
+    box-shadow: 0 1px 2px rgba(15,23,42,.04);
+    padding: 16px; display: flex; flex-direction: row; align-items: center; gap: 12px;
+    transition: box-shadow .2s ease, border-color .2s ease;
 }
-.ddtr-kpi:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(15,23,42,.08); }
+.ddtr-kpi:hover { border-color: #dcdfeb; box-shadow: 0 4px 12px rgba(15,23,42,.06); }
 .ddtr-kpi-icon {
-    width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
 }
 .ddtr-kpi-icon.green  { background: #ecfdf3; color: #16a34a; }
@@ -277,113 +301,127 @@
 .ddtr-kpi-icon.blue   { background: #eef4ff; color: #4F7CFF; }
 .ddtr-kpi-icon.rose   { background: #fef1f6; color: #e11d73; }
 .ddtr-kpi-icon.purple { background: #f4f1ff; color: #7C5CFF; }
-.ddtr-kpi-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.ddtr-kpi-label { font-size: 10px; font-weight: 600; color: var(--muted); }
-.ddtr-kpi-val { font-size: 18px; font-weight: 800; color: var(--ink); line-height: 1; letter-spacing: -.5px; }
-.ddtr-kpi-sub { font-size: 10px; color: var(--muted); font-weight: 500; }
+.ddtr-kpi-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ddtr-kpi-label { font-size: 11px; font-weight: 500; color: var(--muted); line-height: 1.2; }
+.ddtr-kpi-val { font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1.1; letter-spacing: -.4px; }
+.ddtr-kpi-sub {
+    font-size: 10.5px; color: var(--faint); font-weight: 500; line-height: 1.3;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
-/* ── TOOLBAR ── */
+/* ── FILTER TOOLBAR · unified control bar ── */
 .ddtr-toolbar {
     display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    background: #fff; border: 1px solid var(--line); border-radius: 14px;
-    box-shadow: 0 1px 3px rgba(15,23,42,.03);
-    padding: 8px 12px;
+    background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(15,23,42,.04);
+    padding: 8px 16px;
 }
 .ddtr-toolbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.ddtr-toolbar-divider { width: 1px; height: 24px; background: var(--line); margin: 0 4px; }
 .ddtr-fld { position: relative; display: flex; align-items: center; }
-.ddtr-fld > svg { position: absolute; left: 9px; color: #9aa1b5; pointer-events: none; }
+.ddtr-fld > svg { position: absolute; left: 10px; color: var(--faint); pointer-events: none; }
 .ddtr-input {
-    height: 36px; border: 1px solid var(--line); border-radius: 9px;
-    background: #f8fafc; color: var(--ink); font-size: 12px; font-family: 'Poppins', sans-serif;
-    outline: none; padding: 0 10px 0 28px; transition: all .2s ease; width: 136px;
+    height: 36px; border: 1px solid var(--line); border-radius: 8px;
+    background: #fff; color: var(--ink); font-size: 12px; font-family: 'Poppins', sans-serif;
+    outline: none; padding: 0 10px 0 30px; transition: border-color .15s ease, box-shadow .15s ease; width: 140px;
 }
-.ddtr-input:focus { border-color: var(--pri); background: #fff; box-shadow: 0 0 0 3px rgba(11,10,77,.07); }
-.ddtr-sep { font-size: 11px; font-weight: 600; color: var(--muted); }
+.ddtr-input:hover { border-color: #cdd2e3; }
+.ddtr-input:focus { border-color: var(--pri); box-shadow: 0 0 0 3px rgba(11,10,77,.08); }
+.ddtr-sep { font-size: 11px; font-weight: 500; color: var(--faint); padding: 0 2px; }
 .ddtr-btn-solid, .ddtr-btn-ghost {
-    height: 36px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px;
-    border-radius: 9px; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif;
-    cursor: pointer; transition: all .2s ease; white-space: nowrap;
+    height: 36px; display: inline-flex; align-items: center; gap: 6px; padding: 0 16px;
+    border-radius: 8px; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif;
+    cursor: pointer; transition: background .15s ease, border-color .15s ease, box-shadow .15s ease; white-space: nowrap;
 }
-.ddtr-btn-solid { background: var(--pri); color: #fff; border: 1px solid var(--pri); box-shadow: 0 4px 12px rgba(11,10,77,.18); }
-.ddtr-btn-solid:hover { background: #1a0f6e; }
+.ddtr-btn-solid { background: var(--pri); color: #fff; border: 1px solid var(--pri); box-shadow: 0 1px 3px rgba(11,10,77,.24); }
+.ddtr-btn-solid:hover { background: #191670; border-color: #191670; }
 .ddtr-btn-ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
-.ddtr-btn-ghost:hover { background: #f6f7fc; border-color: #cdd4ea; }
+.ddtr-btn-ghost:hover { background: var(--bg); border-color: #cdd2e3; }
+.ddtr-btn-solid:focus-visible, .ddtr-btn-ghost:focus-visible,
+.ddtr-view-btn:focus-visible, .ddtr-close:focus-visible {
+    outline: 2px solid var(--pri); outline-offset: 2px;
+}
 
 /* ── VIEW DROPDOWN ── */
 .ddtr-view-wrap { position: relative; }
 .ddtr-view-btn {
     height: 36px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px;
-    border-radius: 9px; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif;
-    border: 1px solid var(--line); background: #f8fafc; color: var(--ink);
-    cursor: pointer; transition: all .2s ease; white-space: nowrap;
+    border-radius: 8px; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif;
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+    cursor: pointer; transition: background .15s ease, border-color .15s ease, box-shadow .15s ease; white-space: nowrap;
 }
-.ddtr-view-btn:hover { background: #f0f2fa; border-color: #c4c9e0; }
-.ddtr-view-btn.open  { border-color: var(--pri); background: #fff; box-shadow: 0 0 0 3px rgba(11,10,77,.07); }
-.ddtr-caret { transition: transform .2s ease; }
+.ddtr-view-btn:hover { background: var(--bg); border-color: #cdd2e3; }
+.ddtr-view-btn.open  { border-color: var(--pri); background: #fff; box-shadow: 0 0 0 3px rgba(11,10,77,.08); }
+.ddtr-caret { transition: transform .2s ease; color: var(--faint); }
 .ddtr-view-btn.open .ddtr-caret { transform: rotate(180deg); }
 .ddtr-dropdown {
     display: none; position: absolute; top: calc(100% + 6px); left: 0;
-    min-width: 200px; background: #fff; border: 1px solid var(--line);
-    border-radius: 12px; box-shadow: 0 8px 28px rgba(15,23,42,.12);
+    min-width: 208px; background: #fff; border: 1px solid var(--line);
+    border-radius: 12px; box-shadow: 0 12px 32px rgba(15,23,42,.12), 0 2px 8px rgba(15,23,42,.06);
     padding: 6px; z-index: 999; animation: ddFadeIn .15s ease;
 }
 .ddtr-dropdown.open { display: block; }
 @keyframes ddFadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
 .ddtr-dd-section {
-    font-size: 9.5px; font-weight: 700; color: var(--muted);
+    font-size: 10px; font-weight: 600; color: var(--faint);
     text-transform: uppercase; letter-spacing: .6px;
-    padding: 6px 10px 3px;
+    padding: 8px 10px 4px;
 }
-.ddtr-dd-sep { height: 1px; background: var(--line); margin: 4px 0; }
+.ddtr-dd-sep { height: 1px; background: var(--line); margin: 4px 6px; }
 .ddtr-dd-item {
     display: flex; align-items: center; gap: 8px; width: 100%;
-    padding: 7px 10px; border-radius: 8px; border: none; background: none;
+    padding: 8px 10px; border-radius: 8px; border: none; background: none;
     font-size: 12px; font-weight: 500; color: var(--ink); font-family: 'Poppins', sans-serif;
     cursor: pointer; text-align: left; transition: background .15s ease;
 }
-.ddtr-dd-item:hover  { background: #f4f5fb; }
-.ddtr-dd-item.active { background: #eef0fb; color: var(--pri); font-weight: 700; }
+.ddtr-dd-item:hover  { background: var(--bg); }
+.ddtr-dd-item.active { background: var(--pri-soft); color: var(--pri); font-weight: 600; }
 .ddtr-dd-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
 /* ── TABLE CARD ── */
 .ddtr-table-card {
-    background: #fff; border: 1px solid var(--line); border-radius: 18px;
-    box-shadow: 0 1px 3px rgba(15,23,42,.03);
+    background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(15,23,42,.04);
     display: flex; flex-direction: column;
     flex: 1 1 0; min-height: 0;
+    overflow: hidden;
 }
-.ddtr-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 56px; color: var(--muted); font-size: 13px; }
+/* JS toggles this element to display:block — style for block flow */
+.ddtr-loading { text-align: center; padding: 64px 24px; color: var(--muted); font-size: 13px; }
+.ddtr-loading svg { display: inline-block; }
+.ddtr-loading p { margin: 12px 0 0; }
 .ddtr-table-scroll {
     flex: 1 1 0; min-height: 0;
     overflow-x: auto; overflow-y: auto;
-    border-radius: 18px;
     -webkit-overflow-scrolling: touch;
 }
 
-.detailed-dtr-table { width: 100%; min-width: 700px; border-collapse: separate; border-spacing: 0; }
+.detailed-dtr-table { width: 100%; min-width: 760px; border-collapse: separate; border-spacing: 0; }
 .detailed-dtr-table thead th {
     position: sticky; top: 0; z-index: 2;
-    background: #f7f8fc; color: var(--muted);
-    font-size: 10px; font-weight: 600; text-transform: none;
-    padding: 7px 8px; text-align: left; white-space: nowrap;
+    background: #fff; color: var(--muted);
+    font-size: 11px; font-weight: 500;
+    padding: 12px; text-align: left; white-space: nowrap;
     border-bottom: 1px solid var(--line);
+    box-shadow: 0 1px 0 var(--line);
 }
+.ddtr-th-hint { font-weight: 400; color: var(--faint); font-size: 9.5px; margin-left: 3px; }
 .detailed-dtr-table td {
-    padding: 0 8px; border-bottom: 1px solid #f1f2f8;
-    font-size: 11px; color: var(--ink); height: 52px; vertical-align: middle; white-space: nowrap;
+    padding: 0 12px; border-bottom: 1px solid #f1f2f8;
+    font-size: 12px; color: var(--ink); height: 56px; vertical-align: middle; white-space: nowrap;
 }
 
 /* ── WEEK SEPARATOR ── */
 .detailed-dtr-table tr.week-sep td {
-    background: #f0f2fa; padding: 5px 14px;
-    font-size: 9.5px; font-weight: 700; color: #9aa1b5;
-    text-transform: uppercase; letter-spacing: .7px;
+    background: var(--bg); padding: 6px 16px;
+    font-size: 10px; font-weight: 600; color: var(--faint);
+    text-transform: uppercase; letter-spacing: .8px;
     border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
     height: auto;
 }
 
 /* ── TIMELINE DATE CELL ── */
-.dtr-date-cell { display: flex; align-items: stretch; min-width: 110px; height: 52px; }
+.dtr-date-cell { display: flex; align-items: stretch; min-width: 112px; height: 56px; }
 .dtr-tl-track {
     display: flex; flex-direction: column; align-items: center;
     width: 18px; flex-shrink: 0;
@@ -393,10 +431,10 @@
     width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
     border: 2px solid #fff; box-shadow: 0 0 0 2px currentColor;
 }
-.dtr-date-info { display: flex; flex-direction: column; justify-content: center; padding-left: 9px; gap: 2px; }
-.dtr-date-num  { font-size: 16px; font-weight: 800; color: var(--ink); line-height: 1; }
-.dtr-date-meta { display: flex; align-items: center; gap: 4px; }
-.dtr-date-sub  { font-size: 9.5px; font-weight: 600; color: var(--muted); }
+.dtr-date-info { display: flex; flex-direction: column; justify-content: center; padding-left: 10px; gap: 2px; }
+.dtr-date-num  { font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1; letter-spacing: -.3px; }
+.dtr-date-meta { display: flex; align-items: center; gap: 6px; }
+.dtr-date-sub  { font-size: 10px; font-weight: 500; color: var(--faint); }
 
 /* dot + line colors */
 .tl-present { color: #16a34a; background: #16a34a; }
@@ -405,101 +443,87 @@
 .tl-leave   { color: #4F7CFF; background: #4F7CFF; }
 .tl-late    { color: #f59e0b; background: #f59e0b; }
 .tl-review  { color: #7C5CFF; background: #7C5CFF; }
-.tl-line-present { background: #bbf7d0; }
-.tl-line-absent  { background: #fecaca; }
-.tl-line-weekend { background: #e2e8f0; }
-.tl-line-leave   { background: #bfdbfe; }
-.tl-line-late    { background: #fde68a; }
-.tl-line-review  { background: #ede9fe; }
+.tl-line-present, .tl-line-absent, .tl-line-weekend,
+.tl-line-leave, .tl-line-late, .tl-line-review { background: #eceef4; }
+
 .detailed-dtr-table td:last-child, .detailed-dtr-table th:last-child { text-align: center; }
 .detailed-dtr-table tbody tr { transition: background .15s ease; }
-.detailed-dtr-table tbody tr:hover { background: #f6f9ff; }
+.detailed-dtr-table tbody tr:hover { background: #f7f9fd; }
 .detailed-dtr-table tbody tr:last-child td { border-bottom: none; }
 
 /* Row states */
-.detailed-dtr-table tr.day-weekend { background: #f4f7ff; }
-.detailed-dtr-table tr.day-weekend:hover { background: #eaf0ff; }
-.detailed-dtr-table tr.day-absent { background: #fff7f7; }
-.detailed-dtr-table tr.day-absent:hover { background: #fff0f0; }
-.detailed-dtr-table tr.day-needs-review { background: #fffdf3; }
-.detailed-dtr-table tr.day-today td { box-shadow: inset 0 0 0 1.5px rgba(79,124,255,.35); }
+.detailed-dtr-table tr.day-weekend { background: #fafbfd; }
+.detailed-dtr-table tr.day-weekend:hover { background: #f3f5f9; }
+.detailed-dtr-table tr.day-absent { background: #fcfcfd; }
+.detailed-dtr-table tr.day-absent:hover { background: #f5f5f7; }
+.detailed-dtr-table tr.day-needs-review { background: #fcfcfd; }
+.detailed-dtr-table tr.day-today td { box-shadow: inset 0 0 0 1.5px rgba(79,124,255,.25); }
 
-/* ── TIME SLOT CELL ── */
-.time-slot {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: #f8fafc; border: 1px solid #eceaf8;
-    border-radius: 8px; padding: 4px 8px;
-}
-.time-entry { display: flex; align-items: center; gap: 4px; }
-.time-lbl {
-    font-size: 8.5px; font-weight: 700; letter-spacing: .4px;
-    padding: 1px 4px; border-radius: 4px; flex-shrink: 0;
-}
-.time-lbl.in  { display: none; }
-.time-lbl.out { display: none; }
-.time-val {
-    font-size: 11px; font-weight: 600; color: #1e2247; white-space: nowrap;
-}
-.time-val.time-missing { color: #c4c9d8; font-weight: 500; }
-.time-divider {
-    width: 1px; height: 16px; background: #e2e5f0; flex-shrink: 0;
-}
+/* ── TIME VALUES ── */
+.time-val { font-size: 12px; font-weight: 500; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.time-val.time-missing { color: #c4c9d8; font-weight: 400; }
 
-/* ── ACCREDITED PILL ── */
+/* ── STATUS BADGES · soft rounded pills ── */
+.detailed-dtr-table .badge-absent,
+.detailed-dtr-table .badge-incomplete,
+.detailed-dtr-table .badge-needs-review {
+    display: inline-flex; align-items: center;
+    font-size: 9.5px; font-weight: 600; letter-spacing: .3px;
+    padding: 2px 8px; border-radius: 999px;
+    vertical-align: middle; line-height: 1.5;
+}
+.detailed-dtr-table .badge-absent { background: #fef2f2; color: #dc2626; }
+.detailed-dtr-table .badge-incomplete { background: #fefce8; color: #a16207; }
+.detailed-dtr-table .badge-needs-review { background: #f4f1ff; color: #7C5CFF; }
+.detailed-dtr-table .log-late { color: var(--ink); font-weight: 600; }
+
+/* ── ACCREDITED PILL · soft backgrounds ── */
 .acc-pill {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
     white-space: nowrap; cursor: default; position: relative;
 }
 .acc-full       { background: #ecfdf3; color: #15803d; }
-.acc-partial    { background: #fff7ed; color: #a16207; }
+.acc-partial    { background: #fefce8; color: #a16207; }
 .acc-absent     { background: #fef2f2; color: #dc2626; }
-.acc-leave      { background: transparent; color: #4F7CFF; border: none; padding: 0; }
-.acc-incomplete { background: #f4f1ff; color: #7C5CFF; }
-.acc-info-ico   { opacity: .6; flex-shrink: 0; }
+.acc-leave      { background: #eef4ff; color: #4F7CFF; }
+.acc-incomplete { background: #f3f4f8; color: var(--faint); }
+.acc-info-ico   { opacity: .55; flex-shrink: 0; }
 
 /* tooltip */
 .acc-pill[data-acc-tip]:hover::after {
     content: attr(data-acc-tip);
     position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-    background: #1e2247; color: #fff; font-size: 10px; font-weight: 500;
-    padding: 5px 10px; border-radius: 8px; white-space: nowrap;
+    background: var(--ink); color: #fff; font-size: 10.5px; font-weight: 500;
+    padding: 6px 10px; border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,.18); z-index: 99; pointer-events: none;
     max-width: 320px; white-space: normal; text-align: center; line-height: 1.5;
 }
 .acc-pill[data-acc-tip]:hover::before {
     content: '';
     position: absolute; bottom: calc(100% + 1px); left: 50%; transform: translateX(-50%);
-    border: 5px solid transparent; border-top-color: #1e2247; z-index: 99;
+    border: 5px solid transparent; border-top-color: var(--ink); z-index: 99;
 }
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
-    margin-left: 6px; vertical-align: middle;
-}
-.detailed-dtr-table .badge-absent { background: #fef2f2; color: #dc2626; }
-.detailed-dtr-table .badge-incomplete { background: #fefce8; color: #a16207; }
-.detailed-dtr-table .badge-needs-review { background: #f4f1ff; color: #7C5CFF; }
-.detailed-dtr-table .log-missing {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 10.5px; font-weight: 600; padding: 3px 8px; border-radius: 7px;
-    background: #fff7ed; color: #d97706;
-}
-.detailed-dtr-table .log-missing::before { content: "⚠"; font-size: 10px; }
-.detailed-dtr-table .log-late { color: #d97706; font-weight: 600; }
 
-/* Icon action button */
+/* ── ROW ACTION · ghost, revealed on hover ── */
 .detailed-dtr-table .btn-edit-time {
-    width: 34px; height: 34px; border-radius: 9px;
-    border: 1px solid var(--line); background: #fff; color: var(--muted);
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 1px solid transparent; background: transparent; color: var(--faint);
     display: inline-flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all .2s ease; padding: 0;
+    cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease, opacity .15s ease; padding: 0;
 }
-.detailed-dtr-table .btn-edit-time:hover { color: #fff; background: var(--pri); border-color: var(--pri); transform: translateY(-2px); }
+.detailed-dtr-table .btn-edit-time:hover { color: var(--pri); background: var(--pri-soft); border-color: #dfe2f4; }
+.detailed-dtr-table .btn-edit-time:focus-visible { outline: 2px solid var(--pri); outline-offset: 2px; opacity: 1; }
+@media (hover: hover) {
+    .detailed-dtr-table tbody tr .btn-edit-time { opacity: 0; }
+    .detailed-dtr-table tbody tr:hover .btn-edit-time,
+    .detailed-dtr-table tbody tr:focus-within .btn-edit-time { opacity: 1; }
+}
 
 /* ── FOOTER ── */
 .ddtr-footer {
     display: flex; align-items: center; justify-content: flex-end;
-    padding: 10px 20px; border-top: 1px solid var(--line); background: #fff;
+    padding: 12px 24px; border-top: 1px solid var(--line); background: #fff;
     flex-shrink: 0;
 }
 
@@ -509,28 +533,36 @@
 }
 @media (max-width: 820px) {
     .ddtr-overlay { padding: 0; }
-    .ddtr-modal { max-width: 100%; height: 100vh; border-radius: 0; }
+    .ddtr-modal { max-width: 100%; height: 100vh; border-radius: 0; border: none; }
 
-    .ddtr-header { padding: 0 12px; gap: 10px; }
-    .ddtr-header-brand { gap: 8px; }
+    .ddtr-header { padding: 0 16px; gap: 10px; height: 56px; }
+    .ddtr-header-brand { gap: 10px; }
+    .ddtr-header-icon { width: 32px; height: 32px; }
     .ddtr-period-pill { display: none; }
-    .ddtr-title { font-size: 12px; }
-    .ddtr-body { padding: 14px 12px; gap: 14px; }
+    .ddtr-subtitle { display: none; }
+    .ddtr-title { font-size: 13px; }
+    .ddtr-body { padding: 16px; gap: 12px; }
 
-    .ddtr-kpis { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .ddtr-kpi { padding: 14px 12px; }
-    .ddtr-kpi-val { font-size: 22px; }
+    .ddtr-kpis { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .ddtr-kpi { padding: 12px; gap: 10px; }
+    .ddtr-kpi-icon { width: 34px; height: 34px; }
+    .ddtr-kpi-val { font-size: 18px; }
 
-    .ddtr-toolbar { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px; }
-    .ddtr-toolbar-fields { flex-direction: column; align-items: stretch; gap: 8px; }
+    .ddtr-toolbar { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px; }
+    .ddtr-toolbar-divider { display: none; }
     .ddtr-fld { width: 100%; }
     .ddtr-input { width: 100%; box-sizing: border-box; }
     .ddtr-sep { text-align: center; }
-    .ddtr-toolbar-actions { flex-direction: row; }
+    .ddtr-view-btn { width: 100%; justify-content: center; }
+    .ddtr-dropdown { left: 0; right: 0; }
+    .ddtr-toolbar-actions { flex-direction: row; margin-left: 0; }
     .ddtr-toolbar-actions .ddtr-btn-solid,
     .ddtr-toolbar-actions .ddtr-btn-ghost { flex: 1; justify-content: center; }
 
-    .ddtr-footer { padding: 10px 12px; }
+    /* touch devices: keep row action always visible */
+    .detailed-dtr-table tbody tr .btn-edit-time { opacity: 1; border-color: var(--line); }
+
+    .ddtr-footer { padding: 12px 16px; }
 }
 @media (max-width: 480px) {
     .ddtr-kpis { grid-template-columns: repeat(2, 1fr); }

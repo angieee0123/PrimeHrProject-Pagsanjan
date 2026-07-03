@@ -745,10 +745,31 @@ function renderDetailedDTR(data) {
         // Build leave deduction display
         let leaveDeductionDisplay = '—';
         if (record.is_on_leave && record.leave_info) {
+            // Full-day approved leave
             const leaveType = record.leave_info.leave_type || 'Leave';
             const leaveCode = record.leave_info.leave_code || 'N/A';
             const days = record.leave_info.days || 1;
-            leaveDeductionDisplay = `<span style="color: #0b044d; font-weight: 600;">${leaveCode}</span><br><small style="color: #6b6a8a; font-size: 10px;">${leaveType} (${days} day${days > 1 ? 's' : ''})</small>`;
+            leaveDeductionDisplay = `<span style="color:#0b044d;font-weight:600;">${leaveCode}</span><br><small style="color:#6b6a8a;font-size:10px;">${leaveType} (${days} day${days > 1 ? 's' : ''})</small>`;
+        } else {
+            // Late / undertime deducted from leave credits
+            const parts = [];
+            if (record.late_deducted_from_leave && record.late_deduction_leave_type) {
+                const lt = record.late_deduction_leave_type.replace(/ \((full|partial)\)/, '');
+                const lm = record.late_minutes || 0;
+                const lDays = (lm / 480).toFixed(4);
+                parts.push(`<span style="color:#0b044d;font-weight:600;">${lt}</span><br><small style="color:#6b6a8a;font-size:10px;">Late ${lm}m (${lDays}d)</small>`);
+            }
+            if (record.undertime_deducted_from_leave && record.undertime_deduction_leave_type) {
+                const ut = record.undertime_deduction_leave_type.replace(/ \((full|partial)\)/, '');
+                const um = record.undertime || 0;
+                const uDays = (um / 480).toFixed(4);
+                parts.push(`<span style="color:#0b044d;font-weight:600;">${ut}</span><br><small style="color:#6b6a8a;font-size:10px;">Undertime ${um}m (${uDays}d)</small>`);
+            }
+            if (record.lwop_minutes > 0) {
+                const lwopDays = (record.lwop_minutes / 480).toFixed(4);
+                parts.push(`<span style="color:#dc2626;font-weight:600;">LWOP</span><br><small style="color:#6b6a8a;font-size:10px;">${record.lwop_minutes}m (${lwopDays}d)</small>`);
+            }
+            if (parts.length) leaveDeductionDisplay = parts.join('<br>');
         }
 
         const fmt12 = (t) => {
