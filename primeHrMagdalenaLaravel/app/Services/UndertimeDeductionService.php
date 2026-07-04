@@ -39,11 +39,11 @@ class UndertimeDeductionService
             $totalCoveredMinutes = 0;  // Track covered minutes directly
 
             // Try to deduct from VL first
-            if ($vlBalance && $vlBalance->available_credits > 0) {
+            if ($remainingUndertimeDays > 0 && $vlBalance && $vlBalance->available_credits > 0) {
                 $deductAmount = min($vlBalance->available_credits, $remainingUndertimeDays);
                 $this->deductFromLeave($vlBalance, $deductAmount, $log, 'VL', false);
                 $remainingUndertimeDays -= $deductAmount;
-                $totalCoveredMinutes += (int)($deductAmount * 480);  // Convert to minutes without rounding
+                $totalCoveredMinutes += (int)($deductAmount * 480);
                 $deductedFromLeave = true;
                 $leaveTypes[] = 'VL';
             }
@@ -53,50 +53,34 @@ class UndertimeDeductionService
                 $deductAmount = min($slBalance->available_credits, $remainingUndertimeDays);
                 $this->deductFromLeave($slBalance, $deductAmount, $log, 'SL', false);
                 $remainingUndertimeDays -= $deductAmount;
-                $totalCoveredMinutes += (int)($deductAmount * 480);  // Convert to minutes without rounding
+                $totalCoveredMinutes += (int)($deductAmount * 480);
                 $deductedFromLeave = true;
                 $leaveTypes[] = 'SL';
             }
 
-            // Calculate LWOP minutes directly
-            $lwopMinutes = $undertimeMinutes - $totalCoveredMinutes;
+            // Uncovered undertime minutes become LWOP
+            $undertimeLwopMinutes = max(0, $undertimeMinutes - $totalCoveredMinutes);
 
-            // Update log based on coverage
-            if ($lwopMinutes <= 0) {
-                // Fully covered by leave - credit full 8 hours
-                $log->update([
-                    'total_accredited_minutes' => 480,
-                    'undertime_deducted_from_leave' => true,
-                    'undertime_deduction_leave_type' => implode('+', $leaveTypes) . ' (full)',
-                    'lwop_minutes' => max(0, $log->lwop_minutes - $undertimeMinutes), // Reduce LWOP if undertime was previously counted
-                    'requires_salary_deduction' => $log->lwop_minutes > $undertimeMinutes
-                ]);
-                
-                if ($log->attendance) {
-                    $log->attendance->update(['accredited_hours' => 480]);
-                }
-            } else {
-                // Partially covered - restore leave-covered time, keep only LWOP deduction
-                // Example: 180 min undertime, VL covered 60 min, SL covered 60 min → Restore 120 min, keep 60 min LWOP
-                
-                // Restore the time that was covered by leave credits
-                $newAccreditedMinutes = min(480, $log->total_accredited_minutes + $totalCoveredMinutes);
-                
-                // Update LWOP to reflect only uncovered undertime
-                $existingLwop = $log->lwop_minutes;
-                $newLwop = max(0, $existingLwop - $totalCoveredMinutes);
-                
-                $log->update([
-                    'total_accredited_minutes' => $newAccreditedMinutes,
-                    'undertime_deducted_from_leave' => $deductedFromLeave,
-                    'undertime_deduction_leave_type' => $deductedFromLeave ? implode('+', $leaveTypes) . ' (partial)' : null,
-                    'lwop_minutes' => $newLwop,
-                    'requires_salary_deduction' => $newLwop > 0
-                ]);
-                
-                if ($log->attendance) {
-                    $log->attendance->update(['accredited_hours' => $newAccreditedMinutes]);
-                }
+            // Preserve late LWOP: only reduce it by what undertime leave actually covered
+            $lateLwop = max(0, ($log->lwop_minutes ?? 0) - $totalCoveredMinutes);
+            $newLwop  = $lateLwop + $undertimeLwopMinutes;
+
+            // Accredited = current accredited - uncovered undertime
+            // (late service may have already set it to 480 if late was fully covered)
+            $newAccreditedMinutes = max(0, $log->total_accredited_minutes - max(0, $undertimeLwopMinutes));
+
+            $log->update([
+                'total_accredited_minutes'       => $newAccreditedMinutes,
+                'undertime_deducted_from_leave'  => $deductedFromLeave,
+                'undertime_deduction_leave_type' => $deductedFromLeave
+                    ? implode('+', $leaveTypes) . ($undertimeLwopMinutes <= 0 ? ' (full)' : ' (partial)')
+                    : null,
+                'lwop_minutes'              => $newLwop,
+                'requires_salary_deduction' => $newLwop > 0,
+            ]);
+
+            if ($log->attendance) {
+                $log->attendance->update(['accredited_hours' => $newAccreditedMinutes]);
             }
         });
     }

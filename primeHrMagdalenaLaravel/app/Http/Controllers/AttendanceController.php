@@ -1413,6 +1413,9 @@ class AttendanceController extends Controller
 
         // Update or create accredited hours log (one log per attendance)
         if ($computationResult['log_data']) {
+            // Snapshot deduction state BEFORE updateOrCreate overwrites the same row
+            $hadPreviousDeductions = $oldLog && ($oldLog->late_deducted_from_leave || $oldLog->undertime_deducted_from_leave);
+
             $accreditedLog = AccreditedHoursLog::updateOrCreate(
                 [
                     'attendance_id' => $attendance->id,
@@ -1436,14 +1439,14 @@ class AttendanceController extends Controller
             // Trigger daily salary computation
             \App\Models\DailySalaryComputation::computeFromAccreditedLog($accreditedLog);
             
-            // NEW: Handle leave balance recalculation if there was a previous log
+            // Handle leave balance recalculation
             $recalculationSummary = null;
-            if ($oldLog && $oldLog->id !== $accreditedLog->id) {
-                // There was a previous log, so we need to recalculate leave deductions
+            if ($hadPreviousDeductions) {
+                // Correction of an existing record that already had leave deductions — reverse + reapply
                 $recalculationService = new \App\Services\AttendanceCorrectionLeaveRecalculationService();
                 $recalculationSummary = $recalculationService->recalculateLeaveDeductions($oldLog, $accreditedLog);
                 $summaryMessage = $recalculationService->getSummaryMessage($recalculationSummary);
-                
+
                 Log::info('Leave balance recalculation completed', [
                     'attendance_id' => $attendance->id,
                     'employee_id' => $validated['employee_id'],
@@ -1451,12 +1454,10 @@ class AttendanceController extends Controller
                     'summary' => $summaryMessage,
                 ]);
             } else {
-                // No previous log, just process deductions normally
-                // Process late deduction from leave balances
+                // New record or first-time correction — process deductions fresh
                 $lateDeductionService = new LateDeductionService();
                 $lateDeductionService->processLateDeduction($accreditedLog);
-                
-                // Process undertime deduction from leave balances
+
                 $undertimeDeductionService = new UndertimeDeductionService();
                 $undertimeDeductionService->processUndertimeDeduction($accreditedLog);
             }

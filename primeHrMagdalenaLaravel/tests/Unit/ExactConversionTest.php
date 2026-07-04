@@ -59,7 +59,7 @@ class ExactConversionTest extends TestCase
             [60, 0.125],          // 60 minutes = 0.125 day ✅ YOUR CASE
             [30, 0.0625],         // 30 minutes = 0.0625 day
             [180, 0.375],         // 180 minutes = 0.375 day ✅ YOUR CASE
-            [1, 0.002083333333],  // 1 minute = 0.002083... day
+            [1, 1/480],            // 1 minute = 0.002083... day
         ];
 
         foreach ($testCases as [$minutes, $expectedDays]) {

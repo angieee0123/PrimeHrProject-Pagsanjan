@@ -14,21 +14,24 @@ class LateDeductionLogicTest extends TestCase
 {
     // ─── helpers that mirror the service logic ───────────────────────────────
 
-    private function runDeduction(int $lateMinutes, float $vlCredits, float $slCredits): array
+    /**
+     * Mirrors LateDeductionService::processLateDeduction()
+     * Returns updated log state + remaining leave credits.
+     */
+    private function runLateDeduction(int $lateMinutes, float $vlCredits, float $slCredits): array
     {
-        $lateDays          = CSC::convertMinutesToDays($lateMinutes);
-        $remainingLateDays = $lateDays;
+        $lateDays            = CSC::convertMinutesToDays($lateMinutes);
+        $remainingLateDays   = $lateDays;
         $totalCoveredMinutes = 0;
-        $leaveTypes        = [];
+        $leaveTypes          = [];
 
-        if ($vlCredits > 0) {
+        if ($remainingLateDays > 0 && $vlCredits > 0) {
             $deduct = min($vlCredits, $remainingLateDays);
             $remainingLateDays   -= $deduct;
             $totalCoveredMinutes += (int)($deduct * 480);
             $leaveTypes[]         = 'VL';
             $vlCredits           -= $deduct;
         }
-
         if ($remainingLateDays > 0 && $slCredits > 0) {
             $deduct = min($slCredits, $remainingLateDays);
             $remainingLateDays   -= $deduct;
@@ -37,26 +40,81 @@ class LateDeductionLogicTest extends TestCase
             $slCredits           -= $deduct;
         }
 
-        $lwopMinutes        = $lateMinutes - $totalCoveredMinutes;
-        $initialAccredited  = 480 - $lateMinutes;
-        $fullyCovered       = $lwopMinutes <= 0;
-
-        $finalAccredited = $fullyCovered
-            ? 480
-            : min(480, $initialAccredited + $totalCoveredMinutes);
+        $lateLwop           = max(0, $lateMinutes - $totalCoveredMinutes);
+        $initialAccredited  = 480 - $lateMinutes;   // what computeAccreditedHours produced
+        $logAccredited      = $lateLwop <= 0 ? 480 : min(480, $initialAccredited + $totalCoveredMinutes);
 
         return [
-            'late_minutes'         => $lateMinutes,
-            'late_days'            => $lateDays,
+            'log_accredited'  => $logAccredited,
+            'log_lwop'        => $lateLwop,
+            'covered_minutes' => $totalCoveredMinutes,
+            'lwop_minutes'    => $lateLwop,
+            'fully_covered'   => $lateLwop <= 0,
+            'leave_types'     => $leaveTypes,
+            'vl_remaining'    => $vlCredits,
+            'sl_remaining'    => $slCredits,
+        ];
+    }
+
+    /**
+     * Mirrors UndertimeDeductionService::processUndertimeDeduction()
+     * Takes the log state left by runLateDeduction() as input.
+     */
+    private function runUndertimeDeduction(
+        int   $undertimeMinutes,
+        float $vlCredits,
+        float $slCredits,
+        int   $logAccredited,   // total_accredited_minutes after late service
+        int   $logLwop          // lwop_minutes after late service
+    ): array {
+        $undertimeDays          = CSC::convertMinutesToDays($undertimeMinutes);
+        $remainingUndertimeDays = $undertimeDays;
+        $totalCoveredMinutes    = 0;
+        $leaveTypes             = [];
+
+        if ($remainingUndertimeDays > 0 && $vlCredits > 0) {
+            $deduct = min($vlCredits, $remainingUndertimeDays);
+            $remainingUndertimeDays -= $deduct;
+            $totalCoveredMinutes    += (int)($deduct * 480);
+            $leaveTypes[]            = 'VL';
+            $vlCredits              -= $deduct;
+        }
+        if ($remainingUndertimeDays > 0 && $slCredits > 0) {
+            $deduct = min($slCredits, $remainingUndertimeDays);
+            $remainingUndertimeDays -= $deduct;
+            $totalCoveredMinutes    += (int)($deduct * 480);
+            $leaveTypes[]            = 'SL';
+            $slCredits              -= $deduct;
+        }
+
+        $undertimeLwop = max(0, $undertimeMinutes - $totalCoveredMinutes);
+        // Preserve late LWOP: only reduce it by what undertime leave actually covered
+        $lateLwop      = max(0, $logLwop - $totalCoveredMinutes);
+        $newLwop       = $lateLwop + $undertimeLwop;
+
+        // Subtract uncovered undertime from current accredited (key fix)
+        $newAccredited = max(0, $logAccredited - $undertimeLwop);
+
+        return [
+            'final_accredited_min' => $newAccredited,
+            'final_accredited_hrs' => $newAccredited / 60,
+            'final_lwop'           => $newLwop,
             'covered_minutes'      => $totalCoveredMinutes,
-            'lwop_minutes'         => max(0, $lwopMinutes),
-            'fully_covered'        => $fullyCovered,
-            'final_accredited_min' => $finalAccredited,
-            'final_accredited_hrs' => $finalAccredited / 60,
             'leave_types'          => $leaveTypes,
             'vl_remaining'         => $vlCredits,
             'sl_remaining'         => $slCredits,
         ];
+    }
+
+    /** Convenience: run both services in sequence (late first, then undertime) */
+    private function runDeduction(int $lateMinutes, float $vlCredits, float $slCredits): array
+    {
+        $late = $this->runLateDeduction($lateMinutes, $vlCredits, $slCredits);
+        return array_merge($late, [
+            'final_accredited_min' => $late['log_accredited'],
+            'final_accredited_hrs' => $late['log_accredited'] / 60,
+            'final_lwop'           => $late['log_lwop'],
+        ]);
     }
 
     // ─── tests ───────────────────────────────────────────────────────────────
@@ -171,5 +229,93 @@ class LateDeductionLogicTest extends TestCase
         // 1/480 = 0.002083333... — PHP float, delta comparison needed
         $days = CSC::convertMinutesToDays(1);
         $this->assertEqualsWithDelta(1 / 480, $days, 0.000001);
+    }
+
+    // ─── COMBINED late + undertime on the same day ──────────────────────────
+
+    /**
+     * 30 min late + 30 min undertime, VL=0.0625 (30 min only)
+     * Late fully covered by VL, undertime has no leave left → 30 min LWOP, 7.5 hrs accredited
+     */
+    public function test_late_covered_undertime_lwop()
+    {
+        $late = $this->runLateDeduction(30, 0.0625, 0.0);
+        $this->assertEquals(480, $late['log_accredited'], 'Late fully covered → 480 accredited');
+        $this->assertEquals(0,   $late['log_lwop'],       'No late LWOP');
+        $this->assertEquals(0.0, $late['vl_remaining'],   'VL exhausted');
+
+        $ut = $this->runUndertimeDeduction(30, $late['vl_remaining'], $late['sl_remaining'], $late['log_accredited'], $late['log_lwop']);
+        $this->assertEquals(450, $ut['final_accredited_min'], '7.5 hrs: 480 - 30 uncovered undertime');
+        $this->assertEquals(7.5, $ut['final_accredited_hrs']);
+        $this->assertEquals(30,  $ut['final_lwop'],           '30 min LWOP from undertime');
+    }
+
+    /**
+     * 30 min late + 30 min undertime, VL=1.0 (plenty)
+     * Both fully covered → 480 accredited, 0 LWOP
+     */
+    public function test_late_and_undertime_both_fully_covered()
+    {
+        $late = $this->runLateDeduction(30, 1.0, 0.0);
+        $this->assertEquals(480, $late['log_accredited']);
+        $this->assertEquals(0,   $late['log_lwop']);
+
+        $ut = $this->runUndertimeDeduction(30, $late['vl_remaining'], $late['sl_remaining'], $late['log_accredited'], $late['log_lwop']);
+        $this->assertEquals(480, $ut['final_accredited_min'], 'Full 8 hrs');
+        $this->assertEquals(8.0, $ut['final_accredited_hrs']);
+        $this->assertEquals(0,   $ut['final_lwop'],           'No LWOP');
+    }
+
+    /**
+     * 60 min late + 60 min undertime, no leave at all
+     * Both become LWOP → 360 accredited (6 hrs), 120 min LWOP
+     */
+    public function test_late_and_undertime_no_leave_all_lwop()
+    {
+        $late = $this->runLateDeduction(60, 0.0, 0.0);
+        $this->assertEquals(420, $late['log_accredited'], '480-60=420 accredited after late');
+        $this->assertEquals(60,  $late['log_lwop']);
+
+        $ut = $this->runUndertimeDeduction(60, 0.0, 0.0, $late['log_accredited'], $late['log_lwop']);
+        $this->assertEquals(360, $ut['final_accredited_min'], '6 hrs: 420 - 60 undertime LWOP');
+        $this->assertEquals(6.0, $ut['final_accredited_hrs']);
+        $this->assertEquals(120, $ut['final_lwop'],           '60 late LWOP + 60 undertime LWOP');
+    }
+
+    /**
+     * 60 min late + 60 min undertime, VL=0.125 (covers late only), SL=0.125 (covers undertime)
+     * Both fully covered via different leave types → 480 accredited, 0 LWOP
+     */
+    public function test_late_covered_by_vl_undertime_covered_by_sl()
+    {
+        $late = $this->runLateDeduction(60, 0.125, 0.125);
+        $this->assertEquals(480,   $late['log_accredited']);
+        $this->assertEquals(0,     $late['log_lwop']);
+        $this->assertEquals(0.0,   $late['vl_remaining'], 'VL used for late');
+        $this->assertEquals(0.125, $late['sl_remaining'], 'SL untouched');
+
+        $ut = $this->runUndertimeDeduction(60, $late['vl_remaining'], $late['sl_remaining'], $late['log_accredited'], $late['log_lwop']);
+        $this->assertEquals(480, $ut['final_accredited_min'], 'Full 8 hrs');
+        $this->assertEquals(0,   $ut['final_lwop'],           'No LWOP');
+        $this->assertContains('SL', $ut['leave_types'],       'SL used for undertime');
+    }
+
+    /**
+     * 120 min late + 60 min undertime, VL=0.125 (60 min), SL=0.125 (60 min)
+     * Late: VL covers 60, SL covers 60 → late fully covered
+     * Undertime: no leave left → 60 min LWOP, 420 accredited (7 hrs)
+     */
+    public function test_late_fully_covered_undertime_all_lwop()
+    {
+        $late = $this->runLateDeduction(120, 0.125, 0.125);
+        $this->assertEquals(480, $late['log_accredited'], 'Late fully covered');
+        $this->assertEquals(0,   $late['log_lwop']);
+        $this->assertEquals(0.0, $late['vl_remaining']);
+        $this->assertEquals(0.0, $late['sl_remaining']);
+
+        $ut = $this->runUndertimeDeduction(60, $late['vl_remaining'], $late['sl_remaining'], $late['log_accredited'], $late['log_lwop']);
+        $this->assertEquals(420, $ut['final_accredited_min'], '7 hrs: 480 - 60 undertime LWOP');
+        $this->assertEquals(7.0, $ut['final_accredited_hrs']);
+        $this->assertEquals(60,  $ut['final_lwop'],           '60 min undertime LWOP');
     }
 }
