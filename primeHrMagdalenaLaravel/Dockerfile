@@ -25,7 +25,8 @@ COPY --from=assets /app/public/build ./public/build
 
 RUN composer dump-autoload --optimize \
     && mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache \
+    && php artisan storage:link
 
 EXPOSE 10000
 CMD php artisan migrate --force && php artisan optimize && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
