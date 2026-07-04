@@ -113,11 +113,11 @@ class LateDeductionService
             'amount' => -$amount,
             'balance_before' => $balanceBefore,
             'balance_after' => $balance->available_credits,
-            'reference_type' => 'manual_adjustment',
+            'reference_type' => 'tardiness_deduction',
             'reference_id' => $log->id,
             'transaction_date' => date('Y-m-d'),
             'processed_by' => auth()->id(),
-            'remarks' => "Late deduction: {$log->late_minutes} minutes (" . number_format($amount, 6, '.', '') . " days) from attendance on " . date('Y-m-d', strtotime($log->created_at))
+            'remarks' => "Late deduction: {$log->late_minutes} minutes (" . number_format($amount, 6, '.', '') . " days) from attendance on " . date('Y-m-d', strtotime($log->created_at)),
         ]);
 
         // Only update log if this is the final deduction (for backward compatibility)

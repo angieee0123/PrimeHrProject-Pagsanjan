@@ -111,7 +111,7 @@ class AttendanceCorrectionLeaveRecalculationService
 
         // Find all previous deduction transactions for this attendance
         $previousTransactions = LeaveTransaction::where('employee_id', $employeeId)
-            ->where('reference_type', 'manual_adjustment')
+            ->where('reference_type', 'tardiness_deduction')
             ->where('reference_id', $log->id)
             ->where('transaction_type', 'debit')
             ->where('amount', '<', 0)
@@ -139,7 +139,7 @@ class AttendanceCorrectionLeaveRecalculationService
                     'employee_id' => $employeeId,
                     'leave_code' => $transaction->leave_code,
                     'year' => $year,
-                    'transaction_type' => 'credit',
+                    'transaction_type' => 'reversal',
                     'amount' => $creditAmount,
                     'balance_before' => $balanceBefore,
                     'balance_after' => $leaveBalance->available_credits,
