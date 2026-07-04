@@ -15,10 +15,6 @@
     </div>
 </div>
 
-<style>
-no-notification-styles
-</style>
-
 <script>
 function searchLeaveRecords(query) {
     const searchTerm = query.toLowerCase().trim();
