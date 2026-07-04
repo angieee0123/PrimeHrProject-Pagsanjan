@@ -24,6 +24,7 @@ COPY . .
 COPY --from=assets /app/public/build ./public/build
 
 RUN composer dump-autoload --optimize \
+    && mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views \
     && chmod -R 775 storage bootstrap/cache
 
 EXPOSE 10000
