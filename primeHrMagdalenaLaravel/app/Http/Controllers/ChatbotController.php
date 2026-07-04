@@ -115,25 +115,25 @@ class ChatbotController extends Controller
         }
 
         // Count queries - more flexible patterns
-        if (preg_match('/\b(how many|total|count|number of|ilang|gaano karami|ilan|people|tao)\b/i', $lower)) {
-            if (preg_match('/\b(employee|personnel|staff|empleyado|tauhan|tao|people|work|workers)\b/i', $lower)) {
+        if (preg_match('/\b(how many|total|counts?|number of|ilang|gaano karami|ilan|people|tao)\b/i', $lower)) {
+            if (preg_match('/\b(employees?|personnel|staff|empleyado|tauhan|tao|people|works?|workers?)\b/i', $lower)) {
                 if (preg_match('/\b(active|aktibo)\b/i', $lower)) return 'count_active';
                 if (preg_match('/\b(inactive|hindi aktibo|deactivated)\b/i', $lower)) return 'count_inactive';
                 if (preg_match('/\b(permanent|permanente)\b/i', $lower)) return 'count_permanent';
-                if (preg_match('/\b(job order|contractual)\b/i', $lower)) return 'count_job_order';
+                if (preg_match('/\b(job orders?|contractual)\b/i', $lower)) return 'count_job_order';
                 return 'count_employees';
             }
-            if (preg_match('/\b(department|office|opisina|tanggapan)\b/i', $lower)) return 'count_departments';
+            if (preg_match('/\b(departments?|offices?|opisina|tanggapan)\b/i', $lower)) return 'count_departments';
         }
 
         // List/Show queries
         if (preg_match('/\b(list|show|display|enumerate|ipakita|ilista|all|lahat)\b/i', $lower)) {
-            if (preg_match('/\b(employee|personnel|staff|empleyado)\b/i', $lower)) {
+            if (preg_match('/\b(employees?|personnel|staff|empleyado)\b/i', $lower)) {
                 if (preg_match('/\b(active|aktibo)\b/i', $lower)) return 'list_active_employees';
                 if (preg_match('/\b(inactive)\b/i', $lower)) return 'list_inactive_employees';
                 return 'list_employees';
             }
-            if (preg_match('/\b(department|office|opisina)\b/i', $lower)) return 'list_departments';
+            if (preg_match('/\b(departments?|offices?|opisina)\b/i', $lower)) return 'list_departments';
         }
 
         // Search/Find specific employee
@@ -142,32 +142,32 @@ class ChatbotController extends Controller
         }
 
         // Department-specific queries
-        if (preg_match('/\b(mayor|assessor|health|engineer|treasurer|agriculture|budget)\b/i', $lower)) {
-            if (preg_match('/\b(employee|personnel|staff|work|trabaho|empleyado)\b/i', $lower)) {
+        if (preg_match('/\b(mayor|assessor|health|engineers?|treasurer|agriculture|budget)\b/i', $lower)) {
+            if (preg_match('/\b(employees?|personnel|staff|works?|trabaho|empleyado)\b/i', $lower)) {
                 return 'employees_by_department';
             }
-            if (preg_match('/\b(head|chief|officer|director|pinuno)\b/i', $lower)) {
+            if (preg_match('/\b(heads?|chiefs?|officers?|directors?|pinuno)\b/i', $lower)) {
                 return 'department_head';
             }
         }
 
         // Position/Role queries
-        if (preg_match('/\b(position|role|trabaho|tungkulin)\b/i', $lower)) {
+        if (preg_match('/\b(positions?|roles?|trabaho|tungkulin)\b/i', $lower)) {
             return 'search_by_position';
         }
 
         // Status queries
-        if (preg_match('/\b(status|kalagayan)\b/i', $lower) && preg_match('/\b(employee|empleyado)\b/i', $lower)) {
+        if (preg_match('/\b(status|kalagayan)\b/i', $lower) && preg_match('/\b(employees?|empleyado)\b/i', $lower)) {
             return 'employee_status';
         }
 
         // Contact information queries
-        if (preg_match('/\b(contact|email|phone|number|telepono)\b/i', $lower)) {
+        if (preg_match('/\b(contacts?|emails?|phones?|numbers?|telepono)\b/i', $lower)) {
             return 'search_employee';
         }
 
         // General employee information
-        if (preg_match('/\b(employee|personnel|staff|empleyado)\b/i', $lower)) {
+        if (preg_match('/\b(employees?|personnel|staff|empleyado)\b/i', $lower)) {
             return 'general_employee_info';
         }
 
