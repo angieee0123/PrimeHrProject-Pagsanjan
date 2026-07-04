@@ -20,11 +20,16 @@ export default defineConfig({
                 'resources/css/adminPersonnel.css',
                 'resources/css/joborder.css',
                 'resources/css/permanent.css',
+                'resources/css/adminChatbot.css',
+                'resources/css/adminPayroll.css',
+                'resources/css/adminLeaveAndBenefits.css',
                 'resources/js/app.js',
                 'resources/js/adminDashboard.js',
                 'resources/js/employeeWizard.js',
                 'resources/js/adminPersonnel.js',
-                'resources/js/personnelTopbar.js'
+                'resources/js/personnelTopbar.js',
+                'resources/js/adminAttendance.js',
+                'resources/js/adminLeaveAndBenefits.js'
             ],
             refresh: true,
         }),
