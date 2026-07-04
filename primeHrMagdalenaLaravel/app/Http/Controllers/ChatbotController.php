@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Http;
 
 class ChatbotController extends Controller
 {
-    private $groqApiKey = '***REMOVED-GROQ-KEY***';
-
     // Query expansion synonyms (like government chatbot)
     private $querySynonyms = [
         'employee' => ['personnel', 'staff', 'worker', 'empleyado', 'tauhan', 'kawani', 'people', 'workers'],
@@ -465,10 +463,10 @@ class ChatbotController extends Controller
 
         try {
             $response = Http::timeout(15)->withHeaders([
-                'Authorization' => 'Bearer ' . $this->groqApiKey,
+                'Authorization' => 'Bearer ' . config('services.groq.api_key'),
                 'Content-Type' => 'application/json'
             ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                'model' => 'llama-3.3-70b-versatile',
+                'model' => config('services.groq.model', 'llama-3.3-70b-versatile'),
                 'messages' => [
                     ['role' => 'user', 'content' => $prompt]
                 ],
@@ -481,6 +479,8 @@ class ChatbotController extends Controller
                 if (isset($result['choices'][0]['message']['content'])) {
                     return $result['choices'][0]['message']['content'];
                 }
+            } else {
+                \Log::error('Groq API error response', ['status' => $response->status(), 'body' => $response->body()]);
             }
         } catch (\Exception $e) {
             \Log::error('Groq API Exception', ['message' => $e->getMessage()]);
