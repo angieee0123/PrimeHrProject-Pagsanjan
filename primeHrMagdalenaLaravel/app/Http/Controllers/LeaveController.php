@@ -238,7 +238,10 @@ class LeaveController extends Controller
             ->get();
 
         // Get available years for transaction filter dropdown
-        $transactionYears = LeaveTransaction::select(DB::raw('YEAR(transaction_date) as year'))
+        $yearExpr = DB::connection()->getDriverName() === 'pgsql'
+            ? 'EXTRACT(YEAR FROM transaction_date)'
+            : 'YEAR(transaction_date)';
+        $transactionYears = LeaveTransaction::select(DB::raw("$yearExpr as year"))
             ->distinct()
             ->orderBy('year', 'desc')
             ->pluck('year');

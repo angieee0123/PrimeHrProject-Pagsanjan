@@ -10,7 +10,10 @@ return new class extends Migration
     {
         Schema::create('travel_orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+            // employee_id/approved_by FKs are added later in
+            // add_deferred_foreign_keys_for_fresh_install, since employees
+            // doesn't exist yet at this point in a fresh install.
+            $table->unsignedBigInteger('employee_id');
             $table->string('destination');
             $table->text('purpose');
             $table->date('travel_date');
@@ -21,7 +24,7 @@ return new class extends Migration
             $table->string('attachment')->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected', 'cancelled'])->default('pending');
             $table->text('remarks')->nullable();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->unsignedBigInteger('approved_by')->nullable();
             $table->timestamp('approved_at')->nullable();
             $table->timestamps();
         });

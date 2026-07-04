@@ -12,6 +12,7 @@ use App\Models\DailySalaryComputation;
 use App\Models\LeaveBalance;
 use App\Models\Attendance;
 use App\Models\EmployeeDeduction;
+use App\Support\SqlCompat;
 use Carbon\Carbon;
 
 class MobileDashboardController extends Controller
@@ -477,7 +478,7 @@ class MobileDashboardController extends Controller
             $result = DB::table('attendance')
                 ->where('employee_id', $employeeId)
                 ->whereBetween('date', [$weekStart, $weekEnd])
-                ->whereRaw('DAYOFWEEK(date) NOT IN (1, 7)')
+                ->whereRaw(SqlCompat::isNotWeekend('date'))
                 ->selectRaw('
                     COUNT(*) as total,
                     SUM(CASE WHEN am_in IS NOT NULL OR pm_in IS NOT NULL THEN 1 ELSE 0 END) as present
@@ -504,7 +505,7 @@ class MobileDashboardController extends Controller
             $result = DB::table('attendance')
                 ->where('employee_id', $employeeId)
                 ->whereBetween('date', [$monthStart, $monthEnd])
-                ->whereRaw('DAYOFWEEK(date) NOT IN (1, 7)')
+                ->whereRaw(SqlCompat::isNotWeekend('date'))
                 ->selectRaw('
                     COUNT(*) as total,
                     SUM(CASE WHEN am_in IS NOT NULL OR pm_in IS NOT NULL THEN 1 ELSE 0 END) as present
@@ -567,7 +568,7 @@ class MobileDashboardController extends Controller
             $weekNetPay = DB::table('daily_salary_computations')
                 ->where('employee_id', $employeeId)
                 ->whereBetween('work_date', [$weekStart, $weekEnd])
-                ->whereRaw('DAYOFWEEK(work_date) NOT IN (1, 7)')
+                ->whereRaw(SqlCompat::isNotWeekend('work_date'))
                 ->selectRaw('SUM(daily_basic_pay - late_deduction - undertime_deduction) as net_pay')
                 ->value('net_pay');
             
@@ -591,7 +592,7 @@ class MobileDashboardController extends Controller
             $monthNetPay = DB::table('daily_salary_computations')
                 ->where('employee_id', $employeeId)
                 ->whereBetween('work_date', [$monthStart, $monthEnd])
-                ->whereRaw('DAYOFWEEK(work_date) NOT IN (1, 7)')
+                ->whereRaw(SqlCompat::isNotWeekend('work_date'))
                 ->selectRaw('SUM(daily_basic_pay - late_deduction - undertime_deduction) as net_pay')
                 ->value('net_pay');
             

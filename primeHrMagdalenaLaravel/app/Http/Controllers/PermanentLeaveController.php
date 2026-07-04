@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\LeaveType;
 use App\Models\LeaveApplication;
 use App\Models\LeaveTransaction;
@@ -51,10 +52,14 @@ class PermanentLeaveController extends Controller
 
         // Build leave statistics history directly from database
         $leaveStatsHistory = [];
+        $monthYearExpr = DB::connection()->getDriverName() === 'pgsql'
+            ? "to_char(transaction_date, 'YYYY-MM')"
+            : 'DATE_FORMAT(transaction_date, "%Y-%m")';
+
         $allDebits = LeaveTransaction::where('employee_id', $employee->id)
             ->where('transaction_type', 'debit')
-            ->selectRaw('DATE_FORMAT(transaction_date, "%Y-%m") as month_year, leave_code, reference_type, COUNT(*) as count')
-            ->groupByRaw('DATE_FORMAT(transaction_date, "%Y-%m"), leave_code, reference_type')
+            ->selectRaw("$monthYearExpr as month_year, leave_code, reference_type, COUNT(*) as count")
+            ->groupByRaw("$monthYearExpr, leave_code, reference_type")
             ->get();
 
         foreach ($allDebits as $row) {

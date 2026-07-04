@@ -10,9 +10,9 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libzip-dev unzip zip libxml2-dev libcurl4-openssl-dev libonig-dev \
-    libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
+    libpng-dev libjpeg62-turbo-dev libfreetype6-dev libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql mbstring curl xml zip gd \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring curl xml zip gd \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

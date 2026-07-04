@@ -176,7 +176,7 @@ class AdminDashboardController extends Controller
         $buildPerformance = function($start, $end, $workingDays) use ($allEmployees) {
             $attendanceData = Attendance::whereBetween('date', [$start->toDateString(), $end->toDateString()])
                 ->whereNotNull('am_in')
-                ->selectRaw('employee_id, COUNT(*) as present_days, SUM(CASE WHEN TIME(am_in) > "08:05:00" THEN 1 ELSE 0 END) as late_days')
+                ->selectRaw("employee_id, COUNT(*) as present_days, SUM(CASE WHEN am_in > '08:05:00' THEN 1 ELSE 0 END) as late_days")
                 ->groupBy('employee_id')
                 ->get()
                 ->keyBy('employee_id');

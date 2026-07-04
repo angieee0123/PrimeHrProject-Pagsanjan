@@ -9,6 +9,7 @@ use App\Models\DailySalaryComputation;
 use App\Models\LeaveBalance;
 use App\Models\Attendance;
 use App\Models\EmployeeDeduction;
+use App\Support\SqlCompat;
 use Carbon\Carbon;
 
 class PermanentDashboardController extends Controller
@@ -68,14 +69,16 @@ class PermanentDashboardController extends Controller
         $attendanceRate = $totalDays > 0 ? round(($presentDays / $totalDays) * 100) : 0;
 
         // Get payslip history (group by semi-monthly periods)
+        $year = SqlCompat::year('work_date');
+        $month = SqlCompat::month('work_date');
+        $day = SqlCompat::day('work_date');
+        $cutoffCase = "CASE WHEN $day <= 15 THEN 1 ELSE 2 END";
+
         $payslips = DailySalaryComputation::where('employee_id', $employee->id)
-            ->selectRaw('
-                YEAR(work_date) as year,
-                MONTH(work_date) as month,
-                CASE 
-                    WHEN DAY(work_date) <= 15 THEN 1 
-                    ELSE 2 
-                END as cutoff,
+            ->selectRaw("
+                $year as year,
+                $month as month,
+                $cutoffCase as cutoff,
                 MIN(work_date) as period_start,
                 MAX(work_date) as period_end,
                 SUM(daily_basic_pay) as basic_pay,
@@ -84,9 +87,9 @@ class PermanentDashboardController extends Controller
                 SUM(late_deduction + undertime_deduction) as deductions,
                 SUM(daily_basic_pay - late_deduction - undertime_deduction) as net_pay,
                 MAX(work_date) as pay_date
-            ')
-            ->groupByRaw('YEAR(work_date), MONTH(work_date), CASE WHEN DAY(work_date) <= 15 THEN 1 ELSE 2 END')
-            ->orderByRaw('YEAR(work_date) DESC, MONTH(work_date) DESC, CASE WHEN DAY(work_date) <= 15 THEN 1 ELSE 2 END DESC')
+            ")
+            ->groupByRaw("$year, $month, $cutoffCase")
+            ->orderByRaw("$year DESC, $month DESC, $cutoffCase DESC")
             ->limit(5)
             ->get()
             ->map(function($payslip) {
@@ -204,12 +207,12 @@ class PermanentDashboardController extends Controller
             
             $total = Attendance::where('employee_id', $employeeId)
                 ->whereBetween('date', [$weekStart, $weekEnd])
-                ->whereRaw('DAYOFWEEK(date) NOT IN (1, 7)') // Exclude Sunday (1) and Saturday (7)
+                ->whereRaw(SqlCompat::isNotWeekend('date')) // Exclude Sunday and Saturday
                 ->count();
             
             $present = Attendance::where('employee_id', $employeeId)
                 ->whereBetween('date', [$weekStart, $weekEnd])
-                ->whereRaw('DAYOFWEEK(date) NOT IN (1, 7)')
+                ->whereRaw(SqlCompat::isNotWeekend('date'))
                 ->where(function($q) {
                     $q->whereNotNull('am_in')->orWhereNotNull('pm_in');
                 })
@@ -227,12 +230,12 @@ class PermanentDashboardController extends Controller
             
             $total = Attendance::where('employee_id', $employeeId)
                 ->whereBetween('date', [$monthStart, $monthEnd])
-                ->whereRaw('DAYOFWEEK(date) NOT IN (1, 7)') // Exclude Sunday (1) and Saturday (7)
+                ->whereRaw(SqlCompat::isNotWeekend('date')) // Exclude Sunday and Saturday
                 ->count();
             
             $present = Attendance::where('employee_id', $employeeId)
                 ->whereBetween('date', [$monthStart, $monthEnd])
-                ->whereRaw('DAYOFWEEK(date) NOT IN (1, 7)')
+                ->whereRaw(SqlCompat::isNotWeekend('date'))
                 ->where(function($q) {
                     $q->whereNotNull('am_in')->orWhereNotNull('pm_in');
                 })
@@ -328,7 +331,7 @@ class PermanentDashboardController extends Controller
             
             $weekSalary = DailySalaryComputation::where('employee_id', $employeeId)
                 ->whereBetween('work_date', [$weekStart, $weekEnd])
-                ->whereRaw('DAYOFWEEK(work_date) NOT IN (1, 7)') // Exclude Sunday (1) and Saturday (7)
+                ->whereRaw(SqlCompat::isNotWeekend('work_date')) // Exclude Sunday and Saturday
                 ->get();
             
             $weekNetPay = $weekSalary->sum(function($s) {
@@ -347,7 +350,7 @@ class PermanentDashboardController extends Controller
             
             $monthSalary = DailySalaryComputation::where('employee_id', $employeeId)
                 ->whereBetween('work_date', [$monthStart, $monthEnd])
-                ->whereRaw('DAYOFWEEK(work_date) NOT IN (1, 7)') // Exclude Sunday (1) and Saturday (7)
+                ->whereRaw(SqlCompat::isNotWeekend('work_date')) // Exclude Sunday and Saturday
                 ->get();
             
             $monthNetPay = $monthSalary->sum(function($s) {
