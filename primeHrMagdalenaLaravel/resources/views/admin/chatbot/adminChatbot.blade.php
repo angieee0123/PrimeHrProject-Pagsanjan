@@ -486,10 +486,12 @@ function sendChatMessage() {
 
     addTypingIndicator();
 
-    fetch('http://127.0.0.1:5001/chat', {
+    fetch('/api/chatbot', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
         },
         body: JSON.stringify({ message: message })
     })

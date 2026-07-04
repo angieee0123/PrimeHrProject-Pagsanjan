@@ -147,9 +147,28 @@ function sendAdminMessage() {
     input.value = '';
     showAdminTyping();
 
-    setTimeout(() => {
+    fetch('/api/chatbot', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ message: text })
+    })
+    .then(response => response.json())
+    .then(data => {
         removeAdminTyping();
-        addAdminMessage(`I'm processing your request about "${text}". This is a demo response from the PRIME HRIS assistant.`, false);
-    }, 800);
+        if (data.status === 'success') {
+            addAdminMessage(data.response, false);
+        } else {
+            addAdminMessage('Sorry, I encountered an error. Please try again.', false);
+        }
+    })
+    .catch(error => {
+        removeAdminTyping();
+        console.error('Chatbot error:', error);
+        addAdminMessage("Sorry, I couldn't process your request. Please try again.", false);
+    });
 }
 </script>
