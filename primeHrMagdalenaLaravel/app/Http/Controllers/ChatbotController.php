@@ -186,7 +186,7 @@ class ChatbotController extends Controller
     private function fuzzyMatchEmployee($searchTerm)
     {
         // Fuzzy search for employee names (like government chatbot's fuzzy_match_service)
-        $employees = Employee::with(['employmentDetail.department', 'user', 'contacts'])->get();
+        $employees = Employee::with(['employmentDetail.departmentRelation', 'user', 'contacts'])->get();
         $matches = [];
 
         foreach ($employees as $emp) {
@@ -245,20 +245,20 @@ class ChatbotController extends Controller
 
             case 'list_employees':
             case 'general_employee_info':
-                return Employee::with(['employmentDetail.department', 'user'])
+                return Employee::with(['employmentDetail.departmentRelation', 'user'])
                     ->limit(10)
                     ->get()
                     ->map(function($emp) {
                         return [
                             'name' => trim($emp->first_name . ' ' . $emp->last_name),
-                            'position' => $emp->employmentDetail->position ?? 'N/A',
+                            'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
                             'department' => $this->getDepartmentName($emp),
                             'status' => $emp->user->status ?? 'Inactive'
                         ];
                     });
 
             case 'list_active_employees':
-                return Employee::with(['employmentDetail.department', 'user'])
+                return Employee::with(['employmentDetail.departmentRelation', 'user'])
                     ->whereHas('user', function($q) {
                         $q->where('status', 'Active');
                     })
@@ -266,13 +266,13 @@ class ChatbotController extends Controller
                     ->map(function($emp) {
                         return [
                             'name' => trim($emp->first_name . ' ' . $emp->last_name),
-                            'position' => $emp->employmentDetail->position ?? 'N/A',
+                            'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
                             'department' => $this->getDepartmentName($emp)
                         ];
                     });
 
             case 'list_inactive_employees':
-                return Employee::with(['employmentDetail.department', 'user'])
+                return Employee::with(['employmentDetail.departmentRelation', 'user'])
                     ->whereHas('user', function($q) {
                         $q->where('status', 'Inactive');
                     })
@@ -281,7 +281,7 @@ class ChatbotController extends Controller
                     ->map(function($emp) {
                         return [
                             'name' => trim($emp->first_name . ' ' . $emp->last_name),
-                            'position' => $emp->employmentDetail->position ?? 'N/A',
+                            'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
                             'department' => $this->getDepartmentName($emp)
                         ];
                     });
@@ -300,7 +300,7 @@ class ChatbotController extends Controller
                 $searchTerm = $this->extractSearchTerm($message);
 
                 // Try exact match first
-                $exactMatches = Employee::with(['employmentDetail.department', 'user', 'contacts'])
+                $exactMatches = Employee::with(['employmentDetail.departmentRelation', 'user', 'contacts'])
                     ->where(function($q) use ($searchTerm) {
                         $q->where('first_name', 'like', "%{$searchTerm}%")
                           ->orWhere('last_name', 'like', "%{$searchTerm}%")
@@ -321,7 +321,7 @@ class ChatbotController extends Controller
                     return [
                         'name' => trim($emp->first_name . ' ' . $emp->last_name),
                         'employee_id' => $emp->employee_id,
-                        'position' => $emp->employmentDetail->position ?? 'N/A',
+                        'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
                         'department' => $this->getDepartmentName($emp),
                         'status' => $emp->user->status ?? 'Inactive',
                         'email' => $emp->email,
@@ -331,15 +331,15 @@ class ChatbotController extends Controller
 
             case 'search_by_position':
                 $position = $this->extractSearchTerm($message);
-                return Employee::with(['employmentDetail.department', 'user'])
-                    ->whereHas('employmentDetail', function($q) use ($position) {
-                        $q->where('position', 'like', "%{$position}%");
+                return Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'user'])
+                    ->whereHas('employmentDetail.designationRelation', function($q) use ($position) {
+                        $q->where('title', 'like', "%{$position}%");
                     })
                     ->get()
                     ->map(function($emp) {
                         return [
                             'name' => trim($emp->first_name . ' ' . $emp->last_name),
-                            'position' => $emp->employmentDetail->position ?? 'N/A',
+                            'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
                             'department' => $this->getDepartmentName($emp),
                             'status' => $emp->user->status ?? 'Inactive'
                         ];
@@ -353,15 +353,15 @@ class ChatbotController extends Controller
 
                 return [
                     'department' => $dept->name,
-                    'employees' => Employee::with(['employmentDetail'])
+                    'employees' => Employee::with(['employmentDetail.designationRelation'])
                         ->whereHas('employmentDetail', function($q) use ($dept) {
-                            $q->where('department', $dept->id);
+                            $q->where('department_id', $dept->id);
                         })
                         ->get()
                         ->map(function($emp) {
                             return [
                                 'name' => trim($emp->first_name . ' ' . $emp->last_name),
-                                'position' => $emp->employmentDetail->position ?? 'N/A'
+                                'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A'
                             ];
                         })
                 ];
@@ -384,16 +384,11 @@ class ChatbotController extends Controller
 
     private function getDepartmentName($employee)
     {
-        if (!$employee->employmentDetail || !$employee->employmentDetail->department) {
+        if (!$employee->employmentDetail || !$employee->employmentDetail->departmentRelation) {
             return 'N/A';
         }
 
-        if (is_object($employee->employmentDetail->department)) {
-            return $employee->employmentDetail->department->name;
-        }
-
-        $dept = Department::find($employee->employmentDetail->department);
-        return $dept ? $dept->name : 'N/A';
+        return $employee->employmentDetail->departmentRelation->name;
     }
 
     private function extractSearchTerm($message)
