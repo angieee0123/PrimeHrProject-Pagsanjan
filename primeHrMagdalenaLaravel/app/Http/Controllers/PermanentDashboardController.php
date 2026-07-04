@@ -100,7 +100,7 @@ class PermanentDashboardController extends Controller
         // Get employee deductions with actual computed amounts
         $deductions = EmployeeDeduction::where('employee_id', $employee->id)
             ->with('deductionType')
-            ->whereIn('status', ['active', 'pending'])
+            ->where('status', 'ACTIVE')
             ->orderBy('start_date', 'desc')
             ->get()
             ->map(function($deduction) use ($employee) {

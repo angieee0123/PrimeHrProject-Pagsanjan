@@ -179,7 +179,7 @@ class MobileDashboardController extends Controller
                 // Eager load deduction types
                 return EmployeeDeduction::where('employee_id', $employee->id)
                     ->with('deductionType:id,name,code,category,computation_type,percentage_rate,base_salary_type,max_amount')
-                    ->whereIn('status', ['active', 'pending', 'ACTIVE', 'PENDING'])
+                    ->where('status', 'ACTIVE')
                     ->select('id', 'employee_id', 'deduction_type_id', 'installment_amount', 'amount', 'remaining_balance', 'total_amount', 'start_date', 'end_date', 'status')
                     ->orderBy('start_date', 'desc')
                     ->get()
