@@ -110,6 +110,7 @@
                         <span id="ddtrViewLabel">All Records</span>
                         <svg class="ddtr-caret" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
+
                     <div class="ddtr-dropdown" id="ddtrDropdown">
                         <div class="ddtr-dd-section">Show</div>
                         <button class="ddtr-dd-item active" data-chip="all">All Records</button>
@@ -140,6 +141,7 @@
                             <span class="ddtr-dd-dot" style="background:#7C5CFF"></span>Incomplete
                         </button>
                     </div>
+
                 </div>
 
                 <div class="ddtr-toolbar-actions">
