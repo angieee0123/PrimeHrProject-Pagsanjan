@@ -418,9 +418,51 @@ window.addEventListener('DOMContentLoaded', function() {
         startWakeWordListening();
         console.log('🎤 Ready! Say "Hey Anna" to activate chatbot');
     }, 2000);
+
+    restoreChatbotUiState();
+    restoreChatbotHistory();
 });
 
 let isFullscreen = false;
+
+// Widget open/closed and fullscreen state survive page navigations (this
+// partial is re-rendered fresh on every admin page load) via localStorage.
+function restoreChatbotUiState() {
+    if (localStorage.getItem('chatbotOpen') === 'true') {
+        const chatWindow = document.getElementById('chatbotWindow');
+        const fab = document.querySelector('.chat-fab');
+
+        chatWindow.style.display = 'flex';
+        fab.classList.add('open');
+        document.querySelector('.chat-fab-icon-open').style.display = 'none';
+        document.querySelector('.chat-fab-icon-close').style.display = 'block';
+        document.querySelector('.chat-fab-badge').style.display = 'none';
+    }
+
+    if (localStorage.getItem('chatbotFullscreen') === 'true') {
+        isFullscreen = true;
+        document.getElementById('chatbotWindow').classList.add('fullscreen-mode');
+        document.getElementById('fullscreenIcon').style.display = 'none';
+        document.getElementById('fullscreenExitIcon').style.display = 'block';
+    }
+}
+
+// The conversation itself lives in the Laravel session (see ChatbotController)
+// so re-fetch and re-render it here instead of showing the static greeting.
+function restoreChatbotHistory() {
+    fetch('/chatbot/history', { headers: { 'Accept': 'application/json' } })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success' && Array.isArray(data.history) && data.history.length > 0) {
+                const messagesContainer = document.getElementById('chatbotMessages');
+                messagesContainer.innerHTML = '';
+                data.history.forEach(turn => {
+                    addChatMessage(turn.role === 'user' ? 'user' : 'bot', turn.content);
+                });
+            }
+        })
+        .catch(error => console.error('Error restoring chatbot history:', error));
+}
 
 function toggleFullscreen() {
     const chatWindow = document.getElementById('chatbotWindow');
@@ -428,6 +470,7 @@ function toggleFullscreen() {
     const fullscreenExitIcon = document.getElementById('fullscreenExitIcon');
 
     isFullscreen = !isFullscreen;
+    localStorage.setItem('chatbotFullscreen', isFullscreen ? 'true' : 'false');
 
     if (isFullscreen) {
         chatWindow.classList.add('fullscreen-mode');
@@ -453,6 +496,7 @@ function toggleChatbot() {
         openIcon.style.display = 'none';
         closeIcon.style.display = 'block';
         badge.style.display = 'none';
+        localStorage.setItem('chatbotOpen', 'true');
     } else {
         window.style.display = 'none';
         fab.classList.remove('open');
@@ -460,6 +504,7 @@ function toggleChatbot() {
         closeIcon.style.display = 'none';
         badge.style.display = 'block';
         stopVoiceInput();
+        localStorage.setItem('chatbotOpen', 'false');
     }
 }
 
@@ -508,6 +553,17 @@ function sendPredefinedMessage(message) {
 
 function clearChatbotConversation() {
     if (!confirm('Clear the conversation?')) return;
+
+    fetch('/chatbot/chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ message: '', reset: true })
+    }).catch(error => console.error('Error clearing chatbot memory:', error));
+
     const messagesContainer = document.getElementById('chatbotMessages');
     messagesContainer.innerHTML = `
         <div class="chat-msg bot">

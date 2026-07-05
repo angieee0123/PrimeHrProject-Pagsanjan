@@ -2664,6 +2664,7 @@ Route::get('/admin/chatbot', function () {
 
 // Chatbot API
 Route::post('/chatbot/chat', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware('auth')->name('chatbot.chat');
+Route::get('/chatbot/history', [\App\Http\Controllers\ChatbotController::class, 'history'])->middleware('auth')->name('chatbot.history');
 
 // Notification API Routes
 Route::post('/api/notifications/mark-all-read', function () {

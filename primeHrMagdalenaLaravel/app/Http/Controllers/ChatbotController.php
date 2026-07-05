@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Log;
 
 class ChatbotController extends Controller
 {
+    /** Session key under which the running conversation is stored. */
+    private const HISTORY_KEY = 'chatbot_conversation';
+
+    /** Messages to keep (user + assistant combined) — bounds session size and prompt length. */
+    private const MAX_HISTORY_MESSAGES = 12;
+
     private const SYSTEM_KNOWLEDGE = <<<'TEXT'
 === PRIME HRIS MAGDALENA SYSTEM RULES ===
 
@@ -175,23 +181,34 @@ TEXT;
 
     public function chat(Request $request)
     {
+        if ($request->boolean('reset')) {
+            $request->session()->forget(self::HISTORY_KEY);
+        }
+
         $message = trim($request->input('message', ''));
 
         if (empty($message)) {
+            if ($request->boolean('reset')) {
+                return response()->json(['response' => null, 'status' => 'success']);
+            }
             return response()->json(['error' => 'No message provided'], 400);
         }
 
+        $history = $request->session()->get(self::HISTORY_KEY, []);
+
         // Greeting handler
         if (preg_match('/^(hi|hello|hey|good\s+(morning|afternoon|evening)|kumusta|kamusta)\b/i', $message) && str_word_count($message) <= 6) {
-            return response()->json([
-                'response' => "Hello! I'm your PRIME HRIS Assistant. I can answer questions about employees, attendance, leave balances, government IDs, deductions, payroll, and HR policies. What would you like to know?",
-                'status'   => 'success',
-            ]);
+            $greeting = "Hello! I'm your PRIME HRIS Assistant. I can answer questions about employees, attendance, leave balances, government IDs, deductions, payroll, and HR policies. What would you like to know?";
+            $this->rememberTurn($request, $history, $message, $greeting);
+
+            return response()->json(['response' => $greeting, 'status' => 'success']);
         }
 
         // Policy-only questions (no DB needed)
         $policyAnswer = $this->getPolicyAnswer($message);
         if ($policyAnswer) {
+            $this->rememberTurn($request, $history, $message, $policyAnswer);
+
             return response()->json(['response' => $policyAnswer, 'status' => 'success']);
         }
 
@@ -199,14 +216,14 @@ TEXT;
         $schema = $this->getDbSchema();
 
         // Ask Groq to generate SQL
-        $sql = $this->generateSql($message, $schema);
+        $sql = $this->generateSql($message, $schema, $history);
 
         if (!$sql || strtoupper(substr(trim($sql), 0, 6)) !== 'SELECT') {
             // Fallback: let Groq answer from system knowledge alone
-            return response()->json([
-                'response' => $this->askGroqDirectly($message),
-                'status'   => 'success',
-            ]);
+            $answer = $this->askGroqDirectly($message, $history);
+            $this->rememberTurn($request, $history, $message, $answer);
+
+            return response()->json(['response' => $answer, 'status' => 'success']);
         }
 
         // Execute SQL
@@ -214,16 +231,57 @@ TEXT;
             $results = DB::select($sql);
         } catch (\Throwable $e) {
             Log::error('Chatbot SQL error: ' . $e->getMessage() . ' | SQL: ' . $sql);
-            return response()->json([
-                'response' => $this->askGroqDirectly($message),
-                'status'   => 'success',
-            ]);
+            $answer = $this->askGroqDirectly($message, $history);
+            $this->rememberTurn($request, $history, $message, $answer);
+
+            return response()->json(['response' => $answer, 'status' => 'success']);
         }
 
         // Narrate results
-        $response = $this->narrateResults($message, $sql, $results);
+        $response = $this->narrateResults($message, $sql, $results, $history);
+        $this->rememberTurn($request, $history, $message, $response);
 
         return response()->json(['response' => $response, 'status' => 'success']);
+    }
+
+    /**
+     * Returns the session-backed conversation so the widget can re-render it
+     * after a page navigation instead of resetting to the default greeting.
+     */
+    public function history(Request $request)
+    {
+        return response()->json([
+            'history' => $request->session()->get(self::HISTORY_KEY, []),
+            'status'  => 'success',
+        ]);
+    }
+
+    /**
+     * Append the latest exchange to the session-backed conversation and trim it
+     * to MAX_HISTORY_MESSAGES so the prompt context and session payload stay bounded.
+     */
+    private function rememberTurn(Request $request, array $history, string $userMessage, string $botResponse): void
+    {
+        $history[] = ['role' => 'user', 'content' => $userMessage];
+        $history[] = ['role' => 'assistant', 'content' => $botResponse];
+        $history   = array_slice($history, -self::MAX_HISTORY_MESSAGES);
+
+        $request->session()->put(self::HISTORY_KEY, $history);
+    }
+
+    private function formatHistory(array $history): string
+    {
+        if (empty($history)) {
+            return '(This is the start of the conversation — no previous messages.)';
+        }
+
+        $lines = [];
+        foreach ($history as $turn) {
+            $speaker  = $turn['role'] === 'user' ? 'User' : 'Assistant';
+            $lines[] = "{$speaker}: {$turn['content']}";
+        }
+
+        return implode("\n", $lines);
     }
 
     private function getDbSchema(): string
@@ -243,11 +301,14 @@ TEXT;
         return $schema;
     }
 
-    private function generateSql(string $question, string $schema): ?string
+    private function generateSql(string $question, string $schema, array $history = []): ?string
     {
-        $knowledge = self::SYSTEM_KNOWLEDGE;
-        $today     = now()->toDateString();   // e.g. 2026-07-04
-        $thisMonth = now()->format('Y-m');    // e.g. 2026-07
+        $knowledge   = self::SYSTEM_KNOWLEDGE;
+        $today       = now()->toDateString();       // e.g. 2026-07-04
+        $yesterday   = now()->subDay()->toDateString();
+        $tomorrow    = now()->addDay()->toDateString();
+        $thisMonth   = now()->format('Y-m');         // e.g. 2026-07
+        $conversation = $this->formatHistory($history);
 
         $prompt = <<<PROMPT
 You are a MySQL expert for the Prime HRIS Magdalena system. Generate a valid MySQL SELECT query to answer the user's question.
@@ -258,13 +319,19 @@ SYSTEM KNOWLEDGE:
 Database Schema:
 {$schema}
 
+CONVERSATION SO FAR (use this to resolve pronouns like "siya"/"he"/"her" and follow-up references to a previously mentioned employee, date, or topic):
+{$conversation}
+
 CRITICAL RULES — follow exactly:
 - Only generate SELECT queries, never INSERT, UPDATE, DELETE, or DROP
 - Return ONLY the raw SQL query — no explanation, no markdown, no backticks
 - Use JOINs when data spans multiple tables (e.g. employee name + government_ids)
 - For employee name searches always use LIKE on BOTH first_name AND last_name
+- If the question refers back to someone/something from the conversation above (e.g. "him", "her", "siya", "that employee"), resolve it using the conversation history instead of returning CANNOT_ANSWER
 - If the question cannot be answered from the schema, return: CANNOT_ANSWER
 - "today" means date = '{$today}'
+- "yesterday" or "kahapon" means date = '{$yesterday}'
+- "tomorrow" or "bukas" means date = '{$tomorrow}'
 - "this month" means date LIKE '{$thisMonth}%'
 - am_in, am_out, pm_in, pm_out are VARCHAR time strings (e.g. '07:45:00') — compare as strings
 - "early bird" or "earliest" means smallest (earliest) am_in value where am_in IS NOT NULL AND am_in != ''
@@ -306,31 +373,36 @@ PROMPT;
         return $content;
     }
 
-    private function narrateResults(string $question, string $sql, array $results): string
+    private function narrateResults(string $question, string $sql, array $results, array $history = []): string
     {
         $knowledge = self::SYSTEM_KNOWLEDGE;
         $preview = count($results) > 0
             ? json_encode(array_slice($results, 0, 10), JSON_PRETTY_PRINT)
             : 'No results found';
 
-        $total = count($results);
+        $total        = count($results);
+        $conversation = $this->formatHistory($history);
 
         $prompt = <<<PROMPT
-You are a friendly HR assistant for Prime HRIS Magdalena. A user asked a question, a SQL query was run, and here are the results. Answer naturally and conversationally.
+You are a friendly HR assistant for Prime HRIS Magdalena. A user asked a question, a SQL query was run, and here are the results. Answer naturally and conversationally, as a continuation of the ongoing chat below — don't reintroduce yourself or restate things already established in the conversation.
 
 SYSTEM KNOWLEDGE:
 {$knowledge}
 
-User Question: {$question}
+CONVERSATION SO FAR:
+{$conversation}
+
+Latest User Question: {$question}
 SQL Query Used: {$sql}
 Query Results (first 10): {$preview}
 Total Records Found: {$total}
 
 Instructions:
-- Answer in a friendly, concise tone (3-5 sentences max)
+- Answer in a friendly, concise tone (3-5 sentences max), like you're picking up the conversation naturally
+- Never dump raw field names or key/value pairs — turn the data into a natural sentence (e.g. "Jeremy clocked in at 8:11 AM yesterday, about 6.5 minutes late")
 - If no results, say so politely and suggest checking the spelling or name
 - All monetary amounts in Philippine Peso (PHP), never use dollar signs
-- Match the user's language (Tagalog or English)
+- Match the user's language (Tagalog or English) and mirror the tone of the conversation so far
 - Never expose raw SQL to the user
 - If the question involves late deductions or leave computation, explain the math step-by-step:
     * How many minutes late (AM and/or PM)
@@ -345,17 +417,22 @@ PROMPT;
         return $this->callGroq($prompt, 0.7, 400) ?? $this->buildFallbackNarration($results);
     }
 
-    private function askGroqDirectly(string $question): string
+    private function askGroqDirectly(string $question, array $history = []): string
     {
-        $knowledge = self::SYSTEM_KNOWLEDGE;
+        $knowledge    = self::SYSTEM_KNOWLEDGE;
+        $conversation = $this->formatHistory($history);
+
         $prompt = <<<PROMPT
 You are an HR assistant for Prime HRIS Magdalena. Answer this question using the system knowledge below.
 
 {$knowledge}
 
-User Question: {$question}
+CONVERSATION SO FAR (continue naturally from this, resolving any pronouns or follow-up references):
+{$conversation}
 
-Provide a clear, friendly answer in 2-4 sentences. Match the user's language (Tagalog or English).
+Latest User Question: {$question}
+
+Provide a clear, friendly answer in 2-4 sentences. Match the user's language (Tagalog or English) and don't repeat introductions already made earlier in the conversation.
 PROMPT;
 
         return $this->callGroq($prompt, 0.7, 500)
@@ -508,18 +585,22 @@ PROMPT;
     private function buildFallbackNarration(array $results): string
     {
         if (empty($results)) {
-            return "I couldn't find any matching records in the database. Please check the name or details and try again.";
+            return "I couldn't find any matching records for that. Could you double-check the name or details and try again?";
         }
 
         $first = (array) $results[0];
-        $lines = [];
+        $parts = [];
         foreach ($first as $key => $value) {
-            $lines[] = "**{$key}**: {$value}";
+            $label   = ucwords(str_replace('_', ' ', $key));
+            $parts[] = "{$label}: {$value}";
         }
 
-        $summary = implode(', ', $lines);
-        $extra   = count($results) > 1 ? ' (' . count($results) . ' records found total)' : '';
+        $summary = implode(', ', $parts);
+        $total   = count($results);
+        $intro   = $total > 1
+            ? "I found {$total} matching records — here's the first one:"
+            : "Here's what I found:";
 
-        return "Here's what I found{$extra}: {$summary}.";
+        return "{$intro} {$summary}.";
     }
 }
