@@ -206,31 +206,21 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
 
     recognition.onerror = function(event) {
         console.error('Speech recognition error:', event.error);
-        if (event.error === 'no-speech') {
-            // Don't stop on no-speech, just continue
-            console.log('No speech detected, continuing...');
-        } else if (event.error === 'not-allowed') {
+        if (event.error === 'not-allowed') {
             stopVoiceInput();
-            addChatMessage('bot', 'Microphone access denied. Please enable microphone permissions.');
-            speakText('Microphone access denied. Please enable microphone permissions.');
+            addChatMessage('bot', 'Microphone access denied. Please enable microphone permissions in your browser settings.');
+        } else if (event.error === 'aborted' || event.error === 'no-speech') {
+            // non-fatal, let onend handle restart
         } else {
-            // For other errors, try to restart
-            if (isListening) {
-                setTimeout(() => {
-                    try { recognition.start(); } catch(e) {}
-                }, 100);
-            }
+            stopVoiceInput();
         }
     };
 
     recognition.onend = function() {
         if (isListening) {
-            // Restart recognition if still in listening mode
-            setTimeout(() => {
-                try { recognition.start(); } catch(e) {}
-            }, 100);
+            try { recognition.start(); } catch(e) { console.warn('Recognition restart:', e.message); }
         } else {
-            startWakeWordListening(); // Resume wake word listening
+            startWakeWordListening();
         }
     };
 }
@@ -378,8 +368,8 @@ function toggleVoiceInput() {
 }
 
 function startVoiceInput() {
-    // Stop speaking if currently speaking
     stopSpeaking();
+    stopWakeWordListening();
 
     isListening = true;
     const micButton = document.getElementById('micButton');
@@ -392,7 +382,7 @@ function startVoiceInput() {
     micActiveIcon.style.display = 'block';
     chatInput.placeholder = 'Nakikinig...';
 
-    recognition.start();
+    try { recognition.start(); } catch(e) { console.warn('Recognition start:', e.message); }
 }
 
 function stopVoiceInput() {
@@ -407,9 +397,7 @@ function stopVoiceInput() {
     micActiveIcon.style.display = 'none';
     chatInput.placeholder = 'Type your question...';
 
-    if (recognition) {
-        recognition.stop();
-    }
+    try { recognition.stop(); } catch(e) {}
 }
 
 // Load voices when available
@@ -486,7 +474,7 @@ function sendChatMessage() {
 
     addTypingIndicator();
 
-    fetch('/api/chatbot', {
+    fetch('/chatbot/chat', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

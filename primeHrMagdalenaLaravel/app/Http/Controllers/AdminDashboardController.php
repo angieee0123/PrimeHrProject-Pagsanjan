@@ -155,17 +155,17 @@ class AdminDashboardController extends Controller
         });
         
         // Attendance Performance Rating (this month)
-        $monthStart = Carbon::now()->startOfMonth();
-        $monthEnd   = Carbon::now()->endOfMonth();
-        $weekStart  = Carbon::now()->startOfWeek();
-        $weekEnd    = Carbon::now()->endOfWeek();
+        $prevMonthStart = Carbon::now()->subMonth()->startOfMonth();
+        $prevMonthEnd   = Carbon::now()->subMonth()->endOfMonth();
+        $prevWeekStart  = Carbon::now()->subWeek()->startOfWeek();
+        $prevWeekEnd    = Carbon::now()->subWeek()->endOfWeek();
 
         $workingDaysMonth = 0;
-        for ($d = $monthStart->copy(); $d->lte($monthEnd); $d->addDay()) {
+        for ($d = $prevMonthStart->copy(); $d->lte($prevMonthEnd); $d->addDay()) {
             if (!in_array($d->dayOfWeek, [Carbon::SATURDAY, Carbon::SUNDAY])) $workingDaysMonth++;
         }
         $workingDaysWeek = 0;
-        for ($d = $weekStart->copy(); $d->lte($weekEnd); $d->addDay()) {
+        for ($d = $prevWeekStart->copy(); $d->lte($prevWeekEnd); $d->addDay()) {
             if (!in_array($d->dayOfWeek, [Carbon::SATURDAY, Carbon::SUNDAY])) $workingDaysWeek++;
         }
         $workingDaysMonth = max($workingDaysMonth, 1);
@@ -182,11 +182,11 @@ class AdminDashboardController extends Controller
                 ->keyBy('employee_id');
 
             return $allEmployees->map(function($emp) use ($attendanceData, $workingDays) {
-                $record     = $attendanceData->get($emp->id);
+                $record      = $attendanceData->get($emp->id);
                 $presentDays = $record ? $record->present_days : 0;
                 $lateDays    = $record ? $record->late_days    : 0;
                 $absentDays  = $workingDays - $presentDays;
-                $rate        = round(($presentDays / $workingDays) * 100);
+                $rate        = min(round(($presentDays / $workingDays) * 100), 100);
 
                 if ($rate >= 95)      $tier = 'excellent';
                 elseif ($rate >= 80)  $tier = 'good';
@@ -214,15 +214,27 @@ class AdminDashboardController extends Controller
             })->sortByDesc('rate')->values();
         };
 
-        $attendancePerformanceMonth = $buildPerformance($monthStart, Carbon::now(), $workingDaysMonth);
-        $attendancePerformanceWeek  = $buildPerformance($weekStart, Carbon::now(), $workingDaysWeek);
+        $attendancePerformanceMonth = $buildPerformance($prevMonthStart, $prevMonthEnd, $workingDaysMonth);
+        $attendancePerformanceWeek  = $buildPerformance($prevWeekStart,  $prevWeekEnd,  $workingDaysWeek);
+
+        $perfPeriodMonth = $prevMonthStart->format('F Y');
+        $perfPeriodWeek  = $prevWeekStart->format('M d') . ' – ' . $prevWeekEnd->format('M d, Y');
+        // Fall back to last working day if today has no attendance (e.g. weekend)
+        $attendanceDate = $today;
+        $hasToday = Attendance::whereDate('date', $today)->whereNotNull('am_in')->exists();
+        if (!$hasToday) {
+            $lastRecord = Attendance::whereNotNull('am_in')->whereDate('date', '<', $today)->orderBy('date', 'desc')->value('date');
+            if ($lastRecord) $attendanceDate = Carbon::parse($lastRecord);
+        }
+
         $earlyBirds = Attendance::with(['employee.employmentDetail.designationRelation', 'employee.employmentDetail.departmentRelation', 'employee.schedule'])
-            ->whereDate('date', $today)
+            ->whereDate('date', $attendanceDate)
             ->whereNotNull('am_in')
             ->orderBy('am_in', 'asc')
             ->limit(5)
             ->get()
-            ->map(function($attendance, $index) use ($today) {
+            ->map(function($attendance, $index) use ($attendanceDate) {
+                $today = $attendanceDate;
                 $emp = $attendance->employee;
                 if (!$emp) return null;
 
@@ -262,15 +274,16 @@ class AdminDashboardController extends Controller
             })
             ->filter();
 
-        // Top 5 Late Birds (latest time-in today, must be after 8:05 AM grace period)
+        // Top 5 Late Birds (latest time-in, must be after 8:05 AM grace period)
         $lateBirds = Attendance::with(['employee.employmentDetail.designationRelation', 'employee.employmentDetail.departmentRelation', 'employee.schedule'])
-            ->whereDate('date', $today)
+            ->whereDate('date', $attendanceDate)
             ->whereNotNull('am_in')
             ->whereTime('am_in', '>', '08:05:00')
             ->orderBy('am_in', 'desc')
             ->limit(5)
             ->get()
-            ->map(function($attendance, $index) use ($today) {
+            ->map(function($attendance, $index) use ($attendanceDate) {
+                $today = $attendanceDate;
                 $emp = $attendance->employee;
                 if (!$emp) return null;
 
@@ -344,7 +357,7 @@ class AdminDashboardController extends Controller
             'monthly_payroll' => $monthlyPayroll,
         ];
         
-        return view('admin.dashboard.adminDashboard', compact('stats', 'employees', 'leaveRequests', 'departments', 'chartData', 'earlyBirds', 'lateBirds', 'attendancePerformanceMonth', 'attendancePerformanceWeek', 'topEarners', 'recentLeaveFilers'));
+        return view('admin.dashboard.adminDashboard', compact('stats', 'employees', 'leaveRequests', 'departments', 'chartData', 'earlyBirds', 'lateBirds', 'attendancePerformanceMonth', 'attendancePerformanceWeek', 'topEarners', 'recentLeaveFilers', 'attendanceDate', 'perfPeriodMonth', 'perfPeriodWeek'));
     }
     
     private function getChartData()

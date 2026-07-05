@@ -839,11 +839,11 @@
         <div class="table-header">
             <div>
                 <p class="table-title">Top Performers</p>
-                <p class="table-sub">Best attendance records</p>
+                <p class="table-sub" id="perfPeriodSub">{{ $perfPeriodMonth }}</p>
             </div>
             <div style="display:flex;gap:6px">
-                <button id="perfTabMonth" onclick="switchPerfTab('month')" class="chart-tab active">This Month</button>
-                <button id="perfTabWeek" onclick="switchPerfTab('week')" class="chart-tab">This Week</button>
+                <button id="perfTabMonth" onclick="switchPerfTab('month')" class="chart-tab active">Prev Month</button>
+                <button id="perfTabWeek" onclick="switchPerfTab('week')" class="chart-tab">Prev Week</button>
             </div>
         </div>
         <div class="enterprise-card-body">
@@ -963,8 +963,8 @@
     <div class="table-section" style="margin:0">
         <div class="table-header">
             <div>
-                <p class="table-title" id="birdsTabTitle">Top 5 Early Birds Today</p>
-                <p class="table-sub">{{ now()->format('F d, Y') }} · Earliest clock-ins</p>
+                <p class="table-title" id="birdsTabTitle">Top 5 Early Birds</p>
+                <p class="table-sub">{{ $attendanceDate->isToday() ? 'Today' : $attendanceDate->format('F d, Y') }} · Earliest clock-ins</p>
             </div>
             <div style="display:flex;gap:6px">
                 <button id="tabEarly" onclick="switchBirdsTab('early')" class="chart-tab active">Earliest</button>
@@ -1469,12 +1469,15 @@ document.addEventListener('click', function() {
     document.querySelectorAll('.leave-action-menu').forEach(m => m.style.display = 'none');
 });
 
+const perfPeriods = { month: '{{ $perfPeriodMonth }}', week: '{{ $perfPeriodWeek }}' };
+
 function switchPerfTab(tab) {
     const isMonth = tab === 'month';
     document.getElementById('perfPanelMonth').style.display = isMonth ? 'flex' : 'none';
     document.getElementById('perfPanelWeek').style.display  = isMonth ? 'none'  : 'flex';
     document.getElementById('perfTabMonth').classList.toggle('active', isMonth);
     document.getElementById('perfTabWeek').classList.toggle('active', !isMonth);
+    document.getElementById('perfPeriodSub').textContent = perfPeriods[tab];
 }
 
 // Initialize with week view by default
@@ -2020,8 +2023,8 @@ function showPerformerDetails(emp, period, rank) {
     const modal = document.getElementById('performerDetailsModal');
     const rankEmojis = ['🥇', '🥈', '🥉', '4', '5'];
     const periodLabels = {
-        'month': 'This Month Performance',
-        'week': 'This Week Performance'
+        'month': 'Previous Month · ' + perfPeriods.month,
+        'week':  'Previous Week · '  + perfPeriods.week
     };
 
     document.getElementById('modalPerformerName').textContent = emp.name;

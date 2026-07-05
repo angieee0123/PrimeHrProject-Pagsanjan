@@ -2663,7 +2663,7 @@ Route::get('/admin/chatbot', function () {
 })->middleware('auth')->name('admin.chatbot');
 
 // Chatbot API
-Route::post('/api/chatbot', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware('auth');
+Route::post('/chatbot/chat', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware('auth')->name('chatbot.chat');
 
 // Notification API Routes
 Route::post('/api/notifications/mark-all-read', function () {
