@@ -91,6 +91,7 @@
 
             {{-- ── FILTER TOOLBAR ── --}}
             <div class="ddtr-toolbar">
+                <span class="ddtr-toolbar-label">Date Range</span>
                 <div class="ddtr-fld">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     <input type="date" id="detailedStartDate" class="ddtr-input" aria-label="Start date">
@@ -200,6 +201,7 @@
    Every class emitted by adminAttendance.js is styled below. */
 .ddtr-overlay {
     --pri: #0B0A4D;
+    --pri-2: #1b1464;
     --pri-soft: #eef0fb;
     --card: #FFFFFF;
     --line: #e9eaf2;
@@ -207,10 +209,14 @@
     --muted: #697086;
     --faint: #9aa1b5;
     --bg: #f8f9fc;
+    --glass: rgba(255, 255, 255, .58);
+    --glass-strong: rgba(255, 255, 255, .8);
+    --glass-border: rgba(255, 255, 255, .65);
+    --radius: 18px;
     padding: 32px;
-    background: rgba(20, 20, 32, .38);
-    backdrop-filter: blur(9px) saturate(150%);
-    -webkit-backdrop-filter: blur(9px) saturate(150%);
+    background: rgba(20, 20, 32, .45);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
 }
 .ddtr-modal {
     display: flex;
@@ -218,13 +224,29 @@
     width: 100%;
     max-width: 1400px;
     height: 90vh;
-    background: #fff;
-    border-radius: 20px;
-    border: 1px solid rgba(15,23,42,.06);
-    box-shadow: 0 20px 50px rgba(15, 23, 42, .14), 0 2px 10px rgba(15, 23, 42, .05);
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .8),
+        0 30px 70px rgba(11, 4, 77, .22),
+        0 8px 24px rgba(15, 23, 42, .1);
     overflow: hidden;
-    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Poppins', sans-serif;
     animation: ddtrIn .38s cubic-bezier(.32,.72,0,1);
+}
+.ddtr-modal::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(480px 320px at 8% -12%, rgba(99, 102, 241, .12), transparent 60%),
+        radial-gradient(420px 300px at 100% 0%, rgba(56, 189, 248, .1), transparent 60%);
 }
 @keyframes ddtrIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
@@ -237,19 +259,21 @@
     display: flex; align-items: center; justify-content: space-between; gap: 16px;
     padding: 0 24px;
     height: 64px; flex-shrink: 0;
-    background: rgba(255,255,255,.82);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    background: rgba(255,255,255,.5);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
     border-bottom: 1px solid rgba(15,23,42,.06);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
 }
 .ddtr-header-brand {
     display: flex; align-items: center; gap: 12px; min-width: 0;
 }
 .ddtr-header-icon {
-    width: 36px; height: 36px; border-radius: 11px; flex-shrink: 0;
-    background: var(--pri); color: #fff;
+    width: 36px; height: 36px; border-radius: 12px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--pri-2), var(--pri)); color: #fff;
+    border: 1px solid rgba(255,255,255,.18);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 2px 8px rgba(11,10,77,.2);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 4px 12px rgba(11,10,77,.3);
 }
 .ddtr-header-titles { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .ddtr-title {
@@ -262,26 +286,27 @@
 }
 .ddtr-period-pill {
     font-size: 11px; font-weight: 600; color: var(--muted);
-    background: var(--bg); border: 1px solid var(--line);
+    background: rgba(255,255,255,.5); border: 1px solid rgba(15,23,42,.08);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     border-radius: 999px; padding: 4px 12px; white-space: nowrap;
     margin-left: 8px;
 }
 /* Close */
 .ddtr-close {
-    width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
-    border: none; background: transparent;
+    width: 32px; height: 32px; border-radius: 999px; flex-shrink: 0;
+    border: 1px solid transparent; background: rgba(15,23,42,.05);
     color: var(--faint);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: background .2s cubic-bezier(.4,0,.2,1), color .2s cubic-bezier(.4,0,.2,1), transform .15s ease;
 }
 .ddtr-close:active { transform: scale(.9); }
-.ddtr-close:hover { background: var(--bg); color: var(--ink); }
+.ddtr-close:hover { background: rgba(11,10,77,.1); color: var(--ink); }
 
 /* ── BODY (scroll) ── */
 .ddtr-body {
     flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-x: hidden;
     padding: 24px;
-    background: var(--bg);
+    background: transparent;
     display: flex; flex-direction: column; gap: 16px;
 }
 
@@ -290,14 +315,17 @@
     display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px;
 }
 .ddtr-kpi {
-    background: #fff; border: 1px solid var(--line); border-radius: 14px;
-    box-shadow: 0 1px 2px rgba(15,23,42,.03);
+    background: linear-gradient(180deg, rgba(255,255,255,.8), rgba(255,255,255,.55));
+    backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid rgba(255,255,255,.7); border-radius: 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 4px 14px rgba(15,23,42,.04);
     padding: 16px; display: flex; flex-direction: row; align-items: center; gap: 12px;
     transition: box-shadow .25s cubic-bezier(.4,0,.2,1), border-color .25s cubic-bezier(.4,0,.2,1), transform .25s cubic-bezier(.4,0,.2,1);
 }
-.ddtr-kpi:hover { border-color: #dcdfeb; box-shadow: 0 8px 20px rgba(15,23,42,.06); transform: translateY(-1px); }
+.ddtr-kpi:hover { border-color: rgba(255,255,255,.9); box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 12px 28px rgba(11,4,77,.1); transform: translateY(-2px); }
 .ddtr-kpi-icon {
-    width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
+    width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,.6);
     display: flex; align-items: center; justify-content: center;
 }
 .ddtr-kpi-icon.green  { background: #e9f9ef; color: #2fa860; }
@@ -317,32 +345,42 @@
 /* ── FILTER TOOLBAR · unified control bar ── */
 .ddtr-toolbar {
     display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    background: #fff; border: 1px solid var(--line); border-radius: 14px;
-    box-shadow: 0 1px 2px rgba(15,23,42,.03);
+    background: rgba(255,255,255,.55); backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255,255,255,.65); border-radius: 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 2px 8px rgba(15,23,42,.03);
     padding: 8px 16px;
 }
 .ddtr-toolbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .ddtr-toolbar-divider { width: 1px; height: 24px; background: var(--line); margin: 0 4px; }
+.ddtr-toolbar-label {
+    font-size: 10.5px; font-weight: 600; color: var(--faint);
+    text-transform: uppercase; letter-spacing: .5px;
+    padding-right: 2px; white-space: nowrap;
+}
 .ddtr-fld { position: relative; display: flex; align-items: center; }
 .ddtr-fld > svg { position: absolute; left: 10px; color: var(--faint); pointer-events: none; }
 .ddtr-input {
-    height: 36px; border: 1px solid var(--line); border-radius: 9px;
-    background: #fff; color: var(--ink); font-size: 12px; font-family: 'Poppins', sans-serif;
+    height: 36px; border: 1px solid rgba(15,23,42,.08); border-radius: 999px;
+    background: rgba(255,255,255,.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: var(--ink); font-size: 12px; font-family: inherit;
     outline: none; padding: 0 10px 0 30px; transition: border-color .2s cubic-bezier(.4,0,.2,1), box-shadow .2s cubic-bezier(.4,0,.2,1); width: 140px;
 }
-.ddtr-input:hover { border-color: #cdd2e3; }
+.ddtr-input:hover { border-color: #cdd2e3; background: rgba(255,255,255,.85); }
 .ddtr-input:focus { border-color: var(--pri); box-shadow: 0 0 0 4px rgba(11,10,77,.08); }
 .ddtr-sep { font-size: 11px; font-weight: 500; color: var(--faint); padding: 0 2px; }
 .ddtr-btn-solid, .ddtr-btn-ghost {
     height: 36px; display: inline-flex; align-items: center; gap: 6px; padding: 0 16px;
-    border-radius: 9px; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif;
-    cursor: pointer; transition: background .2s cubic-bezier(.4,0,.2,1), border-color .2s cubic-bezier(.4,0,.2,1), box-shadow .2s cubic-bezier(.4,0,.2,1), transform .15s ease; white-space: nowrap;
+    border-radius: 999px; font-size: 12px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: all .22s cubic-bezier(.4,0,.2,1); white-space: nowrap;
 }
-.ddtr-btn-solid { background: var(--pri); color: #fff; border: 1px solid var(--pri); box-shadow: 0 1px 3px rgba(11,10,77,.22); }
-.ddtr-btn-solid:hover { background: #191670; border-color: #191670; }
+.ddtr-btn-solid {
+    background: linear-gradient(135deg, var(--pri-2), var(--pri)); color: #fff; border: 1px solid transparent;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 20px rgba(11,10,77,.3);
+}
+.ddtr-btn-solid:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 10px 24px rgba(11,10,77,.38); }
 .ddtr-btn-solid:active, .ddtr-btn-ghost:active { transform: scale(.97); }
-.ddtr-btn-ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
-.ddtr-btn-ghost:hover { background: var(--bg); border-color: #cdd2e3; }
+.ddtr-btn-ghost { background: rgba(255,255,255,.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--ink); border: 1px solid rgba(15,23,42,.08); }
+.ddtr-btn-ghost:hover { background: rgba(255,255,255,.85); border-color: #cdd2e3; }
 .ddtr-btn-solid:focus-visible, .ddtr-btn-ghost:focus-visible,
 .ddtr-view-btn:focus-visible, .ddtr-close:focus-visible {
     outline: 2px solid var(--pri); outline-offset: 2px;
@@ -352,19 +390,20 @@
 .ddtr-view-wrap { position: relative; }
 .ddtr-view-btn {
     height: 36px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px;
-    border-radius: 9px; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif;
-    border: 1px solid var(--line); background: #fff; color: var(--ink);
+    border-radius: 999px; font-size: 12px; font-weight: 600; font-family: inherit;
+    border: 1px solid rgba(15,23,42,.08); background: rgba(255,255,255,.55);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--ink);
     cursor: pointer; transition: background .2s cubic-bezier(.4,0,.2,1), border-color .2s cubic-bezier(.4,0,.2,1), box-shadow .2s cubic-bezier(.4,0,.2,1); white-space: nowrap;
 }
-.ddtr-view-btn:hover { background: var(--bg); border-color: #cdd2e3; }
-.ddtr-view-btn.open  { border-color: var(--pri); background: #fff; box-shadow: 0 0 0 4px rgba(11,10,77,.08); }
+.ddtr-view-btn:hover { background: rgba(255,255,255,.85); border-color: #cdd2e3; }
+.ddtr-view-btn.open  { border-color: var(--pri); background: rgba(255,255,255,.9); box-shadow: 0 0 0 4px rgba(11,10,77,.08); }
 .ddtr-caret { transition: transform .25s cubic-bezier(.4,0,.2,1); color: var(--faint); }
 .ddtr-view-btn.open .ddtr-caret { transform: rotate(180deg); }
 .ddtr-dropdown {
     display: none; position: absolute; top: calc(100% + 8px); left: 0;
-    min-width: 208px; background: rgba(255,255,255,.9); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
-    border: 1px solid var(--line);
-    border-radius: 14px; box-shadow: 0 16px 40px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.05);
+    min-width: 208px; background: rgba(255,255,255,.85); backdrop-filter: saturate(180%) blur(24px); -webkit-backdrop-filter: saturate(180%) blur(24px);
+    border: 1px solid rgba(255,255,255,.7);
+    border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 20px 45px rgba(15,23,42,.16), 0 2px 8px rgba(15,23,42,.05);
     padding: 6px; z-index: 999; animation: ddFadeIn .18s cubic-bezier(.32,.72,0,1);
 }
 .ddtr-dropdown.open { display: block; }
@@ -387,8 +426,10 @@
 
 /* ── TABLE CARD ── */
 .ddtr-table-card {
-    background: #fff; border: 1px solid var(--line); border-radius: 14px;
-    box-shadow: 0 1px 2px rgba(15,23,42,.03);
+    background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.6));
+    backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255,255,255,.65); border-radius: 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.75), 0 2px 8px rgba(15,23,42,.03);
     display: flex; flex-direction: column;
     flex: 1 1 0; min-height: 0;
     overflow: hidden;
@@ -406,7 +447,8 @@
 .detailed-dtr-table { width: 100%; min-width: 760px; border-collapse: separate; border-spacing: 0; }
 .detailed-dtr-table thead th {
     position: sticky; top: 0; z-index: 2;
-    background: #fff; color: var(--muted);
+    background: rgba(248,250,252,.8); backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
+    color: var(--muted);
     font-size: 11px; font-weight: 500;
     padding: 12px; text-align: left; white-space: nowrap;
     border-bottom: 1px solid var(--line);
@@ -464,7 +506,13 @@
 .detailed-dtr-table tr.day-absent { background: #fcfcfd; }
 .detailed-dtr-table tr.day-absent:hover { background: #f5f5f7; }
 .detailed-dtr-table tr.day-needs-review { background: #fcfcfd; }
-.detailed-dtr-table tr.day-today td { box-shadow: inset 0 0 0 1.5px rgba(79,124,255,.25); }
+.detailed-dtr-table tr.day-today td { box-shadow: inset 0 0 0 1.5px rgba(24,75,68,.35); }
+.detailed-dtr-table tr.day-today .dtr-date-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 24px; height: 24px; padding: 0 6px;
+    background: #184B44; color: #fff; border-radius: 999px;
+    line-height: 1;
+}
 
 /* ── TIME VALUES ── */
 .time-val { font-size: 12px; font-weight: 500; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -531,7 +579,8 @@
 /* ── FOOTER ── */
 .ddtr-footer {
     display: flex; align-items: center; justify-content: flex-end;
-    padding: 12px 24px; border-top: 1px solid var(--line); background: #fff;
+    padding: 12px 24px; border-top: 1px solid rgba(15,23,42,.06);
+    background: rgba(255,255,255,.5); backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%);
     flex-shrink: 0;
 }
 
@@ -558,6 +607,7 @@
 
     .ddtr-toolbar { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px; }
     .ddtr-toolbar-divider { display: none; }
+    .ddtr-toolbar-label { padding: 0 0 2px 2px; }
     .ddtr-fld { width: 100%; }
     .ddtr-input { width: 100%; box-sizing: border-box; }
     .ddtr-sep { text-align: center; }

@@ -36,15 +36,31 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     --warning: #eba417;
     --blue: #4F7CFF;
     --purple: #7C5CFF;
+    --glass: rgba(255, 255, 255, .58);
+    --glass-strong: rgba(255, 255, 255, .8);
+    --glass-border: rgba(255, 255, 255, .65);
     --shadow: 0 1px 3px rgba(15, 23, 42, .03), 0 1px 2px rgba(15, 23, 42, .02);
     --shadow-hover: 0 6px 22px rgba(11, 4, 77, .08), 0 2px 6px rgba(11, 4, 77, .04);
-    --radius-card: 13px;
+    --radius-card: 18px;
     --radius-input: 8px;
-    --radius-table: 14px;
+    --radius-table: 20px;
     color: var(--ink);
     min-height: 100vh;
     padding: 0 0 48px;
-    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    position: relative;
+    isolation: isolate;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Poppins', sans-serif;
+}
+.attendance-dashboard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(720px 480px at 6% -8%, rgba(99, 102, 241, .14), transparent 60%),
+        radial-gradient(640px 440px at 100% 0%, rgba(56, 189, 248, .12), transparent 60%),
+        radial-gradient(900px 620px at 50% 112%, rgba(79, 124, 255, .08), transparent 60%),
+        var(--bg);
 }
 
 /* ============ STATISTICS CARDS ============ */
@@ -56,22 +72,31 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 }
 
 .attendance-dashboard .stat-card {
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: var(--card);
-    box-shadow: 0 2px 8px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .8),
+        0 1px 3px rgba(15, 23, 42, .04),
+        0 10px 30px rgba(15, 23, 42, .07);
     min-height: 132px;
     padding: 20px;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow: hidden;
-    transition: border-color .18s ease, box-shadow .18s ease;
+    transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
 }
 
 .attendance-dashboard .stat-card:hover {
-    border-color: #cfd4dc;
-    box-shadow: 0 4px 12px rgba(15,23,42,.08), 0 2px 4px rgba(15,23,42,.06);
+    border-color: rgba(255, 255, 255, .9);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .9),
+        0 2px 4px rgba(15, 23, 42, .05),
+        0 16px 40px rgba(11, 4, 77, .12);
+    transform: translateY(-2px);
 }
 
 .attendance-dashboard .stat-top {
@@ -84,9 +109,12 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 .attendance-dashboard .stat-icon-wrap {
     width: 40px;
     height: 40px;
-    border-radius: 10px;
-    border: 1px solid #dbe0ea;
-    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, .7);
+    background: rgba(255, 255, 255, .55);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -132,10 +160,14 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 
 /* ============ ATTENDANCE OVERVIEW PANEL ============ */
 .attendance-dashboard .overview-panel {
-    border: 1px solid var(--line);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-card);
-    background: var(--card);
-    box-shadow: var(--shadow);
+    background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .8),
+        0 10px 30px rgba(15, 23, 42, .06);
     padding: 18px 8px;
     margin-bottom: 18px;
     display: grid;
@@ -159,13 +191,14 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     transform: translateY(-50%);
     height: 40px;
     width: 1px;
-    background: var(--line);
+    background: rgba(15, 23, 42, .08);
 }
 
 .attendance-dashboard .ov-icon {
     width: 42px;
     height: 42px;
     border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, .6);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -199,10 +232,12 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.03);
+    background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), 0 10px 30px rgba(15, 23, 42, .06);
     padding: 10px 14px;
     margin-bottom: 18px;
 }
@@ -235,12 +270,14 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 .attendance-dashboard .fc-input,
 .attendance-dashboard .fc-select {
     height: 38px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, .08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .55);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
     color: var(--ink);
     font-size: 12.5px;
-    font-family: 'Poppins', sans-serif;
+    font-family: inherit;
     outline: none;
     padding: 0 12px 0 32px;
     transition: border-color .2s ease, background .2s ease;
@@ -254,13 +291,14 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     padding-right: 30px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%237C839D' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-color: #f8fafc;
+    background-position: right 12px center;
 }
+.attendance-dashboard .fc-input:hover,
+.attendance-dashboard .fc-select:hover { background: rgba(255, 255, 255, .8); }
 .attendance-dashboard .fc-input:focus,
 .attendance-dashboard .fc-select:focus {
     border-color: var(--pri);
-    background: #fff;
+    background: rgba(255, 255, 255, .95);
     box-shadow: 0 0 0 3px rgba(11,10,77,.07);
 }
 .attendance-dashboard .fc-sep {
@@ -273,7 +311,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 .attendance-dashboard .fc-divider {
     width: 1px;
     height: 24px;
-    background: var(--line);
+    background: rgba(15, 23, 42, .1);
     flex-shrink: 0;
     margin: 0 6px;
 }
@@ -285,37 +323,43 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     align-items: center;
     gap: 8px;
     padding: 0 20px;
-    border-radius: 10px;
+    border-radius: 999px;
     font-size: 12px;
     font-weight: 600;
-    font-family: 'Poppins', sans-serif;
+    font-family: inherit;
     cursor: pointer;
     transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
     white-space: nowrap;
     flex-shrink: 0;
 }
 .attendance-dashboard .btn-solid {
-    background: var(--pri);
+    background: linear-gradient(135deg, var(--pri-2), var(--pri));
     color: #fff;
-    border: 1px solid var(--pri);
-    box-shadow: 0 4px 14px rgba(11,10,77,.22);
+    border: 1px solid transparent;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 20px rgba(11,10,77,.3);
 }
-.attendance-dashboard .btn-solid:hover { background: var(--pri-2); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(11,10,77,.28); }
+.attendance-dashboard .btn-solid:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 10px 24px rgba(11,10,77,.38); }
 .attendance-dashboard .btn-ghost {
-    background: var(--card);
+    background: rgba(255, 255, 255, .55);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
     color: var(--ink);
-    border: 1px solid var(--line);
-    box-shadow: 0 2px 8px rgba(15,23,42,.04);
+    border: 1px solid rgba(15, 23, 42, .08);
+    box-shadow: none;
 }
-.attendance-dashboard .btn-ghost:hover { background: #f8fafc; transform: translateY(-1px); }
+.attendance-dashboard .btn-ghost:hover { background: rgba(255, 255, 255, .85); transform: translateY(-1px); }
 
 /* ============ SEGMENTED TABS ============ */
 .attendance-dashboard .seg-tabs {
     display: inline-flex;
     gap: 4px;
     padding: 5px;
-    background: #eef0f6;
-    border-radius: 14px;
+    background: rgba(255, 255, 255, .5);
+    border: 1px solid rgba(255, 255, 255, .6);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 4px 14px rgba(15,23,42,.04);
+    border-radius: 16px;
     margin-bottom: 18px;
 }
 .attendance-dashboard .tab-btn {
@@ -329,15 +373,15 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: 12px;
     transition: all .2s ease;
-    font-family: 'Poppins', sans-serif;
+    font-family: inherit;
 }
 .attendance-dashboard .tab-btn:hover { color: var(--pri); }
 .attendance-dashboard .tab-btn.active {
-    color: var(--pri);
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(15,23,42,.08);
+    color: #fff;
+    background: linear-gradient(135deg, var(--pri-2), var(--pri));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 6px 16px rgba(11,4,77,.28);
 }
 .attendance-dashboard .tab-btn.active::after {
     content: "";

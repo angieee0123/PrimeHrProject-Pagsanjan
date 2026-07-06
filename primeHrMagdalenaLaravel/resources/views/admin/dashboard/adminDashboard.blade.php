@@ -80,6 +80,45 @@
     50% { opacity: 0.7; }
 }
 
+.welcome-banner {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, .18) !important;
+    background:
+        radial-gradient(340px 200px at 100% -20%, rgba(129, 140, 248, .35), transparent 70%),
+        linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .16),
+        0 16px 40px rgba(11, 4, 77, .28) !important;
+}
+
+.welcome-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .08), transparent 45%);
+    pointer-events: none;
+}
+
+.banner-icon {
+    border: 1px solid rgba(255, 255, 255, .22) !important;
+    background: rgba(255, 255, 255, .12) !important;
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+}
+
+.banner-badge {
+    border: 1px solid rgba(255, 255, 255, .16);
+    background: rgba(255, 255, 255, .12) !important;
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+}
+
+.banner-badge.outline {
+    background: transparent !important;
+}
+
 .enterprise-hr-dashboard {
     --eh-blue: #0b044d;
     --eh-blue-2: #1b1464;
@@ -92,9 +131,28 @@
     --eh-green: #15803d;
     --eh-red: #b42318;
     --eh-amber: #b7791f;
+    --eh-glass: rgba(255, 255, 255, .58);
+    --eh-glass-strong: rgba(255, 255, 255, .78);
+    --eh-glass-border: rgba(255, 255, 255, .65);
+    --eh-radius: 18px;
     color: var(--eh-ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Poppins', sans-serif;
     min-height: 100vh;
-    padding: 0 0 28px;
+    padding: 20px 0 28px;
+    position: relative;
+    isolation: isolate;
+}
+
+.enterprise-hr-dashboard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(720px 480px at 6% -8%, rgba(99, 102, 241, .18), transparent 60%),
+        radial-gradient(640px 440px at 100% 0%, rgba(56, 189, 248, .16), transparent 60%),
+        radial-gradient(900px 620px at 50% 112%, rgba(236, 72, 153, .12), transparent 60%),
+        var(--eh-bg);
 }
 
 .enterprise-hr-dashboard,
@@ -227,23 +285,43 @@
 .enterprise-hr-dashboard .table-section,
 .enterprise-hr-dashboard .chart-card,
 .enterprise-card {
-    border: 1px solid var(--eh-line) !important;
-    border-radius: 12px !important;
-    background: var(--eh-card) !important;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .03) !important;
+    border: 1px solid var(--eh-glass-border) !important;
+    border-radius: var(--eh-radius) !important;
+    background: linear-gradient(180deg, var(--eh-glass-strong), var(--eh-glass)) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .8),
+        0 1px 3px rgba(15, 23, 42, .04),
+        0 10px 30px rgba(15, 23, 42, .07) !important;
+    position: relative;
+    isolation: isolate;
 }
 
 .enterprise-hr-dashboard .stat-card {
     min-height: 132px;
     padding: 20px !important;
     overflow: hidden;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
 }
 
 .enterprise-hr-dashboard .stat-card:hover,
 .enterprise-hr-dashboard .table-section:hover,
 .enterprise-hr-dashboard .chart-card:hover {
-    border-color: #cfd4dc !important;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, .08), 0 2px 4px rgba(15, 23, 42, .06) !important;
+    border-color: rgba(255, 255, 255, .9) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .9),
+        0 2px 4px rgba(15, 23, 42, .05),
+        0 16px 40px rgba(11, 4, 77, .12) !important;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .enterprise-hr-dashboard .stat-card,
+    .enterprise-hr-dashboard .table-section,
+    .enterprise-hr-dashboard .chart-card,
+    .enterprise-card {
+        background: rgba(255, 255, 255, .96) !important;
+    }
 }
 
 .enterprise-hr-dashboard .stat-top {
@@ -274,9 +352,12 @@
 .enterprise-hr-dashboard .stat-icon-wrap {
     width: 40px !important;
     height: 40px !important;
-    border: 1px solid #dbe0ea;
-    border-radius: 10px !important;
-    background: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, .7);
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, .55) !important;
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
 }
 
 .enterprise-hr-dashboard .stat-sub {
@@ -291,10 +372,12 @@
     flex-wrap: wrap;
     margin-bottom: 18px;
     padding: 14px 16px;
-    border: 1px solid var(--eh-line) !important;
-    border-radius: 12px !important;
-    background: #fff !important;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, .03);
+    border: 1px solid var(--eh-glass-border) !important;
+    border-radius: var(--eh-radius) !important;
+    background: linear-gradient(180deg, var(--eh-glass-strong), var(--eh-glass)) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), 0 10px 30px rgba(15, 23, 42, .06);
 }
 
 .enterprise-action-spacer {
@@ -415,8 +498,9 @@
 .enterprise-hr-dashboard .chart-header {
     align-items: center;
     padding: 18px 20px !important;
-    border-bottom: 1px solid var(--eh-line) !important;
-    background: #fff !important;
+    border-bottom: 1px solid rgba(15, 23, 42, .06) !important;
+    background: transparent !important;
+    border-radius: var(--eh-radius) var(--eh-radius) 0 0 !important;
 }
 
 .enterprise-hr-dashboard .table-title,
@@ -444,25 +528,47 @@
 .enterprise-hr-dashboard .filter-select,
 .enterprise-hr-dashboard .btn-view,
 .enterprise-hr-dashboard input[type="text"] {
-    border-radius: 8px !important;
+    border-radius: 999px !important;
     font-weight: 700 !important;
-    transition: all .18s ease !important;
+    transition: all .22s cubic-bezier(.4, 0, .2, 1) !important;
 }
 
 .enterprise-hr-dashboard .chart-tab.active,
 .enterprise-hr-dashboard .modal-btn-primary {
-    border-color: var(--eh-blue) !important;
-    background: var(--eh-blue) !important;
+    border-color: transparent !important;
+    background: linear-gradient(135deg, var(--eh-blue-2), var(--eh-blue)) !important;
     color: #fff !important;
-    box-shadow: 0 8px 18px rgba(11, 4, 77, .18) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .25),
+        0 8px 20px rgba(11, 4, 77, .35) !important;
+}
+
+.enterprise-hr-dashboard .chart-tab.active:hover,
+.enterprise-hr-dashboard .modal-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .3),
+        0 10px 26px rgba(11, 4, 77, .42) !important;
 }
 
 .enterprise-hr-dashboard .btn-export,
 .enterprise-hr-dashboard .filter-select,
 .enterprise-hr-dashboard input[type="text"] {
-    border-color: var(--eh-line) !important;
-    background: #fff !important;
+    border-color: rgba(15, 23, 42, .08) !important;
+    background: rgba(255, 255, 255, .55) !important;
+    backdrop-filter: blur(12px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
     color: #344054 !important;
+}
+
+.enterprise-hr-dashboard .btn-export:hover {
+    background: rgba(255, 255, 255, .85) !important;
+    border-color: rgba(15, 23, 42, .12) !important;
+    transform: translateY(-1px);
+}
+
+.enterprise-hr-dashboard .chart-tab:not(.active):hover {
+    background: rgba(11, 4, 77, .06) !important;
 }
 
 .enterprise-hr-dashboard .payroll-table {
@@ -479,7 +585,9 @@
     position: sticky;
     top: 0;
     z-index: 2;
-    background: #f8fafc;
+    background: rgba(248, 250, 252, .75);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
     color: #667085;
     font-size: 10.5px;
     font-weight: 800;
@@ -487,11 +595,11 @@
 }
 
 .enterprise-hr-dashboard .payroll-table td {
-    border-bottom: 1px solid #eef2f6;
+    border-bottom: 1px solid rgba(15, 23, 42, .05);
 }
 
 .enterprise-hr-dashboard .payroll-table tbody tr:hover {
-    background: #f9fafb;
+    background: rgba(11, 4, 77, .035);
 }
 
 .enterprise-hr-dashboard .dept-tag,
@@ -502,17 +610,20 @@
 
 .enterprise-hr-dashboard #panelEarly > div,
 .enterprise-hr-dashboard #panelLate > div {
-    border-color: var(--eh-line) !important;
-    border-radius: 10px !important;
-    background: #fff !important;
-    box-shadow: 0 2px 6px rgba(15, 23, 42, .03);
-    transition: all .18s ease;
+    border-color: rgba(255, 255, 255, .6) !important;
+    border-radius: 14px !important;
+    background: rgba(255, 255, 255, .5) !important;
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 2px 6px rgba(15, 23, 42, .03);
+    transition: all .22s cubic-bezier(.4, 0, .2, 1);
 }
 
 .enterprise-hr-dashboard #panelEarly > div:hover,
 .enterprise-hr-dashboard #panelLate > div:hover {
-    border-color: #cfd4dc !important;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, .06);
+    border-color: rgba(255, 255, 255, .85) !important;
+    background: rgba(255, 255, 255, .72) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .85), 0 10px 24px rgba(11, 4, 77, .1);
     transform: translateY(-2px);
 }
 
@@ -658,11 +769,14 @@
 #birdScheduleTooltip {
     position: fixed;
     z-index: 9999;
-    background: #0b044d;
+    background: linear-gradient(180deg, rgba(27, 20, 100, .82), rgba(11, 4, 77, .88));
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, .12);
     color: #fff;
-    border-radius: 12px;
+    border-radius: 16px;
     min-width: 220px;
-    box-shadow: 0 12px 32px rgba(11,4,77,0.3), 0 4px 8px rgba(0,0,0,0.15);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 12px 32px rgba(11,4,77,0.35), 0 4px 8px rgba(0,0,0,0.15);
     pointer-events: none;
     font-family: inherit;
     overflow: hidden;
@@ -677,8 +791,8 @@
     pointer-events: none;
 }
 
-#birdScheduleTooltip.bst-arrow-down::after { top: 100%; border-top-color: #0b044d; }
-#birdScheduleTooltip.bst-arrow-up::after   { bottom: 100%; border-bottom-color: #0b044d; }
+#birdScheduleTooltip.bst-arrow-down::after { top: 100%; border-top-color: #1b1464; }
+#birdScheduleTooltip.bst-arrow-up::after   { bottom: 100%; border-bottom-color: #1b1464; }
 
 .bst-header {
     padding: 10px 14px 8px;
@@ -1228,11 +1342,11 @@
 </main>
 
 {{-- Performer Details Modal --}}
-<div id="performerDetailsModal" style="display:none;position:fixed;inset:0;background:rgba(11,4,77,0.5);backdrop-filter:blur(6px);z-index:2000;align-items:center;justify-content:center;padding:20px">
-    <div style="background:#fff;border-radius:20px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 2px 8px rgba(15,23,42,.04)">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:28px 32px;border-bottom:1px solid #f1f5f9">
+<div id="performerDetailsModal" style="display:none;position:fixed;inset:0;background:rgba(11,4,77,0.55);backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);z-index:2000;align-items:center;justify-content:center;padding:20px">
+    <div style="position:relative;background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.78));backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:1px solid rgba(255,255,255,.7);border-radius:24px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 30px 70px rgba(11,4,77,.28), 0 8px 24px rgba(15,23,42,.1)">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:28px 32px;border-bottom:1px solid rgba(15,23,42,.06)">
             <div style="display:flex;align-items:center;gap:20px">
-                <div id="modalPerformerAvatar" style="width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(15,23,42,.04)"></div>
+                <div id="modalPerformerAvatar" style="width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid rgba(255,255,255,.8);box-shadow:0 8px 20px rgba(11,4,77,.15)"></div>
                 <div>
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
                         <h3 id="modalPerformerName" style="margin:0;font-size:22px;font-weight:700;color:#0b044d"></h3>
@@ -1242,10 +1356,10 @@
                     <p id="modalPerformerDept" style="margin:0;font-size:13px;color:#94a3b8"></p>
                 </div>
             </div>
-            <button onclick="closePerformerModal()" style="background:#f8fafc;border:none;font-size:20px;color:#64748b;cursor:pointer;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all .2s" onmouseover="this.style.background='#f1f5f9';this.style.color='#0b044d'" onmouseout="this.style.background='#f8fafc';this.style.color='#64748b'">&times;</button>
+            <button onclick="closePerformerModal()" style="background:rgba(15,23,42,.05);border:1px solid rgba(15,23,42,.06);font-size:18px;color:#64748b;cursor:pointer;width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;transition:all .2s" onmouseover="this.style.background='rgba(11,4,77,.1)';this.style.color='#0b044d'" onmouseout="this.style.background='rgba(15,23,42,.05)';this.style.color='#64748b'">&times;</button>
         </div>
         <div style="padding:32px">
-            <div style="background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(15,23,42,.04)">
+            <div style="background:linear-gradient(135deg, rgba(239,246,255,.85) 0%, rgba(219,234,254,.7) 100%);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);border:1px solid rgba(255,255,255,.6);border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 8px 24px rgba(59,130,246,.08)">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
                     <div>
                         <p style="font-size:11px;color:#3b82f6;font-weight:700;letter-spacing:0.5px;margin:0 0 4px">ATTENDANCE PERFORMANCE</p>
@@ -1257,22 +1371,22 @@
                     </div>
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-                    <div style="background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(15,23,42,.04)">
+                    <div style="background:rgba(255,255,255,.65);backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);border:1px solid rgba(255,255,255,.7);border-radius:14px;padding:16px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 4px 14px rgba(15,23,42,.05)">
                         <p style="font-size:28px;font-weight:800;color:#22c55e;margin:0" id="modalPresentDays"></p>
                         <p style="font-size:11px;color:#64748b;margin:6px 0 0;font-weight:600">Days Present</p>
                     </div>
-                    <div style="background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(15,23,42,.04)">
+                    <div style="background:rgba(255,255,255,.65);backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);border:1px solid rgba(255,255,255,.7);border-radius:14px;padding:16px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 4px 14px rgba(15,23,42,.05)">
                         <p style="font-size:28px;font-weight:800;color:#ef4444;margin:0" id="modalAbsentDays"></p>
                         <p style="font-size:11px;color:#64748b;margin:6px 0 0;font-weight:600">Days Absent</p>
                     </div>
-                    <div style="background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(15,23,42,.04)">
+                    <div style="background:rgba(255,255,255,.65);backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);border:1px solid rgba(255,255,255,.7);border-radius:14px;padding:16px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 4px 14px rgba(15,23,42,.05)">
                         <p style="font-size:28px;font-weight:800;color:#f59e0b;margin:0" id="modalLateDays"></p>
                         <p style="font-size:11px;color:#64748b;margin:6px 0 0;font-weight:600">Late Arrivals</p>
                     </div>
                 </div>
             </div>
 
-            <div style="background:#f8fafc;border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(15,23,42,.04)">
+            <div style="background:rgba(248,250,252,.65);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,.6);border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 4px 16px rgba(15,23,42,.05)">
                 <p style="font-size:13px;color:#0b044d;font-weight:700;margin:0 0 18px">Performance Breakdown</p>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
                     <div>
@@ -1296,7 +1410,7 @@
                         </div>
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
                             <span style="font-size:13px;color:#64748b;font-weight:500">Performance Tier</span>
-                            <span id="modalTier" style="font-size:11px;padding:5px 12px;border-radius:8px;font-weight:700"></span>
+                            <span id="modalTier" style="font-size:11px;padding:5px 12px;border-radius:999px;font-weight:700"></span>
                         </div>
                         <div style="display:flex;justify-content:space-between;align-items:center">
                             <span style="font-size:13px;color:#64748b;font-weight:500">Attendance Rate</span>
@@ -1306,7 +1420,7 @@
                 </div>
             </div>
 
-            <div style="background:#fffbeb;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(15,23,42,.04)">
+            <div style="background:linear-gradient(135deg, rgba(255,251,235,.8) 0%, rgba(254,243,199,.6) 100%);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);border:1px solid rgba(245,158,11,.18);border-radius:20px;padding:24px;box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 4px 16px rgba(245,158,11,.06)">
                 <p style="font-size:13px;color:#0b044d;font-weight:700;margin:0 0 14px">🏆 Why Top Performer?</p>
                 <div id="modalReason" style="font-size:13px;color:#64748b;line-height:1.7"></div>
             </div>
@@ -2056,7 +2170,7 @@ function showPerformerDetails(emp, period, rank) {
         'poor': 'background:#fde8e8;color:#dc2626'
     };
     tierEl.textContent = tierLabels[emp.tier] || emp.tier;
-    tierEl.style.cssText = 'font-size:12px;padding:4px 10px;border-radius:6px;font-weight:700;' + tierColors[emp.tier];
+    tierEl.style.cssText = 'font-size:12px;padding:4px 10px;border-radius:999px;font-weight:700;' + tierColors[emp.tier];
 
     const avatar = document.getElementById('modalPerformerAvatar');
     if (emp.photo) {

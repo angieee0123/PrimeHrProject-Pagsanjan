@@ -70,16 +70,29 @@ class AttendanceController extends Controller
             ->sort()
             ->values();
 
-        // Simplified detailed records pagination
-        $detailedRecords = [];
-        $detailedPagination = [
-            'current_page' => 1,
-            'per_page' => 10,
-            'total' => 0,
-            'last_page' => 0,
-            'from' => 0,
-            'to' => 0,
-        ];
+        // Build the flat, day-by-day log for the "Detailed Time Record" tab
+        $detailedEmployeesQuery = Employee::with(['employmentDetail.departmentRelation', 'schedule'])
+            ->orderBy('first_name');
+
+        if ($department && $department !== 'All Departments') {
+            $detailedEmployeesQuery->whereHas('employmentDetail.departmentRelation', function ($q) use ($department) {
+                $q->where('name', $department);
+            });
+        }
+
+        $detailedEmployees = $detailedEmployeesQuery->get();
+
+        $employeeNameFilter = $request->get('employee_name');
+        if ($employeeNameFilter) {
+            $detailedEmployees = $detailedEmployees->filter(function ($employee) use ($employeeNameFilter) {
+                $fullName = trim($employee->first_name . ' ' . ($employee->middle_name ? $employee->middle_name . ' ' : '') . $employee->last_name);
+                return $fullName === $employeeNameFilter;
+            })->values();
+        }
+
+        $detailedResult = $this->buildDetailedRecords($detailedEmployees, $startDate, $endDate, (int) $page, (int) $perPage);
+        $detailedRecords = $detailedResult['records'];
+        $detailedPagination = $detailedResult['pagination'];
 
         $exemptions = \App\Models\AttendanceExemption::with('creator')
             ->orderBy('created_at', 'desc')
@@ -108,7 +121,7 @@ class AttendanceController extends Controller
         // Use database queries instead of in-memory processing
         $attendances = Attendance::where('employee_id', $employee->id)
             ->whereBetween('date', [$startDate, $endDate])
-            ->select('id', 'date', 'am_in', 'am_out', 'pm_in', 'pm_out', 'ot_in', 'ot_out')
+            ->select('id', 'date', 'am_in', 'am_out', 'pm_in', 'pm_out', 'ot_in', 'ot_out', 'attendance_type')
             ->get();
 
         $approvedLeaves = \App\Models\LeaveApplication::where('employee_id', $employee->id)
@@ -132,7 +145,14 @@ class AttendanceController extends Controller
         $onLeave = 0;
 
         $workingDays = $this->getWorkingDays($startDate, $endDate);
-        $attendedDates = $attendances->pluck('date')->map(fn($d) => $d->format('Y-m-d'))->unique()->toArray();
+        // Only dates with actual time punches count as "attended" — blank placeholder
+        // rows (no am_in/pm_in) must not block the leave-day fallback check below.
+        $attendedDates = $attendances
+            ->filter(fn($a) => $a->am_in || $a->pm_in)
+            ->pluck('date')
+            ->map(fn($d) => $d->format('Y-m-d'))
+            ->unique()
+            ->toArray();
         
         // Build leave dates efficiently
         $leaveDates = [];
@@ -150,13 +170,28 @@ class AttendanceController extends Controller
         }
         $leaveDates = array_unique($leaveDates);
 
+        // Track dates already counted as leave from attendance_type = 'LEAVE' rows
+        $leaveAttendanceDates = $attendances
+            ->where('attendance_type', 'LEAVE')
+            ->pluck('date')
+            ->map(fn($d) => $d->format('Y-m-d'))
+            ->toArray();
+
         foreach ($attendances as $attendance) {
+            $attendanceDate = $attendance->date->format('Y-m-d');
+
+            // Count LEAVE-type attendance rows as on_leave + present
+            if ($attendance->attendance_type === 'LEAVE') {
+                $onLeave++;
+                $present++;
+                continue;
+            }
+
             $hasAttendance = $attendance->am_in || $attendance->pm_in;
 
             if ($hasAttendance) {
                 $present++;
 
-                $attendanceDate = $attendance->date->format('Y-m-d');
                 $scheduleForDate = $employee->getScheduleForDate($attendanceDate);
                 $expectedAmIn = $scheduleForDate ? Carbon::parse($scheduleForDate->am_in) : Carbon::parse('08:00:00');
                 $graceThreshold = $expectedAmIn->copy()->addMinutes(5);
@@ -190,6 +225,10 @@ class AttendanceController extends Controller
 
         foreach ($workingDays as $workingDay) {
             $dayStr = $workingDay->format('Y-m-d');
+            // Skip days already counted as leave via attendance_type = 'LEAVE'
+            if (in_array($dayStr, $leaveAttendanceDates)) {
+                continue;
+            }
             if (!in_array($dayStr, $attendedDates)) {
                 if (in_array($dayStr, $leaveDates)) {
                     $onLeave++;
@@ -234,6 +273,144 @@ class AttendanceController extends Controller
     {
         // Use CSC service to get working days (excludes weekends automatically)
         return CscTimeConversionService::getWorkingDates($startDate, $endDate);
+    }
+
+    /**
+     * Build the flat, day-by-day attendance log used by the "Detailed Time Record" tab
+     * (one row per employee per calendar day), paginated at the row level.
+     */
+    private function buildDetailedRecords($employees, Carbon $startDate, Carbon $endDate, int $page, int $perPage)
+    {
+        $rows = [];
+        $today = Carbon::now()->startOfDay();
+
+        foreach ($employees as $employee) {
+            $fullName = trim($employee->first_name . ' ' . ($employee->middle_name ? $employee->middle_name . ' ' : '') . $employee->last_name);
+
+            $attendances = Attendance::with('accreditedHoursLogs')
+                ->where('employee_id', $employee->id)
+                ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+                ->get()
+                ->keyBy(fn($a) => Carbon::parse($a->date)->format('Y-m-d'));
+
+            $approvedLeaves = \App\Models\LeaveApplication::where('employee_id', $employee->id)
+                ->where('status', 'approved')
+                ->where(function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('start_date', [$startDate, $endDate])
+                          ->orWhereBetween('end_date', [$startDate, $endDate])
+                          ->orWhere(function ($q) use ($startDate, $endDate) {
+                              $q->where('start_date', '<=', $startDate)
+                                ->where('end_date', '>=', $endDate);
+                          });
+                })
+                ->with('leaveType')
+                ->get();
+
+            // Map every weekday covered by an approved leave to its leave type name
+            $leaveDatesMap = [];
+            foreach ($approvedLeaves as $leave) {
+                $cursor = Carbon::parse($leave->start_date);
+                $leaveEnd = Carbon::parse($leave->end_date);
+                while ($cursor->lte($leaveEnd)) {
+                    if (!in_array($cursor->dayOfWeek, [0, 6])) {
+                        $leaveDatesMap[$cursor->format('Y-m-d')] = $leave->leaveType->leave_name ?? 'Leave';
+                    }
+                    $cursor->addDay();
+                }
+            }
+
+            $current = $startDate->copy();
+            while ($current->lte($endDate)) {
+                $dateKey = $current->format('Y-m-d');
+                $attendance = $attendances->get($dateKey);
+                $isWeekend = in_array($current->dayOfWeek, [0, 6]);
+                $hasPunch = $attendance && ($attendance->am_in || $attendance->pm_in);
+
+                // A blank placeholder attendance row must not shadow an approved leave day
+                // (same fix applied to the summary tab's on_leave calculation).
+                $isOnLeave = !$isWeekend && !$hasPunch && isset($leaveDatesMap[$dateKey]);
+
+                // A future weekday with nothing to show yet (no punch, no leave) isn't
+                // "absent" — the day just hasn't happened. Mirrors the per-employee
+                // Detailed DTR modal (generateDetailedRecords), which skips these
+                // entirely instead of marking them absent.
+                if (!$isWeekend && $current->gt($today) && !$hasPunch && !$isOnLeave) {
+                    $current->addDay();
+                    continue;
+                }
+
+                $isAbsent = !$isWeekend && !$isOnLeave && !$hasPunch;
+
+                $log = ($attendance && $attendance->accreditedHoursLogs->isNotEmpty())
+                    ? $attendance->accreditedHoursLogs->last()
+                    : null;
+
+                $rows[] = [
+                    'date_key' => $dateKey,
+                    'date' => $current->format('M d, Y'),
+                    'day' => $current->format('l'),
+                    'employee_name' => $fullName,
+                    'employee_id' => $employee->id,
+                    'employee_code' => $employee->employee_id,
+                    'photo' => $employee->photo,
+                    'attendance_id' => $attendance->id ?? null,
+                    'am_in' => $attendance && $attendance->am_in ? Carbon::parse($attendance->am_in)->format('H:i') : null,
+                    'am_out' => $attendance && $attendance->am_out ? Carbon::parse($attendance->am_out)->format('H:i') : null,
+                    'pm_in' => $attendance && $attendance->pm_in ? Carbon::parse($attendance->pm_in)->format('H:i') : null,
+                    'pm_out' => $attendance && $attendance->pm_out ? Carbon::parse($attendance->pm_out)->format('H:i') : null,
+                    'ot_in' => $attendance && $attendance->ot_in ? Carbon::parse($attendance->ot_in)->format('H:i') : null,
+                    'ot_out' => $attendance && $attendance->ot_out ? Carbon::parse($attendance->ot_out)->format('H:i') : null,
+                    'late_minutes' => $log->late_minutes ?? 0,
+                    'undertime_minutes' => $log->undertime_minutes ?? 0,
+                    'total_hours' => $attendance && $attendance->total_hours ? round($attendance->total_hours / 60, 2) : 0,
+                    // Blade compares this against 480 (minutes in an 8-hour day), so it holds minutes despite the key name.
+                    'accredited_hours' => $log->total_accredited_minutes ?? 0,
+                    'is_absent' => $isAbsent,
+                    'is_on_leave' => $isOnLeave,
+                    'leave_info' => $isOnLeave ? ['leave_type' => $leaveDatesMap[$dateKey]] : null,
+                ];
+
+                $current->addDay();
+            }
+        }
+
+        usort($rows, fn($a, $b) => [$a['date_key'], $a['employee_name']] <=> [$b['date_key'], $b['employee_name']]);
+
+        // Paginate by distinct date, not by flat employee-day row, so each
+        // page holds N whole days (with every employee's record for those
+        // days) instead of cutting a day's avatar cluster in half.
+        $byDate = [];
+        foreach ($rows as $row) {
+            $byDate[$row['date_key']][] = $row;
+        }
+        $dateKeys = array_keys($byDate);
+
+        $totalRows = count($rows);
+        $totalDays = count($dateKeys);
+        $lastPage = $perPage > 0 ? (int) ceil($totalDays / $perPage) : 0;
+        $page = max(1, min($page, max(1, $lastPage)));
+
+        $pageDateKeys = array_slice($dateKeys, ($page - 1) * $perPage, $perPage);
+
+        $sliced = [];
+        foreach ($pageDateKeys as $dateKey) {
+            foreach ($byDate[$dateKey] as $row) {
+                $sliced[] = $row;
+            }
+        }
+
+        return [
+            'records' => $sliced,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $totalRows,
+                'total_days' => $totalDays,
+                'last_page' => $lastPage,
+                'from' => $totalDays > 0 ? ($page - 1) * $perPage + 1 : 0,
+                'to' => $totalDays > 0 ? min($page * $perPage, $totalDays) : 0,
+            ],
+        ];
     }
 
     public function detailedDTR(Request $request, $employeeId)

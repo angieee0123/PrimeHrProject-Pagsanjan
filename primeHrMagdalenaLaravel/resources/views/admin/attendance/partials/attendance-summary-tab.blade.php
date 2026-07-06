@@ -41,7 +41,7 @@
                             </div>
                         </div>
                     </td>
-                    <td><span class="dept-tag" data-tooltip="{{ $record['dept'] }}">{{ $record['dept_code'] ?? $record['dept'] }}</span></td>
+                    <td><span class="dept-tag" data-tooltip="{{ $record['dept'] }}">{{ $record['dept'] }}</span></td>
                     <td class="num-cell num-present">{{ $record['present'] }}</td>
                     <td class="num-cell">
                         @if(isset($record['on_leave']) && $record['on_leave'] > 0)
@@ -103,3 +103,136 @@
         <div class="pagination" id="attendancePaginationControls"></div>
     </div>
 </section>
+
+<style>
+/* ══ Liquid Glass refinement for the Daily Time Record card ══
+   Scoped to #summary-tab only — doesn't touch other tabs/pages
+   that share .table-section / .payroll-table / .action-dropdown.
+   Includes its own tinted backdrop so the frosted-glass blur has
+   something colorful to show through (the page behind it is flat
+   gray, so blur alone was invisible without this). */
+#summary-tab {
+    position: relative;
+    isolation: isolate;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Poppins', sans-serif !important;
+    background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.5)) !important;
+    backdrop-filter: blur(28px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+    border: 1px solid rgba(255,255,255,.75) !important;
+    border-radius: 22px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9),
+        0 20px 45px rgba(11,4,77,.12),
+        0 4px 14px rgba(15,23,42,.06) !important;
+    transition: box-shadow .3s ease;
+}
+
+#summary-tab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 22px;
+    background:
+        radial-gradient(420px 260px at 4% -10%, rgba(99,102,241,.20), transparent 60%),
+        radial-gradient(380px 240px at 100% 0%, rgba(56,189,248,.18), transparent 60%),
+        radial-gradient(520px 320px at 60% 115%, rgba(79,124,255,.14), transparent 60%);
+}
+
+#summary-tab:hover {
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9),
+        0 26px 55px rgba(11,4,77,.16),
+        0 4px 14px rgba(15,23,42,.07) !important;
+}
+
+#summary-tab .table-header {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(15,23,42,.07);
+    border-radius: 22px 22px 0 0;
+    padding: 20px 24px !important;
+}
+
+#summary-tab .table-title {
+    letter-spacing: -.3px;
+}
+
+#summary-tab .payroll-table thead th {
+    background: rgba(248,250,252,.65) !important;
+    backdrop-filter: blur(14px) saturate(180%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+}
+
+#summary-tab .payroll-table tbody tr:nth-child(even) { background: rgba(255,255,255,.3); }
+#summary-tab .payroll-table tbody tr:hover { background: rgba(79,124,255,.1) !important; }
+
+#summary-tab .emp-avatar {
+    border: 2px solid rgba(255,255,255,.8);
+    box-shadow: 0 4px 10px rgba(11,4,77,.14);
+}
+
+#summary-tab .dept-tag {
+    background: rgba(227,236,255,.75) !important;
+    border: 1px solid rgba(37,71,176,.12);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+#summary-tab .badge-status {
+    border: 1px solid transparent;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+#summary-tab .badge-status.processed { background: rgba(233,249,239,.8) !important; border-color: rgba(35,135,90,.15); }
+#summary-tab .badge-status.pending   { background: rgba(253,243,227,.8) !important; border-color: rgba(166,114,12,.15); }
+
+#summary-tab .act-btn {
+    border-radius: 999px !important;
+    background: rgba(255,255,255,.65) !important;
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    border: 1px solid rgba(15,23,42,.08) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+}
+#summary-tab .act-btn:hover {
+    background: linear-gradient(135deg, #1b1464, #0b044d) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+    box-shadow: 0 6px 16px rgba(11,4,77,.35);
+    transform: translateY(-1px);
+}
+
+#summary-tab .action-dropdown {
+    background: rgba(255,255,255,.88) !important;
+    backdrop-filter: blur(28px) saturate(200%);
+    -webkit-backdrop-filter: blur(28px) saturate(200%);
+    border: 1px solid rgba(255,255,255,.75) !important;
+    border-radius: 16px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9),
+        0 24px 50px rgba(15,23,42,.18),
+        0 2px 8px rgba(15,23,42,.06) !important;
+}
+#summary-tab .action-dropdown-item { border-radius: 10px; }
+#summary-tab .action-dropdown-item:hover { background: rgba(11,4,77,.08) !important; color: var(--pri); }
+
+#summary-tab .table-footer {
+    background: rgba(255,255,255,.4) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-top: 1px solid rgba(15,23,42,.07);
+    border-radius: 0 0 22px 22px;
+}
+
+#summary-tab .rows-select {
+    border-radius: 999px !important;
+    background: rgba(255,255,255,.65) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(15,23,42,.08) !important;
+}
+</style>

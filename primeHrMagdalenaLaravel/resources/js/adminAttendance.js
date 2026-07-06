@@ -496,8 +496,17 @@ document.getElementById('correctForm').addEventListener('submit', function(e) {
     .then(data => {
         if (data.success) {
             closeCorrectModal();
+            if (currentDetailedEmployeeId) {
+                // Correction was made from the per-employee Detailed DTR modal —
+                // refresh its own AJAX table in place.
+                loadDetailedDTR();
+            } else {
+                // Correction was made from the Detailed Time Record tab's timeline,
+                // which is server-rendered — reload once the user dismisses the
+                // success modal so the updated status/avatar/times actually show.
+                window.reloadAfterSuccessModal = true;
+            }
             openSuccessModal();
-            loadDetailedDTR();
         } else {
             alert('Error: ' + (data.message || 'Failed to correct attendance'));
         }
@@ -1005,4 +1014,8 @@ window.openSuccessModal = function() {
 
 window.closeSuccessModal = function() {
     document.getElementById('successModal').style.display = 'none';
+    if (window.reloadAfterSuccessModal) {
+        window.reloadAfterSuccessModal = false;
+        window.location.reload();
+    }
 }

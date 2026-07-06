@@ -23,6 +23,16 @@
     border: 5px solid transparent; border-top-color: #1a1f36; z-index: 99;
 }
 
+/* Detailed Time Record tab — soft status pills (same palette as the Detailed DTR modal) */
+.dtr-pill {
+    display: inline-flex; align-items: center;
+    font-size: 10px; font-weight: 600; letter-spacing: .2px;
+    padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+}
+.dtr-pill-leave      { background: #eaf1ff; color: #4F7CFF; }
+.dtr-pill-absent     { background: #fdedec; color: #d5433c; }
+.dtr-pill-incomplete { background: #fdf3e3; color: #a6720c; }
+
 /* Button Styles */
 .btn-view { padding: 6px 14px; background: #0b044d; color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; white-space: nowrap; }
 .btn-view:hover { background: #1a0f6e; }
