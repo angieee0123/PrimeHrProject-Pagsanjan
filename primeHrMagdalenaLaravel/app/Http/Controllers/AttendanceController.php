@@ -205,8 +205,10 @@ class AttendanceController extends Controller
         $status = ($absent === 0 && $late <= 2 && $totalDays > 0) ? 'Complete' : 'Incomplete';
 
         $deptName = 'N/A';
+        $deptCode = 'N/A';
         if ($employee->employmentDetail && $employee->employmentDetail->departmentRelation) {
             $deptName = $employee->employmentDetail->departmentRelation->name;
+            $deptCode = $employee->employmentDetail->departmentRelation->code ?? $deptName;
         }
 
         return [
@@ -215,6 +217,7 @@ class AttendanceController extends Controller
             'name' => trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name),
             'position' => $employee->employmentDetail->position ?? 'N/A',
             'dept' => $deptName,
+            'dept_code' => $deptCode,
             'present' => $present,
             'absent' => $absent,
             'late' => $late,

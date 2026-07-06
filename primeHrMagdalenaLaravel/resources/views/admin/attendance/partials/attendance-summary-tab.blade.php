@@ -41,7 +41,7 @@
                             </div>
                         </div>
                     </td>
-                    <td><span class="dept-tag">{{ $record['dept'] }}</span></td>
+                    <td><span class="dept-tag" data-tooltip="{{ $record['dept'] }}">{{ $record['dept_code'] ?? $record['dept'] }}</span></td>
                     <td class="num-cell num-present">{{ $record['present'] }}</td>
                     <td class="num-cell">
                         @if(isset($record['on_leave']) && $record['on_leave'] > 0)

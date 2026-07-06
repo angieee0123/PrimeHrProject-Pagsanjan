@@ -10,11 +10,11 @@
                 <input type="date" class="filter-select" id="filterTransactionDateFrom" value="{{ request('filter_transaction_date_from') }}" style="width: 140px;">
                 <span style="color: #9ca3af; font-size: 13px;">to</span>
                 <input type="date" class="filter-select" id="filterTransactionDateTo" value="{{ request('filter_transaction_date_to') }}" style="width: 140px;">
-                <button type="button" onclick="applyTransactionDateRangeFilter()" style="background: #0b044d; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap;">
+                <button type="button" onclick="applyTransactionDateRangeFilter()" style="background: #0b044d; color: white; padding: 8px 16px; border: none; border-radius: 9px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap; transition: background .2s cubic-bezier(.4,0,.2,1);">
                     Apply
                 </button>
                 @if(request('filter_transaction_date_from') || request('filter_transaction_date_to'))
-                    <button type="button" onclick="clearTransactionDateRangeFilter()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap;">
+                    <button type="button" onclick="clearTransactionDateRangeFilter()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 9px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap; transition: background .2s cubic-bezier(.4,0,.2,1);">
                         Clear
                     </button>
                 @endif
@@ -46,7 +46,7 @@
                 @endforeach
             </select>
             @if(request('filter_transaction_date_from') || request('filter_transaction_date_to') || request('filter_transaction_year') || request('filter_employee') || request('filter_type') || request('filter_leave_code'))
-                <button type="button" onclick="clearAllTransactionFilters()" style="background: #dc2626; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap;">
+                <button type="button" onclick="clearAllTransactionFilters()" style="background: #d5433c; color: white; padding: 8px 16px; border: none; border-radius: 9px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap; transition: background .2s cubic-bezier(.4,0,.2,1);">
                     Clear All
                 </button>
             @endif
@@ -122,7 +122,7 @@
                             <span class="badge-status cancelled">{{ ucfirst($transaction->transaction_type) }}</span>
                         @endif
                     </td>
-                    <td data-label="Amount" style="text-align: center; font-weight: 600; color: {{ $transaction->transaction_type === 'credit' || $transaction->transaction_type === 'adjustment' ? '#15803d' : '#dc2626' }};">
+                    <td data-label="Amount" style="text-align: center; font-weight: 600; color: {{ $transaction->transaction_type === 'credit' || $transaction->transaction_type === 'adjustment' ? '#23875a' : '#d5433c' }};">
                         {{ $transaction->transaction_type === 'debit' ? '-' : '+' }}{{ number_format(abs($transaction->amount), 6) }} days
                     </td>
                     <td data-label="Before" style="text-align: center; color: #6b6a8a;">
@@ -140,7 +140,7 @@
                         @elseif($transaction->reference_type === 'manual_adjustment')
                             <span style="color: #8e1e18; font-weight: 500;">Manual</span>
                         @elseif($transaction->reference_type === 'accrual')
-                            <span style="color: #15803d; font-weight: 500;">Accrual</span>
+                            <span style="color: #23875a; font-weight: 500;">Accrual</span>
                         @elseif($transaction->reference_type === 'initialization')
                             <span style="color: #6b3fa0; font-weight: 500;">Initialization</span>
                         @elseif($transaction->reference_type === 'leave_import')
@@ -241,7 +241,7 @@
             <span class="modal-section-label">TRANSACTION INFORMATION</span>
             <div class="modal-row"><span>Leave Type</span><strong id="transactionLeaveType">VL</strong></div>
             <div class="modal-row"><span>Transaction Type</span><span class="badge-status pending" id="transactionType">Credit</span></div>
-            <div class="modal-row"><span>Amount</span><strong id="transactionAmount" style="color: #15803d;">+5.00 days</strong></div>
+            <div class="modal-row"><span>Amount</span><strong id="transactionAmount" style="color: #23875a;">+5.00 days</strong></div>
             <div class="modal-row"><span>Balance Before</span><strong id="transactionBalanceBefore">10.00 days</strong></div>
             <div class="modal-row"><span>Balance After</span><strong id="transactionBalanceAfter">15.00 days</strong></div>
             <div class="modal-row"><span>Transaction Date</span><strong id="transactionDate">Jan 15, 2026</strong></div>
@@ -399,7 +399,7 @@ function viewTransactionDetails(employeeName, employeeId, leaveType, type, amoun
     const amountEl = document.getElementById('transactionAmount');
     const sign = (type === 'Debit') ? '-' : '+';
     amountEl.textContent = sign + parseFloat(Math.abs(amount)).toFixed(6) + ' days';
-    amountEl.style.color = (type === 'Debit') ? '#dc2626' : '#15803d';
+    amountEl.style.color = (type === 'Debit') ? '#d5433c' : '#23875a';
 
     document.getElementById('transactionBalanceBefore').textContent = parseFloat(balanceBefore).toFixed(6) + ' days';
     document.getElementById('transactionBalanceAfter').textContent = parseFloat(balanceAfter).toFixed(6) + ' days';

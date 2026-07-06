@@ -7,6 +7,22 @@
 .emp-id { font-size: 11px; color: #9999bb; margin: 0; }
 .dept-tag { display: inline-block; padding: 4px 10px; background: #f7f6ff; border: 1px solid #e8e7f5; border-radius: 6px; font-size: 11px; font-weight: 600; color: #0b044d; }
 
+/* Tooltip on hover for tags carrying a data-tooltip attribute (e.g. department code → full name) */
+.dept-tag[data-tooltip] { position: relative; cursor: default; }
+.dept-tag[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+    background: #1a1f36; color: #fff; font-size: 11px; font-weight: 500;
+    padding: 6px 10px; border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.18); z-index: 99; pointer-events: none;
+    max-width: 240px; white-space: normal; text-align: center; line-height: 1.4;
+}
+.dept-tag[data-tooltip]:hover::before {
+    content: '';
+    position: absolute; bottom: calc(100% + 1px); left: 50%; transform: translateX(-50%);
+    border: 5px solid transparent; border-top-color: #1a1f36; z-index: 99;
+}
+
 /* Button Styles */
 .btn-view { padding: 6px 14px; background: #0b044d; color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; white-space: nowrap; }
 .btn-view:hover { background: #1a0f6e; }
@@ -63,8 +79,8 @@
 .modal-btn-primary:hover { background: #1a0f6e; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .form-field label { display: block; font-size: 12px; font-weight: 600; color: #6b6a8a; margin-bottom: 6px; }
-.form-input { width: 100%; padding: 10px 12px; border: 1px solid #e8e7f5; border-radius: 6px; font-size: 13px; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
-.form-input:focus { outline: none; border-color: #0b044d; box-shadow: 0 0 0 3px rgba(11, 4, 77, 0.1); }
+.form-input { width: 100%; padding: 10px 12px; border: 1px solid #e8e7f5; border-radius: 9px; font-size: 13px; font-family: 'Poppins', sans-serif; transition: border-color .2s cubic-bezier(.4,0,.2,1), box-shadow .2s cubic-bezier(.4,0,.2,1); }
+.form-input:focus { outline: none; border-color: #0b044d; box-shadow: 0 0 0 4px rgba(11, 4, 77, 0.08); }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .modal-box-wide { max-width: 1400px; width: 95%; }
 .filter-select-sm { padding: 6px 12px; border: 1px solid #e8e7f5; border-radius: 6px; font-size: 12px; font-family: 'Poppins', sans-serif; background: #fff; color: #0b044d; cursor: pointer; transition: all 0.2s; }

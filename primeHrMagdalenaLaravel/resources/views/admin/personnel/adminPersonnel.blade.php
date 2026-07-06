@@ -33,13 +33,13 @@
     <div class="stat-card personnel-stat-card">
         <div class="stat-top">
             <p class="stat-label">Active</p>
-            <div class="stat-icon-wrap" style="background:#e8f9ef">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div class="stat-icon-wrap" style="background:#e9f9ef">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#23875a" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
         </div>
         <h2 class="stat-value">{{ $stats['active'] }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#15803d"></span>
+            <span class="stat-dot" style="background:#23875a"></span>
             <p class="stat-sub">Currently active</p>
         </div>
     </div>
@@ -47,7 +47,7 @@
     <div class="stat-card personnel-stat-card">
         <div class="stat-top">
             <p class="stat-label">Inactive</p>
-            <div class="stat-icon-wrap" style="background:#fdf0ef">
+            <div class="stat-icon-wrap" style="background:#fdedec">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8e1e18" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
             </div>
         </div>
@@ -126,7 +126,7 @@
                 </svg>
                 Export
             </button>
-            <button class="btn-export" onclick="openBulkImportModal()" style="background:#15803d; color:#fff; border-color:#15803d;">
+            <button class="btn-export" onclick="openBulkImportModal()" style="background:#23875a; color:#fff; border-color:#23875a;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="17 8 12 3 7 8"/>
@@ -550,7 +550,7 @@
 <div id="successModal" class="personnel-modal">
     <div class="personnel-modal-box">
         <div class="personnel-modal-icon success">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#23875a" stroke-width="2.5">
                 <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
         </div>
@@ -620,7 +620,7 @@
 <div id="exportSuccessModal" class="personnel-modal">
     <div class="personnel-modal-box">
         <div class="personnel-modal-icon export">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#23875a" stroke-width="2.5">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="7 10 12 15 17 10"/>
                 <line x1="12" y1="15" x2="12" y2="3"/>
@@ -633,9 +633,9 @@
 </div>
 
 <!-- Export Error Modal -->
-<div id="exportErrorModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
-    <div style="background:#fff; border-radius:12px; width:100%; max-width:450px; padding:32px; text-align:center; box-shadow:0 8px 32px rgba(11,4,77,0.2);">
-        <div style="width:64px; height:64px; background:#fee8e8; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
+<div id="exportErrorModal" style="display:none; position:fixed; inset:0; background:rgba(15,12,40,0.42); -webkit-backdrop-filter:blur(8px) saturate(150%); backdrop-filter:blur(8px) saturate(150%); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:18px; width:100%; max-width:450px; padding:32px; text-align:center; box-shadow:0 20px 50px rgba(15,23,42,.16), 0 2px 10px rgba(15,23,42,.05);">
+        <div style="width:64px; height:64px; background:#fdedec; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8e1e18" stroke-width="2.5">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="15" y1="9" x2="9" y2="15"></line>
@@ -644,21 +644,21 @@
         </div>
         <h3 style="margin:0 0 12px; font-size:20px; font-weight:700; color:#0b044d;">Export Failed</h3>
         <p id="exportErrorMessage" style="margin:0 0 24px; font-size:14px; color:#6b6a8a; line-height:1.6;"></p>
-        <button onclick="closeExportErrorModal()" style="padding:12px 32px; background:#8e1e18; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif;">
+        <button onclick="closeExportErrorModal()" style="padding:12px 32px; background:#8e1e18; color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; transition:transform .15s ease;">
             Close
         </button>
     </div>
 </div>
 
 <!-- QR Code Modal -->
-<div id="qrCodeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
-    <div style="background:#fff; border-radius:12px; width:100%; max-width:500px; padding:32px; text-align:center; box-shadow:0 8px 32px rgba(11,4,77,0.2);">
+<div id="qrCodeModal" style="display:none; position:fixed; inset:0; background:rgba(15,12,40,0.42); -webkit-backdrop-filter:blur(8px) saturate(150%); backdrop-filter:blur(8px) saturate(150%); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:18px; width:100%; max-width:500px; padding:32px; text-align:center; box-shadow:0 20px 50px rgba(15,23,42,.16), 0 2px 10px rgba(15,23,42,.05);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h3 style="margin:0; font-size:20px; font-weight:700; color:#0b044d;">Employee QR Code</h3>
-            <button onclick="closeQRModal()" style="background:transparent; border:none; color:#6b6a8a; font-size:24px; cursor:pointer; width:32px; height:32px; display:flex; align-items:center; justify-content:center;">&times;</button>
+            <button onclick="closeQRModal()" style="background:transparent; border:none; border-radius:9px; color:#6b6a8a; font-size:24px; cursor:pointer; width:32px; height:32px; display:flex; align-items:center; justify-content:center; transition:background .2s cubic-bezier(.4,0,.2,1);">&times;</button>
         </div>
 
-        <div style="background:#f7f6ff; border:2px solid #e8e7f5; border-radius:12px; padding:24px; margin-bottom:20px;">
+        <div style="background:#f7f6ff; border:2px solid #e8e7f5; border-radius:14px; padding:24px; margin-bottom:20px;">
             <p style="margin:0 0 8px; font-size:14px; font-weight:600; color:#0b044d;" id="qrEmployeeName"></p>
             <p style="margin:0 0 16px; font-size:12px; color:#6b6a8a;" id="qrEmployeeId"></p>
             <div id="qrCodeContainer" style="display:flex; justify-content:center; align-items:center; min-height:300px;">
@@ -667,7 +667,7 @@
         </div>
 
         <div style="display:flex; gap:10px;">
-            <button onclick="downloadQRCode()" style="flex:1; padding:12px; background:#0b044d; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <button onclick="downloadQRCode()" style="flex:1; padding:12px; background:#0b044d; color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .2s cubic-bezier(.4,0,.2,1);">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="7 10 12 15 17 10"/>
@@ -675,7 +675,7 @@
                 </svg>
                 Download
             </button>
-            <button onclick="printQRCode()" style="flex:1; padding:12px; background:#15803d; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <button onclick="printQRCode()" style="flex:1; padding:12px; background:#23875a; color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .2s cubic-bezier(.4,0,.2,1);">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="6 9 6 2 18 2 18 9"/>
                     <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
@@ -688,22 +688,22 @@
 </div>
 
 <!-- Bulk Import Modal -->
-<div id="bulkImportModal" style="display:none; position:fixed; inset:0; background:rgba(11,4,77,0.6); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center;">
-    <div style="background:#fff; border-radius:16px; width:100%; max-width:600px; box-shadow:0 25px 50px rgba(0,0,0,0.25);">
+<div id="bulkImportModal" style="display:none; position:fixed; inset:0; background:rgba(15,12,40,0.42); -webkit-backdrop-filter:blur(8px) saturate(150%); backdrop-filter:blur(8px) saturate(150%); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:20px; width:100%; max-width:600px; box-shadow:0 20px 50px rgba(15,23,42,.16), 0 2px 10px rgba(15,23,42,.05);">
         <div style="padding:24px; border-bottom:1.5px solid #f0effe;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
                     <h3 style="margin:0 0 4px; font-size:18px; font-weight:700; color:#0b044d;">Bulk Import Employees</h3>
                     <p style="margin:0; font-size:13px; color:#6b6a8a;">Upload a CSV file to import multiple employees at once</p>
                 </div>
-                <button onclick="closeBulkImportModal()" style="background:none; border:none; font-size:28px; color:#6b6a8a; cursor:pointer; width:32px; height:32px; display:flex; align-items:center; justify-content:center;">&times;</button>
+                <button onclick="closeBulkImportModal()" style="background:none; border:none; border-radius:9px; font-size:28px; color:#6b6a8a; cursor:pointer; width:32px; height:32px; display:flex; align-items:center; justify-content:center; transition:background .2s cubic-bezier(.4,0,.2,1);">&times;</button>
             </div>
         </div>
 
         <div style="padding:24px;">
-            <div style="background:#f0effe; border:1.5px solid #dddcf0; border-radius:10px; padding:16px; margin-bottom:20px;">
+            <div style="background:#f0effe; border:1.5px solid #dddcf0; border-radius:14px; padding:16px; margin-bottom:20px;">
                 <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                    <div style="width:40px; height:40px; background:#0b044d; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <div style="width:40px; height:40px; background:#0b044d; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
                             <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
                             <polyline points="13 2 13 9 20 9"/>
@@ -714,7 +714,7 @@
                         <p style="margin:0; font-size:12px; color:#6b6a8a;">Use our template to ensure proper formatting</p>
                     </div>
                 </div>
-                <button onclick="downloadTemplate()" style="width:100%; padding:10px; background:#0b044d; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px;">
+                <button onclick="downloadTemplate()" style="width:100%; padding:10px; background:#0b044d; color:#fff; border:none; border-radius:9px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .2s cubic-bezier(.4,0,.2,1);">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                         <polyline points="7 10 12 15 17 10"/>
@@ -727,8 +727,8 @@
             <form id="bulkImportForm" enctype="multipart/form-data">
                 @csrf
                 <div style="margin-bottom:20px;">
-                    <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:8px;">Upload CSV File <span style="color:#dc2626;">*</span></label>
-                    <div id="dropZone" style="border:2px dashed #dddcf0; border-radius:10px; padding:32px; text-align:center; cursor:pointer; transition:all 0.2s; background:#fafafe;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:8px;">Upload CSV File <span style="color:#d5433c;">*</span></label>
+                    <div id="dropZone" style="border:2px dashed #dddcf0; border-radius:14px; padding:32px; text-align:center; cursor:pointer; transition:border-color .2s cubic-bezier(.4,0,.2,1), background .2s cubic-bezier(.4,0,.2,1); background:#fafafe;">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9999bb" stroke-width="1.5" style="margin:0 auto 12px;">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                             <polyline points="17 8 12 3 7 8"/>
@@ -738,19 +738,19 @@
                         <p style="margin:0; font-size:12px; color:#9999bb;">Maximum file size: 5MB</p>
                         <input type="file" id="csvFile" name="csv_file" accept=".csv" style="display:none;" onchange="handleFileSelect(event)">
                     </div>
-                    <div id="fileInfo" style="display:none; margin-top:12px; padding:12px; background:#e8f9ef; border:1.5px solid #bbf7d0; border-radius:8px;">
+                    <div id="fileInfo" style="display:none; margin-top:12px; padding:12px; background:#e9f9ef; border:1.5px solid #c8f0d8; border-radius:9px;">
                         <div style="display:flex; align-items:center; justify-content:space-between;">
                             <div style="display:flex; align-items:center; gap:10px;">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#23875a" stroke-width="2">
                                     <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
                                     <polyline points="13 2 13 9 20 9"/>
                                 </svg>
                                 <div>
-                                    <p id="fileName" style="margin:0; font-size:13px; font-weight:600; color:#15803d;"></p>
-                                    <p id="fileSize" style="margin:0; font-size:11px; color:#15803d;"></p>
+                                    <p id="fileName" style="margin:0; font-size:13px; font-weight:600; color:#23875a;"></p>
+                                    <p id="fileSize" style="margin:0; font-size:11px; color:#23875a;"></p>
                                 </div>
                             </div>
-                            <button type="button" onclick="removeFile()" style="background:none; border:none; color:#8e1e18; cursor:pointer; padding:4px;">
+                            <button type="button" onclick="removeFile()" style="background:none; border:none; border-radius:8px; color:#8e1e18; cursor:pointer; padding:4px; transition:background .2s cubic-bezier(.4,0,.2,1);">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <line x1="18" y1="6" x2="6" y2="18"/>
                                     <line x1="6" y1="6" x2="18" y2="18"/>
@@ -760,16 +760,16 @@
                     </div>
                 </div>
 
-                <div style="background:#fefce8; border:1.5px solid #fde68a; border-radius:10px; padding:12px; margin-bottom:20px;">
+                <div style="background:#fdf3e3; border:1.5px solid #f7e2b3; border-radius:14px; padding:12px; margin-bottom:20px;">
                     <div style="display:flex; gap:10px;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a16207" stroke-width="2" style="flex-shrink:0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a6720c" stroke-width="2" style="flex-shrink:0;">
                             <circle cx="12" cy="12" r="10"/>
                             <line x1="12" y1="8" x2="12" y2="12"/>
                             <line x1="12" y1="16" x2="12.01" y2="16"/>
                         </svg>
                         <div>
-                            <p style="margin:0 0 4px; font-size:12px; font-weight:600; color:#a16207;">Important Notes:</p>
-                            <ul style="margin:0; padding-left:16px; font-size:11px; color:#a16207; line-height:1.6;">
+                            <p style="margin:0 0 4px; font-size:12px; font-weight:600; color:#a6720c;">Important Notes:</p>
+                            <ul style="margin:0; padding-left:16px; font-size:11px; color:#a6720c; line-height:1.6;">
                                 <li>Use the provided template for correct column headers</li>
                                 <li>All required fields must be filled</li>
                                 <li>Date format: YYYY-MM-DD</li>
@@ -782,8 +782,8 @@
         </div>
 
         <div style="display:flex; justify-content:flex-end; gap:10px; padding:16px 24px; border-top:1.5px solid #f0effe;">
-            <button onclick="closeBulkImportModal()" style="padding:10px 20px; border:1.5px solid #dddcf0; border-radius:8px; background:#fff; font-size:13px; font-weight:600; color:#6b6a8a; cursor:pointer; font-family:'Poppins',sans-serif;">Cancel</button>
-            <button onclick="submitBulkImport()" style="padding:10px 20px; border:none; border-radius:8px; background:linear-gradient(135deg,#0b044d,#1a0f6e); color:#fff; font-size:13px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:6px;">
+            <button onclick="closeBulkImportModal()" style="padding:10px 20px; border:1.5px solid #dddcf0; border-radius:9px; background:#fff; font-size:13px; font-weight:600; color:#6b6a8a; cursor:pointer; font-family:'Poppins',sans-serif; transition:background .2s cubic-bezier(.4,0,.2,1);">Cancel</button>
+            <button onclick="submitBulkImport()" style="padding:10px 20px; border:none; border-radius:9px; background:linear-gradient(135deg,#0b044d,#1a0f6e); color:#fff; font-size:13px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:6px; transition:transform .15s ease;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="17 8 12 3 7 8"/>

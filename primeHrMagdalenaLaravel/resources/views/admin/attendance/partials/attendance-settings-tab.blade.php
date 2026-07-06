@@ -59,16 +59,16 @@
                         <td data-label="Not Required" style="text-align: center; font-size: 11px;">
                             <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">
                                 @if($exemption->am_in_not_required)
-                                    <span style="background: #e8f9ef; color: #15803d; padding: 2px 6px; border-radius: 4px; font-weight: 600;">AM IN</span>
+                                    <span class="exempt-pill">AM IN</span>
                                 @endif
                                 @if($exemption->am_out_not_required)
-                                    <span style="background: #e8f9ef; color: #15803d; padding: 2px 6px; border-radius: 4px; font-weight: 600;">AM OUT</span>
+                                    <span class="exempt-pill">AM OUT</span>
                                 @endif
                                 @if($exemption->pm_in_not_required)
-                                    <span style="background: #e8f9ef; color: #15803d; padding: 2px 6px; border-radius: 4px; font-weight: 600;">PM IN</span>
+                                    <span class="exempt-pill">PM IN</span>
                                 @endif
                                 @if($exemption->pm_out_not_required)
-                                    <span style="background: #e8f9ef; color: #15803d; padding: 2px 6px; border-radius: 4px; font-weight: 600;">PM OUT</span>
+                                    <span class="exempt-pill">PM OUT</span>
                                 @endif
                                 @if(!$exemption->am_in_not_required && !$exemption->am_out_not_required && !$exemption->pm_in_not_required && !$exemption->pm_out_not_required)
                                     <span style="color: #9ca3af;">None</span>
@@ -173,11 +173,11 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div>
                             <label style="display: block; margin-bottom: 4px; font-size: 12px; color: #6b7280;">Start Date</label>
-                            <input type="date" id="exemptionStartDate" name="start_date" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px;">
+                            <input type="date" id="exemptionStartDate" name="start_date" class="form-input">
                         </div>
                         <div>
                             <label style="display: block; margin-bottom: 4px; font-size: 12px; color: #6b7280;">End Date</label>
-                            <input type="date" id="exemptionEndDate" name="end_date" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px;">
+                            <input type="date" id="exemptionEndDate" name="end_date" class="form-input">
                         </div>
                     </div>
                 </div>
@@ -187,19 +187,19 @@
                     <p style="margin: 0 0 8px; font-size: 12px; color: #6b7280;">Checked punches are optional. Missing punches are auto-filled from the employee's schedule for DTR and accredited hours.</p>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="amInNotRequired" name="am_in_not_required" value="1" style="width: 16px; height: 16px;">
+                            <input type="checkbox" id="amInNotRequired" name="am_in_not_required" value="1" style="width: 16px; height: 16px; accent-color: #0b044d;">
                             <span>AM In</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="amOutNotRequired" name="am_out_not_required" value="1" style="width: 16px; height: 16px;">
+                            <input type="checkbox" id="amOutNotRequired" name="am_out_not_required" value="1" style="width: 16px; height: 16px; accent-color: #0b044d;">
                             <span>AM Out</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="pmInNotRequired" name="pm_in_not_required" value="1" style="width: 16px; height: 16px;">
+                            <input type="checkbox" id="pmInNotRequired" name="pm_in_not_required" value="1" style="width: 16px; height: 16px; accent-color: #0b044d;">
                             <span>PM In</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="pmOutNotRequired" name="pm_out_not_required" value="1" style="width: 16px; height: 16px;">
+                            <input type="checkbox" id="pmOutNotRequired" name="pm_out_not_required" value="1" style="width: 16px; height: 16px; accent-color: #0b044d;">
                             <span>PM Out</span>
                         </label>
                     </div>
@@ -209,11 +209,11 @@
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #0b044d;">Auto-fill from Schedule</label>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="autoFillAmOut" name="auto_fill_am_out" value="1" checked style="width: 16px; height: 16px;">
+                            <input type="checkbox" id="autoFillAmOut" name="auto_fill_am_out" value="1" checked style="width: 16px; height: 16px; accent-color: #0b044d;">
                             <span>Auto-fill AM Out with schedule default when not required</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="autoFillPmIn" name="auto_fill_pm_in" value="1" checked style="width: 16px; height: 16px;">
+                            <input type="checkbox" id="autoFillPmIn" name="auto_fill_pm_in" value="1" checked style="width: 16px; height: 16px; accent-color: #0b044d;">
                             <span>Auto-fill PM In with schedule default when not required</span>
                         </label>
                     </div>
@@ -223,11 +223,11 @@
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #0b044d;">Legacy Flag Overrides <span style="font-weight: 400; color: #9ca3af;">(optional)</span></label>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="exemptAbandoned" name="exempt_from_abandoned" value="1" style="width: 16px; height: 16px;">
+                            <input type="checkbox" id="exemptAbandoned" name="exempt_from_abandoned" value="1" style="width: 16px; height: 16px; accent-color: #0b044d;">
                             <span>Exempt from "Abandoned" flag</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="exemptIncomplete" name="exempt_from_incomplete" value="1" style="width: 16px; height: 16px;">
+                            <input type="checkbox" id="exemptIncomplete" name="exempt_from_incomplete" value="1" style="width: 16px; height: 16px; accent-color: #0b044d;">
                             <span>Exempt from "Incomplete" flag</span>
                         </label>
                     </div>
@@ -235,7 +235,7 @@
 
                 <div class="modal-row" style="display: block; margin-top: 16px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #0b044d;">Reason for Exemption</label>
-                    <textarea id="exemptionReason" name="reason" rows="3" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; font-family: inherit;" placeholder="e.g., Field worker with flexible schedule"></textarea>
+                    <textarea id="exemptionReason" name="reason" rows="3" class="form-input" style="resize: vertical;" placeholder="e.g., Field worker with flexible schedule"></textarea>
                 </div>
             </div>
             <div class="modal-footer">

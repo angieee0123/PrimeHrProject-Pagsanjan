@@ -31,9 +31,9 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     --line: #eceaf8;
     --ink: #1E2247;
     --muted: #7C839D;
-    --success: #22C55E;
-    --danger: #EF4444;
-    --warning: #F59E0B;
+    --success: #2fa860;
+    --danger: #e5484d;
+    --warning: #eba417;
     --blue: #4F7CFF;
     --purple: #7C5CFF;
     --shadow: 0 1px 3px rgba(15, 23, 42, .03), 0 1px 2px rgba(15, 23, 42, .02);
@@ -351,7 +351,6 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     background: var(--card);
     box-shadow: var(--shadow);
     margin-bottom: 18px;
-    overflow: hidden;
 }
 
 .attendance-dashboard .table-header {
@@ -437,9 +436,24 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     border-radius: 999px;
     font-size: 11px;
     font-weight: 600;
-    background: #eef4ff;
-    color: #3a5bd9;
+    background: #e3ecff;
+    color: #2547b0;
     white-space: nowrap;
+    position: relative;
+    cursor: default;
+}
+.attendance-dashboard .dept-tag[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+    background: #1a1f36; color: #fff; font-size: 11px; font-weight: 500;
+    padding: 6px 10px; border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.18); z-index: 99; pointer-events: none;
+    max-width: 240px; white-space: normal; text-align: center; line-height: 1.4;
+}
+.attendance-dashboard .dept-tag[data-tooltip]:hover::before {
+    content: '';
+    position: absolute; bottom: calc(100% + 1px); left: 50%; transform: translateX(-50%);
+    border: 5px solid transparent; border-top-color: #1a1f36; z-index: 99;
 }
 
 .attendance-dashboard .num-cell { text-align: center; font-size: 12px; font-weight: 600; }
@@ -465,9 +479,9 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     border-radius: 999px;
     transition: width .8s cubic-bezier(.22,.61,.36,1);
 }
-.attendance-dashboard .rate-fill.good { background: linear-gradient(90deg, #22c55e, #16a34a); }
-.attendance-dashboard .rate-fill.mid  { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
-.attendance-dashboard .rate-fill.low  { background: linear-gradient(90deg, #f87171, #ef4444); }
+.attendance-dashboard .rate-fill.good { background: linear-gradient(90deg, #2fa860, #23875a); }
+.attendance-dashboard .rate-fill.mid  { background: linear-gradient(90deg, #eba417, #c98a0c); }
+.attendance-dashboard .rate-fill.low  { background: linear-gradient(90deg, #e5484d, #c93a3a); }
 .attendance-dashboard .rate-pct { font-size: 11px; font-weight: 700; color: var(--ink); white-space: nowrap; min-width: 32px; text-align: right; }
 
 /* status pills */
@@ -488,8 +502,8 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     border-radius: 50%;
     background: currentColor;
 }
-.attendance-dashboard .badge-status.processed { background: #ecfdf3; color: #16a34a; }
-.attendance-dashboard .badge-status.pending   { background: #fffbeb; color: #d97706; }
+.attendance-dashboard .badge-status.processed { background: #e9f9ef; color: #23875a; }
+.attendance-dashboard .badge-status.pending   { background: #fdf3e3; color: #a6720c; }
 
 /* icon action buttons */
 .attendance-dashboard .row-actions { display: flex; align-items: center; gap: 8px; }
@@ -513,6 +527,55 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     transform: translateY(-2px);
 }
 .attendance-dashboard .act-btn.primary:hover { color: #fff; background: var(--pri); border-color: var(--pri); }
+
+/* Settings tab: primary action + icon buttons (unstyled elsewhere, scoped here) */
+.attendance-dashboard .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 16px;
+    background: var(--pri);
+    color: #fff;
+    border: 1px solid var(--pri);
+    border-radius: 9px;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(11,4,77,.18);
+    transition: background .2s cubic-bezier(.4,0,.2,1), transform .15s ease, box-shadow .2s cubic-bezier(.4,0,.2,1);
+}
+.attendance-dashboard .btn-primary:hover { background: var(--pri-2); }
+.attendance-dashboard .btn-primary:active { transform: scale(.97); }
+
+.attendance-dashboard .btn-edit,
+.attendance-dashboard .btn-delete {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 9px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .2s cubic-bezier(.4,0,.2,1), color .2s cubic-bezier(.4,0,.2,1), border-color .2s cubic-bezier(.4,0,.2,1), transform .15s ease;
+}
+.attendance-dashboard .btn-edit:hover { color: var(--pri); border-color: #cdd4ea; background: #f6f7fc; }
+.attendance-dashboard .btn-delete:hover { color: #e5484d; border-color: #f7d4d1; background: #fdedec; }
+.attendance-dashboard .btn-edit:active,
+.attendance-dashboard .btn-delete:active { transform: scale(.93); }
+
+.attendance-dashboard .exempt-pill {
+    background: #e9f9ef;
+    color: #23875a;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-weight: 600;
+}
 
 /* footer + pagination */
 .attendance-dashboard .table-footer {
@@ -644,7 +707,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
         </div>
         <p class="stat-value">{{ number_format($totalPresent) }}</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#22c55e"></span>
+            <span class="stat-dot" style="background:#2fa860"></span>
             <p class="stat-sub">Present days logged</p>
         </div>
     </div>
@@ -670,7 +733,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
         </div>
         <p class="stat-value">{{ number_format($totalAbsent) }}</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#ef4444"></span>
+            <span class="stat-dot" style="background:#e5484d"></span>
             <p class="stat-sub">Absences recorded</p>
         </div>
     </div>
@@ -683,7 +746,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
         </div>
         <p class="stat-value">{{ $totalOT }} hrs</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#f59e0b"></span>
+            <span class="stat-dot" style="background:#eba417"></span>
             <p class="stat-sub">{{ $totalLate }} late arrivals</p>
         </div>
     </div>
@@ -692,7 +755,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 {{-- ============ ATTENDANCE OVERVIEW PANEL ============ --}}
 <div class="overview-panel">
     <div class="ov-item">
-        <div class="ov-icon" style="background:#ecfdf3;color:#16a34a;">
+        <div class="ov-icon" style="background:#e9f9ef;color:#23875a;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
         <div>
@@ -702,7 +765,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
         </div>
     </div>
     <div class="ov-item">
-        <div class="ov-icon" style="background:#eef4ff;color:#4F7CFF;">
+        <div class="ov-icon" style="background:#eaf1ff;color:#4F7CFF;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
         </div>
         <div>
@@ -712,7 +775,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
         </div>
     </div>
     <div class="ov-item">
-        <div class="ov-icon" style="background:#fef2f2;color:#ef4444;">
+        <div class="ov-icon" style="background:#fdedec;color:#e5484d;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
         </div>
         <div>
@@ -722,7 +785,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
         </div>
     </div>
     <div class="ov-item">
-        <div class="ov-icon" style="background:#fff7ed;color:#f59e0b;">
+        <div class="ov-icon" style="background:#fdf3e3;color:#eba417;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><line x1="22" y1="2" x2="18" y2="6"/></svg>
         </div>
         <div>
@@ -732,7 +795,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
         </div>
     </div>
     <div class="ov-item">
-        <div class="ov-icon" style="background:#f4f1ff;color:#7C5CFF;">
+        <div class="ov-icon" style="background:#f2effd;color:#7C5CFF;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
         <div>
