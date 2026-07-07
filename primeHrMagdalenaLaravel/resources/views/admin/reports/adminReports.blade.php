@@ -88,7 +88,7 @@
             ['label' => 'Gross Payroll', 'value' => '₱128,485.00', 'sub' => '8 employees · June 16–30, 2025', 'accent' => '#0b044d', 'icon' => 'peso'],
             ['label' => 'Total Net Pay', 'value' => '₱102,788.00', 'sub' => 'After all deductions', 'accent' => '#15803d', 'icon' => 'peso'],
             ['label' => 'Total Deductions', 'value' => '₱25,697.00', 'sub' => 'GSIS, PhilHealth, Pag-IBIG, Tax', 'accent' => '#8e1e18', 'icon' => 'creditCard'],
-            ['label' => 'Processed', 'value' => '6', 'sub' => '2 pending/on-hold', 'accent' => '#d9bb00', 'icon' => 'checkCircle'],
+            ['label' => 'Processed', 'value' => '6', 'sub' => '2 pending/on-hold', 'accent' => '#c9a227', 'icon' => 'checkCircle'],
         ];
         @endphp
 
@@ -165,7 +165,7 @@
                     @endforeach
                 </tbody>
                 <tfoot>
-                    <tr style="font-weight: 700; background: #f7f6ff;">
+                    <tr style="font-weight: 700; background: #f7f6fc;">
                         <td colspan="3" style="padding: 10px 14px; font-size: 13px;">TOTAL (8 employees)</td>
                         <td class="pay-cell">₱141,485.00</td>
                         <td class="deduction">₱28,107.00</td>
@@ -207,7 +207,7 @@
                                 <div style="flex: 1; height: 6px; background: #eceaf8; border-radius: 4px; overflow: hidden;">
                                     <div style="width: 17%; height: 100%; background: #0b044d; border-radius: 4px;"></div>
                                 </div>
-                                <span style="font-size: 12px; color: #6b6a8a; min-width: 32px;">17%</span>
+                                <span style="font-size: 12px; color: #56547a; min-width: 32px;">17%</span>
                             </div>
                         </td>
                     </tr>
@@ -221,7 +221,7 @@
                                 <div style="flex: 1; height: 6px; background: #eceaf8; border-radius: 4px; overflow: hidden;">
                                     <div style="width: 15%; height: 100%; background: #0b044d; border-radius: 4px;"></div>
                                 </div>
-                                <span style="font-size: 12px; color: #6b6a8a; min-width: 32px;">15%</span>
+                                <span style="font-size: 12px; color: #56547a; min-width: 32px;">15%</span>
                             </div>
                         </td>
                     </tr>
@@ -238,7 +238,7 @@
                 <p class="table-sub">8 employees · June 16–30, 2025</p>
             </div>
         </div>
-        <p style="padding: 40px; text-align: center; color: #9999bb;">Deductions report content</p>
+        <p style="padding: 40px; text-align: center; color: #8f8daf;">Deductions report content</p>
     </section>
 
     <section class="table-section report-content" id="headcount-report" style="display: none;">
@@ -248,7 +248,7 @@
                 <p class="table-sub">8 total personnel · June 16–30, 2025</p>
             </div>
         </div>
-        <p style="padding: 40px; text-align: center; color: #9999bb;">Headcount report content</p>
+        <p style="padding: 40px; text-align: center; color: #8f8daf;">Headcount report content</p>
     </section>
 
     <section class="table-section report-content" id="recruitment-report" style="display: none;">
@@ -258,7 +258,7 @@
                 <p class="table-sub">Job postings and applicant statistics · 2025</p>
             </div>
         </div>
-        <p style="padding: 40px; text-align: center; color: #9999bb;">Recruitment report content</p>
+        <p style="padding: 40px; text-align: center; color: #8f8daf;">Recruitment report content</p>
     </section>
 
     <section class="table-section report-content" id="training-report" style="display: none;">
@@ -268,7 +268,7 @@
                 <p class="table-sub">Training programs and participation · 2025</p>
             </div>
         </div>
-        <p style="padding: 40px; text-align: center; color: #9999bb;">Training report content</p>
+        <p style="padding: 40px; text-align: center; color: #8f8daf;">Training report content</p>
     </section>
 
     <section class="table-section report-content" id="performance-report" style="display: none;">
@@ -278,7 +278,7 @@
                 <p class="table-sub">Employee performance ratings · Jan-Jun 2025</p>
             </div>
         </div>
-        <p style="padding: 40px; text-align: center; color: #9999bb;">Performance report content</p>
+        <p style="padding: 40px; text-align: center; color: #8f8daf;">Performance report content</p>
     </section>
 </div>
 
@@ -293,7 +293,7 @@
     font-size: 13px;
     font-weight: 600;
     font-family: 'Poppins', sans-serif;
-    border: 1.5px solid #e4e3f0;
+    border: 1.5px solid #ecebf6;
     background: #ffffff;
     color: #5a5888;
     transition: all 0.18s;
@@ -301,7 +301,7 @@
 
 .report-tab-btn:hover {
     border-color: #0b044d;
-    background: #f0effe;
+    background: #f2f1fb;
 }
 
 .report-tab-btn.active {
@@ -318,8 +318,8 @@
     display: flex;
     align-items: center;
     gap: 9px;
-    background: #fafafe;
-    border: 1.5px solid #e4e3f0;
+    background: #f7f6fc;
+    border: 1.5px solid #ecebf6;
     border-radius: 10px;
     transition: all 0.2s;
 }

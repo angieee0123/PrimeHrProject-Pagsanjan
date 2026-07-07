@@ -50,13 +50,13 @@
                                         $photo = $emp->photo ?? null;
                                         $initials = collect(explode(' ', trim($exemption->reference_name)))
                                             ->filter()->map(fn($p) => strtoupper(substr($p,0,1)))->take(2)->join('');
-                                        $colors = ['#0b044d','#8e1e18','#1a0f6e','#23875a','#5a0f0b','#6b3fa0'];
+                                        $colors = ['#0b044d','#8e1e18','#150c63','#15803d','#a52820','#56547a'];
                                         $color = $colors[$exemption->id % count($colors)];
                                     @endphp
                                     @if($photo)
-                                        <img src="{{ $photo }}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid #e8e7f5;flex-shrink:0">
+                                        <img src="{{ $photo }}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid #ecebf6;flex-shrink:0">
                                     @else
-                                        <div style="width:34px;height:34px;border-radius:50%;background:{{ $color }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;flex-shrink:0;border:2px solid #e8e7f5">{{ $initials }}</div>
+                                        <div style="width:34px;height:34px;border-radius:50%;background:{{ $color }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;flex-shrink:0;border:2px solid #ecebf6">{{ $initials }}</div>
                                     @endif
                                 @elseif($exemption->exemption_type === 'department')
                                     <div style="width:34px;height:34px;border-radius:10px;background:#eef2ff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -72,7 +72,7 @@
                         </td>
                         <td data-label="Effectivity" style="text-align: center; font-size: 12px; white-space: nowrap;">
                             @if($exemption->start_date || $exemption->end_date)
-                                <span style="color: #6b6a8a;">
+                                <span style="color: #56547a;">
                                     {{ $exemption->start_date ? $exemption->start_date->format('M d, Y') : 'No start' }}
                                     &rarr;
                                     {{ $exemption->end_date ? $exemption->end_date->format('M d, Y') : 'No end' }}
@@ -104,20 +104,20 @@
                             @if($exemption->exempt_from_abandoned || $exemption->exempt_from_incomplete)
                                 <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: nowrap;">
                                     @if($exemption->exempt_from_abandoned)
-                                        <span style="color: #6b6a8a;">Abandoned</span>
+                                        <span style="color: #56547a;">Abandoned</span>
                                     @endif
                                     @if($exemption->exempt_from_abandoned && $exemption->exempt_from_incomplete)
                                         <span style="color: #d1d5db;">·</span>
                                     @endif
                                     @if($exemption->exempt_from_incomplete)
-                                        <span style="color: #6b6a8a;">Incomplete</span>
+                                        <span style="color: #56547a;">Incomplete</span>
                                     @endif
                                 </div>
                             @else
                                 <span style="color: #9ca3af;">-</span>
                             @endif
                         </td>
-                        <td data-label="Reason" style="text-align: left; font-size: 13px; color: #6b6a8a;">
+                        <td data-label="Reason" style="text-align: left; font-size: 13px; color: #56547a;">
                             {{ $exemption->reason ?? 'N/A' }}
                         </td>
                         <td data-label="Created By" style="text-align: center; font-size: 13px;">

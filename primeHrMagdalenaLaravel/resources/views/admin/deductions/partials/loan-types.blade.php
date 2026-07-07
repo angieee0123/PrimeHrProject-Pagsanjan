@@ -73,14 +73,14 @@
                     data-provider="{{ $provider }}" 
                     data-status="{{ $loanType->is_active ? '1' : '0' }}">
                     <td>
-                        <span style="font-family: 'Courier New', monospace; font-size: 12px; color: #6b6a8a; background: #f7f6ff; padding: 4px 8px; border-radius: 4px;">
+                        <span style="font-family: 'Courier New', monospace; font-size: 12px; color: #56547a; background: #f7f6fc; padding: 4px 8px; border-radius: 4px;">
                             {{ $loanType->code }}
                         </span>
                     </td>
                     <td>
                         <div>
                             <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">{{ $loanType->name }}</p>
-                            <p style="color: #9999bb; margin: 0; font-size: 11px;">{{ $loanType->category }}</p>
+                            <p style="color: #8f8daf; margin: 0; font-size: 11px;">{{ $loanType->category }}</p>
                         </div>
                     </td>
                     <td>
@@ -88,7 +88,7 @@
                             $providerColors = [
                                 'GSIS' => ['bg' => '#0b044d18', 'text' => '#0b044d'],
                                 'PAG-IBIG' => ['bg' => '#15803d18', 'text' => '#15803d'],
-                                'OTHER' => ['bg' => '#6b6a8a18', 'text' => '#6b6a8a'],
+                                'OTHER' => ['bg' => '#56547a18', 'text' => '#56547a'],
                             ];
                             $providerColor = $providerColors[$provider] ?? $providerColors['OTHER'];
                         @endphp
@@ -97,29 +97,29 @@
                         </span>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #6b6a8a;">
+                        <span style="font-size: 12px; color: #56547a;">
                             {{ $loanType->max_amount ? '₱' . number_format($loanType->max_amount, 2) : 'No limit' }}
                         </span>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #6b6a8a;">
+                        <span style="font-size: 12px; color: #56547a;">
                             {{ $loanType->percentage_rate ? $loanType->percentage_rate . '%' : 'N/A' }}
                         </span>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #6b6a8a;">N/A</span>
+                        <span style="font-size: 12px; color: #56547a;">N/A</span>
                     </td>
                     <td>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-weight: 600; color: #0b044d; font-size: 14px;">{{ $employeesCount }}</span>
-                            <span style="font-size: 11px; color: #9999bb;">{{ $employeesCount == 1 ? 'employee' : 'employees' }}</span>
+                            <span style="font-size: 11px; color: #8f8daf;">{{ $employeesCount == 1 ? 'employee' : 'employees' }}</span>
                         </div>
                     </td>
                     <td>
                         @if($loanType->is_active)
                             <span class="badge" style="background: #15803d18; color: #15803d;">Active</span>
                         @else
-                            <span class="badge" style="background: #6b6a8a18; color: #6b6a8a;">Inactive</span>
+                            <span class="badge" style="background: #56547a18; color: #56547a;">Inactive</span>
                         @endif
                     </td>
                     <td>
@@ -156,7 +156,7 @@
                 </tr>
             @empty
                 <tr id="noLoanTypesRow">
-                    <td colspan="9" style="text-align: center; padding: 40px; color: #9999bb;">
+                    <td colspan="9" style="text-align: center; padding: 40px; color: #8f8daf;">
                         No loan types registered. Click "Register Loan Type" to add a new loan type.
                     </td>
                 </tr>

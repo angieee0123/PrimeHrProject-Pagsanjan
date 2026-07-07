@@ -1,7 +1,7 @@
 <!-- Assign Deduction Schedule Modal -->
 <div id="assignDeductionScheduleModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
     <div style="background:#fff; border-radius:12px; width:100%; max-width:650px; max-height:90vh; box-shadow:0 8px 32px rgba(11,4,77,0.2); overflow:hidden; display:flex; flex-direction:column;">
-        <div style="background:linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%); padding:20px 24px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="background:linear-gradient(135deg, #0b044d 0%, #150c63 100%); padding:20px 24px; display:flex; justify-content:space-between; align-items:center;">
             <div style="display:flex; align-items:center; gap:12px;">
                 <div style="width:40px; height:40px; background:rgba(255,255,255,0.12); border-radius:10px; display:flex; align-items:center; justify-content:center;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
@@ -29,12 +29,12 @@
                     </label>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
                         <div>
-                            <label style="display:block; font-size:11px; font-weight:600; color:#6b6a8a; margin-bottom:6px;">From Month</label>
-                            <input type="month" name="start_month" id="startMonth" required style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                            <label style="display:block; font-size:11px; font-weight:600; color:#56547a; margin-bottom:6px;">From Month</label>
+                            <input type="month" name="start_month" id="startMonth" required style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
                         </div>
                         <div>
-                            <label style="display:block; font-size:11px; font-weight:600; color:#6b6a8a; margin-bottom:6px;">To Month</label>
-                            <input type="month" name="end_month" id="endMonth" required style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                            <label style="display:block; font-size:11px; font-weight:600; color:#56547a; margin-bottom:6px;">To Month</label>
+                            <input type="month" name="end_month" id="endMonth" required style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
                         </div>
                     </div>
                 </div>
@@ -49,17 +49,17 @@
                             </svg>
                         </button>
                     </div>
-                    <div id="scheduleHistoryList" style="display:none; background:#f7f6ff; border:1.5px solid #e8e7f5; border-radius:8px; padding:12px; max-height:200px; overflow-y:auto;">
+                    <div id="scheduleHistoryList" style="display:none; background:#f7f6fc; border:1.5px solid #ecebf6; border-radius:8px; padding:12px; max-height:200px; overflow-y:auto;">
                         <!-- Schedule history will be loaded here -->
                     </div>
                 </div>
 
-                <div style="background:#f7f6ff; border:1.5px solid #e8e7f5; border-radius:10px; padding:16px; margin-bottom:20px;">
-                    <p style="margin:0 0 12px; font-size:11px; font-weight:700; letter-spacing:1px; color:#9999bb;">EMPLOYEE DEDUCTIONS & LOANS</p>
+                <div style="background:#f7f6fc; border:1.5px solid #ecebf6; border-radius:10px; padding:16px; margin-bottom:20px;">
+                    <p style="margin:0 0 12px; font-size:11px; font-weight:700; letter-spacing:1px; color:#8f8daf;">EMPLOYEE DEDUCTIONS & LOANS</p>
 
                     <div id="deductionsList" style="display:flex; flex-direction:column; gap:10px; max-height:400px; overflow-y:auto; padding-right:8px;">
                         <!-- Deductions will be loaded here dynamically -->
-                        <p style="margin:0; font-size:13px; color:#9999bb; text-align:center; padding:20px;">
+                        <p style="margin:0; font-size:13px; color:#8f8daf; text-align:center; padding:20px;">
                             Loading deductions...
                         </p>
                     </div>
@@ -75,20 +75,20 @@
                     </p>
                 </div>
 
-                <div style="background:#fff9e6; border:1.5px solid #ffe9a3; border-radius:10px; padding:12px; display:flex; align-items:start; gap:10px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d9bb00" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
+                <div style="background:#fbf6e3; border:1.5px solid #ecdca4; border-radius:10px; padding:12px; display:flex; align-items:start; gap:10px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="12" y1="8" x2="12" y2="12"/>
                         <line x1="12" y1="16" x2="12.01" y2="16"/>
                     </svg>
-                    <p style="margin:0; font-size:12px; color:#8b7500; line-height:1.5;">
+                    <p style="margin:0; font-size:12px; color:#c9a227; line-height:1.5;">
                         Set the period for this deduction schedule. The selected cutoff configuration will apply to all months within the specified range. You can create different schedules for different periods.
                     </p>
                 </div>
             </div>
 
-            <div style="padding:16px 24px; border-top:1px solid #f0effe; display:flex; justify-content:flex-end; gap:10px;">
-                <button type="button" onclick="closeAssignDeductionScheduleModal()" style="padding:10px 24px; background:#fff; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-weight:600; color:#6b6a8a; cursor:pointer; font-family:'Poppins',sans-serif;">
+            <div style="padding:16px 24px; border-top:1px solid #f2f1fb; display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" onclick="closeAssignDeductionScheduleModal()" style="padding:10px 24px; background:#fff; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-weight:600; color:#56547a; cursor:pointer; font-family:'Poppins',sans-serif;">
                     Cancel
                 </button>
                 <button type="submit" style="padding:10px 24px; background:#0b044d; border:none; border-radius:8px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:8px;">
@@ -105,7 +105,7 @@
 <style>
 .deduction-schedule-item {
     background: #fff;
-    border: 1.5px solid #e8e7f5;
+    border: 1.5px solid #ecebf6;
     border-radius: 8px;
     padding: 14px;
     display: flex;
@@ -132,7 +132,7 @@
 
 .deduction-details {
     font-size: 11px;
-    color: #9999bb;
+    color: #8f8daf;
     margin: 0;
 }
 
@@ -146,18 +146,18 @@
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    border: 1.5px solid #e8e7f5;
+    border: 1.5px solid #ecebf6;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
     font-size: 12px;
     font-weight: 600;
-    color: #6b6a8a;
+    color: #56547a;
 }
 
 .cutoff-radio:hover {
     border-color: #0b044d;
-    background: #f7f6ff;
+    background: #f7f6fc;
 }
 
 .cutoff-radio input[type="radio"] {
@@ -173,13 +173,13 @@
 
 .cutoff-radio:has(input[type="radio"]:checked) {
     border-color: #0b044d;
-    background: #f7f6ff;
+    background: #f7f6fc;
     color: #0b044d;
 }
 
 .schedule-history-item {
     background: #fff;
-    border: 1px solid #e8e7f5;
+    border: 1px solid #ecebf6;
     border-radius: 6px;
     padding: 10px 12px;
     margin-bottom: 8px;
@@ -197,7 +197,7 @@
 }
 
 .schedule-details {
-    color: #6b6a8a;
+    color: #56547a;
     font-size: 11px;
 }
 
@@ -233,7 +233,7 @@
 
 #deductionsList::-webkit-scrollbar-track,
 #scheduleHistoryList::-webkit-scrollbar-track {
-    background: #f7f6ff;
+    background: #f7f6fc;
     border-radius: 10px;
 }
 
@@ -261,7 +261,7 @@
     left: 0;
     right: 0;
     height: 20px;
-    background: linear-gradient(to top, #f7f6ff, transparent);
+    background: linear-gradient(to top, #f7f6fc, transparent);
     pointer-events: none;
     display: block;
 }
@@ -301,14 +301,14 @@ function closeAssignDeductionScheduleModal() {
 
 function loadEmployeeDeductions(employeeId) {
     const deductionsList = document.getElementById('deductionsList');
-    deductionsList.innerHTML = '<p style="margin:0; font-size:13px; color:#9999bb; text-align:center; padding:20px;">Loading deductions...</p>';
+    deductionsList.innerHTML = '<p style="margin:0; font-size:13px; color:#8f8daf; text-align:center; padding:20px;">Loading deductions...</p>';
 
     // Fetch employee deductions from API
     fetch(`/admin/deductions/employee/${employeeId}/deductions`)
         .then(response => response.json())
         .then(data => {
             if (!data.deductions || data.deductions.length === 0) {
-                deductionsList.innerHTML = '<p style="margin:0; font-size:13px; color:#9999bb; text-align:center; padding:20px;">No active deductions found for this employee.</p>';
+                deductionsList.innerHTML = '<p style="margin:0; font-size:13px; color:#8f8daf; text-align:center; padding:20px;">No active deductions found for this employee.</p>';
                 return;
             }
 
@@ -333,7 +333,7 @@ function loadEmployeeDeductions(employeeId) {
                         <div class="deduction-info">
                             <p class="deduction-name">${deduction.name}</p>
                             <p class="deduction-details">
-                                <span style="display:inline-block; padding:2px 8px; background:#f0effe; border-radius:4px; font-size:10px; font-weight:600; color:#0b044d; margin-right:6px;">${deduction.category}</span>
+                                <span style="display:inline-block; padding:2px 8px; background:#f2f1fb; border-radius:4px; font-size:10px; font-weight:600; color:#0b044d; margin-right:6px;">${deduction.category}</span>
                                 ${deduction.amount}
                             </p>
                         </div>

@@ -32,7 +32,7 @@
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Loan Type Code <span style="color: #8e1e18;">*</span></label>
                         <input type="text" name="code" id="loanTypeCode" class="form-input" placeholder="e.g., GSIS_HOUSING" maxlength="50" required style="text-transform: uppercase;">
-                        <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;">Unique identifier (auto-generated, can be edited)</p>
+                        <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">Unique identifier (auto-generated, can be edited)</p>
                     </div>
                     <div class="form-group" style="flex: 2;">
                         <label class="form-label">Loan Type Name <span style="color: #8e1e18;">*</span></label>
@@ -126,7 +126,7 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: 24px;
-    border-bottom: 1px solid #f0effe;
+    border-bottom: 1px solid #f2f1fb;
 }
 
 .modal-title {
@@ -138,14 +138,14 @@
 
 .modal-subtitle {
     font-size: 12px;
-    color: #6b6a8a;
+    color: #56547a;
     margin: 0;
 }
 
 .modal-close {
     background: transparent;
     border: none;
-    color: #6b6a8a;
+    color: #56547a;
     cursor: pointer;
     padding: 4px;
     display: flex;
@@ -156,7 +156,7 @@
 }
 
 .modal-close:hover {
-    background: #f7f6ff;
+    background: #f7f6fc;
     color: #0b044d;
 }
 
@@ -216,14 +216,14 @@ textarea.form-input {
     justify-content: flex-end;
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid #f0effe;
+    border-top: 1px solid #f2f1fb;
 }
 
 .btn-cancel {
     padding: 10px 20px;
     border: 1px solid #e5e3f8;
     background: #fff;
-    color: #6b6a8a;
+    color: #56547a;
     font-size: 13px;
     font-weight: 600;
     border-radius: 6px;
@@ -233,7 +233,7 @@ textarea.form-input {
 }
 
 .btn-cancel:hover {
-    background: #f7f6ff;
+    background: #f7f6fc;
     border-color: #0b044d;
     color: #0b044d;
 }
@@ -252,7 +252,7 @@ textarea.form-input {
 }
 
 .btn-submit:hover {
-    background: #1a0f6e;
+    background: #150c63;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(11, 4, 77, 0.3);
 }

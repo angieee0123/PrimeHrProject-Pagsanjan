@@ -26,7 +26,7 @@
                     </div>
                     <div>
                         <p style="font-size:13px;font-weight:700;color:#15803d;margin-bottom:2px;">Step 1 — Download Template</p>
-                        <p style="font-size:12px;color:#6b6a8a;">Use the CSV template to fill in your designation data correctly.</p>
+                        <p style="font-size:12px;color:#56547a;">Use the CSV template to fill in your designation data correctly.</p>
                     </div>
                 </div>
                 <a href="{{ route('admin.designations.template') }}" class="adm-btn-ghost" style="white-space:nowrap;text-decoration:none;display:flex;align-items:center;gap:6px;font-size:12.5px;">
@@ -43,22 +43,22 @@
                 <div class="adm-field">
                     <label>CSV File <span class="adm-req">*</span></label>
                     <div id="desig-drop-zone" style="border:2px dashed #c7c5e8;border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:border-color .2s;" onclick="document.getElementById('desig-csv-input').click()" ondragover="event.preventDefault();this.style.borderColor='#0b044d'" ondragleave="this.style.borderColor='#c7c5e8'" ondrop="handleDesigDrop(event)">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9999bb" stroke-width="2" style="margin-bottom:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8f8daf" stroke-width="2" style="margin-bottom:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                         <p style="font-size:13px;font-weight:600;color:#0b044d;margin-bottom:4px;" id="desig-drop-label">Drag & drop your CSV here</p>
-                        <p style="font-size:12px;color:#9999bb;">or click to browse · .csv files only</p>
+                        <p style="font-size:12px;color:#8f8daf;">or click to browse · .csv files only</p>
                     </div>
                     <input type="file" id="desig-csv-input" name="csv_file" accept=".csv" style="display:none;" onchange="handleDesigFileSelect(this)">
                 </div>
 
                 {{-- Column Guide --}}
-                <div style="background:#f7f6ff;border-radius:10px;padding:14px 16px;margin-top:4px;">
+                <div style="background:#f7f6fc;border-radius:10px;padding:14px 16px;margin-top:4px;">
                     <p style="font-size:11px;font-weight:700;color:#0b044d;margin-bottom:8px;letter-spacing:.4px;">EXPECTED COLUMNS</p>
                     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
                         @foreach(['title','department_code','salary_grade','monthly_rate','employment_type','description'] as $col)
-                        <div style="background:#fff;border-radius:6px;padding:6px 10px;font-size:11.5px;font-weight:600;color:#1a0f6e;border:1px solid #e8e6f8;">{{ $col }}</div>
+                        <div style="background:#fff;border-radius:6px;padding:6px 10px;font-size:11.5px;font-weight:600;color:#150c63;border:1px solid #e8e6f8;">{{ $col }}</div>
                         @endforeach
                     </div>
-                    <p style="font-size:11px;color:#9999bb;margin-top:8px;"><strong>department_code</strong> must match an existing department · employment_type: Permanent, Casual, Contractual, Job Order · monthly_rate and description are optional</p>
+                    <p style="font-size:11px;color:#8f8daf;margin-top:8px;"><strong>department_code</strong> must match an existing department · employment_type: Permanent, Casual, Contractual, Job Order · monthly_rate and description are optional</p>
                 </div>
 
                 <div class="adm-footer" style="margin-top:16px;padding:0;">

@@ -34,7 +34,7 @@
                     @endforeach
                 </select>
                 <input type="date" class="filter-select" name="start_date" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}">
-                <span style="font-size: 12px; color: #9999bb;">to</span>
+                <span style="font-size: 12px; color: #8f8daf;">to</span>
                 <input type="date" class="filter-select" name="end_date" value="{{ request('end_date', now()->endOfMonth()->format('Y-m-d')) }}">
                 <select class="filter-select" name="department">
                     <option value="">All Departments</option>
@@ -49,7 +49,7 @@
                 @if(request('employee_name') || request('department'))
                     <a href="{{ route('admin.attendance', ['tab' => 'detailed', 'start_date' => request('start_date'), 'end_date' => request('end_date')]) }}" 
                        class="btn-filter-main" 
-                       style="background: #f7f6ff; color: #0b044d; border: 1px solid #e8e7f5;">
+                       style="background: #f7f6fc; color: #0b044d; border: 1px solid #ecebf6;">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         Clear
                     </a>
@@ -377,8 +377,8 @@
     white-space: nowrap;
     border: 1px solid transparent;
 }
-#detailed-tab .dtl-stat.present { background: rgba(233,249,239,.8); color: #23875a; border-color: rgba(35,135,90,.15); }
-#detailed-tab .dtl-stat.late    { background: rgba(253,243,227,.8); color: #a6720c; border-color: rgba(166,114,12,.15); }
+#detailed-tab .dtl-stat.present { background: rgba(233,249,239,.8); color: #15803d; border-color: rgba(35,135,90,.15); }
+#detailed-tab .dtl-stat.late    { background: rgba(253,243,227,.8); color: #c9a227; border-color: rgba(166,114,12,.15); }
 #detailed-tab .dtl-stat.absent  { background: rgba(253,237,236,.8); color: #d5433c; border-color: rgba(213,67,60,.15); }
 #detailed-tab .dtl-stat.leave    { background: rgba(234,241,255,.8); color: #2547b0; border-color: rgba(37,71,176,.15); }
 #detailed-tab .dtl-stat.passslip { background: rgba(230,247,245,.8); color: #0c8377; border-color: rgba(13,148,136,.18); }

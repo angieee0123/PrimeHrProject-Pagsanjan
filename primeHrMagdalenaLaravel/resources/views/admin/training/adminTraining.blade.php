@@ -12,7 +12,7 @@
         <div class="stat-top">
             <p class="stat-label">Pending Review</p>
             <div class="stat-icon-wrap stat-icon-wrap-warning">
-                <svg width="17" height="17" fill="none" stroke="#a16207" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <svg width="17" height="17" fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
         </div>
         <p class="stat-value">{{ $stats['pending'] }}</p>
@@ -72,7 +72,7 @@
 
 {{-- HR workflow note --}}
 <div class="training-enroll-note admin-training-workflow-note">
-    <svg width="16" height="16" fill="none" stroke="#a16207" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" class="training-enroll-note-icon" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <svg width="16" height="16" fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" class="training-enroll-note-icon" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     <p class="training-enroll-note-text">Review the certificate and reference document for each submission. <strong>Approve</strong> to credit L&amp;D hours to the employee's PDS record, or <strong>Reject</strong> with a reason so they can correct and re-submit.</p>
 </div>
 
@@ -203,7 +203,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" style="text-align:center;padding:40px;color:#9999bb;">
+                    <td colspan="8" style="text-align:center;padding:40px;color:#8f8daf;">
                         No training submissions yet.
                     </td>
                 </tr>
@@ -418,13 +418,13 @@
         if (page > 1) html += '<button class="page-btn" onclick="goToPage(' + (page - 1) + ')">‹</button>';
         if (startPage > 1) {
             html += '<button class="page-btn" onclick="goToPage(1)">1</button>';
-            if (startPage > 2) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+            if (startPage > 2) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
         }
         for (let i = startPage; i <= endPage; i++) {
             html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
         }
         if (endPage < totalPages) {
-            if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+            if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
             html += '<button class="page-btn" onclick="goToPage(' + totalPages + ')">' + totalPages + '</button>';
         }
         if (page < totalPages) html += '<button class="page-btn" onclick="goToPage(' + (page + 1) + ')">›</button>';

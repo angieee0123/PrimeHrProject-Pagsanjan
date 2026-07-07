@@ -11,7 +11,7 @@
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Pass Slips</p>
-            <div class="stat-icon-wrap" style="background: #f0effe;">
+            <div class="stat-icon-wrap" style="background: #f2f1fb;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
         </div>
@@ -24,13 +24,13 @@
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Pending Approval</p>
-            <div class="stat-icon-wrap" style="background: #fefce8;">
+            <div class="stat-icon-wrap" style="background: #fbf6e3;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
         </div>
         <h2 class="stat-value">{{ $pendingSlips->total() }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #d9bb00;"></span>
+            <span class="stat-dot" style="background: #c9a227;"></span>
             <p class="stat-sub">Needs action</p>
         </div>
     </div>
@@ -108,11 +108,11 @@
     <button class="tab-btn" onclick="switchPassSlipTab('disapproved')">Disapproved</button>
 </div>
 
-@php $passSlipColors = ['#0b044d','#8e1e18','#1a0f6e','#5a0f0b','#2d1a8e','#6b3fa0']; @endphp
+@php $passSlipColors = ['#0b044d','#8e1e18','#150c63','#a52820','#150c63','#56547a']; @endphp
 
 {{-- Pending Pass Slips --}}
 <section class="table-section" id="passslip-pending-tab" style="border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; box-shadow: 0 2px 8px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.03); overflow: hidden;">
-    <div class="table-header" style="background: linear-gradient(135deg, #f0effe 0%, #fff 100%); padding: 18px 20px; border-bottom: 1px solid #e5e7eb; align-items: center;">
+    <div class="table-header" style="background: linear-gradient(135deg, #f2f1fb 0%, #fff 100%); padding: 18px 20px; border-bottom: 1px solid #e5e7eb; align-items: center;">
         <div>
             <h3 class="table-title" style="color: #111827; font-size: 15px; font-weight: 800; margin: 0 0 4px;">Pending Pass Slips</h3>
             <p class="table-sub" style="color: #667085; font-size: 12px; margin: 0;">Awaiting approval · {{ $pendingSlips->total() }} records</p>
@@ -149,7 +149,7 @@
                         </div>
                     </td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; text-align: center;">
-                        <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: {{ $slip->type === 'official_activity' ? '#f0effe' : '#fefce8' }}; color: {{ $slip->type === 'official_activity' ? '#0b044d' : '#a16207' }};">{{ $slip->type === 'official_activity' ? 'Official' : 'Personal' }}</span>
+                        <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: {{ $slip->type === 'official_activity' ? '#f2f1fb' : '#fbf6e3' }}; color: {{ $slip->type === 'official_activity' ? '#0b044d' : '#c9a227' }};">{{ $slip->type === 'official_activity' ? 'Official' : 'Personal' }}</span>
                     </td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #64748b;">{{ Str::limit($slip->reason ?? '', 40) }}</td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #111827; font-weight: 600;">{{ $slip->date ? $slip->date->format('M d, Y') : '' }}</td>
@@ -224,7 +224,7 @@
                         </div>
                     </td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; text-align: center;">
-                        <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: {{ $slip->type === 'official_activity' ? '#f0effe' : '#fefce8' }}; color: {{ $slip->type === 'official_activity' ? '#0b044d' : '#a16207' }};">{{ $slip->type === 'official_activity' ? 'Official' : 'Personal' }}</span>
+                        <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: {{ $slip->type === 'official_activity' ? '#f2f1fb' : '#fbf6e3' }}; color: {{ $slip->type === 'official_activity' ? '#0b044d' : '#c9a227' }};">{{ $slip->type === 'official_activity' ? 'Official' : 'Personal' }}</span>
                     </td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #64748b;">{{ Str::limit($slip->reason ?? '', 40) }}</td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #111827; font-weight: 600;">{{ $slip->date ? $slip->date->format('M d, Y') : '' }}</td>
@@ -373,7 +373,7 @@
 .ps-ellipsis-btn {
     background: none;
     border: none;
-    color: #9999bb;
+    color: #8f8daf;
     cursor: pointer;
     padding: 6px 10px;
     border-radius: 8px;
@@ -416,7 +416,7 @@
     gap: 8px;
 }
 .ps-action-menu button:hover {
-    background: #f0effe;
+    background: #f2f1fb;
 }
 @keyframes psSlideDown {
     from { opacity: 0; transform: translateY(-8px); }

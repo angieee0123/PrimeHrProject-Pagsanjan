@@ -92,9 +92,9 @@
                     <td>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             @if($loan->employee->photo)
-                                <img src="{{ $loan->employee->photo }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                                <img src="{{ $loan->employee->photo }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
                             @else
-                                <div class="avatar" style="background: {{ $avatarColors[($loan->employee_id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #e8e7f5;">
+                                <div class="avatar" style="background: {{ $avatarColors[($loan->employee_id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #ecebf6;">
                                     {{ getInitials($loan->employee->first_name . ' ' . $loan->employee->last_name) }}
                                 </div>
                             @endif
@@ -102,19 +102,19 @@
                                 <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">
                                     {{ $loan->employee->first_name }} {{ $loan->employee->last_name }}
                                 </p>
-                                <p style="color: #9999bb; margin: 0; font-size: 11px;">ID: {{ $loan->employee->employee_id }}</p>
+                                <p style="color: #8f8daf; margin: 0; font-size: 11px;">ID: {{ $loan->employee->employee_id }}</p>
                             </div>
                         </div>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #6b6a8a;">
+                        <span style="font-size: 12px; color: #56547a;">
                             {{ $loan->employee->employmentDetail->departmentRelation->name ?? 'N/A' }}
                         </span>
                     </td>
                     <td>
                         <div>
                             <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">{{ $loan->deductionType->name }}</p>
-                            <p style="color: #9999bb; margin: 0; font-size: 11px;">{{ $loan->deductionType->code }}</p>
+                            <p style="color: #8f8daf; margin: 0; font-size: 11px;">{{ $loan->deductionType->code }}</p>
                         </div>
                     </td>
                     <td>
@@ -122,7 +122,7 @@
                             $providerColors = [
                                 'GSIS' => ['bg' => '#0b044d18', 'text' => '#0b044d'],
                                 'Pag-IBIG' => ['bg' => '#15803d18', 'text' => '#15803d'],
-                                'Other' => ['bg' => '#6b6a8a18', 'text' => '#6b6a8a'],
+                                'Other' => ['bg' => '#56547a18', 'text' => '#56547a'],
                             ];
                             $providerColor = $providerColors[$provider] ?? $providerColors['Other'];
                         @endphp
@@ -137,11 +137,11 @@
                     </td>
                     <td>
                         <div>
-                            <p style="font-weight: 600; color: {{ $loan->remaining_balance > 0 ? '#d9bb00' : '#15803d' }}; margin: 0; font-size: 13px;">
+                            <p style="font-weight: 600; color: {{ $loan->remaining_balance > 0 ? '#c9a227' : '#15803d' }}; margin: 0; font-size: 13px;">
                                 ₱{{ number_format($loan->remaining_balance ?? 0, 2) }}
                             </p>
                             @if($loan->remaining_balance > 0)
-                                <p style="color: #9999bb; margin: 0; font-size: 11px;">
+                                <p style="color: #8f8daf; margin: 0; font-size: 11px;">
                                     {{ number_format($progress, 1) }}% paid
                                 </p>
                             @else
@@ -150,7 +150,7 @@
                         </div>
                     </td>
                     <td>
-                        <span style="font-size: 13px; color: #6b6a8a;">
+                        <span style="font-size: 13px; color: #56547a;">
                             ₱{{ number_format($loan->installment_amount ?? 0, 2) }}
                         </span>
                     </td>
@@ -159,24 +159,24 @@
                             <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">
                                 {!! $perCutoffDisplay !!}
                             </p>
-                            <p style="color: #9999bb; margin: 0; font-size: 11px;">{{ $scheduleLabel }}</p>
+                            <p style="color: #8f8daf; margin: 0; font-size: 11px;">{{ $scheduleLabel }}</p>
                         </div>
                     </td>
                     <td style="min-width: 120px;">
                         <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <div style="width: 100%; height: 6px; background: #f0effe; border-radius: 3px; overflow: hidden;">
+                            <div style="width: 100%; height: 6px; background: #f2f1fb; border-radius: 3px; overflow: hidden;">
                                 <div style="width: {{ $progress }}%; height: 100%; background: {{ $progress >= 100 ? '#15803d' : '#0b044d' }}; transition: width 0.3s;"></div>
                             </div>
-                            <span style="font-size: 11px; color: #6b6a8a;">{{ number_format($progress, 1) }}%</span>
+                            <span style="font-size: 11px; color: #56547a;">{{ number_format($progress, 1) }}%</span>
                         </div>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #6b6a8a;">
+                        <span style="font-size: 12px; color: #56547a;">
                             {{ \Carbon\Carbon::parse($loan->start_date)->format('M d, Y') }}
                         </span>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #6b6a8a;">
+                        <span style="font-size: 12px; color: #56547a;">
                             {{ $loan->end_date ? \Carbon\Carbon::parse($loan->end_date)->format('M d, Y') : 'Ongoing' }}
                         </span>
                     </td>
@@ -184,8 +184,8 @@
                         @php
                             $statusColors = [
                                 'ACTIVE' => ['bg' => '#15803d18', 'text' => '#15803d'],
-                                'SUSPENDED' => ['bg' => '#d9bb0018', 'text' => '#d9bb00'],
-                                'COMPLETED' => ['bg' => '#6b6a8a18', 'text' => '#6b6a8a'],
+                                'SUSPENDED' => ['bg' => '#c9a22718', 'text' => '#c9a227'],
+                                'COMPLETED' => ['bg' => '#56547a18', 'text' => '#56547a'],
                             ];
                             $statusColor = $statusColors[$loan->status] ?? $statusColors['ACTIVE'];
                         @endphp
@@ -218,7 +218,7 @@
                 </tr>
             @empty
                 <tr id="noLoansRow">
-                    <td colspan="13" style="text-align: center; padding: 40px; color: #9999bb;">
+                    <td colspan="13" style="text-align: center; padding: 40px; color: #8f8daf;">
                         No loans found. Click "Add Loan" to create a new loan.
                     </td>
                 </tr>
@@ -308,13 +308,13 @@ window.updateLoanPagination = function () {
     if (page > 1) html += '<button class="page-btn" onclick="goToLoanPage(' + (page - 1) + ')">‹</button>';
     if (startPage > 1) {
         html += '<button class="page-btn" onclick="goToLoanPage(1)">1</button>';
-        if (startPage > 2) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+        if (startPage > 2) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
     }
     for (let i = startPage; i <= endPage; i++) {
         html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToLoanPage(' + i + ')">' + i + '</button>';
     }
     if (endPage < totalPages) {
-        if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+        if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
         html += '<button class="page-btn" onclick="goToLoanPage(' + totalPages + ')">' + totalPages + '</button>';
     }
     if (page < totalPages) html += '<button class="page-btn" onclick="goToLoanPage(' + (page + 1) + ')">›</button>';

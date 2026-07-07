@@ -1,5 +1,5 @@
 @php
-$avatarColors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
+$avatarColors = ['#0b044d', '#8e1e18', '#150c63', '#a52820', '#150c63', '#56547a'];
 function getInitials($name) {
     $parts = explode(' ', $name);
     $initials = '';
@@ -105,9 +105,9 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
                 <td>
                     <div class="emp-cell">
                         @if($record['photo'] ?? false)
-                            <img src="{{ $record['photo'] }}" alt="{{ $record['name'] }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                            <img src="{{ $record['photo'] }}" alt="{{ $record['name'] }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
                         @else
-                            <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">
+                            <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #ecebf6;">
                                 {{ getInitials($record['name']) }}
                             </div>
                         @endif
@@ -192,7 +192,7 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
             </button>
         </div>
         <div class="vdm-body" style="padding: 24px;" id="deductionsModalBody"></div>
-        <div class="adm-footer" style="background: #fafafe;">
+        <div class="adm-footer" style="background: #f7f6fc;">
             <button class="adm-btn-primary" onclick="closeDeductionsModal()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 Got it
@@ -299,7 +299,7 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
 .adm-close {
     background: none;
     border: none;
-    color: #9999bb;
+    color: #8f8daf;
     cursor: pointer;
     padding: 0;
     width: 30px;
@@ -323,7 +323,7 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
 .vdm-section-label {
     font-size: 11px;
     font-weight: 700;
-    color: #9999bb;
+    color: #8f8daf;
     letter-spacing: 0.8px;
     margin-bottom: 16px;
     display: flex;
@@ -345,7 +345,7 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
     align-items: center;
     padding: 14px 18px;
     background: #ffffff;
-    border: 1px solid #f0effe;
+    border: 1px solid #f2f1fb;
     border-radius: 10px;
     margin-bottom: 10px;
     transition: all 0.2s;
@@ -392,8 +392,8 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
 .adm-btn-ghost {
     padding: 8px 20px;
     background: transparent;
-    color: #6b6a8a;
-    border: 1px solid #e8e7f5;
+    color: #56547a;
+    border: 1px solid #ecebf6;
     border-radius: 6px;
     font-size: 13px;
     font-weight: 600;
@@ -403,14 +403,14 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
 }
 
 .adm-btn-ghost:hover {
-    background: #f7f6ff;
+    background: #f7f6fc;
     color: #0b044d;
     border-color: #d0c9ff;
 }
 
 .adm-btn-primary {
     padding: 10px 24px;
-    background: linear-gradient(135deg, #0b044d, #2d1a8e);
+    background: linear-gradient(135deg, #0b044d, #150c63);
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -490,11 +490,11 @@ function showDeductionsModal(index) {
     });
     
     if (deductions.length === 0) {
-        html = '<div style="text-align: center; padding: 40px 20px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d0c9ff" stroke-width="1.5" style="margin-bottom: 12px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p style="color: #9999bb; font-size: 14px; margin: 0;">No deductions found</p></div>';
+        html = '<div style="text-align: center; padding: 40px 20px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d0c9ff" stroke-width="1.5" style="margin-bottom: 12px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p style="color: #8f8daf; font-size: 14px; margin: 0;">No deductions found</p></div>';
     } else {
         // Add total row
         html += `
-            <div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid #f0effe;">
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid #f2f1fb;">
                 <div class="vdm-row" style="background: linear-gradient(135deg, #fef8f8, #fff); border: 2px solid #fdd;">
                     <span class="vdm-row-label" style="font-weight: 700; color: #0b044d !important;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e1e18" stroke-width="2.5">

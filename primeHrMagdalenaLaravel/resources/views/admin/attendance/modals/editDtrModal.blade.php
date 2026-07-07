@@ -92,6 +92,6 @@
     font-size: 9.5px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase;
     padding: 3px 9px; border-radius: 999px; white-space: nowrap; flex-shrink: 0;
 }
-.eps-badge.official { background: #e9f9ef; color: #23875a; }
-.eps-badge.personal { background: #fdf3e3; color: #a6720c; }
+.eps-badge.official { background: #e9f9ef; color: #15803d; }
+.eps-badge.personal { background: #fbf6e3; color: #c9a227; }
 </style>

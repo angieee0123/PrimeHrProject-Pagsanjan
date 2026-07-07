@@ -50,7 +50,7 @@
                     </thead>
                     <tbody id="payrollTableBody">
                         <tr>
-                            <td colspan="14" style="text-align: center; padding: 40px; color: #9999bb;">
+                            <td colspan="14" style="text-align: center; padding: 40px; color: #8f8daf;">
                                 Loading payroll data...
                             </td>
                         </tr>
@@ -111,7 +111,7 @@
 
 .modal-header {
     padding: 20px 24px;
-    border-bottom: 1px solid #e8e7f5;
+    border-bottom: 1px solid #ecebf6;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -128,7 +128,7 @@
     width: 32px;
     height: 32px;
     border: none;
-    background: #f7f6ff;
+    background: #f7f6fc;
     color: #0b044d;
     font-size: 24px;
     border-radius: 6px;
@@ -140,7 +140,7 @@
 }
 
 .modal-close:hover {
-    background: #e8e7f5;
+    background: #ecebf6;
 }
 
 .modal-body {
@@ -150,7 +150,7 @@
 
 .modal-footer {
     padding: 16px 24px;
-    border-top: 1px solid #e8e7f5;
+    border-top: 1px solid #ecebf6;
     display: flex;
     gap: 12px;
     justify-content: flex-end;
@@ -160,9 +160,9 @@
     display: flex;
     gap: 24px;
     padding: 16px 20px;
-    background: #f7f6ff;
+    background: #f7f6fc;
     border-radius: 8px;
-    border: 1px solid #e8e7f5;
+    border: 1px solid #ecebf6;
 }
 
 .info-item {
@@ -173,7 +173,7 @@
 
 .info-label {
     font-size: 12px;
-    color: #6b6a8a;
+    color: #56547a;
     font-weight: 500;
 }
 
@@ -201,22 +201,22 @@
     padding: 10px 8px;
     text-align: center;
     font-weight: 600;
-    border: 1px solid #1a0f6e;
+    border: 1px solid #150c63;
     font-size: 11px;
 }
 
 .payroll-summary-table td {
     padding: 8px;
-    border: 1px solid #e8e7f5;
+    border: 1px solid #ecebf6;
     font-size: 12px;
 }
 
 .payroll-summary-table tbody tr:hover {
-    background: #f7f6ff;
+    background: #f7f6fc;
 }
 
 .payroll-summary-table .total-row {
-    background: #f7f6ff;
+    background: #f7f6fc;
     font-weight: 700;
 }
 
@@ -488,7 +488,7 @@ function proceedSavePayroll() {
 <!-- Confirm Payroll Modal -->
 <div id="confirmPayrollModal" class="adm-overlay" onclick="closeConfirmPayrollModal()">
     <div class="adm-box" style="max-width:480px;" onclick="event.stopPropagation()">
-        <div class="adm-header" style="background: linear-gradient(135deg, #d9bb00, #fbbf24); border-bottom: none;">
+        <div class="adm-header" style="background: linear-gradient(135deg, #c9a227, #fbbf24); border-bottom: none;">
             <div class="adm-header-left">
                 <div class="vdm-avatar" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
@@ -516,7 +516,7 @@ function proceedSavePayroll() {
                     </svg>
                 </div>
                 <h4 style="font-size: 17px; font-weight: 600; color: #0b044d; margin: 0 0 12px 0;">Are you sure you want to save this payroll?</h4>
-                <p style="font-size: 13.5px; color: #6b6a8a; line-height: 1.6; margin: 0;">This will create salary computation records for all employees in the selected period. This action cannot be undone.</p>
+                <p style="font-size: 13.5px; color: #56547a; line-height: 1.6; margin: 0;">This will create salary computation records for all employees in the selected period. This action cannot be undone.</p>
             </div>
             <div style="background: #fef9f3; border: 1px solid #fed7aa; border-radius: 10px; padding: 16px;">
                 <div style="display: flex; align-items: flex-start; gap: 12px;">
@@ -536,7 +536,7 @@ function proceedSavePayroll() {
                 </div>
             </div>
         </div>
-        <div class="adm-footer" style="background: #fafafe; padding: 20px 24px;">
+        <div class="adm-footer" style="background: #f7f6fc; padding: 20px 24px;">
             <button class="adm-btn-ghost" onclick="closeConfirmPayrollModal()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 Cancel
@@ -626,7 +626,7 @@ function proceedSavePayroll() {
 .adm-close {
     background: none;
     border: none;
-    color: #9999bb;
+    color: #8f8daf;
     cursor: pointer;
     padding: 0;
     width: 30px;
@@ -658,8 +658,8 @@ function proceedSavePayroll() {
 .adm-btn-ghost {
     padding: 10px 20px;
     background: transparent;
-    color: #6b6a8a;
-    border: 1px solid #e8e7f5;
+    color: #56547a;
+    border: 1px solid #ecebf6;
     border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
@@ -672,14 +672,14 @@ function proceedSavePayroll() {
 }
 
 .adm-btn-ghost:hover {
-    background: #f7f6ff;
+    background: #f7f6fc;
     color: #0b044d;
     border-color: #d0c9ff;
 }
 
 .adm-btn-primary {
     padding: 10px 24px;
-    background: linear-gradient(135deg, #0b044d, #2d1a8e);
+    background: linear-gradient(135deg, #0b044d, #150c63);
     color: #fff;
     border: none;
     border-radius: 8px;

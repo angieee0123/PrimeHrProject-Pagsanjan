@@ -53,21 +53,21 @@
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label" id="amountLabel">Credit Amount (Days) <span style="color: #8e1e18;">*</span></label>
                         <input type="number" name="amount" class="form-input" step="0.000001" min="0.000001" placeholder="e.g., 5.125000 or 0.083333" required onchange="calculateNewBalance()">
-                        <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;" id="amountHint">Number of days to add (up to 6 decimals, e.g., 0.125000 = 1 hour)</p>
+                        <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;" id="amountHint">Number of days to add (up to 6 decimals, e.g., 0.125000 = 1 hour)</p>
                     </div>
 
                     <!-- Transaction Date -->
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Transaction Date <span style="color: #8e1e18;">*</span></label>
                         <input type="date" name="transaction_date" class="form-input" value="{{ date('Y-m-d') }}" required>
-                        <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;">Date of adjustment</p>
+                        <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">Date of adjustment</p>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Reason / Remarks <span style="color: #8e1e18;">*</span></label>
                     <textarea name="remarks" class="form-input" rows="3" placeholder="e.g., Manual adjustment for service award, correction of previous error, etc." required></textarea>
-                    <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;">Explain why this manual adjustment is being made</p>
+                    <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">Explain why this manual adjustment is being made</p>
                 </div>
 
                 <!-- Preview Box -->

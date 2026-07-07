@@ -1,5 +1,5 @@
 <section class="table-section" id="leave-tab" style="display: block; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .03); overflow: hidden;">
-    <div class="table-header" style="background: linear-gradient(135deg, #f0effe 0%, #fff 100%); padding: 18px 20px; border-bottom: 1px solid #e5e7eb; align-items: center;">
+    <div class="table-header" style="background: linear-gradient(135deg, #f2f1fb 0%, #fff 100%); padding: 18px 20px; border-bottom: 1px solid #e5e7eb; align-items: center;">
         <div>
             <h3 class="table-title" style="color: #111827; font-size: 15px; font-weight: 800; margin: 0 0 4px;">Leave Requests — {{ now()->format('F Y') }}</h3>
             <p class="table-sub" style="color: #667085; font-size: 12px; margin: 0;">Municipal Government of Pagsanjan · <span id="leaveRequestCount">{{ $leaveApplications->count() }}</span> records</p>
@@ -91,7 +91,7 @@
                     </td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
                         <div style="position: relative; display: flex; justify-content: center;">
-                            <button class="action-ellipsis-btn" onclick="toggleLeaveActionMenu(event, this)" title="Actions" style="background: none; border: none; color: #9999bb; cursor: pointer; padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0b044d'" onmouseout="this.style.background='none'; this.style.color='#9999bb'">
+                            <button class="action-ellipsis-btn" onclick="toggleLeaveActionMenu(event, this)" title="Actions" style="background: none; border: none; color: #8f8daf; cursor: pointer; padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0b044d'" onmouseout="this.style.background='none'; this.style.color='#8f8daf'">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                             </button>
                             <div class="leave-action-menu" style="display: none; position: absolute; right: 0; top: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15); z-index: 100; min-width: 160px; margin-top: 6px; overflow: hidden;">
@@ -108,7 +108,7 @@
                                     '{{ $application->application_number }}',
                                     '{{ $application->attachment_path ? asset('storage/' . $application->attachment_path) : '' }}',
                                     '{{ addslashes($application->approver_remarks ?? '') }}'
-                                )" style="width: 100%; padding: 11px 14px; border: none; background: none; text-align: left; font-size: 12px; color: #0b044d; font-weight: 600; cursor: pointer; transition: all 0.2s; border-radius: 0;" onmouseover="this.style.background='#f0effe'" onmouseout="this.style.background='none'">
+                                )" style="width: 100%; padding: 11px 14px; border: none; background: none; text-align: left; font-size: 12px; color: #0b044d; font-weight: 600; cursor: pointer; transition: all 0.2s; border-radius: 0;" onmouseover="this.style.background='#f2f1fb'" onmouseout="this.style.background='none'">
                                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display: inline; margin-right: 8px; vertical-align: middle;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                     View Details
                                 </button>
@@ -146,7 +146,7 @@
     <div class="table-footer" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-top: 1px solid #eef2f6; background: #f8fafc;">
         <div style="display: flex; align-items: center; gap: 12px;">
             <p id="leaveRequestFooter" style="margin: 0; font-size: 12px; color: #64748b; font-weight: 500;">Showing <strong style="color: #0b044d; font-weight: 700;" id="leaveRequestRowStart">1</strong>-<strong style="color: #0b044d; font-weight: 700;" id="leaveRequestRowEnd">{{ min(10, $leaveApplications->count()) }}</strong> of <strong style="color: #0b044d; font-weight: 700;" id="leaveRequestRowTotal">{{ $leaveApplications->count() }}</strong> records</p>
-            <select id="leaveRequestRowsPerPage" onchange="changeLeaveRequestRowsPerPage()" style="width: auto; padding: 6px 10px; font-size: 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; color: #344054; font-weight: 600; cursor: pointer;">
+            <select id="leaveRequestRowsPerPage" onchange="changeLeaveRequestRowsPerPage()" style="width: auto; padding: 6px 10px; font-size: 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; color: #56547a; font-weight: 600; cursor: pointer;">
                 <option value="10">10 rows</option>
                 <option value="25">25 rows</option>
                 <option value="50">50 rows</option>
@@ -250,14 +250,14 @@ function renderLeaveRequestPagination() {
     const paginationControls = document.getElementById('leaveRequestPaginationControls');
     let html = '';
 
-    html += `<button class="page-btn" ${leaveRequestCurrentPage === 1 ? 'disabled' : ''} onclick="changeLeaveRequestPage(${leaveRequestCurrentPage - 1})" style="padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; color: #344054; font-size: 12px; font-weight: 600; cursor: ${leaveRequestCurrentPage === 1 ? 'not-allowed' : 'pointer'}; transition: all 0.2s; ${leaveRequestCurrentPage === 1 ? 'opacity: 0.5;' : ''}">‹</button>`;
+    html += `<button class="page-btn" ${leaveRequestCurrentPage === 1 ? 'disabled' : ''} onclick="changeLeaveRequestPage(${leaveRequestCurrentPage - 1})" style="padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; color: #56547a; font-size: 12px; font-weight: 600; cursor: ${leaveRequestCurrentPage === 1 ? 'not-allowed' : 'pointer'}; transition: all 0.2s; ${leaveRequestCurrentPage === 1 ? 'opacity: 0.5;' : ''}">‹</button>`;
 
     for (let i = 1; i <= totalPages; i++) {
         const isActive = i === leaveRequestCurrentPage;
-        html += `<button class="page-btn ${isActive ? 'active' : ''}" onclick="changeLeaveRequestPage(${i})" style="padding: 6px 12px; border: 1px solid ${isActive ? '#0b044d' : '#e5e7eb'}; border-radius: 6px; background: ${isActive ? '#0b044d' : '#fff'}; color: ${isActive ? '#fff' : '#344054'}; font-size: 12px; font-weight: ${isActive ? '700' : '600'}; cursor: pointer; transition: all 0.2s; ${isActive ? 'box-shadow: 0 2px 4px rgba(11, 4, 77, 0.15);' : ''}" ${isActive ? '' : 'onmouseover="this.style.borderColor=\'#d1d5db\'; this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.05)\'" onmouseout="this.style.borderColor=\'#e5e7eb\'; this.style.boxShadow=\'none\'"'}>${i}</button>`;
+        html += `<button class="page-btn ${isActive ? 'active' : ''}" onclick="changeLeaveRequestPage(${i})" style="padding: 6px 12px; border: 1px solid ${isActive ? '#0b044d' : '#e5e7eb'}; border-radius: 6px; background: ${isActive ? '#0b044d' : '#fff'}; color: ${isActive ? '#fff' : '#56547a'}; font-size: 12px; font-weight: ${isActive ? '700' : '600'}; cursor: pointer; transition: all 0.2s; ${isActive ? 'box-shadow: 0 2px 4px rgba(11, 4, 77, 0.15);' : ''}" ${isActive ? '' : 'onmouseover="this.style.borderColor=\'#d1d5db\'; this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.05)\'" onmouseout="this.style.borderColor=\'#e5e7eb\'; this.style.boxShadow=\'none\'"'}>${i}</button>`;
     }
 
-    html += `<button class="page-btn" ${leaveRequestCurrentPage === totalPages ? 'disabled' : ''} onclick="changeLeaveRequestPage(${leaveRequestCurrentPage + 1})" style="padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; color: #344054; font-size: 12px; font-weight: 600; cursor: ${leaveRequestCurrentPage === totalPages ? 'not-allowed' : 'pointer'}; transition: all 0.2s; ${leaveRequestCurrentPage === totalPages ? 'opacity: 0.5;' : ''}">›</button>`;
+    html += `<button class="page-btn" ${leaveRequestCurrentPage === totalPages ? 'disabled' : ''} onclick="changeLeaveRequestPage(${leaveRequestCurrentPage + 1})" style="padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; color: #56547a; font-size: 12px; font-weight: 600; cursor: ${leaveRequestCurrentPage === totalPages ? 'not-allowed' : 'pointer'}; transition: all 0.2s; ${leaveRequestCurrentPage === totalPages ? 'opacity: 0.5;' : ''}">›</button>`;
 
     paginationControls.innerHTML = html;
 }
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', function() {
 .action-ellipsis-btn {
     background: none;
     border: none;
-    color: #9999bb;
+    color: #8f8daf;
     cursor: pointer;
     padding: 6px 10px;
     border-radius: 8px;
@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .table-section:hover {
-    border-color: #cfd4dc !important;
+    border-color: #ecebf6 !important;
     box-shadow: 0 4px 12px rgba(15, 23, 42, .08), 0 2px 4px rgba(15, 23, 42, .06) !important;
 }
 </style>

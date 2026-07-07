@@ -88,7 +88,7 @@
                     </div>
                     <div class="form-group" style="flex: 1;" id="loanProviderDisplay">
                         <label class="form-label">Provider</label>
-                        <input type="text" id="providerName" class="form-input" readonly placeholder="Select loan type first" style="background: #f7f6ff; cursor: not-allowed;">
+                        <input type="text" id="providerName" class="form-input" readonly placeholder="Select loan type first" style="background: #f7f6fc; cursor: not-allowed;">
                     </div>
                 </div>
 
@@ -107,7 +107,7 @@
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Total Loan Amount <span style="color: #8e1e18;">*</span></label>
                         <input type="number" name="total_amount" id="loanTotalAmount" class="form-input" placeholder="e.g., 50000.00" step="0.01" min="0" required onchange="calculateLoanInstallment()">
-                        <p id="maxAmountHint" style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0; display: none;"></p>
+                        <p id="maxAmountHint" style="font-size: 11px; color: #56547a; margin: 4px 0 0 0; display: none;"></p>
                     </div>
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Monthly Installment <span style="color: #8e1e18;">*</span></label>
@@ -185,7 +185,7 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: 24px;
-    border-bottom: 1px solid #f0effe;
+    border-bottom: 1px solid #f2f1fb;
 }
 
 .modal-title {
@@ -197,14 +197,14 @@
 
 .modal-subtitle {
     font-size: 12px;
-    color: #6b6a8a;
+    color: #56547a;
     margin: 0;
 }
 
 .modal-close {
     background: transparent;
     border: none;
-    color: #6b6a8a;
+    color: #56547a;
     cursor: pointer;
     padding: 4px;
     display: flex;
@@ -215,7 +215,7 @@
 }
 
 .modal-close:hover {
-    background: #f7f6ff;
+    background: #f7f6fc;
     color: #0b044d;
 }
 
@@ -275,14 +275,14 @@ textarea.form-input {
     justify-content: flex-end;
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid #f0effe;
+    border-top: 1px solid #f2f1fb;
 }
 
 .btn-cancel {
     padding: 10px 20px;
     border: 1px solid #e5e3f8;
     background: #fff;
-    color: #6b6a8a;
+    color: #56547a;
     font-size: 13px;
     font-weight: 600;
     border-radius: 6px;
@@ -292,7 +292,7 @@ textarea.form-input {
 }
 
 .btn-cancel:hover {
-    background: #f7f6ff;
+    background: #f7f6fc;
     border-color: #0b044d;
     color: #0b044d;
 }
@@ -311,7 +311,7 @@ textarea.form-input {
 }
 
 .btn-submit:hover {
-    background: #1a0f6e;
+    background: #150c63;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(11, 4, 77, 0.3);
 }

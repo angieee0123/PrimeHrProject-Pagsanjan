@@ -9,7 +9,7 @@
                     </svg>
                 </div>
                 <h3 class="modal-title" style="color: #15803d; margin-bottom: 8px;">Success!</h3>
-                <p class="modal-sub" id="successMessage" style="color: #6b6a8a;">Leave type registered successfully!</p>
+                <p class="modal-sub" id="successMessage" style="color: #56547a;">Leave type registered successfully!</p>
             </div>
             <button type="button" class="modal-close" onclick="closeSuccessModal()" style="position: absolute; top: 20px; right: 20px;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">

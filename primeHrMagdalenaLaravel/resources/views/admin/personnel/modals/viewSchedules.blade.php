@@ -1,7 +1,7 @@
 <!-- View Employee Schedules Modal -->
 <div id="viewSchedulesModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; overflow-y:auto;">
     <div style="background:#fff; border-radius:12px; width:100%; max-width:900px; margin:20px; box-shadow:0 8px 32px rgba(11,4,77,0.2); max-height:90vh; display:flex; flex-direction:column;">
-        <div style="background:linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%); padding:20px 24px; border-radius:12px 12px 0 0; display:flex; justify-content:space-between; align-items:center;">
+        <div style="background:linear-gradient(135deg, #0b044d 0%, #150c63 100%); padding:20px 24px; border-radius:12px 12px 0 0; display:flex; justify-content:space-between; align-items:center;">
             <div style="display:flex; align-items:center; gap:12px;">
                 <div style="width:40px; height:40px; background:rgba(255,255,255,0.12); border-radius:10px; display:flex; align-items:center; justify-content:center;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
@@ -25,8 +25,8 @@
             </div>
         </div>
 
-        <div style="padding:16px 24px; border-top:1px solid #f0effe; display:flex; justify-content:flex-end; gap:10px;">
-            <button onclick="closeViewSchedulesModal()" style="padding:10px 24px; background:#fff; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-weight:600; color:#6b6a8a; cursor:pointer; font-family:'Poppins',sans-serif;">
+        <div style="padding:16px 24px; border-top:1px solid #f2f1fb; display:flex; justify-content:flex-end; gap:10px;">
+            <button onclick="closeViewSchedulesModal()" style="padding:10px 24px; background:#fff; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-weight:600; color:#56547a; cursor:pointer; font-family:'Poppins',sans-serif;">
                 Close
             </button>
             <button onclick="openAddScheduleFromView()" style="padding:10px 24px; background:#0b044d; border:none; border-radius:8px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:8px;">
@@ -73,7 +73,7 @@ function displaySchedules(schedules) {
     
     if (schedules.length === 0) {
         container.innerHTML = `
-            <div style="text-align:center; padding:40px; color:#6b6a8a;">
+            <div style="text-align:center; padding:40px; color:#56547a;">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 16px; opacity:0.3;">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                     <line x1="16" y1="2" x2="16" y2="6"/>
@@ -103,14 +103,14 @@ function displaySchedules(schedules) {
             statusColor = '#15803d';
         } else if (isFuture) {
             statusBadge = 'Upcoming';
-            statusColor = '#d9bb00';
+            statusColor = '#c9a227';
         } else {
             statusBadge = 'Expired';
-            statusColor = '#6b6a8a';
+            statusColor = '#56547a';
         }
         
         html += `
-            <div style="background:${isActive ? '#f0fdf4' : '#f7f6ff'}; border:1.5px solid ${isActive ? '#bbf7d0' : '#e8e7f5'}; border-radius:10px; padding:16px; margin-bottom:12px;">
+            <div style="background:${isActive ? '#f0fdf4' : '#f7f6fc'}; border:1.5px solid ${isActive ? '#bbf7d0' : '#ecebf6'}; border-radius:10px; padding:16px; margin-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:12px;">
                     <div style="flex:1;">
                         <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
@@ -118,12 +118,12 @@ function displaySchedules(schedules) {
                                 ${statusBadge}
                             </span>
                         </div>
-                        <p style="margin:0; font-size:13px; color:#6b6a8a;">
+                        <p style="margin:0; font-size:13px; color:#56547a;">
                             <strong style="color:#0b044d;">${formatDate(schedule.start_date)}</strong> to <strong style="color:#0b044d;">${formatDate(schedule.end_date)}</strong>
                         </p>
                     </div>
                     <div style="display:flex; gap:6px;">
-                        <button onclick="editSchedule(${schedule.id})" style="padding:6px 12px; background:#fff; border:1.5px solid #e8e7f5; border-radius:6px; font-size:12px; font-weight:600; color:#0b044d; cursor:pointer; font-family:'Poppins',sans-serif;">
+                        <button onclick="editSchedule(${schedule.id})" style="padding:6px 12px; background:#fff; border:1.5px solid #ecebf6; border-radius:6px; font-size:12px; font-weight:600; color:#0b044d; cursor:pointer; font-family:'Poppins',sans-serif;">
                             Edit
                         </button>
                         <button onclick="confirmDeleteSchedule(${schedule.id}, '${formatDate(schedule.start_date)}', '${formatDate(schedule.end_date)}')" style="padding:6px 12px; background:#fee8e8; border:1.5px solid #f5d0ce; border-radius:6px; font-size:12px; font-weight:600; color:#8e1e18; cursor:pointer; font-family:'Poppins',sans-serif;">
@@ -134,28 +134,28 @@ function displaySchedules(schedules) {
                 
                 <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px;">
                     <div style="background:#fff; border-radius:8px; padding:12px;">
-                        <p style="margin:0 0 8px; font-size:10px; font-weight:700; letter-spacing:1px; color:#9999bb;">MORNING SHIFT</p>
+                        <p style="margin:0 0 8px; font-size:10px; font-weight:700; letter-spacing:1px; color:#8f8daf;">MORNING SHIFT</p>
                         <div style="display:flex; gap:12px;">
                             <div style="flex:1;">
-                                <p style="margin:0 0 4px; font-size:11px; color:#6b6a8a;">Time In</p>
+                                <p style="margin:0 0 4px; font-size:11px; color:#56547a;">Time In</p>
                                 <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${formatTime12h(schedule.am_in)}</p>
                             </div>
                             <div style="flex:1;">
-                                <p style="margin:0 0 4px; font-size:11px; color:#6b6a8a;">Time Out</p>
+                                <p style="margin:0 0 4px; font-size:11px; color:#56547a;">Time Out</p>
                                 <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${formatTime12h(schedule.am_out)}</p>
                             </div>
                         </div>
                     </div>
                     
                     <div style="background:#fff; border-radius:8px; padding:12px;">
-                        <p style="margin:0 0 8px; font-size:10px; font-weight:700; letter-spacing:1px; color:#9999bb;">AFTERNOON SHIFT</p>
+                        <p style="margin:0 0 8px; font-size:10px; font-weight:700; letter-spacing:1px; color:#8f8daf;">AFTERNOON SHIFT</p>
                         <div style="display:flex; gap:12px;">
                             <div style="flex:1;">
-                                <p style="margin:0 0 4px; font-size:11px; color:#6b6a8a;">Time In</p>
+                                <p style="margin:0 0 4px; font-size:11px; color:#56547a;">Time In</p>
                                 <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${formatTime12h(schedule.pm_in)}</p>
                             </div>
                             <div style="flex:1;">
-                                <p style="margin:0 0 4px; font-size:11px; color:#6b6a8a;">Time Out</p>
+                                <p style="margin:0 0 4px; font-size:11px; color:#56547a;">Time Out</p>
                                 <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${formatTime12h(schedule.pm_out)}</p>
                             </div>
                         </div>

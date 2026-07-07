@@ -24,9 +24,9 @@
                     <td>
                         <div class="emp-cell">
                             @if(isset($benefit['photo']) && $benefit['photo'])
-                                <img src="{{ $benefit['photo'] }}" alt="{{ $benefit['name'] }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                                <img src="{{ $benefit['photo'] }}" alt="{{ $benefit['name'] }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
                             @else
-                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">
+                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #ecebf6;">
                                     {{ getInitials($benefit['name']) }}
                                 </div>
                             @endif
@@ -41,7 +41,7 @@
                     <td class="deduction">{{ $benefit['pagibig'] }}</td>
                     <td>
                         <div style="display: flex; align-items: center; gap: 6px;">
-                            <div style="flex: 1; height: 6px; background: #f0effe; border-radius: 3px; min-width: 50px;">
+                            <div style="flex: 1; height: 6px; background: #f2f1fb; border-radius: 3px; min-width: 50px;">
                                 <div style="width: {{ ($benefit['vlBalance'] / 15) * 100 }}%; height: 100%; background: #0b044d; border-radius: 3px;"></div>
                             </div>
                             <span style="font-size: 12px; font-weight: 600; color: #0b044d;">{{ $benefit['vlBalance'] }} days</span>
@@ -49,7 +49,7 @@
                     </td>
                     <td>
                         <div style="display: flex; align-items: center; gap: 6px;">
-                            <div style="flex: 1; height: 6px; background: #f0effe; border-radius: 3px; min-width: 50px;">
+                            <div style="flex: 1; height: 6px; background: #f2f1fb; border-radius: 3px; min-width: 50px;">
                                 <div style="width: {{ ($benefit['slBalance'] / 15) * 100 }}%; height: 100%; background: #15803d; border-radius: 3px;"></div>
                             </div>
                             <span style="font-size: 12px; font-weight: 600; color: #15803d;">{{ $benefit['slBalance'] }} days</span>

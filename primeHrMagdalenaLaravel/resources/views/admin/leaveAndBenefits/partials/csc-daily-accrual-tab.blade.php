@@ -31,12 +31,12 @@
                 <tr class="accrual-rate-row" data-status="{{ $rate->is_active ? 'active' : 'inactive' }}" data-frequency="{{ $rate->accrual_frequency }}">
                     <td data-label="Leave Type" style="text-align: left;">
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <div class="emp-avatar" style="background: {{ ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b'][$loop->index % 4] }}; margin-left: 0;">
+                            <div class="emp-avatar" style="background: {{ ['#0b044d', '#8e1e18', '#150c63', '#a52820'][$loop->index % 4] }}; margin-left: 0;">
                                 {{ $rate->leave_code }}
                             </div>
                             <div>
                                 <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">{{ $rate->leaveType->leave_name ?? $rate->leave_code }}</p>
-                                <p style="color: #6b6a8a; margin: 0; font-size: 12px;">{{ $rate->leaveType->is_accrued ? 'Accrued Leave Type' : 'Fixed Leave Type' }}</p>
+                                <p style="color: #56547a; margin: 0; font-size: 12px;">{{ $rate->leaveType->is_accrued ? 'Accrued Leave Type' : 'Fixed Leave Type' }}</p>
                             </div>
                         </div>
                     </td>
@@ -51,10 +51,10 @@
                     <td data-label="Credits Earned" style="text-align: center; font-weight: 600; color: #15803d;">
                         {{ number_format($rate->credits_earned_per_period, 4) }} credits
                     </td>
-                    <td data-label="Effective Date" style="text-align: center; color: #6b6a8a;">
+                    <td data-label="Effective Date" style="text-align: center; color: #56547a;">
                         {{ $rate->effective_date->format('M d, Y') }}
                     </td>
-                    <td data-label="End Date" style="text-align: center; color: #6b6a8a;">
+                    <td data-label="End Date" style="text-align: center; color: #56547a;">
                         {{ $rate->end_date ? $rate->end_date->format('M d, Y') : '—' }}
                     </td>
                     <td data-label="Status" style="text-align: center;">
@@ -71,7 +71,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" style="text-align: center; padding: 40px; color: #6b6a8a;">
+                    <td colspan="8" style="text-align: center; padding: 40px; color: #56547a;">
                         No accrual rates found. Click "Add Accrual Rate" to create one.
                     </td>
                 </tr>

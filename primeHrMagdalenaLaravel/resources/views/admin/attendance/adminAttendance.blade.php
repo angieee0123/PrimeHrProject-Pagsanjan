@@ -5,7 +5,7 @@
 @include('admin.notification.adminNotification')
 
 @php
-$avatarColors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
+$avatarColors = ['#0b044d', '#8e1e18', '#150c63', '#a52820', '#150c63', '#56547a'];
 function getInitials($name) {
     $parts = explode(' ', $name);
     $initials = '';
@@ -25,7 +25,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 <style>
 .attendance-dashboard {
     --pri: #0b044d;
-    --pri-2: #1a0f6e;
+    --pri-2: #150c63;
     --bg: #F7F8FC;
     --card: #FFFFFF;
     --line: #eceaf8;
@@ -523,7 +523,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     border-radius: 999px;
     transition: width .8s cubic-bezier(.22,.61,.36,1);
 }
-.attendance-dashboard .rate-fill.good { background: linear-gradient(90deg, #2fa860, #23875a); }
+.attendance-dashboard .rate-fill.good { background: linear-gradient(90deg, #2fa860, #15803d); }
 .attendance-dashboard .rate-fill.mid  { background: linear-gradient(90deg, #eba417, #c98a0c); }
 .attendance-dashboard .rate-fill.low  { background: linear-gradient(90deg, #e5484d, #c93a3a); }
 .attendance-dashboard .rate-pct { font-size: 11px; font-weight: 700; color: var(--ink); white-space: nowrap; min-width: 32px; text-align: right; }
@@ -546,8 +546,8 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     border-radius: 50%;
     background: currentColor;
 }
-.attendance-dashboard .badge-status.processed { background: #e9f9ef; color: #23875a; }
-.attendance-dashboard .badge-status.pending   { background: #fdf3e3; color: #a6720c; }
+.attendance-dashboard .badge-status.processed { background: #e9f9ef; color: #15803d; }
+.attendance-dashboard .badge-status.pending   { background: #fbf6e3; color: #c9a227; }
 
 /* icon action buttons */
 .attendance-dashboard .row-actions { display: flex; align-items: center; gap: 8px; }
@@ -615,7 +615,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 
 .attendance-dashboard .exempt-pill {
     background: #e9f9ef;
-    color: #23875a;
+    color: #15803d;
     padding: 3px 9px;
     border-radius: 999px;
     font-weight: 600;
@@ -745,7 +745,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Present</p>
-            <div class="stat-icon-wrap" style="background:#f0effe">
+            <div class="stat-icon-wrap" style="background:#f2f1fb">
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
         </div>
@@ -758,7 +758,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">On Leave</p>
-            <div class="stat-icon-wrap" style="background:#f0effe">
+            <div class="stat-icon-wrap" style="background:#f2f1fb">
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
             </div>
         </div>
@@ -771,7 +771,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Absent</p>
-            <div class="stat-icon-wrap" style="background:#f0effe">
+            <div class="stat-icon-wrap" style="background:#f2f1fb">
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="8" x2="22" y2="13"/><line x1="22" y1="8" x2="17" y2="13"/></svg>
             </div>
         </div>
@@ -784,7 +784,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Overtime Hours</p>
-            <div class="stat-icon-wrap" style="background:#f0effe">
+            <div class="stat-icon-wrap" style="background:#f2f1fb">
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
         </div>
@@ -799,7 +799,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 {{-- ============ ATTENDANCE OVERVIEW PANEL ============ --}}
 <div class="overview-panel">
     <div class="ov-item">
-        <div class="ov-icon" style="background:#e9f9ef;color:#23875a;">
+        <div class="ov-icon" style="background:#e9f9ef;color:#15803d;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
         <div>
@@ -829,7 +829,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
         </div>
     </div>
     <div class="ov-item">
-        <div class="ov-icon" style="background:#fdf3e3;color:#eba417;">
+        <div class="ov-icon" style="background:#fbf6e3;color:#eba417;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><line x1="22" y1="2" x2="18" y2="6"/></svg>
         </div>
         <div>
@@ -999,7 +999,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 
         tbody.innerHTML = '';
         if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 40px; color: #6b6a8a;">No records found matching your search.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 40px; color: #56547a;">No records found matching your search.</td></tr>';
         } else {
             filtered.forEach(row => tbody.appendChild(row.cloneNode(true)));
         }
@@ -1052,13 +1052,13 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
         if (page > 1) html += '<button class="page-btn" onclick="goToAttendancePage(' + (page - 1) + ')">‹</button>';
         if (startPage > 1) {
             html += '<button class="page-btn" onclick="goToAttendancePage(1)">1</button>';
-            if (startPage > 2) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+            if (startPage > 2) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
         }
         for (let i = startPage; i <= endPage; i++) {
             html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToAttendancePage(' + i + ')">' + i + '</button>';
         }
         if (endPage < totalPages) {
-            if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+            if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
             html += '<button class="page-btn" onclick="goToAttendancePage(' + totalPages + ')">' + totalPages + '</button>';
         }
         if (page < totalPages) html += '<button class="page-btn" onclick="goToAttendancePage(' + (page + 1) + ')">›</button>';

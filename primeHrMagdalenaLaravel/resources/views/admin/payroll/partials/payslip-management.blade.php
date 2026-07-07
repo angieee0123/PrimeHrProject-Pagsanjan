@@ -39,13 +39,13 @@
                 <td>
                     <div class="emp-cell">
                         @if($computation->employee->photo ?? false)
-                            <img src="{{ $computation->employee->photo }}" alt="{{ $computation->employee->first_name }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                            <img src="{{ $computation->employee->photo }}" alt="{{ $computation->employee->first_name }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
                         @else
                             @php
-                                $colors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
+                                $colors = ['#0b044d', '#8e1e18', '#150c63', '#a52820', '#150c63', '#56547a'];
                                 $empIndex = $loop->index % 6;
                             @endphp
-                            <div style="width:40px; height:40px; background: {{ $colors[$empIndex] }}; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">
+                            <div style="width:40px; height:40px; background: {{ $colors[$empIndex] }}; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #ecebf6;">
                                 {{ strtoupper(substr($computation->employee->first_name ?? 'N', 0, 1)) }}{{ strtoupper(substr($computation->employee->last_name ?? 'A', 0, 1)) }}
                             </div>
                         @endif
@@ -92,7 +92,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="9" style="text-align: center; padding: 40px; color: #9999bb;">
+                <td colspan="9" style="text-align: center; padding: 40px; color: #8f8daf;">
                     No payslips generated yet. Go to "Generate Payroll" tab to create payslips.
                 </td>
             </tr>
@@ -127,7 +127,7 @@
 <style>
 .filter-select {
     padding: 8px 12px;
-    border: 1px solid #e8e7f5;
+    border: 1px solid #ecebf6;
     border-radius: 6px;
     font-size: 13px;
     font-family: 'Poppins', sans-serif;
@@ -143,7 +143,7 @@
 
 .btn-action {
     padding: 6px 8px;
-    border: 1px solid #e8e7f5;
+    border: 1px solid #ecebf6;
     border-radius: 6px;
     background: #fff;
     cursor: pointer;
@@ -158,7 +158,7 @@
 }
 
 .btn-view:hover {
-    background: #f7f6ff;
+    background: #f7f6fc;
     border-color: #0b044d;
 }
 

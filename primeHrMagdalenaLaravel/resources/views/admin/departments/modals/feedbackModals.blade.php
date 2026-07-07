@@ -62,11 +62,11 @@
         <div style="display:flex;gap:12px;justify-content:center;margin:12px 0;">
             <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 20px;text-align:center;">
                 <p style="font-size:22px;font-weight:800;color:#15803d;margin:0;" id="import-count">0</p>
-                <p style="font-size:11px;color:#6b6a8a;margin:2px 0 0;">Imported</p>
+                <p style="font-size:11px;color:#56547a;margin:2px 0 0;">Imported</p>
             </div>
             <div style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:10px;padding:12px 20px;text-align:center;">
                 <p style="font-size:22px;font-weight:800;color:#8e1e18;margin:0;" id="skipped-count">0</p>
-                <p style="font-size:11px;color:#6b6a8a;margin:2px 0 0;">Skipped</p>
+                <p style="font-size:11px;color:#56547a;margin:2px 0 0;">Skipped</p>
             </div>
         </div>
 

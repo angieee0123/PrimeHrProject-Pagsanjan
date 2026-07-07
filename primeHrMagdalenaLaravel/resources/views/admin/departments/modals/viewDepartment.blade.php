@@ -16,7 +16,7 @@
 
         <div class="vdm-stats">
             <div class="vdm-stat">
-                <div class="vdm-stat-icon" style="background:linear-gradient(135deg,#0b044d,#2d1a8e)">
+                <div class="vdm-stat-icon" style="background:linear-gradient(135deg,#0b044d,#150c63)">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 </div>
                 <div>
@@ -34,7 +34,7 @@
                 </div>
             </div>
             <div class="vdm-stat">
-                <div class="vdm-stat-icon" style="background:linear-gradient(135deg,#d9bb00,#fbbf24)">
+                <div class="vdm-stat-icon" style="background:linear-gradient(135deg,#c9a227,#fbbf24)">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
                 <div>
@@ -48,24 +48,24 @@
             <p class="vdm-section-label">OFFICE INFORMATION</p>
             <div class="vdm-row">
                 <span class="vdm-row-label">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9999bb" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8f8daf" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     Department Head
                 </span>
                 <strong id="modal-head"></strong>
             </div>
             <div class="vdm-row">
                 <span class="vdm-row-label">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9999bb" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8f8daf" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                     Municipality
                 </span>
                 <strong>Municipal Government of Pagsanjan</strong>
             </div>
             <div class="vdm-row" id="modal-desc-row">
                 <span class="vdm-row-label">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9999bb" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8f8daf" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     Description
                 </span>
-                <span id="modal-desc" style="color:#6b6a8a;font-size:12.5px;text-align:right;max-width:60%;"></span>
+                <span id="modal-desc" style="color:#56547a;font-size:12.5px;text-align:right;max-width:60%;"></span>
             </div>
         </div>
 

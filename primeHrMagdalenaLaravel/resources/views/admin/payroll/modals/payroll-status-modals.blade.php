@@ -120,14 +120,14 @@
 
 .status-message {
     font-size: 14px;
-    color: #6b6a8a;
+    color: #56547a;
     margin: 0 0 24px 0;
     line-height: 1.6;
 }
 
 .status-details {
-    background: #f7f6ff;
-    border: 1px solid #e8e7f5;
+    background: #f7f6fc;
+    border: 1px solid #ecebf6;
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 24px;
@@ -138,7 +138,7 @@
     display: flex;
     justify-content: space-between;
     padding: 8px 0;
-    border-bottom: 1px solid #e8e7f5;
+    border-bottom: 1px solid #ecebf6;
 }
 
 .status-details .detail-row:last-child {
@@ -147,7 +147,7 @@
 
 .status-details .detail-label {
     font-size: 13px;
-    color: #6b6a8a;
+    color: #56547a;
     font-weight: 500;
 }
 
@@ -204,17 +204,17 @@
 }
 
 .status-actions .btn-primary:hover {
-    background: #1a0f6e;
+    background: #150c63;
 }
 
 .status-actions .btn-secondary {
-    background: #f7f6ff;
+    background: #f7f6fc;
     color: #0b044d;
-    border: 1px solid #e8e7f5;
+    border: 1px solid #ecebf6;
 }
 
 .status-actions .btn-secondary:hover {
-    background: #e8e7f5;
+    background: #ecebf6;
 }
 </style>
 

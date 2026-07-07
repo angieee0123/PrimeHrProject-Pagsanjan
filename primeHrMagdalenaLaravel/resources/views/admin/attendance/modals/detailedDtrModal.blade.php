@@ -338,7 +338,7 @@
 }
 .ddtr-kpi-icon.green  { background: #e9f9ef; color: #2fa860; }
 .ddtr-kpi-icon.red    { background: #fdedec; color: #e5484d; }
-.ddtr-kpi-icon.amber  { background: #fdf3e3; color: #eba417; }
+.ddtr-kpi-icon.amber  { background: #fbf6e3; color: #eba417; }
 .ddtr-kpi-icon.blue   { background: #eaf1ff; color: #4F7CFF; }
 .ddtr-kpi-icon.rose   { background: #fdedf3; color: #e3568b; }
 .ddtr-kpi-icon.purple { background: #f2effd; color: #8a6ff0; }
@@ -541,7 +541,7 @@
     vertical-align: middle; line-height: 1.5;
 }
 .detailed-dtr-table .badge-absent { background: #fdedec; color: #d5433c; }
-.detailed-dtr-table .badge-incomplete { background: #fdf3e3; color: #a6720c; }
+.detailed-dtr-table .badge-incomplete { background: #fbf6e3; color: #c9a227; }
 .detailed-dtr-table .badge-needs-review { background: #f2effd; color: #7C5CFF; }
 .detailed-dtr-table .badge-passslip { background: #e6f7f5; color: #0d9488; }
 .detailed-dtr-table .log-late { color: var(--ink); font-weight: 600; }
@@ -552,8 +552,8 @@
     font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
     white-space: nowrap; cursor: default; position: relative;
 }
-.acc-full       { background: #e9f9ef; color: #23875a; }
-.acc-partial    { background: #fdf3e3; color: #a6720c; }
+.acc-full       { background: #e9f9ef; color: #15803d; }
+.acc-partial    { background: #fbf6e3; color: #c9a227; }
 .acc-absent     { background: #fdedec; color: #d5433c; }
 .acc-leave      { background: #eaf1ff; color: #4F7CFF; }
 .acc-incomplete { background: #f3f4f8; color: var(--faint); }
@@ -619,7 +619,7 @@
     padding-left: 6px; border-left: 1px solid rgba(13,148,136,.2);
 }
 .ps-time-gap {
-    color: #a6720c; font-weight: 600;
+    color: #c9a227; font-weight: 600;
     padding-left: 6px; border-left: 1px solid rgba(166,114,7,.22);
 }
 

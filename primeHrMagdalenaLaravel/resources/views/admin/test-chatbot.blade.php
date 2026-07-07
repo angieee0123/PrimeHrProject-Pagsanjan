@@ -9,13 +9,13 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f7f6ff;
+            background: #f7f6fc;
             padding: 20px;
             color: #0b044d;
         }
         .container { max-width: 1200px; margin: 0 auto; }
         .header {
-            background: linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%);
+            background: linear-gradient(135deg, #0b044d 0%, #150c63 100%);
             color: #fff;
             padding: 26px;
             border-radius: 14px;

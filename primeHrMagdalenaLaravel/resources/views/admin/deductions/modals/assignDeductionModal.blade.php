@@ -43,7 +43,7 @@
                 <div class="form-group">
                     <label class="form-label">
                         Deduction Types <span style="color: #8e1e18;">*</span>
-                        <span id="selectedCount" style="color: #6b6a8a; font-weight: 400; margin-left: 8px;">(0 selected)</span>
+                        <span id="selectedCount" style="color: #56547a; font-weight: 400; margin-left: 8px;">(0 selected)</span>
                     </label>
                     <div class="checkbox-actions">
                         <button type="button" class="btn-link" onclick="selectAllDeductions()">Select All</button>
@@ -66,9 +66,9 @@
                                                onchange="handleCheckboxChange()">
                                         <span class="checkbox-text">
                                             {{ $type->name }} 
-                                            <span style="color: #9999bb; font-size: 11px;">({{ $type->code }})</span>
+                                            <span style="color: #8f8daf; font-size: 11px;">({{ $type->code }})</span>
                                             @if($type->computation_type === 'PERCENTAGE')
-                                                <span style="color: #6b6a8a; font-size: 11px;"> - {{ $type->percentage_rate }}%</span>
+                                                <span style="color: #56547a; font-size: 11px;"> - {{ $type->percentage_rate }}%</span>
                                             @endif
                                         </span>
                                     </label>
@@ -148,7 +148,7 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: 24px;
-    border-bottom: 1px solid #f0effe;
+    border-bottom: 1px solid #f2f1fb;
 }
 
 .modal-title {
@@ -160,14 +160,14 @@
 
 .modal-subtitle {
     font-size: 12px;
-    color: #6b6a8a;
+    color: #56547a;
     margin: 0;
 }
 
 .modal-close {
     background: transparent;
     border: none;
-    color: #6b6a8a;
+    color: #56547a;
     cursor: pointer;
     padding: 4px;
     display: flex;
@@ -178,7 +178,7 @@
 }
 
 .modal-close:hover {
-    background: #f7f6ff;
+    background: #f7f6fc;
     color: #0b044d;
 }
 
@@ -238,14 +238,14 @@ textarea.form-input {
     justify-content: flex-end;
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid #f0effe;
+    border-top: 1px solid #f2f1fb;
 }
 
 .btn-cancel {
     padding: 10px 20px;
     border: 1px solid #e5e3f8;
     background: #fff;
-    color: #6b6a8a;
+    color: #56547a;
     font-size: 13px;
     font-weight: 600;
     border-radius: 6px;
@@ -255,7 +255,7 @@ textarea.form-input {
 }
 
 .btn-cancel:hover {
-    background: #f7f6ff;
+    background: #f7f6fc;
     border-color: #0b044d;
     color: #0b044d;
 }
@@ -274,7 +274,7 @@ textarea.form-input {
 }
 
 .btn-submit:hover {
-    background: #1a0f6e;
+    background: #150c63;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(11, 4, 77, 0.3);
 }
@@ -325,7 +325,7 @@ textarea.form-input {
     letter-spacing: 0.5px;
     margin: 0 0 8px 0;
     padding-bottom: 6px;
-    border-bottom: 1px solid #f0effe;
+    border-bottom: 1px solid #f2f1fb;
 }
 
 .checkbox-label {
@@ -340,7 +340,7 @@ textarea.form-input {
 }
 
 .checkbox-label:hover {
-    background: #f7f6ff;
+    background: #f7f6fc;
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -365,7 +365,7 @@ textarea.form-input {
     border-radius: 6px;
     margin-bottom: 16px;
     font-size: 13px;
-    color: #6b6a8a;
+    color: #56547a;
 }
 
 .warning-box svg {
@@ -392,7 +392,7 @@ textarea.form-input {
 }
 
 .btn-link:hover {
-    background: #f7f6ff;
+    background: #f7f6fc;
 }
 </style>
 

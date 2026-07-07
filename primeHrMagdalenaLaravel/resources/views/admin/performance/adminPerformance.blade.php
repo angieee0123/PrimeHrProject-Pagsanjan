@@ -16,7 +16,7 @@ $performance = collect([
     ['id' => 'PGS-0310', 'name' => 'Roberto T. Flores',     'position' => 'Municipal Civil Registrar I', 'dept' => 'Municipal Civil Registrar',      'period' => 'Jan-Jun 2025', 'rating' => null, 'status' => 'Pending',   'evaluator' => 'Civil Registrar',     'dueDate' => 'Jun 30, 2025'],
 ]);
 
-$avatarColors = ['#0b044d','#8e1e18','#1a0f6e','#5a0f0b','#2d1a8e','#6b3fa0'];
+$avatarColors = ['#0b044d','#8e1e18','#150c63','#a52820','#150c63','#56547a'];
 
 if (!function_exists('getInitials')) {
     function getInitials($name) {
@@ -67,7 +67,7 @@ $avgRating        = $performance->whereNotNull('rating')->avg('rating') ?? 0;
         <div class="stat-top">
             <p class="stat-label">Pending</p>
             <div class="stat-icon-wrap pf-icon-warning">
-                <svg width="18" height="18" fill="none" stroke="#d9bb00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <svg width="18" height="18" fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
         </div>
         <h2 class="stat-value">{{ $pendingCount }}</h2>
@@ -78,7 +78,7 @@ $avgRating        = $performance->whereNotNull('rating')->avg('rating') ?? 0;
         <div class="stat-top">
             <p class="stat-label">Average Rating</p>
             <div class="stat-icon-wrap pf-icon-purple">
-                <svg width="18" height="18" fill="none" stroke="#6b3fa0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="18" height="18" fill="none" stroke="#56547a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             </div>
         </div>
         <h2 class="stat-value">{{ number_format($avgRating, 1) }}</h2>
@@ -151,8 +151,8 @@ $avgRating        = $performance->whereNotNull('rating')->avg('rating') ?? 0;
                             <div class="pf-stars">
                                 @for($i = 1; $i <= 5; $i++)
                                 <svg width="14" height="14" viewBox="0 0 24 24"
-                                     fill="{{ $i <= round($perf['rating']) ? '#6b3fa0' : '#e4e3f0' }}"
-                                     stroke="{{ $i <= round($perf['rating']) ? '#6b3fa0' : '#e4e3f0' }}"
+                                     fill="{{ $i <= round($perf['rating']) ? '#56547a' : '#ecebf6' }}"
+                                     stroke="{{ $i <= round($perf['rating']) ? '#56547a' : '#ecebf6' }}"
                                      stroke-width="1">
                                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                                 </svg>
@@ -326,7 +326,7 @@ function submitEvaluation() {
 
             let stars = '<div class="pf-rating-wrap"><div class="pf-stars">';
             for (let i = 1; i <= 5; i++) {
-                const c = i <= Math.round(rating) ? '#6b3fa0' : '#e4e3f0';
+                const c = i <= Math.round(rating) ? '#56547a' : '#ecebf6';
                 stars += `<svg width="14" height="14" viewBox="0 0 24 24" fill="${c}" stroke="${c}" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
             }
             stars += `</div><span class="pf-rating-value">${rating}</span></div>`;

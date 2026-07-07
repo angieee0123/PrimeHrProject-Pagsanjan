@@ -9,18 +9,18 @@
 /* Stat dot colours */
 .pf-dot-primary { background: #0b044d; }
 .pf-dot-success { background: #15803d; }
-.pf-dot-warning { background: #d9bb00; }
-.pf-dot-purple  { background: #6b3fa0; }
+.pf-dot-warning { background: #c9a227; }
+.pf-dot-purple  { background: #56547a; }
 
 /* Table cell helpers */
-.pf-period-cell    { font-size: 12.5px; color: #6b6a8a; white-space: nowrap; }
-.pf-evaluator-cell { font-size: 12.5px; color: #6b6a8a; }
+.pf-period-cell    { font-size: 12.5px; color: #56547a; white-space: nowrap; }
+.pf-evaluator-cell { font-size: 12.5px; color: #56547a; }
 
 /* Star rating */
 .pf-rating-wrap  { display: flex; align-items: center; gap: 6px; }
 .pf-stars        { display: flex; gap: 2px; }
 .pf-rating-value { font-size: 13px; color: #0b044d; font-weight: 600; }
-.pf-not-rated    { font-size: 12.5px; color: #9999bb; }
+.pf-not-rated    { font-size: 12.5px; color: #8f8daf; }
 
 /* Evaluate button */
 .btn-evaluate {
@@ -35,11 +35,11 @@
     cursor: pointer;
     transition: all 0.2s;
 }
-.btn-evaluate:hover { background: #1a0f6e; border-color: #1a0f6e; }
+.btn-evaluate:hover { background: #150c63; border-color: #150c63; }
 
 /* Empty state */
 .empty-state { text-align: center; padding: 40px 20px; }
-.empty-sub   { font-size: 13px; color: #9999bb; margin: 0; }
+.empty-sub   { font-size: 13px; color: #8f8daf; margin: 0; }
 
 /* View modal — employee row */
 .pf-modal-emp-row {
@@ -48,10 +48,10 @@
     gap: 16px;
     margin-bottom: 20px;
     padding: 16px;
-    background: #f7f6ff;
+    background: #f7f6fc;
     border-radius: 12px;
 }
-.pf-modal-emp-id { font-size: 11px; color: #9999bb; margin: 0 0 4px; }
+.pf-modal-emp-id { font-size: 11px; color: #8f8daf; margin: 0 0 4px; }
 
 /* Avatar size variant */
 .emp-avatar-lg {
@@ -65,7 +65,7 @@
 .form-field textarea {
     width: 100%;
     padding: 9px 12px;
-    border: 1.5px solid #e4e3f0;
+    border: 1.5px solid #ecebf6;
     border-radius: 9px;
     font-size: 13px;
     font-family: 'Poppins', sans-serif;

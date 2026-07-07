@@ -9,7 +9,7 @@
 
         body {
             font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f7f6ff;
+            background: #f7f6fc;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -31,7 +31,7 @@
         }
 
         .chat-header {
-            background: linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%);
+            background: linear-gradient(135deg, #0b044d 0%, #150c63 100%);
             color: #fff;
             padding: 20px;
             border-bottom: 1px solid #1f1675;
@@ -131,7 +131,7 @@
 
         input[type="text"] {
             flex: 1;
-            border: 1.5px solid #e4e3f0;
+            border: 1.5px solid #ecebf6;
             border-radius: 10px;
             padding: 10px 12px;
             font-size: 13px;

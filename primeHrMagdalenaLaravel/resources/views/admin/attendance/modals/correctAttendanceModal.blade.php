@@ -59,7 +59,7 @@
                 <div class="form-field" style="margin-top: 16px;">
                     <label>Supporting Documents (PDF, JPG, PNG) <span style="color: #8e1e18;">*</span></label>
                     <input type="file" id="correctAttachments" name="attachments[]" class="form-input" accept=".pdf,.jpg,.jpeg,.png" multiple required style="padding: 8px;">
-                    <p style="font-size: 11px; color: #9999bb; margin-top: 4px;">Required: Upload one or more documents (max 5MB each)</p>
+                    <p style="font-size: 11px; color: #8f8daf; margin-top: 4px;">Required: Upload one or more documents (max 5MB each)</p>
                     <div id="filePreview" style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
                 </div>
             </div>
@@ -104,7 +104,7 @@
     font-size: 9px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase;
     padding: 2px 8px; border-radius: 999px; white-space: nowrap;
 }
-.cps-badge.official { background: #e9f9ef; color: #23875a; }
-.cps-badge.personal { background: #fdf3e3; color: #a6720c; }
+.cps-badge.official { background: #e9f9ef; color: #15803d; }
+.cps-badge.personal { background: #fbf6e3; color: #c9a227; }
 </style>
 

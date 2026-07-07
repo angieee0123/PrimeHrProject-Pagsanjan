@@ -2,7 +2,7 @@
 <div class="welcome-banner">
     <div class="banner-left">
         <div class="banner-icon">
-            <svg width="22" height="22" fill="none" stroke="#d9bb00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <svg width="22" height="22" fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
@@ -22,7 +22,7 @@
 
 <style>
 .topbar-search-wrap { position: relative; display: flex; align-items: center; }
-.topbar-search-icon { position: absolute; left: 10px; color: #6b6a8a; pointer-events: none; }
+.topbar-search-icon { position: absolute; left: 10px; color: #56547a; pointer-events: none; }
 .topbar-search-input { background: #fff; border: 1.5px solid #e5e4f0; border-radius: 9px; padding: 8px 12px 8px 32px; font-size: 12.5px; color: #0b044d; outline: none; width: 280px; font-family: 'Poppins', sans-serif; transition: border-color 0.2s, box-shadow 0.2s; box-shadow: 0 1px 3px rgba(11,4,77,0.06); }
 .topbar-search-input::placeholder { color: #aaa8cc; }
 .topbar-search-input:focus { border-color: #0b044d; box-shadow: 0 0 0 3px rgba(11,4,77,0.1); }

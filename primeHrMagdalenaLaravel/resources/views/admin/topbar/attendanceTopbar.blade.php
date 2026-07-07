@@ -2,7 +2,7 @@
 <div class="welcome-banner">
     <div class="banner-left">
         <div class="banner-icon">
-            <svg width="22" height="22" fill="none" stroke="#d9bb00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <svg width="22" height="22" fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                 <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/>
             </svg>
         </div>
@@ -29,7 +29,7 @@
     border: 1px solid rgba(255, 255, 255, .18) !important;
     background:
         radial-gradient(340px 200px at 100% -20%, rgba(129, 140, 248, .35), transparent 70%),
-        linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%) !important;
+        linear-gradient(135deg, #0b044d 0%, #150c63 100%) !important;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, .16),
         0 16px 40px rgba(11, 4, 77, .28) !important;
@@ -84,7 +84,7 @@ function searchAttendance(query) {
 
     tbody.innerHTML = '';
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#6b6a8a;">No records found matching your search.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#56547a;">No records found matching your search.</td></tr>';
     } else {
         filtered.forEach(row => tbody.appendChild(row.cloneNode(true)));
     }

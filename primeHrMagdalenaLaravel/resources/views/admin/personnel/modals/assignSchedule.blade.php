@@ -1,7 +1,7 @@
 <!-- Assign Schedule Modal -->
 <div id="assignScheduleModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
     <div style="background:#fff; border-radius:12px; width:100%; max-width:550px; box-shadow:0 8px 32px rgba(11,4,77,0.2); overflow:hidden;">
-        <div style="background:linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%); padding:20px 24px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="background:linear-gradient(135deg, #0b044d 0%, #150c63 100%); padding:20px 24px; display:flex; justify-content:space-between; align-items:center;">
             <div style="display:flex; align-items:center; gap:12px;">
                 <div style="width:40px; height:40px; background:rgba(255,255,255,0.12); border-radius:10px; display:flex; align-items:center; justify-content:center;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
@@ -30,59 +30,59 @@
                         <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
                             Start Date <span style="color:#8e1e18;">*</span>
                         </label>
-                        <input type="date" name="start_date" id="scheduleStartDate" required onchange="validateScheduleDates()" style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                        <input type="date" name="start_date" id="scheduleStartDate" required onchange="validateScheduleDates()" style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
                     </div>
                     <div>
                         <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
                             End Date <span style="color:#8e1e18;">*</span>
                         </label>
-                        <input type="date" name="end_date" id="scheduleEndDate" required onchange="validateScheduleDates()" style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                        <input type="date" name="end_date" id="scheduleEndDate" required onchange="validateScheduleDates()" style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
                     </div>
                 </div>
 
-                <div style="background:#f7f6ff; border:1.5px solid #e8e7f5; border-radius:10px; padding:16px;">
-                    <p style="margin:0 0 12px; font-size:11px; font-weight:700; letter-spacing:1px; color:#9999bb;">MORNING SHIFT</p>
+                <div style="background:#f7f6fc; border:1.5px solid #ecebf6; border-radius:10px; padding:16px;">
+                    <p style="margin:0 0 12px; font-size:11px; font-weight:700; letter-spacing:1px; color:#8f8daf;">MORNING SHIFT</p>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
                         <div>
                             <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
                                 Time In <span style="color:#8e1e18;">*</span>
                             </label>
-                            <input type="time" name="am_in" id="scheduleAmIn" required style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                            <input type="time" name="am_in" id="scheduleAmIn" required style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
                         </div>
                         <div>
                             <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
                                 Time Out <span style="color:#8e1e18;">*</span>
                             </label>
-                            <input type="time" name="am_out" id="scheduleAmOut" required style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                            <input type="time" name="am_out" id="scheduleAmOut" required style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
                         </div>
                     </div>
                 </div>
 
-                <div style="background:#f7f6ff; border:1.5px solid #e8e7f5; border-radius:10px; padding:16px;">
-                    <p style="margin:0 0 12px; font-size:11px; font-weight:700; letter-spacing:1px; color:#9999bb;">AFTERNOON SHIFT</p>
+                <div style="background:#f7f6fc; border:1.5px solid #ecebf6; border-radius:10px; padding:16px;">
+                    <p style="margin:0 0 12px; font-size:11px; font-weight:700; letter-spacing:1px; color:#8f8daf;">AFTERNOON SHIFT</p>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
                         <div>
                             <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
                                 Time In <span style="color:#8e1e18;">*</span>
                             </label>
-                            <input type="time" name="pm_in" id="schedulePmIn" required style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                            <input type="time" name="pm_in" id="schedulePmIn" required style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
                         </div>
                         <div>
                             <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
                                 Time Out <span style="color:#8e1e18;">*</span>
                             </label>
-                            <input type="time" name="pm_out" id="schedulePmOut" required style="width:100%; padding:10px 12px; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                            <input type="time" name="pm_out" id="schedulePmOut" required style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
                         </div>
                     </div>
                 </div>
 
-                <div style="background:#fff9e6; border:1.5px solid #ffe9a3; border-radius:10px; padding:12px; display:flex; align-items:start; gap:10px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d9bb00" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
+                <div style="background:#fbf6e3; border:1.5px solid #ecdca4; border-radius:10px; padding:12px; display:flex; align-items:start; gap:10px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="12" y1="8" x2="12" y2="12"/>
                         <line x1="12" y1="16" x2="12.01" y2="16"/>
                     </svg>
-                    <p style="margin:0; font-size:12px; color:#8b7500; line-height:1.5;">
+                    <p style="margin:0; font-size:12px; color:#c9a227; line-height:1.5;">
                         Set the effectivity period for this schedule. The employee will follow this schedule only within the specified date range. You can create multiple schedules for different periods.
                     </p>
                 </div>
@@ -102,8 +102,8 @@
                 </div>
             </div>
 
-            <div style="padding:16px 24px; border-top:1px solid #f0effe; display:flex; justify-content:flex-end; gap:10px;">
-                <button type="button" onclick="closeAssignScheduleModal()" style="padding:10px 24px; background:#fff; border:1.5px solid #e8e7f5; border-radius:8px; font-size:13px; font-weight:600; color:#6b6a8a; cursor:pointer; font-family:'Poppins',sans-serif;">
+            <div style="padding:16px 24px; border-top:1px solid #f2f1fb; display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" onclick="closeAssignScheduleModal()" style="padding:10px 24px; background:#fff; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-weight:600; color:#56547a; cursor:pointer; font-family:'Poppins',sans-serif;">
                     Cancel
                 </button>
                 <button type="submit" style="padding:10px 24px; background:#0b044d; border:none; border-radius:8px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:8px;">

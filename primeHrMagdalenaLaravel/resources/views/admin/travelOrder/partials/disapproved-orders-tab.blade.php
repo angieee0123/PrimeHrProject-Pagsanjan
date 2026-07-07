@@ -6,7 +6,7 @@
         </div>
     </div>
 
-    @php $colors = ['#0b044d','#8e1e18','#1a0f6e','#5a0f0b','#2d1a8e','#6b3fa0']; @endphp
+    @php $colors = ['#0b044d','#8e1e18','#150c63','#a52820','#150c63','#56547a']; @endphp
 
     <div class="table-wrapper" style="max-width: 100%; overflow: auto;">
         <table class="payroll-table" style="width: 100%; border-collapse: separate; border-spacing: 0;">
@@ -44,7 +44,7 @@
                     </td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
                         <div style="display: flex; justify-content: center;">
-                            <button onclick="viewOrder({{ $order->id }})" style="padding: 6px 14px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; color: #0b044d; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f0effe'; this.style.borderColor='#c4b5fd'" onmouseout="this.style.background='#fff'; this.style.borderColor='#e5e7eb'">View</button>
+                            <button onclick="viewOrder({{ $order->id }})" style="padding: 6px 14px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; color: #0b044d; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f2f1fb'; this.style.borderColor='#c4b5fd'" onmouseout="this.style.background='#fff'; this.style.borderColor='#e5e7eb'">View</button>
                         </div>
                     </td>
                 </tr>
@@ -66,7 +66,7 @@
     <div class="table-footer" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-top: 1px solid #eef2f6; background: #f8fafc;">
         <div style="display: flex; align-items: center; gap: 12px;">
             <p style="margin: 0; font-size: 12px; color: #64748b; font-weight: 500;">Showing <strong style="color: #0b044d; font-weight: 700;">{{ $disapprovedOrders->firstItem() ?? 0 }}</strong>–<strong style="color: #0b044d; font-weight: 700;">{{ $disapprovedOrders->lastItem() ?? 0 }}</strong> of <strong style="color: #0b044d; font-weight: 700;">{{ $disapprovedOrders->total() }}</strong> records</p>
-            <select id="disapprovedRowsPerPage" class="filter-select" style="width: auto; padding: 6px 10px; font-size: 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; color: #344054; font-weight: 600; cursor: pointer;" onchange="changeDisapprovedRowsPerPage()">
+            <select id="disapprovedRowsPerPage" class="filter-select" style="width: auto; padding: 6px 10px; font-size: 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; color: #56547a; font-weight: 600; cursor: pointer;" onchange="changeDisapprovedRowsPerPage()">
                 <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 rows</option>
                 <option value="25" {{ request('per_page', 10) == 25 ? 'selected' : '' }}>25 rows</option>
                 <option value="50" {{ request('per_page', 10) == 50 ? 'selected' : '' }}>50 rows</option>
@@ -76,16 +76,16 @@
         <div class="pagination" id="disapprovedPaginationControls" style="display: flex; gap: 4px;">
             @php $params = $disapprovedOrders->appends(request()->except('page')); @endphp
             {!! $disapprovedOrders->onFirstPage()
-                ? '<button class="page-btn" disabled style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#344054;font-size:12px;font-weight:600;opacity:0.5;cursor:not-allowed;">‹</button>'
-                : '<a href="' . $params->previousPageUrl() . '" class="page-btn" onclick="event.preventDefault(); navigateToPage(\'' . $params->previousPageUrl() . '\');" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#344054;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;">‹</a>' !!}
+                ? '<button class="page-btn" disabled style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#56547a;font-size:12px;font-weight:600;opacity:0.5;cursor:not-allowed;">‹</button>'
+                : '<a href="' . $params->previousPageUrl() . '" class="page-btn" onclick="event.preventDefault(); navigateToPage(\'' . $params->previousPageUrl() . '\');" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#56547a;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;">‹</a>' !!}
             @foreach($disapprovedOrders->getUrlRange(1, $disapprovedOrders->lastPage()) as $page => $url)
                 {!! $page == $disapprovedOrders->currentPage()
                     ? '<button class="page-btn active" style="padding:6px 12px;border:1px solid #0b044d;border-radius:6px;background:#0b044d;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">' . $page . '</button>'
-                    : '<a href="' . $params->url($page) . '" class="page-btn" onclick="event.preventDefault(); navigateToPage(\'' . $params->url($page) . '\');" style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#344054;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;">' . $page . '</a>' !!}
+                    : '<a href="' . $params->url($page) . '" class="page-btn" onclick="event.preventDefault(); navigateToPage(\'' . $params->url($page) . '\');" style="padding:6px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#56547a;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;">' . $page . '</a>' !!}
             @endforeach
             {!! $disapprovedOrders->hasMorePages()
-                ? '<a href="' . $params->nextPageUrl() . '" class="page-btn" onclick="event.preventDefault(); navigateToPage(\'' . $params->nextPageUrl() . '\');" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#344054;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;">›</a>'
-                : '<button class="page-btn" disabled style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#344054;font-size:12px;font-weight:600;opacity:0.5;cursor:not-allowed;">›</button>' !!}
+                ? '<a href="' . $params->nextPageUrl() . '" class="page-btn" onclick="event.preventDefault(); navigateToPage(\'' . $params->nextPageUrl() . '\');" style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#56547a;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;">›</a>'
+                : '<button class="page-btn" disabled style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;color:#56547a;font-size:12px;font-weight:600;opacity:0.5;cursor:not-allowed;">›</button>' !!}
         </div>
     </div>
 </section>

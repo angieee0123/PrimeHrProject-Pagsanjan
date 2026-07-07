@@ -33,7 +33,7 @@
     right: -4px;
     padding: 2px 6px;
     border-radius: 999px;
-    background: #d9bb00;
+    background: #c9a227;
     color: #0b044d;
     font-size: 9px;
     font-weight: 800;
@@ -71,7 +71,7 @@
     justify-content: space-between;
     gap: 10px;
     padding: 12px 14px;
-    background: linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%);
+    background: linear-gradient(135deg, #0b044d 0%, #150c63 100%);
     color: #fff;
     border-bottom: 1px solid #1f1675;
 }
@@ -141,7 +141,7 @@
     gap: 6px;
     padding: 8px 12px;
     background: #fff;
-    border-bottom: 1px solid #f0effe;
+    border-bottom: 1px solid #f2f1fb;
     overflow-x: auto;
     scrollbar-width: none;
 }
@@ -153,7 +153,7 @@
 .admin-chatbot-ui .chatbot-quick-btn {
     border: 1px solid #dedcf2;
     border-radius: 999px;
-    background: #f7f6ff;
+    background: #f7f6fc;
     color: #0b044d;
     padding: 5px 11px;
     font-size: 11px;

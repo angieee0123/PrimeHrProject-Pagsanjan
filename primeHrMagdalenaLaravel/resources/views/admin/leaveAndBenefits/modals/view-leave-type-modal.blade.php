@@ -23,7 +23,7 @@
 
             <div id="viewAttachmentInfoGroup" style="display: none; margin-top: 16px;">
                 <div class="modal-section-label">ATTACHMENT INSTRUCTIONS</div>
-                <p id="viewAttachmentInfo" style="font-size: 13px; color: #6b6a8a; line-height: 1.6; margin: 8px 0;">-</p>
+                <p id="viewAttachmentInfo" style="font-size: 13px; color: #56547a; line-height: 1.6; margin: 8px 0;">-</p>
             </div>
 
             <div id="viewDocumentGroup" style="display: none; margin-top: 16px;">

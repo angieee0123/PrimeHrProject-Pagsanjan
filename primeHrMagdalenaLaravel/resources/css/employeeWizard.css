@@ -26,7 +26,7 @@
 
 /* Header */
 .wizard-header {
-    background: linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%);
+    background: linear-gradient(135deg, #0b044d 0%, #150c63 100%);
     color: #fff;
     padding: 24px;
     border-radius: 12px 12px 0 0;
@@ -232,7 +232,7 @@
 .wizard-hint {
     margin: 4px 0 0;
     font-size: 11px;
-    color: #6b6a8a;
+    color: #56547a;
 }
 
 .wizard-requirements-box {
@@ -253,7 +253,7 @@
     margin: 0;
     padding-left: 20px;
     font-size: 11px;
-    color: #6b6a8a;
+    color: #56547a;
 }
 
 .wizard-address-header {
@@ -304,7 +304,7 @@
 }
 
 .review-label {
-    color: #6b6a8a;
+    color: #56547a;
     font-size: 11px;
     margin-bottom: 2px;
 }
@@ -378,7 +378,7 @@
 .wizard-btn-cancel {
     border: 1px solid #e5e5e8;
     background: #fff;
-    color: #6b6a8a;
+    color: #56547a;
 }
 
 .wizard-btn-next {
@@ -396,7 +396,7 @@
 /* QR Code Button */
 .btn-qr {
     padding: 6px 12px;
-    background: #d9bb00;
+    background: #c9a227;
     color: #fff;
     border: none;
     border-radius: 9px;
@@ -525,7 +525,7 @@ body, html {
 }
 
 .table-wrapper::-webkit-scrollbar-track {
-    background: #f7f6ff;
+    background: #f7f6fc;
     border-radius: 4px;
 }
 
@@ -535,7 +535,7 @@ body, html {
 }
 
 .table-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #1a0f6e;
+    background: #150c63;
 }
 
 .payroll-table {
@@ -666,8 +666,8 @@ body, html {
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: #f7f6ff;
-    border: 1.5px solid #e8e7f5;
+    background: #f7f6fc;
+    border: 1.5px solid #ecebf6;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -678,7 +678,7 @@ body, html {
 }
 
 .action-buttons-desktop button:hover {
-    background: #f0effe;
+    background: #f2f1fb;
     border-color: #0b044d;
 }
 
@@ -693,12 +693,12 @@ body, html {
 
 .action-buttons-desktop .btn-edit:hover {
     background: #f3e8ff;
-    border-color: #6b3fa0;
+    border-color: #56547a;
 }
 
 .action-buttons-desktop .btn-qr:hover {
     background: #fffbeb;
-    border-color: #d9bb00;
+    border-color: #c9a227;
 }
 
 .action-buttons-desktop .btn-deactivate {
@@ -741,16 +741,16 @@ body, html {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f7f6ff;
-    border: 1.5px solid #e8e7f5;
+    background: #f7f6fc;
+    border: 1.5px solid #ecebf6;
     border-radius: 9px;
     cursor: pointer;
     transition: background .2s cubic-bezier(.4,0,.2,1), border-color .2s cubic-bezier(.4,0,.2,1), color .2s cubic-bezier(.4,0,.2,1), transform .15s ease;
-    color: #6b6a8a;
+    color: #56547a;
 }
 
 .action-menu-btn:hover {
-    background: #f0effe;
+    background: #f2f1fb;
     border-color: #0b044d;
     color: #0b044d;
 }
@@ -771,7 +771,7 @@ body, html {
     background: rgba(255,255,255,.92);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     backdrop-filter: saturate(180%) blur(20px);
-    border: 1.5px solid #e8e7f5;
+    border: 1.5px solid #ecebf6;
     border-radius: 14px;
     box-shadow: 0 16px 40px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.05);
     min-width: 200px;
@@ -816,7 +816,7 @@ body, html {
 }
 
 .action-menu-item:hover {
-    background: #f7f6ff;
+    background: #f7f6fc;
     color: #0b044d;
 }
 
@@ -841,18 +841,18 @@ body, html {
 
 /* Success Item */
 .action-menu-item.success {
-    color: #23875a;
+    color: #15803d;
 }
 
 .action-menu-item.success:hover {
     background: #e9f9ef;
-    color: #23875a;
+    color: #15803d;
 }
 
 /* Divider */
 .action-menu-divider {
     height: 1px;
-    background: #f0effe;
+    background: #f2f1fb;
     margin: 6px 0;
 }
 

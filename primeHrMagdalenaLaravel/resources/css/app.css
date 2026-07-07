@@ -491,7 +491,7 @@ body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
 .chat-fab-light:hover { background: #c0392b !important; }
 .chat-fab-badge {
   position: absolute; top: -4px; right: -4px;
-  background: #d9bb00; color: #0b044d;
+  background: #c9a227; color: #0b044d;
   font-size: 9px; font-weight: 800;
   padding: 2px 5px; border-radius: 10px;
   font-family: 'Poppins', sans-serif;
@@ -529,9 +529,9 @@ body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
 .chat-msg.bot  .chat-msg-bubble { background: #f4f3ff; color: #0b044d; border-bottom-left-radius: 4px; }
 .chat-msg.user .chat-msg-bubble { background: #0b044d; color: #ffffff; border-bottom-right-radius: 4px; }
 
-.chatbot-faqs { padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid #f0effe; }
+.chatbot-faqs { padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid #f2f1fb; }
 .chatbot-faq-btn {
-  background: #f0effe; color: #0b044d; border: 1px solid #dddcf0;
+  background: #f2f1fb; color: #0b044d; border: 1px solid #e2e1f0;
   font-size: 11.5px; font-weight: 500; font-family: 'Poppins', sans-serif;
   padding: 5px 11px; border-radius: 20px; cursor: pointer; transition: all 0.2s;
 }
@@ -539,7 +539,7 @@ body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
 
 .chatbot-input-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid #eceaf8; }
 .chatbot-input-row input {
-  flex: 1; padding: 9px 13px; border: 1.5px solid #e4e3f0; border-radius: 9px;
+  flex: 1; padding: 9px 13px; border: 1.5px solid #ecebf6; border-radius: 9px;
   font-size: 13px; font-family: 'Poppins', sans-serif; color: #0b044d; outline: none; transition: border-color 0.2s;
 }
 .chatbot-input-row input:focus { border-color: #0b044d; }
@@ -597,13 +597,13 @@ body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
 /* ── Chatbot upgrades ── */
 .chatbot-quick-actions {
   display: flex; gap: 6px; padding: 8px 12px;
-  background: #fff; border-bottom: 1px solid #f0effe;
+  background: #fff; border-bottom: 1px solid #f2f1fb;
   overflow-x: auto; scrollbar-width: none;
 }
 .chatbot-quick-actions::-webkit-scrollbar { display: none; }
 .chatbot-quick-btn {
-  background: #f0effe; color: #0b044d;
-  border: 1px solid #dddcf0;
+  background: #f2f1fb; color: #0b044d;
+  border: 1px solid #e2e1f0;
   font-size: 11px; font-weight: 600;
   font-family: 'Poppins', sans-serif;
   padding: 5px 11px; border-radius: 20px;
@@ -652,11 +652,11 @@ body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
   display: flex; flex-direction: column; gap: 5px;
 }
 .chat-followup-label {
-  font-size: 11px; color: #9999bb; font-weight: 600; margin-bottom: 2px;
+  font-size: 11px; color: #8f8daf; font-weight: 600; margin-bottom: 2px;
 }
 .chat-followup-btn {
   background: #fff; color: #0b044d;
-  border: 1.5px solid #e4e3f0; border-radius: 10px;
+  border: 1.5px solid #ecebf6; border-radius: 10px;
   font-size: 11.5px; font-weight: 500;
   font-family: 'Poppins', sans-serif;
   padding: 7px 12px; cursor: pointer;
@@ -671,8 +671,8 @@ body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
 /* See More / See Less toggle */
 .chat-toggle-wrap { padding: 2px 12px 6px 46px; }
 .chat-toggle-btn {
-  background: #f7f6ff; color: #0b044d;
-  border: 1px solid #e4e3f0; border-radius: 10px;
+  background: #f7f6fc; color: #0b044d;
+  border: 1px solid #ecebf6; border-radius: 10px;
   font-size: 11px; font-weight: 600;
   font-family: 'Poppins', sans-serif;
   padding: 5px 12px; cursor: pointer;
@@ -921,13 +921,13 @@ body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
    ADMIN DASHBOARD & SIDEBAR
 ══════════════════════════════════════════════════════ */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; }
+body { font-family: 'Poppins', sans-serif; background: #f7f6fc; color: #0b044d; }
 
 .app-layout { display: flex; min-height: 100vh; }
 .main-content { flex: 1; margin-left: 280px; padding: 24px; transition: margin-left 0.3s; }
 .sidebar.collapsed ~ .main-content { margin-left: 72px; }
 
-.welcome-banner { background: linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%); color: #fff; padding: 24px 28px; border-radius: 14px; margin-bottom: 22px; display: flex; justify-content: space-between; align-items: center; }
+.welcome-banner { background: linear-gradient(135deg, #0b044d 0%, #150c63 100%); color: #fff; padding: 24px 28px; border-radius: 14px; margin-bottom: 22px; display: flex; justify-content: space-between; align-items: center; }
 .banner-left { display: flex; align-items: center; gap: 16px; }
 .banner-icon { width: 52px; height: 52px; background: rgba(255,255,255,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
 .welcome-banner h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
@@ -939,33 +939,33 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 22px; }
-.stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #f0effe; }
+.stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #f2f1fb; }
 .stat-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-.stat-label { font-size: 13px; color: #6b6a8a; font-weight: 600; }
+.stat-label { font-size: 13px; color: #56547a; font-weight: 600; }
 .stat-icon-wrap { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
 .stat-value { font-size: 28px; font-weight: 800; color: #0b044d; margin-bottom: 8px; }
 .stat-footer { display: flex; align-items: center; gap: 8px; }
 .stat-dot { width: 6px; height: 6px; border-radius: 50%; }
-.stat-sub { font-size: 12px; color: #9999bb; }
+.stat-sub { font-size: 12px; color: #8f8daf; }
 
-.tab-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: none; border: none; border-bottom: 3px solid transparent; color: #9999bb; font-weight: 500; font-size: 13px; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.2s; margin-bottom: -2px; }
+.tab-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: none; border: none; border-bottom: 3px solid transparent; color: #8f8daf; font-weight: 500; font-size: 13px; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.2s; margin-bottom: -2px; }
 .tab-btn.active { border-bottom: 3px solid #0b044d; color: #0b044d; font-weight: 700; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-.table-section { background: #fff; border-radius: 12px; border: 1px solid #f0effe; overflow: hidden; }
-.table-header { padding: 20px 24px; border-bottom: 1px solid #f0effe; display: flex; justify-content: space-between; align-items: center; }
+.table-section { background: #fff; border-radius: 12px; border: 1px solid #f2f1fb; overflow: hidden; }
+.table-header { padding: 20px 24px; border-bottom: 1px solid #f2f1fb; display: flex; justify-content: space-between; align-items: center; }
 .table-title { font-size: 16px; font-weight: 700; color: #0b044d; margin-bottom: 4px; }
-.table-sub { font-size: 12px; color: #9999bb; }
+.table-sub { font-size: 12px; color: #8f8daf; }
 .table-actions { display: flex; gap: 10px; }
-.filter-select { padding: 7px 14px; border: 1.5px solid #e8e7f5; border-radius: 8px; font-size: 12.5px; font-family: 'Poppins', sans-serif; color: #0b044d; background: #fff; cursor: pointer; }
-.btn-export { padding: 7px 16px; background: #fff; border: 1.5px solid #e8e7f5; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: #0b044d; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; }
+.filter-select { padding: 7px 14px; border: 1.5px solid #ecebf6; border-radius: 8px; font-size: 12.5px; font-family: 'Poppins', sans-serif; color: #0b044d; background: #fff; cursor: pointer; }
+.btn-export { padding: 7px 16px; background: #fff; border: 1.5px solid #ecebf6; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: #0b044d; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; }
 .modal-btn-primary { background: #0b044d; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; }
 
 .table-wrapper { overflow-x: auto; }
 .payroll-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.payroll-table th { text-align: left; padding: 14px 20px; font-size: 11.5px; font-weight: 700; color: #6b6a8a; text-transform: uppercase; letter-spacing: 0.5px; background: #f7f6ff; border-bottom: 1px solid #f0effe; }
-.payroll-table td { padding: 16px 20px; font-size: 13px; border-bottom: 1px solid #f7f6ff; }
+.payroll-table th { text-align: left; padding: 14px 20px; font-size: 11.5px; font-weight: 700; color: #56547a; text-transform: uppercase; letter-spacing: 0.5px; background: #f7f6fc; border-bottom: 1px solid #f2f1fb; }
+.payroll-table td { padding: 16px 20px; font-size: 13px; border-bottom: 1px solid #f7f6fc; }
 
 /* Attendance Summary Table Optimizations */
 .attendance-summary-table th,
@@ -996,7 +996,7 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .payroll-register-table .emp-id { font-size: 11px; }
 .payroll-register-table .dept-tag { padding: 3px 8px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: inline-block; }
 .payroll-register-table .work-date { font-size: 12px; white-space: nowrap; }
-.payroll-register-table .days-count { font-size: 12px; font-weight: 600; background: #f0effe; padding: 3px 8px; border-radius: 4px; display: inline-block; }
+.payroll-register-table .days-count { font-size: 12px; font-weight: 600; background: #f2f1fb; padding: 3px 8px; border-radius: 4px; display: inline-block; }
 .payroll-register-table .daily-rate,
 .payroll-register-table .pay-cell,
 .payroll-register-table .ot-pay,
@@ -1005,25 +1005,25 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .emp-cell { display: flex; align-items: center; gap: 12px; }
 .emp-avatar { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; flex-shrink: 0; }
 .emp-name { font-size: 13.5px; font-weight: 600; color: #0b044d; margin-bottom: 2px; }
-.emp-id { font-size: 11.5px; color: #9999bb; }
-.position-cell { color: #6b6a8a; font-size: 12.5px; }
-.dept-tag { background: #f0effe; color: #0b044d; padding: 4px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; }
+.emp-id { font-size: 11.5px; color: #8f8daf; }
+.position-cell { color: #56547a; font-size: 12.5px; }
+.dept-tag { background: #f2f1fb; color: #0b044d; padding: 4px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; }
 .pay-cell { font-weight: 600; color: #0b044d; }
 .deduction { color: #8e1e18; font-weight: 600; }
 .net-pay { color: #15803d; font-weight: 700; font-size: 14px; }
 .badge-status { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
 .badge-status.processed { background: #e8f9ef; color: #15803d; }
-.badge-status.pending { background: #fef3e8; color: #d9bb00; }
+.badge-status.pending { background: #fbf6e3; color: #c9a227; }
 .badge-status.on-hold { background: #fee8e8; color: #8e1e18; }
-.btn-view { padding: 6px 16px; background: #f0effe; color: #0b044d; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
-.btn-view:hover { background: #e8e7f5; }
+.btn-view { padding: 6px 16px; background: #f2f1fb; color: #0b044d; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
+.btn-view:hover { background: #ecebf6; }
 .btn-edit {
-    padding: 6px 16px; background: #f7f6ff; color: #0b044d;
-    border: 1px solid #e8e7f5; border-radius: 6px;
+    padding: 6px 16px; background: #f7f6fc; color: #0b044d;
+    border: 1px solid #ecebf6; border-radius: 6px;
     font-size: 12px; font-weight: 600; cursor: pointer;
     font-family: 'Poppins', sans-serif; transition: all 0.2s;
 }
-.btn-edit:hover { background: #e8e7f5; }
+.btn-edit:hover { background: #ecebf6; }
 .btn-deactivate {
     padding: 6px 16px; background: #fee8e8; color: #8e1e18;
     border: 1px solid #f5d0ce; border-radius: 6px;
@@ -1040,24 +1040,24 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .btn-activate:hover { background: #d1fae5; }
 .row-actions { display: flex; gap: 6px; }
 .badge-emptype {
-    font-size: 11px; color: #0b044d; background: #f0effe;
+    font-size: 11px; color: #0b044d; background: #f2f1fb;
     padding: 3px 10px; border-radius: 20px; font-weight: 600;
-    border: 1px solid #dddcf0;
+    border: 1px solid #e2e1f0;
 }
 .table-footer {
-    padding: 16px 24px; border-top: 1px solid #f0effe;
+    padding: 16px 24px; border-top: 1px solid #f2f1fb;
     display: flex; justify-content: space-between; align-items: center;
 }
-.table-footer p { font-size: 13px; color: #6b6a8a; }
+.table-footer p { font-size: 13px; color: #56547a; }
 .pagination { display: flex; gap: 6px; }
 .page-btn {
-    width: 32px; height: 32px; border: 1px solid #e8e7f5;
-    border-radius: 6px; background: #fff; color: #6b6a8a;
+    width: 32px; height: 32px; border: 1px solid #ecebf6;
+    border-radius: 6px; background: #fff; color: #56547a;
     font-size: 13px; font-weight: 600; cursor: pointer;
     font-family: 'Poppins', sans-serif; transition: all 0.2s;
 }
 .page-btn.active { background: #0b044d; color: #fff; border-color: #0b044d; }
-.page-btn:hover { background: #f7f6ff; }
+.page-btn:hover { background: #f7f6fc; }
 
 /* Sidebar Styles */
 .sidebar { width: 280px; border-right: none; height: 100vh; position: fixed; left: 0; top: 0; display: flex; flex-direction: column; transition: width 0.3s; z-index: 100; background: var(--sidebar-bg); box-shadow: 4px 0 24px rgba(11,4,77,0.15); }
@@ -1079,7 +1079,7 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .nav-active-bar { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; background: #fff; border-radius: 99px 0 0 99px; }
 .sidebar-footer { padding: 16px; display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--sidebar-border); }
 .user-avatar-wrap { position: relative; }
-.user-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #0b044d 0%, #2d1a8e 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+.user-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #0b044d 0%, #150c63 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
 .user-status-dot { position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; background: #22c55e; border: 2px solid #fff; border-radius: 50%; }
 .user-info { flex: 1; }
 .user-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; color: var(--sidebar-text); }
@@ -1097,13 +1097,13 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .icon-btn:hover { background: var(--topbar-icon-hover-bg); }
 .notif-badge { position: absolute; top: -4px; right: -4px; background: #8e1e18; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
 .btn-run-payroll { background: #0b044d; color: #fff; border: none; padding: 9px 18px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 7px; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
-.btn-run-payroll:hover { background: #1a0f6e; }
+.btn-run-payroll:hover { background: #150c63; }
 
 /* AI Chatbot Styles */
 .chat-fab { position: fixed; bottom: 28px; right: 28px; width: 56px; height: 56px; background: #0b044d; color: #fff; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 999; box-shadow: 0 6px 24px rgba(11,4,77,0.35); transition: all 0.2s; }
 .chat-fab:hover { background: #8e1e18; transform: scale(1.07); }
 .chat-fab.open { background: #8e1e18; }
-.chat-fab-badge { position: absolute; top: -4px; right: -4px; background: #d9bb00; color: #0b044d; font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 10px; font-family: 'Poppins', sans-serif; }
+.chat-fab-badge { position: absolute; top: -4px; right: -4px; background: #c9a227; color: #0b044d; font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 10px; font-family: 'Poppins', sans-serif; }
 
 .chatbot-window { position: fixed; bottom: 96px; right: 28px; width: 420px; height: 600px; background: #fff; border-radius: 18px; box-shadow: 0 12px 48px rgba(11,4,77,0.2); border: 1.5px solid #eceaf8; display: flex; flex-direction: column; z-index: 998; overflow: hidden; }
 .chatbot-header { background: #0b044d; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
@@ -1127,19 +1127,19 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .chat-msg.bot .chat-msg-bubble { background: #f4f3ff; color: #0b044d; border-bottom-left-radius: 4px; }
 .chat-msg.user .chat-msg-bubble { background: #0b044d; color: #fff; border-bottom-right-radius: 4px; }
 
-.chatbot-faqs { padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid #f0effe; }
-.chatbot-faq-btn { background: #f0effe; color: #0b044d; border: 1px solid #dddcf0; font-size: 11.5px; font-weight: 500; font-family: 'Poppins', sans-serif; padding: 5px 11px; border-radius: 20px; cursor: pointer; transition: all 0.2s; }
+.chatbot-faqs { padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid #f2f1fb; }
+.chatbot-faq-btn { background: #f2f1fb; color: #0b044d; border: 1px solid #e2e1f0; font-size: 11.5px; font-weight: 500; font-family: 'Poppins', sans-serif; padding: 5px 11px; border-radius: 20px; cursor: pointer; transition: all 0.2s; }
 .chatbot-faq-btn:hover { background: #0b044d; color: #fff; border-color: #0b044d; }
 
 .chatbot-input-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid #eceaf8; }
-.chatbot-input-row input { flex: 1; padding: 9px 13px; border: 1.5px solid #e4e3f0; border-radius: 9px; font-size: 13px; font-family: 'Poppins', sans-serif; color: #0b044d; outline: none; transition: border-color 0.2s; }
+.chatbot-input-row input { flex: 1; padding: 9px 13px; border: 1.5px solid #ecebf6; border-radius: 9px; font-size: 13px; font-family: 'Poppins', sans-serif; color: #0b044d; outline: none; transition: border-color 0.2s; }
 .chatbot-input-row input:focus { border-color: #0b044d; }
 .chatbot-input-row input::placeholder { color: #c0bedd; }
-.chatbot-speaker { width: 36px; height: 36px; background: #f7f6ff; color: #0b044d; border: 1.5px solid #e4e3f0; border-radius: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.2s; }
+.chatbot-speaker { width: 36px; height: 36px; background: #f7f6fc; color: #0b044d; border: 1.5px solid #ecebf6; border-radius: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.2s; }
 .chatbot-speaker:hover { background: #0b044d; color: #fff; border-color: #0b044d; }
 .chatbot-speaker.speaking { background: #22c55e; color: #fff; border-color: #22c55e; animation: pulse-speaker 1s infinite; }
 @keyframes pulse-speaker { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
-.chatbot-mic { width: 36px; height: 36px; background: #f7f6ff; color: #0b044d; border: 1.5px solid #e4e3f0; border-radius: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.2s; }
+.chatbot-mic { width: 36px; height: 36px; background: #f7f6fc; color: #0b044d; border: 1.5px solid #ecebf6; border-radius: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.2s; }
 .chatbot-mic:hover { background: #0b044d; color: #fff; border-color: #0b044d; }
 .chatbot-mic.listening { background: #ef4444; color: #fff; border-color: #ef4444; animation: pulse-mic 1.5s infinite; }
 @keyframes pulse-mic { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
@@ -1149,14 +1149,14 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 /* Theme Settings FAB & Panel */
 :root {
     --primary-color: #0b044d;
-    --primary-light: #2d1a8e;
-    --primary-bg: #f0effe;
-    --body-bg: #f7f6ff;
+    --primary-light: #150c63;
+    --primary-bg: #f2f1fb;
+    --body-bg: #f7f6fc;
     --card-bg: #ffffff;
-    --card-border: #f0effe;
+    --card-border: #f2f1fb;
 }
 
-.theme-fab { position: fixed; bottom: 100px; right: 28px; width: 56px; height: 56px; background: #6b6a8a; color: #fff; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 999; box-shadow: 0 6px 24px rgba(107,106,138,0.35); transition: all 0.2s; }
+.theme-fab { position: fixed; bottom: 100px; right: 28px; width: 56px; height: 56px; background: #56547a; color: #fff; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 999; box-shadow: 0 6px 24px rgba(107,106,138,0.35); transition: all 0.2s; }
 .theme-fab:hover { background: #0b044d; transform: scale(1.07); }
 .theme-fab.open { background: #0b044d; }
 
@@ -1173,73 +1173,73 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .theme-section-label { font-size: 12px; font-weight: 700; color: #0b044d; text-transform: uppercase; letter-spacing: 0.5px; }
 
 .theme-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.theme-mode-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px; background: #f7f6ff; border: 2px solid #e8e7f5; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif; }
+.theme-mode-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px; background: #f7f6fc; border: 2px solid #ecebf6; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif; }
 .theme-mode-btn:hover { border-color: var(--primary-color); background: var(--primary-bg); }
 .theme-mode-btn.active { border-color: var(--primary-color); background: var(--primary-bg); color: var(--primary-color); }
 .theme-mode-btn span { font-size: 12px; font-weight: 600; }
 
 .theme-color-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.theme-color-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px; background: #f7f6ff; border: 2px solid #e8e7f5; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif; }
+.theme-color-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px; background: #f7f6fc; border: 2px solid #ecebf6; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif; }
 .theme-color-btn:hover { border-color: #0b044d; transform: translateY(-2px); }
 .theme-color-btn.active { border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(11,4,77,0.15); }
 .theme-color-preview { width: 32px; height: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.theme-color-name { font-size: 11px; font-weight: 600; color: #6b6a8a; }
+.theme-color-name { font-size: 11px; font-weight: 600; color: #56547a; }
 
 .theme-nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.theme-sidebar-btn, .theme-topbar-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; background: #f7f6ff; border: 2px solid #e8e7f5; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif; }
+.theme-sidebar-btn, .theme-topbar-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; background: #f7f6fc; border: 2px solid #ecebf6; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif; }
 .theme-sidebar-btn:hover, .theme-topbar-btn:hover { border-color: #0b044d; transform: translateY(-2px); }
 .theme-sidebar-btn.active, .theme-topbar-btn.active { border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(11,4,77,0.15); }
 
-.theme-body-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; background: #f7f6ff; border: 2px solid #e8e7f5; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif; }
+.theme-body-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; background: #f7f6fc; border: 2px solid #ecebf6; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif; }
 .theme-body-btn:hover { border-color: #0b044d; transform: translateY(-2px); }
 .theme-body-btn.active { border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(11,4,77,0.15); }
 
 .theme-nav-preview { width: 100%; height: 40px; border-radius: 6px; overflow: hidden; display: flex; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .theme-nav-preview .theme-nav-bar { width: 30%; height: 100%; }
-.theme-nav-preview .theme-nav-content { flex: 1; background: #f7f6ff; }
+.theme-nav-preview .theme-nav-content { flex: 1; background: #f7f6fc; }
 .theme-nav-preview.topbar-preview { flex-direction: column; }
 .theme-nav-preview.topbar-preview .theme-nav-bar { width: 100%; height: 35%; }
 .theme-nav-preview.topbar-preview .theme-nav-content { width: 100%; height: 65%; }
 
-.theme-reset-btn { width: 100%; padding: 10px 16px; background: #f7f6ff; border: 1.5px solid #e8e7f5; border-radius: 9px; font-size: 13px; font-weight: 600; color: #6b6a8a; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
+.theme-reset-btn { width: 100%; padding: 10px 16px; background: #f7f6fc; border: 1.5px solid #ecebf6; border-radius: 9px; font-size: 13px; font-weight: 600; color: #56547a; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
 .theme-reset-btn:hover { background: #fee8e8; border-color: #8e1e18; color: #8e1e18; }
 
 /* Dark Mode Styles */
-body.dark-mode { color: #e8e7f5; }
+body.dark-mode { color: #ecebf6; }
 body.dark-mode .main-content { background: transparent; }
 body.dark-mode .stat-card { background: var(--card-bg); border-color: var(--card-border); }
-body.dark-mode .stat-label { color: #9999bb; }
-body.dark-mode .stat-value { color: #e8e7f5; }
-body.dark-mode .stat-sub { color: #9999bb; }
+body.dark-mode .stat-label { color: #8f8daf; }
+body.dark-mode .stat-value { color: #ecebf6; }
+body.dark-mode .stat-sub { color: #8f8daf; }
 body.dark-mode .table-section { background: var(--card-bg); border-color: var(--card-border); }
-body.dark-mode .table-title { color: #e8e7f5; }
-body.dark-mode .table-sub { color: #9999bb; }
-body.dark-mode .payroll-table th { background: var(--body-bg); color: #9999bb; border-bottom-color: var(--card-border); }
-body.dark-mode .payroll-table td { border-bottom-color: var(--card-border); color: #e8e7f5; }
-body.dark-mode .emp-name { color: #e8e7f5; }
-body.dark-mode .emp-id { color: #9999bb; }
-body.dark-mode .position-cell { color: #9999bb; }
-body.dark-mode .pay-cell { color: #e8e7f5; }
+body.dark-mode .table-title { color: #ecebf6; }
+body.dark-mode .table-sub { color: #8f8daf; }
+body.dark-mode .payroll-table th { background: var(--body-bg); color: #8f8daf; border-bottom-color: var(--card-border); }
+body.dark-mode .payroll-table td { border-bottom-color: var(--card-border); color: #ecebf6; }
+body.dark-mode .emp-name { color: #ecebf6; }
+body.dark-mode .emp-id { color: #8f8daf; }
+body.dark-mode .position-cell { color: #8f8daf; }
+body.dark-mode .pay-cell { color: #ecebf6; }
 body.dark-mode .welcome-banner { background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%); }
-body.dark-mode .filter-select { background: var(--card-bg); border-color: var(--card-border); color: #e8e7f5; }
-body.dark-mode .btn-export { background: var(--card-bg); border-color: var(--card-border); color: #e8e7f5; }
-body.dark-mode .btn-view { background: var(--card-border); color: #e8e7f5; }
+body.dark-mode .filter-select { background: var(--card-bg); border-color: var(--card-border); color: #ecebf6; }
+body.dark-mode .btn-export { background: var(--card-bg); border-color: var(--card-border); color: #ecebf6; }
+body.dark-mode .btn-view { background: var(--card-border); color: #ecebf6; }
 body.dark-mode .btn-view:hover { background: #3a4a6a; }
-body.dark-mode .tab-btn { color: #9999bb; }
-body.dark-mode .tab-btn.active { color: #e8e7f5; border-bottom-color: var(--primary-color); }
+body.dark-mode .tab-btn { color: #8f8daf; }
+body.dark-mode .tab-btn.active { color: #ecebf6; border-bottom-color: var(--primary-color); }
 
 
 
 /* Navigation Theme Variables */
 :root {
-    --sidebar-bg: linear-gradient(180deg, #0b044d 0%, #1a0f6e 100%);
+    --sidebar-bg: linear-gradient(180deg, #0b044d 0%, #150c63 100%);
     --sidebar-text: #ffffff;
     --sidebar-active-text: #ffffff;
     --sidebar-active-bg: rgba(255, 255, 255, 0.1);
     --sidebar-border: rgba(255, 255, 255, 0.1);
     --sidebar-hover-bg: rgba(255, 255, 255, 0.08);
     --sidebar-hover-text: #ffffff;
-    --topbar-bg: linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%);
+    --topbar-bg: linear-gradient(135deg, #0b044d 0%, #150c63 100%);
     --topbar-text: #ffffff;
     --topbar-border: rgba(255, 255, 255, 0.1);
     --topbar-subtitle-text: rgba(255, 255, 255, 0.7);
@@ -1251,8 +1251,8 @@ body.dark-mode .tab-btn.active { color: #e8e7f5; border-bottom-color: var(--prim
 
 /* Enhanced Chatbot Styles */
 .chatbot-details-btn {
-    background: #f0effe; color: #0b044d;
-    border: 1.5px solid #dddcf0; border-radius: 10px;
+    background: #f2f1fb; color: #0b044d;
+    border: 1.5px solid #e2e1f0; border-radius: 10px;
     font-size: 12px; font-weight: 600;
     font-family: 'Poppins', sans-serif;
     padding: 8px 14px; cursor: pointer;
@@ -1270,7 +1270,7 @@ body.dark-mode .tab-btn.active { color: #e8e7f5; border-bottom-color: var(--prim
 }
 .chatbot-followup-btn {
     background: #fff; color: #0b044d;
-    border: 1.5px solid #e4e3f0; border-radius: 10px;
+    border: 1.5px solid #ecebf6; border-radius: 10px;
     font-size: 11.5px; font-weight: 500;
     font-family: 'Poppins', sans-serif;
     padding: 8px 12px; cursor: pointer;

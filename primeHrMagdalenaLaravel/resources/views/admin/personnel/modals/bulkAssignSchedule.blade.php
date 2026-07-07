@@ -162,7 +162,7 @@
 
 /* ── Header ── */
 .bulk-header {
-    background: linear-gradient(135deg, #1a0f6e, #2d1a8e);
+    background: linear-gradient(135deg, #150c63, #150c63);
     padding: 16px 20px;
     display: flex;
     justify-content: space-between;
@@ -203,22 +203,22 @@
 .bulk-left {
     display: flex;
     flex-direction: column;
-    border-right: 1.5px solid #f0effe;
+    border-right: 1.5px solid #f2f1fb;
     overflow: hidden;
     min-height: 0;
 }
 .bulk-filters {
     padding: 14px 16px;
-    border-bottom: 1px solid #f0effe;
+    border-bottom: 1px solid #f2f1fb;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     gap: 7px;
 }
-.bulk-section-label { margin: 0 0 8px; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #9999bb; }
+.bulk-section-label { margin: 0 0 8px; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #8f8daf; }
 .bulk-select {
     width: 100%; padding: 7px 10px;
-    border: 1.5px solid #e8e7f5; border-radius: 8px;
+    border: 1.5px solid #ecebf6; border-radius: 8px;
     font-size: 12px; font-family: 'Poppins', sans-serif;
     color: #0b044d; background: #fff; cursor: pointer;
 }
@@ -231,11 +231,11 @@
     cursor: pointer; font-family: 'Poppins', sans-serif;
     transition: background 0.2s;
 }
-.bulk-btn-primary:hover { background: #1a0f6e; }
+.bulk-btn-primary:hover { background: #150c63; }
 .bulk-btn-ghost {
     flex: 1; padding: 7px 10px;
-    background: #fff; color: #6b6a8a;
-    border: 1.5px solid #e8e7f5; border-radius: 6px;
+    background: #fff; color: #56547a;
+    border: 1.5px solid #ecebf6; border-radius: 6px;
     font-size: 11.5px; font-weight: 600;
     cursor: pointer; font-family: 'Poppins', sans-serif;
     transition: all 0.2s;
@@ -243,7 +243,7 @@
 .bulk-btn-ghost:hover { border-color: #0b044d; color: #0b044d; }
 .bulk-select-all-row {
     padding: 10px 16px;
-    border-bottom: 1px solid #f0effe;
+    border-bottom: 1px solid #f2f1fb;
     flex-shrink: 0;
 }
 .bulk-select-all-label {
@@ -258,12 +258,12 @@
     cursor: pointer; transition: background 0.15s;
     margin-bottom: 2px;
 }
-.bulk-emp-item:hover { background: #f0effe; }
+.bulk-emp-item:hover { background: #f2f1fb; }
 .bulk-emp-info { min-width: 0; }
 .bulk-emp-name { margin: 0; font-size: 12px; font-weight: 600; color: #0b044d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bulk-emp-meta { margin: 0; font-size: 10.5px; color: #9999bb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bulk-count-bar { padding: 9px 16px; border-top: 1px solid #f0effe; flex-shrink: 0; background: #fafafe; }
-.bulk-count-text { margin: 0; font-size: 11.5px; color: #6b6a8a; }
+.bulk-emp-meta { margin: 0; font-size: 10.5px; color: #8f8daf; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bulk-count-bar { padding: 9px 16px; border-top: 1px solid #f2f1fb; flex-shrink: 0; background: #f7f6fc; }
+.bulk-count-text { margin: 0; font-size: 11.5px; color: #56547a; }
 .bulk-count-num { font-weight: 700; color: #0b044d; }
 
 /* ── RIGHT column ── */
@@ -279,15 +279,15 @@
 .bulk-req { color: #8e1e18; }
 .bulk-input {
     width: 100%; padding: 8px 10px;
-    border: 1.5px solid #e8e7f5; border-radius: 8px;
+    border: 1.5px solid #ecebf6; border-radius: 8px;
     font-size: 12.5px; font-family: 'Poppins', sans-serif;
     color: #0b044d; background: #fff; box-sizing: border-box;
     transition: border-color 0.2s;
 }
 .bulk-input:focus { outline: none; border-color: #0b044d; }
 .bulk-shift-block {
-    background: #f7f6ff;
-    border: 1.5px solid #e8e7f5;
+    background: #f7f6fc;
+    border: 1.5px solid #ecebf6;
     border-radius: 10px;
     padding: 12px;
 }
@@ -303,14 +303,14 @@
 /* ── Footer ── */
 .bulk-footer {
     padding: 12px 20px;
-    border-top: 1.5px solid #f0effe;
+    border-top: 1.5px solid #f2f1fb;
     display: flex; justify-content: flex-end; gap: 10px;
     flex-shrink: 0; background: #fff;
 }
 .bulk-footer-cancel { flex: none; padding: 9px 20px; }
 .bulk-btn-submit {
     padding: 9px 20px;
-    background: linear-gradient(135deg, #1a0f6e, #2d1a8e);
+    background: linear-gradient(135deg, #150c63, #150c63);
     border: none; border-radius: 8px;
     font-size: 13px; font-weight: 600; color: #fff;
     cursor: pointer; font-family: 'Poppins', sans-serif;
@@ -334,7 +334,7 @@
     }
     .bulk-left {
         border-right: none;
-        border-bottom: 1.5px solid #f0effe;
+        border-bottom: 1.5px solid #f2f1fb;
         max-height: 280px;
         overflow: hidden;
     }

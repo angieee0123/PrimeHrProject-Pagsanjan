@@ -5,7 +5,7 @@
 .admin-training .training-stat-hero .stat-value { margin-bottom: 8px; }
 .admin-training .training-goal-track {
     height: 6px;
-    background: #f0effe;
+    background: #f2f1fb;
     border-radius: 99px;
     overflow: hidden;
     margin-bottom: 10px;
@@ -13,16 +13,16 @@
 .admin-training .training-goal-fill {
     height: 100%;
     border-radius: 99px;
-    background: linear-gradient(90deg, #0b044d, #1a0f6e);
+    background: linear-gradient(90deg, #0b044d, #150c63);
     transition: width 0.35s ease;
 }
 .admin-training .training-goal-fill-queue {
-    background: linear-gradient(90deg, #d9bb00, #f59e0b);
+    background: linear-gradient(90deg, #c9a227, #f59e0b);
 }
 
-.admin-training .stat-icon-wrap-primary { background: #f0effe; }
+.admin-training .stat-icon-wrap-primary { background: #f2f1fb; }
 .admin-training .stat-icon-wrap-success { background: #e8f9ef; }
-.admin-training .stat-icon-wrap-warning { background: #fefce8; }
+.admin-training .stat-icon-wrap-warning { background: #fbf6e3; }
 .admin-training .stat-icon-wrap-danger { background: #fdf0ef; }
 .admin-training .stat-dot-primary { background: #0b044d; }
 .admin-training .stat-dot-success { background: #22c55e; }
@@ -40,7 +40,7 @@
 .admin-training .training-breakdown-panel-title {
     font-size: 12px;
     font-weight: 700;
-    color: #9999bb;
+    color: #8f8daf;
     text-transform: uppercase;
     letter-spacing: 0.6px;
     margin: 0 0 14px;
@@ -51,10 +51,10 @@
     gap: 14px;
 }
 .admin-training .training-breakdown-card {
-    background: #f7f6ff;
+    background: #f7f6fc;
     border-radius: 10px;
     padding: 12px 14px;
-    border: 1px solid #f0effe;
+    border: 1px solid #f2f1fb;
 }
 .admin-training .training-breakdown-card-head {
     display: flex;
@@ -68,13 +68,13 @@
     border-radius: 50%;
     flex-shrink: 0;
 }
-.admin-training .training-breakdown-dot.leadership { background: #6b3fa0; }
+.admin-training .training-breakdown-dot.leadership { background: #56547a; }
 .admin-training .training-breakdown-dot.technical { background: #15803d; }
-.admin-training .training-breakdown-dot.core { background: #d9bb00; }
+.admin-training .training-breakdown-dot.core { background: #c9a227; }
 .admin-training .training-breakdown-card-label {
     font-size: 12px;
     font-weight: 600;
-    color: #6b6a8a;
+    color: #56547a;
     flex: 1;
 }
 .admin-training .training-breakdown-card-hours {
@@ -93,9 +93,9 @@
     border-radius: 99px;
     transition: width 0.35s ease;
 }
-.admin-training .training-mini-bar-fill.leadership { background: #6b3fa0; }
+.admin-training .training-mini-bar-fill.leadership { background: #56547a; }
 .admin-training .training-mini-bar-fill.technical { background: #15803d; }
-.admin-training .training-mini-bar-fill.core { background: #d9bb00; }
+.admin-training .training-mini-bar-fill.core { background: #c9a227; }
 
 /* Workflow note (same as permanent enroll note) */
 .admin-training .training-enroll-note {
@@ -103,7 +103,7 @@
     align-items: flex-start;
     gap: 10px;
     padding: 12px 14px;
-    background: #fefce8;
+    background: #fbf6e3;
     border-radius: 10px;
     border: 1px solid #fde68a;
     margin-bottom: 22px;
@@ -111,7 +111,7 @@
 .admin-training .training-enroll-note-icon { flex-shrink: 0; margin-top: 1px; }
 .admin-training .training-enroll-note-text {
     font-size: 12.5px;
-    color: #a16207;
+    color: #c9a227;
     margin: 0;
     line-height: 1.5;
 }
@@ -130,8 +130,8 @@
     gap: 12px;
     flex-wrap: wrap;
     padding: 12px 24px;
-    border-bottom: 1.5px solid #f0effe;
-    background: #fafafe;
+    border-bottom: 1.5px solid #f2f1fb;
+    background: #f7f6fc;
 }
 .admin-training .training-filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .admin-training .training-filter-chip {
@@ -141,7 +141,7 @@
     background: #fff;
     font-size: 12px;
     font-weight: 600;
-    color: #6b6a8a;
+    color: #56547a;
     cursor: pointer;
     font-family: 'Poppins', sans-serif;
     transition: all 0.2s;
@@ -158,12 +158,12 @@
 .admin-training .training-pds-table th:nth-child(2) { min-width: 220px; }
 .admin-training .admin-employee-cell { display: flex; flex-direction: column; gap: 3px; min-width: 140px; }
 .admin-training .admin-employee-name { font-size: 13.5px; font-weight: 600; color: #0b044d; line-height: 1.35; }
-.admin-training .admin-employee-meta { font-size: 11px; color: #9999bb; font-weight: 500; }
+.admin-training .admin-employee-meta { font-size: 11px; color: #8f8daf; font-weight: 500; }
 
 .admin-training .training-title-wrap { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .admin-training .training-title-text { font-size: 13.5px; font-weight: 600; color: #0b044d; line-height: 1.35; }
-.admin-training .training-ref-doc { font-size: 11px; color: #9999bb; font-weight: 500; }
-.admin-training .training-table-date { font-size: 12.5px; color: #6b6a8a; white-space: nowrap; }
+.admin-training .training-ref-doc { font-size: 11px; color: #8f8daf; font-weight: 500; }
+.admin-training .training-table-date { font-size: 12.5px; color: #56547a; white-space: nowrap; }
 .admin-training .training-date-sep { margin: 0 4px; color: #aaa8cc; }
 
 .admin-training .training-hours-pill {
@@ -176,13 +176,13 @@
     font-size: 12.5px;
     font-weight: 700;
     color: #0b044d;
-    background: #f0effe;
+    background: #f2f1fb;
 }
-.admin-training .training-hours-pill-pending { background: #fefce8; color: #a16207; }
-.admin-training .training-hours-pill-muted { background: #f7f6ff; color: #aaa8cc; }
+.admin-training .training-hours-pill-pending { background: #fbf6e3; color: #c9a227; }
+.admin-training .training-hours-pill-muted { background: #f7f6fc; color: #aaa8cc; }
 
 .admin-training .payroll-table tbody tr.training-row-verified { border-left: 3px solid #22c55e; }
-.admin-training .payroll-table tbody tr.training-row-pending { border-left: 3px solid #d9bb00; }
+.admin-training .payroll-table tbody tr.training-row-pending { border-left: 3px solid #c9a227; }
 .admin-training .payroll-table tbody tr.training-row-rejected { border-left: 3px solid #ef4444; }
 .admin-training .payroll-table tbody tr.training-row-verified:hover { background: #f8fdf9; }
 .admin-training .payroll-table tbody tr.training-row-pending:hover { background: #fffef5; }
@@ -196,10 +196,10 @@
     display: inline-block;
     white-space: nowrap;
 }
-.admin-training .type-badge.managerial { background: #f0effe; color: #6b3fa0; }
+.admin-training .type-badge.managerial { background: #f2f1fb; color: #56547a; }
 .admin-training .type-badge.supervisory { background: #e8f4fd; color: #0369a1; }
 .admin-training .type-badge.technical { background: #e8f9ef; color: #15803d; }
-.admin-training .type-badge.clerical { background: #fefce8; color: #a16207; }
+.admin-training .type-badge.clerical { background: #fbf6e3; color: #c9a227; }
 
 .admin-training .verify-badge {
     display: inline-flex;
@@ -218,8 +218,8 @@
     border-radius: 50%;
     flex-shrink: 0;
 }
-.admin-training .verify-badge.pending { background: #fefce8; color: #a16207; }
-.admin-training .verify-badge.pending::before { background: #d9bb00; }
+.admin-training .verify-badge.pending { background: #fbf6e3; color: #c9a227; }
+.admin-training .verify-badge.pending::before { background: #c9a227; }
 .admin-training .verify-badge.verified { background: #e8f9ef; color: #15803d; }
 .admin-training .verify-badge.verified::before { background: #22c55e; }
 .admin-training .verify-badge.rejected { background: #fdf0ef; color: #8e1e18; cursor: help; }
@@ -270,7 +270,7 @@
 .admin-training .btn-admin-review:hover { background: #0b044d; color: #fff; }
 .admin-training .btn-admin-review-muted {
     border-color: #e5e4f0;
-    color: #6b6a8a;
+    color: #56547a;
 }
 .admin-training .btn-admin-review-muted:hover {
     background: #f4f3ff;
@@ -328,7 +328,7 @@
     background: rgba(255, 255, 255, 0.14);
 }
 .banner-badge-dot-success { background: #22c55e; }
-.banner-badge-dot-amber { background: #d9bb00; }
+.banner-badge-dot-amber { background: #c9a227; }
 
 /* Toast */
 .training-toast {
@@ -360,11 +360,11 @@
 /* Modal helpers */
 .pmodal-hero { display: flex; gap: 16px; align-items: flex-start; flex: 1; min-width: 0; }
 .pmodal-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-.training-hero-icon { background: linear-gradient(135deg, #0b044d, #1a0f6e); }
+.training-hero-icon { background: linear-gradient(135deg, #0b044d, #150c63); }
 .admin-reject-hero-icon { background: linear-gradient(135deg, #8e1e18, #b91c1c); }
 
 .training-verified-strong { color: #15803d; }
-.training-pending-strong { color: #d9bb00; }
+.training-pending-strong { color: #c9a227; }
 
 .modal-btn-danger {
     padding: 10px 18px;
@@ -410,7 +410,7 @@
 }
 #adminFlashSuccessModal .admin-success-modal-accent {
     height: 6px;
-    background: linear-gradient(90deg, #0b044d 0%, #1a0f6e 40%, #15803d 100%);
+    background: linear-gradient(90deg, #0b044d 0%, #150c63 40%, #15803d 100%);
 }
 #adminFlashSuccessModal .admin-success-modal-body {
     text-align: center;
@@ -453,7 +453,7 @@
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 1.2px;
-    color: #9999bb;
+    color: #8f8daf;
     text-transform: uppercase;
     margin-bottom: 6px;
 }
@@ -466,7 +466,7 @@
 }
 #adminFlashSuccessModal .admin-success-message {
     font-size: 14px;
-    color: #6b6a8a;
+    color: #56547a;
     line-height: 1.55;
     margin: 0 auto;
     max-width: 340px;
@@ -475,7 +475,7 @@
     justify-content: center;
     padding: 20px 28px 28px;
     border-top: none;
-    background: linear-gradient(180deg, transparent 0%, #f7f6ff 100%);
+    background: linear-gradient(180deg, transparent 0%, #f7f6fc 100%);
 }
 #adminFlashSuccessModal .admin-success-btn {
     width: 100%;
@@ -505,7 +505,7 @@
 #reviewModal .training-modal-meta,
 #approveModal .training-modal-meta {
     text-align: left;
-    background: #f7f6ff;
+    background: #f7f6fc;
     border-radius: 12px;
     padding: 14px 16px;
 }
@@ -513,7 +513,7 @@
 #reviewModal .training-cert-preview {
     text-align: center;
     padding: 24px 20px;
-    background: #f7f6ff;
+    background: #f7f6fc;
     border-radius: 12px;
     border: 1.5px dashed #e5e4f0;
 }
@@ -532,7 +532,7 @@
 }
 #reviewModal .training-cert-preview-note {
     font-size: 12px;
-    color: #6b6a8a;
+    color: #56547a;
     margin: 0;
 }
 #reviewModal .pmodal-badges { margin-top: 8px; }
@@ -565,7 +565,7 @@
 }
 #rejectModal .training-field-hint {
     font-size: 11px;
-    color: #9999bb;
+    color: #8f8daf;
     margin: 6px 0 0;
     line-height: 1.4;
 }
@@ -585,7 +585,7 @@
 #approveModal .training-modal-title-gap { margin-bottom: 6px; }
 #approveModal .training-modal-text {
     font-size: 13px;
-    color: #6b6a8a;
+    color: #56547a;
     margin-bottom: 18px;
 }
 #approveModal .training-modal-row-last { border: none; }

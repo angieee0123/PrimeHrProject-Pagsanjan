@@ -14,7 +14,7 @@
 
     @php
         $sortIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;"><polyline points="18 15 12 9 6 15"></polyline></svg>';
-        $colors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
+        $colors = ['#0b044d', '#8e1e18', '#150c63', '#a52820', '#150c63', '#56547a'];
     @endphp
 
     <div class="table-wrapper">
@@ -68,7 +68,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 40px; color: #6b6a8a;">No leave types found</td>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #56547a;">No leave types found</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -109,7 +109,7 @@
 .lt-ellipsis-btn {
     background: none;
     border: none;
-    color: #9999bb;
+    color: #8f8daf;
     cursor: pointer;
     padding: 6px 10px;
     border-radius: 8px;
@@ -152,7 +152,7 @@
     gap: 8px;
 }
 .lt-action-menu button:hover {
-    background: #f0effe;
+    background: #f2f1fb;
 }
 @keyframes ltSlideDown {
     from { opacity: 0; transform: translateY(-8px); }

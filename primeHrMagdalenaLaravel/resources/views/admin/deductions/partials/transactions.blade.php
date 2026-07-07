@@ -20,7 +20,7 @@
             </tr>
         </thead>
             <tr>
-                <td colspan="6" style="text-align: center; padding: 40px; color: #9999bb;">
+                <td colspan="6" style="text-align: center; padding: 40px; color: #8f8daf;">
                     No transactions found. Transactions will appear here after processing payroll.
                 </td>
             </tr>

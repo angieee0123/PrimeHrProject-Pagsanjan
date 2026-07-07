@@ -16,13 +16,13 @@
                 @method('PUT')
                 <input type="hidden" id="editDeductionId" name="deduction_id">
                 
-                <div class="info-box" style="background: #f7f6ff; padding: 12px; border-radius: 6px; margin-bottom: 16px;">
+                <div class="info-box" style="background: #f7f6fc; padding: 12px; border-radius: 6px; margin-bottom: 16px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                        <span style="font-size: 11px; color: #6b6a8a; font-weight: 600;">EMPLOYEE</span>
+                        <span style="font-size: 11px; color: #56547a; font-weight: 600;">EMPLOYEE</span>
                         <span id="editEmployeeName" style="font-size: 13px; color: #0b044d; font-weight: 600;"></span>
                     </div>
                     <div style="display: flex; justify-content: space-between;">
-                        <span style="font-size: 11px; color: #6b6a8a; font-weight: 600;">DEDUCTION TYPE</span>
+                        <span style="font-size: 11px; color: #56547a; font-weight: 600;">DEDUCTION TYPE</span>
                         <span id="editDeductionType" style="font-size: 13px; color: #0b044d; font-weight: 600;"></span>
                     </div>
                 </div>
@@ -30,7 +30,7 @@
                 <div class="form-row" id="editLoanFields" style="display: none;">
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Total Amount</label>
-                        <input type="number" id="editTotalAmount" class="form-input" step="0.01" min="0" readonly style="background: #f7f6ff; cursor: not-allowed;">
+                        <input type="number" id="editTotalAmount" class="form-input" step="0.01" min="0" readonly style="background: #f7f6fc; cursor: not-allowed;">
                     </div>
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Remaining Balance</label>
@@ -84,7 +84,7 @@
 
 <style>
 .info-box {
-    background: #f7f6ff;
+    background: #f7f6fc;
     padding: 12px;
     border-radius: 6px;
     margin-bottom: 16px;

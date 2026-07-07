@@ -18,7 +18,7 @@
     <div class="stat-card" style="cursor:pointer;transition:all 0.3s" onclick="window.location.href='#employee-directory'" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
         <div class="stat-top">
             <p class="stat-label">Total Employees</p>
-            <div class="stat-icon-wrap" style="background:#f0effe">
+            <div class="stat-icon-wrap" style="background:#f2f1fb">
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
         </div>
@@ -32,11 +32,11 @@
     <div class="stat-card" style="cursor:pointer;transition:all 0.3s" onclick="document.getElementById('birdsTabTitle').scrollIntoView({behavior:'smooth'})" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
         <div class="stat-top">
             <p class="stat-label">Present Today</p>
-            <div class="stat-icon-wrap" style="background:#f0effe">
+            <div class="stat-icon-wrap" style="background:#f2f1fb">
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
             </div>
         </div>
-        <p class="stat-value">{{ number_format($stats['present_today']) }}<span style="font-size:14px;color:#9999bb;font-weight:500"> / {{ number_format($stats['total_employees']) }}</span></p>
+        <p class="stat-value">{{ number_format($stats['present_today']) }}<span style="font-size:14px;color:#8f8daf;font-weight:500"> / {{ number_format($stats['total_employees']) }}</span></p>
         <div class="stat-footer">
             <span class="stat-dot" style="background:#22c55e"></span>
             <p class="stat-sub">{{ $stats['attendance_rate'] }}% attendance rate</p>
@@ -51,13 +51,13 @@
                 <span style="font-size:10px;font-weight:700;color:#fff;background:#8e1e18;padding:2px 7px;border-radius:4px;line-height:1.5">{{ $stats['pending_leave'] }}</span>
                 @endif
             </p>
-            <div class="stat-icon-wrap" style="background:#f0effe">
+            <div class="stat-icon-wrap" style="background:#f2f1fb">
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
         </div>
         <p class="stat-value">{{ number_format($stats['on_leave']) }}</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#d9bb00"></span>
+            <span class="stat-dot" style="background:#c9a227"></span>
             <p class="stat-sub">{{ $stats['pending_leave'] }} pending approval</p>
         </div>
     </div>
@@ -65,7 +65,7 @@
     <div class="stat-card" style="cursor:pointer;transition:all 0.3s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
         <div class="stat-top">
             <p class="stat-label">Monthly Payroll</p>
-            <div class="stat-icon-wrap" style="background:#f0effe">
+            <div class="stat-icon-wrap" style="background:#f2f1fb">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="#0b044d" stroke="none"><text x="3" y="19" font-size="17" font-weight="bold" font-family="Arial, sans-serif">₱</text></svg>
             </div>
         </div>
@@ -90,7 +90,7 @@
     border: 1px solid rgba(255, 255, 255, .18) !important;
     background:
         radial-gradient(340px 200px at 100% -20%, rgba(129, 140, 248, .35), transparent 70%),
-        linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%) !important;
+        linear-gradient(135deg, #0b044d 0%, #150c63 100%) !important;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, .16),
         0 16px 40px rgba(11, 4, 77, .28) !important;
@@ -221,7 +221,7 @@
 }
 
 .enterprise-icon-btn:hover {
-    border-color: #cfd4dc;
+    border-color: #ecebf6;
     box-shadow: 0 4px 12px rgba(15, 23, 42, .06);
     transform: translateY(-1px);
 }
@@ -561,7 +561,7 @@
     background: rgba(255, 255, 255, .55) !important;
     backdrop-filter: blur(12px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
-    color: #344054 !important;
+    color: #56547a !important;
 }
 
 .enterprise-hr-dashboard .btn-export:hover {
@@ -926,7 +926,7 @@
                         <strong>{{ $l['name'] }}</strong>
                         <span>{{ $l['type'] }} · {{ $l['days'] }}</span>
                     </div>
-                    <button onclick="toggleLeaveMenu(event)" style="background:none;border:none;color:#9999bb;cursor:pointer;padding:4px 8px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0" onmouseover="this.style.background='#f1f5f9';this.style.color='#0b044d'" onmouseout="this.style.background='none';this.style.color='#9999bb'">
+                    <button onclick="toggleLeaveMenu(event)" style="background:none;border:none;color:#8f8daf;cursor:pointer;padding:4px 8px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0" onmouseover="this.style.background='#f1f5f9';this.style.color='#0b044d'" onmouseout="this.style.background='none';this.style.color='#8f8daf'">
                         <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                     </button>
                     <div class="leave-action-menu" style="display:none;position:absolute;right:0;top:100%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(15,23,42,0.12);z-index:100;min-width:140px;margin-top:4px">
@@ -938,7 +938,7 @@
                             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display:inline;margin-right:6px;vertical-align:middle"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                             Disapprove
                         </button>
-                        <button onclick="viewLeaveDetails(event)" style="width:100%;padding:10px 12px;border:none;background:none;text-align:left;font-size:12px;color:#0b044d;font-weight:600;cursor:pointer;transition:all 0.2s;border-radius:0 0 6px 6px" onmouseover="this.style.background='#f0effe'" onmouseout="this.style.background='none'">
+                        <button onclick="viewLeaveDetails(event)" style="width:100%;padding:10px 12px;border:none;background:none;text-align:left;font-size:12px;color:#0b044d;font-weight:600;cursor:pointer;transition:all 0.2s;border-radius:0 0 6px 6px" onmouseover="this.style.background='#f2f1fb'" onmouseout="this.style.background='none'">
                             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display:inline;margin-right:6px;vertical-align:middle"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             View
                         </button>
@@ -962,7 +962,7 @@
                         <strong>{{ $p['name'] }}</strong>
                         <span>{{ $p['type_label'] }}{{ $p['destination'] ? ' · ' . $p['destination'] : '' }}</span>
                     </div>
-                    <button onclick="togglePassSlipMenuDash(event)" style="background:none;border:none;color:#9999bb;cursor:pointer;padding:4px 8px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0" onmouseover="this.style.background='#f1f5f9';this.style.color='#0b044d'" onmouseout="this.style.background='none';this.style.color='#9999bb'">
+                    <button onclick="togglePassSlipMenuDash(event)" style="background:none;border:none;color:#8f8daf;cursor:pointer;padding:4px 8px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0" onmouseover="this.style.background='#f1f5f9';this.style.color='#0b044d'" onmouseout="this.style.background='none';this.style.color='#8f8daf'">
                         <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                     </button>
                     <div class="leave-action-menu" style="display:none;position:absolute;right:0;top:100%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(15,23,42,0.12);z-index:100;min-width:160px;margin-top:4px">
@@ -1267,7 +1267,7 @@
 </div>
 {{-- Employee Directory Table - Full Width --}}
 <div class="table-section" id="employee-directory">
-    <div class="table-header" style="background:linear-gradient(135deg,#f0effe 0%,#fff 100%)">
+    <div class="table-header" style="background:linear-gradient(135deg,#f2f1fb 0%,#fff 100%)">
         <div>
             <p class="table-title" style="display:flex;align-items:center;gap:8px">
                 Employee Directory
@@ -1276,7 +1276,7 @@
         </div>
         <div class="table-actions">
             <div style="position:relative;margin-right:8px">
-                <svg width="14" height="14" fill="none" stroke="#9999bb" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <svg width="14" height="14" fill="none" stroke="#8f8daf" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                 <input type="text" id="searchEmployee" placeholder="Search employees..." style="font-size:11px;padding:6px 12px 6px 32px;border-radius:6px;border:1.5px solid #e5e4f0;width:200px;font-family:inherit" oninput="searchEmployees(this.value)">
             </div>
             <select class="filter-select" id="filterDept" onchange="applyFilters()" style="font-size:11px">
@@ -1321,9 +1321,9 @@
                     <td>
                         <div class="emp-cell">
                             @if($emp['photo'])
-                                <img src="{{ $emp['photo'] }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                                <img src="{{ $emp['photo'] }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
                             @else
-                                <div class="emp-avatar emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #e8e7f5;">{{ $emp['initials'] }}</div>
+                                <div class="emp-avatar emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #ecebf6;">{{ $emp['initials'] }}</div>
                             @endif
                             <div>
                                 <p class="emp-name">{{ $emp['name'] }}</p>
@@ -1345,7 +1345,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="text-align:center;padding:40px;color:#9999bb;">No employees found</td>
+                    <td colspan="6" style="text-align:center;padding:40px;color:#8f8daf;">No employees found</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -1470,15 +1470,15 @@
 {{-- View Employee Modal --}}
 <div id="viewEmployeeDashboardModal" style="display:none; position:fixed; inset:0; background:rgba(11,4,77,0.6); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center;">
     <div style="background:#fff; border-radius:16px; width:100%; max-width:900px; max-height:90vh; overflow-y:auto; box-shadow:0 25px 50px rgba(0,0,0,0.25);">
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:24px; border-bottom:1.5px solid #f0effe;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:24px; border-bottom:1.5px solid #f2f1fb;">
             <div>
                 <h3 style="margin:0 0 4px; font-size:18px; font-weight:700; color:#0b044d;">Employee Details</h3>
-                <p id="viewEmployeeDashboardId" style="margin:0; font-size:13px; color:#6b6a8a;"></p>
+                <p id="viewEmployeeDashboardId" style="margin:0; font-size:13px; color:#56547a;"></p>
             </div>
-            <button onclick="closeViewDashboardModal()" style="background:none; border:none; font-size:28px; color:#6b6a8a; cursor:pointer; width:32px; height:32px; display:flex; align-items:center; justify-content:center;">&times;</button>
+            <button onclick="closeViewDashboardModal()" style="background:none; border:none; font-size:28px; color:#56547a; cursor:pointer; width:32px; height:32px; display:flex; align-items:center; justify-content:center;">&times;</button>
         </div>
         <div id="viewEmployeeDashboardContent" style="padding:24px;">
-            <p style="text-align:center; color:#6b6a8a;">Loading...</p>
+            <p style="text-align:center; color:#56547a;">Loading...</p>
         </div>
     </div>
 </div>
@@ -1488,7 +1488,7 @@
     <div class="modal-box" style="max-width:560px" onclick="event.stopPropagation()">
         <div class="modal-header">
             <div class="pmodal-hero">
-                <div class="pmodal-hero-icon" style="background:linear-gradient(135deg,#0b044d,#1a0f6e)">
+                <div class="pmodal-hero-icon" style="background:linear-gradient(135deg,#0b044d,#150c63)">
                     <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                 </div>
                 <div>
@@ -1754,9 +1754,9 @@ function initCharts() {
             scales: {
                 y: {
                     beginAtZero: true,
-                    grid: { color: '#f7f6ff', drawBorder: false },
+                    grid: { color: '#f7f6fc', drawBorder: false },
                     ticks: {
-                        color: '#9999bb',
+                        color: '#8f8daf',
                         font: { size: 11, family: 'Poppins' },
                         callback: function(value) {
                             if (value >= 1000000) return '₱' + (value / 1000000).toFixed(1) + 'M';
@@ -1768,7 +1768,7 @@ function initCharts() {
                 x: {
                     grid: { display: false, drawBorder: false },
                     ticks: {
-                        color: '#9999bb',
+                        color: '#8f8daf',
                         font: { size: 11, family: 'Poppins' },
                         callback: function(value, index) {
                             const labels = this.getLabelForValue(value);
@@ -1866,9 +1866,9 @@ function initCharts() {
                 y: {
                     beginAtZero: true,
                     max: 120,
-                    grid: { color: '#f7f6ff', drawBorder: false },
+                    grid: { color: '#f7f6fc', drawBorder: false },
                     ticks: {
-                        color: '#9999bb',
+                        color: '#8f8daf',
                         font: { size: 11, family: 'Poppins' },
                         padding: 8
                     }
@@ -1877,7 +1877,7 @@ function initCharts() {
                     offset: false,
                     grid: { display: false, drawBorder: false, offset: false },
                     ticks: {
-                        color: '#9999bb',
+                        color: '#8f8daf',
                         font: { size: 11, family: 'Poppins' },
                         padding: 2,
                         autoSkip: true,
@@ -2023,7 +2023,7 @@ window.addEventListener('resize', adjustDeptDistribution);
 
 function viewEmployeeDashboard(employeeId) {
     document.getElementById('viewEmployeeDashboardModal').style.display = 'flex';
-    document.getElementById('viewEmployeeDashboardContent').innerHTML = '<p style="text-align:center; color:#6b6a8a;">Loading...</p>';
+    document.getElementById('viewEmployeeDashboardContent').innerHTML = '<p style="text-align:center; color:#56547a;">Loading...</p>';
 
     fetch(`/admin/personnel/${employeeId}`)
         .then(response => response.json())
@@ -2044,60 +2044,60 @@ function generateEmployeeViewDashboard(data) {
     return `
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;">
             <div>
-                <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f0effe;">👤 Personal Information</h4>
+                <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f2f1fb;">👤 Personal Information</h4>
                 <div style="display:flex; flex-direction:column; gap:12px;">
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Full Name</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.first_name} ${data.middle_name || ''} ${data.last_name} ${data.suffix || ''}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Date of Birth</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.birth_date || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Place of Birth</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.place_of_birth || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Sex</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.sex || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Civil Status</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.civil_status || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Citizenship</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.citizenship || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Blood Type</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.blood_type || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Full Name</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.first_name} ${data.middle_name || ''} ${data.last_name} ${data.suffix || ''}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Date of Birth</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.birth_date || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Place of Birth</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.place_of_birth || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Sex</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.sex || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Civil Status</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.civil_status || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Citizenship</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.citizenship || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Blood Type</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.blood_type || 'N/A'}</span></div>
                 </div>
             </div>
             <div>
-                <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f0effe;">💼 Employment Details</h4>
+                <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f2f1fb;">💼 Employment Details</h4>
                 <div style="display:flex; flex-direction:column; gap:12px;">
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Designation</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.designation_relation?.title || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Department</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.department_relation?.name || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Employment Status</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.employment_status || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Appointment Date</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.appointment_date || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Salary Grade</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.salary_grade || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Step Increment</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.step_increment || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Designation</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.designation_relation?.title || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Department</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.department_relation?.name || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Employment Status</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.employment_status || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Appointment Date</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.appointment_date || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Salary Grade</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.salary_grade || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Step Increment</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.employment_detail?.step_increment || 'N/A'}</span></div>
                 </div>
             </div>
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;">
             <div>
-                <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f0effe;">📞 Contact Information</h4>
+                <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f2f1fb;">📞 Contact Information</h4>
                 <div style="display:flex; flex-direction:column; gap:12px;">
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Email</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.email || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Mobile Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.contacts?.[0]?.mobile_number || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Landline</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.contacts?.[0]?.landline_number || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Emergency Contact</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.contacts?.[0]?.emergency_contact_person || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Emergency Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.contacts?.[0]?.emergency_contact_number || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Email</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.email || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Mobile Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.contacts?.[0]?.mobile_number || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Landline</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.contacts?.[0]?.landline_number || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Emergency Contact</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.contacts?.[0]?.emergency_contact_person || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Emergency Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.contacts?.[0]?.emergency_contact_number || 'N/A'}</span></div>
                 </div>
             </div>
             <div>
-                <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f0effe;">🪪 Government IDs</h4>
+                <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f2f1fb;">🪪 Government IDs</h4>
                 <div style="display:flex; flex-direction:column; gap:12px;">
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">GSIS Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.gsis_no || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">PhilHealth Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.philhealth_no || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">PAG-IBIG Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.pagibig_no || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">TIN Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.tin_no || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">License Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.license_no || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">GSIS Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.gsis_no || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">PhilHealth Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.philhealth_no || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">PAG-IBIG Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.pagibig_no || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">TIN Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.tin_no || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">License Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.license_no || 'N/A'}</span></div>
                 </div>
             </div>
         </div>
         <div>
-            <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f0effe;">📍 Address</h4>
+            <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f2f1fb;">📍 Address</h4>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">House No.</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.house_no || 'N/A'}</span></div>
-                <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Street</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.street || 'N/A'}</span></div>
-                <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Barangay</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.barangay || 'N/A'}</span></div>
-                <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">City/Municipality</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.city || 'N/A'}</span></div>
-                <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Province</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.province || 'N/A'}</span></div>
-                <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">Zip Code</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.zip_code || 'N/A'}</span></div>
+                <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">House No.</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.house_no || 'N/A'}</span></div>
+                <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Street</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.street || 'N/A'}</span></div>
+                <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Barangay</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.barangay || 'N/A'}</span></div>
+                <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">City/Municipality</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.city || 'N/A'}</span></div>
+                <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Province</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.province || 'N/A'}</span></div>
+                <div><span style="font-size:11px; color:#8f8daf; display:block; margin-bottom:4px;">Zip Code</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.addresses?.[0]?.zip_code || 'N/A'}</span></div>
             </div>
         </div>
     `;
@@ -2225,7 +2225,7 @@ function showPerformerDetails(emp, period, rank) {
     const tierColors = {
         'excellent': 'background:#e8f9ef;color:#15803d',
         'good': 'background:#e8f9ef;color:#15803d',
-        'needs_improvement': 'background:#fefce8;color:#a16207',
+        'needs_improvement': 'background:#fbf6e3;color:#c9a227',
         'poor': 'background:#fde8e8;color:#dc2626'
     };
     tierEl.textContent = tierLabels[emp.tier] || emp.tier;

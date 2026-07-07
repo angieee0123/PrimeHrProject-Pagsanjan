@@ -29,15 +29,15 @@
                             <option value="COOP">Cooperative</option>
                             <option value="OTHER">Other</option>
                         </select>
-                        <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;">Provider cannot be changed</p>
+                        <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">Provider cannot be changed</p>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Loan Type Code <span style="color: #8e1e18;">*</span></label>
-                        <input type="text" name="code" id="editLoanTypeCode" class="form-input" readonly style="background: #f7f6ff; cursor: not-allowed;">
-                        <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;">Code cannot be changed</p>
+                        <input type="text" name="code" id="editLoanTypeCode" class="form-input" readonly style="background: #f7f6fc; cursor: not-allowed;">
+                        <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">Code cannot be changed</p>
                     </div>
                     <div class="form-group" style="flex: 2;">
                         <label class="form-label">Loan Type Name <span style="color: #8e1e18;">*</span></label>

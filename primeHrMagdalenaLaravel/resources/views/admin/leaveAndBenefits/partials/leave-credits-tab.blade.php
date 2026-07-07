@@ -51,9 +51,9 @@
                             <td data-label="Employee" style="text-align: left;" rowspan="{{ $balances->count() }}">
                                 <div class="emp-cell">
                                     @if($balance->employee->photo)
-                                        <img src="{{ $balance->employee->photo }}" alt="{{ $balance->employee->first_name }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                                        <img src="{{ $balance->employee->photo }}" alt="{{ $balance->employee->first_name }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
                                     @else
-                                        <div class="emp-avatar" style="background: {{ $avatarColors[($balance->employee_id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #e8e7f5;">
+                                        <div class="emp-avatar" style="background: {{ $avatarColors[($balance->employee_id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #ecebf6;">
                                             {{ strtoupper(substr($balance->employee->first_name ?? 'N', 0, 1) . substr($balance->employee->last_name ?? 'A', 0, 1)) }}
                                         </div>
                                     @endif
@@ -64,7 +64,7 @@
                                 </div>
                             </td>
                             @endif
-                            <td data-label="Year" style="font-weight: 600; color: #6b6a8a;">
+                            <td data-label="Year" style="font-weight: 600; color: #56547a;">
                                 {{ $balance->year }}
                             </td>
                             <td data-label="Leave Type">
@@ -86,7 +86,7 @@
                             <td data-label="Used" class="deduction">
                                 {{ number_format($balance->used_credits, 2) }}
                             </td>
-                            <td data-label="Pending" class="ot-pay" style="color: #d9bb00; font-weight: 600;">
+                            <td data-label="Pending" class="ot-pay" style="color: #c9a227; font-weight: 600;">
                                 {{ number_format($balance->pending_credits, 2) }}
                             </td>
                             <td data-label="Available" class="net-pay">
@@ -101,10 +101,10 @@
                             </td>
                             <td data-label="Progress">
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="flex: 1; height: 6px; background: #f0effe; border-radius: 3px; overflow: hidden; min-width: 80px;">
-                                        <div style="width: {{ min($percentage, 100) }}%; height: 100%; background: {{ $percentage > 70 ? '#15803d' : ($percentage > 30 ? '#d9bb00' : '#8e1e18') }}; transition: width 0.3s;"></div>
+                                    <div style="flex: 1; height: 6px; background: #f2f1fb; border-radius: 3px; overflow: hidden; min-width: 80px;">
+                                        <div style="width: {{ min($percentage, 100) }}%; height: 100%; background: {{ $percentage > 70 ? '#15803d' : ($percentage > 30 ? '#c9a227' : '#8e1e18') }}; transition: width 0.3s;"></div>
                                     </div>
-                                    <span style="font-size: 12px; color: #6b6a8a; font-weight: 600; min-width: 38px;">{{ number_format(min($percentage, 100), 0) }}%</span>
+                                    <span style="font-size: 12px; color: #56547a; font-weight: 600; min-width: 38px;">{{ number_format(min($percentage, 100), 0) }}%</span>
                                 </div>
                             </td>
                         </tr>

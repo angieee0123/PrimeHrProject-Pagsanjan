@@ -55,7 +55,7 @@
                         <p style="margin: 0; color: #0369a1; font-size: 12px; opacity: 0.7;">Supported: .xlsx, .xls (Max 5MB)</p>
                     </div>
                     <input type="file" id="migrateExcelFile" name="excel_file" accept=".xlsx,.xls" required class="form-control" style="display: none;" onchange="updateMigrateFileName(this)">
-                    <p id="migrateFileName" style="margin-top: 8px; font-size: 12px; color: #6b6a8a; display: none;">
+                    <p id="migrateFileName" style="margin-top: 8px; font-size: 12px; color: #56547a; display: none;">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 4px; vertical-align: -1px;">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                         </svg>

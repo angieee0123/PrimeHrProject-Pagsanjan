@@ -84,9 +84,9 @@ $currentRoute = Route::currentRouteName();
     <div class="sidebar-footer" id="sidebar-footer">
         <div class="user-avatar-wrap">
             @if(Auth::check() && Auth::user()->employee && Auth::user()->employee->photo)
-                <img src="{{ Auth::user()->employee->photo }}" class="user-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                <img src="{{ Auth::user()->employee->photo }}" class="user-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
             @else
-                <div class="user-avatar" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#0b044d; color:white; font-weight:600; font-size:13px; border:2px solid #e8e7f5;">
+                <div class="user-avatar" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#0b044d; color:white; font-weight:600; font-size:13px; border:2px solid #ecebf6;">
                     @if(Auth::check())
                         {{ strtoupper(substr(Auth::user()->employee->first_name ?? 'A', 0, 1) . substr(Auth::user()->employee->last_name ?? 'D', 0, 1)) }}
                     @else

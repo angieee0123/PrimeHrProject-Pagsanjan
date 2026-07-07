@@ -4,7 +4,7 @@
 
 @section('content')
 @php
-$avatarColors   = ['#0b044d','#8e1e18','#1a0f6e','#5a0f0b','#2d1a8e','#0b044d','#3b1a6e','#6b0f0b'];
+$avatarColors   = ['#0b044d','#8e1e18','#150c63','#a52820','#150c63','#0b044d','#3b1a6e','#6b0f0b'];
 $totalPersonnel = $departments->sum('personnel_count');
 $activeDepts    = $departments->where('status','Active')->count();
 $largestDept    = $departments->sortByDesc('personnel_count')->first();
@@ -20,7 +20,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Departments</p>
-            <div class="stat-icon-wrap" style="background:#f0effe;">
+            <div class="stat-icon-wrap" style="background:#f2f1fb;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             </div>
         </div>
@@ -46,13 +46,13 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Active Offices</p>
-            <div class="stat-icon-wrap" style="background:#fefce8;">
+            <div class="stat-icon-wrap" style="background:#fbf6e3;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
         </div>
         <h2 class="stat-value">{{ $activeDepts }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#d9bb00;"></span>
+            <span class="stat-dot" style="background:#c9a227;"></span>
             <p class="stat-sub">Operational units</p>
         </div>
     </div>
@@ -179,7 +179,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     <div class="table-footer">
         <div style="display:flex;align-items:center;gap:8px;">
             <p>Showing <strong><span id="showing-start">1</span>–<span id="showing-end">10</span></strong> of <strong><span id="showing-total">{{ $departments->count() }}</span></strong> offices</p>
-            <select id="dept-rows-select" onchange="changeRowsDept(this.value)" style="font-size:13px;padding:6px 12px;border:none;border-radius:8px;color:#0b044d;background:#f7f6ff;font-family:'Poppins',sans-serif;outline:none;cursor:pointer;">
+            <select id="dept-rows-select" onchange="changeRowsDept(this.value)" style="font-size:13px;padding:6px 12px;border:none;border-radius:8px;color:#0b044d;background:#f7f6fc;font-family:'Poppins',sans-serif;outline:none;cursor:pointer;">
                 <option value="10">10 rows</option>
                 <option value="25">25 rows</option>
                 <option value="50">50 rows</option>
@@ -202,7 +202,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Bulk Import
             </button>
-            <button class="modal-btn-primary" style="padding:7px 16px;font-size:12.5px;background:#1a0f6e;" onclick="openAddDesignationModal()">
+            <button class="modal-btn-primary" style="padding:7px 16px;font-size:12.5px;background:#150c63;" onclick="openAddDesignationModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Designation
             </button>
@@ -226,7 +226,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     <div class="table-footer">
         <div style="display:flex;align-items:center;gap:8px;">
             <p>Showing <strong><span id="desig-showing-start">1</span>–<span id="desig-showing-end">10</span></strong> of <strong><span id="desig-showing-total">{{ $designations->count() }}</span></strong> designations</p>
-            <select id="desig-rows-select" onchange="changeRowsDesig(this.value)" style="font-size:13px;padding:6px 12px;border:none;border-radius:8px;color:#0b044d;background:#f7f6ff;font-family:'Poppins',sans-serif;outline:none;cursor:pointer;">
+            <select id="desig-rows-select" onchange="changeRowsDesig(this.value)" style="font-size:13px;padding:6px 12px;border:none;border-radius:8px;color:#0b044d;background:#f7f6fc;font-family:'Poppins',sans-serif;outline:none;cursor:pointer;">
                 <option value="10">10 rows</option>
                 <option value="25">25 rows</option>
                 <option value="50">50 rows</option>
@@ -377,7 +377,7 @@ function renderTable() {
     tbody.innerHTML = '';
 
     if (total === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#9999bb;padding:32px;font-size:13px;">No departments found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8f8daf;padding:32px;font-size:13px;">No departments found.</td></tr>';
     } else {
         filteredDepartments.slice(start, end).forEach((dept, i) => {
             const idx = start + i;
@@ -420,7 +420,7 @@ function renderDesigTable() {
     tbody.innerHTML = '';
 
     if (total === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#9999bb;padding:32px;font-size:13px;">No designations added yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8f8daf;padding:32px;font-size:13px;">No designations added yet.</td></tr>';
     } else {
         source.slice(start, end).forEach(d => {
             const rate = d.monthly_rate ? '₱' + parseFloat(d.monthly_rate).toLocaleString('en-PH', {minimumFractionDigits:2}) : '—';
@@ -430,7 +430,7 @@ function renderDesigTable() {
                 <tr>
                     <td><p class="emp-name">${d.title}</p></td>
                     <td><span class="dept-tag">${d.department ? d.department.name : 'N/A'}</span></td>
-                    <td><span class="dept-tag" style="background:#f0effe;color:#1a0f6e;">${deptCode}</span></td>
+                    <td><span class="dept-tag" style="background:#f2f1fb;color:#150c63;">${deptCode}</span></td>
                     <td style="font-size:13px;color:#0b044d;">${d.salary_grade || '—'}</td>
                     <td style="font-size:13px;font-weight:600;color:#15803d;">${rate}</td>
                     <td><span class="badge-status ${type === 'Permanent' ? 'processed' : 'pending'}">${type}</span></td>
@@ -460,7 +460,7 @@ function renderPagination(containerId, current, total, onPageClick) {
         pages.push(total);
     }
     pages.forEach(p => {
-        if (p === '...') { html += `<span style="padding:0 4px;color:#9999bb;">…</span>`; }
+        if (p === '...') { html += `<span style="padding:0 4px;color:#8f8daf;">…</span>`; }
         else { html += `<button class="page-btn ${p===current?'active':''}" onclick="(${onPageClick.toString()})(${p})">${p}</button>`; }
     });
     html += `<button class="page-btn" ${current===total?'disabled style="opacity:.5"':''} onclick="(${onPageClick.toString()})(${current+1})">›</button>`;

@@ -260,7 +260,7 @@ function handleGeneratePayroll(event) {
 
 .generate-form-card, .preview-card {
     background: #fff;
-    border: 1px solid #e8e7f5;
+    border: 1px solid #ecebf6;
     border-radius: 8px;
     padding: 24px;
 }
@@ -268,7 +268,7 @@ function handleGeneratePayroll(event) {
 .form-section {
     margin-bottom: 24px;
     padding-bottom: 24px;
-    border-bottom: 1px solid #f0effe;
+    border-bottom: 1px solid #f2f1fb;
 }
 
 .form-section:last-of-type {
@@ -296,14 +296,14 @@ function handleGeneratePayroll(event) {
     display: block;
     font-size: 12px;
     font-weight: 600;
-    color: #6b6a8a;
+    color: #56547a;
     margin-bottom: 6px;
 }
 
 .form-input {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #e8e7f5;
+    border: 1px solid #ecebf6;
     border-radius: 6px;
     font-size: 13px;
     font-family: 'Poppins', sans-serif;
@@ -326,7 +326,7 @@ function handleGeneratePayroll(event) {
     align-items: center;
     gap: 8px;
     font-size: 13px;
-    color: #6b6a8a;
+    color: #56547a;
     cursor: pointer;
 }
 
@@ -345,9 +345,9 @@ function handleGeneratePayroll(event) {
 
 .btn-secondary {
     padding: 10px 20px;
-    background: #f7f6ff;
+    background: #f7f6fc;
     color: #0b044d;
-    border: 1px solid #e8e7f5;
+    border: 1px solid #ecebf6;
     border-radius: 6px;
     font-size: 13px;
     font-weight: 600;
@@ -371,7 +371,7 @@ function handleGeneratePayroll(event) {
 }
 
 .btn-primary:hover {
-    background: #1a0f6e;
+    background: #150c63;
 }
 
 .preview-card {
@@ -399,13 +399,13 @@ function handleGeneratePayroll(event) {
     justify-content: space-between;
     align-items: center;
     padding: 12px;
-    background: #fafafe;
+    background: #f7f6fc;
     border-radius: 6px;
 }
 
 .preview-label {
     font-size: 12px;
-    color: #9999bb;
+    color: #8f8daf;
     font-weight: 500;
 }
 
@@ -420,9 +420,9 @@ function handleGeneratePayroll(event) {
     align-items: center;
     gap: 8px;
     font-size: 11px;
-    color: #9999bb;
+    color: #8f8daf;
     padding: 12px;
-    background: #f7f6ff;
+    background: #f7f6fc;
     border-radius: 6px;
 }
 

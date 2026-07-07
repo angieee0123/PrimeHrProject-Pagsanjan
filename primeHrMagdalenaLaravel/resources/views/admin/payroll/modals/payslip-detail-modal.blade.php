@@ -180,7 +180,7 @@
 
 .modal-header {
     padding: 20px 24px;
-    border-bottom: 1px solid #e8e7f5;
+    border-bottom: 1px solid #ecebf6;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -198,7 +198,7 @@
     width: 32px;
     height: 32px;
     border: none;
-    background: #f7f6ff;
+    background: #f7f6fc;
     color: #0b044d;
     font-size: 24px;
     border-radius: 6px;
@@ -210,7 +210,7 @@
 }
 
 .modal-close:hover {
-    background: #e8e7f5;
+    background: #ecebf6;
 }
 
 .modal-body {
@@ -221,7 +221,7 @@
 
 .modal-footer {
     padding: 16px 24px;
-    border-top: 1px solid #e8e7f5;
+    border-top: 1px solid #ecebf6;
     display: flex;
     gap: 12px;
     justify-content: flex-end;
@@ -230,9 +230,9 @@
 
 .btn-secondary {
     padding: 10px 20px;
-    background: #f7f6ff;
+    background: #f7f6fc;
     color: #0b044d;
-    border: 1px solid #e8e7f5;
+    border: 1px solid #ecebf6;
     border-radius: 6px;
     font-size: 13px;
     font-weight: 600;
@@ -241,7 +241,7 @@
 }
 
 .btn-secondary:hover {
-    background: #e8e7f5;
+    background: #ecebf6;
 }
 
 .btn-primary {
@@ -260,7 +260,7 @@
 }
 
 .btn-primary:hover {
-    background: #1a0f6e;
+    background: #150c63;
 }
 
 .payslip-header {
@@ -294,7 +294,7 @@
 
 .payslip-logo p {
     font-size: 13px;
-    color: #6b6a8a;
+    color: #56547a;
     margin: 0;
 }
 
@@ -312,10 +312,10 @@
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     margin-bottom: 20px;
-    border: 1px solid #e8e7f5;
+    border: 1px solid #ecebf6;
     padding: 16px;
     border-radius: 6px;
-    background: #fafafe;
+    background: #f7f6fc;
 }
 
 .info-group {
@@ -326,7 +326,7 @@
 
 .info-group label {
     font-size: 11px;
-    color: #6b6a8a;
+    color: #56547a;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -340,7 +340,7 @@
 
 .payslip-divider {
     height: 1px;
-    background: #e8e7f5;
+    background: #ecebf6;
     margin: 20px 0;
 }
 
@@ -368,13 +368,13 @@
     justify-content: space-between;
     align-items: center;
     padding: 8px 12px;
-    background: #fafafe;
+    background: #f7f6fc;
     border-radius: 6px;
 }
 
 .table-row span {
     font-size: 13px;
-    color: #6b6a8a;
+    color: #56547a;
 }
 
 .table-row strong {
@@ -384,8 +384,8 @@
 }
 
 .table-row.highlight {
-    background: #f7f6ff;
-    border: 1px solid #e8e7f5;
+    background: #f7f6fc;
+    border: 1px solid #ecebf6;
 }
 
 .table-row.total {
@@ -409,7 +409,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px 24px;
-    background: linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%);
+    background: linear-gradient(135deg, #0b044d 0%, #150c63 100%);
     border-radius: 8px;
     color: #fff;
 }
@@ -428,7 +428,7 @@
 .payslip-footer {
     margin-top: 24px;
     padding-top: 16px;
-    border-top: 1px solid #e8e7f5;
+    border-top: 1px solid #ecebf6;
 }
 
 .status-info {
@@ -440,7 +440,7 @@
 
 .status-info label {
     font-size: 12px;
-    color: #6b6a8a;
+    color: #56547a;
     font-weight: 600;
 }
 
@@ -450,7 +450,7 @@
 
 .notes-info label {
     font-size: 12px;
-    color: #6b6a8a;
+    color: #56547a;
     font-weight: 600;
     display: block;
     margin-bottom: 6px;
@@ -459,7 +459,7 @@
 .notes-info p {
     font-size: 13px;
     color: #0b044d;
-    background: #f7f6ff;
+    background: #f7f6fc;
     padding: 12px;
     border-radius: 6px;
     margin: 0;
@@ -468,7 +468,7 @@
 .notes-info p {
     font-size: 13px;
     color: #0b044d;
-    background: #f7f6ff;
+    background: #f7f6fc;
     padding: 12px;
     border-radius: 6px;
     margin: 0;
@@ -477,7 +477,7 @@
 .signature-section {
     margin-top: 40px;
     padding-top: 20px;
-    border-top: 1px solid #e8e7f5;
+    border-top: 1px solid #ecebf6;
 }
 
 .signature-row {
@@ -515,7 +515,7 @@
 
 .signature-date {
     font-size: 11px;
-    color: #6b6a8a;
+    color: #56547a;
     margin: 0;
 }
 

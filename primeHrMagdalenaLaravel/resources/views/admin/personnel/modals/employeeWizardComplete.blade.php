@@ -202,7 +202,7 @@
                 </div>
                 <div id="step2-edit" style="display:none;">
                     <h4 class="wizard-section-title">🔐 Account Info</h4>
-                    <div class="wizard-info-box" style="background:#f0effe;border-color:#0b044d22;">
+                    <div class="wizard-info-box" style="background:#f2f1fb;border-color:#0b044d22;">
                         <p class="wizard-info-title"><strong>ℹ️ Account credentials cannot be changed here.</strong></p>
                         <p class="wizard-info-text">Username, email, password and role are managed separately. Click Next to continue editing other details.</p>
                     </div>
@@ -231,7 +231,7 @@
                 <div class="wizard-grid-2">
                     <div>
                         <label class="wizard-label-text">Employment Type / Status *</label>
-                        <input type="text" name="employment_status" id="wizard-employment-status" class="wizard-input" placeholder="Auto-filled from designation" readonly style="background:#f7f6ff;color:#6b6a8a;cursor:not-allowed;">
+                        <input type="text" name="employment_status" id="wizard-employment-status" class="wizard-input" placeholder="Auto-filled from designation" readonly style="background:#f7f6fc;color:#56547a;cursor:not-allowed;">
                     </div>
                     <div>
                         <label class="wizard-label-text">Appointment Date *</label>
@@ -241,7 +241,7 @@
                 <div class="wizard-grid-2">
                     <div>
                         <label class="wizard-label-text">Salary Grade</label>
-                        <input type="text" name="salary_grade" id="wizard-salary-grade" class="wizard-input" placeholder="Auto-filled from designation" readonly style="background:#f7f6ff;color:#6b6a8a;cursor:not-allowed;">
+                        <input type="text" name="salary_grade" id="wizard-salary-grade" class="wizard-input" placeholder="Auto-filled from designation" readonly style="background:#f7f6fc;color:#56547a;cursor:not-allowed;">
                     </div>
                     <div>
                         <label class="wizard-label-text">Step Increment</label>
@@ -341,7 +341,7 @@
             <div class="wizard-content" data-step="6" style="display:none;">
                 <h4 class="wizard-section-title">✅ Review All Information</h4>
                 <div id="wizardReviewContent" class="wizard-review-content">
-                    <p style="color:#6b6a8a; text-align:center; padding:40px 20px;">Loading review data...</p>
+                    <p style="color:#56547a; text-align:center; padding:40px 20px;">Loading review data...</p>
                 </div>
                 <div class="wizard-success-box">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2" class="wizard-success-icon">
@@ -370,7 +370,7 @@
                 <button type="submit" id="submitBtn" class="wizard-btn wizard-btn-submit" style="display:none;">
                     ✓ Submit
                 </button>
-                <button type="button" id="updateBtn" class="wizard-btn wizard-btn-submit" style="display:none;background:#1a0f6e;" onclick="submitWizardUpdate()">
+                <button type="button" id="updateBtn" class="wizard-btn wizard-btn-submit" style="display:none;background:#150c63;" onclick="submitWizardUpdate()">
                     ✓ Save Changes
                 </button>
             </div>

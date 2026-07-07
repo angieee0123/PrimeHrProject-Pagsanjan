@@ -2,7 +2,7 @@
 
 @section('content')
 @php
-$avatarColors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
+$avatarColors = ['#0b044d', '#8e1e18', '#150c63', '#a52820', '#150c63', '#56547a'];
 function getInitials($name) {
     $parts = explode(' ', $name);
     $initials = '';
@@ -37,7 +37,7 @@ function getInitials($name) {
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Active Loans</p>
-            <div class="stat-icon-wrap" style="background: #d9bb0018; color: #d9bb00;">
+            <div class="stat-icon-wrap" style="background: #c9a22718; color: #c9a227;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
                     <path d="M12 6v6l4 2"/>
@@ -46,7 +46,7 @@ function getInitials($name) {
         </div>
         <h2 class="stat-value">{{ $stats['active_loans'] }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #d9bb00;"></span>
+            <span class="stat-dot" style="background: #c9a227;"></span>
             <p class="stat-sub">{{ $stats['active_loans'] > 0 ? 'Ongoing loans' : 'No active loans' }}</p>
         </div>
     </div>

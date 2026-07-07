@@ -7,7 +7,7 @@
 
 /* Global reset & body — all views extending layouts/joborder.blade.php */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; }
+body { font-family: 'Poppins', sans-serif; background: #f7f6fc; color: #0b044d; }
 
 /* ---------------------------------------------------------------------------
    Shared dashboard UI — banner, stat cards, tables, pagination
@@ -16,7 +16,7 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
    --------------------------------------------------------------------------- */
 .welcome-banner {
   display: flex; align-items: center; justify-content: space-between;
-  background: linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%);
+  background: linear-gradient(135deg, #0b044d 0%, #150c63 100%);
   border-radius: 14px; padding: 20px 26px; margin-bottom: 22px;
   flex-wrap: wrap; gap: 14px;
 }
@@ -44,9 +44,9 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
   background: #ffffff; border: 1.5px solid #eceaf8; border-radius: 13px;
   padding: 18px 20px; transition: box-shadow 0.2s, border-color 0.2s;
 }
-.stat-card:hover { box-shadow: 0 6px 22px rgba(11,4,77,0.08); border-color: #dddcf0; }
+.stat-card:hover { box-shadow: 0 6px 22px rgba(11,4,77,0.08); border-color: #e2e1f0; }
 .stat-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
-.stat-label { font-size: 12px; font-weight: 600; color: #9999bb; margin: 0; }
+.stat-label { font-size: 12px; font-weight: 600; color: #8f8daf; margin: 0; }
 .stat-icon-wrap {
   width: 36px; height: 36px; border-radius: 9px;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -54,7 +54,7 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .stat-value { font-size: 24px; font-weight: 800; color: #0b044d; margin: 0 0 10px; }
 .stat-footer { display: flex; align-items: center; gap: 7px; }
 .stat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.stat-sub { font-size: 11.5px; color: #9999bb; margin: 0; }
+.stat-sub { font-size: 11.5px; color: #8f8daf; margin: 0; }
 
 .table-section {
   background: #ffffff; border: 1.5px solid #eceaf8;
@@ -62,14 +62,14 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 }
 .table-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 24px; border-bottom: 1.5px solid #f0effe; flex-wrap: wrap; gap: 12px;
+  padding: 18px 24px; border-bottom: 1.5px solid #f2f1fb; flex-wrap: wrap; gap: 12px;
 }
 .table-title { font-size: 15px; font-weight: 700; color: #0b044d; margin: 0 0 3px; }
-.table-sub   { font-size: 12px; color: #9999bb; margin: 0; }
+.table-sub   { font-size: 12px; color: #8f8daf; margin: 0; }
 .table-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .btn-export {
   display: flex; align-items: center; gap: 6px;
-  height: 34px; padding: 0 14px; border: 1.5px solid #e4e3f0; border-radius: 8px;
+  height: 34px; padding: 0 14px; border: 1.5px solid #ecebf6; border-radius: 8px;
   background: #ffffff; font-size: 12.5px; font-weight: 600; font-family: 'Poppins', sans-serif;
   color: #0b044d; cursor: pointer; transition: all 0.2s;
 }
@@ -85,18 +85,19 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 
 .table-wrapper { overflow-x: auto; }
 .payroll-table { width: 100%; border-collapse: collapse; }
-.payroll-table thead tr { background: #f7f6ff; }
+.payroll-table thead tr { background: #f2f1fb; }
 .payroll-table th {
   padding: 11px 16px; text-align: left;
-  font-size: 11px; font-weight: 700; color: #9999bb;
+  font-size: 11px; font-weight: 700; color: #0b044d;
   text-transform: uppercase; letter-spacing: 0.8px;
-  border-bottom: 1.5px solid #f0effe; white-space: nowrap;
+  border-bottom: 2px solid #c9a227; white-space: nowrap;
 }
 .payroll-table td {
-  padding: 13px 16px; border-bottom: 1px solid #f7f6ff;
+  padding: 13px 16px; border-bottom: 1px solid #ecebf6;
   font-size: 13px; color: #0b044d; vertical-align: middle;
 }
-.payroll-table tbody tr:hover { background: #fafafe; }
+.payroll-table tbody tr:nth-child(even) { background: #f7f6fc; }
+.payroll-table tbody tr:hover { background: #f2f1fb; }
 .payroll-table tbody tr:last-child td { border-bottom: none; }
 .net-pay { font-size: 13px; font-weight: 700; color: #15803d; }
 .badge-status {
@@ -104,17 +105,17 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
   padding: 3px 10px; border-radius: 20px;
 }
 .badge-status.processed { background: #e8f9ef; color: #15803d; }
-.badge-status.pending   { background: #fefce8; color: #a16207; }
+.badge-status.pending   { background: #fbf6e3; color: #c9a227; }
 .badge-status.on-hold   { background: #fdf0ef; color: #8e1e18; }
 .table-footer {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 24px; border-top: 1.5px solid #f0effe;
-  font-size: 12.5px; color: #9999bb; flex-wrap: wrap; gap: 10px;
+  padding: 14px 24px; border-top: 1.5px solid #f2f1fb;
+  font-size: 12.5px; color: #8f8daf; flex-wrap: wrap; gap: 10px;
 }
 .table-footer strong { color: #0b044d; }
 .pagination { display: flex; gap: 6px; }
 .page-btn {
-  width: 32px; height: 32px; border: 1.5px solid #e4e3f0; border-radius: 7px;
+  width: 32px; height: 32px; border: 1.5px solid #ecebf6; border-radius: 7px;
   background: #ffffff; font-size: 12.5px; font-weight: 600;
   font-family: 'Poppins', sans-serif; color: #0b044d; cursor: pointer; transition: all 0.2s;
 }
@@ -132,7 +133,7 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
    --------------------------------------------------------------------------- */
 .app-layout {
   display: flex; min-height: 100vh;
-  background: #f7f6ff; font-family: 'Poppins', sans-serif;
+  background: #f7f6fc; font-family: 'Poppins', sans-serif;
 }
 .sidebar {
   width: 240px; height: 100vh;
@@ -176,7 +177,7 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .nav-label { overflow: hidden; text-overflow: ellipsis; }
 .nav-active-bar {
   position: absolute; right: 0; top: 50%; transform: translateY(-50%);
-  width: 3px; height: 18px; background: #d9bb00; border-radius: 3px 0 0 3px;
+  width: 3px; height: 18px; background: #c9a227; border-radius: 3px 0 0 3px;
 }
 .sidebar-footer {
   display: flex; align-items: center; gap: 10px;
@@ -188,7 +189,7 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
   width: 34px; height: 34px; border-radius: 9px;
   background: rgba(217,187,0,0.2); border: 1.5px solid rgba(217,187,0,0.35);
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; color: #d9bb00;
+  font-size: 11px; font-weight: 700; color: #c9a227;
 }
 .user-status-dot {
   position: absolute; bottom: -2px; right: -2px;
@@ -228,7 +229,7 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .chat-fab:hover { background: #8e1e18; transform: scale(1.07); }
 .chat-fab-badge {
   position: absolute; top: -4px; right: -4px;
-  background: #d9bb00; color: #0b044d;
+  background: #c9a227; color: #0b044d;
   font-size: 9px; font-weight: 800;
   padding: 2px 5px; border-radius: 10px;
   font-family: 'Poppins', sans-serif;
@@ -258,13 +259,13 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .chatbot-close:hover, .chatbot-clear:hover { background: rgba(255,255,255,0.2); }
 .chatbot-quick-actions {
   display: flex; gap: 6px; padding: 8px 12px;
-  background: #fff; border-bottom: 1px solid #f0effe;
+  background: #fff; border-bottom: 1px solid #f2f1fb;
   overflow-x: auto; scrollbar-width: none;
 }
 .chatbot-quick-actions::-webkit-scrollbar { display: none; }
 .chatbot-quick-btn {
-  background: #f0effe; color: #0b044d;
-  border: 1px solid #dddcf0;
+  background: #f2f1fb; color: #0b044d;
+  border: 1px solid #e2e1f0;
   font-size: 11px; font-weight: 600;
   font-family: 'Poppins', sans-serif;
   padding: 5px 11px; border-radius: 20px;
@@ -283,7 +284,7 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6ff; color: #0b044d; 
 .chat-msg.user .chat-msg-bubble { background: #0b044d; color: #ffffff; border-bottom-right-radius: 4px; }
 .chatbot-input-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid #eceaf8; }
 .chatbot-input-row input {
-  flex: 1; padding: 9px 13px; border: 1.5px solid #e4e3f0; border-radius: 9px;
+  flex: 1; padding: 9px 13px; border: 1.5px solid #ecebf6; border-radius: 9px;
   font-size: 13px; font-family: 'Poppins', sans-serif; color: #0b044d; outline: none; transition: border-color 0.2s;
 }
 .chatbot-input-row input:focus { border-color: #0b044d; }

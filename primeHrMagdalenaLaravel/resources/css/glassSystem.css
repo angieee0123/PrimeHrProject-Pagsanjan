@@ -14,7 +14,7 @@
 
 .glass-shell {
     --gp-pri: #0b044d;
-    --gp-pri-2: #1a0f6e;
+    --gp-pri-2: #150c63;
     --gp-bg: #F7F8FC;
     --gp-ink: #1E2247;
     --gp-muted: #7C839D;
@@ -145,12 +145,15 @@
     position: sticky;
     top: 0;
     z-index: 2;
-    background: rgba(248, 250, 252, .75) !important;
+    background: #f2f1fb !important;
+    color: #0b044d !important;
+    border-bottom: 2px solid #c9a227 !important;
     backdrop-filter: blur(10px) saturate(160%);
     -webkit-backdrop-filter: blur(10px) saturate(160%);
 }
-.glass-shell .payroll-table td { border-bottom: 1px solid rgba(15, 23, 42, .05) !important; }
-.glass-shell .payroll-table tbody tr:hover { background: rgba(11, 4, 77, .035) !important; }
+.glass-shell .payroll-table td { border-bottom: 1px solid #ecebf6 !important; }
+.glass-shell .payroll-table tbody tr:nth-child(even) { background: #f7f6fc !important; }
+.glass-shell .payroll-table tbody tr:hover { background: #f2f1fb !important; }
 .glass-shell .table-footer {
     background: transparent !important;
     border-top: 1px solid rgba(15, 23, 42, .06) !important;
@@ -166,7 +169,7 @@
     background: rgba(255, 255, 255, .55) !important;
     backdrop-filter: blur(12px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
-    color: #344054 !important;
+    color: #56547a !important;
 }
 .glass-shell .btn-export {
     border-radius: 999px !important;

@@ -53,7 +53,7 @@ $departments    = ['All Departments', 'Office of the Mayor', 'Office of the Mun.
         <div class="stat-top">
             <p class="stat-label">Total Applicants</p>
             <div class="stat-icon-wrap rc-icon-warning">
-                <svg width="18" height="18" fill="none" stroke="#d9bb00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <svg width="18" height="18" fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
         </div>
         <h2 class="stat-value">{{ $totalApplicants }}</h2>
@@ -157,7 +157,7 @@ $departments    = ['All Departments', 'Office of the Mayor', 'Office of the Mun.
     </div>
     <div class="empty-state" id="grid-empty-state" style="display:none">
         <div class="empty-icon">
-            <svg width="32" height="32" fill="none" stroke="#9999bb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <svg width="32" height="32" fill="none" stroke="#8f8daf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
         </div>
         <h3 class="empty-title">No Job Postings Found</h3>
         <p class="empty-sub">Try adjusting your filters or search criteria</p>

@@ -89,7 +89,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="10" style="text-align: center; padding: 40px; color: #9999bb;">
+                <td colspan="10" style="text-align: center; padding: 40px; color: #8f8daf;">
                     No deduction types found. Click "Add Deduction Type" to create one.
                 </td>
             </tr>

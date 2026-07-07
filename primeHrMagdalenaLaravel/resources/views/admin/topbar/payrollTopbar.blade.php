@@ -2,7 +2,7 @@
 <div class="welcome-banner">
     <div class="banner-left">
         <div class="banner-icon">
-            <svg width="22" height="22" fill="none" stroke="#d9bb00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <svg width="22" height="22" fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                 <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
             </svg>
         </div>
@@ -21,7 +21,7 @@
 
 <style>
 .topbar-search-wrap { position: relative; display: flex; align-items: center; }
-.topbar-search-icon { position: absolute; left: 10px; color: #6b6a8a; pointer-events: none; }
+.topbar-search-icon { position: absolute; left: 10px; color: #56547a; pointer-events: none; }
 .topbar-search-input { background: #fff; border: 1.5px solid #e5e4f0; border-radius: 9px; padding: 8px 12px 8px 32px; font-size: 12.5px; color: #0b044d; outline: none; width: 260px; font-family: 'Poppins', sans-serif; transition: border-color 0.2s, box-shadow 0.2s; box-shadow: 0 1px 3px rgba(11,4,77,0.06); }
 .topbar-search-input::placeholder { color: #aaa8cc; }
 .topbar-search-input:focus { border-color: #0b044d; box-shadow: 0 0 0 3px rgba(11,4,77,0.1); }
@@ -51,7 +51,7 @@ function searchPayroll(query) {
 
     tbody.innerHTML = '';
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#6b6a8a;">No records found matching your search.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#56547a;">No records found matching your search.</td></tr>';
     } else {
         filtered.forEach(row => tbody.appendChild(row.cloneNode(true)));
     }

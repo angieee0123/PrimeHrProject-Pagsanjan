@@ -67,7 +67,7 @@
                 <div class="form-group">
                     <label class="form-label">Attachment Instructions</label>
                     <textarea name="attachment_info" class="form-input" rows="2" placeholder="e.g., Medical certificate required if more than 2 consecutive days"></textarea>
-                    <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;">Instructions shown to employees when filing this leave type</p>
+                    <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">Instructions shown to employees when filing this leave type</p>
                 </div>
 
                 <div class="form-group">
@@ -79,7 +79,7 @@
                             <span id="fileNameDisplay">Choose PDF file or drag here</span>
                         </label>
                     </div>
-                    <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;">Upload policy document, memo, or reference file (PDF only, max 5MB)</p>
+                    <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">Upload policy document, memo, or reference file (PDF only, max 5MB)</p>
                 </div>
 
                 <div class="form-actions">

@@ -10,7 +10,7 @@
                     </svg>
                 </div>
                 <h3 class="modal-title" style="color: #8e1e18; margin-bottom: 8px;">Error!</h3>
-                <p class="modal-sub" id="errorMessage" style="color: #6b6a8a;">Something went wrong. Please try again.</p>
+                <p class="modal-sub" id="errorMessage" style="color: #56547a;">Something went wrong. Please try again.</p>
             </div>
             <button type="button" class="modal-close" onclick="closeErrorModal()" style="position: absolute; top: 20px; right: 20px;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">

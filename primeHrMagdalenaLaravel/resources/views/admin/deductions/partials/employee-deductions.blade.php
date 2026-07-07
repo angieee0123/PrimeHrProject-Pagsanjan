@@ -40,9 +40,9 @@
                     <td>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             @if($deduction->employee->photo)
-                                <img src="{{ $deduction->employee->photo }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                                <img src="{{ $deduction->employee->photo }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
                             @else
-                                <div class="avatar" style="background: {{ $avatarColors[($deduction->employee_id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #e8e7f5;">
+                                <div class="avatar" style="background: {{ $avatarColors[($deduction->employee_id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #ecebf6;">
                                     {{ getInitials($deduction->employee->first_name . ' ' . $deduction->employee->last_name) }}
                                 </div>
                             @endif
@@ -50,27 +50,27 @@
                                 <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">
                                     {{ $deduction->employee->first_name }} {{ $deduction->employee->last_name }}
                                 </p>
-                                <p style="color: #9999bb; margin: 0; font-size: 11px;">ID: {{ $deduction->employee->employee_id }}</p>
+                                <p style="color: #8f8daf; margin: 0; font-size: 11px;">ID: {{ $deduction->employee->employee_id }}</p>
                             </div>
                         </div>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #6b6a8a;">
+                        <span style="font-size: 12px; color: #56547a;">
                             {{ $deduction->employee->employmentDetail->departmentRelation->name ?? 'N/A' }}
                         </span>
                     </td>
                     <td>
                         <div>
                             <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">{{ $deduction->deductionType->name }}</p>
-                            <p style="color: #9999bb; margin: 0; font-size: 11px;">{{ $deduction->deductionType->code }}</p>
+                            <p style="color: #8f8daf; margin: 0; font-size: 11px;">{{ $deduction->deductionType->code }}</p>
                         </div>
                     </td>
                     <td>
                         @php
                             $categoryColors = [
                                 'MANDATORY' => ['bg' => '#0b044d18', 'text' => '#0b044d'],
-                                'LOAN' => ['bg' => '#d9bb0018', 'text' => '#d9bb00'],
-                                'OTHER' => ['bg' => '#6b6a8a18', 'text' => '#6b6a8a'],
+                                'LOAN' => ['bg' => '#c9a22718', 'text' => '#c9a227'],
+                                'OTHER' => ['bg' => '#56547a18', 'text' => '#56547a'],
                             ];
                             $colors = $categoryColors[$deduction->deductionType->category] ?? $categoryColors['OTHER'];
                         @endphp
@@ -84,21 +84,21 @@
                                 <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">
                                     ₱{{ number_format($deduction->remaining_balance ?? 0, 2) }}
                                 </p>
-                                <p style="color: #9999bb; margin: 0; font-size: 11px;">
+                                <p style="color: #8f8daf; margin: 0; font-size: 11px;">
                                     of ₱{{ number_format($deduction->total_amount ?? 0, 2) }}
                                 </p>
                             </div>
                         @elseif($deduction->deductionType->computation_type === 'PERCENTAGE')
-                            <span style="font-size: 13px; color: #6b6a8a;">
+                            <span style="font-size: 13px; color: #56547a;">
                                 {{ $deduction->deductionType->percentage_rate }}% 
                                 @if($deduction->deductionType->max_amount)
                                     (max ₱{{ number_format($deduction->deductionType->max_amount, 2) }})
                                 @endif
                             </span>
                         @elseif($deduction->amount)
-                            <span style="font-size: 13px; color: #6b6a8a;">₱{{ number_format($deduction->amount, 2) }}</span>
+                            <span style="font-size: 13px; color: #56547a;">₱{{ number_format($deduction->amount, 2) }}</span>
                         @else
-                            <span style="font-size: 13px; color: #9999bb;">Auto-computed</span>
+                            <span style="font-size: 13px; color: #8f8daf;">Auto-computed</span>
                         @endif
                     </td>
                     <td>
@@ -116,26 +116,26 @@
                                 $scheduleColor = '#15803d';
                             } elseif ($cutoffSchedule === 'BOTH_FULL') {
                                 $scheduleDisplay = 'Both (Full Each)';
-                                $scheduleColor = '#d9bb00';
+                                $scheduleColor = '#c9a227';
                             } else { // BOTH_SPLIT
                                 $scheduleDisplay = 'Both (Split 50-50)';
-                                $scheduleColor = '#6b6a8a';
+                                $scheduleColor = '#56547a';
                             }
                         @endphp
                         <div>
                             <p style="font-weight: 600; color: {{ $scheduleColor }}; margin: 0; font-size: 13px;">
                                 {{ $scheduleDisplay }}
                             </p>
-                            <p style="color: #9999bb; margin: 0; font-size: 11px;">{{ $cutoffSchedule }}</p>
+                            <p style="color: #8f8daf; margin: 0; font-size: 11px;">{{ $cutoffSchedule }}</p>
                         </div>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #6b6a8a;">
+                        <span style="font-size: 12px; color: #56547a;">
                             {{ \Carbon\Carbon::parse($deduction->start_date)->format('M d, Y') }}
                         </span>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #6b6a8a;">
+                        <span style="font-size: 12px; color: #56547a;">
                             {{ $deduction->end_date ? \Carbon\Carbon::parse($deduction->end_date)->format('M d, Y') : 'Ongoing' }}
                         </span>
                     </td>
@@ -143,8 +143,8 @@
                         @php
                             $statusColors = [
                                 'ACTIVE' => ['bg' => '#15803d18', 'text' => '#15803d'],
-                                'SUSPENDED' => ['bg' => '#d9bb0018', 'text' => '#d9bb00'],
-                                'COMPLETED' => ['bg' => '#6b6a8a18', 'text' => '#6b6a8a'],
+                                'SUSPENDED' => ['bg' => '#c9a22718', 'text' => '#c9a227'],
+                                'COMPLETED' => ['bg' => '#56547a18', 'text' => '#56547a'],
                             ];
                             $statusColor = $statusColors[$deduction->status] ?? $statusColors['ACTIVE'];
                         @endphp
@@ -171,7 +171,7 @@
                 </tr>
             @empty
                 <tr id="noDataRow">
-                    <td colspan="10" style="text-align: center; padding: 40px; color: #9999bb;">
+                    <td colspan="10" style="text-align: center; padding: 40px; color: #8f8daf;">
                         No employee deductions found. Click "Assign Deduction" to add.
                     </td>
                 </tr>
@@ -261,13 +261,13 @@ window.updateDeductionPagination = function () {
     if (page > 1) html += '<button class="page-btn" onclick="goToDeductionPage(' + (page - 1) + ')">‹</button>';
     if (startPage > 1) {
         html += '<button class="page-btn" onclick="goToDeductionPage(1)">1</button>';
-        if (startPage > 2) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+        if (startPage > 2) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
     }
     for (let i = startPage; i <= endPage; i++) {
         html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToDeductionPage(' + i + ')">' + i + '</button>';
     }
     if (endPage < totalPages) {
-        if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+        if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
         html += '<button class="page-btn" onclick="goToDeductionPage(' + totalPages + ')">' + totalPages + '</button>';
     }
     if (page < totalPages) html += '<button class="page-btn" onclick="goToDeductionPage(' + (page + 1) + ')">›</button>';

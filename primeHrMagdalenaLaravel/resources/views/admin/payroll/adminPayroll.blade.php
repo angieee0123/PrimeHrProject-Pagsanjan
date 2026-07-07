@@ -95,13 +95,13 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Pending Records</p>
-            <div class="stat-icon-wrap" style="background: #d9bb0018; color: #d9bb00;">
+            <div class="stat-icon-wrap" style="background: #c9a22718; color: #c9a227;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
         </div>
         <h2 class="stat-value">{{ $pendingCount }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #d9bb00;"></span>
+            <span class="stat-dot" style="background: #c9a227;"></span>
             <p class="stat-sub">{{ $processedCount }} processed</p>
         </div>
     </div>
@@ -212,8 +212,8 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
     display: inline-flex;
     gap: 4px;
     padding: 5px;
-    background: #f0effe;
-    border: 1px solid #e3e1f7;
+    background: #f2f1fb;
+    border: 1px solid #e2e1f0;
     border-radius: 14px;
     margin-bottom: 20px;
 }
@@ -225,7 +225,7 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
     padding: 9px 18px;
     font-size: 13px;
     font-weight: 600;
-    color: #6b6a8a;
+    color: #56547a;
     text-decoration: none;
     border-radius: 10px;
     transition: all 0.2s;
@@ -237,7 +237,7 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
 
 .tab-link.active {
     color: #fff;
-    background: linear-gradient(135deg, #1a0f6e, #0b044d);
+    background: linear-gradient(135deg, #150c63, #0b044d);
     box-shadow: 0 4px 12px rgba(11,4,77,.25);
 }
 
@@ -247,41 +247,41 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
 }
 
 .badge-emptype {
-    font-size: 11px; color: #0b044d; background: #f0effe;
+    font-size: 11px; color: #0b044d; background: #f2f1fb;
     padding: 3px 10px; border-radius: 20px; font-weight: 600;
-    border: 1px solid #dddcf0;
+    border: 1px solid #e2e1f0;
 }
 .btn-edit {
-    padding: 6px 16px; background: #f7f6ff; color: #0b044d;
-    border: 1px solid #e8e7f5; border-radius: 6px;
+    padding: 6px 16px; background: #f7f6fc; color: #0b044d;
+    border: 1px solid #ecebf6; border-radius: 6px;
     font-size: 12px; font-weight: 600; cursor: pointer;
     font-family: 'Poppins', sans-serif; transition: all 0.2s;
 }
-.btn-edit:hover { background: #e8e7f5; }
+.btn-edit:hover { background: #ecebf6; }
 .row-actions { display: flex; gap: 6px; }
 .table-footer {
-    padding: 16px 24px; border-top: 1px solid #f0effe;
+    padding: 16px 24px; border-top: 1px solid #f2f1fb;
     display: flex; justify-content: space-between; align-items: center;
 }
-.table-footer p { font-size: 13px; color: #6b6a8a; }
+.table-footer p { font-size: 13px; color: #56547a; }
 .pagination { display: flex; gap: 6px; }
 .page-btn {
-    width: 32px; height: 32px; border: 1px solid #e8e7f5;
-    border-radius: 6px; background: #fff; color: #6b6a8a;
+    width: 32px; height: 32px; border: 1px solid #ecebf6;
+    border-radius: 6px; background: #fff; color: #56547a;
     font-size: 13px; font-weight: 600; cursor: pointer;
     font-family: 'Poppins', sans-serif; transition: all 0.2s;
 }
 .page-btn.active { background: #0b044d; color: #fff; border-color: #0b044d; }
-.page-btn:hover { background: #f7f6ff; }
+.page-btn:hover { background: #f7f6fc; }
 .payroll-summary-bar {
     display: flex; align-items: center; gap: 20px;
-    padding: 14px 24px; background: #fafafe;
-    border: 1px solid #f0effe; border-radius: 8px;
+    padding: 14px 24px; background: #f7f6fc;
+    border: 1px solid #f2f1fb; border-radius: 8px;
 }
 .psummary-item { display: flex; flex-direction: column; gap: 2px; }
-.psummary-item span { font-size: 11px; color: #9999bb; font-weight: 500; }
+.psummary-item span { font-size: 11px; color: #8f8daf; font-weight: 500; }
 .psummary-item strong { font-size: 13px; color: #0b044d; font-weight: 600; }
-.psummary-divider { width: 1px; height: 28px; background: #e8e7f5; }
+.psummary-divider { width: 1px; height: 28px; background: #ecebf6; }
 .pay-cell {
     font-size: 13px; color: #0b044d; font-weight: 600;
 }
@@ -295,14 +295,14 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
     font-size: 13px; color: #15803d; font-weight: 700;
 }
 .daily-rate {
-    font-size: 13px; color: #5a0f0b; font-weight: 600;
+    font-size: 13px; color: #a52820; font-weight: 600;
 }
 .work-date {
-    font-size: 12.5px; color: #6b6a8a; font-weight: 500;
+    font-size: 12.5px; color: #56547a; font-weight: 500;
 }
 .days-count {
     font-size: 12.5px; color: #0b044d; font-weight: 600;
-    background: #f0effe; padding: 4px 10px; border-radius: 4px;
+    background: #f2f1fb; padding: 4px 10px; border-radius: 4px;
 }
 .btn-filter-main {
     padding: 7px 16px; background: #0b044d; color: #fff;
@@ -311,7 +311,7 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
     align-items: center; gap: 6px; font-family: 'Poppins', sans-serif;
     transition: all 0.2s;
 }
-.btn-filter-main:hover { background: #1a0f6e; }
+.btn-filter-main:hover { background: #150c63; }
 </style>
 
 <script>
@@ -362,13 +362,13 @@ window.updatePayrollPagination = function () {
     if (page > 1) html += '<button class="page-btn" onclick="goToPayrollPage(' + (page - 1) + ')">‹</button>';
     if (startPage > 1) {
         html += '<button class="page-btn" onclick="goToPayrollPage(1)">1</button>';
-        if (startPage > 2) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+        if (startPage > 2) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
     }
     for (let i = startPage; i <= endPage; i++) {
         html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToPayrollPage(' + i + ')">' + i + '</button>';
     }
     if (endPage < totalPages) {
-        if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#9999bb;">...</span>';
+        if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
         html += '<button class="page-btn" onclick="goToPayrollPage(' + totalPages + ')">' + totalPages + '</button>';
     }
     if (page < totalPages) html += '<button class="page-btn" onclick="goToPayrollPage(' + (page + 1) + ')">›</button>';

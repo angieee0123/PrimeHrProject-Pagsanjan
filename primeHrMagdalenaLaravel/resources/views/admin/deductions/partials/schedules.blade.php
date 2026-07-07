@@ -36,23 +36,23 @@
                     <td>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             @if($emp['photo'] ?? null)
-                                <img src="{{ $emp['photo'] }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #e8e7f5;">
+                                <img src="{{ $emp['photo'] }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
                             @else
-                                <div class="avatar" style="background: {{ $avatarColors[($emp['id'] ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #e8e7f5;">
+                                <div class="avatar" style="background: {{ $avatarColors[($emp['id'] ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #ecebf6;">
                                     {{ getInitials($emp['name']) }}
                                 </div>
                             @endif
                             <div>
                                 <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">{{ $emp['name'] }}</p>
-                                <p style="color: #9999bb; margin: 0; font-size: 11px;">ID: {{ $emp['employee_id'] }}</p>
+                                <p style="color: #8f8daf; margin: 0; font-size: 11px;">ID: {{ $emp['employee_id'] }}</p>
                             </div>
                         </div>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #6b6a8a;">{{ $emp['department'] }}</span>
+                        <span style="font-size: 12px; color: #56547a;">{{ $emp['department'] }}</span>
                     </td>
                     <td>
-                        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #f0effe; border-radius: 6px; font-size: 12px; font-weight: 600; color: #0b044d;">
+                        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #f2f1fb; border-radius: 6px; font-size: 12px; font-weight: 600; color: #0b044d;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="2" y="5" width="20" height="14" rx="2"/>
                                 <line x1="2" y1="10" x2="22" y2="10"/>
@@ -62,7 +62,7 @@
                     </td>
                     <td>
                         @if($emp['loans_count'] > 0)
-                            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #fff9e6; border-radius: 6px; font-size: 12px; font-weight: 600; color: #8b7500;">
+                            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #fbf6e3; border-radius: 6px; font-size: 12px; font-weight: 600; color: #c9a227;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="10"/>
                                     <path d="M12 6v6l4 2"/>
@@ -70,10 +70,10 @@
                                 {{ $emp['loans_count'] }} {{ $emp['loans_count'] == 1 ? 'Loan' : 'Loans' }}
                             </span>
                         @else
-                            <span style="color: #9999bb; font-size: 12px;">No loans</span>
+                            <span style="color: #8f8daf; font-size: 12px;">No loans</span>
                         @endif
                     </td>
-                    <td style="color: #6b6a8a; font-size: 12px;">
+                    <td style="color: #56547a; font-size: 12px;">
                         {{ $emp['updated_at'] ? \Carbon\Carbon::parse($emp['updated_at'])->format('M d, Y') : 'N/A' }}
                     </td>
                     <td>
@@ -84,7 +84,7 @@
                 </tr>
             @empty
                 <tr id="noSchedulesRow">
-                    <td colspan="6" style="text-align: center; padding: 40px; color: #9999bb;">
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #8f8daf;">
                         No employees with active deductions found. Assign deductions to employees first.
                     </td>
                 </tr>

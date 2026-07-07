@@ -17,7 +17,7 @@
                 <div class="form-row">
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Code <span style="color: #8e1e18;">*</span></label>
-                        <input type="text" name="code" id="edit_code" class="form-input" maxlength="50" required readonly style="background: #f7f6ff;">
+                        <input type="text" name="code" id="edit_code" class="form-input" maxlength="50" required readonly style="background: #f7f6fc;">
                     </div>
                     <div class="form-group" style="flex: 2;">
                         <label class="form-label">Name <span style="color: #8e1e18;">*</span></label>
