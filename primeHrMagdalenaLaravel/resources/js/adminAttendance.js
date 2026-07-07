@@ -253,7 +253,48 @@ window.openEditModal = function(record) {
         document.getElementById(id).addEventListener('input', updateRatePreview);
     });
 
+    renderEditPassSlipList(record.pass_slips || []);
+
     document.getElementById('editModal').style.display = 'flex';
+}
+
+function renderEditPassSlipList(passSlips) {
+    const container = document.getElementById('editPassSlipList');
+    if (!passSlips.length) {
+        container.innerHTML = '<div class="edit-passslip-empty">No approved pass slips in this period.</div>';
+        return;
+    }
+
+    const fmt12 = (t) => {
+        if (!t) return null;
+        const [h, m] = t.split(':').map(Number);
+        const suffix = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 || 12;
+        return `${h12}:${String(m).padStart(2, '0')} ${suffix}`;
+    };
+
+    container.innerHTML = passSlips.map(slip => {
+        const isOfficial = slip.type === 'official_activity';
+        const badgeClass = isOfficial ? 'official' : 'personal';
+        const badgeLabel = isOfficial ? 'Official Activity' : 'Personal Reason';
+        const gapNote = slip.gap_minutes > 0
+            ? (slip.excused ? `Excused ${slip.gap_minutes} min (from approved Pass Slip)` : `Charged ${slip.gap_minutes} min undertime (from approved Pass Slip)`)
+            : 'Times from approved Pass Slip';
+        const timeRange = fmt12(slip.time_out) && fmt12(slip.time_in)
+            ? `${fmt12(slip.time_out)} – ${fmt12(slip.time_in)}`
+            : (fmt12(slip.time_out) || '');
+        const slipNum = slip.slip_number ? `<span class="eps-slip-num">#${slip.slip_number}</span>` : '';
+
+        return `
+            <div class="edit-passslip-item">
+                <div>
+                    <div class="eps-date">${slip.date}${timeRange ? ' · ' + timeRange : ''} ${slipNum}</div>
+                    <div class="eps-meta">${gapNote}</div>
+                </div>
+                <span class="eps-badge ${badgeClass}">${badgeLabel}</span>
+            </div>
+        `;
+    }).join('');
 }
 
 window.closeEditModal = function() {
@@ -442,6 +483,37 @@ window.openCorrectModal = function(attendanceId, date) {
             }
 
             calculateTotalHours();
+
+            // Pass slip banner
+            const banner = document.getElementById('correctPassSlipBanner');
+            if (banner) {
+                const slips = data.pass_slips || [];
+                if (slips.length) {
+                    const fmt12 = (t) => {
+                        if (!t) return null;
+                        const [h, m] = t.split(':').map(Number);
+                        return `${h % 12 || 12}:${String(m).padStart(2,'0')} ${h >= 12 ? 'PM' : 'AM'}`;
+                    };
+                    banner.style.display = 'block';
+                    banner.innerHTML = `<div class="correct-ps-banner">
+                        <div class="correct-ps-banner-title">&#10003; Approved Pass Slip(s) on this date &mdash; times noted below</div>
+                        ${slips.map(s => {
+                            const out = fmt12(s.time_out), inn = fmt12(s.time_in);
+                            const range = out ? (inn ? `${out} &ndash; ${inn}` : `Out: ${out}`) : '';
+                            const badge = s.type === 'official_activity' ? 'official' : 'personal';
+                            const label = s.type === 'official_activity' ? 'Official Activity' : 'Personal Reason';
+                            return `<div class="correct-ps-row">
+                                <span class="cps-times">${range}</span>
+                                ${s.slip_number ? `<span class="cps-num">#${s.slip_number}</span>` : ''}
+                                <span class="cps-badge ${badge}">${label}</span>
+                            </div>`;
+                        }).join('')}
+                    </div>`;
+                } else {
+                    banner.style.display = 'none';
+                    banner.innerHTML = '';
+                }
+            }
 
             document.getElementById('correctModal').style.display = 'flex';
         })
@@ -713,6 +785,9 @@ function renderDetailedDTR(data) {
         } else if (record.needs_review) {
             statusBadge = ' <span class="badge-needs-review">Needs Review</span>';
         }
+        if (record.is_on_pass_slip) {
+            statusBadge += ' <span class="badge-passslip">Pass Slip</span>';
+        }
 
         // Build accredited hours — clean pill + optional tooltip for annotations
         let accreditedDisplay;
@@ -743,6 +818,17 @@ function renderDetailedDTR(data) {
             }
             if (record.lwop_minutes > 0) {
                 tips.push(`LWOP ${record.lwop_minutes}m → salary deduction`);
+            }
+            if (record.is_on_pass_slip && record.pass_slip_info) {
+                record.pass_slip_info.forEach(slip => {
+                    const label = slip.type === 'official_activity' ? 'Official Activity' : 'Personal Reason';
+                    if (slip.gap_minutes > 0) {
+                        const verb = slip.excused ? 'excused' : 'charged as undertime';
+                        tips.push(`${label} Pass Slip: ${slip.gap_minutes}m ${verb} (approved)`);
+                    } else {
+                        tips.push(`${label} Pass Slip (approved)`);
+                    }
+                });
             }
 
             const tipAttr = tips.length ? ` data-acc-tip="${tips.join(' · ')}"` : '';
@@ -832,13 +918,56 @@ function renderDetailedDTR(data) {
                 </div>
             </div>`;
 
+        // Build pass slip time annotations for AM/PM cells
+        const psClockIcon = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+        let passSlipAmNote = '', passSlipPmNote = '';
+        if (record.is_on_pass_slip && record.pass_slip_info) {
+            record.pass_slip_info.forEach(slip => {
+                const slipOut = fmt12(slip.time_out);
+                const slipIn  = fmt12(slip.time_in);
+                const label   = slip.type === 'official_activity' ? 'Official Activity' : 'Personal Reason';
+                const gapNote = slip.gap_minutes > 0
+                    ? (slip.excused ? `Excused ${slip.gap_minutes}m` : `+${slip.gap_minutes}m undertime`)
+                    : null;
+                const note = `<div class="ps-time-note" title="Approved Pass Slip${slip.slip_number ? ' #' + slip.slip_number : ''}">` +
+                    psClockIcon +
+                    `<span class="ps-time-badge">${label}</span>` +
+                    (slipOut ? `<span class="ps-time-range">${slipOut}${slipIn ? ' – ' + slipIn : ''}</span>` : '') +
+                    (gapNote ? `<span class="ps-time-gap">${gapNote}</span>` : '') +
+                    `</div>`;
+                // time_out is when they left — that's AM out or PM out depending on time
+                if (slip.time_out) {
+                    const h = parseInt(slip.time_out.split(':')[0]);
+                    if (h < 13) passSlipAmNote += note;
+                    else passSlipPmNote += note;
+                } else {
+                    passSlipPmNote += note;
+                }
+            });
+        }
+
+        const renderTimePair = (inTime, outTime, isOnLeave) => {
+            if (isOnLeave && !inTime && !outTime) return '';
+            const i = fmt12(inTime), o = fmt12(outTime);
+            if (!i && !o) return '';
+            return `<span class="time-val${i ? '' : ' time-missing'}">${i || '—'}</span>` +
+                `<span class="time-sep">–</span>` +
+                `<span class="time-val${o ? '' : ' time-missing'}">${o || '—'}</span>`;
+        };
+
         tr.innerHTML = `
             <td style="padding:0 8px;">${dateCellHtml}</td>
             <td>
-                ${record.is_on_leave && !record.am_in && !record.am_out ? '' : (() => { const i = fmt12(record.am_in), o = fmt12(record.am_out); return (i || o) ? `<span class="time-val${i ? '' : ' time-missing'}">${i || ''}</span>${i && o ? '<span style="color:#c4c9d8;margin:0 4px;">–</span>' : ''}<span class="time-val${o ? '' : ' time-missing'}">${o || ''}</span>` : ''; })()}
+                <div class="dtr-time-cell">
+                    <div class="dtr-time-row">${renderTimePair(record.am_in, record.am_out, record.is_on_leave)}</div>
+                    ${passSlipAmNote}
+                </div>
             </td>
             <td>
-                ${record.is_on_leave && !record.pm_in && !record.pm_out ? '' : (() => { const i = fmt12(record.pm_in), o = fmt12(record.pm_out); return (i || o) ? `<span class="time-val${i ? '' : ' time-missing'}">${i || ''}</span>${i && o ? '<span style="color:#c4c9d8;margin:0 4px;">–</span>' : ''}<span class="time-val${o ? '' : ' time-missing'}">${o || ''}</span>` : ''; })()}
+                <div class="dtr-time-cell">
+                    <div class="dtr-time-row">${renderTimePair(record.pm_in, record.pm_out, record.is_on_leave)}</div>
+                    ${passSlipPmNote}
+                </div>
             </td>
             <td>${record.ot_in ? record.ot_in + '<br><span style="color:#9aa1b5;font-size:11px;">' + (record.ot_out || '—') + '</span>' : '—'}</td>
             <td>${record.is_on_leave && !record.pm_out ? '' : (record.undertime_display ? '<span class="log-late">' + record.undertime_display + '</span>' : (record.pm_out ? '0 min' : '—'))}</td>

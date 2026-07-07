@@ -12,6 +12,14 @@
 </div>
 
 <style>
+/* successModal can appear after a correction made from inside
+   detailedDTRModal (which stays open behind it), so it needs to
+   outrank both detailedDTRModal (3000) and correctModal (3100) —
+   see detailedDtrModal.blade.php for the cascade explanation. */
+#successModal.modal-overlay {
+    z-index: 3200 !important;
+    position: fixed !important;
+}
 #successModal .modal-box {
     animation: successSlideIn 0.3s ease-out;
 }

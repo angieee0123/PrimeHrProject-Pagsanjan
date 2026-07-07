@@ -95,6 +95,7 @@
             <thead>
                 <tr>
                     <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid #eef2f6;">Employee</th>
+                    <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid #eef2f6;">Type</th>
                     <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid #eef2f6;">Reason</th>
                     <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid #eef2f6;">Date</th>
                     <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid #eef2f6;">Time Out</th>
@@ -106,6 +107,9 @@
                 @forelse($pendingSlips as $slip)
                 <tr class="passslip-pending-row" style="transition: all 0.15s ease;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">{{ $slip->employee->first_name ?? '' }} {{ $slip->employee->last_name ?? '' }}</td>
+                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; text-align: center;">
+                        <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: {{ $slip->type === 'official_activity' ? '#f0effe' : '#fefce8' }}; color: {{ $slip->type === 'official_activity' ? '#0b044d' : '#a16207' }};">{{ $slip->type === 'official_activity' ? 'Official' : 'Personal' }}</span>
+                    </td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #64748b;">{{ Str::limit($slip->reason ?? '', 40) }}</td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #111827; font-weight: 600;">{{ $slip->date ? $slip->date->format('M d, Y') : '' }}</td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; text-align: center;">{{ $slip->time_out ? \Carbon\Carbon::parse($slip->time_out)->format('g:i A') : '' }}</td>
@@ -122,7 +126,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 60px 20px; border-bottom: none;">
+                    <td colspan="7" style="text-align: center; padding: 60px 20px; border-bottom: none;">
                         <div style="width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center;">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                         </div>
@@ -166,24 +170,32 @@
             <thead>
                 <tr>
                     <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid #eef2f6;">Employee</th>
+                    <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid #eef2f6;">Type</th>
                     <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid #eef2f6;">Reason</th>
                     <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid #eef2f6;">Date</th>
                     <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid #eef2f6;">Approved By</th>
                     <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid #eef2f6;">Approved Date</th>
+                    <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid #eef2f6;">Form</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($approvedSlips as $slip)
                 <tr class="passslip-approved-row" style="transition: all 0.15s ease;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">{{ $slip->employee->first_name ?? '' }} {{ $slip->employee->last_name ?? '' }}</td>
+                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; text-align: center;">
+                        <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: {{ $slip->type === 'official_activity' ? '#f0effe' : '#fefce8' }}; color: {{ $slip->type === 'official_activity' ? '#0b044d' : '#a16207' }};">{{ $slip->type === 'official_activity' ? 'Official' : 'Personal' }}</span>
+                    </td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #64748b;">{{ Str::limit($slip->reason ?? '', 40) }}</td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #111827; font-weight: 600;">{{ $slip->date ? $slip->date->format('M d, Y') : '' }}</td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #15803d; font-weight: 600;">{{ $slip->approver->name ?? 'Admin User' }}</td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #64748b;">{{ $slip->approved_at ? $slip->approved_at->format('M d, Y') : 'N/A' }}</td>
+                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; text-align: center;">
+                        <a href="{{ route('admin.passslip.view-form', $slip->id) }}" target="_blank" style="padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; color: #0b044d; font-size: 11px; font-weight: 700; text-decoration: none;">Print</a>
+                    </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 60px 20px; border-bottom: none;">
+                    <td colspan="7" style="text-align: center; padding: 60px 20px; border-bottom: none;">
                         <div style="width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center;">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                         </div>

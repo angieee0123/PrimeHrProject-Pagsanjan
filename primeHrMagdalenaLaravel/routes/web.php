@@ -7,6 +7,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\PermanentAttendanceController;
 use App\Http\Controllers\PermanentLeaveBalanceController;
+use App\Http\Controllers\PassSlipController;
 use App\Models\User;
 
 Route::get('/', function () {
@@ -398,96 +399,10 @@ Route::delete('/permanent/travelorder/{id}', function ($id) {
     return redirect()->route('permanent.travelorder')->with('success', 'Travel order cancelled successfully.');
 })->middleware('auth')->name('travelorder.delete');
 
-Route::get('/permanent/passslip', function () {
-    $user = Auth::user();
-    $employee = $user instanceof User ? $user->employee : null;
-
-    if (!$employee) {
-        $passSlips = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10, 1);
-        return view('permanent.passSlip.permanentPassSlip', compact('passSlips'));
-    }
-
-    $employee->load('employmentDetail.designationRelation', 'employmentDetail.departmentRelation');
-
-    $perPage = request('per_page', 10);
-    $passSlips = \App\Models\PassSlip::where('employee_id', $employee->id)
-        ->orderBy('created_at', 'desc')
-        ->paginate($perPage);
-
-    return view('permanent.passSlip.permanentPassSlip', compact('employee', 'passSlips'));
-})->middleware('auth')->name('permanent.passslip');
-
-Route::post('/permanent/passslip', function (\Illuminate\Http\Request $request) {
-    $user = Auth::user();
-    $employee = $user instanceof User ? $user->employee : null;
-    if (!$employee) {
-        return back()->with('error', 'No employee record found.');
-    }
-
-    $data = $request->validate([
-        'destination' => 'nullable|string|max:255',
-        'reason' => 'required|string|max:300',
-        'date' => 'required|date',
-        'time_out' => 'required',
-        'time_in' => 'nullable',
-        'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-    ]);
-
-    $attachmentPath = null;
-    if ($request->hasFile('attachment')) {
-        $attachmentPath = $request->file('attachment')->store('pass_slips', 'public');
-    }
-
-    \App\Models\PassSlip::create([
-        'employee_id' => $employee->id,
-        'destination' => $data['destination'] ?? null,
-        'reason' => $data['reason'],
-        'date' => $data['date'],
-        'time_out' => $data['time_out'],
-        'time_in' => $data['time_in'] ?? null,
-        'attachment' => $attachmentPath,
-        'filed_by' => $user->id,
-        'status' => 'pending',
-    ]);
-
-    return redirect()->route('permanent.passslip')->with('success', 'Pass slip submitted successfully.');
-})->middleware('auth')->name('passslip.store');
-
-Route::get('/permanent/passslip/{id}', function ($id) {
-    $user = Auth::user();
-    $employee = $user instanceof User ? $user->employee : null;
-    if (!$employee) {
-        abort(403, 'No employee record found.');
-    }
-
-    $passSlip = \App\Models\PassSlip::where('id', $id)
-        ->where('employee_id', $employee->id)
-        ->with('approver')
-        ->firstOrFail();
-
-    return response()->json($passSlip);
-})->middleware('auth')->name('passslip.show');
-
-Route::delete('/permanent/passslip/{id}', function ($id) {
-    $user = Auth::user();
-    $employee = $user instanceof User ? $user->employee : null;
-    if (!$employee) {
-        return redirect()->route('permanent.passslip')->with('error', 'No employee record found.');
-    }
-
-    $passSlip = \App\Models\PassSlip::where('id', $id)
-        ->where('employee_id', $employee->id)
-        ->where('status', 'pending')
-        ->firstOrFail();
-
-    if ($passSlip->attachment) {
-        \Illuminate\Support\Facades\Storage::disk('public')->delete($passSlip->attachment);
-    }
-
-    $passSlip->delete();
-
-    return redirect()->route('permanent.passslip')->with('success', 'Pass slip cancelled successfully.');
-})->middleware('auth')->name('passslip.delete');
+Route::get('/permanent/passslip', [PassSlipController::class, 'indexPermanent'])->middleware('auth')->name('permanent.passslip');
+Route::post('/permanent/passslip', [PassSlipController::class, 'store'])->middleware('auth')->name('passslip.store');
+Route::get('/permanent/passslip/{id}', [PassSlipController::class, 'show'])->middleware('auth')->name('passslip.show');
+Route::delete('/permanent/passslip/{id}', [PassSlipController::class, 'destroy'])->middleware('auth')->name('passslip.delete');
 
 // ── Job Order Employee Dashboard ──
 Route::get('/joborder/dashboard', function () {
@@ -1063,65 +978,13 @@ Route::get('/admin/travelorder/{id}', function ($id) {
     return response()->json($travelOrder);
 })->middleware('auth')->name('admin.travelorder.view');
 
-Route::get('/admin/passslip', function (\Illuminate\Http\Request $request) {
-    $perPage = $request->input('per_page', 10);
-
-    $pendingSlips = \App\Models\PassSlip::with(['employee.employmentDetail.departmentRelation'])
-        ->where('status', 'pending')
-        ->orderBy('created_at', 'desc')
-        ->paginate($perPage, ['*'], 'pending_page');
-
-    $approvedSlips = \App\Models\PassSlip::with(['employee.employmentDetail.departmentRelation', 'approver'])
-        ->where('status', 'approved')
-        ->orderBy('approved_at', 'desc')
-        ->paginate($perPage, ['*'], 'approved_page');
-
-    $disapprovedSlips = \App\Models\PassSlip::with(['employee.employmentDetail.departmentRelation', 'approver'])
-        ->where('status', 'rejected')
-        ->orderBy('updated_at', 'desc')
-        ->paginate($perPage, ['*'], 'disapproved_page');
-
-    $departments = \App\Models\Department::where('status', 'Active')->orderBy('name')->get();
-
-    return view('admin.passSlip.passSlip', compact('pendingSlips', 'approvedSlips', 'disapprovedSlips', 'departments'));
-})->middleware('auth')->name('admin.passslip');
-
-Route::post('/admin/passslip/{id}/approve', function ($id) {
-    $passSlip = \App\Models\PassSlip::findOrFail($id);
-
-    $passSlip->update([
-        'status' => 'approved',
-        'approved_by' => Auth::id(),
-        'approved_at' => now(),
-        'remarks' => null,
-    ]);
-
-    return redirect()->route('admin.passslip', ['tab' => 'approved'])
-        ->with('success', 'Pass slip approved successfully.');
-})->middleware('auth')->name('admin.passslip.approve');
-
-Route::post('/admin/passslip/{id}/disapprove', function (\Illuminate\Http\Request $request, $id) {
-    $request->validate(['reason' => 'required|string|max:500']);
-
-    $passSlip = \App\Models\PassSlip::findOrFail($id);
-
-    $passSlip->update([
-        'status' => 'rejected',
-        'approved_by' => Auth::id(),
-        'approved_at' => now(),
-        'remarks' => $request->reason,
-    ]);
-
-    return redirect()->route('admin.passslip', ['tab' => 'disapproved'])
-        ->with('success', 'Pass slip disapproved.');
-})->middleware('auth')->name('admin.passslip.disapprove');
-
-Route::get('/admin/passslip/{id}', function ($id) {
-    $passSlip = \App\Models\PassSlip::with(['employee.employmentDetail.departmentRelation', 'approver'])
-        ->findOrFail($id);
-
-    return response()->json($passSlip);
-})->middleware('auth')->name('admin.passslip.view');
+Route::get('/admin/passslip', [PassSlipController::class, 'indexAdmin'])->middleware('auth')->name('admin.passslip');
+Route::post('/admin/passslip/{id}/approve', [PassSlipController::class, 'approve'])->middleware('auth')->name('admin.passslip.approve');
+Route::post('/admin/passslip/{id}/disapprove', [PassSlipController::class, 'disapprove'])->middleware('auth')->name('admin.passslip.disapprove');
+Route::get('/admin/passslip/{id}', [PassSlipController::class, 'viewAdmin'])->middleware('auth')->name('admin.passslip.view');
+Route::get('/admin/passslip/{id}/view-form', [PassSlipController::class, 'viewForm'])->middleware('auth')->name('admin.passslip.view-form');
+Route::get('/admin/passslip/{id}/print-form', [PassSlipController::class, 'generateForm'])->middleware('auth')->name('admin.passslip.print-form');
+Route::get('/admin/passslip/{id}/download-form', [PassSlipController::class, 'generateForm'])->middleware('auth')->name('admin.passslip.download-form');
 
 Route::post('/admin/leave/types', [LeaveController::class, 'storeLeaveType'])->middleware('auth')->name('admin.leave.types.store');
 Route::get('/admin/leave/types/{code}', [LeaveController::class, 'show'])->middleware('auth')->name('admin.leave.types.show');

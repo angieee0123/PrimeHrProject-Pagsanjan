@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.46, for macos15 (arm64)
 --
 -- Host: localhost    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.45
+-- Server version	9.6.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,6 +14,14 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+SET @@SESSION.SQL_LOG_BIN= 0;
+
+--
+-- GTID state at the beginning of the backup 
+--
+
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ 'dd1c05b4-6cab-11f1-9888-371ff5725969:1-2494';
 
 --
 -- Table structure for table `work_experiences`
@@ -47,6 +55,7 @@ LOCK TABLES `work_experiences` WRITE;
 INSERT INTO `work_experiences` VALUES (1,8,'XYZ Company','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(2,9,'XYZ Company','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(3,10,'Tech Solutions Inc','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(4,11,'XYZ Company','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(5,12,'Business Partners Ltd','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(6,13,'Business Partners Ltd','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(7,14,'Tech Solutions Inc','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(8,15,'Business Partners Ltd','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(9,16,'ABC Corporation','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0),(10,17,'XYZ Company','Junior Staff','2015-01-01','2020-12-31',NULL,NULL,0);
 /*!40000 ALTER TABLE `work_experiences` ENABLE KEYS */;
 UNLOCK TABLES;
+SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -57,4 +66,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-26  9:30:15
+-- Dump completed on 2026-07-07 12:38:25

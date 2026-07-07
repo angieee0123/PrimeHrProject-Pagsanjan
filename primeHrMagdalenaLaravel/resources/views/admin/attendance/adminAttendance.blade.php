@@ -925,13 +925,23 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 @include('admin.attendance.partials.attendance-summary-tab')
 @include('admin.attendance.partials.detailed-time-record-tab')
 @include('admin.attendance.partials.attendance-settings-tab')
+
+</main>
+
+{{-- Modals live outside .attendance-dashboard on purpose: that wrapper has
+     `isolation: isolate` (to contain its own decorative ::before gradient),
+     which makes it establish a stacking context with z-index:auto (≈0).
+     Any position:fixed modal nested inside it — no matter how high its own
+     z-index — can never out-rank the sidebar (z-index: 200), because the
+     comparison happens one level up, between the whole .attendance-dashboard
+     bubble (level 0) and the sidebar (level 200). Keeping modals as siblings
+     of .attendance-dashboard lets each one's own z-index compete directly
+     against the sidebar instead. --}}
 @include('admin.attendance.modals.dtrDetailModal')
 @include('admin.attendance.modals.detailedDtrModal')
 @include('admin.attendance.modals.editDtrModal')
 @include('admin.attendance.modals.correctAttendanceModal')
 @include('admin.attendance.modals.successModal')
-
-</main>
 
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>

@@ -57,3 +57,15 @@
         </div>
     </div>
 </div>
+
+<style>
+/* Standalone modal — give it the same explicit base z-index as the
+   other top-level attendance modals instead of leaving it to whichever
+   admin CSS file happens to load last (see detailedDtrModal.blade.php
+   for the full cascade explanation). */
+#dtrModal.modal-overlay {
+    z-index: 3000 !important;
+    position: fixed !important;
+}
+</style>
+

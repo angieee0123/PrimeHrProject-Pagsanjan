@@ -7,9 +7,11 @@ use App\Models\Attendance;
 use App\Models\AttendanceCorrection;
 use App\Models\AccreditedHoursLog;
 use App\Models\DailySalaryComputation;
+use App\Models\PassSlip;
 use App\Services\LateDeductionService;
 use App\Services\UndertimeDeductionService;
 use App\Services\CscTimeConversionService;
+use App\Services\PassSlipComplianceService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -136,6 +138,29 @@ class AttendanceController extends Controller
             })
             ->with('leaveType')
             ->get();
+
+        $approvedPassSlips = PassSlip::where('employee_id', $employee->id)
+            ->where('status', 'approved')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date')
+            ->get();
+
+        $passSlipCompliance = new PassSlipComplianceService();
+        $passSlips = $approvedPassSlips->map(function ($slip) use ($employee, $passSlipCompliance) {
+            $schedule = $employee->getScheduleForDate(Carbon::parse($slip->date)->format('Y-m-d'));
+
+            return [
+                'slip_number' => $slip->slip_number,
+                'date' => Carbon::parse($slip->date)->format('M d, Y'),
+                'type' => $slip->type,
+                'purpose_label' => $slip->purpose_label,
+                'destination' => $slip->destination,
+                'time_out' => $slip->time_out,
+                'time_in' => $slip->time_in,
+                'gap_minutes' => $passSlipCompliance->computeGapMinutes($slip, $schedule),
+                'excused' => $passSlipCompliance->isExcused($slip),
+            ];
+        })->values()->toArray();
 
         $present = 0;
         $absent = 0;
@@ -266,6 +291,7 @@ class AttendanceController extends Controller
             'rate' => $rate,
             'status' => $status,
             'photo' => $employee->photo,
+            'pass_slips' => $passSlips,
         ];
     }
 
@@ -470,7 +496,13 @@ class AttendanceController extends Controller
             })
             ->get();
 
-        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee, $approvedLeaves, $approvedTravelOrders);
+        // Get approved pass slips for this employee in the date range
+        $approvedPassSlips = PassSlip::where('employee_id', $employeeId)
+            ->where('status', 'approved')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get();
+
+        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee, $approvedLeaves, $approvedTravelOrders, $approvedPassSlips);
 
         return response()->json([
             'records' => $records,
@@ -568,8 +600,148 @@ class AttendanceController extends Controller
         return CscTimeConversionService::formatMinutes($minutes);
     }
 
-    private function generateDetailedRecords($startDate, $endDate, $attendances, $employee = null, $approvedLeaves = null, $approvedTravelOrders = null)
+    /**
+     * Shared by every branch of generateDetailedRecords() (weekday, weekend,
+     * etc.) so accredited hours are computed consistently regardless of which
+     * branch a day falls into. Prefers an existing AccreditedHoursLog; falls
+     * back to computing from actual punches, crediting a session from an
+     * approved Official Activity pass slip's overlap when that session has
+     * no punches because the employee was out on official business.
+     */
+    /**
+     * Extra minutes to credit within a session when an approved Official
+     * Activity pass slip covers the gap before the employee's actual
+     * arrival and/or after their actual departure — e.g. he returned early
+     * from official business partway through the session, so the punch
+     * pair alone would under-credit the pre-arrival hour.
+     */
+    private function creditPassSlipGapMinutes(int $sessionStart, int $sessionEnd, int $realFrom, int $realTo, iterable $passSlipsForDate, PassSlipComplianceService $passSlipCompliance): int
     {
+        $extra = 0;
+
+        $preGap = max(0, $realFrom - $sessionStart);
+        if ($preGap > 0) {
+            $covered = 0;
+            foreach ($passSlipsForDate as $slip) {
+                $covered += $passSlipCompliance->excusedRangeOverlapMinutes($slip, $sessionStart, $realFrom);
+            }
+            $extra += min($preGap, $covered);
+        }
+
+        $postGap = max(0, $sessionEnd - $realTo);
+        if ($postGap > 0) {
+            $covered = 0;
+            foreach ($passSlipsForDate as $slip) {
+                $covered += $passSlipCompliance->excusedRangeOverlapMinutes($slip, $realTo, $sessionEnd);
+            }
+            $extra += min($postGap, $covered);
+        }
+
+        return $extra;
+    }
+
+    private function computeDayAccreditedMinutes(
+        $attendance,
+        ?string $amIn,
+        ?string $amOut,
+        ?string $pmIn,
+        ?string $pmOut,
+        bool $amExcusedByPassSlip,
+        bool $pmExcusedByPassSlip,
+        array $passSlipsToday,
+        PassSlipComplianceService $passSlipCompliance,
+        $schedule,
+        Carbon $expectedAmIn,
+        Carbon $expectedAmOut,
+        Carbon $expectedPmIn,
+        Carbon $expectedPmOut
+    ): array {
+        $accreditedMinutes = 0;
+        $amAccreditedMins = 0;
+        $pmAccreditedMins = 0;
+        $amGraceApplied = false;
+        $pmGraceApplied = false;
+        $scheduleUsed = null;
+        $hasLog = false;
+        $log = null;
+
+        if ($attendance && $attendance->accreditedHoursLogs->isNotEmpty()) {
+            $log = $attendance->accreditedHoursLogs->last();
+            $accreditedMinutes = $log->total_accredited_minutes;
+            $amAccreditedMins = $log->am_accredited_minutes;
+            $pmAccreditedMins = $log->pm_accredited_minutes;
+            $amGraceApplied = $log->am_grace_applied;
+            $pmGraceApplied = $log->pm_grace_applied;
+
+            if ($log->schedule) {
+                $scheduleUsed = [
+                    'am_in' => substr($log->schedule->am_in, 0, 5),
+                    'am_out' => substr($log->schedule->am_out, 0, 5),
+                    'pm_in' => substr($log->schedule->pm_in, 0, 5),
+                    'pm_out' => substr($log->schedule->pm_out, 0, 5),
+                ];
+            }
+            $hasLog = true;
+        } elseif ($attendance && (($amIn && $amOut) || $amExcusedByPassSlip) && (($pmIn && $pmOut) || $pmExcusedByPassSlip)) {
+            $toMin = fn($t) => $t ? (int)(explode(':', $t)[0]) * 60 + (int)(explode(':', $t)[1]) : null;
+
+            $AM_START = $toMin($expectedAmIn->format('H:i'));
+            $AM_END = $toMin($expectedAmOut->format('H:i'));
+            $AM_GRACE = $AM_START + 5;
+            $PM_START = $toMin($expectedPmIn->format('H:i'));
+            $PM_END = $toMin($expectedPmOut->format('H:i'));
+            $PM_GRACE = $PM_START + 5;
+
+            if ($amIn && $amOut) {
+                $amInMin = $toMin($amIn);
+                if ($amInMin <= $AM_GRACE) {
+                    $amFrom = $AM_START;
+                    $amGraceApplied = true;
+                } else {
+                    $amFrom = $amInMin;
+                }
+                $amTo = min($toMin($amOut), $AM_END);
+                $amAccreditedMins = max(0, $amTo - $amFrom);
+                if (!empty($passSlipsToday)) {
+                    $amAccreditedMins = min($AM_END - $AM_START, $amAccreditedMins + $this->creditPassSlipGapMinutes($AM_START, $AM_END, $amFrom, $amTo, $passSlipsToday, $passSlipCompliance));
+                }
+            } elseif ($amExcusedByPassSlip) {
+                $amAccreditedMins = min($AM_END - $AM_START, array_reduce($passSlipsToday, fn($carry, $slip) => max($carry, $passSlipCompliance->sessionOverlapMinutes($slip, $schedule, 'am')), 0));
+            }
+
+            if ($pmIn && $pmOut) {
+                $pmInMin = $toMin($pmIn);
+                if ($pmInMin <= $PM_GRACE) {
+                    $pmFrom = $PM_START;
+                    $pmGraceApplied = true;
+                } else {
+                    $pmFrom = $pmInMin;
+                }
+                $pmTo = min($toMin($pmOut), $PM_END);
+                $pmAccreditedMins = max(0, $pmTo - $pmFrom);
+                if (!empty($passSlipsToday)) {
+                    $pmAccreditedMins = min($PM_END - $PM_START, $pmAccreditedMins + $this->creditPassSlipGapMinutes($PM_START, $PM_END, $pmFrom, $pmTo, $passSlipsToday, $passSlipCompliance));
+                }
+            } elseif ($pmExcusedByPassSlip) {
+                $pmAccreditedMins = min($PM_END - $PM_START, array_reduce($passSlipsToday, fn($carry, $slip) => max($carry, $passSlipCompliance->sessionOverlapMinutes($slip, $schedule, 'pm')), 0));
+            }
+
+            $accreditedMinutes = $amAccreditedMins + $pmAccreditedMins;
+            $scheduleUsed = [
+                'am_in' => $expectedAmIn->format('H:i'),
+                'am_out' => $expectedAmOut->format('H:i'),
+                'pm_in' => $expectedPmIn->format('H:i'),
+                'pm_out' => $expectedPmOut->format('H:i'),
+            ];
+        }
+
+        return compact('accreditedMinutes', 'amAccreditedMins', 'pmAccreditedMins', 'amGraceApplied', 'pmGraceApplied', 'scheduleUsed', 'hasLog', 'log');
+    }
+
+    private function generateDetailedRecords($startDate, $endDate, $attendances, $employee = null, $approvedLeaves = null, $approvedTravelOrders = null, $approvedPassSlips = null)
+    {
+        $passSlipCompliance = new PassSlipComplianceService();
+
         $graceMinutes = 5;
         $today = Carbon::now()->startOfDay();
         
@@ -638,6 +810,15 @@ class AttendanceController extends Controller
             }
         }
 
+        // Build pass slip dates map (a day can have more than one approved slip)
+        $passSlipDatesMap = [];
+        if ($approvedPassSlips) {
+            foreach ($approvedPassSlips as $passSlip) {
+                $dateKey = Carbon::parse($passSlip->date)->format('Y-m-d');
+                $passSlipDatesMap[$dateKey][] = $passSlip;
+            }
+        }
+
         $records = [];
         $current = $startDate->copy();
 
@@ -648,6 +829,8 @@ class AttendanceController extends Controller
             $isOnTravelOrder = isset($travelOrderDatesMap[$dateKey]);
             $leaveInfo = $isOnLeave ? $leaveDatesMap[$dateKey] : null;
             $travelOrderInfo = $isOnTravelOrder ? $travelOrderDatesMap[$dateKey] : null;
+            $passSlipsToday = $passSlipDatesMap[$dateKey] ?? [];
+            $isOnPassSlip = !empty($passSlipsToday);
 
             // Get schedule for this specific date
             $schedule = $employee ? $employee->getScheduleForDate($dateKey) : null;
@@ -658,6 +841,20 @@ class AttendanceController extends Controller
             
             $graceThresholdAm = $expectedAmIn->copy()->addMinutes($graceMinutes);
             $graceThresholdPm = $expectedPmIn->copy()->addMinutes($graceMinutes);
+
+            // Built once per day so every branch below (travel order / leave /
+            // weekend / absent / normal) can attach the same approved Pass Slip
+            // annotation regardless of which branch the day falls into.
+            $passSlipInfo = $isOnPassSlip ? array_map(fn($slip) => [
+                'slip_number' => $slip->slip_number,
+                'type' => $slip->type,
+                'purpose_label' => $slip->purpose_label,
+                'destination' => $slip->destination,
+                'time_out' => $slip->time_out,
+                'time_in' => $slip->time_in,
+                'gap_minutes' => $passSlipCompliance->computeGapMinutes($slip, $schedule ?? null),
+                'excused' => $passSlipCompliance->isExcused($slip),
+            ], $passSlipsToday) : null;
 
             // Parse time fields safely
             $amIn = null;
@@ -779,6 +976,8 @@ class AttendanceController extends Controller
                     'is_on_leave' => false,
                     'is_on_travel_order' => true,
                     'travel_order_info' => $travelOrderInfo,
+                    'is_on_pass_slip' => $isOnPassSlip,
+                    'pass_slip_info' => $passSlipInfo,
                 ];
                 $current->addDay();
                 continue;
@@ -819,6 +1018,8 @@ class AttendanceController extends Controller
                     'is_on_leave' => true,
                     'is_on_travel_order' => false,
                     'leave_info' => $leaveInfo,
+                    'is_on_pass_slip' => $isOnPassSlip,
+                    'pass_slip_info' => $passSlipInfo,
                 ];
                 $current->addDay();
                 continue;
@@ -858,14 +1059,45 @@ class AttendanceController extends Controller
                 }
             }
 
+            // Apply CSC-based Pass Slip adjustment: Official Activity excuses the gap,
+            // Personal Reason charges it (biometric AM/PM punches alone wouldn't
+            // otherwise reflect a mid-session personal errand).
+            if ($isOnPassSlip) {
+                $undertimeMinutes = $passSlipCompliance->adjustUndertimeMinutes($undertimeMinutes, $passSlipsToday, $schedule ?? null);
+            }
+
             // Check if employee only timed in AM without returning (uses effective punches after auto-fill)
             $isAbandoned = false;
             if ($attendance && $amIn && !$amOut && !$pmIn && !in_array($current->dayOfWeek, [0, 6])) {
                 $isAbandoned = true;
             }
 
+            // If an approved Official Activity pass slip's window fully covers a
+            // session, that session's missing punch pair is explained — the
+            // employee was on official business, not incomplete/absent. Computed
+            // here (before the weekend branch) so both weekday and weekend days
+            // can credit accredited hours for it consistently.
+            $amExcusedByPassSlip = false;
+            $pmExcusedByPassSlip = false;
+            if ($isOnPassSlip) {
+                foreach ($passSlipsToday as $slip) {
+                    if ($passSlipCompliance->excusesSession($slip, $schedule ?? null, 'am')) {
+                        $amExcusedByPassSlip = true;
+                    }
+                    if ($passSlipCompliance->excusesSession($slip, $schedule ?? null, 'pm')) {
+                        $pmExcusedByPassSlip = true;
+                    }
+                }
+            }
+
             // Always include weekends in the table
             if (in_array($current->dayOfWeek, [0, 6])) {
+                $weekendAccredited = $this->computeDayAccreditedMinutes(
+                    $attendance, $amIn, $amOut, $pmIn, $pmOut,
+                    $amExcusedByPassSlip, $pmExcusedByPassSlip, $passSlipsToday, $passSlipCompliance,
+                    $schedule ?? null, $expectedAmIn, $expectedAmOut, $expectedPmIn, $expectedPmOut
+                );
+
                 $records[] = [
                     'date'                => $current->format('M d, Y'),
                     'day'                 => $current->format('l'),
@@ -884,18 +1116,18 @@ class AttendanceController extends Controller
                         $h = (int)($m / 60); $min = $m % 60;
                         return $min > 0 ? "{$h}h {$min}m" : "{$h} hrs";
                     })() : '0 hrs',
-                    'accredited_minutes'  => 0,
-                    'am_accredited_minutes' => 0,
-                    'pm_accredited_minutes' => 0,
-                    'am_grace_applied'    => false,
-                    'pm_grace_applied'    => false,
-                    'schedule'            => [
+                    'accredited_minutes'  => $weekendAccredited['accreditedMinutes'],
+                    'am_accredited_minutes' => $weekendAccredited['amAccreditedMins'],
+                    'pm_accredited_minutes' => $weekendAccredited['pmAccreditedMins'],
+                    'am_grace_applied'    => $weekendAccredited['amGraceApplied'],
+                    'pm_grace_applied'    => $weekendAccredited['pmGraceApplied'],
+                    'schedule'            => $weekendAccredited['scheduleUsed'] ?? [
                         'am_in'  => $expectedAmIn->format('H:i'),
                         'am_out' => $expectedAmOut->format('H:i'),
                         'pm_in'  => $expectedPmIn->format('H:i'),
                         'pm_out' => $expectedPmOut->format('H:i'),
                     ],
-                    'has_log'             => false,
+                    'has_log'             => $weekendAccredited['hasLog'],
                     'needs_review'        => false,
                     'is_incomplete'       => false,
                     'is_absent'           => false,
@@ -904,6 +1136,8 @@ class AttendanceController extends Controller
                     'date_key'            => $current->format('Y-m-d'),
                     'is_on_leave'         => false,
                     'leave_info'          => null,
+                    'is_on_pass_slip'     => $isOnPassSlip,
+                    'pass_slip_info'      => $passSlipInfo,
                 ];
                 $current->addDay();
                 continue;
@@ -946,8 +1180,8 @@ class AttendanceController extends Controller
             $isAbsent = false;
 
             if ($attendance && !in_array($current->dayOfWeek, [0, 6])) {
-                $hasAmPair = $amIn && $amOut;
-                $hasPmPair = $pmIn && $pmOut;
+                $hasAmPair = ($amIn && $amOut) || $amExcusedByPassSlip;
+                $hasPmPair = ($pmIn && $pmOut) || $pmExcusedByPassSlip;
                 $hasOnlyAmIn = $attendance->am_in && !$attendance->am_out && !$attendance->pm_in && !$attendance->pm_out;
                 $hasOnlyPmIn = !$attendance->am_in && !$attendance->am_out && $attendance->pm_in && !$attendance->pm_out;
 
@@ -1001,6 +1235,8 @@ class AttendanceController extends Controller
                     'date_key' => $current->format('Y-m-d'),
                     'is_on_leave' => false,
                     'leave_info' => null,
+                    'is_on_pass_slip' => $isOnPassSlip,
+                    'pass_slip_info' => $passSlipInfo,
                 ];
                 $current->addDay();
                 continue;
@@ -1022,74 +1258,20 @@ class AttendanceController extends Controller
             $needsReview = ($lateMinutes > 0 && $undertimeMinutes > 0);
 
             // Get accredited hours from log if exists, otherwise calculate
-            $accreditedMinutes = 0;
-            $amAccreditedMins = 0;
-            $pmAccreditedMins = 0;
-            $amGraceApplied = false;
-            $pmGraceApplied = false;
-            $scheduleUsed = null;
-            $hasLog = false;
-            
-            if ($attendance && $attendance->accreditedHoursLogs->isNotEmpty()) {
-                // Use the latest log entry for this attendance
-                $log = $attendance->accreditedHoursLogs->last();
-                $accreditedMinutes = $log->total_accredited_minutes;
-                $amAccreditedMins = $log->am_accredited_minutes;
-                $pmAccreditedMins = $log->pm_accredited_minutes;
-                $amGraceApplied = $log->am_grace_applied;
-                $pmGraceApplied = $log->pm_grace_applied;
-                
-                // Get schedule from relationship
-                if ($log->schedule) {
-                    $scheduleUsed = [
-                        'am_in' => substr($log->schedule->am_in, 0, 5),
-                        'am_out' => substr($log->schedule->am_out, 0, 5),
-                        'pm_in' => substr($log->schedule->pm_in, 0, 5),
-                        'pm_out' => substr($log->schedule->pm_out, 0, 5),
-                    ];
-                }
-                $hasLog = true;
-            } elseif ($attendance && ($amIn && $amOut && $pmIn && $pmOut)) {
-                // Fallback: Calculate if no log exists
-                $toMin = fn($t) => $t ? (int)(explode(':', $t)[0]) * 60 + (int)(explode(':', $t)[1]) : null;
-                
-                $AM_START = $toMin($expectedAmIn->format('H:i'));
-                $AM_END = $toMin($expectedAmOut->format('H:i'));
-                $AM_GRACE = $AM_START + 5;
-                $PM_START = $toMin($expectedPmIn->format('H:i'));
-                $PM_END = $toMin($expectedPmOut->format('H:i'));
-                $PM_GRACE = $PM_START + 5;
-                
-                // Calculate AM accredited
-                $amInMin = $toMin($amIn);
-                if ($amInMin <= $AM_GRACE) {
-                    $amFrom = $AM_START;
-                    $amGraceApplied = true;
-                } else {
-                    $amFrom = $amInMin;
-                }
-                $amTo = min($toMin($amOut), $AM_END);
-                $amAccreditedMins = max(0, $amTo - $amFrom);
-                
-                // Calculate PM accredited
-                $pmInMin = $toMin($pmIn);
-                if ($pmInMin <= $PM_GRACE) {
-                    $pmFrom = $PM_START;
-                    $pmGraceApplied = true;
-                } else {
-                    $pmFrom = $pmInMin;
-                }
-                $pmTo = min($toMin($pmOut), $PM_END);
-                $pmAccreditedMins = max(0, $pmTo - $pmFrom);
-                
-                $accreditedMinutes = $amAccreditedMins + $pmAccreditedMins;
-                $scheduleUsed = [
-                    'am_in' => $expectedAmIn->format('H:i'),
-                    'am_out' => $expectedAmOut->format('H:i'),
-                    'pm_in' => $expectedPmIn->format('H:i'),
-                    'pm_out' => $expectedPmOut->format('H:i'),
-                ];
-            }
+            // (shared with the weekend branch above via computeDayAccreditedMinutes)
+            $dayAccredited = $this->computeDayAccreditedMinutes(
+                $attendance, $amIn, $amOut, $pmIn, $pmOut,
+                $amExcusedByPassSlip, $pmExcusedByPassSlip, $passSlipsToday, $passSlipCompliance,
+                $schedule ?? null, $expectedAmIn, $expectedAmOut, $expectedPmIn, $expectedPmOut
+            );
+            $accreditedMinutes = $dayAccredited['accreditedMinutes'];
+            $amAccreditedMins = $dayAccredited['amAccreditedMins'];
+            $pmAccreditedMins = $dayAccredited['pmAccreditedMins'];
+            $amGraceApplied = $dayAccredited['amGraceApplied'];
+            $pmGraceApplied = $dayAccredited['pmGraceApplied'];
+            $scheduleUsed = $dayAccredited['scheduleUsed'];
+            $hasLog = $dayAccredited['hasLog'];
+            $log = $dayAccredited['log'];
 
             $records[] = [
                 'date' => $current->format('M d, Y'),
@@ -1130,6 +1312,8 @@ class AttendanceController extends Controller
                 'date_key' => $current->format('Y-m-d'),
                 'is_on_leave' => false,
                 'leave_info' => null,
+                'is_on_pass_slip' => $isOnPassSlip,
+                'pass_slip_info' => $passSlipInfo,
             ];
 
             $current->addDay();
@@ -1149,24 +1333,35 @@ class AttendanceController extends Controller
 
             $employee = Employee::findOrFail($employeeId);
 
+            $approvedPassSlips = PassSlip::where('employee_id', $employeeId)
+                ->where('status', 'approved')
+                ->where('date', $date)
+                ->get()
+                ->map(fn($slip) => [
+                    'slip_number' => $slip->slip_number,
+                    'type'        => $slip->type,
+                    'time_out'    => $slip->time_out ? substr($slip->time_out, 0, 5) : null,
+                    'time_in'     => $slip->time_in  ? substr($slip->time_in,  0, 5) : null,
+                ])->values()->toArray();
+
             return response()->json([
-                'id' => null,
-                'employee_id' => $employeeId,
+                'id'            => null,
+                'employee_id'   => $employeeId,
                 'employee_name' => $employee->first_name . ' ' . $employee->last_name,
-                'date' => $date,
-                'am_in' => null,
-                'am_out' => null,
-                'pm_in' => null,
-                'pm_out' => null,
-                'ot_in' => null,
-                'ot_out' => null,
-                'is_new' => true,
+                'date'          => $date,
+                'am_in'         => null,
+                'am_out'        => null,
+                'pm_in'         => null,
+                'pm_out'        => null,
+                'ot_in'         => null,
+                'ot_out'        => null,
+                'is_new'        => true,
+                'pass_slips'    => $approvedPassSlips,
             ]);
         }
 
         $attendance = Attendance::with('employee')->findOrFail($attendanceId);
 
-        // Helper to format time to HH:MM
         $formatTime = function($time) {
             if (!$time) return null;
             try {
@@ -1176,18 +1371,31 @@ class AttendanceController extends Controller
             }
         };
 
+        $dateStr = Carbon::parse($attendance->date)->format('Y-m-d');
+        $approvedPassSlips = PassSlip::where('employee_id', $attendance->employee_id)
+            ->where('status', 'approved')
+            ->where('date', $dateStr)
+            ->get()
+            ->map(fn($slip) => [
+                'slip_number' => $slip->slip_number,
+                'type'        => $slip->type,
+                'time_out'    => $formatTime($slip->time_out),
+                'time_in'     => $formatTime($slip->time_in),
+            ])->values()->toArray();
+
         return response()->json([
-            'id' => $attendance->id,
-            'employee_id' => $attendance->employee_id,
+            'id'            => $attendance->id,
+            'employee_id'   => $attendance->employee_id,
             'employee_name' => $attendance->employee->first_name . ' ' . $attendance->employee->last_name,
-            'date' => Carbon::parse($attendance->date)->format('Y-m-d'),
-            'am_in' => $formatTime($attendance->am_in),
-            'am_out' => $formatTime($attendance->am_out),
-            'pm_in' => $formatTime($attendance->pm_in),
-            'pm_out' => $formatTime($attendance->pm_out),
-            'ot_in' => $formatTime($attendance->ot_in),
-            'ot_out' => $formatTime($attendance->ot_out),
-            'is_new' => false,
+            'date'          => $dateStr,
+            'am_in'         => $formatTime($attendance->am_in),
+            'am_out'        => $formatTime($attendance->am_out),
+            'pm_in'         => $formatTime($attendance->pm_in),
+            'pm_out'        => $formatTime($attendance->pm_out),
+            'ot_in'         => $formatTime($attendance->ot_in),
+            'ot_out'        => $formatTime($attendance->ot_out),
+            'is_new'        => false,
+            'pass_slips'    => $approvedPassSlips,
         ]);
     }
 
@@ -1245,7 +1453,7 @@ class AttendanceController extends Controller
      * Compute accredited hours and create detailed log.
      * Returns array with accredited minutes and log data.
      */
-    private function computeAccreditedHours($employeeId, $date, ?string $amIn, ?string $amOut, ?string $pmIn, ?string $pmOut, ?string $otIn = null, ?string $otOut = null): array
+    private function computeAccreditedHours($employeeId, $date, ?string $amIn, ?string $amOut, ?string $pmIn, ?string $pmOut, ?string $otIn = null, ?string $otOut = null, ?iterable $passSlipsForDate = null): array
     {
         if (!$amIn && !$amOut && !$pmIn && !$pmOut) {
             return ['accredited_minutes' => null, 'log_data' => null];
@@ -1304,6 +1512,8 @@ class AttendanceController extends Controller
             ];
         }
 
+        $passSlipCompliance = new PassSlipComplianceService();
+
         $amMins = 0;
         $amGraceApplied = false;
         if ($amIn && $amOut) {
@@ -1316,6 +1526,17 @@ class AttendanceController extends Controller
             }
             $amTo = min($toMin($amOut), $AM_END);
             $amMins = max(0, $amTo - $amFrom);
+            if ($passSlipsForDate) {
+                $amMins = min($AM_END - $AM_START, $amMins + $this->creditPassSlipGapMinutes($AM_START, $AM_END, $amFrom, $amTo, $passSlipsForDate, $passSlipCompliance));
+            }
+        } elseif ($passSlipsForDate) {
+            // No AM punches — credit the session if an approved Official
+            // Activity pass slip's window explains the absence.
+            foreach ($passSlipsForDate as $slip) {
+                if ($passSlipCompliance->excusesSession($slip, $schedule, 'am')) {
+                    $amMins = max($amMins, min($AM_END - $AM_START, $passSlipCompliance->sessionOverlapMinutes($slip, $schedule, 'am')));
+                }
+            }
         }
 
         $pmMins = 0;
@@ -1330,6 +1551,15 @@ class AttendanceController extends Controller
             }
             $pmTo = min($toMin($pmOut), $PM_END);
             $pmMins = max(0, $pmTo - $pmFrom);
+            if ($passSlipsForDate) {
+                $pmMins = min($PM_END - $PM_START, $pmMins + $this->creditPassSlipGapMinutes($PM_START, $PM_END, $pmFrom, $pmTo, $passSlipsForDate, $passSlipCompliance));
+            }
+        } elseif ($passSlipsForDate) {
+            foreach ($passSlipsForDate as $slip) {
+                if ($passSlipCompliance->excusesSession($slip, $schedule, 'pm')) {
+                    $pmMins = max($pmMins, min($PM_END - $PM_START, $passSlipCompliance->sessionOverlapMinutes($slip, $schedule, 'pm')));
+                }
+            }
         }
 
         // Calculate OT
@@ -1379,6 +1609,12 @@ class AttendanceController extends Controller
         if ($amIn && $amOut) $totalActual += $toMin($amOut) - $toMin($amIn);
         if ($pmIn && $pmOut) $totalActual += $toMin($pmOut) - $toMin($pmIn);
         if ($otIn && $otOut) $totalActual += $otMins;
+
+        // Apply CSC-based Pass Slip adjustment (see PassSlipComplianceService):
+        // Official Activity excuses the gap, Personal Reason charges it.
+        if ($passSlipsForDate) {
+            $undertimeMins = $passSlipCompliance->adjustUndertimeMinutes($undertimeMins, $passSlipsForDate, $schedule);
+        }
 
         return [
             'accredited_minutes' => $totalAccredited,
@@ -1438,6 +1674,12 @@ class AttendanceController extends Controller
             ->whereBetween('date', [$startDate, $endDate])
             ->get();
 
+        $passSlipsByDate = PassSlip::where('employee_id', $employeeId)
+            ->where('status', 'approved')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get()
+            ->groupBy(fn($slip) => Carbon::parse($slip->date)->format('Y-m-d'));
+
         $recalculatedCount = 0;
 
         foreach ($attendances as $attendance) {
@@ -1446,15 +1688,18 @@ class AttendanceController extends Controller
                 continue;
             }
 
+            $dateKey = Carbon::parse($attendance->date)->format('Y-m-d');
+
             $computationResult = $this->computeAccreditedHours(
                 $employeeId,
-                Carbon::parse($attendance->date)->format('Y-m-d'),
+                $dateKey,
                 $attendance->am_in ? Carbon::parse($attendance->am_in)->format('H:i') : null,
                 $attendance->am_out ? Carbon::parse($attendance->am_out)->format('H:i') : null,
                 $attendance->pm_in ? Carbon::parse($attendance->pm_in)->format('H:i') : null,
                 $attendance->pm_out ? Carbon::parse($attendance->pm_out)->format('H:i') : null,
                 $attendance->ot_in ? Carbon::parse($attendance->ot_in)->format('H:i') : null,
-                $attendance->ot_out ? Carbon::parse($attendance->ot_out)->format('H:i') : null
+                $attendance->ot_out ? Carbon::parse($attendance->ot_out)->format('H:i') : null,
+                $passSlipsByDate->get($dateKey)
             );
 
             // Update attendance accredited hours
@@ -1562,6 +1807,11 @@ class AttendanceController extends Controller
             'corrected_by' => Auth::id(),
         ]);
 
+        $passSlipsForDate = PassSlip::where('employee_id', $validated['employee_id'])
+            ->where('status', 'approved')
+            ->where('date', $validated['date'])
+            ->get();
+
         $computationResult = $this->computeAccreditedHours(
             $validated['employee_id'],
             $validated['date'],
@@ -1570,7 +1820,8 @@ class AttendanceController extends Controller
             $validated['pm_in'],
             $validated['pm_out'],
             $validated['ot_in'],
-            $validated['ot_out']
+            $validated['ot_out'],
+            $passSlipsForDate
         );
 
         $attendance->update([

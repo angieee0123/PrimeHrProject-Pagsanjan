@@ -199,7 +199,7 @@
 /* ══════════════ DETAILED DTR MODAL — premium refinement ══════════════
    8px spacing system · light header · soft-badge status system
    Every class emitted by adminAttendance.js is styled below. */
-.ddtr-overlay {
+#detailedDTRModal.ddtr-overlay {
     --pri: #0B0A4D;
     --pri-2: #1b1464;
     --pri-soft: #eef0fb;
@@ -217,6 +217,14 @@
     background: rgba(20, 20, 32, .45);
     backdrop-filter: blur(12px) saturate(160%);
     -webkit-backdrop-filter: blur(12px) saturate(160%);
+    /* This app loads 11 admin CSS files that each redeclare a bare
+       `.modal-overlay` z-index (1000/9999/1000); adminDashboard.css's
+       `.modal-overlay:not(#addEmployeeModal)` (specificity 1,1,0) wins
+       that fight but still only reaches 1000. Match that specificity
+       here (id + class) so this modal reliably renders above the
+       sidebar (z-index: 200) regardless of stylesheet load order. */
+    z-index: 3000 !important;
+    position: fixed !important;
 }
 .ddtr-modal {
     display: flex;
@@ -456,8 +464,8 @@
 }
 .ddtr-th-hint { font-weight: 400; color: var(--faint); font-size: 9.5px; margin-left: 3px; }
 .detailed-dtr-table td {
-    padding: 0 12px; border-bottom: 1px solid #f1f2f8;
-    font-size: 12px; color: var(--ink); height: 56px; vertical-align: middle; white-space: nowrap;
+    padding: 10px 12px; border-bottom: 1px solid #f1f2f8;
+    font-size: 12px; color: var(--ink); min-height: 56px; vertical-align: middle; white-space: nowrap;
 }
 
 /* ── WEEK SEPARATOR ── */
@@ -521,7 +529,8 @@
 /* ── STATUS BADGES · soft rounded pills ── */
 .detailed-dtr-table .badge-absent,
 .detailed-dtr-table .badge-incomplete,
-.detailed-dtr-table .badge-needs-review {
+.detailed-dtr-table .badge-needs-review,
+.detailed-dtr-table .badge-passslip {
     display: inline-flex; align-items: center;
     font-size: 9.5px; font-weight: 600; letter-spacing: .3px;
     padding: 2px 8px; border-radius: 999px;
@@ -530,6 +539,7 @@
 .detailed-dtr-table .badge-absent { background: #fdedec; color: #d5433c; }
 .detailed-dtr-table .badge-incomplete { background: #fdf3e3; color: #a6720c; }
 .detailed-dtr-table .badge-needs-review { background: #f2effd; color: #7C5CFF; }
+.detailed-dtr-table .badge-passslip { background: #e6f7f5; color: #0d9488; }
 .detailed-dtr-table .log-late { color: var(--ink); font-weight: 600; }
 
 /* ── ACCREDITED PILL · soft backgrounds ── */
@@ -576,6 +586,39 @@
     .detailed-dtr-table tbody tr:focus-within .btn-edit-time { opacity: 1; }
 }
 
+/* ── TIME CELL (AM/PM) ── */
+.dtr-time-cell {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+    white-space: normal;
+}
+.dtr-time-row { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+.time-sep { color: #c4c9d8; font-size: 11px; }
+
+/* ── PASS SLIP TIME ANNOTATION · refined chip, Apple-style ── */
+.ps-time-note {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px 4px 8px;
+    background: linear-gradient(180deg, rgba(13,148,136,.09), rgba(13,148,136,.04));
+    border: 1px solid rgba(13,148,136,.16);
+    border-radius: 999px;
+    font-size: 10.5px; font-weight: 500; color: #0c8377;
+    line-height: 1.3; white-space: nowrap; max-width: 100%;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+}
+.ps-time-note svg { flex-shrink: 0; opacity: .8; }
+.ps-time-badge {
+    font-size: 9px; font-weight: 700; letter-spacing: .3px;
+    color: #0c8377;
+}
+.ps-time-range {
+    color: #4b5563; font-weight: 500;
+    padding-left: 6px; border-left: 1px solid rgba(13,148,136,.2);
+}
+.ps-time-gap {
+    color: #a6720c; font-weight: 600;
+    padding-left: 6px; border-left: 1px solid rgba(166,114,7,.22);
+}
+
 /* ── FOOTER ── */
 .ddtr-footer {
     display: flex; align-items: center; justify-content: flex-end;
@@ -589,7 +632,7 @@
     .ddtr-kpis { grid-template-columns: repeat(3, 1fr); }
 }
 @media (max-width: 820px) {
-    .ddtr-overlay { padding: 0; }
+    #detailedDTRModal.ddtr-overlay { padding: 0; }
     .ddtr-modal { max-width: 100%; height: 100vh; border-radius: 0; border: none; }
 
     .ddtr-header { padding: 0 16px; gap: 10px; height: 56px; }

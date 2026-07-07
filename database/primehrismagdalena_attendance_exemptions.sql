@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.46, for macos15 (arm64)
 --
 -- Host: localhost    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.45
+-- Server version	9.6.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,6 +14,14 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+SET @@SESSION.SQL_LOG_BIN= 0;
+
+--
+-- GTID state at the beginning of the backup 
+--
+
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ 'dd1c05b4-6cab-11f1-9888-371ff5725969:1-2494';
 
 --
 -- Table structure for table `attendance_exemptions`
@@ -24,12 +32,12 @@ DROP TABLE IF EXISTS `attendance_exemptions`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `attendance_exemptions` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `exemption_type` enum('employee','department','designation') COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Type of exemption',
+  `exemption_type` enum('employee','department','designation') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Type of exemption',
   `reference_id` bigint unsigned NOT NULL COMMENT 'ID of employee, department, or designation',
-  `reference_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Name for display purposes',
+  `reference_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Name for display purposes',
   `exempt_from_abandoned` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Exempt from abandoned flag',
   `exempt_from_incomplete` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Exempt from incomplete flag',
-  `reason` text COLLATE utf8mb4_unicode_ci COMMENT 'Reason for exemption',
+  `reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Reason for exemption',
   `start_date` date DEFAULT NULL COMMENT 'Exemption start date (null = no start limit)',
   `end_date` date DEFAULT NULL COMMENT 'Exemption end date (null = no end limit)',
   `am_in_not_required` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'AM IN is not required',
@@ -58,6 +66,7 @@ LOCK TABLES `attendance_exemptions` WRITE;
 INSERT INTO `attendance_exemptions` VALUES (1,'employee',10,'Ana Garcia Ramos',1,1,'Garbage Collector po','2026-05-24','2026-05-30',0,1,1,0,1,1,1,'2026-05-23 20:50:05','2026-05-23 20:50:05');
 /*!40000 ALTER TABLE `attendance_exemptions` ENABLE KEYS */;
 UNLOCK TABLES;
+SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -68,4 +77,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-26  9:30:14
+-- Dump completed on 2026-07-07 12:38:25

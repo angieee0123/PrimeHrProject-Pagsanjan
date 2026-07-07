@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.46, for macos15 (arm64)
 --
 -- Host: localhost    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.45
+-- Server version	9.6.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,6 +14,14 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+SET @@SESSION.SQL_LOG_BIN= 0;
+
+--
+-- GTID state at the beginning of the backup 
+--
+
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ 'dd1c05b4-6cab-11f1-9888-371ff5725969:1-2494';
 
 --
 -- Table structure for table `employment_details`
@@ -50,6 +58,7 @@ LOCK TABLES `employment_details` WRITE;
 INSERT INTO `employment_details` VALUES (5,6,73,14,'Permanent','2026-01-01',NULL,'1'),(6,8,2,1,'Permanent','2026-01-01',NULL,NULL),(7,9,6,1,'Permanent','2026-01-01',NULL,NULL),(8,10,5,1,'Permanent','2026-01-01',NULL,NULL),(9,11,4,1,'Permanent','2026-01-01',NULL,NULL),(10,12,94,18,'Permanent','2026-01-01',NULL,NULL),(11,13,112,21,'Permanent','2026-01-01',NULL,NULL),(12,14,105,19,'Permanent','2026-01-01',NULL,NULL),(13,15,96,18,'Permanent','2026-01-01',NULL,NULL),(14,16,64,13,'Permanent','2026-01-01',NULL,NULL),(15,17,140,3,'Permanent','2026-01-01',NULL,NULL),(16,18,92,17,'Permanent','2026-05-24',NULL,NULL);
 /*!40000 ALTER TABLE `employment_details` ENABLE KEYS */;
 UNLOCK TABLES;
+SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -60,4 +69,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-26  9:30:13
+-- Dump completed on 2026-07-07 12:38:24

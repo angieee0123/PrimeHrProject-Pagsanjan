@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.46, for macos15 (arm64)
 --
 -- Host: localhost    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.45
+-- Server version	9.6.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,6 +14,14 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+SET @@SESSION.SQL_LOG_BIN= 0;
+
+--
+-- GTID state at the beginning of the backup 
+--
+
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ 'dd1c05b4-6cab-11f1-9888-371ff5725969:1-2494';
 
 --
 -- Table structure for table `trainings`
@@ -58,6 +66,7 @@ LOCK TABLES `trainings` WRITE;
 INSERT INTO `trainings` VALUES (1,8,'Leadership Training','2023-06-01','2023-06-03',24,NULL,NULL,NULL,'CSC',NULL,NULL,'verified',NULL,'2026-05-17 22:25:46',1,NULL,'2026-05-17 22:25:46'),(2,9,'Customer Service Excellence','2023-06-01','2023-06-03',24,NULL,NULL,NULL,'CSC',NULL,NULL,'verified',NULL,'2026-06-09 18:22:54',1,NULL,'2026-06-09 18:22:54'),(3,10,'Project Management','2023-06-01','2023-06-03',24,NULL,NULL,NULL,'CSC',NULL,NULL,'pending',NULL,NULL,NULL,NULL,NULL),(4,11,'Data Privacy Seminar','2023-06-01','2023-06-03',24,NULL,NULL,NULL,'CSC',NULL,NULL,'pending',NULL,NULL,NULL,NULL,NULL),(5,12,'Data Privacy Seminar','2023-06-01','2023-06-03',24,NULL,NULL,NULL,'CSC',NULL,NULL,'pending',NULL,NULL,NULL,NULL,NULL),(6,13,'Customer Service Excellence','2023-06-01','2023-06-03',24,NULL,NULL,NULL,'CSC',NULL,NULL,'pending',NULL,NULL,NULL,NULL,NULL),(7,14,'Data Privacy Seminar','2023-06-01','2023-06-03',24,NULL,NULL,NULL,'CSC',NULL,NULL,'pending',NULL,NULL,NULL,NULL,NULL),(8,15,'Project Management','2023-06-01','2023-06-03',24,NULL,NULL,NULL,'CSC',NULL,NULL,'pending',NULL,NULL,NULL,NULL,NULL),(9,16,'Data Privacy Seminar','2023-06-01','2023-06-03',24,NULL,NULL,NULL,'CSC',NULL,NULL,'pending',NULL,NULL,NULL,NULL,NULL),(10,17,'Customer Service Excellence','2023-06-01','2023-06-03',24,NULL,NULL,NULL,'CSC',NULL,NULL,'pending',NULL,NULL,NULL,NULL,NULL),(11,8,'Think Before You Click: Digital Citizenship in the Modern Age','2025-03-28','2025-03-28',8,'Technical',NULL,'6','the ICT Literacy and Competency','hgfh','training_certificates/wXvorMXkd9NWwY8ByO2YxLdnSUbYZIaLcGmQmZjO.pdf','verified',NULL,'2026-05-17 21:27:06',1,'2026-05-17 21:25:53','2026-05-17 21:27:06'),(12,8,'Think Before You Click: Digital Citizenship in the Modern Age','2025-03-28','2025-03-28',6,'Technical',NULL,NULL,'the ICT Literacy and Competency','342','training_certificates/eTlsTqseKmzBk9cmCJ8dLSUb0p5YGSgYo8wVJjgR.pdf','verified',NULL,'2026-05-17 22:36:49',1,'2026-05-17 22:36:30','2026-05-17 22:36:49'),(13,9,'Think Before You Click: Digital Citizenship in the Modern Age','2025-03-28','2025-03-28',5,'Technical','Laguna, Ph',NULL,'the ICT Literacy and Competency','1','training_certificates/yGG3ZqBHaaG8VfVU9FuO0thMhhV0dAQQWUFwU9mr.pdf','verified',NULL,'2026-05-18 11:26:51',1,'2026-05-18 11:26:20','2026-05-18 11:26:51');
 /*!40000 ALTER TABLE `trainings` ENABLE KEYS */;
 UNLOCK TABLES;
+SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -68,4 +77,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-26  9:30:08
+-- Dump completed on 2026-07-07 12:38:26

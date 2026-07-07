@@ -49,6 +49,8 @@
                     <strong id="calculatedTotalHours" style="color: #0b044d;">0.0 hrs</strong>
                 </div>
 
+                <div id="correctPassSlipBanner" style="display:none; margin-top:14px;"></div>
+
                 <div class="form-field" style="margin-top: 16px;">
                     <label>Reason for Correction <span style="color: #8e1e18;">*</span></label>
                     <textarea id="correctReason" name="reason" class="form-input" rows="3" placeholder="Explain why this correction is needed..." required></textarea>
@@ -71,3 +73,38 @@
         </form>
     </div>
 </div>
+
+<style>
+/* correctModal opens on top of detailedDTRModal (row-level "edit time"
+   button inside the Detailed DTR table) as well as standalone from the
+   Detailed Time Record tab, so it must always outrank detailedDTRModal's
+   forced z-index: 3000 — see detailedDtrModal.blade.php for the cascade
+   explanation. */
+#correctModal.modal-overlay {
+    z-index: 3100 !important;
+    position: fixed !important;
+}
+
+/* ── Pass Slip banner inside correctModal ── */
+.correct-ps-banner {
+    background: #f0fdf9; border: 1px solid #99e6d8; border-radius: 10px;
+    padding: 10px 14px; display: flex; flex-direction: column; gap: 6px;
+}
+.correct-ps-banner-title {
+    font-size: 10.5px; font-weight: 700; color: #0d9488;
+    text-transform: uppercase; letter-spacing: .4px;
+}
+.correct-ps-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font-size: 12px; color: #1E2247;
+}
+.correct-ps-row .cps-times { font-weight: 600; }
+.correct-ps-row .cps-num  { font-size: 10.5px; color: #9aa1b5; }
+.cps-badge {
+    font-size: 9px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+}
+.cps-badge.official { background: #e9f9ef; color: #23875a; }
+.cps-badge.personal { background: #fdf3e3; color: #a6720c; }
+</style>
+

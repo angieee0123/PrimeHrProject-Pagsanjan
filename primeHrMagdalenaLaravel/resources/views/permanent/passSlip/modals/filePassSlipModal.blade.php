@@ -15,6 +15,43 @@
             </div>
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
 
+                {{-- Issued For --}}
+                <div class="form-field" style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; color: #0b044d; margin-bottom: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        Issued For <span style="color: #8e1e18;">*</span>
+                    </label>
+                    <div style="display: flex; gap: 20px; padding: 10px 4px;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+                            <input type="radio" name="type" value="official_activity" checked onchange="togglePassSlipPurposeOptions()"> Official Activity
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+                            <input type="radio" name="type" value="personal_reason" onchange="togglePassSlipPurposeOptions()"> Personal Reasons
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Purpose --}}
+                <div class="form-field" style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; color: #0b044d; margin-bottom: 8px;">
+                        Purpose <span style="color: #8e1e18;">*</span>
+                    </label>
+                    <select name="purpose_category" id="purposeCategory" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;">
+                        <optgroup label="Official Activity" id="officialPurposeGroup">
+                            <option value="coordinate_with">To coordinate with</option>
+                            <option value="meeting_conference">To attend meeting/conference</option>
+                            <option value="secure_documents">To secure documents &amp; others</option>
+                            <option value="follow_up">To follow up</option>
+                        </optgroup>
+                        <optgroup label="Personal Reason" id="personalPurposeGroup" style="display: none;">
+                            <option value="personal_matter">To attend personal matter</option>
+                        </optgroup>
+                    </select>
+                </div>
+
                 {{-- Reason --}}
                 <div class="form-field" style="margin-bottom: 20px;">
                     <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; color: #0b044d; margin-bottom: 8px;">
@@ -22,7 +59,7 @@
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                             <polyline points="14 2 14 8 20 8"/>
                         </svg>
-                        Reason for Leaving Premises <span style="color: #8e1e18;">*</span>
+                        Details <span style="color: #8e1e18;">*</span>
                     </label>
                     <textarea name="reason" id="reason" rows="3" placeholder="Briefly describe the reason for your pass slip..." required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical; line-height: 1.6;"></textarea>
                     <div style="display: flex; justify-content: space-between; margin-top: 4px;">
@@ -134,6 +171,7 @@ function closePassSlipModal() {
 function openPassSlipModal() {
     document.getElementById('filePassSlipModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    togglePassSlipPurposeOptions();
     // Set today's date as default
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('passSlipDate').value = today;
@@ -155,6 +193,23 @@ function handlePassSlipFileSelect(input) {
         display.style.display = 'block';
     } else {
         display.style.display = 'none';
+    }
+}
+
+function togglePassSlipPurposeOptions() {
+    const type = document.querySelector('input[name="type"]:checked').value;
+    const officialGroup = document.getElementById('officialPurposeGroup');
+    const personalGroup = document.getElementById('personalPurposeGroup');
+    const select = document.getElementById('purposeCategory');
+
+    if (type === 'personal_reason') {
+        officialGroup.style.display = 'none';
+        personalGroup.style.display = '';
+        select.value = 'personal_matter';
+    } else {
+        officialGroup.style.display = '';
+        personalGroup.style.display = 'none';
+        select.value = 'coordinate_with';
     }
 }
 

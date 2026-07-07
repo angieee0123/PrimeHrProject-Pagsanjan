@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.46, for macos15 (arm64)
 --
 -- Host: localhost    Database: primehrismagdalena
 -- ------------------------------------------------------
--- Server version	8.0.45
+-- Server version	9.6.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,6 +14,14 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+SET @@SESSION.SQL_LOG_BIN= 0;
+
+--
+-- GTID state at the beginning of the backup 
+--
+
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ 'dd1c05b4-6cab-11f1-9888-371ff5725969:1-2494';
 
 --
 -- Table structure for table `users`
@@ -46,9 +54,10 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'admin@gmail.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active','2026-04-13 07:09:46','2026-04-24 10:00:26',6,'admin'),(6,'jeremypogi@gmail.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,8,'maria.cruz'),(7,'permanent@gmail.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,'2026-04-27 06:51:40',9,'juan.delacruz'),(8,'ana.ramos@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,'2026-05-03 18:14:57',10,'ana.ramos'),(9,'pedro.santos@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,11,'pedro.santos'),(10,'rosa.bautista@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,12,'rosa.bautista'),(11,'carlos.gonzales@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,13,'carlos.gonzales'),(12,'luz.villanueva@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,14,'luz.villanueva'),(13,'miguel.rivera@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,15,'miguel.rivera'),(14,'elena.fernandez@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,16,'elena.fernandez'),(15,'roberto.mercado@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,17,'roberto.mercado'),(16,'basha@gmail.com','$2y$12$OHLJ2AllcsbhDlY3PzG9e.EsZgXYivQEBiqAI7UMB773mX1hzdGv6','employee','Active','2026-05-23 21:22:09','2026-05-23 21:30:41',18,'admin@gmail.com');
+INSERT INTO `users` VALUES (1,'admin@gmail.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active','2026-04-13 07:09:46','2026-04-24 10:00:26',6,'admin'),(6,'jeremypogi@gmail.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,8,'maria.cruz'),(7,'permanent@gmail.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,'2026-04-27 06:51:40',9,'juan.delacruz'),(8,'ana.ramos@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,'2026-05-03 18:14:57',10,'ana.ramos'),(9,'pedro.santos@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,11,'pedro.santos'),(10,'rosa.bautista@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,12,'rosa.bautista'),(11,'carlos.gonzales@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,13,'carlos.gonzales'),(12,'luz.villanueva@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,14,'luz.villanueva'),(13,'miguel.rivera@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,15,'miguel.rivera'),(14,'elena.fernandez@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,16,'elena.fernandez'),(15,'roberto.mercado@primehr.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active',NULL,NULL,17,'roberto.mercado'),(16,'basha@gmail.com','$2y$12$XYzyqa8uKssaOtMytMCUx.Q7Afs4IyjBCkz2sLnHyVKmvOJ8YiSPS','employee','Active','2026-05-23 21:22:09','2026-05-23 21:30:41',18,'admin@gmail.com');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
+SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -59,4 +68,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-26  9:30:09
+-- Dump completed on 2026-07-07 12:38:26

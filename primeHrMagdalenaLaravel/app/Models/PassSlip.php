@@ -11,13 +11,27 @@ class PassSlip extends Model
 
     protected $table = 'pass_slips';
 
+    /**
+     * Official wording from the Pass Slip form's purpose checkboxes (item 3).
+     */
+    public const PURPOSE_LABELS = [
+        'coordinate_with' => 'to coordinate with',
+        'meeting_conference' => 'to attend meeting/conference',
+        'secure_documents' => 'to secure documents & others',
+        'follow_up' => 'to follow up',
+        'personal_matter' => 'to attend personal matter',
+    ];
+
     protected $fillable = [
         'slip_number',
         'employee_id',
+        'type',
+        'purpose_category',
         'date',
         'time_out',
         'time_in',
         'destination',
+        'recommended_by_name',
         'reason',
         'attachment',
         'status',
@@ -85,5 +99,10 @@ class PassSlip extends Model
     public function scopeByEmployee($query, $employeeId)
     {
         return $query->where('employee_id', $employeeId);
+    }
+
+    public function getPurposeLabelAttribute()
+    {
+        return self::PURPOSE_LABELS[$this->purpose_category] ?? '';
     }
 }
