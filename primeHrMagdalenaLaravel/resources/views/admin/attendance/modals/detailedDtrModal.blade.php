@@ -357,6 +357,8 @@
     border: 1px solid rgba(255,255,255,.65); border-radius: 16px;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 2px 8px rgba(15,23,42,.03);
     padding: 8px 16px;
+    position: relative;
+    z-index: 50;
 }
 .ddtr-toolbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .ddtr-toolbar-divider { width: 1px; height: 24px; background: var(--line); margin: 0 4px; }
@@ -409,10 +411,10 @@
 .ddtr-view-btn.open .ddtr-caret { transform: rotate(180deg); }
 .ddtr-dropdown {
     display: none; position: absolute; top: calc(100% + 8px); left: 0;
-    min-width: 208px; background: rgba(255,255,255,.85); backdrop-filter: saturate(180%) blur(24px); -webkit-backdrop-filter: saturate(180%) blur(24px);
+    min-width: 208px; background: #ffffff;
     border: 1px solid rgba(255,255,255,.7);
     border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 20px 45px rgba(15,23,42,.16), 0 2px 8px rgba(15,23,42,.05);
-    padding: 6px; z-index: 999; animation: ddFadeIn .18s cubic-bezier(.32,.72,0,1);
+    padding: 6px; z-index: 9999; animation: ddFadeIn .18s cubic-bezier(.32,.72,0,1);
 }
 .ddtr-dropdown.open { display: block; }
 @keyframes ddFadeIn { from { opacity:0; transform:translateY(-4px) scale(.98); } to { opacity:1; transform:none; } }
@@ -441,6 +443,8 @@
     display: flex; flex-direction: column;
     flex: 1 1 0; min-height: 0;
     overflow: hidden;
+    position: relative;
+    z-index: 1;
 }
 /* JS toggles this element to display:block — style for block flow */
 .ddtr-loading { text-align: center; padding: 64px 24px; color: var(--muted); font-size: 13px; }

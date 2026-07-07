@@ -107,7 +107,12 @@
                     $record['_status'] = $status;
                     return $record;
                 });
-                $recordsByStatus = $taggedRecords->groupBy('_status');
+                $recordsByStatus = $taggedRecords->groupBy('_status')->map(function ($records, $status) {
+                    if ($status === 'present') {
+                        return $records->sortBy(fn($r) => $r['am_in'] ?? '99:99')->values();
+                    }
+                    return $records;
+                });
             @endphp
             <div class="dtl-day {{ $isWeekendDay ? 'is-weekend' : '' }}">
                 <div class="dtl-day-track">
@@ -406,9 +411,10 @@
     background: none;
     cursor: pointer;
     border-radius: 50%;
-    transition: transform .18s cubic-bezier(.4,0,.2,1);
 }
-#detailed-tab .dtl-avatar-chip:hover { transform: translateY(-3px) scale(1.1); z-index: 5; }
+#detailed-tab .dtl-avatar-chip:hover {
+    z-index: 30;
+}
 #detailed-tab .dtl-avatar-img {
     display: flex;
     align-items: center;
@@ -421,6 +427,11 @@
     font-size: 10px;
     font-weight: 700;
     box-sizing: border-box;
+    transition: transform .25s cubic-bezier(.4,0,.2,1), filter .25s ease;
+}
+#detailed-tab .dtl-avatar-chip:hover .dtl-avatar-img {
+    transform: translateY(-14px) scale(2.8);
+    filter: drop-shadow(0 14px 22px rgba(11,4,77,.35));
 }
 #detailed-tab .dtl-avatar-fallback { display: flex; }
 
@@ -452,15 +463,15 @@
 /* custom tooltip, matching .dept-tag / .acc-pill pattern used elsewhere */
 #detailed-tab .dtl-avatar-chip:hover::after {
     content: attr(data-tooltip);
-    position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+    position: absolute; bottom: calc(100% + 10px); left: 100%; margin-left: -8px;
     background: #1a1f36; color: #fff; font-size: 11px; font-weight: 500;
     padding: 6px 10px; border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,.18); z-index: 20; pointer-events: none;
-    max-width: 240px; white-space: normal; text-align: center; line-height: 1.4;
+    max-width: 240px; white-space: normal; text-align: left; line-height: 1.4;
 }
 #detailed-tab .dtl-avatar-chip:hover::before {
     content: '';
-    position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
+    position: absolute; bottom: calc(100% + 4px); left: 100%; margin-left: 2px;
     border: 5px solid transparent; border-top-color: #1a1f36; z-index: 20;
 }
 
