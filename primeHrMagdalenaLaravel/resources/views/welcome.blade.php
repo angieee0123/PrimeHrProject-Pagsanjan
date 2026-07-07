@@ -100,10 +100,13 @@
                     </div>
                 </div>
                 <div class="pub-hero-card-tags">
-                    <span class="pub-tag">✓ BIR Compliant</span>
-                    <span class="pub-tag">✓ GSIS Ready</span>
-                    <span class="pub-tag">✓ CSC Accredited</span>
-                    <span class="pub-tag">✓ ARTA Compliant</span>
+                    @php
+                    $check = '<svg class="pub-check" width="14" height="14" viewBox="0 0 24 24" fill="#15803d" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1.1 14.3-3.6-3.6 1.4-1.4 2.2 2.2 4.9-4.9 1.4 1.4Z"/></svg>';
+                    @endphp
+                    <span class="pub-tag">{!! $check !!} BIR Compliant</span>
+                    <span class="pub-tag">{!! $check !!} GSIS Ready</span>
+                    <span class="pub-tag">{!! $check !!} CSC Accredited</span>
+                    <span class="pub-tag">{!! $check !!} ARTA Compliant</span>
                 </div>
             </div>
         </div>
@@ -117,33 +120,79 @@
                 <h2>What can we help you with?</h2>
                 <p>Access the services offered by the Municipal Government of Pagsanjan, Laguna.</p>
             </div>
-            <div class="pub-services-grid">
-                @php
-                $services = [
-                    ['svg'=>'building','title'=>'Business Permits','desc'=>'Apply and renew business permits online through the Municipal Business Office.'],
-                    ['svg'=>'clipboard','title'=>'Civil Registration','desc'=>'Request birth, marriage, and death certificates from the Civil Registrar.'],
-                    ['svg'=>'heart','title'=>'Health Services','desc'=>'Access municipal health programs, consultations, and medical assistance.'],
-                    ['svg'=>'users','title'=>'Social Welfare','desc'=>'MSWD programs for senior citizens, PWDs, and indigent families.'],
-                    ['svg'=>'leaf','title'=>'Agricultural Support','desc'=>'Livelihood programs and agricultural assistance for local farmers.'],
-                    ['svg'=>'tool','title'=>'Infrastructure Projects','desc'=>'Updates on public works, road projects, and community infrastructure.'],
-                ];
-                $svgs = [
-                    'building'  => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
-                    'clipboard' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>',
-                    'heart'     => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
-                    'users'     => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-                    'leaf'      => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
-                    'tool'      => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
-                ];
-                @endphp
-                @foreach($services as $s)
-                <div class="pub-service-card">
-                    <div class="pub-service-icon">{!! $svgs[$s['svg']] !!}</div>
-                    <h4>{{ $s['title'] }}</h4>
-                    <p>{{ $s['desc'] }}</p>
-                    <span class="pub-service-link">Learn more →</span>
+            @php
+            $svgs = [
+                'building'  => '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>',
+                'clipboard' => '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>',
+                'heart'     => '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+                'users'     => '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+                'leaf'      => '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
+                'tool'      => '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+            ];
+            $serviceCategories = [
+                'permits' => [
+                    'label' => 'Permits & Registration',
+                    'icon'  => 'building',
+                    'items' => [
+                        ['svg'=>'building','title'=>'Business Permits','desc'=>'Apply and renew business permits online through the Municipal Business Office.','office'=>'Municipal Business Office'],
+                        ['svg'=>'clipboard','title'=>'Civil Registration','desc'=>'Request birth, marriage, and death certificates from the Civil Registrar.','office'=>'Office of the Civil Registrar'],
+                    ],
+                ],
+                'health' => [
+                    'label' => 'Health & Social Services',
+                    'icon'  => 'heart',
+                    'items' => [
+                        ['svg'=>'heart','title'=>'Health Services','desc'=>'Access municipal health programs, consultations, and medical assistance.','office'=>'Municipal Health Office'],
+                        ['svg'=>'users','title'=>'Social Welfare','desc'=>'MSWD programs for senior citizens, PWDs, and indigent families.','office'=>'Social Welfare & Development Office'],
+                    ],
+                ],
+                'community' => [
+                    'label' => 'Community Development',
+                    'icon'  => 'leaf',
+                    'items' => [
+                        ['svg'=>'leaf','title'=>'Agricultural Support','desc'=>'Livelihood programs and agricultural assistance for local farmers.','office'=>'Municipal Agriculture Office'],
+                        ['svg'=>'tool','title'=>'Infrastructure Projects','desc'=>'Updates on public works, road projects, and community infrastructure.','office'=>'Municipal Engineering Office'],
+                    ],
+                ],
+            ];
+            @endphp
+            <div class="pub-svc-panel">
+                <div class="pub-svc-nav" role="tablist">
+                    @foreach($serviceCategories as $key => $cat)
+                    <button type="button" class="pub-svc-nav-item{{ $loop->first ? ' active' : '' }}" data-category="{{ $key }}" role="tab" aria-selected="{{ $loop->first ? 'true' : 'false' }}">
+                        <span class="pub-svc-nav-icon">{!! $svgs[$cat['icon']] !!}</span>
+                        <span class="pub-svc-nav-label">{{ $cat['label'] }}</span>
+                        <span class="pub-svc-nav-count">{{ count($cat['items']) }}</span>
+                    </button>
+                    @endforeach
                 </div>
-                @endforeach
+                <div class="pub-svc-body">
+                    @foreach($serviceCategories as $key => $cat)
+                    <div class="pub-svc-panel-content{{ $loop->first ? ' active' : '' }}" data-panel="{{ $key }}">
+                        <div class="pub-svc-panel-head">
+                            <h4>{{ $cat['label'] }}</h4>
+                            <span>{{ count($cat['items']) }} services</span>
+                        </div>
+                        @foreach($cat['items'] as $s)
+                        <div class="pub-svc-row">
+                            <span class="pub-svc-row-icon">{!! $svgs[$s['svg']] !!}</span>
+                            <div class="pub-svc-row-body">
+                                <span class="pub-svc-row-title">{{ $s['title'] }}</span>
+                                <span class="pub-svc-row-desc">{{ $s['desc'] }}</span>
+                                <span class="pub-svc-row-office">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
+                                    {{ $s['office'] }}
+                                </span>
+                            </div>
+                            <a href="#" class="pub-link-arrow">
+                                Request
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                            </a>
+                        </div>
+                        @endforeach
+                    </div>
+                    @endforeach
+                </div>
             </div>
         </div>
     </section>
@@ -156,24 +205,48 @@
                 <h2>Announcements &amp; Advisories</h2>
                 <p>Stay informed with the latest news from the Municipal Government.</p>
             </div>
-            <div class="pub-announcements">
-                @php
-                $announcements = [
-                    ['date'=>'Jun 20, 2025','tag'=>'Advisory','title'=>'Schedule of Payment for Real Property Tax — 2nd Quarter 2025'],
-                    ['date'=>'Jun 18, 2025','tag'=>'Event','title'=>'Pagsanjan Founding Anniversary Celebration — June 25, 2025'],
-                    ['date'=>'Jun 15, 2025','tag'=>'Program','title'=>'MSWD Livelihood Training Program — Open for Registration'],
-                    ['date'=>'Jun 10, 2025','tag'=>'Notice','title'=>'Water Interruption Advisory — Barangay Pinagsanjan Area'],
-                ];
-                @endphp
-                @foreach($announcements as $a)
-                <div class="pub-announce-item">
-                    <div class="pub-announce-left">
-                        <span class="pub-announce-tag {{ strtolower($a['tag']) }}">{{ $a['tag'] }}</span>
-                        <p class="pub-announce-title">{{ $a['title'] }}</p>
-                    </div>
-                    <span class="pub-announce-date">{{ $a['date'] }}</span>
+            @php
+            $announcements = [
+                ['date'=>'Jun 20, 2025','tag'=>'Advisory','title'=>'Schedule of Payment for Real Property Tax — 2nd Quarter 2025','excerpt'=>'Property owners are reminded to settle 2nd quarter real property tax payments on or before the deadline to avoid penalties.'],
+                ['date'=>'Jun 18, 2025','tag'=>'Event','title'=>'Pagsanjan Founding Anniversary Celebration — June 25, 2025','excerpt'=>'Join the community celebration marking the founding anniversary of Pagsanjan with a parade, cultural shows, and local exhibits.'],
+                ['date'=>'Jun 15, 2025','tag'=>'Program','title'=>'MSWD Livelihood Training Program — Open for Registration','excerpt'=>'Residents may now register for the MSWD livelihood training program offering skills development and starter kits.'],
+                ['date'=>'Jun 10, 2025','tag'=>'Notice','title'=>'Water Interruption Advisory — Barangay Pinagsanjan Area','excerpt'=>'A scheduled water service interruption will affect Barangay Pinagsanjan Area residents; please store water in advance.'],
+            ];
+            $tagDotColors = ['advisory'=>'#c9a227','event'=>'#15803d','program'=>'#0b044d','notice'=>'#8e1e18'];
+            $featured = $announcements[0];
+            $moreUpdates = array_slice($announcements, 1);
+            @endphp
+            <div class="pub-news-grid">
+                <div class="pub-news-feature">
+                    <span class="pub-announce-tag pub-news-feature-tag {{ strtolower($featured['tag']) }}">{{ $featured['tag'] }}</span>
+                    <h3 class="pub-news-feature-title">{{ $featured['title'] }}</h3>
+                    <p class="pub-news-feature-meta">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        {{ date('F j, Y', strtotime($featured['date'])) }}
+                    </p>
+                    <p class="pub-news-feature-desc">{{ $featured['excerpt'] }}</p>
+                    <a href="#" class="pub-news-feature-btn">
+                        View Full Advisory
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
                 </div>
-                @endforeach
+
+                <div class="pub-news-side">
+                    <span class="pub-news-side-head">More Updates</span>
+                    @foreach($moreUpdates as $a)
+                    <a href="#" class="pub-news-side-item">
+                        <span class="pub-news-side-dot" style="background:{{ $tagDotColors[strtolower($a['tag'])] }}"></span>
+                        <span class="pub-news-side-body">
+                            <span class="pub-news-side-title">{{ $a['title'] }}</span>
+                            <span class="pub-news-side-date">{{ date('M j, Y', strtotime($a['date'])) }}</span>
+                        </span>
+                    </a>
+                    @endforeach
+                    <a href="#" class="pub-link-arrow pub-news-side-all">
+                        View all announcements
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
+                </div>
             </div>
         </div>
     </section>
@@ -187,57 +260,55 @@
                 <p>A brief overview of the municipality, its leadership, and its commitment to public service.</p>
             </div>
 
-            <div class="pub-about-hero">
-                <div class="pub-about-hero-text">
-                    <div class="pub-about-hero-badge">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-                        </svg>
-                        Pagsanjan, Laguna
-                    </div>
-                    <h3>Home of the Famous<br><span>Pagsanjan Falls</span></h3>
-                    <p>
-                        Pagsanjan is a <strong>first-class municipality</strong> in the Province of Laguna, Philippines —
-                        known as the <strong>"Shooting the Rapids" capital</strong>. Composed of 16 barangays, it serves
-                        a population of over 40,000 residents across Region IV-A (CALABARZON).
-                    </p>
-                    <p>
-                        The Municipal Government is committed to transparent, efficient, and responsive governance
-                        through its 17 offices and departments, serving every Pagsanjeño.
-                    </p>
+            <div class="pub-profile-frame">
+                <div class="pub-profile-frame-header">
+                    <span class="pub-profile-frame-tag">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 6v6c0 5 3.8 9 9 10 5.2-1 9-5 9-10V6Z"/></svg>
+                        Official Municipal Profile
+                    </span>
+                    <span class="pub-profile-frame-meta">Local Government Unit &middot; Province of Laguna</span>
                 </div>
-                <div class="pub-about-hero-stats">
-                    @foreach([['16','Barangays'],['17','Offices & Depts'],['40K+','Residents'],['348',"Gov't Personnel"]] as $stat)
-                    <div class="pub-about-stat">
-                        <span class="pub-about-stat-val">{{ $stat[0] }}</span>
-                        <span class="pub-about-stat-label">{{ $stat[1] }}</span>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
 
-            <div class="pub-about-cards">
-                <div class="pub-about-card2">
-                    <div class="pub-about-card2-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
-                    <h4>Vision</h4>
-                    <p>A progressive, peaceful, and self-reliant municipality with empowered citizens enjoying a high quality of life under a transparent and accountable local government.</p>
-                </div>
-                <div class="pub-about-card2">
-                    <div class="pub-about-card2-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>
-                    <h4>Mission</h4>
-                    <p>To deliver efficient, effective, and equitable public services through good governance, community participation, and sustainable development programs for all Pagsanjeños.</p>
-                </div>
-                <div class="pub-about-card2">
-                    <div class="pub-about-card2-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-                    <h4>Key Facts</h4>
-                    <ul class="pub-about-list">
-                        <li><span>Classification</span><strong>1st Class Municipality</strong></li>
-                        <li><span>Province</span><strong>Laguna</strong></li>
-                        <li><span>Region</span><strong>IV-A (CALABARZON)</strong></li>
-                        <li><span>Barangays</span><strong>16 Barangays</strong></li>
-                        <li><span>Departments</span><strong>17 Offices</strong></li>
-                        <li><span>Personnel</span><strong>348 Employees</strong></li>
-                    </ul>
+                <div class="pub-about-profile">
+                    <aside class="pub-profile-side">
+                        <div class="pub-profile-seal">
+                            <img src="/municipal-of-pagsanjan-logo.jpg" alt="Pagsanjan Logo" onerror="this.style.display='none'">
+                        </div>
+                        <p class="pub-profile-name">Pagsanjan, Laguna</p>
+                        <span class="pub-profile-badge">1st Class Municipality</span>
+                        <dl class="pub-profile-facts">
+                            @foreach([['Province','Laguna'],['Region','IV-A (CALABARZON)'],['Barangays','16'],['Departments','17 Offices'],['Personnel','348 Employees'],['Population','40,000+']] as $fact)
+                            <div class="pub-profile-fact">
+                                <dt>{{ $fact[0] }}</dt>
+                                <dd>{{ $fact[1] }}</dd>
+                            </div>
+                            @endforeach
+                        </dl>
+                    </aside>
+
+                    <div class="pub-profile-main">
+                        <h3>Home of the Famous <span>Pagsanjan Falls</span></h3>
+                        <p>
+                            Pagsanjan is a <strong>first-class municipality</strong> in the Province of Laguna, Philippines —
+                            known as the <strong>"Shooting the Rapids" capital</strong>. Composed of 16 barangays, it serves
+                            a population of over 40,000 residents across Region IV-A (CALABARZON).
+                        </p>
+                        <p>
+                            The Municipal Government is committed to transparent, efficient, and responsive governance
+                            through its 17 offices and departments, serving every Pagsanjeño.
+                        </p>
+
+                        <div class="pub-profile-statements">
+                            <div class="pub-profile-statement">
+                                <span class="pub-profile-statement-label">Our Vision</span>
+                                <p>A progressive, peaceful, and self-reliant municipality with empowered citizens enjoying a high quality of life under a transparent and accountable local government.</p>
+                            </div>
+                            <div class="pub-profile-statement">
+                                <span class="pub-profile-statement-label">Our Mission</span>
+                                <p>To deliver efficient, effective, and equitable public services through good governance, community participation, and sustainable development programs for all Pagsanjeños.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -251,42 +322,42 @@
                 <h2>Contact Us</h2>
                 <p>Reach out to the Municipal Government of Pagsanjan for inquiries, concerns, or assistance.</p>
             </div>
-            <div class="pub-contact-grid">
+            <div class="pub-contact-card">
 
-                <div class="pub-contact-panel">
-                    <div class="pub-contact-panel-header">
-                        <div class="pub-contact-panel-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+                <div class="pub-contact-office">
+                    <div class="pub-contact-office-head">
+                        <div class="pub-contact-office-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
                         <div>
-                            <p class="pub-contact-panel-title">Municipal Hall</p>
-                            <p class="pub-contact-panel-sub">Pagsanjan, Laguna</p>
+                            <p class="pub-contact-office-title">Municipal Hall</p>
+                            <p class="pub-contact-office-sub">Pagsanjan, Laguna</p>
                         </div>
                     </div>
-                    <div class="pub-contact-items">
+                    <ul class="pub-contact-lines">
                         @php
                         $contactItems = [
-                            ['icon' => '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>', 'label' => 'Address', 'val' => 'Poblacion, Pagsanjan, Laguna 4008'],
-                            ['icon' => '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>', 'label' => 'Telephone', 'val' => '(049) 501-0000 · (049) 501-0001'],
-                            ['icon' => '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', 'label' => 'Email', 'val' => 'info@pagsanjan.gov.ph'],
-                            ['icon' => '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', 'label' => 'Office Hours', 'val' => 'Mon – Fri, 8:00 AM – 5:00 PM'],
+                            ['icon' => '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>', 'val' => 'Poblacion, Pagsanjan, Laguna 4008'],
+                            ['icon' => '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>', 'val' => '(049) 501-0000 · (049) 501-0001'],
+                            ['icon' => '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', 'val' => 'info@pagsanjan.gov.ph'],
+                            ['icon' => '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', 'val' => 'Mon – Fri, 8:00 AM – 5:00 PM'],
                         ];
                         @endphp
                         @foreach($contactItems as $item)
-                        <div class="pub-contact-item">
-                            <div class="pub-contact-icon">{!! $item['icon'] !!}</div>
-                            <div>
-                                <p class="pub-contact-label">{{ $item['label'] }}</p>
-                                <p class="pub-contact-val">{{ $item['val'] }}</p>
-                            </div>
-                        </div>
+                        <li>{!! $item['icon'] !!} {{ $item['val'] }}</li>
                         @endforeach
-                    </div>
-                    <div class="pub-contact-note">Closed on weekends &amp; public holidays</div>
+                    </ul>
+                    <div class="pub-contact-office-note">Closed on weekends &amp; public holidays</div>
                 </div>
 
                 <form class="pub-contact-form" id="contact-form">
                     <div class="pub-contact-form-head">
-                        <p class="pub-contact-form-title">Send us a Message</p>
-                        <p class="pub-contact-form-sub">We'll respond within 1–2 business days.</p>
+                        <div>
+                            <p class="pub-contact-form-title">Send us a Message</p>
+                            <p class="pub-contact-form-sub">Fill out the form and our office will get back to you.</p>
+                        </div>
+                        <span class="pub-contact-form-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            1–2 business days
+                        </span>
                     </div>
                     <div class="pub-contact-row">
                         <div class="pub-contact-field">
@@ -309,6 +380,10 @@
                     <button type="submit" class="pub-btn-primary" style="width:100%;justify-content:center">
                         Send Message
                     </button>
+                    <p class="pub-contact-form-privacy">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Your information is kept confidential and used only to respond to your inquiry.
+                    </p>
                 </form>
 
             </div>
@@ -334,12 +409,15 @@
                 <div class="pub-cta-card-label">PRIME HRIS</div>
                 <p class="pub-cta-card-sub">Personnel Records &amp; Information Management for Employees</p>
                 <div class="pub-cta-features">
-                    <div class="pub-cta-feat">✓ Payroll Processing</div>
-                    <div class="pub-cta-feat">✓ 201 File Management</div>
-                    <div class="pub-cta-feat">✓ Leave &amp; Benefits</div>
-                    <div class="pub-cta-feat">✓ DTR Monitoring</div>
-                    <div class="pub-cta-feat">✓ BIR / GSIS / PhilHealth</div>
-                    <div class="pub-cta-feat">✓ Payroll Reports</div>
+                    @php
+                    $ctaCheck = '<svg class="pub-check" width="15" height="15" viewBox="0 0 24 24" fill="#5fd694" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1.1 14.3-3.6-3.6 1.4-1.4 2.2 2.2 4.9-4.9 1.4 1.4Z"/></svg>';
+                    @endphp
+                    <div class="pub-cta-feat">{!! $ctaCheck !!} Payroll Processing</div>
+                    <div class="pub-cta-feat">{!! $ctaCheck !!} 201 File Management</div>
+                    <div class="pub-cta-feat">{!! $ctaCheck !!} Leave &amp; Benefits</div>
+                    <div class="pub-cta-feat">{!! $ctaCheck !!} DTR Monitoring</div>
+                    <div class="pub-cta-feat">{!! $ctaCheck !!} BIR / GSIS / PhilHealth</div>
+                    <div class="pub-cta-feat">{!! $ctaCheck !!} Payroll Reports</div>
                 </div>
             </div>
         </div>
@@ -600,6 +678,22 @@ window.addEventListener('scroll', function() {
     const docH = document.documentElement.scrollHeight;
     fab.classList.toggle('chat-fab-light', scrollY > docH - 400);
 }, { passive: true });
+
+document.querySelectorAll('.pub-svc-nav-item').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const category = btn.dataset.category;
+        document.querySelectorAll('.pub-svc-nav-item').forEach(function(b) {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+        });
+        document.querySelectorAll('.pub-svc-panel-content').forEach(function(p) {
+            p.classList.remove('active');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        document.querySelector('.pub-svc-panel-content[data-panel="' + category + '"]').classList.add('active');
+    });
+});
 </script>
 
 </body>

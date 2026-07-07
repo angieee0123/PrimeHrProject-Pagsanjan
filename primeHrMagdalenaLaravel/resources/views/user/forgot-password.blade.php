@@ -177,10 +177,13 @@
 
         </div>
 
+        @php
+        $fpCheck = '<svg class="pub-check" width="14" height="14" viewBox="0 0 24 24" fill="#15803d" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1.1 14.3-3.6-3.6 1.4-1.4 2.2 2.2 4.9-4.9 1.4 1.4Z"/></svg>';
+        @endphp
         <div class="auth-tags">
-            <span class="pub-tag">✓ Secure Recovery</span>
-            <span class="pub-tag">✓ Encrypted</span>
-            <span class="pub-tag">✓ Email Verified</span>
+            <span class="pub-tag">{!! $fpCheck !!} Secure Recovery</span>
+            <span class="pub-tag">{!! $fpCheck !!} Encrypted</span>
+            <span class="pub-tag">{!! $fpCheck !!} Email Verified</span>
         </div>
 
     </div>
@@ -246,8 +249,8 @@ function sendCode(e) {
     if (!email) { showError(1, 'Please enter your email address.'); return; }
     showSuccess(1, 'Verification code sent to your email!');
     document.getElementById('fp-email-display').innerHTML =
-        `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        <div><p style="font-size:12.5px;color:#0b044d;font-weight:600;margin-bottom:4px">Code sent to:</p><p style="font-size:13px;color:#6b6a8a;margin:0">${email}</p></div>`;
+        `<svg class="fp-email-info-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <div><p class="fp-email-info-label">Code sent to:</p><p class="fp-email-info-value">${email}</p></div>`;
     setTimeout(() => goStep(2), 1500);
 }
 

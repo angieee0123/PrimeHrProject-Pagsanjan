@@ -132,19 +132,18 @@
                 <p class="auth-note">
                     No account? Contact your <strong>System Administrator</strong> or the Human Resource Management Office.
                 </p>
-                <p class="auth-switch">
-                    Need to register?
-                    <a href="{{ route('signup') }}" class="auth-switch-btn">Create an account</a>
-                </p>
             </div>
         </div>
 
         {{-- Compliance tags --}}
+        @php
+        $authCheck = '<svg class="pub-check" width="14" height="14" viewBox="0 0 24 24" fill="#15803d" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1.1 14.3-3.6-3.6 1.4-1.4 2.2 2.2 4.9-4.9 1.4 1.4Z"/></svg>';
+        @endphp
         <div class="auth-tags">
-            <span class="pub-tag">✓ BIR Compliant</span>
-            <span class="pub-tag">✓ GSIS Ready</span>
-            <span class="pub-tag">✓ RA 10173 Compliant</span>
-            <span class="pub-tag">✓ CSC Accredited</span>
+            <span class="pub-tag">{!! $authCheck !!} BIR Compliant</span>
+            <span class="pub-tag">{!! $authCheck !!} GSIS Ready</span>
+            <span class="pub-tag">{!! $authCheck !!} RA 10173 Compliant</span>
+            <span class="pub-tag">{!! $authCheck !!} CSC Accredited</span>
         </div>
 
     </div>
