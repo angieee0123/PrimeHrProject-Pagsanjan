@@ -2,6 +2,12 @@
    ADMIN PERSONNEL PAGE STYLES
 ══════════════════════════════════════════════════════ */
 
+/* SF Pro font stack — mirrors macOS/iOS system font */
+:root {
+    --sf-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+               "Helvetica Neue", Arial, sans-serif;
+}
+
 /* Stats */
 .personnel-stat-card { margin-bottom: 0; }
 
@@ -28,7 +34,7 @@
     color: #6b6a8a;
     cursor: pointer;
     border-radius: 10px;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--sf-font);
     transition: all .2s cubic-bezier(.4,0,.2,1);
 }
 .tab-btn:hover { color: #0b044d; }
@@ -132,7 +138,7 @@
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--sf-font);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -151,7 +157,7 @@
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--sf-font);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -220,7 +226,7 @@
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--sf-font);
     transition: transform .15s ease, opacity .2s cubic-bezier(.4,0,.2,1);
 }
 .personnel-modal-btn:active { transform: scale(.97); }
@@ -293,7 +299,7 @@
     border: 1.5px solid #e8e7f5;
     border-radius: 9px;
     font-size: 14px;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--sf-font);
     box-sizing: border-box;
     transition: border-color .2s cubic-bezier(.4,0,.2,1), box-shadow .2s cubic-bezier(.4,0,.2,1);
 }
@@ -323,7 +329,7 @@
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--sf-font);
     transition: background .2s cubic-bezier(.4,0,.2,1), transform .15s ease;
 }
 .confirm-btn-cancel:hover { background: #e8e7f5; }
@@ -337,7 +343,7 @@
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--sf-font);
     transition: transform .15s ease, opacity .2s cubic-bezier(.4,0,.2,1);
 }
 .confirm-btn-cancel:active, .confirm-btn-submit:active { transform: scale(.97); }

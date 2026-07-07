@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @push('styles')
     @vite('resources/css/adminPersonnel.css')
@@ -145,7 +145,7 @@
     <div class="table-header">
         <div>
             <h3 class="table-title">Employee Records</h3>
-            <p class="table-sub">Municipal Government of Pagsanjan Â· {{ $employees->count() }} of {{ $employees->count() }} records</p>
+            <p class="table-sub">Municipal Government of Pagsanjan · {{ $employees->count() }} of {{ $employees->count() }} records</p>
         </div>
         <div class="table-actions">
             <button class="btn-export" onclick="openBulkImportModal()" style="background:#23875a; color:#fff; border-color:#23875a;">
@@ -381,7 +381,7 @@
     <div class="table-footer">
         <div style="display: flex; align-items: center; gap: 12px;">
             <p>Showing <strong id="showingStart">1</strong>-<strong id="showingEnd">10</strong> of <strong id="totalRecords">{{ $employees->count() }}</strong> records</p>
-            <select id="rowsPerPageSelect" onchange="changeRowsPerPage(this.value)" style="padding: 6px 12px; border: 1.5px solid #e8e7f5; border-radius: 6px; font-size: 12px; font-family: 'Poppins', sans-serif; color: #0b044d; background: #fff; cursor: pointer;">
+            <select id="rowsPerPageSelect" onchange="changeRowsPerPage(this.value)" style="padding: 6px 12px; border: 1.5px solid #e8e7f5; border-radius: 6px; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif; color: #0b044d; background: #fff; cursor: pointer;">
                 <option value="10" selected>10 per page</option>
                 <option value="25">25 per page</option>
                 <option value="50">50 per page</option>
@@ -400,7 +400,7 @@
     <div class="table-header">
         <div>
             <h3 class="table-title">Work Schedules</h3>
-            <p class="table-sub">Manage employee work schedules · {{ $employees->count() }} employees</p>
+            <p class="table-sub">Manage employee work schedules � {{ $employees->count() }} employees</p>
         </div>
         <div class="table-actions">
             <select class="filter-select" id="schedDepartmentFilter" onchange="applyScheduleFilters()">
@@ -472,10 +472,10 @@
                         </div>
                     </td>
                     <td><span class="dept-tag">{{ $department }}</span></td>
-                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule->am_in ?? '--:--' }}</td>
-                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule->am_out ?? '--:--' }}</td>
-                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule->pm_in ?? '--:--' }}</td>
-                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule->pm_out ?? '--:--' }}</td>
+                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->am_in)->format('g:i A') : '--:--' }}</td>
+                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->am_out)->format('g:i A') : '--:--' }}</td>
+                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->pm_in)->format('g:i A') : '--:--' }}</td>
+                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->pm_out)->format('g:i A') : '--:--' }}</td>
                     <td>
                         @if($currentSchedule)
                             <span class="badge-status processed">Active</span>
@@ -552,7 +552,7 @@
     <div class="table-footer">
         <div style="display: flex; align-items: center; gap: 12px;">
             <p>Showing <strong id="schedShowingStart">1</strong>-<strong id="schedShowingEnd">10</strong> of <strong id="schedTotalRecords">{{ $employees->count() }}</strong> records</p>
-            <select id="schedRowsPerPageSelect" onchange="changeScheduleRowsPerPage(this.value)" style="padding: 6px 12px; border: 1.5px solid #e8e7f5; border-radius: 6px; font-size: 12px; font-family: 'Poppins', sans-serif; color: #0b044d; background: #fff; cursor: pointer;">
+            <select id="schedRowsPerPageSelect" onchange="changeScheduleRowsPerPage(this.value)" style="padding: 6px 12px; border: 1.5px solid #e8e7f5; border-radius: 6px; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif; color: #0b044d; background: #fff; cursor: pointer;">
                 <option value="10" selected>10 per page</option>
                 <option value="25">25 per page</option>
                 <option value="50">50 per page</option>
@@ -671,7 +671,7 @@
         </div>
         <h3 style="margin:0 0 12px; font-size:20px; font-weight:700; color:#0b044d;">Export Failed</h3>
         <p id="exportErrorMessage" style="margin:0 0 24px; font-size:14px; color:#6b6a8a; line-height:1.6;"></p>
-        <button onclick="closeExportErrorModal()" style="padding:12px 32px; background:#8e1e18; color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; transition:transform .15s ease;">
+        <button onclick="closeExportErrorModal()" style="padding:12px 32px; background:#8e1e18; color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif; transition:transform .15s ease;">
             Close
         </button>
     </div>
@@ -694,7 +694,7 @@
         </div>
 
         <div style="display:flex; gap:10px;">
-            <button onclick="downloadQRCode()" style="flex:1; padding:12px; background:#0b044d; color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .2s cubic-bezier(.4,0,.2,1);">
+            <button onclick="downloadQRCode()" style="flex:1; padding:12px; background:#0b044d; color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .2s cubic-bezier(.4,0,.2,1);">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="7 10 12 15 17 10"/>
@@ -702,7 +702,7 @@
                 </svg>
                 Download
             </button>
-            <button onclick="printQRCode()" style="flex:1; padding:12px; background:#23875a; color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .2s cubic-bezier(.4,0,.2,1);">
+            <button onclick="printQRCode()" style="flex:1; padding:12px; background:#23875a; color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .2s cubic-bezier(.4,0,.2,1);">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="6 9 6 2 18 2 18 9"/>
                     <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
@@ -741,7 +741,7 @@
                         <p style="margin:0; font-size:12px; color:#6b6a8a;">Use our template to ensure proper formatting</p>
                     </div>
                 </div>
-                <button onclick="downloadTemplate()" style="width:100%; padding:10px; background:#0b044d; color:#fff; border:none; border-radius:9px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .2s cubic-bezier(.4,0,.2,1);">
+                <button onclick="downloadTemplate()" style="width:100%; padding:10px; background:#0b044d; color:#fff; border:none; border-radius:9px; font-size:13px; font-weight:600; cursor:pointer; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .2s cubic-bezier(.4,0,.2,1);">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                         <polyline points="7 10 12 15 17 10"/>
@@ -809,8 +809,8 @@
         </div>
 
         <div style="display:flex; justify-content:flex-end; gap:10px; padding:16px 24px; border-top:1.5px solid #f0effe;">
-            <button onclick="closeBulkImportModal()" style="padding:10px 20px; border:1.5px solid #dddcf0; border-radius:9px; background:#fff; font-size:13px; font-weight:600; color:#6b6a8a; cursor:pointer; font-family:'Poppins',sans-serif; transition:background .2s cubic-bezier(.4,0,.2,1);">Cancel</button>
-            <button onclick="submitBulkImport()" style="padding:10px 20px; border:none; border-radius:9px; background:linear-gradient(135deg,#0b044d,#1a0f6e); color:#fff; font-size:13px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:6px; transition:transform .15s ease;">
+            <button onclick="closeBulkImportModal()" style="padding:10px 20px; border:1.5px solid #dddcf0; border-radius:9px; background:#fff; font-size:13px; font-weight:600; color:#6b6a8a; cursor:pointer; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif; transition:background .2s cubic-bezier(.4,0,.2,1);">Cancel</button>
+            <button onclick="submitBulkImport()" style="padding:10px 20px; border:none; border-radius:9px; background:linear-gradient(135deg,#0b044d,#1a0f6e); color:#fff; font-size:13px; font-weight:600; cursor:pointer; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif; display:flex; align-items:center; gap:6px; transition:transform .15s ease;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="17 8 12 3 7 8"/>

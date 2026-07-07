@@ -8,7 +8,7 @@ PASSWORD = "admin"
 DATABASE = "primehrismagdalena"
 
 SQL_FOLDER = os.path.join(os.path.dirname(__file__), "database")
-MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe" if sys.platform == "win32" else "mysql"
+MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" if sys.platform == "win32" else "mysql"
 
 ORDER = [
     "primehrismagdalena_migrations.sql",
@@ -59,6 +59,7 @@ ORDER = [
     "primehrismagdalena_payroll_deductions.sql",
     "primehrismagdalena_sessions.sql",
     "primehrismagdalena_chat_history.sql",
+    "primehrismagdalena_pass_slips.sql",
 ]
 
 def mysql_cmd(sql, db=None):

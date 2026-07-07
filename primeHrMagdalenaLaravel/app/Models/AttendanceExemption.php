@@ -47,6 +47,14 @@ class AttendanceExemption extends Model
     }
 
     /**
+     * Get the employee for employee-type exemptions
+     */
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'reference_id');
+    }
+
+    /**
      * Check if an employee is exempt from abandoned flag on a given date
      */
     public static function isExemptFromAbandoned(int $employeeId, ?int $departmentId = null, ?int $designationId = null, $date = null): bool

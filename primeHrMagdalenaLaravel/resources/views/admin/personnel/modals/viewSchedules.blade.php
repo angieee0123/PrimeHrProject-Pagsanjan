@@ -138,11 +138,11 @@ function displaySchedules(schedules) {
                         <div style="display:flex; gap:12px;">
                             <div style="flex:1;">
                                 <p style="margin:0 0 4px; font-size:11px; color:#6b6a8a;">Time In</p>
-                                <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${schedule.am_in}</p>
+                                <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${formatTime12h(schedule.am_in)}</p>
                             </div>
                             <div style="flex:1;">
                                 <p style="margin:0 0 4px; font-size:11px; color:#6b6a8a;">Time Out</p>
-                                <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${schedule.am_out}</p>
+                                <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${formatTime12h(schedule.am_out)}</p>
                             </div>
                         </div>
                     </div>
@@ -152,11 +152,11 @@ function displaySchedules(schedules) {
                         <div style="display:flex; gap:12px;">
                             <div style="flex:1;">
                                 <p style="margin:0 0 4px; font-size:11px; color:#6b6a8a;">Time In</p>
-                                <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${schedule.pm_in}</p>
+                                <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${formatTime12h(schedule.pm_in)}</p>
                             </div>
                             <div style="flex:1;">
                                 <p style="margin:0 0 4px; font-size:11px; color:#6b6a8a;">Time Out</p>
-                                <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${schedule.pm_out}</p>
+                                <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${formatTime12h(schedule.pm_out)}</p>
                             </div>
                         </div>
                     </div>
@@ -172,6 +172,14 @@ function formatDate(dateString) {
     const date = new Date(dateString);
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return date.toLocaleDateString('en-US', options);
+}
+
+function formatTime12h(timeStr) {
+    if (!timeStr) return '--';
+    const [h, m] = timeStr.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hour = h % 12 || 12;
+    return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
 function closeViewSchedulesModal() {

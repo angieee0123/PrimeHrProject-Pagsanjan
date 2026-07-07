@@ -43,21 +43,46 @@
                             @endif
                         </td>
                         <td data-label="Name" style="text-align: left;">
-                            <strong>{{ $exemption->reference_name }}</strong>
+                            <div style="display:flex;align-items:center;gap:10px">
+                                @if($exemption->exemption_type === 'employee')
+                                    @php
+                                        $emp = $exemption->employee;
+                                        $photo = $emp->photo ?? null;
+                                        $initials = collect(explode(' ', trim($exemption->reference_name)))
+                                            ->filter()->map(fn($p) => strtoupper(substr($p,0,1)))->take(2)->join('');
+                                        $colors = ['#0b044d','#8e1e18','#1a0f6e','#23875a','#5a0f0b','#6b3fa0'];
+                                        $color = $colors[$exemption->id % count($colors)];
+                                    @endphp
+                                    @if($photo)
+                                        <img src="{{ $photo }}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid #e8e7f5;flex-shrink:0">
+                                    @else
+                                        <div style="width:34px;height:34px;border-radius:50%;background:{{ $color }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;flex-shrink:0;border:2px solid #e8e7f5">{{ $initials }}</div>
+                                    @endif
+                                @elseif($exemption->exemption_type === 'department')
+                                    <div style="width:34px;height:34px;border-radius:10px;background:#eef2ff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+                                    </div>
+                                @else
+                                    <div style="width:34px;height:34px;border-radius:10px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                                    </div>
+                                @endif
+                                <strong style="font-size:13px">{{ $exemption->reference_name }}</strong>
+                            </div>
                         </td>
-                        <td data-label="Effectivity" style="text-align: center; font-size: 12px;">
+                        <td data-label="Effectivity" style="text-align: center; font-size: 12px; white-space: nowrap;">
                             @if($exemption->start_date || $exemption->end_date)
-                                <div style="color: #6b6a8a;">
+                                <span style="color: #6b6a8a;">
                                     {{ $exemption->start_date ? $exemption->start_date->format('M d, Y') : 'No start' }}
-                                    <br>to<br>
+                                    &rarr;
                                     {{ $exemption->end_date ? $exemption->end_date->format('M d, Y') : 'No end' }}
-                                </div>
+                                </span>
                             @else
                                 <span style="color: #9ca3af;">Permanent</span>
                             @endif
                         </td>
                         <td data-label="Not Required" style="text-align: center; font-size: 11px;">
-                            <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">
+                            <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: nowrap;">
                                 @if($exemption->am_in_not_required)
                                     <span class="exempt-pill">AM IN</span>
                                 @endif
@@ -75,11 +100,14 @@
                                 @endif
                             </div>
                         </td>
-                        <td data-label="Legacy" style="text-align: center; font-size: 11px;">
+                        <td data-label="Legacy" style="text-align: center; font-size: 11px; white-space: nowrap;">
                             @if($exemption->exempt_from_abandoned || $exemption->exempt_from_incomplete)
-                                <div style="display: flex; gap: 4px; justify-content: center; flex-direction: column;">
+                                <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: nowrap;">
                                     @if($exemption->exempt_from_abandoned)
                                         <span style="color: #6b6a8a;">Abandoned</span>
+                                    @endif
+                                    @if($exemption->exempt_from_abandoned && $exemption->exempt_from_incomplete)
+                                        <span style="color: #d1d5db;">·</span>
                                     @endif
                                     @if($exemption->exempt_from_incomplete)
                                         <span style="color: #6b6a8a;">Incomplete</span>
