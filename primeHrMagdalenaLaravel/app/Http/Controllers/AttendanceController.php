@@ -345,12 +345,28 @@ class AttendanceController extends Controller
                 }
             }
 
+            // Approved pass slips for this employee in the period, keyed by date
+            // (a day can have more than one), so this timeline reflects the same
+            // real Pass Slip exceptions as the Summary tab and per-employee
+            // Detailed DTR modal instead of flagging those days Absent/Needs Review.
+            $approvedPassSlips = PassSlip::where('employee_id', $employee->id)
+                ->where('status', 'approved')
+                ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+                ->get();
+
+            $passSlipDatesMap = [];
+            foreach ($approvedPassSlips as $slip) {
+                $passSlipDatesMap[Carbon::parse($slip->date)->format('Y-m-d')][] = $slip;
+            }
+
             $current = $startDate->copy();
             while ($current->lte($endDate)) {
                 $dateKey = $current->format('Y-m-d');
                 $attendance = $attendances->get($dateKey);
                 $isWeekend = in_array($current->dayOfWeek, [0, 6]);
                 $hasPunch = $attendance && ($attendance->am_in || $attendance->pm_in);
+                $passSlipsToday = $passSlipDatesMap[$dateKey] ?? [];
+                $isOnPassSlip = !empty($passSlipsToday);
 
                 // A blank placeholder attendance row must not shadow an approved leave day
                 // (same fix applied to the summary tab's on_leave calculation).
@@ -365,7 +381,7 @@ class AttendanceController extends Controller
                     continue;
                 }
 
-                $isAbsent = !$isWeekend && !$isOnLeave && !$hasPunch;
+                $isAbsent = !$isWeekend && !$isOnLeave && !$hasPunch && !$isOnPassSlip;
 
                 $log = ($attendance && $attendance->accreditedHoursLogs->isNotEmpty())
                     ? $attendance->accreditedHoursLogs->last()
@@ -394,6 +410,12 @@ class AttendanceController extends Controller
                     'is_absent' => $isAbsent,
                     'is_on_leave' => $isOnLeave,
                     'leave_info' => $isOnLeave ? ['leave_type' => $leaveDatesMap[$dateKey]] : null,
+                    'is_on_pass_slip' => $isOnPassSlip,
+                    'pass_slip_info' => $isOnPassSlip ? array_map(fn($slip) => [
+                        'type' => $slip->type,
+                        'purpose_label' => $slip->purpose_label,
+                        'destination' => $slip->destination,
+                    ], $passSlipsToday) : null,
                 ];
 
                 $current->addDay();

@@ -189,8 +189,24 @@
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #111827; font-weight: 600;">{{ $slip->date ? $slip->date->format('M d, Y') : '' }}</td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #15803d; font-weight: 600;">{{ $slip->approver->name ?? 'Admin User' }}</td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #64748b;">{{ $slip->approved_at ? $slip->approved_at->format('M d, Y') : 'N/A' }}</td>
-                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; text-align: center;">
-                        <a href="{{ route('admin.passslip.view-form', $slip->id) }}" target="_blank" style="padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; color: #0b044d; font-size: 11px; font-weight: 700; text-decoration: none;">Print</a>
+                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
+                        <div style="position: relative; display: flex; justify-content: center;">
+                            <button class="ps-ellipsis-btn" onclick="togglePassSlipActionMenu(event, this)" title="Actions">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                            </button>
+                            <div class="ps-action-menu" style="display: none;">
+                                <button onclick="openPassSlipFormModal(
+                                    {{ $slip->id }},
+                                    '{{ addslashes(($slip->employee->first_name ?? '') . ' ' . ($slip->employee->last_name ?? '')) }}',
+                                    '{{ $slip->employee->employee_id ?? 'N/A' }}',
+                                    '{{ $slip->type === 'official_activity' ? 'Official Activity' : 'Personal Reason' }}',
+                                    '{{ $slip->slip_number }}'
+                                )">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    View Form
+                                </button>
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 @empty
@@ -272,9 +288,154 @@
     </div>
 </section>
 
+{{-- Pass Slip Form Preview Modal --}}
+<div class="modal-overlay" id="passSlipFormModal" onclick="closePassSlipFormModal()" style="display: none;">
+    <div class="modal-box" onclick="event.stopPropagation()" style="max-width: 920px; width: 95vw;">
+        <div class="modal-header">
+            <div>
+                <span class="modal-eyebrow" id="psFormSlipNumber">PASS SLIP · PS-2026-0001</span>
+                <h3 class="modal-title" id="psFormEmployeeName">Employee Name</h3>
+                <p class="modal-sub">
+                    <span id="psFormEmployeeId">PGS-0115</span>
+                    · <span id="psFormType">Official Activity</span>
+                </p>
+            </div>
+            <button class="modal-close" onclick="closePassSlipFormModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body" style="padding: 0; background: #e8e8f0;">
+            <iframe id="psFormFrame"
+                title="Pass Slip"
+                style="width: 100%; height: 65vh; border: none; display: block; background: #fff;"
+                src="about:blank"></iframe>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn-ghost" onclick="closePassSlipFormModal()">Close</button>
+            <div style="display: flex; gap: 8px; margin-left: auto;">
+                <button class="modal-btn-primary" onclick="printPassSlipForm()" style="background: #6366f1;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    Print Form
+                </button>
+                <button class="modal-btn-primary" onclick="downloadPassSlipForm()" style="background: #10b981;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.ps-ellipsis-btn {
+    background: none;
+    border: none;
+    color: #9999bb;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.ps-ellipsis-btn:hover {
+    background: #f1f5f9;
+    color: #0b044d;
+}
+.ps-action-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15);
+    z-index: 100;
+    min-width: 160px;
+    margin-top: 6px;
+    overflow: hidden;
+    animation: psSlideDown 0.2s ease-out;
+}
+.ps-action-menu button {
+    width: 100%;
+    padding: 11px 14px;
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 12px;
+    color: #0b044d;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ps-action-menu button:hover {
+    background: #f0effe;
+}
+@keyframes psSlideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
 @vite(['resources/css/adminLeaveAndBenefits.css'])
 
 <script>
+function togglePassSlipActionMenu(event, btn) {
+    event.stopPropagation();
+    const menu = btn.nextElementSibling;
+    document.querySelectorAll('.ps-action-menu').forEach(m => {
+        if (m !== menu) m.style.display = 'none';
+    });
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+document.addEventListener('click', () => {
+    document.querySelectorAll('.ps-action-menu').forEach(m => m.style.display = 'none');
+});
+
+window.currentPassSlipId = null;
+
+function openPassSlipFormModal(id, name, empId, type, slipNumber) {
+    window.currentPassSlipId = id;
+    document.getElementById('psFormSlipNumber').textContent = 'PASS SLIP · ' + slipNumber;
+    document.getElementById('psFormEmployeeName').textContent = name;
+    document.getElementById('psFormEmployeeId').textContent = empId;
+    document.getElementById('psFormType').textContent = type;
+
+    const frame = document.getElementById('psFormFrame');
+    frame.src = `/admin/passslip/${id}/view-form?embed=1`;
+
+    document.getElementById('passSlipFormModal').style.display = 'flex';
+}
+
+function closePassSlipFormModal() {
+    document.getElementById('psFormFrame').src = 'about:blank';
+    document.getElementById('passSlipFormModal').style.display = 'none';
+    window.currentPassSlipId = null;
+}
+
+function printPassSlipForm() {
+    const frame = document.getElementById('psFormFrame');
+    if (frame?.contentWindow) {
+        frame.contentWindow.print();
+        return;
+    }
+    if (!window.currentPassSlipId) return;
+    const printWindow = window.open(`/admin/passslip/${window.currentPassSlipId}/view-form`, '_blank');
+    if (printWindow) {
+        printWindow.addEventListener('load', () => printWindow.print());
+    }
+}
+
+function downloadPassSlipForm() {
+    if (!window.currentPassSlipId) return;
+    window.location.href = `/admin/passslip/${window.currentPassSlipId}/download-form`;
+}
+
 function switchPassSlipTab(tabName) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.table-section').forEach(section => section.style.display = 'none');

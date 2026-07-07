@@ -67,25 +67,38 @@
             @php
                 $first = $dayRecords->first();
                 $isWeekendDay = in_array($first['day'], ['Saturday', 'Sunday']);
-                $presentCount = $dayRecords->filter(fn($r) => !$r['is_absent'] && !$r['is_on_leave'] && $r['late_minutes'] == 0)->count();
-                $lateCount    = $dayRecords->filter(fn($r) => !$r['is_absent'] && !$r['is_on_leave'] && $r['late_minutes'] > 0)->count();
-                $absentCount  = $dayRecords->filter(fn($r) => $r['is_absent'])->count();
-                $leaveCount   = $dayRecords->filter(fn($r) => $r['is_on_leave'])->count();
+                // A weekend day only means "nobody was expected in" — it must not
+                // override someone who actually has real punches that day (e.g.
+                // special/OT duty), which is what was hiding Jeremy Pogi's Jul 11
+                // attendance behind a blanket "Weekend" tag despite him clocking in.
+                $hasAttendance = fn($r) => $r['am_in'] || $r['am_out'] || $r['pm_in'] || $r['pm_out'];
+
+                $presentCount  = $dayRecords->filter(fn($r) => $hasAttendance($r) && !$r['is_absent'] && !$r['is_on_leave'] && !$r['is_on_pass_slip'] && $r['late_minutes'] == 0)->count();
+                $lateCount     = $dayRecords->filter(fn($r) => $hasAttendance($r) && !$r['is_absent'] && !$r['is_on_leave'] && !$r['is_on_pass_slip'] && $r['late_minutes'] > 0)->count();
+                $absentCount   = $dayRecords->filter(fn($r) => $r['is_absent'])->count();
+                $leaveCount    = $dayRecords->filter(fn($r) => $r['is_on_leave'])->count();
+                $passSlipCount = $dayRecords->filter(fn($r) => $r['is_on_pass_slip'])->count();
 
                 // Tag each record with its status, then cluster same-status
                 // avatars together (worst-first) so the day's mix is scannable
                 // at a glance instead of just relying on ring color alone.
-                $statusOrder = ['absent', 'late', 'review', 'leave', 'present', 'weekend'];
-                $taggedRecords = $dayRecords->map(function ($record) use ($isWeekendDay) {
-                    $needsReview = ($record['am_in'] && !$record['am_out']) || ($record['pm_in'] && !$record['pm_out']) || (!$record['am_in'] && $record['am_out']) || (!$record['pm_in'] && $record['pm_out']);
-                    if ($isWeekendDay) {
-                        $status = 'weekend';
-                    } elseif ($record['is_on_leave']) {
+                // An approved Pass Slip explains a missing/mismatched punch the
+                // same way an approved Leave does, so it's checked before the
+                // Absent/Needs Review classification, not layered on top of it.
+                $statusOrder = ['absent', 'late', 'review', 'leave', 'passslip', 'present', 'weekend'];
+                $taggedRecords = $dayRecords->map(function ($record) use ($isWeekendDay, $hasAttendance) {
+                    $attended = $hasAttendance($record);
+                    $needsReview = !$record['is_on_pass_slip'] && (($record['am_in'] && !$record['am_out']) || ($record['pm_in'] && !$record['pm_out']) || (!$record['am_in'] && $record['am_out']) || (!$record['pm_in'] && $record['pm_out']));
+                    if ($record['is_on_leave']) {
                         $status = 'leave';
                     } elseif ($record['is_absent']) {
                         $status = 'absent';
                     } elseif ($needsReview) {
                         $status = 'review';
+                    } elseif ($record['is_on_pass_slip']) {
+                        $status = 'passslip';
+                    } elseif ($isWeekendDay && !$attended) {
+                        $status = 'weekend';
                     } elseif ($record['late_minutes'] > 0) {
                         $status = 'late';
                     } else {
@@ -113,12 +126,12 @@
                         <div class="dtl-day-stats">
                             @if($isWeekendDay)
                                 <span class="dtl-stat weekend">Weekend</span>
-                            @else
-                                @if($presentCount > 0)<span class="dtl-stat present">{{ $presentCount }} Present</span>@endif
-                                @if($lateCount > 0)<span class="dtl-stat late">{{ $lateCount }} Late</span>@endif
-                                @if($absentCount > 0)<span class="dtl-stat absent">{{ $absentCount }} Absent</span>@endif
-                                @if($leaveCount > 0)<span class="dtl-stat leave">{{ $leaveCount }} Leave</span>@endif
                             @endif
+                            @if($presentCount > 0)<span class="dtl-stat present">{{ $presentCount }} Present</span>@endif
+                            @if($lateCount > 0)<span class="dtl-stat late">{{ $lateCount }} Late</span>@endif
+                            @if($absentCount > 0)<span class="dtl-stat absent">{{ $absentCount }} Absent</span>@endif
+                            @if($leaveCount > 0)<span class="dtl-stat leave">{{ $leaveCount }} Leave</span>@endif
+                            @if($passSlipCount > 0)<span class="dtl-stat passslip">{{ $passSlipCount }} Pass Slip</span>@endif
                         </div>
                     </div>
                     <div class="dtl-avatar-grid">
@@ -130,10 +143,14 @@
                                             $timeLabel = match(true) {
                                                 $record['is_on_leave'] => $record['leave_info']['leave_type'] ?? 'On Leave',
                                                 $record['is_absent'] => 'Absent',
-                                                $isWeekendDay => 'Weekend',
                                                 ($record['am_in'] || $record['pm_out']) => trim(($record['am_in'] ?? '—') . ' – ' . ($record['pm_out'] ?? '—')),
+                                                $isWeekendDay => 'Weekend',
                                                 default => 'No record',
                                             };
+                                            if ($record['is_on_pass_slip'] && $record['pass_slip_info']) {
+                                                $psLabels = collect($record['pass_slip_info'])->map(fn($s) => ($s['type'] === 'official_activity' ? 'Official Activity' : 'Personal Reason') . ($s['destination'] ? ' – ' . $s['destination'] : ''))->join(', ');
+                                                $timeLabel .= ' • Pass Slip: ' . $psLabels;
+                                            }
                                             $tooltip = $record['employee_name'] . ' • ' . $timeLabel;
                                         @endphp
                                         <button type="button" class="dtl-avatar-chip status-{{ $record['_status'] }}" data-tooltip="{{ $tooltip }}"
@@ -358,8 +375,9 @@
 #detailed-tab .dtl-stat.present { background: rgba(233,249,239,.8); color: #23875a; border-color: rgba(35,135,90,.15); }
 #detailed-tab .dtl-stat.late    { background: rgba(253,243,227,.8); color: #a6720c; border-color: rgba(166,114,12,.15); }
 #detailed-tab .dtl-stat.absent  { background: rgba(253,237,236,.8); color: #d5433c; border-color: rgba(213,67,60,.15); }
-#detailed-tab .dtl-stat.leave   { background: rgba(234,241,255,.8); color: #2547b0; border-color: rgba(37,71,176,.15); }
-#detailed-tab .dtl-stat.weekend { background: rgba(241,242,246,.8); color: #7c839d; border-color: rgba(124,131,157,.15); }
+#detailed-tab .dtl-stat.leave    { background: rgba(234,241,255,.8); color: #2547b0; border-color: rgba(37,71,176,.15); }
+#detailed-tab .dtl-stat.passslip { background: rgba(230,247,245,.8); color: #0c8377; border-color: rgba(13,148,136,.18); }
+#detailed-tab .dtl-stat.weekend  { background: rgba(241,242,246,.8); color: #7c839d; border-color: rgba(124,131,157,.15); }
 
 #detailed-tab .dtl-avatar-grid {
     display: flex;
@@ -409,9 +427,10 @@
 #detailed-tab .status-present .dtl-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--success); }
 #detailed-tab .status-late    .dtl-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--warning); }
 #detailed-tab .status-absent  .dtl-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--danger); opacity: .7; }
-#detailed-tab .status-leave   .dtl-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--blue); }
-#detailed-tab .status-review  .dtl-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--purple); }
-#detailed-tab .status-weekend .dtl-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #cbd5e1; opacity: .6; }
+#detailed-tab .status-leave    .dtl-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--blue); }
+#detailed-tab .status-passslip .dtl-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #0d9488; }
+#detailed-tab .status-review   .dtl-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--purple); }
+#detailed-tab .status-weekend  .dtl-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #cbd5e1; opacity: .6; }
 
 #detailed-tab .dtl-status-dot {
     position: absolute;
@@ -425,9 +444,10 @@
 #detailed-tab .status-present .dtl-status-dot { background: var(--success); }
 #detailed-tab .status-late    .dtl-status-dot { background: var(--warning); }
 #detailed-tab .status-absent  .dtl-status-dot { background: var(--danger); }
-#detailed-tab .status-leave   .dtl-status-dot { background: var(--blue); }
-#detailed-tab .status-review  .dtl-status-dot { background: var(--purple); }
-#detailed-tab .status-weekend .dtl-status-dot { background: #cbd5e1; }
+#detailed-tab .status-leave    .dtl-status-dot { background: var(--blue); }
+#detailed-tab .status-passslip .dtl-status-dot { background: #0d9488; }
+#detailed-tab .status-review   .dtl-status-dot { background: var(--purple); }
+#detailed-tab .status-weekend  .dtl-status-dot { background: #cbd5e1; }
 
 /* custom tooltip, matching .dept-tag / .acc-pill pattern used elsewhere */
 #detailed-tab .dtl-avatar-chip:hover::after {
