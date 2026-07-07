@@ -131,7 +131,38 @@ class AdminDashboardController extends Controller
                 ];
             })
             ->filter();
-        
+
+        // Pending pass slip requests (mirrors $leaveRequests above, same shape
+        // so the dashboard's "Pending Requests" card can render either list
+        // through the same Leave/Pass Slip tab toggle)
+        $pendingPassSlips = \App\Models\PassSlip::where('status', 'pending')->count();
+
+        $passSlipRequests = \App\Models\PassSlip::with('employee')
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function ($slip) {
+                $emp = $slip->employee;
+                if (!$emp) return null;
+
+                $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
+                $colors = ['#0b044d', '#8e1e18', '#a16207'];
+                $color = $colors[array_rand($colors)];
+
+                return [
+                    'initials' => $initials,
+                    'color' => $color,
+                    'photo' => $emp->photo,
+                    'name' => $emp->first_name . ' ' . $emp->last_name,
+                    'type_label' => $slip->type === 'official_activity' ? 'Official Activity' : 'Personal Reason',
+                    'destination' => $slip->destination,
+                    'date' => Carbon::parse($slip->date)->format('M d, Y'),
+                    'id' => $slip->id,
+                ];
+            })
+            ->filter();
+
         // Department breakdown - ordered by member count (most to least)
         $departments = Department::where('status', 'Active')
             ->withCount(['employmentDetails as employee_count'])
@@ -357,7 +388,7 @@ class AdminDashboardController extends Controller
             'monthly_payroll' => $monthlyPayroll,
         ];
         
-        return view('admin.dashboard.adminDashboard', compact('stats', 'employees', 'leaveRequests', 'departments', 'chartData', 'earlyBirds', 'lateBirds', 'attendancePerformanceMonth', 'attendancePerformanceWeek', 'topEarners', 'recentLeaveFilers', 'attendanceDate', 'perfPeriodMonth', 'perfPeriodWeek'));
+        return view('admin.dashboard.adminDashboard', compact('stats', 'employees', 'leaveRequests', 'departments', 'chartData', 'earlyBirds', 'lateBirds', 'attendancePerformanceMonth', 'attendancePerformanceWeek', 'topEarners', 'recentLeaveFilers', 'attendanceDate', 'perfPeriodMonth', 'perfPeriodWeek', 'passSlipRequests', 'pendingPassSlips'));
     }
     
     private function getChartData()

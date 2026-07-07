@@ -898,12 +898,20 @@
     <div class="table-section enterprise-sidebar-card" style="margin-bottom:0">
         <div class="table-header">
             <div>
-                <p class="table-title">Pending Leave Requests</p>
+                <p class="table-title">Pending Requests</p>
                 <p class="table-sub">Requires immediate approval</p>
             </div>
-            <button class="btn-export" style="font-size:11px;padding:6px 12px" onclick="window.location.href='/admin/leave'">View All</button>
+            <button class="btn-export" id="pendingRequestsViewAllBtn" style="font-size:11px;padding:6px 12px" onclick="window.location.href='/admin/leave'">View All</button>
         </div>
-        <div class="enterprise-card-body">
+        <div style="display:flex;gap:6px;padding:0 20px 14px">
+            <button type="button" class="chart-tab active" id="pendingTabLeaveBtn" onclick="switchPendingRequestsTab('leave')" style="font-size:11px">
+                Leave{{ $stats['pending_leave'] > 0 ? ' (' . $stats['pending_leave'] . ')' : '' }}
+            </button>
+            <button type="button" class="chart-tab" id="pendingTabPassSlipBtn" onclick="switchPendingRequestsTab('passslip')" style="font-size:11px">
+                Pass Slip{{ $pendingPassSlips > 0 ? ' (' . $pendingPassSlips . ')' : '' }}
+            </button>
+        </div>
+        <div class="enterprise-card-body" id="pendingLeaveTabPanel">
             <div class="enterprise-list">
                 @forelse($leaveRequests as $l)
                 <div class="enterprise-list-item" style="cursor:default;padding:12px 0;position:relative">
@@ -936,6 +944,34 @@
                 </div>
                 @empty
                 <p class="table-sub" style="text-align:center;padding:28px 0;margin:0">No pending requests</p>
+                @endforelse
+            </div>
+        </div>
+        <div class="enterprise-card-body" id="pendingPassSlipTabPanel" style="display:none">
+            <div class="enterprise-list">
+                @forelse($passSlipRequests as $p)
+                <div class="enterprise-list-item" style="cursor:default;padding:12px 0;position:relative">
+                    @if($p['photo'])
+                        <img src="{{ $p['photo'] }}" style="width:38px;height:38px;border-radius:50%;object-fit:cover">
+                    @else
+                        <div class="emp-avatar-dynamic" data-bg="{{ $p['color'] }}" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px">{{ $p['initials'] }}</div>
+                    @endif
+                    <div class="enterprise-person" style="flex:1">
+                        <strong>{{ $p['name'] }}</strong>
+                        <span>{{ $p['type_label'] }}{{ $p['destination'] ? ' · ' . $p['destination'] : '' }}</span>
+                    </div>
+                    <button onclick="togglePassSlipMenuDash(event)" style="background:none;border:none;color:#9999bb;cursor:pointer;padding:4px 8px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0" onmouseover="this.style.background='#f1f5f9';this.style.color='#0b044d'" onmouseout="this.style.background='none';this.style.color='#9999bb'">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                    </button>
+                    <div class="leave-action-menu" style="display:none;position:absolute;right:0;top:100%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(15,23,42,0.12);z-index:100;min-width:160px;margin-top:4px">
+                        <button onclick="window.location.href='/admin/passslip'" style="width:100%;padding:10px 12px;border:none;background:#0b044d;color:#fff;text-align:left;font-size:12px;font-weight:600;cursor:pointer;border-radius:6px 6px 0 0" onmouseover="this.style.background='#1b1464'" onmouseout="this.style.background='#0b044d'">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display:inline;margin-right:6px;vertical-align:middle"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            Review in Pass Slip
+                        </button>
+                    </div>
+                </div>
+                @empty
+                <p class="table-sub" style="text-align:center;padding:28px 0;margin:0">No pending pass slips</p>
                 @endforelse
             </div>
         </div>
@@ -1545,6 +1581,26 @@
 </div>
 
 <script>
+function switchPendingRequestsTab(tab) {
+    const isLeave = tab === 'leave';
+    document.getElementById('pendingLeaveTabPanel').style.display = isLeave ? 'block' : 'none';
+    document.getElementById('pendingPassSlipTabPanel').style.display = isLeave ? 'none' : 'block';
+    document.getElementById('pendingTabLeaveBtn').classList.toggle('active', isLeave);
+    document.getElementById('pendingTabPassSlipBtn').classList.toggle('active', !isLeave);
+    document.getElementById('pendingRequestsViewAllBtn').onclick = () => window.location.href = isLeave ? '/admin/leave' : '/admin/passslip';
+    document.querySelectorAll('.leave-action-menu').forEach(m => m.style.display = 'none');
+}
+
+function togglePassSlipMenuDash(e) {
+    e.stopPropagation();
+    const menu = e.target.closest('button').nextElementSibling;
+    const allMenus = document.querySelectorAll('.leave-action-menu');
+    allMenus.forEach(m => {
+        if (m !== menu) m.style.display = 'none';
+    });
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
 function toggleLeaveMenu(e) {
     e.stopPropagation();
     const menu = e.target.closest('button').nextElementSibling;
