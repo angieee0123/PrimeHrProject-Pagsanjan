@@ -34,6 +34,8 @@
                 <tr data-department="{{ $application->employee->employmentDetail->departmentRelation->name ?? 'N/A' }}"
                     data-type="{{ $application->leaveType->leave_name ?? 'N/A' }}"
                     data-status="{{ ucfirst($application->status) }}"
+                    data-start-date="{{ $application->start_date->format('Y-m-d') }}"
+                    data-end-date="{{ $application->end_date->format('Y-m-d') }}"
                     style="transition: all 0.15s ease;"
                     onmouseover="this.style.background='#f9fafb'"
                     onmouseout="this.style.background='#fff'">
@@ -293,6 +295,8 @@ function applyAdminLeaveFilters() {
     const department = document.getElementById('filterDepartment').value;
     const type = document.getElementById('filterLeaveType').value;
     const status = document.getElementById('filterLeaveStatus').value;
+    const dateFrom = document.getElementById('filterLeaveDateFrom').value;
+    const dateTo = document.getElementById('filterLeaveDateTo').value;
     const rows = document.querySelectorAll('#leaveRequestsTableBody tr');
     let visible = 0;
 
@@ -301,7 +305,9 @@ function applyAdminLeaveFilters() {
             const matchDept = !department || row.dataset.department === department;
             const matchType = !type || row.dataset.type === type;
             const matchStatus = !status || row.dataset.status === status;
-            const show = matchDept && matchType && matchStatus;
+            const matchDateFrom = !dateFrom || row.dataset.endDate >= dateFrom;
+            const matchDateTo = !dateTo || row.dataset.startDate <= dateTo;
+            const show = matchDept && matchType && matchStatus && matchDateFrom && matchDateTo;
             row.style.display = show ? '' : 'none';
             if (show) visible++;
         }

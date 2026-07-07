@@ -152,6 +152,8 @@ function changeRowsPerPage(value) {
 function applyFilters() {
     const departmentFilter = document.getElementById('departmentFilter').value;
     const statusFilter = document.getElementById('statusFilter').value;
+    const hiredFrom = document.getElementById('hiredDateFrom')?.value || '';
+    const hiredTo = document.getElementById('hiredDateTo')?.value || '';
 
     allRows.forEach(row => {
         let showRow = true;
@@ -170,6 +172,14 @@ function applyFilters() {
             if (statusText !== statusFilter) {
                 showRow = false;
             }
+        }
+
+        if (hiredFrom && (!row.dataset.hired || row.dataset.hired < hiredFrom)) {
+            showRow = false;
+        }
+
+        if (hiredTo && (!row.dataset.hired || row.dataset.hired > hiredTo)) {
+            showRow = false;
         }
 
         row.style.display = showRow ? '' : 'none';

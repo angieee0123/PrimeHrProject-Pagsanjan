@@ -66,12 +66,33 @@
 <div class="filter-card">
     <div class="filter-card-fields">
         <div class="fld">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" class="fc-input" id="travelOrderFilterDateFrom" title="Travel date from" onchange="filterPendingOrders(); filterApprovedOrders(); filterDisapprovedOrders();">
+        </div>
+        <span class="fc-sep">to</span>
+        <div class="fld">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" class="fc-input" id="travelOrderFilterDateTo" title="Travel date to" onchange="filterPendingOrders(); filterApprovedOrders(); filterDisapprovedOrders();">
+        </div>
+        <div class="fc-divider"></div>
+        <div class="fld">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
             <select class="fc-select" id="travelOrderFilterDept" onchange="filterPendingOrders(); filterApprovedOrders(); filterDisapprovedOrders();">
                 <option value="all">All Departments</option>
                 @foreach($departments ?? [] as $dept)
                     <option value="{{ $dept->name }}">{{ $dept->name }}</option>
                 @endforeach
+            </select>
+        </div>
+        <div class="fld">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <select class="fc-select" id="travelOrderFilterMode" onchange="filterPendingOrders(); filterApprovedOrders(); filterDisapprovedOrders();">
+                <option value="all">All Modes</option>
+                <option value="Private Vehicle">Private Vehicle</option>
+                <option value="Government Vehicle">Government Vehicle</option>
+                <option value="Public Transportation">Public Transportation</option>
+                <option value="Air Travel">Air Travel</option>
+                <option value="Other">Other</option>
             </select>
         </div>
     </div>

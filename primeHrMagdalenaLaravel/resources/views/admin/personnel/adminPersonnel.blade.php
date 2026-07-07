@@ -99,6 +99,16 @@
                 <option value="Inactive">Inactive</option>
             </select>
         </div>
+        <div class="fc-divider"></div>
+        <div class="fld">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" class="fc-input" id="hiredDateFrom" title="Date hired from" onchange="applyFilters()">
+        </div>
+        <span class="fc-sep">to</span>
+        <div class="fld">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" class="fc-input" id="hiredDateTo" title="Date hired to" onchange="applyFilters()">
+        </div>
     </div>
     <div class="filter-card-actions">
         <button class="btn-ghost" onclick="exportTableData()">
@@ -228,8 +238,11 @@
                     $dateHired = $employee->employmentDetail && $employee->employmentDetail->appointment_date
                         ? \Carbon\Carbon::parse($employee->employmentDetail->appointment_date)->format('M d, Y')
                         : 'N/A';
+                    $dateHiredIso = $employee->employmentDetail && $employee->employmentDetail->appointment_date
+                        ? \Carbon\Carbon::parse($employee->employmentDetail->appointment_date)->format('Y-m-d')
+                        : '';
                 @endphp
-                <tr>
+                <tr data-hired="{{ $dateHiredIso }}">
                     <td>
                         <div class="emp-cell">
                             @if($employee->photo)

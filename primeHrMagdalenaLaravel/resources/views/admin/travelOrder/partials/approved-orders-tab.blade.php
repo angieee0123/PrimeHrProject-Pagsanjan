@@ -23,7 +23,7 @@
             </thead>
             <tbody>
                 @forelse($approvedOrders as $order)
-                <tr class="approved-order-row" style="transition: all 0.15s ease;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
+                <tr class="approved-order-row" data-department="{{ $order->employee->employmentDetail->departmentRelation->name ?? '' }}" data-mode="{{ $order->transportation_mode ?? '' }}" data-travel-date="{{ $order->travel_date->format('Y-m-d') }}" style="transition: all 0.15s ease;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
                         <div class="emp-cell" style="display: flex; align-items: center; gap: 12px;">
                             @if($order->employee->photo)
@@ -104,8 +104,15 @@ function changeApprovedRowsPerPage() {
 
 function filterApprovedOrders() {
     const dept = document.getElementById('travelOrderFilterDept').value;
+    const mode = document.getElementById('travelOrderFilterMode').value;
+    const dateFrom = document.getElementById('travelOrderFilterDateFrom').value;
+    const dateTo = document.getElementById('travelOrderFilterDateTo').value;
     document.querySelectorAll('.approved-order-row').forEach(row => {
-        row.style.display = dept === 'all' || row.dataset.department === dept ? '' : 'none';
+        const matchDept = dept === 'all' || row.dataset.department === dept;
+        const matchMode = mode === 'all' || row.dataset.mode === mode;
+        const matchDateFrom = !dateFrom || row.dataset.travelDate >= dateFrom;
+        const matchDateTo = !dateTo || row.dataset.travelDate <= dateTo;
+        row.style.display = matchDept && matchMode && matchDateFrom && matchDateTo ? '' : 'none';
     });
 }
 </script>

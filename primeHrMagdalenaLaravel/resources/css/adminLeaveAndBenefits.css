@@ -430,6 +430,111 @@
     }
 }
 
+.page-ellipsis {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    color: #9999bb;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+#transactions-tab .transaction-row {
+    transition: background-color .15s ease;
+}
+
+#transactions-tab .transaction-row:hover {
+    background: #fafaff;
+}
+
+#transactions-tab .payroll-table td {
+    vertical-align: middle;
+}
+
+#transactions-tab .payroll-table th:nth-child(1),
+#transactions-tab .payroll-table td:nth-child(1) {
+    width: 22%;
+}
+
+#transactions-tab .payroll-table th:last-child,
+#transactions-tab .payroll-table td:last-child {
+    width: 90px;
+}
+
+/* Responsive table for mobile */
+@media (max-width: 1200px) {
+    #transactions-tab .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #transactions-tab .payroll-table {
+        min-width: 1080px;
+    }
+}
+
+@media (max-width: 768px) {
+    #transactions-tab .payroll-table {
+        min-width: 100%;
+        display: block;
+    }
+
+    #transactions-tab .payroll-table thead {
+        display: none;
+    }
+
+    #transactions-tab .payroll-table tbody {
+        display: block;
+    }
+
+    #transactions-tab .payroll-table tbody tr {
+        display: block;
+        margin-bottom: 16px;
+        border: 1px solid #f0effe;
+        border-radius: 12px;
+        padding: 16px;
+        background: #fff;
+        height: auto;
+    }
+
+    #transactions-tab .payroll-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border: none;
+        text-align: right;
+        width: auto !important;
+    }
+
+    #transactions-tab .payroll-table td:before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 11.5px;
+        color: #6b6a8a;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left;
+    }
+
+    #transactions-tab .payroll-table td:nth-child(1) {
+        justify-content: flex-start;
+        border-bottom: 1px solid #f0effe;
+        padding-bottom: 12px;
+        margin-bottom: 8px;
+    }
+
+    #transactions-tab .payroll-table td:nth-child(1):before {
+        display: none;
+    }
+
+    #transactions-tab .row-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
 /* Modal styles */
 .modal {
     display: none;

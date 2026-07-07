@@ -1003,6 +1003,7 @@ Route::delete('/admin/leave/accrual-rates/{id}', [LeaveController::class, 'destr
 // Manual Credit Adjustment Routes
 Route::get('/admin/leave/employee/{employeeId}/balances', [LeaveController::class, 'getEmployeeBalances'])->middleware('auth')->name('admin.leave.employee.balances');
 Route::post('/admin/leave/manual-credit/store', [LeaveController::class, 'storeManualCredit'])->middleware('auth')->name('admin.leave.manual-credit.store');
+Route::put('/admin/leave/transactions/{id}', [LeaveController::class, 'updateTransaction'])->middleware('auth')->name('admin.leave.transactions.update');
 
 // Leave Form Routes (CS Form No. 6)
 Route::get('/admin/leave/{id}/view-form', [LeaveController::class, 'viewLeaveForm'])->middleware('auth')->name('admin.leave.view-form');

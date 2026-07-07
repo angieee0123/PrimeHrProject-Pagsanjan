@@ -56,7 +56,7 @@
                     <td data-label="Leave Type" style="text-align: center;">
                         <span class="dept-tag">{{ $transaction->leave_code }}</span>
                     </td>
-                    <td data-label="Type" style="text-align: center;">
+                    <td data-label="Transaction Type" style="text-align: center;">
                         @if($transaction->transaction_type === 'credit')
                             <span class="badge-status processed">Credit</span>
                         @elseif($transaction->transaction_type === 'debit')
@@ -72,13 +72,13 @@
                         @endif
                     </td>
                     <td data-label="Amount" style="text-align: center; font-weight: 600; color: {{ $transaction->transaction_type === 'credit' || $transaction->transaction_type === 'adjustment' ? '#23875a' : '#d5433c' }};">
-                        {{ $transaction->transaction_type === 'debit' ? '-' : '+' }}{{ number_format(abs($transaction->amount), 6) }} days
+                        {{ $transaction->transaction_type === 'debit' ? '-' : '+' }}{{ number_format(abs($transaction->amount), 2) }} days
                     </td>
-                    <td data-label="Before" style="text-align: center; color: #6b6a8a;">
-                        {{ number_format($transaction->balance_before, 6) }}
+                    <td data-label="Balance Before" style="text-align: center; color: #6b6a8a;">
+                        {{ number_format($transaction->balance_before, 2) }}
                     </td>
-                    <td data-label="After" style="text-align: center; font-weight: 600; color: #0b044d;">
-                        {{ number_format($transaction->balance_after, 6) }}
+                    <td data-label="Balance After" style="text-align: center; font-weight: 600; color: #0b044d;">
+                        {{ number_format($transaction->balance_after, 2) }}
                     </td>
                     <td data-label="Date" style="text-align: center; color: #6b6a8a; font-size: 12px;">
                         {{ $transaction->transaction_date ? $transaction->transaction_date->format('M d, Y') : 'N/A' }}
@@ -99,20 +99,40 @@
                         @endif
                     </td>
                     <td data-label="Actions" style="text-align: center;">
-                        <div class="row-actions">
-                            <button class="btn-view" onclick="viewTransactionDetails(
-                                '{{ addslashes($transaction->employee->first_name ?? 'N/A') }} {{ addslashes($transaction->employee->last_name ?? '') }}',
-                                '{{ $transaction->employee->employee_id ?? 'N/A' }}',
-                                '{{ $transaction->leave_code }}',
-                                '{{ ucfirst($transaction->transaction_type) }}',
-                                {{ $transaction->amount }},
-                                {{ $transaction->balance_before }},
-                                {{ $transaction->balance_after }},
-                                '{{ $transaction->transaction_date ? $transaction->transaction_date->format('M d, Y') : 'N/A' }}',
-                                '{{ ucfirst(str_replace('_', ' ', $transaction->reference_type ?? 'N/A')) }}',
-                                '{{ addslashes($transaction->remarks ?? 'N/A') }}',
-                                '{{ optional(optional($transaction->processedBy)->employee)->first_name ?? 'System' }} {{ optional(optional($transaction->processedBy)->employee)->last_name ?? '' }}'
-                            )">View</button>
+                        <div style="position: relative; display: flex; justify-content: center;">
+                            <button class="th-ellipsis-btn" onclick="toggleTransactionActionMenu(event, this)" title="Actions">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                            </button>
+                            <div class="th-action-menu" style="display: none;">
+                                <button onclick="viewTransactionDetails(
+                                    '{{ addslashes($transaction->employee->first_name ?? 'N/A') }} {{ addslashes($transaction->employee->last_name ?? '') }}',
+                                    '{{ $transaction->employee->employee_id ?? 'N/A' }}',
+                                    '{{ $transaction->leave_code }}',
+                                    '{{ ucfirst($transaction->transaction_type) }}',
+                                    {{ $transaction->amount }},
+                                    {{ $transaction->balance_before }},
+                                    {{ $transaction->balance_after }},
+                                    '{{ $transaction->transaction_date ? $transaction->transaction_date->format('M d, Y') : 'N/A' }}',
+                                    '{{ ucfirst(str_replace('_', ' ', $transaction->reference_type ?? 'N/A')) }}',
+                                    '{{ addslashes($transaction->remarks ?? 'N/A') }}',
+                                    '{{ optional(optional($transaction->processedBy)->employee)->first_name ?? 'System' }} {{ optional(optional($transaction->processedBy)->employee)->last_name ?? '' }}'
+                                )">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    View
+                                </button>
+                                @if($transaction->reference_type === 'manual_adjustment')
+                                <button onclick="openEditTransactionModal(
+                                    {{ $transaction->id }},
+                                    {{ abs($transaction->amount) }},
+                                    '{{ $transaction->amount < 0 ? 'deduct' : 'add' }}',
+                                    '{{ $transaction->transaction_date ? $transaction->transaction_date->format('Y-m-d') : '' }}',
+                                    '{{ addslashes(preg_replace('/^\[(DEDUCTION|ADDITION)\]\s*/', '', $transaction->remarks ?? '')) }}'
+                                )">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    Edit
+                                </button>
+                                @endif
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -148,6 +168,15 @@
             @php
                 $currentPage = $leaveTransactions->currentPage();
                 $lastPage = $leaveTransactions->lastPage();
+                $window = 1;
+                $pageItems = [];
+                for ($i = 1; $i <= $lastPage; $i++) {
+                    if ($i === 1 || $i === $lastPage || ($i >= $currentPage - $window && $i <= $currentPage + $window)) {
+                        $pageItems[] = $i;
+                    } elseif (end($pageItems) !== '...') {
+                        $pageItems[] = '...';
+                    }
+                }
             @endphp
 
             @if($currentPage > 1)
@@ -156,8 +185,10 @@
                 <button class="page-btn" disabled>‹</button>
             @endif
 
-            @foreach ($leaveTransactions->getUrlRange(1, $lastPage) as $page => $url)
-                @if ($page == $currentPage)
+            @foreach ($pageItems as $page)
+                @if($page === '...')
+                    <span class="page-ellipsis">…</span>
+                @elseif($page == $currentPage)
                     <button class="page-btn active">{{ $page }}</button>
                 @else
                     <button class="page-btn" onclick="navigateToTransactionPage({{ $page }})">{{ $page }}</button>
@@ -204,6 +235,51 @@
         </div>
         <div class="modal-footer">
             <button class="modal-btn-ghost" onclick="closeTransactionDetailModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+{{-- Edit Transaction Modal --}}
+<div class="modal-overlay" id="editTransactionModal" onclick="closeEditTransactionModal(event)" style="display: none;">
+    <div class="modal-container" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title">Edit Transaction</h3>
+                <p class="modal-subtitle">Update this manual leave credit adjustment</p>
+            </div>
+            <button class="modal-close" onclick="closeEditTransactionModal()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <form id="editTransactionForm" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="transaction_type" id="editTransactionType" value="add">
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Amount (Days) <span style="color: #8e1e18;">*</span></label>
+                        <input type="number" name="amount" id="editTransactionAmount" class="form-input" step="0.000001" min="0.000001" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Transaction Date <span style="color: #8e1e18;">*</span></label>
+                        <input type="date" name="transaction_date" id="editTransactionDate" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Reason / Remarks <span style="color: #8e1e18;">*</span></label>
+                    <textarea name="remarks" id="editTransactionRemarks" class="form-input" rows="3" maxlength="500" required></textarea>
+                    <p style="font-size: 11px; color: #6b6a8a; margin: 4px 0 0 0;">This is a [ADDITION]/[DEDUCTION] adjustment based on the original transaction type; the amount sign cannot be flipped here.</p>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeEditTransactionModal()">Cancel</button>
+                    <button type="submit" class="btn-submit">Save Changes</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -347,11 +423,11 @@ function viewTransactionDetails(employeeName, employeeId, leaveType, type, amoun
 
     const amountEl = document.getElementById('transactionAmount');
     const sign = (type === 'Debit') ? '-' : '+';
-    amountEl.textContent = sign + parseFloat(Math.abs(amount)).toFixed(6) + ' days';
+    amountEl.textContent = sign + parseFloat(Math.abs(amount)).toFixed(2) + ' days';
     amountEl.style.color = (type === 'Debit') ? '#d5433c' : '#23875a';
 
-    document.getElementById('transactionBalanceBefore').textContent = parseFloat(balanceBefore).toFixed(6) + ' days';
-    document.getElementById('transactionBalanceAfter').textContent = parseFloat(balanceAfter).toFixed(6) + ' days';
+    document.getElementById('transactionBalanceBefore').textContent = parseFloat(balanceBefore).toFixed(2) + ' days';
+    document.getElementById('transactionBalanceAfter').textContent = parseFloat(balanceAfter).toFixed(2) + ' days';
     document.getElementById('transactionDate').textContent = date;
     document.getElementById('transactionReference').textContent = reference;
     document.getElementById('transactionProcessedBy').textContent = processedBy || 'System';
@@ -363,4 +439,87 @@ function viewTransactionDetails(employeeName, employeeId, leaveType, type, amoun
 function closeTransactionDetailModal() {
     document.getElementById('transactionDetailModal').style.display = 'none';
 }
+
+function toggleTransactionActionMenu(event, btn) {
+    event.stopPropagation();
+    const menu = btn.nextElementSibling;
+    document.querySelectorAll('.th-action-menu').forEach(m => {
+        if (m !== menu) m.style.display = 'none';
+    });
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+document.addEventListener('click', () => {
+    document.querySelectorAll('.th-action-menu').forEach(m => m.style.display = 'none');
+});
+
+function openEditTransactionModal(id, amount, type, date, remarks) {
+    document.getElementById('editTransactionForm').action = `/admin/leave/transactions/${id}`;
+    document.getElementById('editTransactionType').value = type;
+    document.getElementById('editTransactionAmount').value = amount;
+    document.getElementById('editTransactionDate').value = date;
+    document.getElementById('editTransactionRemarks').value = remarks;
+    document.getElementById('editTransactionModal').style.display = 'flex';
+}
+
+function closeEditTransactionModal(event) {
+    if (!event || event.target.id === 'editTransactionModal') {
+        document.getElementById('editTransactionModal').style.display = 'none';
+    }
+}
 </script>
+
+<style>
+.th-ellipsis-btn {
+    background: none;
+    border: none;
+    color: #9999bb;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.th-ellipsis-btn:hover {
+    background: #f1f5f9;
+    color: #0b044d;
+}
+.th-action-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15);
+    z-index: 100;
+    min-width: 140px;
+    margin-top: 6px;
+    overflow: hidden;
+    animation: thSlideDown 0.2s ease-out;
+}
+.th-action-menu button {
+    width: 100%;
+    padding: 11px 14px;
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 12px;
+    color: #0b044d;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.th-action-menu button:hover {
+    background: #f0effe;
+}
+@keyframes thSlideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>

@@ -2,7 +2,7 @@
 
 @section('content')
 
-@include('admin.topbar.adminTopbar')
+@include('admin.topbar.passSlipTopbar')
 @include('admin.notification.adminNotification')
 
 <div class="glass-shell">
@@ -66,12 +66,30 @@
 <div class="filter-card">
     <div class="filter-card-fields">
         <div class="fld">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" class="fc-input" id="passSlipFilterDateFrom" title="Date from" onchange="filterPassSlipRows('pending'); filterPassSlipRows('approved'); filterPassSlipRows('disapproved');">
+        </div>
+        <span class="fc-sep">to</span>
+        <div class="fld">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" class="fc-input" id="passSlipFilterDateTo" title="Date to" onchange="filterPassSlipRows('pending'); filterPassSlipRows('approved'); filterPassSlipRows('disapproved');">
+        </div>
+        <div class="fc-divider"></div>
+        <div class="fld">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
             <select class="fc-select" id="passSlipFilterDept" onchange="filterPassSlipRows('pending'); filterPassSlipRows('approved'); filterPassSlipRows('disapproved');">
                 <option value="all">All Departments</option>
                 @foreach($departments ?? [] as $dept)
                     <option value="{{ $dept->name }}">{{ $dept->name }}</option>
                 @endforeach
+            </select>
+        </div>
+        <div class="fld">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <select class="fc-select" id="passSlipFilterType" onchange="filterPassSlipRows('pending'); filterPassSlipRows('approved'); filterPassSlipRows('disapproved');">
+                <option value="all">All Types</option>
+                <option value="official_activity">Official Activity</option>
+                <option value="personal_reason">Personal Reason</option>
             </select>
         </div>
     </div>
@@ -116,8 +134,20 @@
             </thead>
             <tbody>
                 @forelse($pendingSlips as $slip)
-                <tr class="passslip-pending-row" style="transition: all 0.15s ease;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
-                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">{{ $slip->employee->first_name ?? '' }} {{ $slip->employee->last_name ?? '' }}</td>
+                <tr class="passslip-pending-row" data-department="{{ $slip->employee->employmentDetail->departmentRelation->name ?? '' }}" data-type="{{ $slip->type }}" data-slip-date="{{ $slip->date ? $slip->date->format('Y-m-d') : '' }}" style="transition: all 0.15s ease;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
+                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
+                        <div class="emp-cell" style="display: flex; align-items: center; gap: 12px;">
+                            @if($slip->employee->photo)
+                                <img src="{{ $slip->employee->photo }}" alt="{{ $slip->employee->first_name }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0; flex-shrink: 0;">
+                            @else
+                                <div style="background: {{ $passSlipColors[$loop->index % 6] }}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; border: 2px solid #e2e8f0; flex-shrink: 0;">{{ strtoupper(substr($slip->employee->first_name ?? 'N', 0, 1) . substr($slip->employee->last_name ?? 'A', 0, 1)) }}</div>
+                            @endif
+                            <div style="min-width: 0;">
+                                <p style="margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $slip->employee->first_name ?? '' }} {{ $slip->employee->last_name ?? '' }}</p>
+                                <p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 500;">{{ $slip->employee->employee_id ?? 'N/A' }}</p>
+                            </div>
+                        </div>
+                    </td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; text-align: center;">
                         <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: {{ $slip->type === 'official_activity' ? '#f0effe' : '#fefce8' }}; color: {{ $slip->type === 'official_activity' ? '#0b044d' : '#a16207' }};">{{ $slip->type === 'official_activity' ? 'Official' : 'Personal' }}</span>
                     </td>
@@ -179,8 +209,20 @@
             </thead>
             <tbody>
                 @forelse($approvedSlips as $slip)
-                <tr class="passslip-approved-row" style="transition: all 0.15s ease;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
-                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">{{ $slip->employee->first_name ?? '' }} {{ $slip->employee->last_name ?? '' }}</td>
+                <tr class="passslip-approved-row" data-department="{{ $slip->employee->employmentDetail->departmentRelation->name ?? '' }}" data-type="{{ $slip->type }}" data-slip-date="{{ $slip->date ? $slip->date->format('Y-m-d') : '' }}" style="transition: all 0.15s ease;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
+                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
+                        <div class="emp-cell" style="display: flex; align-items: center; gap: 12px;">
+                            @if($slip->employee->photo)
+                                <img src="{{ $slip->employee->photo }}" alt="{{ $slip->employee->first_name }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0; flex-shrink: 0;">
+                            @else
+                                <div style="background: {{ $passSlipColors[$loop->index % 6] }}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; border: 2px solid #e2e8f0; flex-shrink: 0;">{{ strtoupper(substr($slip->employee->first_name ?? 'N', 0, 1) . substr($slip->employee->last_name ?? 'A', 0, 1)) }}</div>
+                            @endif
+                            <div style="min-width: 0;">
+                                <p style="margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $slip->employee->first_name ?? '' }} {{ $slip->employee->last_name ?? '' }}</p>
+                                <p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 500;">{{ $slip->employee->employee_id ?? 'N/A' }}</p>
+                            </div>
+                        </div>
+                    </td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; text-align: center;">
                         <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: {{ $slip->type === 'official_activity' ? '#f0effe' : '#fefce8' }}; color: {{ $slip->type === 'official_activity' ? '#0b044d' : '#a16207' }};">{{ $slip->type === 'official_activity' ? 'Official' : 'Personal' }}</span>
                     </td>
@@ -249,8 +291,20 @@
             </thead>
             <tbody>
                 @forelse($disapprovedSlips as $slip)
-                <tr class="passslip-disapproved-row" style="transition: all 0.15s ease;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
-                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">{{ $slip->employee->first_name ?? '' }} {{ $slip->employee->last_name ?? '' }}</td>
+                <tr class="passslip-disapproved-row" data-department="{{ $slip->employee->employmentDetail->departmentRelation->name ?? '' }}" data-type="{{ $slip->type }}" data-slip-date="{{ $slip->date ? $slip->date->format('Y-m-d') : '' }}" style="transition: all 0.15s ease;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
+                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
+                        <div class="emp-cell" style="display: flex; align-items: center; gap: 12px;">
+                            @if($slip->employee->photo)
+                                <img src="{{ $slip->employee->photo }}" alt="{{ $slip->employee->first_name }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0; flex-shrink: 0;">
+                            @else
+                                <div style="background: {{ $passSlipColors[$loop->index % 6] }}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; border: 2px solid #e2e8f0; flex-shrink: 0;">{{ strtoupper(substr($slip->employee->first_name ?? 'N', 0, 1) . substr($slip->employee->last_name ?? 'A', 0, 1)) }}</div>
+                            @endif
+                            <div style="min-width: 0;">
+                                <p style="margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $slip->employee->first_name ?? '' }} {{ $slip->employee->last_name ?? '' }}</p>
+                                <p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 500;">{{ $slip->employee->employee_id ?? 'N/A' }}</p>
+                            </div>
+                        </div>
+                    </td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #64748b;">{{ Str::limit($slip->reason ?? '', 40) }}</td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #111827; font-weight: 600;">{{ $slip->date ? $slip->date->format('M d, Y') : '' }}</td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #8e1e18;">{{ $slip->remarks ?? '' }}</td>
@@ -435,9 +489,24 @@ function switchPassSlipTab(tabName) {
 
 function filterPassSlipRows(tabName) {
     const dept = document.getElementById('passSlipFilterDept').value;
+    const type = document.getElementById('passSlipFilterType').value;
+    const dateFrom = document.getElementById('passSlipFilterDateFrom').value;
+    const dateTo = document.getElementById('passSlipFilterDateTo').value;
+    const search = (document.getElementById('passSlipSearchInput')?.value || '').toLowerCase().trim();
     document.querySelectorAll('.passslip-' + tabName + '-row').forEach(row => {
-        row.style.display = dept === 'all' || row.dataset.department === dept ? '' : 'none';
+        const matchDept = dept === 'all' || row.dataset.department === dept;
+        const matchType = type === 'all' || row.dataset.type === type;
+        const matchDateFrom = !dateFrom || row.dataset.slipDate >= dateFrom;
+        const matchDateTo = !dateTo || row.dataset.slipDate <= dateTo;
+        const matchSearch = search === '' || row.textContent.toLowerCase().includes(search);
+        row.style.display = matchDept && matchType && matchDateFrom && matchDateTo && matchSearch ? '' : 'none';
     });
+}
+
+function searchPassSlips() {
+    filterPassSlipRows('pending');
+    filterPassSlipRows('approved');
+    filterPassSlipRows('disapproved');
 }
 
 function disapprovePassSlip(id) {

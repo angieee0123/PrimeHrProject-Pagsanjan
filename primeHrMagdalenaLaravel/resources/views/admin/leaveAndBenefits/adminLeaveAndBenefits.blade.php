@@ -84,6 +84,16 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
     <div class="filter-group" id="leave-filter-group" style="display: contents;">
         <div class="filter-card-fields">
             <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input type="date" class="fc-input" id="filterLeaveDateFrom" title="Leave date from" onchange="applyAdminLeaveFilters()">
+            </div>
+            <span class="fc-sep">to</span>
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input type="date" class="fc-input" id="filterLeaveDateTo" title="Leave date to" onchange="applyAdminLeaveFilters()">
+            </div>
+            <div class="fc-divider"></div>
+            <div class="fld">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
                 <select class="fc-select" id="filterDepartment" onchange="applyAdminLeaveFilters()">
                     <option value="">All Departments</option>

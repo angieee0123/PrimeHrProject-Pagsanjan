@@ -229,8 +229,12 @@ class LeaveController extends Controller
         $transactionQuery->orderBy('created_at', 'desc');
         
         $transactionPerPage = request('transaction_per_page', 10);
-        $transactionPerPage = in_array($transactionPerPage, [10, 25, 50, 100]) ? $transactionPerPage : 10;
-        
+        if ($transactionPerPage === 'all') {
+            $transactionPerPage = max($transactionQuery->count(), 1);
+        } elseif (!in_array((int) $transactionPerPage, [10, 25, 50, 100], true)) {
+            $transactionPerPage = 10;
+        }
+
         $leaveTransactions = $transactionQuery->paginate($transactionPerPage)->appends(request()->except('page'));
 
         $transactionEmployees = \App\Models\Employee::whereHas('leaveTransactions')
@@ -1035,9 +1039,76 @@ class LeaveController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return redirect()->route('admin.leave')
                 ->with('error', 'Failed to adjust leave credits: ' . $e->getMessage());
+        }
+    }
+
+    public function updateTransaction(Request $request, $id)
+    {
+        $transaction = LeaveTransaction::findOrFail($id);
+
+        if ($transaction->reference_type !== 'manual_adjustment') {
+            return redirect()->route('admin.leave', ['tab' => 'transactions'])
+                ->with('error', 'Only manual adjustment transactions can be edited.');
+        }
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.000001|max:999.999999',
+            'transaction_type' => 'required|in:add,deduct',
+            'transaction_date' => 'required|date',
+            'remarks' => 'required|string|max:500',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $isDeduction = $validated['transaction_type'] === 'deduct';
+            $newAmount = $isDeduction ? -$validated['amount'] : $validated['amount'];
+            $delta = $newAmount - $transaction->amount;
+
+            $transaction->amount = $newAmount;
+            $transaction->balance_after = $transaction->balance_before + $newAmount;
+            $transaction->transaction_date = $validated['transaction_date'];
+            $transaction->remarks = ($isDeduction ? '[DEDUCTION] ' : '[ADDITION] ') . $validated['remarks'];
+            $transaction->save();
+
+            if ($delta != 0) {
+                LeaveTransaction::where('employee_id', $transaction->employee_id)
+                    ->where('leave_code', $transaction->leave_code)
+                    ->where('year', $transaction->year)
+                    ->where('id', '>', $transaction->id)
+                    ->orderBy('id')
+                    ->each(function ($subsequent) use ($delta) {
+                        $subsequent->balance_before += $delta;
+                        $subsequent->balance_after += $delta;
+                        $subsequent->save();
+                    });
+
+                $leaveBalance = LeaveBalance::where('employee_id', $transaction->employee_id)
+                    ->where('leave_code', $transaction->leave_code)
+                    ->where('year', $transaction->year)
+                    ->first();
+
+                if ($leaveBalance) {
+                    $leaveBalance->available_credits += $delta;
+                    $leaveBalance->total_credits += $delta;
+                    $leaveBalance->save();
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.leave', ['tab' => 'transactions'])
+                ->with('success', 'Transaction updated successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to update leave transaction: ' . $e->getMessage());
+
+            return redirect()->route('admin.leave', ['tab' => 'transactions'])
+                ->with('error', 'Failed to update transaction: ' . $e->getMessage());
         }
     }
 
