@@ -5,6 +5,8 @@
 @include('admin.topbar.adminTopbar')
 @include('admin.notification.adminNotification')
 
+<div class="glass-shell">
+
 <div class="stats-grid stats-grid-4" style="margin-bottom: 20px;">
     <div class="stat-card">
         <div class="stat-top">
@@ -60,8 +62,29 @@
     </div>
 </div>
 
+{{-- Filter Toolbar --}}
+<div class="filter-card">
+    <div class="filter-card-fields">
+        <div class="fld">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+            <select class="fc-select" id="travelOrderFilterDept" onchange="filterPendingOrders(); filterApprovedOrders(); filterDisapprovedOrders();">
+                <option value="all">All Departments</option>
+                @foreach($departments ?? [] as $dept)
+                    <option value="{{ $dept->name }}">{{ $dept->name }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+    <div class="filter-card-actions">
+        <button class="btn-ghost">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+        </button>
+    </div>
+</div>
+
 <!-- Tabs -->
-<div style="display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1.5px solid #eceaf8; padding-bottom: 0;">
+<div class="seg-tabs">
     <button class="tab-btn active" onclick="switchTab('pending')">Pending</button>
     <button class="tab-btn" onclick="switchTab('approved')">Approved</button>
     <button class="tab-btn" onclick="switchTab('disapproved')">Disapproved</button>
@@ -72,6 +95,8 @@
 @include('admin.travelOrder.partials.approved-orders-tab')
 
 @include('admin.travelOrder.partials.disapproved-orders-tab')
+
+</div>
 
 @include('admin.travelOrder.modals.viewTravelOrderModal')
 

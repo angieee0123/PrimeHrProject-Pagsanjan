@@ -5,25 +5,6 @@
             <p class="table-sub" style="color: #667085; font-size: 12px; margin: 0;">Municipal Government of Pagsanjan · <span id="leaveRequestCount">{{ $leaveApplications->count() }}</span> records</p>
         </div>
         <div class="table-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <select class="filter-select" id="filterDepartment" onchange="applyAdminLeaveFilters()" style="font-size: 11px; padding: 6px 12px; border-radius: 8px; border: 1px solid #e5e7eb; font-weight: 600; height: 34px;">
-                <option value="">All Departments</option>
-                @foreach($departments as $dept)
-                    <option value="{{ $dept }}">{{ $dept }}</option>
-                @endforeach
-            </select>
-            <select class="filter-select" id="filterLeaveType" onchange="applyAdminLeaveFilters()" style="font-size: 11px; padding: 6px 12px; border-radius: 8px; border: 1px solid #e5e7eb; font-weight: 600; height: 34px;">
-                <option value="">All Types</option>
-                @foreach($leaveTypes as $type)
-                    <option value="{{ $type->leave_name }}">{{ $type->leave_name }}</option>
-                @endforeach
-            </select>
-            <select class="filter-select" id="filterLeaveStatus" onchange="applyAdminLeaveFilters()" style="font-size: 11px; padding: 6px 12px; border-radius: 8px; border: 1px solid #e5e7eb; font-weight: 600; height: 34px;">
-                <option value="">All Status</option>
-                <option value="Approved">Approved</option>
-                <option value="Pending">Pending</option>
-                <option value="Disapproved">Disapproved</option>
-                <option value="Cancelled">Cancelled</option>
-            </select>
             <button class="btn-export" style="background: #0b044d; color: #fff; border: 1px solid #0b044d; border-radius: 8px; font-size: 11px; padding: 0 14px; height: 34px; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(11, 4, 77, 0.1);" onclick="openManualCreditModal('add')" onmouseover="this.style.background='#1b1464'; this.style.boxShadow='0 4px 8px rgba(11, 4, 77, 0.2)'" onmouseout="this.style.background='#0b044d'; this.style.boxShadow='0 2px 4px rgba(11, 4, 77, 0.1)'">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Manual Credits
@@ -31,10 +12,6 @@
             <button class="btn-export" style="background: #dc2626; color: #fff; border: 1px solid #dc2626; border-radius: 8px; font-size: 11px; padding: 0 14px; height: 34px; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);" onclick="openManualCreditModal('deduct')" onmouseover="this.style.background='#b91c1c'; this.style.boxShadow='0 4px 8px rgba(220, 38, 38, 0.2)'" onmouseout="this.style.background='#dc2626'; this.style.boxShadow='0 2px 4px rgba(220, 38, 38, 0.1)'">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Deduct Credits
-            </button>
-            <button class="btn-export" style="background: #fff; color: #344054; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 11px; padding: 0 14px; height: 34px; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.borderColor='#d1d5db'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
             </button>
         </div>
     </div>
@@ -113,7 +90,7 @@
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
                         <div style="position: relative; display: flex; justify-content: center;">
                             <button class="action-ellipsis-btn" onclick="toggleLeaveActionMenu(event, this)" title="Actions" style="background: none; border: none; color: #9999bb; cursor: pointer; padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0b044d'" onmouseout="this.style.background='none'; this.style.color='#9999bb'">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                             </button>
                             <div class="leave-action-menu" style="display: none; position: absolute; right: 0; top: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15); z-index: 100; min-width: 160px; margin-top: 6px; overflow: hidden;">
                                 <button onclick="openAdminLeaveDetailModal(

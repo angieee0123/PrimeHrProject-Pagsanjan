@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="admin-training" data-fiscal-year="{{ date('Y') }}" data-flash-success="{{ session('success') ? '1' : '0' }}">
+<div class="admin-training glass-shell" data-fiscal-year="{{ date('Y') }}" data-flash-success="{{ session('success') ? '1' : '0' }}">
 
 @include('admin.topbar.trainingTopbar')
 @include('admin.notification.adminNotification')

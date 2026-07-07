@@ -3,7 +3,7 @@
 @section('content')
 @include('admin.topbar.reportsTopbar')
 @include('admin.notification.adminNotification')
-<div>
+<div class="glass-shell">
     <!-- Report Type Tabs -->
     <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
         @php

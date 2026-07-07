@@ -5,6 +5,8 @@
 @include('admin.topbar.adminTopbar')
 @include('admin.notification.adminNotification')
 
+<div class="glass-shell">
+
 <div class="stats-grid stats-grid-4" style="margin-bottom: 20px;">
     <div class="stat-card">
         <div class="stat-top">
@@ -60,8 +62,29 @@
     </div>
 </div>
 
+{{-- Filter Toolbar --}}
+<div class="filter-card">
+    <div class="filter-card-fields">
+        <div class="fld">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+            <select class="fc-select" id="passSlipFilterDept" onchange="filterPassSlipRows('pending'); filterPassSlipRows('approved'); filterPassSlipRows('disapproved');">
+                <option value="all">All Departments</option>
+                @foreach($departments ?? [] as $dept)
+                    <option value="{{ $dept->name }}">{{ $dept->name }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+    <div class="filter-card-actions">
+        <button class="btn-ghost">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+        </button>
+    </div>
+</div>
+
 <!-- Tabs -->
-<div style="display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1.5px solid #eceaf8; padding-bottom: 0;">
+<div class="seg-tabs">
     <button class="tab-btn active" onclick="switchPassSlipTab('pending')">Pending</button>
     <button class="tab-btn" onclick="switchPassSlipTab('approved')">Approved</button>
     <button class="tab-btn" onclick="switchPassSlipTab('disapproved')">Disapproved</button>
@@ -75,18 +98,6 @@
         <div>
             <h3 class="table-title" style="color: #111827; font-size: 15px; font-weight: 800; margin: 0 0 4px;">Pending Pass Slips</h3>
             <p class="table-sub" style="color: #667085; font-size: 12px; margin: 0;">Awaiting approval · {{ $pendingSlips->total() }} records</p>
-        </div>
-        <div class="table-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <select class="filter-select" id="filterPendingPassSlipDept" onchange="filterPassSlipRows('pending')" style="font-size: 11px; padding: 6px 12px; border-radius: 8px; border: 1px solid #e5e7eb; font-weight: 600; height: 34px;">
-                <option value="all">All Departments</option>
-                @foreach($departments ?? [] as $dept)
-                    <option value="{{ $dept->name }}">{{ $dept->name }}</option>
-                @endforeach
-            </select>
-            <button class="btn-export" style="background: #fff; color: #344054; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 11px; padding: 0 14px; height: 34px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
         </div>
     </div>
 
@@ -151,18 +162,6 @@
             <h3 class="table-title" style="color: #111827; font-size: 15px; font-weight: 800; margin: 0 0 4px;">Approved Pass Slips</h3>
             <p class="table-sub" style="color: #667085; font-size: 12px; margin: 0;">Successfully approved · {{ $approvedSlips->total() }} records</p>
         </div>
-        <div class="table-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <select class="filter-select" id="filterApprovedPassSlipDept" onchange="filterPassSlipRows('approved')" style="font-size: 11px; padding: 6px 12px; border-radius: 8px; border: 1px solid #e5e7eb; font-weight: 600; height: 34px;">
-                <option value="all">All Departments</option>
-                @foreach($departments ?? [] as $dept)
-                    <option value="{{ $dept->name }}">{{ $dept->name }}</option>
-                @endforeach
-            </select>
-            <button class="btn-export" style="background: #fff; color: #344054; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 11px; padding: 0 14px; height: 34px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
-        </div>
     </div>
 
     <div class="table-wrapper" style="max-width: 100%; overflow: auto;">
@@ -192,7 +191,7 @@
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
                         <div style="position: relative; display: flex; justify-content: center;">
                             <button class="ps-ellipsis-btn" onclick="togglePassSlipActionMenu(event, this)" title="Actions">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                             </button>
                             <div class="ps-action-menu" style="display: none;">
                                 <button onclick="openPassSlipFormModal(
@@ -236,18 +235,6 @@
             <h3 class="table-title" style="color: #111827; font-size: 15px; font-weight: 800; margin: 0 0 4px;">Disapproved Pass Slips</h3>
             <p class="table-sub" style="color: #667085; font-size: 12px; margin: 0;">Rejected requests · {{ $disapprovedSlips->total() }} records</p>
         </div>
-        <div class="table-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <select class="filter-select" id="filterDisapprovedPassSlipDept" onchange="filterPassSlipRows('disapproved')" style="font-size: 11px; padding: 6px 12px; border-radius: 8px; border: 1px solid #e5e7eb; font-weight: 600; height: 34px;">
-                <option value="all">All Departments</option>
-                @foreach($departments ?? [] as $dept)
-                    <option value="{{ $dept->name }}">{{ $dept->name }}</option>
-                @endforeach
-            </select>
-            <button class="btn-export" style="background: #fff; color: #344054; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 11px; padding: 0 14px; height: 34px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
-        </div>
     </div>
 
     <div class="table-wrapper" style="max-width: 100%; overflow: auto;">
@@ -287,6 +274,8 @@
         <p style="margin: 0; font-size: 12px; color: #64748b; font-weight: 500;">Showing <strong style="color: #0b044d; font-weight: 700;">{{ $disapprovedSlips->firstItem() ?? 0 }}</strong>–<strong style="color: #0b044d; font-weight: 700;">{{ $disapprovedSlips->lastItem() ?? 0 }}</strong> of <strong style="color: #0b044d; font-weight: 700;">{{ $disapprovedSlips->total() }}</strong> records</p>
     </div>
 </section>
+
+</div>
 
 {{-- Pass Slip Form Preview Modal --}}
 <div class="modal-overlay" id="passSlipFormModal" onclick="closePassSlipFormModal()" style="display: none;">
@@ -445,7 +434,7 @@ function switchPassSlipTab(tabName) {
 }
 
 function filterPassSlipRows(tabName) {
-    const dept = document.getElementById('filter' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'PassSlipDept').value;
+    const dept = document.getElementById('passSlipFilterDept').value;
     document.querySelectorAll('.passslip-' + tabName + '-row').forEach(row => {
         row.style.display = dept === 'all' || row.dataset.department === dept ? '' : 'none';
     });

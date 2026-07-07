@@ -5,23 +5,9 @@
             <p class="table-sub">Manage all leave types for LGU Pagsanjan · {{ $leaveTypes->total() }} records</p>
         </div>
         <div class="table-actions">
-            <select class="filter-select" id="filterLeaveTypeStatus" onchange="filterLeaveTypes()">
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-            </select>
-            <select class="filter-select" id="filterLeaveTypeAccrual" onchange="filterLeaveTypes()">
-                <option value="all">All Types</option>
-                <option value="accrued">Accrued</option>
-                <option value="fixed">Fixed</option>
-            </select>
             <button class="btn-export" style="background: #0b044d; color: #fff; border-color: #0b044d;" onclick="openAddLeaveTypeModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Leave Type
-            </button>
-            <button class="btn-export">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
             </button>
         </div>
     </div>
@@ -35,42 +21,54 @@
         <table class="payroll-table">
             <thead>
                 <tr>
-                    <th onclick="sortLeaveTypes('leave_code')" style="cursor: pointer; text-align: left;">Code {!! $sortIcon !!}</th>
-                    <th onclick="sortLeaveTypes('leave_name')" style="cursor: pointer;">Leave Type {!! $sortIcon !!}</th>
+                    <th onclick="sortLeaveTypes('leave_name')" style="cursor: pointer; text-align: left;">Leave Type {!! $sortIcon !!}</th>
                     <th onclick="sortLeaveTypes('annual_limit')" style="cursor: pointer;">Annual Limit {!! $sortIcon !!}</th>
-                    <th style="min-width: 250px;">Attachment</th>
-                    <th onclick="sortLeaveTypes('is_active')" style="cursor: pointer; text-align: center;">Status {!! $sortIcon !!}</th>
+                    <th style="min-width: 320px; padding-left: 24px; padding-right: 24px;">Attachment</th>
+                    <th onclick="sortLeaveTypes('is_active')" style="cursor: pointer; text-align: right;">Status {!! $sortIcon !!}</th>
                     <th style="text-align: center;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($leaveTypes as $type)
                 <tr class="leave-type-row" data-status="{{ $type->is_active ? 'active' : 'inactive' }}" data-accrual="{{ $type->is_accrued ? 'accrued' : 'fixed' }}">
-                    <td data-label="Code" style="text-align: left;">
-                        <div class="emp-avatar" style="background: {{ $colors[$loop->index % 6] }}; margin-left: 0;">{{ $type->leave_code }}</div>
+                    <td data-label="Leave Type" style="text-align: left;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="emp-avatar" style="background: {{ $colors[$loop->index % 6] }}; margin-left: 0; flex-shrink: 0;">{{ $type->leave_code }}</div>
+                            <span style="font-size: 13px; color: #0b044d; font-weight: 500;">{{ $type->leave_name }}</span>
+                        </div>
                     </td>
-                    <td data-label="Leave Type" style="font-size: 13px; color: #0b044d; font-weight: 500;">{{ $type->leave_name }}</td>
                     <td data-label="Annual Limit" style="font-weight: 600; color: #0b044d; font-size: 13px;">
-                        {{ $type->annual_limit > 0 ? number_format($type->annual_limit, 0) . ' days' : '<span style="color: #9ca3af;">—</span>' }}
+                        {!! $type->annual_limit > 0 ? number_format($type->annual_limit, 0) . ' days' : '<span style="color: #9ca3af;">—</span>' !!}
                     </td>
-                    <td data-label="Attachment" style="font-size: 13px;">
+                    <td data-label="Attachment" style="font-size: 13px; padding-left: 24px; padding-right: 24px;">
                         <span style="color: {{ $type->attachment_info ? '#0b044d' : '#9ca3af' }}; font-weight: {{ $type->attachment_info ? '500' : 'normal' }}; font-style: {{ $type->attachment_info ? 'normal' : 'italic' }};">
                             {{ $type->attachment_info ?: 'Not required' }}
                         </span>
                     </td>
-                    <td data-label="Status" style="text-align: center;">
+                    <td data-label="Status" style="text-align: right;">
                         <span class="badge-status {{ $type->is_active ? 'processed' : 'on-hold' }}">{{ $type->is_active ? 'Active' : 'Inactive' }}</span>
                     </td>
                     <td data-label="Actions">
-                        <div class="row-actions">
-                            <button class="btn-view" onclick="viewLeaveType('{{ $type->leave_code }}')">View</button>
-                            <button class="btn-edit" onclick="editLeaveType('{{ $type->leave_code }}')">Edit</button>
+                        <div style="position: relative; display: flex; justify-content: center;">
+                            <button class="lt-ellipsis-btn" onclick="toggleLeaveTypeActionMenu(event, this)" title="Actions">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                            </button>
+                            <div class="lt-action-menu" style="display: none;">
+                                <button onclick="viewLeaveType('{{ $type->leave_code }}')">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    View
+                                </button>
+                                <button onclick="editLeaveType('{{ $type->leave_code }}')">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    Edit
+                                </button>
+                            </div>
                         </div>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 40px; color: #6b6a8a;">No leave types found</td>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #6b6a8a;">No leave types found</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -107,6 +105,61 @@
     </div>
 </section>
 
+<style>
+.lt-ellipsis-btn {
+    background: none;
+    border: none;
+    color: #9999bb;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.lt-ellipsis-btn:hover {
+    background: #f1f5f9;
+    color: #0b044d;
+}
+.lt-action-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15);
+    z-index: 100;
+    min-width: 140px;
+    margin-top: 6px;
+    overflow: hidden;
+    animation: ltSlideDown 0.2s ease-out;
+}
+.lt-action-menu button {
+    width: 100%;
+    padding: 11px 14px;
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 12px;
+    color: #0b044d;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.lt-action-menu button:hover {
+    background: #f0effe;
+}
+@keyframes ltSlideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
 <script>
 function changeLeaveTypesRowsPerPage() {
     const perPage = document.getElementById('leaveTypesRowsPerPage').value;
@@ -116,5 +169,18 @@ function changeLeaveTypesRowsPerPage() {
     url.searchParams.delete('page');
     window.location.href = url.toString();
 }
+
+function toggleLeaveTypeActionMenu(event, btn) {
+    event.stopPropagation();
+    const menu = btn.nextElementSibling;
+    document.querySelectorAll('.lt-action-menu').forEach(m => {
+        if (m !== menu) m.style.display = 'none';
+    });
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+document.addEventListener('click', () => {
+    document.querySelectorAll('.lt-action-menu').forEach(m => m.style.display = 'none');
+});
 </script>
 </section>

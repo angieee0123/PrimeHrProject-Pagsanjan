@@ -181,6 +181,16 @@ window.switchTab = function(tab) {
         if (element) element.style.display = 'none';
     });
 
+    document.querySelectorAll('.filter-group').forEach(g => g.style.display = 'none');
+    const filterGroup = document.getElementById(tab + '-filter-group');
+    const filterCard = document.getElementById('leaveFilterCard');
+    if (filterGroup) {
+        filterGroup.style.display = 'contents';
+        if (filterCard) filterCard.style.display = 'flex';
+    } else if (filterCard) {
+        filterCard.style.display = 'none';
+    }
+
     if (tab === 'leave') {
         const el = document.getElementById('leave-tab');
         if (el) el.style.display = 'block';

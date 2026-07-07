@@ -13,6 +13,8 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
 @include('admin.topbar.departmentsTopbar')
 @include('admin.notification.adminNotification')
 
+<div class="glass-shell">
+
 {{-- Stats --}}
 <div class="stats-grid stats-grid-4" style="margin-bottom:20px;">
     <div class="stat-card">
@@ -70,7 +72,7 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
 </div>
 
 {{-- Tabs --}}
-<div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid #f0effe;padding-bottom:0;">
+<div class="seg-tabs">
     <button class="tab-btn active" data-tab="departments">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Departments & Offices
@@ -81,6 +83,66 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
     </button>
 </div>
 
+{{-- Filter Toolbar (contents swap per active tab) --}}
+<div class="filter-card">
+    <div class="filter-group" id="departments-filter-group" style="display: contents;">
+        <div class="filter-card-fields">
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                <select class="fc-select" id="dept-filter-status" onchange="applyDeptFilters()">
+                    <option value="">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-card-actions">
+            <button class="filter-clear" id="dept-filter-clear" onclick="clearDeptFilters()">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Clear filters
+            </button>
+            <button class="btn-ghost" onclick="exportDepartments()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export
+            </button>
+        </div>
+    </div>
+
+    <div class="filter-group" id="designations-filter-group" style="display: none;">
+        <div class="filter-card-fields">
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+                <select class="fc-select" id="desig-filter-dept" onchange="applyDesigFilters()">
+                    <option value="">All Departments</option>
+                    @foreach($departments->sortBy('name') as $dept)
+                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                <select class="fc-select" id="desig-filter-type" onchange="applyDesigFilters()">
+                    <option value="">All Employment Types</option>
+                    <option value="Permanent">Permanent</option>
+                    <option value="Casual">Casual</option>
+                    <option value="Contractual">Contractual</option>
+                    <option value="Job Order">Job Order</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-card-actions">
+            <button class="filter-clear" id="desig-filter-clear" onclick="clearDesigFilters()">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Clear filters
+            </button>
+            <button class="btn-ghost" onclick="exportDesignations()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export
+            </button>
+        </div>
+    </div>
+</div>
+
 {{-- Departments Tab --}}
 <section class="table-section tab-content active" id="departments">
     <div class="table-header">
@@ -89,10 +151,6 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
             <p class="table-sub">Municipal Government of Pagsanjan · Province of Laguna · {{ $departments->count() }} offices</p>
         </div>
         <div class="table-actions">
-            <button class="btn-export" onclick="exportDepartments()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
             <button class="btn-export" style="color:#15803d;border-color:#15803d;" onclick="openBulkImportModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Bulk Import
@@ -102,23 +160,6 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
                 Add Department
             </button>
         </div>
-    </div>
-    <div class="filter-bar">
-        <div class="filter-bar-left">
-            <span class="filter-label">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                Filter
-            </span>
-            <select id="dept-filter-status" onchange="applyDeptFilters()">
-                <option value="">All Status</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-            </select>
-        </div>
-        <button class="filter-clear" id="dept-filter-clear" onclick="clearDeptFilters()">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Clear filters
-        </button>
     </div>
     <div class="table-wrapper">
         <table class="payroll-table">
@@ -157,10 +198,6 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
             <p class="table-sub">Municipal Government of Pagsanjan · {{ $designations->count() }} designations</p>
         </div>
         <div class="table-actions">
-            <button class="btn-export" onclick="exportDesignations()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
             <button class="btn-export" style="color:#15803d;border-color:#15803d;" onclick="openBulkImportDesignationModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Bulk Import
@@ -170,31 +207,6 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
                 Add Designation
             </button>
         </div>
-    </div>
-    <div class="filter-bar">
-        <div class="filter-bar-left">
-            <span class="filter-label">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                Filter
-            </span>
-            <select id="desig-filter-dept" onchange="applyDesigFilters()">
-                <option value="">All Departments</option>
-                @foreach($departments->sortBy('name') as $dept)
-                    <option value="{{ $dept->id }}">{{ $dept->name }}</option>
-                @endforeach
-            </select>
-            <select id="desig-filter-type" onchange="applyDesigFilters()">
-                <option value="">All Employment Types</option>
-                <option value="Permanent">Permanent</option>
-                <option value="Casual">Casual</option>
-                <option value="Contractual">Contractual</option>
-                <option value="Job Order">Job Order</option>
-            </select>
-        </div>
-        <button class="filter-clear" id="desig-filter-clear" onclick="clearDesigFilters()">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Clear filters
-        </button>
     </div>
     <div class="table-wrapper">
         <table class="payroll-table">
@@ -224,6 +236,8 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
         <div class="pagination" id="desig-pagination"></div>
     </div>
 </section>
+
+</div>
 
 {{-- Modals --}}
 @include('admin.departments.modals.addDepartment')
@@ -498,8 +512,11 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', function () {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.filter-group').forEach(g => g.style.display = 'none');
         this.classList.add('active');
         document.getElementById(this.dataset.tab).classList.add('active');
+        const group = document.getElementById(this.dataset.tab + '-filter-group');
+        if (group) group.style.display = 'contents';
         const searchEl = document.getElementById('dept-search');
         searchEl.value = '';
         searchEl.placeholder = searchPlaceholders[this.dataset.tab] || 'Search...';

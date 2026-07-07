@@ -14,7 +14,7 @@
 
     @include('permanent.sidebar.permanentSidebar')
 
-    <main class="main-content permanent-dashboard permanent-profile">
+    <main class="main-content permanent-dashboard permanent-profile glass-shell">
 
         @include('permanent.notification.permanentNotification')
 

@@ -14,7 +14,7 @@
 
     @include('permanent.sidebar.permanentSidebar')
 
-    <main class="main-content permanent-dashboard permanent-training" data-fiscal-year="{{ date('Y') }}" data-flash-success="{{ session('success') ? '1' : '0' }}">
+    <main class="main-content permanent-dashboard permanent-training glass-shell" data-fiscal-year="{{ date('Y') }}" data-flash-success="{{ session('success') ? '1' : '0' }}">
 
         @include('permanent.notification.permanentNotification')
 

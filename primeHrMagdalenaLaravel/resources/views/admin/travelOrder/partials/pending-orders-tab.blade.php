@@ -4,18 +4,6 @@
             <h3 class="table-title" style="color: #111827; font-size: 15px; font-weight: 800; margin: 0 0 4px;">Pending Travel Orders</h3>
             <p class="table-sub" style="color: #667085; font-size: 12px; margin: 0;">Awaiting approval · {{ $pendingOrders->total() }} records</p>
         </div>
-        <div class="table-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <select class="filter-select" id="filterPendingDept" onchange="filterPendingOrders()" style="font-size: 11px; padding: 6px 12px; border-radius: 8px; border: 1px solid #e5e7eb; font-weight: 600; height: 34px;">
-                <option value="all">All Departments</option>
-                @foreach($departments ?? [] as $dept)
-                    <option value="{{ $dept->name }}">{{ $dept->name }}</option>
-                @endforeach
-            </select>
-            <button class="btn-export" style="background: #fff; color: #344054; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 11px; padding: 0 14px; height: 34px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
-        </div>
     </div>
 
     @php $colors = ['#0b044d','#8e1e18','#1a0f6e','#5a0f0b','#2d1a8e','#6b3fa0']; @endphp
@@ -57,7 +45,7 @@
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
                         <div style="position: relative; display: flex; justify-content: center;">
                             <button class="action-ellipsis-btn" onclick="toggleTravelActionMenu(event, this)" style="background: none; border: none; color: #9999bb; cursor: pointer; padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0b044d'" onmouseout="this.style.background='none'; this.style.color='#9999bb'">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                             </button>
                             <div class="travel-action-menu" style="display: none; position: absolute; right: 0; top: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 10px 24px rgba(15,23,42,0.15); z-index: 100; min-width: 160px; margin-top: 6px; overflow: hidden;">
                                 <button onclick="viewOrder({{ $order->id }})" style="width: 100%; padding: 11px 14px; border: none; background: none; text-align: left; font-size: 12px; color: #0b044d; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f0effe'" onmouseout="this.style.background='none'">
@@ -132,7 +120,7 @@ function changePendingRowsPerPage() {
 }
 
 function filterPendingOrders() {
-    const dept = document.getElementById('filterPendingDept').value;
+    const dept = document.getElementById('travelOrderFilterDept').value;
     document.querySelectorAll('.pending-order-row').forEach(row => {
         row.style.display = dept === 'all' || row.dataset.department === dept ? '' : 'none';
     });

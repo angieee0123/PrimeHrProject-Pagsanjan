@@ -1,19 +1,28 @@
 /* Styles for adminLeaveAndBenefits.blade.php */
 
+.seg-tabs {
+    display: inline-flex;
+    gap: 4px;
+    padding: 5px;
+    background: #f0effe;
+    border: 1px solid #e3e1f7;
+    border-radius: 14px;
+    margin-bottom: 20px;
+}
 .tab-btn {
-    background: none; border: none; cursor: pointer;
-    padding: 10px 20px; font-family: 'Poppins', sans-serif;
+    background: transparent; border: none; cursor: pointer;
+    padding: 9px 20px; font-family: 'Poppins', sans-serif;
     font-size: 13.5px; font-weight: 600;
-    color: #9999bb;
-    border-bottom: 2.5px solid transparent;
-    margin-bottom: -1.5px;
+    color: #6b6a8a;
+    border-radius: 10px;
     transition: all 0.2s;
 }
 .tab-btn.active {
-    color: #0b044d;
-    border-bottom: 2.5px solid #0b044d;
+    color: #fff;
+    background: linear-gradient(135deg, #1a0f6e, #0b044d);
+    box-shadow: 0 4px 12px rgba(11,4,77,.25);
 }
-.tab-btn:hover { color: #0b044d; }
+.tab-btn:hover:not(.active) { color: #0b044d; }
 .badge-emptype {
     font-size: 11px; color: #0b044d; background: #f0effe;
     padding: 3px 10px; border-radius: 20px; font-weight: 600;
@@ -327,12 +336,9 @@
 }
 .modal-btn-primary:hover { background: #1a0f6e; }
 .modal-btn-ghost:active, .modal-btn-primary:active { transform: scale(.97); }
-#types-tab .payroll-table tbody tr {
-    height: 70px;
-}
-
 #types-tab .payroll-table td {
     vertical-align: middle;
+    padding: 10px 14px;
 }
 
 #types-tab .payroll-table th:nth-child(1),
@@ -342,6 +348,14 @@
 
 #types-tab .emp-avatar {
     display: inline-flex;
+    width: 34px;
+    height: 34px;
+    font-size: 12px;
+}
+
+#types-tab .badge-status {
+    padding: 3px 8px;
+    font-size: 10.5px;
 }
 
 /* Responsive table for mobile */

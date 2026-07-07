@@ -39,6 +39,8 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
 @include('admin.topbar.payrollTopbar')
 @include('admin.notification.adminNotification')
 
+<div class="glass-shell">
+
 @if(session('success'))
 <div style="margin-bottom: 20px; padding: 12px 16px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; color: #155724; font-size: 13px;">
     <strong>✓</strong> {{ session('success') }}
@@ -105,6 +107,72 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
     </div>
 </div>
 
+@if($activeTab === 'register')
+{{-- Filter Toolbar --}}
+<div class="filter-card">
+    <form method="GET" action="{{ route('admin.payroll') }}" id="filterForm" style="display: contents;">
+        <input type="hidden" name="tab" value="register">
+        <div class="filter-card-fields">
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input type="date" class="fc-input" name="start_date" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}" title="Start date">
+            </div>
+            <span class="fc-sep">to</span>
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input type="date" class="fc-input" name="end_date" value="{{ request('end_date', now()->endOfMonth()->format('Y-m-d')) }}" title="End date">
+            </div>
+            <div class="fc-divider"></div>
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <select class="fc-select" name="employee_name">
+                    <option value="">All Employees</option>
+                    @foreach($employees as $emp)
+                        <option value="{{ $emp }}" {{ request('employee_name') == $emp ? 'selected' : '' }}>{{ $emp }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+                <select class="fc-select" name="department">
+                    <option value="">All Departments</option>
+                    @foreach($departments as $dept)
+                        <option value="{{ $dept }}" {{ request('department') == $dept ? 'selected' : '' }}>{{ $dept }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <select class="fc-select" name="status">
+                    <option value="">All Status</option>
+                    <option value="Processed" {{ request('status') == 'Processed' ? 'selected' : '' }}>Processed</option>
+                    <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="On Hold" {{ request('status') == 'On Hold' ? 'selected' : '' }}>On Hold</option>
+                </select>
+            </div>
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <select class="fc-select" name="view_mode">
+                    <option value="daily" {{ request('view_mode', 'daily') == 'daily' ? 'selected' : '' }}>Daily View</option>
+                    <option value="employee" {{ request('view_mode') == 'employee' ? 'selected' : '' }}>By Employee</option>
+                    <option value="monthly" {{ request('view_mode') == 'monthly' ? 'selected' : '' }}>Monthly Summary</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-card-actions">
+            <button type="submit" class="btn-solid">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Filter
+            </button>
+            <button type="button" class="btn-ghost">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export
+            </button>
+        </div>
+    </form>
+</div>
+@endif
+
 <div class="payroll-tabs">
     <a href="{{ route('admin.payroll', ['tab' => 'register'] + request()->except('tab')) }}" 
        class="tab-link {{ $activeTab === 'register' ? 'active' : '' }}">
@@ -133,36 +201,44 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
     @endif
 </section>
 
+</div>
+
+@include('admin.payroll.modals.payroll-result-modal')
+@include('admin.payroll.modals.payroll-status-modals')
+@include('admin.payroll.modals.payslip-detail-modal')
+
 <style>
 .payroll-tabs {
-    display: flex;
-    gap: 8px;
+    display: inline-flex;
+    gap: 4px;
+    padding: 5px;
+    background: #f0effe;
+    border: 1px solid #e3e1f7;
+    border-radius: 14px;
     margin-bottom: 20px;
-    border-bottom: 2px solid #f0effe;
 }
 
 .tab-link {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 20px;
+    padding: 9px 18px;
     font-size: 13px;
     font-weight: 600;
     color: #6b6a8a;
     text-decoration: none;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
+    border-radius: 10px;
     transition: all 0.2s;
 }
 
-.tab-link:hover {
+.tab-link:hover:not(.active) {
     color: #0b044d;
-    background: #f7f6ff;
 }
 
 .tab-link.active {
-    color: #0b044d;
-    border-bottom-color: #0b044d;
+    color: #fff;
+    background: linear-gradient(135deg, #1a0f6e, #0b044d);
+    box-shadow: 0 4px 12px rgba(11,4,77,.25);
 }
 
 .tab-link svg {

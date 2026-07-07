@@ -13,49 +13,6 @@
                 @endif
             </p>
         </div>
-        <div class="table-actions" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <label style="font-size: 13px; font-weight: 600; color: #6b6a8a; white-space: nowrap;">Date Range:</label>
-                <input type="date" class="filter-select" id="filterCreditsDateFrom" value="{{ request('filter_credits_date_from') }}" style="width: 140px;">
-                <span style="color: #9ca3af; font-size: 13px;">to</span>
-                <input type="date" class="filter-select" id="filterCreditsDateTo" value="{{ request('filter_credits_date_to') }}" style="width: 140px;">
-                <button type="button" onclick="applyDateRangeFilter()" style="background: #0b044d; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap;">
-                    Apply
-                </button>
-                @if(request('filter_credits_date_from') || request('filter_credits_date_to'))
-                    <button type="button" onclick="clearDateRangeFilter()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap;">
-                        Clear
-                    </button>
-                @endif
-            </div>
-            <select class="filter-select" id="filterCreditsYear" onchange="applyYearFilter()" {{ request('filter_credits_date_from') || request('filter_credits_date_to') ? 'disabled' : '' }} style="min-width: 140px;">
-                <option value="">Most Recent</option>
-                @foreach($availableYears ?? [] as $year)
-                    <option value="{{ $year }}" {{ request('filter_credits_year') == $year ? 'selected' : '' }}>{{ $year }}</option>
-                @endforeach
-            </select>
-            <select class="filter-select" id="filterCreditsEmployee" onchange="applyCreditsFilters()" style="min-width: 180px;">
-                <option value="">All Employees</option>
-                @foreach($employees ?? [] as $emp)
-                    <option value="{{ $emp->id }}">{{ $emp->employee_id }} - {{ $emp->first_name }} {{ $emp->last_name }}</option>
-                @endforeach
-            </select>
-            <select class="filter-select" id="filterCreditsLeaveType" onchange="applyCreditsFilters()" style="min-width: 150px;">
-                <option value="">All Leave Types</option>
-                @foreach($allLeaveTypes ?? [] as $type)
-                    <option value="{{ $type->leave_code }}">{{ $type->leave_code }} - {{ $type->leave_name }}</option>
-                @endforeach
-            </select>
-            <select class="filter-select" id="filterCreditsType" onchange="applyCreditsFilters()" style="min-width: 120px;">
-                <option value="">All Types</option>
-                <option value="accrued">Accrued</option>
-                <option value="fixed">Fixed</option>
-            </select>
-            <button class="btn-export">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
-        </div>
     </div>
 
     <div class="table-wrapper">

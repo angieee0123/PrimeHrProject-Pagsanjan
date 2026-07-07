@@ -16,7 +16,7 @@
     @include('permanent.sidebar.permanentSidebar')
 
     {{-- Main Content --}}
-    <main class="main-content permanent-dashboard permanent-payslip">
+    <main class="main-content permanent-dashboard permanent-payslip glass-shell">
 
         @include('permanent.notification.permanentNotification')
 

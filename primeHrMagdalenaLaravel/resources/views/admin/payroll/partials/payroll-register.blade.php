@@ -26,45 +26,6 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
         <h3 class="table-title">Payroll Register — {{ $periodDisplay }}</h3>
         <p class="table-sub">Municipal Government of Pagsanjan · Pay Date: {{ date('M d, Y', strtotime($endDateDisplay)) }} · {{ $payrollRecords->count() }} records</p>
     </div>
-    <div class="table-actions">
-        <form method="GET" action="{{ route('admin.payroll') }}" id="filterForm" style="display: contents;">
-            <input type="hidden" name="tab" value="register">
-            <input type="date" class="filter-select" name="start_date" value="{{ request('start_date', now()->startOfMonth()->format('Y-m-d')) }}">
-            <span style="font-size: 12px; color: #9999bb;">to</span>
-            <input type="date" class="filter-select" name="end_date" value="{{ request('end_date', now()->endOfMonth()->format('Y-m-d')) }}">
-            <select class="filter-select" name="employee_name">
-                <option value="">All Employees</option>
-                @foreach($employees as $emp)
-                    <option value="{{ $emp }}" {{ request('employee_name') == $emp ? 'selected' : '' }}>{{ $emp }}</option>
-                @endforeach
-            </select>
-            <select class="filter-select" name="department">
-                <option value="">All Departments</option>
-                @foreach($departments as $dept)
-                    <option value="{{ $dept }}" {{ request('department') == $dept ? 'selected' : '' }}>{{ $dept }}</option>
-                @endforeach
-            </select>
-            <select class="filter-select" name="status">
-                <option value="">All Status</option>
-                <option value="Processed" {{ request('status') == 'Processed' ? 'selected' : '' }}>Processed</option>
-                <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                <option value="On Hold" {{ request('status') == 'On Hold' ? 'selected' : '' }}>On Hold</option>
-            </select>
-            <select class="filter-select" name="view_mode" style="background: #f7f6ff; border-color: #0b044d; color: #0b044d; font-weight: 600;">
-                <option value="daily" {{ request('view_mode', 'daily') == 'daily' ? 'selected' : '' }}>Daily View</option>
-                <option value="employee" {{ request('view_mode') == 'employee' ? 'selected' : '' }}>By Employee</option>
-                <option value="monthly" {{ request('view_mode') == 'monthly' ? 'selected' : '' }}>Monthly Summary</option>
-            </select>
-            <button type="submit" class="btn-filter-main">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                Filter
-            </button>
-        </form>
-        <button class="btn-export">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export
-        </button>
-    </div>
 </div>
 
 <div class="payroll-summary-bar" style="margin-top: 0; margin-bottom: 16px;">

@@ -6,18 +6,6 @@
             <p class="table-sub">Municipal Government of Pagsanjan · Register and manage reusable loan types that can be assigned to multiple employees</p>
         </div>
         <div class="table-actions">
-            <input type="text" id="searchLoanType" class="filter-select" placeholder="Search loan type..." style="width: 200px;" onkeyup="filterLoanTypes()">
-            <select id="filterLoanTypeProvider" class="filter-select" onchange="filterLoanTypes()">
-                <option value="">All Providers</option>
-                <option value="GSIS">GSIS</option>
-                <option value="PAG-IBIG">Pag-IBIG</option>
-                <option value="OTHER">Other</option>
-            </select>
-            <select id="filterLoanTypeStatus" class="filter-select" onchange="filterLoanTypes()">
-                <option value="">All Status</option>
-                <option value="1">Active</option>
-                <option value="0">Inactive</option>
-            </select>
             <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAddLoanTypeModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="12" y1="5" x2="12" y2="19"/>
@@ -319,9 +307,6 @@ function deleteLoanType(id, name) {
     form.submit();
 }
 </script>
-
-@include('admin.deductions.modals.addLoanTypeModal')
-@include('admin.deductions.modals.editLoanTypeModal')
 
 <script>
 // Ensure modal functions are in global scope

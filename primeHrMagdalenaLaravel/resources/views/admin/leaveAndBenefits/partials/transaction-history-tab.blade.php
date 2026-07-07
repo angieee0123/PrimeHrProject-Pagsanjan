@@ -4,57 +4,6 @@
             <h3 class="table-title">Leave Transaction History</h3>
             <p class="table-sub">Complete audit trail of all leave credit adjustments · {{ $leaveTransactions->total() ?? 0 }} records</p>
         </div>
-        <div class="table-actions" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <label style="font-size: 13px; font-weight: 600; color: #6b6a8a; white-space: nowrap;">Date Range:</label>
-                <input type="date" class="filter-select" id="filterTransactionDateFrom" value="{{ request('filter_transaction_date_from') }}" style="width: 140px;">
-                <span style="color: #9ca3af; font-size: 13px;">to</span>
-                <input type="date" class="filter-select" id="filterTransactionDateTo" value="{{ request('filter_transaction_date_to') }}" style="width: 140px;">
-                <button type="button" onclick="applyTransactionDateRangeFilter()" style="background: #0b044d; color: white; padding: 8px 16px; border: none; border-radius: 9px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap; transition: background .2s cubic-bezier(.4,0,.2,1);">
-                    Apply
-                </button>
-                @if(request('filter_transaction_date_from') || request('filter_transaction_date_to'))
-                    <button type="button" onclick="clearTransactionDateRangeFilter()" style="background: #6b7280; color: white; padding: 8px 16px; border: none; border-radius: 9px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap; transition: background .2s cubic-bezier(.4,0,.2,1);">
-                        Clear
-                    </button>
-                @endif
-            </div>
-            <select class="filter-select" id="filterTransactionYear" onchange="applyTransactionYearFilter()" {{ request('filter_transaction_date_from') || request('filter_transaction_date_to') ? 'disabled' : '' }} style="min-width: 140px;">
-                <option value="">Most Recent</option>
-                @foreach($transactionYears ?? [] as $year)
-                    <option value="{{ $year }}" {{ request('filter_transaction_year') == $year ? 'selected' : '' }}>{{ $year }}</option>
-                @endforeach
-            </select>
-            <select class="filter-select" id="filterTransactionEmployee" onchange="applyTransactionFilters()" style="min-width: 180px;">
-                <option value="">All Employees</option>
-                @foreach($transactionEmployees ?? [] as $emp)
-                    <option value="{{ $emp->id }}" {{ request('filter_employee') == $emp->id ? 'selected' : '' }}>{{ $emp->employee_id }} - {{ $emp->first_name }} {{ $emp->last_name }}</option>
-                @endforeach
-            </select>
-            <select class="filter-select" id="filterTransactionType" onchange="applyTransactionFilters()" style="min-width: 150px;">
-                <option value="">All Types</option>
-                <option value="credit" {{ request('filter_type') == 'credit' ? 'selected' : '' }}>Credit (Added)</option>
-                <option value="debit" {{ request('filter_type') == 'debit' ? 'selected' : '' }}>Debit (Used)</option>
-                <option value="pending" {{ request('filter_type') == 'pending' ? 'selected' : '' }}>Pending</option>
-                <option value="reversal" {{ request('filter_type') == 'reversal' ? 'selected' : '' }}>Reversal</option>
-                <option value="adjustment" {{ request('filter_type') == 'adjustment' ? 'selected' : '' }}>Manual Adjustment</option>
-            </select>
-            <select class="filter-select" id="filterTransactionLeaveType" onchange="applyTransactionFilters()" style="min-width: 150px;">
-                <option value="">All Leave Types</option>
-                @foreach($allLeaveTypes ?? [] as $type)
-                    <option value="{{ $type->leave_code }}" {{ request('filter_leave_code') == $type->leave_code ? 'selected' : '' }}>{{ $type->leave_code }} - {{ $type->leave_name }}</option>
-                @endforeach
-            </select>
-            @if(request('filter_transaction_date_from') || request('filter_transaction_date_to') || request('filter_transaction_year') || request('filter_employee') || request('filter_type') || request('filter_leave_code'))
-                <button type="button" onclick="clearAllTransactionFilters()" style="background: #d5433c; color: white; padding: 8px 16px; border: none; border-radius: 9px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap; transition: background .2s cubic-bezier(.4,0,.2,1);">
-                    Clear All
-                </button>
-            @endif
-            <button class="btn-export">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
-        </div>
     </div>
 
     <div class="table-wrapper">

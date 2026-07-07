@@ -23,6 +23,8 @@ $departments    = ['All Departments', 'Office of the Mayor', 'Office of the Mun.
 @include('admin.topbar.recruitmentTopbar')
 @include('admin.notification.adminNotification')
 
+<div class="glass-shell">
+
 {{-- Stats --}}
 <div class="stats-grid stats-grid-4">
     <div class="stat-card">
@@ -213,6 +215,8 @@ $departments    = ['All Departments', 'Office of the Mayor', 'Office of the Mun.
             </div>
         </div>
     </div>
+</div>
+
 </div>
 
 {{-- View Job Modal --}}

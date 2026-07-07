@@ -4,18 +4,6 @@
             <h3 class="table-title" style="color: #111827; font-size: 15px; font-weight: 800; margin: 0 0 4px;">Approved Travel Orders</h3>
             <p class="table-sub" style="color: #667085; font-size: 12px; margin: 0;">Successfully approved · {{ $approvedOrders->total() }} records</p>
         </div>
-        <div class="table-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <select class="filter-select" id="filterApprovedDept" onchange="filterApprovedOrders()" style="font-size: 11px; padding: 6px 12px; border-radius: 8px; border: 1px solid #e5e7eb; font-weight: 600; height: 34px;">
-                <option value="all">All Departments</option>
-                @foreach($departments ?? [] as $dept)
-                    <option value="{{ $dept->name }}">{{ $dept->name }}</option>
-                @endforeach
-            </select>
-            <button class="btn-export" style="background: #fff; color: #344054; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 11px; padding: 0 14px; height: 34px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
-        </div>
     </div>
 
     @php $colors = ['#0b044d','#8e1e18','#1a0f6e','#5a0f0b','#2d1a8e','#6b3fa0']; @endphp
@@ -115,7 +103,7 @@ function changeApprovedRowsPerPage() {
 }
 
 function filterApprovedOrders() {
-    const dept = document.getElementById('filterApprovedDept').value;
+    const dept = document.getElementById('travelOrderFilterDept').value;
     document.querySelectorAll('.approved-order-row').forEach(row => {
         row.style.display = dept === 'all' || row.dataset.department === dept ? '' : 'none';
     });

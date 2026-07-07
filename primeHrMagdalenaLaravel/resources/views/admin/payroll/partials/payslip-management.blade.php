@@ -124,8 +124,6 @@
 </div>
 @endif
 
-@include('admin.payroll.modals.payslip-detail-modal')
-
 <style>
 .filter-select {
     padding: 8px 12px;

@@ -66,7 +66,7 @@
                     <td style="text-align: center;">
                         <div class="row-actions" style="justify-content: center; position: relative;">
                             <button class="act-btn" title="Actions" onclick="toggleActionMenu(event, 'action-menu-{{ $index }}')">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
                             </button>
                             <div id="action-menu-{{ $index }}" class="action-dropdown" style="display:none;">
                                 <button class="action-dropdown-item" onclick='openDTRModal(@json($record), {{ $index }}); closeAllActionMenus()'>

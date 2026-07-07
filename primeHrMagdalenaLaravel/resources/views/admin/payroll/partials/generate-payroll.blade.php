@@ -250,9 +250,6 @@ function handleGeneratePayroll(event) {
 }
 </script>
 
-@include('admin.payroll.modals.payroll-result-modal')
-@include('admin.payroll.modals.payroll-status-modals')
-
 <style>
 .generate-payroll-container {
     display: grid;

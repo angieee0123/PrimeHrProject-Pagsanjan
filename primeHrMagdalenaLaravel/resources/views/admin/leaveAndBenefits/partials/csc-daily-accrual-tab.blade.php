@@ -5,24 +5,9 @@
             <p class="table-sub">Configure leave credit earning rates for all accrual-based leave types · {{ $accrualRates->total() }} records</p>
         </div>
         <div class="table-actions">
-            <select class="filter-select" id="filterAccrualStatus" onchange="filterAccrualRates()">
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-            </select>
-            <select class="filter-select" id="filterAccrualFrequency" onchange="filterAccrualRates()">
-                <option value="all">All Frequencies</option>
-                <option value="daily">Daily</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-            </select>
             <button class="btn-export" style="background: #0b044d; color: #fff; border-color: #0b044d;" onclick="openAddAccrualRateModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Accrual Rate
-            </button>
-            <button class="btn-export">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
             </button>
         </div>
     </div>

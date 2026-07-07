@@ -14,6 +14,8 @@
 @include('admin.topbar.personnelTopbar')
 @include('admin.notification.adminNotification')
 
+<div class="glass-shell">
+
 <!-- Stats Grid -->
 <div class="stats-grid stats-grid-4" style="margin-bottom:20px;">
     <div class="stat-card personnel-stat-card">
@@ -73,6 +75,39 @@
     </div>
 </div>
 
+{{-- Filter Toolbar --}}
+<div class="filter-card">
+    <div class="filter-card-fields">
+        <div class="fld">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="personnelSearchInput" placeholder="Search employees..." class="fc-input" oninput="applyFilters()">
+        </div>
+        <div class="fld">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+            <select class="fc-select" id="departmentFilter" onchange="applyFilters()">
+                <option value="">All Departments</option>
+                @foreach($departments as $department)
+                    <option value="{{ $department->name }}">{{ $department->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="fld">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <select class="fc-select" id="statusFilter" onchange="applyFilters()">
+                <option value="">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+        </div>
+    </div>
+    <div class="filter-card-actions">
+        <button class="btn-ghost" onclick="exportTableData()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+        </button>
+    </div>
+</div>
+
 {{-- Tabs --}}
 <div class="tab-nav">
     <button class="tab-btn active" data-tab="employees">
@@ -103,29 +138,6 @@
             <p class="table-sub">Municipal Government of Pagsanjan Â· {{ $employees->count() }} of {{ $employees->count() }} records</p>
         </div>
         <div class="table-actions">
-                    <div class="search-wrap">
-                        <svg width="13" height="13" fill="none" stroke="#9999bb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <input type="text" id="personnelSearchInput" placeholder="Search employees..." class="search-input" oninput="applyFilters()">
-                    </div>
-                    <select class="filter-select" id="departmentFilter" onchange="applyFilters()">
-                <option value="">All Departments</option>
-                @foreach($departments as $department)
-                    <option value="{{ $department->name }}">{{ $department->name }}</option>
-                @endforeach
-            </select>
-            <select class="filter-select" id="statusFilter" onchange="applyFilters()">
-                <option value="">All Status</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-            </select>
-            <button class="btn-export" onclick="exportTableData()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                Export
-            </button>
             <button class="btn-export" onclick="openBulkImportModal()" style="background:#23875a; color:#fff; border-color:#23875a;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -540,6 +552,8 @@
         </div>
     </div>
 </section>
+
+</div>
 
 @include('admin.personnel.modals.employeeWizardComplete')
 @include('admin.personnel.modals.assignSchedule')

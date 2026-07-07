@@ -849,7 +849,7 @@ function debounce(func, wait) {
 
 // Mobile-friendly Filter Dropdowns
 document.addEventListener('DOMContentLoaded', function() {
-    const filters = document.querySelectorAll('.filter-select');
+    const filters = document.querySelectorAll('.filter-select, .fc-select');
     
     filters.forEach(filter => {
         // Add touch-friendly styling
