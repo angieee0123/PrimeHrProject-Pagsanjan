@@ -1,0 +1,89 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class PassSlip extends Model
+{
+    use HasFactory;
+
+    protected $table = 'pass_slips';
+
+    protected $fillable = [
+        'slip_number',
+        'employee_id',
+        'date',
+        'time_out',
+        'time_in',
+        'destination',
+        'reason',
+        'attachment',
+        'status',
+        'remarks',
+        'approved_by',
+        'approved_at',
+        'filed_by',
+    ];
+
+    protected $casts = [
+        'date' => 'date',
+        'approved_at' => 'datetime',
+    ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($passSlip) {
+            if (!$passSlip->slip_number) {
+                $passSlip->slip_number = self::generateSlipNumber();
+            }
+        });
+    }
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function filer()
+    {
+        return $this->belongsTo(User::class, 'filed_by');
+    }
+
+    public static function generateSlipNumber()
+    {
+        $year = now()->year;
+        $month = now()->format('m');
+
+        $lastSlip = self::where('slip_number', 'like', "PS-{$year}{$month}-%")
+            ->orderBy('slip_number', 'desc')
+            ->first();
+
+        if ($lastSlip) {
+            $lastNumber = (int) substr($lastSlip->slip_number, -4);
+            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $newNumber = '0001';
+        }
+
+        return "PS-{$year}{$month}-{$newNumber}";
+    }
+
+    public function scopeByStatus($query, $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    public function scopeByEmployee($query, $employeeId)
+    {
+        return $query->where('employee_id', $employeeId);
+    }
+}

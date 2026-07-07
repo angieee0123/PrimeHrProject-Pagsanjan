@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-@include('admin.topbar.adminTopbar')
-@include('admin.notification.adminNotification')
 
 @php
     $adminName = optional(Auth::user())->name ?? 'Admin';
@@ -10,6 +8,9 @@
 @endphp
 
 <main class="enterprise-hr-dashboard">
+
+@include('admin.topbar.adminTopbar')
+@include('admin.notification.adminNotification')
 
 
 {{-- Enhanced Stats Grid with Trends --}}
@@ -145,7 +146,7 @@
 
 .enterprise-hr-dashboard::before {
     content: '';
-    position: absolute;
+    position: fixed;
     inset: 0;
     z-index: -1;
     background:
