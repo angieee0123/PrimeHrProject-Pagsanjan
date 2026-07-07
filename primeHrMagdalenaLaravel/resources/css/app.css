@@ -861,10 +861,13 @@ body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
 /* ── Forgot Password step progress ── */
 .fp-steps {
   display: flex; align-items: center;
-  max-width: 480px; width: 100%;
+  max-width: 384px; width: 100%;
   margin: 0 auto 32px;
 }
 .fp-step-wrap { display: flex; align-items: center; flex: 1; }
+/* Last step has no connecting line, so it must not grow — otherwise circle 3
+   floats to the 2/3 mark and pulls the row's center off the centered title. */
+.fp-step-wrap:last-child { flex: 0 0 auto; }
 .fp-step-circle {
   width: 34px; height: 34px; border-radius: 50%;
   background: var(--line-2); color: var(--muted);
