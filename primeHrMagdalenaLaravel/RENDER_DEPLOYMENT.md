@@ -115,7 +115,7 @@ Because the dump included the `migrations` table itself, the new Postgres databa
 
 A full sweep of `app/` and `database/migrations` for MySQL-only SQL functions found several call sites that would break at **runtime** (not just migration time) once Postgres was live: `YEAR()`, `MONTH()`, `DAY()`, `DAYOFWEEK()`, `DATE_FORMAT()`, and a MySQL-only `"double quoted string"` literal (Postgres treats double quotes as identifiers, not strings).
 
-Fixed with a small driver-aware helper, `app/Support/SqlCompat.php`, used from `AdminDashboardController`, `LeaveController`, `PermanentLeaveController`, `PermanentDashboardController`, and `Api/MobileDashboardController`:
+Fixed with a small driver-aware helper, `app/Support/SqlCompat.php`, used from `AdminDashboardController`, `LeaveController`, `EmployeeLeaveController`, `EmployeeDashboardController`, and `Api/MobileDashboardController`:
 
 ```php
 SqlCompat::year($column);        // YEAR(col) on MySQL, EXTRACT(YEAR FROM col) on Postgres

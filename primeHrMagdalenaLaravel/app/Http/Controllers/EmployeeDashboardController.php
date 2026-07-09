@@ -12,7 +12,7 @@ use App\Models\EmployeeDeduction;
 use App\Support\SqlCompat;
 use Carbon\Carbon;
 
-class PermanentDashboardController extends Controller
+class EmployeeDashboardController extends Controller
 {
     public function index()
     {
@@ -20,7 +20,7 @@ class PermanentDashboardController extends Controller
         $employee = $user->employee;
 
         if (!$employee) {
-            return view('permanent.dashboard.permanentDashboard')->with('error', 'Employee record not found.');
+            return view('employee.dashboard.employeeDashboard')->with('error', 'Employee record not found.');
         }
 
         // Load relationships
@@ -149,7 +149,7 @@ class PermanentDashboardController extends Controller
         // Prepare chart data
         $chartData = $this->prepareChartData($employee->id);
 
-        return view('permanent.dashboard.permanentDashboard', compact(
+        return view('employee.dashboard.employeeDashboard', compact(
             'employee',
             'basicPay',
             'netPay',

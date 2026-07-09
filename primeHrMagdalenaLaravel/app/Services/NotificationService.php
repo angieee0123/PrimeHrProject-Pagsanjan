@@ -54,7 +54,7 @@ class NotificationService
                 'type' => 'leave_request',
                 'title' => "Leave Request {$statusText}",
                 'message' => $message,
-                'link' => route('permanent.leave'),
+                'link' => route('employee.leave'),
                 'related_id' => $leaveApplication->id,
                 'related_type' => 'App\Models\LeaveApplication',
             ]);
@@ -105,7 +105,7 @@ class NotificationService
             'type' => 'training',
             'title' => "Training {$statusText}",
             'message' => $message,
-            'link' => route('permanent.training'),
+            'link' => route('employee.training'),
             'related_id' => $training->id,
             'related_type' => 'App\Models\Training',
         ]);
@@ -134,7 +134,7 @@ class NotificationService
                 'type' => 'payroll',
                 'title' => 'Payroll Available',
                 'message' => "Your payslip for {$period} is now available.",
-                'link' => route('permanent.payslip'),
+                'link' => route('employee.payslip'),
             ]);
         }
     }
@@ -153,7 +153,7 @@ class NotificationService
             'type' => 'attendance',
             'title' => 'Attendance Corrected',
             'message' => "Your attendance record for " . date('M d, Y', strtotime($attendance->date)) . " has been corrected by HR.",
-            'link' => route('permanent.attendance'),
+            'link' => route('employee.attendance'),
             'related_id' => $attendance->id,
             'related_type' => 'App\Models\Attendance',
         ]);
@@ -285,7 +285,7 @@ class NotificationService
             'type' => 'request',
             'title' => "Request {$statusText}",
             'message' => $message,
-            'link' => route('permanent.requests'),
+            'link' => route('employee.requests'),
             'related_id' => $request->id,
             'related_type' => 'App\\Models\\EmployeeRequest',
         ]);

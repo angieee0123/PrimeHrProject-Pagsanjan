@@ -1,11 +1,11 @@
-@extends('layouts.permanent')
+@extends('layouts.employee')
 
 @section('title', 'Performance · PRIME HRIS')
 
 @section('content')
 <div class="app-layout">
 
-    @include('permanent.topbar.mobileTopbar', [
+    @include('employee.topbar.mobileTopbar', [
         'mobileTopbarEyebrow' => 'Permanent Employee',
         'mobileTopbarTitle' => 'Performance'
     ])
@@ -13,14 +13,14 @@
     {{-- Mobile Overlay --}}
     <div class="mobile-overlay" id="mobile-overlay"></div>
 
-    @include('permanent.sidebar.permanentSidebar')
+    @include('employee.sidebar.employeeSidebar')
 
     {{-- Main Content --}}
     <main class="main-content permanent-dashboard permanent-performance glass-shell">
 
-        @include('permanent.notification.permanentNotification')
+        @include('employee.notification.employeeNotification')
 
-        @include('permanent.topbar.performanceTopbar')
+        @include('employee.topbar.performanceTopbar')
 
         {{-- Stats Grid --}}
         <div class="stats-grid stats-grid-4 performance-stats-grid">
@@ -390,7 +390,7 @@
 
 </div>
 
-@include('permanent.chatbot.permanentChatbot')
+@include('employee.chatbot.employeeChatbot')
 
 {{-- Evaluation Modal --}}
 <div class="modal-overlay" id="evalModal">

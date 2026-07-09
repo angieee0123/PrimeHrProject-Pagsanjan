@@ -1,4 +1,4 @@
-Route::get('/permanent/leave', function () {
+Route::get('/employee/leave', function () {
     $user = Auth::user();
     $employee = $user instanceof User ? $user->employee : null;
 
@@ -10,7 +10,7 @@ Route::get('/permanent/leave', function () {
         $leaveApplications = collect();
         $employeeTransactions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
 
-        return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions'))
+        return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions'))
             ->with('warning', 'Employee record not found. Displaying leave types without balance information.');
     }
 
@@ -76,5 +76,5 @@ Route::get('/permanent/leave', function () {
 
     $employeeTransactions = $transactionQuery->paginate($perPage)->appends(request()->except('page'));
 
-    return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions'));
-})->middleware('auth')->name('permanent.leave');
+    return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions'));
+})->middleware('auth')->name('employee.leave');

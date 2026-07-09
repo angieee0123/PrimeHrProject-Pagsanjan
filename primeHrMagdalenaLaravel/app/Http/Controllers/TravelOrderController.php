@@ -253,7 +253,7 @@ class TravelOrderController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('permanent.travelOrder.permanentTravelOrder', compact('travelOrders'));
+        return view('employee.travelOrder.employeeTravelOrder', compact('travelOrders'));
     }
 
     /**

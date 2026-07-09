@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\PermanentAttendanceController;
+use App\Http\Controllers\EmployeeAttendanceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class MobileAttendanceController extends Controller
 {
     public function __construct(
-        private readonly PermanentAttendanceController $attendanceController
+        private readonly EmployeeAttendanceController $attendanceController
     ) {
     }
 

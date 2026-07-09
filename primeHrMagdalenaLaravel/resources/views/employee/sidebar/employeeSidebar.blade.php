@@ -1,15 +1,23 @@
 @php
+$isPermanent = $isPermanent ?? false;
+
 $navItems = [
-    ['id' => 'dashboard',   'label' => 'Dashboard',              'route' => route('permanent.dashboard')],
-    ['id' => 'payslip',     'label' => 'Payslip',                'route' => route('permanent.payslip')],
-    ['id' => 'attendance',  'label' => 'Attendance',             'route' => route('permanent.attendance')],
-    ['id' => 'leave',       'label' => 'Leave & Benefits',       'route' => route('permanent.leave')],
-    ['id' => 'travelorder', 'label' => 'Travel Order',           'route' => route('permanent.travelorder')],
-    ['id' => 'passslip',    'label' => 'Pass Slip',              'route' => route('permanent.passslip')],
-    ['id' => 'training',    'label' => 'Training',               'route' => route('permanent.training')],
-    ['id' => 'performance', 'label' => 'Performance',            'route' => route('permanent.performance')],
-    ['id' => 'profile',     'label' => 'Profile',                'route' => route('permanent.profile')],
-    ['id' => 'settings',    'label' => 'Settings',               'route' => route('permanent.settings')],
+    ['id' => 'dashboard',   'label' => 'Dashboard',              'route' => route('employee.dashboard')],
+    ['id' => 'payslip',     'label' => 'Payslip',                'route' => route('employee.payslip')],
+    ['id' => 'attendance',  'label' => 'Attendance',             'route' => route('employee.attendance')],
+];
+
+if ($isPermanent) {
+    $navItems[] = ['id' => 'leave', 'label' => 'Leave & Benefits', 'route' => route('employee.leave')];
+}
+
+$navItems = [...$navItems,
+    ['id' => 'travelorder', 'label' => 'Travel Order',           'route' => route('employee.travelorder')],
+    ['id' => 'passslip',    'label' => 'Pass Slip',              'route' => route('employee.passslip')],
+    ['id' => 'training',    'label' => 'Training',               'route' => route('employee.training')],
+    ['id' => 'performance', 'label' => 'Performance',            'route' => route('employee.performance')],
+    ['id' => 'profile',     'label' => 'Profile',                'route' => route('employee.profile')],
+    ['id' => 'settings',    'label' => 'Settings',               'route' => route('employee.settings')],
 ];
 $currentRoute = Route::currentRouteName();
 @endphp

@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
-class PermanentAttendanceController extends Controller
+class EmployeeAttendanceController extends Controller
 {
     public function index(Request $request)
     {
@@ -17,12 +17,12 @@ class PermanentAttendanceController extends Controller
         $employee = $user->employee;
 
         if (!$employee) {
-            return view('permanent.attendance.permanentAttendance')->with('error', 'Employee record not found.');
+            return view('employee.attendance.employeeAttendance')->with('error', 'Employee record not found.');
         }
 
         $payload = $this->buildAttendancePayload($employee, $request);
 
-        return view('permanent.attendance.permanentAttendance', array_merge($payload, [
+        return view('employee.attendance.employeeAttendance', array_merge($payload, [
             'employee' => $employee,
         ]));
     }

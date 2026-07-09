@@ -1,23 +1,23 @@
-@extends('layouts.permanent')
+@extends('layouts.employee')
 
 @section('title', 'Dashboard · PRIME HRIS')
 
 @section('content')
 <div class="app-layout">
 
-    @include('permanent.topbar.mobileTopbar', [
+    @include('employee.topbar.mobileTopbar', [
         'mobileTopbarEyebrow' => 'Permanent Employee',
         'mobileTopbarTitle' => 'Dashboard'
     ])
 
     <div class="mobile-overlay" id="mobile-overlay"></div>
 
-    @include('permanent.sidebar.permanentSidebar')
+    @include('employee.sidebar.employeeSidebar')
 
     <main class="main-content permanent-dashboard glass-shell">
 
-        @include('permanent.notification.permanentNotification')
-        @include('permanent.topbar.permanentTopbar')
+        @include('employee.notification.employeeNotification')
+        @include('employee.topbar.employeeTopbar')
 
         <div class="perm-dash">
 
@@ -54,6 +54,7 @@
                     </div>
                 </div>
 
+                @if($isPermanent ?? false)
                 <div class="stat-card perm-stat-hover">
                     <div class="stat-top">
                         <p class="stat-label">Leave Credits</p>
@@ -67,6 +68,7 @@
                         <p class="stat-sub">{{ $leaveBalances->count() }} leave type(s)</p>
                     </div>
                 </div>
+                @endif
 
                 <div class="stat-card perm-stat-hover">
                     <div class="stat-top">
@@ -99,10 +101,12 @@
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                     View Payslip
                 </button>
+                @if($isPermanent ?? false)
                 <button class="btn-export perm-quick-btn">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     File Leave
                 </button>
+                @endif
                 <button class="btn-export perm-quick-btn">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
                     Attendance
@@ -357,7 +361,7 @@
             </div>
 
             {{-- Bottom Row: Notifications + Leave Balance --}}
-            <div class="perm-bottom-grid">
+            <div class="perm-bottom-grid" @if(!($isPermanent ?? false)) style="grid-template-columns: 1fr" @endif>
 
                 {{-- Notifications --}}
                 <div class="table-section perm-section" style="margin:0">
@@ -397,6 +401,7 @@
                 </div>
 
                 {{-- Leave Balance --}}
+                @if($isPermanent ?? false)
                 <div class="table-section perm-section" style="margin:0">
                     <div class="table-header">
                         <div>
@@ -436,6 +441,7 @@
                         @endforelse
                     </div>
                 </div>
+                @endif
 
             </div>
 
@@ -481,7 +487,7 @@
     </div>
 </div>
 
-@include('permanent.chatbot.permanentChatbot')
+@include('employee.chatbot.employeeChatbot')
 
 <style>
 .perm-dash {

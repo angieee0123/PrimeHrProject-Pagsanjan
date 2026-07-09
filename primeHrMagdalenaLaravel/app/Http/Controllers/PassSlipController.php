@@ -23,7 +23,7 @@ class PassSlipController extends Controller
 
         if (!$employee) {
             $passSlips = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10, 1);
-            return view('permanent.passSlip.permanentPassSlip', compact('passSlips'));
+            return view('employee.passSlip.employeePassSlip', compact('passSlips'));
         }
 
         $employee->load('employmentDetail.designationRelation', 'employmentDetail.departmentRelation');
@@ -33,7 +33,7 @@ class PassSlipController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
-        return view('permanent.passSlip.permanentPassSlip', compact('employee', 'passSlips'));
+        return view('employee.passSlip.employeePassSlip', compact('employee', 'passSlips'));
     }
 
     /**
@@ -80,7 +80,7 @@ class PassSlipController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->route('permanent.passslip')->with('success', 'Pass slip submitted successfully.');
+        return redirect()->route('employee.passslip')->with('success', 'Pass slip submitted successfully.');
     }
 
     /**
@@ -110,7 +110,7 @@ class PassSlipController extends Controller
         $user = Auth::user();
         $employee = $user instanceof User ? $user->employee : null;
         if (!$employee) {
-            return redirect()->route('permanent.passslip')->with('error', 'No employee record found.');
+            return redirect()->route('employee.passslip')->with('error', 'No employee record found.');
         }
 
         $passSlip = PassSlip::where('id', $id)
@@ -124,7 +124,7 @@ class PassSlipController extends Controller
 
         $passSlip->delete();
 
-        return redirect()->route('permanent.passslip')->with('success', 'Pass slip cancelled successfully.');
+        return redirect()->route('employee.passslip')->with('success', 'Pass slip cancelled successfully.');
     }
 
     /**

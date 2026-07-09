@@ -1,11 +1,11 @@
-@extends('layouts.permanent')
+@extends('layouts.employee')
 
 @section('title', 'Payslip · PRIME HRIS')
 
 @section('content')
 <div class="app-layout">
 
-    @include('permanent.topbar.mobileTopbar', [
+    @include('employee.topbar.mobileTopbar', [
         'mobileTopbarEyebrow' => 'Permanent Employee',
         'mobileTopbarTitle' => 'Payslip'
     ])
@@ -13,14 +13,14 @@
     {{-- Mobile Overlay --}}
     <div class="mobile-overlay" id="mobile-overlay"></div>
 
-    @include('permanent.sidebar.permanentSidebar')
+    @include('employee.sidebar.employeeSidebar')
 
     {{-- Main Content --}}
     <main class="main-content permanent-dashboard permanent-payslip glass-shell">
 
-        @include('permanent.notification.permanentNotification')
+        @include('employee.notification.employeeNotification')
 
-        @include('permanent.topbar.payslipTopbar')
+        @include('employee.topbar.payslipTopbar')
 
         {{-- Stats Grid --}}
         <div class="stats-grid stats-grid-4">
@@ -290,7 +290,7 @@
     });
 </script>
 
-@include('permanent.chatbot.permanentChatbot')
+@include('employee.chatbot.employeeChatbot')
 
 {{-- Payslip Detail Modal --}}
 <div id="payslipDetailModal" class="modal-overlay" style="display: none;">

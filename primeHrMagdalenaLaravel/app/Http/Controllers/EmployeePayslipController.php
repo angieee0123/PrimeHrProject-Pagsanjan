@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\SalaryComputation;
 use App\Models\User;
 
-class PermanentPayslipController extends Controller
+class EmployeePayslipController extends Controller
 {
     public function index()
     {
@@ -15,7 +15,7 @@ class PermanentPayslipController extends Controller
         $employee = $user instanceof User ? $user->employee : null;
 
         if (!$employee) {
-            return view('permanent.payslip.permanentPayslip', [
+            return view('employee.payslip.employeePayslip', [
                 'payslips' => collect(),
                 'latestPayslip' => null,
                 'stats' => [
@@ -45,7 +45,7 @@ class PermanentPayslipController extends Controller
             'total_payslips' => SalaryComputation::where('employee_id', $employee->id)->count()
         ];
 
-        return view('permanent.payslip.permanentPayslip', compact('employee', 'payslips', 'latestPayslip', 'stats'));
+        return view('employee.payslip.employeePayslip', compact('employee', 'payslips', 'latestPayslip', 'stats'));
     }
 
     public function getPayslipDetails($id)

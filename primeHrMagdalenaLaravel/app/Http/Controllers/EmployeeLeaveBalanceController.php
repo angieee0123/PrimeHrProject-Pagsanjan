@@ -9,7 +9,7 @@ use App\Models\LeaveType;
 use App\Models\LeaveApplication;
 use App\Models\LeaveTransaction;
 
-class PermanentLeaveBalanceController extends Controller
+class EmployeeLeaveBalanceController extends Controller
 {
     public function show()
     {
@@ -25,7 +25,7 @@ class PermanentLeaveBalanceController extends Controller
             $leaveApplications = collect();
             $employeeTransactions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
 
-            return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions'))
+            return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions'))
                 ->with('warning', 'Employee record not found. Displaying leave types without balance information.');
         }
 
@@ -153,7 +153,7 @@ class PermanentLeaveBalanceController extends Controller
 
         $employeeTransactions = $transactionQuery->paginate($perPage)->appends(request()->except('page'));
 
-        return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions', 'selectedYear', 'availableYears', 'leaveHistory', 'leaveStatsHistory', 'viewMode'));
+        return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions', 'selectedYear', 'availableYears', 'leaveHistory', 'leaveStatsHistory', 'viewMode'));
     }
 
     private function getLeaveFilingStats($employeeId)

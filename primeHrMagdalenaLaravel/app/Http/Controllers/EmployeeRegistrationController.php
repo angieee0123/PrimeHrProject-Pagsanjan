@@ -17,6 +17,29 @@ class EmployeeRegistrationController extends Controller
     public function store(Request $request)
     {
         try {
+            $request->validate([
+                'employee_id' => ['required', 'string', 'max:255', 'unique:employees,employee_id'],
+                'first_name' => ['required', 'string', 'max:255'],
+                'last_name' => ['required', 'string', 'max:255'],
+                'photo' => ['nullable', 'image', 'max:5120'],
+                'birth_date' => ['required', 'date'],
+                'sex' => ['required', 'in:Male,Female'],
+                'civil_status' => ['required', 'in:Single,Married,Widowed,Separated,Divorced'],
+                'username' => ['required', 'string', 'max:255', 'unique:users,username'],
+                'user_email' => ['required', 'email', 'max:255', 'unique:users,email'],
+                'password' => ['required', 'string', 'min:8'],
+                'password_confirm' => ['required', 'same:password'],
+                'role' => ['required', 'in:employee,hr,admin,mayor'],
+                'department' => ['required', 'exists:departments,id'],
+                'designation_id' => ['required', 'exists:designations,id'],
+                'employment_status' => ['required', 'in:Permanent,Casual,Contractual,Job Order'],
+                'appointment_date' => ['required', 'date'],
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->with('error', collect($e->errors())->flatten()->first())->withInput();
+        }
+
+        try {
             DB::beginTransaction();
 
             // Create Employee

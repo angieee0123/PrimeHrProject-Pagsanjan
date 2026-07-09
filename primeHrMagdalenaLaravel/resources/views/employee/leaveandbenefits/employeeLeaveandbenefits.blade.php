@@ -1,11 +1,11 @@
-@extends('layouts.permanent')
+@extends('layouts.employee')
 
 @section('title', 'Leave & Benefits · PRIME HRIS')
 
 @section('content')
 <div class="app-layout">
 
-    @include('permanent.topbar.mobileTopbar', [
+    @include('employee.topbar.mobileTopbar', [
         'mobileTopbarEyebrow' => 'Permanent Employee',
         'mobileTopbarTitle' => 'Leave & Benefits'
     ])
@@ -13,14 +13,14 @@
     {{-- Mobile Overlay --}}
     <div class="mobile-overlay" id="mobile-overlay"></div>
 
-    @include('permanent.sidebar.permanentSidebar')
+    @include('employee.sidebar.employeeSidebar')
 
     {{-- Main Content --}}
     <main class="main-content permanent-dashboard permanent-leavebenefits glass-shell">
 
-        @include('permanent.notification.permanentNotification')
+        @include('employee.notification.employeeNotification')
 
-        @include('permanent.topbar.leaveandbenefitsTopbar')
+        @include('employee.topbar.leaveandbenefitsTopbar')
         {{-- Stats Grid --}}
         <div class="stats-grid stats-grid-4">
             <div class="stat-card">
@@ -84,27 +84,27 @@
 
         {{-- Tab Content --}}
         <div id="tab-leave" class="tab-content">
-            @include('permanent.leaveandbenefits.tabs.leave-requests.leaveRequestsTab')
+            @include('employee.leaveandbenefits.tabs.leave-requests.leaveRequestsTab')
         </div>
 
         <div id="tab-credits" class="tab-content hidden">
-            @include('permanent.leaveandbenefits.tabs.leave-credits.leaveCreditsTab')
+            @include('employee.leaveandbenefits.tabs.leave-credits.leaveCreditsTab')
         </div>
 
         <div id="tab-transactions" class="tab-content hidden" style="display: none;">
-            @include('permanent.leaveandbenefits.tabs.transaction-history.transactionHistoryTab')
+            @include('employee.leaveandbenefits.tabs.transaction-history.transactionHistoryTab')
         </div>
 
         <div id="tab-benefits" class="tab-content hidden">
-            @include('permanent.leaveandbenefits.tabs.benefits.benefitsTab')
+            @include('employee.leaveandbenefits.tabs.benefits.benefitsTab')
         </div>
 
     </main>
 
 </div>
 
-@include('permanent.leaveandbenefits.modals.leaveDetailModal')
-@include('permanent.leaveandbenefits.modals.fileLeaveModal')
+@include('employee.leaveandbenefits.modals.leaveDetailModal')
+@include('employee.leaveandbenefits.modals.fileLeaveModal')
 
 <script>
     const sidebar   = document.getElementById('sidebar');
@@ -743,6 +743,6 @@
     }
 </script>
 
-@include('permanent.chatbot.permanentChatbot')
+@include('employee.chatbot.employeeChatbot')
 
 @endsection

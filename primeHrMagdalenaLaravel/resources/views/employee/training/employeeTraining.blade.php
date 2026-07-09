@@ -1,24 +1,24 @@
-@extends('layouts.permanent')
+@extends('layouts.employee')
 
 @section('title', 'Training · PRIME HRIS')
 
 @section('content')
 <div class="app-layout">
 
-    @include('permanent.topbar.mobileTopbar', [
+    @include('employee.topbar.mobileTopbar', [
         'mobileTopbarEyebrow' => 'Permanent Employee',
         'mobileTopbarTitle' => 'Training'
     ])
 
     <div class="mobile-overlay" id="mobile-overlay"></div>
 
-    @include('permanent.sidebar.permanentSidebar')
+    @include('employee.sidebar.employeeSidebar')
 
     <main class="main-content permanent-dashboard permanent-training glass-shell" data-fiscal-year="{{ date('Y') }}" data-flash-success="{{ session('success') ? '1' : '0' }}">
 
-        @include('permanent.notification.permanentNotification')
+        @include('employee.notification.employeeNotification')
 
-        @include('permanent.topbar.trainingTopbar')
+        @include('employee.topbar.trainingTopbar')
 
         @if(session('error'))
         <div style="background:#fdf0ef;border:1px solid #f5c6c3;color:#8e1e18;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;">
@@ -144,7 +144,7 @@
                     <p class="table-sub">Section IV — Learning &amp; Development (CSC PDS format)</p>
                 </div>
                 <div class="table-actions">
-                    <a href="{{ route('permanent.training.export') }}" class="btn-export">
+                    <a href="{{ route('employee.training.export') }}" class="btn-export">
                         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                         Export to PDS
                     </a>
@@ -233,12 +233,12 @@
                             <td>
                                 <div style="display:flex;gap:6px;align-items:center;">
                                     @if($t->certificate_path)
-                                    <a href="{{ route('permanent.training.certificate', $t->id) }}" target="_blank" class="btn-view-cert" title="View Certificate">
+                                    <a href="{{ route('employee.training.certificate', $t->id) }}" target="_blank" class="btn-view-cert" title="View Certificate">
                                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                     </a>
                                     @endif
                                     @if($t->status === 'pending')
-                                    <form method="POST" action="{{ route('permanent.training.delete', $t->id) }}" onsubmit="return confirm('Delete this training record?')" style="margin:0;">
+                                    <form method="POST" action="{{ route('employee.training.delete', $t->id) }}" onsubmit="return confirm('Delete this training record?')" style="margin:0;">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn-view-cert" title="Delete" style="color:#8e1e18;">
                                             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -272,7 +272,7 @@
 {{-- Add New Training Modal --}}
 <div class="modal-overlay training-modal-overlay" id="addTrainingModal" onclick="closeModal('addTrainingModal')">
     <div class="modal-box training-add-modal" onclick="event.stopPropagation()">
-        <form id="addTrainingForm" class="training-modal-form" method="POST" action="{{ route('permanent.training.store') }}" enctype="multipart/form-data" onsubmit="submitTraining(event)">
+        <form id="addTrainingForm" class="training-modal-form" method="POST" action="{{ route('employee.training.store') }}" enctype="multipart/form-data" onsubmit="submitTraining(event)">
         @csrf
         <div class="modal-header">
             <div class="pmodal-hero">
@@ -679,7 +679,7 @@
     window.setStatusFilter = setStatusFilter;
 
     function filterPermanentTraining() {
-        const q = (document.getElementById('permanentTrainingSearch')?.value || '').toLowerCase().trim();
+        const q = (document.getElementById('employeeTrainingSearch')?.value || '').toLowerCase().trim();
         const posFilter = document.getElementById('trainingPositionFilter')?.value || '';
         const rows = document.querySelectorAll('#trainingHistoryBody tr[data-status]');
         let visible = 0;
@@ -1068,7 +1068,7 @@
     filterPermanentTraining();
 </script>
 
-@include('permanent.chatbot.permanentChatbot')
+@include('employee.chatbot.employeeChatbot')
 
 <style>
 /* ── Step indicator ── */

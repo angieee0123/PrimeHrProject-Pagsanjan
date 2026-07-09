@@ -225,7 +225,7 @@ function loadDetailedDTR() {
     document.getElementById('detailedDTRLoading').style.display = 'block';
     document.getElementById('detailedDTRTable').style.display = 'none';
     
-    fetch(`{{ route('permanent.attendance.detailed') }}?start_date=${startDate}&end_date=${endDate}`)
+    fetch(`{{ route('employee.attendance.detailed') }}?start_date=${startDate}&end_date=${endDate}`)
         .then(response => response.json())
         .then(data => {
             displayDetailedDTR(data.records);

@@ -1,10 +1,10 @@
 /*
- * permanent.css — Employee permanent portal (layouts/permanent.blade.php + @vite).
+ * employee.css — Employee permanent portal (layouts/employee.blade.php + @vite).
  * Responsive breakpoints align with resources/css/joborder.css: 1100 / 900 / 768 / 640 / 480.
  */
 @import "tailwindcss";
 
-/* Global reset & page chrome — all views extending layouts/permanent.blade.php */
+/* Global reset & page chrome — all views extending layouts/employee.blade.php */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Poppins', sans-serif; background: #f7f6fc; color: #0b044d; }
 

@@ -5,8 +5,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\EmployeeRegistrationController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LeaveController;
-use App\Http\Controllers\PermanentAttendanceController;
-use App\Http\Controllers\PermanentLeaveBalanceController;
+use App\Http\Controllers\EmployeeAttendanceController;
+use App\Http\Controllers\EmployeeLeaveBalanceController;
 use App\Http\Controllers\PassSlipController;
 use App\Models\User;
 
@@ -49,21 +49,25 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
             return redirect()->route('admin.dashboard');
         }
 
+        if ($user->role === 'mayor') {
+            return redirect()->route('mayor.dashboard');
+        }
+
         // Check if employee has permanent employment status
         if ($user->employee && $user->employee->employmentDetail) {
             $employmentStatus = $user->employee->employmentDetail->employment_status;
 
             if ($employmentStatus === 'Permanent') {
-                return redirect()->route('permanent.dashboard');
+                return redirect()->route('employee.dashboard');
             }
         }
 
         // Fallback for explicit permanent role or email
         if ($user->role === 'permanent' || $user->email === 'permanent@gmail.com') {
-            return redirect()->route('permanent.dashboard');
+            return redirect()->route('employee.dashboard');
         }
 
-        return redirect()->route('joborder.dashboard');
+        return redirect()->route('employee.dashboard');
     }
 
     return back()->withInput($request->only('email'))
@@ -107,41 +111,47 @@ Route::post('/logout', function (\Illuminate\Http\Request $request) {
 // ── Admin Dashboard ──
 Route::get('/admin/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->middleware('auth')->name('admin.dashboard');
 
+Route::get('/mayor/dashboard', [\App\Http\Controllers\MayorDashboardController::class, 'index'])->middleware('auth')->name('mayor.dashboard');
+Route::get('/mayor/personnel', [\App\Http\Controllers\MayorPersonnelController::class, 'index'])->middleware('auth')->name('mayor.personnel');
+Route::get('/mayor/leave', [\App\Http\Controllers\MayorLeaveController::class, 'index'])->middleware('auth')->name('mayor.leave');
+Route::get('/mayor/travelorder', [\App\Http\Controllers\MayorTravelOrderController::class, 'index'])->middleware('auth')->name('mayor.travelorder');
+Route::get('/mayor/passslip', [\App\Http\Controllers\MayorPassSlipController::class, 'index'])->middleware('auth')->name('mayor.passslip');
+
 // ── Permanent Employee Dashboard ──
-Route::get('/permanent/dashboard', [\App\Http\Controllers\PermanentDashboardController::class, 'index'])->middleware('auth')->name('permanent.dashboard');
+Route::get('/employee/dashboard', [\App\Http\Controllers\EmployeeDashboardController::class, 'index'])->middleware('auth')->name('employee.dashboard');
 
-Route::get('/permanent/attendance', [PermanentAttendanceController::class, 'index'])->middleware('auth')->name('permanent.attendance');
-Route::get('/permanent/attendance/detailed', [PermanentAttendanceController::class, 'detailedDTR'])->middleware('auth')->name('permanent.attendance.detailed');
+Route::get('/employee/attendance', [EmployeeAttendanceController::class, 'index'])->middleware('auth')->name('employee.attendance');
+Route::get('/employee/attendance/detailed', [EmployeeAttendanceController::class, 'detailedDTR'])->middleware('auth')->name('employee.attendance.detailed');
 
-Route::get('/permanent/payslip', [\App\Http\Controllers\PermanentPayslipController::class, 'index'])->middleware('auth')->name('permanent.payslip');
-Route::get('/permanent/payslip/{id}/details', [\App\Http\Controllers\PermanentPayslipController::class, 'getPayslipDetails'])->middleware('auth')->name('permanent.payslip.details');
+Route::get('/employee/payslip', [\App\Http\Controllers\EmployeePayslipController::class, 'index'])->middleware('auth')->name('employee.payslip');
+Route::get('/employee/payslip/{id}/details', [\App\Http\Controllers\EmployeePayslipController::class, 'getPayslipDetails'])->middleware('auth')->name('employee.payslip.details');
 
-Route::get('/permanent/leave', [PermanentLeaveBalanceController::class, 'show'])->middleware('auth')->name('permanent.leave');
+Route::get('/employee/leave', [EmployeeLeaveBalanceController::class, 'show'])->middleware('auth')->name('employee.leave');
 
 // Leave Application Routes
 Route::post('/leave/store', [LeaveController::class, 'store'])->middleware('auth')->name('leave.store');
 Route::post('/leave/{id}/cancel', [LeaveController::class, 'cancel'])->middleware('auth')->name('leave.cancel');
 
-Route::get('/permanent/performance', function () {
+Route::get('/employee/performance', function () {
     $user = Auth::user();
     $employee = $user instanceof User ? $user->employee : null;
 
     if (!$employee) {
-        return view('permanent.performance.permanentPerformance');
+        return view('employee.performance.employeePerformance');
     }
 
     // Load employee relationships for topbar
     $employee->load('employmentDetail.designationRelation', 'employmentDetail.departmentRelation');
 
-    return view('permanent.performance.permanentPerformance', compact('employee'));
-})->middleware('auth')->name('permanent.performance');
+    return view('employee.performance.employeePerformance', compact('employee'));
+})->middleware('auth')->name('employee.performance');
 
-Route::get('/permanent/training', function () {
+Route::get('/employee/training', function () {
     $user = Auth::user();
     $employee = $user instanceof User ? $user->employee : null;
 
     if (!$employee) {
-        return view('permanent.training.permanentTraining', [
+        return view('employee.training.employeeTraining', [
             'trainings'   => collect(),
             'stats'       => ['total_hours' => 0, 'verified' => 0, 'pending' => 0, 'rejected' => 0],
             'breakdown'   => ['leadership' => 0, 'technical' => 0, 'core' => 0],
@@ -171,10 +181,10 @@ Route::get('/permanent/training', function () {
         $breakdown[$cat] = ($breakdown[$cat] ?? 0) + (int) $training->hours;
     }
 
-    return view('permanent.training.permanentTraining', compact('employee', 'trainings', 'stats', 'breakdown'));
-})->middleware('auth')->name('permanent.training');
+    return view('employee.training.employeeTraining', compact('employee', 'trainings', 'stats', 'breakdown'));
+})->middleware('auth')->name('employee.training');
 
-Route::post('/permanent/training', function (\Illuminate\Http\Request $request) {
+Route::post('/employee/training', function (\Illuminate\Http\Request $request) {
     $user = Auth::user();
     $employee = $user instanceof User ? $user->employee : null;
     if (!$employee) {
@@ -211,15 +221,15 @@ Route::post('/permanent/training', function (\Illuminate\Http\Request $request) 
         'status'           => 'pending',
     ]);
 
-    return redirect()->route('permanent.training')
+    return redirect()->route('employee.training')
         ->with('success', 'Training record submitted for HR verification.');
-})->middleware('auth')->name('permanent.training.store');
+})->middleware('auth')->name('employee.training.store');
 
-Route::delete('/permanent/training/{id}', function ($id) {
+Route::delete('/employee/training/{id}', function ($id) {
     $user = Auth::user();
     $employee = $user instanceof User ? $user->employee : null;
     if (!$employee) {
-        return redirect()->route('permanent.training')->with('error', 'No employee record found.');
+        return redirect()->route('employee.training')->with('error', 'No employee record found.');
     }
     $training = \App\Models\Training::where('id', $id)
         ->where('employee_id', $employee->id)
@@ -231,14 +241,14 @@ Route::delete('/permanent/training/{id}', function ($id) {
     }
     $training->delete();
 
-    return redirect()->route('permanent.training')->with('success', 'Training record deleted.');
-})->middleware('auth')->name('permanent.training.delete');
+    return redirect()->route('employee.training')->with('success', 'Training record deleted.');
+})->middleware('auth')->name('employee.training.delete');
 
-Route::get('/permanent/training/export', function () {
+Route::get('/employee/training/export', function () {
     $user = Auth::user();
     $employee = $user instanceof User ? $user->employee : null;
     if (!$employee) {
-        return redirect()->route('permanent.training')->with('error', 'No employee record found.');
+        return redirect()->route('employee.training')->with('error', 'No employee record found.');
     }
     $trainings = \App\Models\Training::where('employee_id', $employee->id)
         ->where('status', 'verified')
@@ -271,9 +281,9 @@ Route::get('/permanent/training/export', function () {
     };
 
     return response()->stream($callback, 200, $headers);
-})->middleware('auth')->name('permanent.training.export');
+})->middleware('auth')->name('employee.training.export');
 
-Route::get('/permanent/training/{id}/certificate', function ($id) {
+Route::get('/employee/training/{id}/certificate', function ($id) {
     $user = Auth::user();
     $employee = $user instanceof User ? $user->employee : null;
     if (!$employee) {
@@ -288,30 +298,30 @@ Route::get('/permanent/training/{id}/certificate', function ($id) {
     }
 
     return response()->file(storage_path('app/public/' . $training->certificate_path));
-})->middleware('auth')->name('permanent.training.certificate');
+})->middleware('auth')->name('employee.training.certificate');
 
-Route::get('/permanent/profile', [\App\Http\Controllers\PermanentProfileController::class, 'index'])->middleware('auth')->name('permanent.profile');
-Route::post('/permanent/profile/update', [\App\Http\Controllers\PermanentProfileController::class, 'update'])->middleware('auth')->name('permanent.profile.update');
+Route::get('/employee/profile', [\App\Http\Controllers\EmployeeProfileController::class, 'index'])->middleware('auth')->name('employee.profile');
+Route::post('/employee/profile/update', [\App\Http\Controllers\EmployeeProfileController::class, 'update'])->middleware('auth')->name('employee.profile.update');
 
-Route::get('/permanent/settings', function () {
-    return view('permanent.settings.permanentSettings');
-})->middleware('auth')->name('permanent.settings');
+Route::get('/employee/settings', function () {
+    return view('employee.settings.employeeSettings');
+})->middleware('auth')->name('employee.settings');
 
-Route::get('/permanent/notification', function () {
-    return view('permanent.notification.permanentNotification');
-})->middleware('auth')->name('permanent.notification');
+Route::get('/employee/notification', function () {
+    return view('employee.notification.employeeNotification');
+})->middleware('auth')->name('employee.notification');
 
-Route::get('/permanent/chatbot', function () {
-    return view('permanent.chatbot.permanentChatbot');
-})->middleware('auth')->name('permanent.chatbot');
+Route::get('/employee/chatbot', function () {
+    return view('employee.chatbot.employeeChatbot');
+})->middleware('auth')->name('employee.chatbot');
 
-Route::get('/permanent/travelorder', function () {
+Route::get('/employee/travelorder', function () {
     $user = Auth::user();
     $employee = $user instanceof User ? $user->employee : null;
 
     if (!$employee) {
         $travelOrders = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10, 1);
-        return view('permanent.travelOrder.permanentTravelOrder', compact('travelOrders'));
+        return view('employee.travelOrder.employeeTravelOrder', compact('travelOrders'));
     }
 
     $employee->load('employmentDetail.designationRelation', 'employmentDetail.departmentRelation');
@@ -321,10 +331,10 @@ Route::get('/permanent/travelorder', function () {
         ->orderBy('created_at', 'desc')
         ->paginate($perPage);
 
-    return view('permanent.travelOrder.permanentTravelOrder', compact('employee', 'travelOrders'));
-})->middleware('auth')->name('permanent.travelorder');
+    return view('employee.travelOrder.employeeTravelOrder', compact('employee', 'travelOrders'));
+})->middleware('auth')->name('employee.travelorder');
 
-Route::post('/permanent/travelorder', function (\Illuminate\Http\Request $request) {
+Route::post('/employee/travelorder', function (\Illuminate\Http\Request $request) {
     $user = Auth::user();
     $employee = $user instanceof User ? $user->employee : null;
     if (!$employee) {
@@ -360,10 +370,10 @@ Route::post('/permanent/travelorder', function (\Illuminate\Http\Request $reques
         'status' => 'pending',
     ]);
 
-    return redirect()->route('permanent.travelorder')->with('success', 'Travel order submitted successfully.');
+    return redirect()->route('employee.travelorder')->with('success', 'Travel order submitted successfully.');
 })->middleware('auth')->name('travelorder.store');
 
-Route::get('/permanent/travelorder/{id}', function ($id) {
+Route::get('/employee/travelorder/{id}', function ($id) {
     $user = Auth::user();
     $employee = $user instanceof User ? $user->employee : null;
     if (!$employee) {
@@ -378,11 +388,11 @@ Route::get('/permanent/travelorder/{id}', function ($id) {
     return response()->json($travelOrder);
 })->middleware('auth')->name('travelorder.show');
 
-Route::delete('/permanent/travelorder/{id}', function ($id) {
+Route::delete('/employee/travelorder/{id}', function ($id) {
     $user = Auth::user();
     $employee = $user instanceof User ? $user->employee : null;
     if (!$employee) {
-        return redirect()->route('permanent.travelorder')->with('error', 'No employee record found.');
+        return redirect()->route('employee.travelorder')->with('error', 'No employee record found.');
     }
 
     $travelOrder = \App\Models\TravelOrder::where('id', $id)
@@ -396,50 +406,13 @@ Route::delete('/permanent/travelorder/{id}', function ($id) {
 
     $travelOrder->delete();
 
-    return redirect()->route('permanent.travelorder')->with('success', 'Travel order cancelled successfully.');
+    return redirect()->route('employee.travelorder')->with('success', 'Travel order cancelled successfully.');
 })->middleware('auth')->name('travelorder.delete');
 
-Route::get('/permanent/passslip', [PassSlipController::class, 'indexPermanent'])->middleware('auth')->name('permanent.passslip');
-Route::post('/permanent/passslip', [PassSlipController::class, 'store'])->middleware('auth')->name('passslip.store');
-Route::get('/permanent/passslip/{id}', [PassSlipController::class, 'show'])->middleware('auth')->name('passslip.show');
-Route::delete('/permanent/passslip/{id}', [PassSlipController::class, 'destroy'])->middleware('auth')->name('passslip.delete');
-
-// ── Job Order Employee Dashboard ──
-Route::get('/joborder/dashboard', function () {
-    return view('joborder.dashboard.joborderDashboard');
-})->middleware('auth')->name('joborder.dashboard');
-
-Route::get('/joborder/attendance', function () {
-    return view('joborder.attendance.joborderAttendance');
-})->middleware('auth')->name('joborder.attendance');
-
-Route::get('/joborder/payslip', function () {
-    return view('joborder.payslip.joborderPayslip');
-})->middleware('auth')->name('joborder.payslip');
-
-Route::get('/joborder/performance', function () {
-    return view('joborder.performance.joborderPerformance');
-})->middleware('auth')->name('joborder.performance');
-
-Route::get('/joborder/training', function () {
-    return view('joborder.training.joborderTraining');
-})->middleware('auth')->name('joborder.training');
-
-Route::get('/joborder/profile', function () {
-    return view('joborder.profile.joborderProfile');
-})->middleware('auth')->name('joborder.profile');
-
-Route::get('/joborder/settings', function () {
-    return view('joborder.settings.joborderSettings');
-})->middleware('auth')->name('joborder.settings');
-
-Route::get('/joborder/notification', function () {
-    return view('joborder.notification.joborderNotification');
-})->middleware('auth')->name('joborder.notification');
-
-Route::get('/joborder/chatbot', function () {
-    return view('joborder.chatbot.joborderChatbot');
-})->middleware('auth')->name('joborder.chatbot');
+Route::get('/employee/passslip', [PassSlipController::class, 'indexPermanent'])->middleware('auth')->name('employee.passslip');
+Route::post('/employee/passslip', [PassSlipController::class, 'store'])->middleware('auth')->name('passslip.store');
+Route::get('/employee/passslip/{id}', [PassSlipController::class, 'show'])->middleware('auth')->name('passslip.show');
+Route::delete('/employee/passslip/{id}', [PassSlipController::class, 'destroy'])->middleware('auth')->name('passslip.delete');
 
 Route::get('/admin/recruitment', function () {
     return view('admin.recruitment.adminRecruitment');
@@ -2715,9 +2688,9 @@ Route::prefix('api')->middleware('auth')->group(function () {
 });
 
 // Request pages
-Route::get('/permanent/requests', function () {
-    return view('permanent.requests.permanentRequests');
-})->middleware('auth')->name('permanent.requests');
+Route::get('/employee/requests', function () {
+    return view('employee.requests.permanentRequests');
+})->middleware('auth')->name('employee.requests');
 
 Route::get('/admin/requests', function () {
     return view('admin.requests.adminRequests');

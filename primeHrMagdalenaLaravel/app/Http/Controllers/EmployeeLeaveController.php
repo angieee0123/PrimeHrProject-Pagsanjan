@@ -10,7 +10,7 @@ use App\Models\LeaveApplication;
 use App\Models\LeaveTransaction;
 use App\Models\LeaveBalance;
 
-class PermanentLeaveController extends Controller
+class EmployeeLeaveController extends Controller
 {
     public function index()
     {
@@ -22,7 +22,7 @@ class PermanentLeaveController extends Controller
             $leaveApplications = collect();
             $employeeTransactions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
 
-            return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions'))
+            return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions'))
                 ->with('warning', 'Employee record not found.');
         }
 
@@ -115,6 +115,6 @@ class PermanentLeaveController extends Controller
 
         $employeeTransactions = $transactionQuery->paginate($perPage)->appends(request()->except('page'));
 
-        return view('permanent.leaveandbenefits.permanentLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions', 'leaveStatsHistory', 'leaveHistory', 'selectedYear'));
+        return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions', 'leaveStatsHistory', 'leaveHistory', 'selectedYear'));
     }
 }

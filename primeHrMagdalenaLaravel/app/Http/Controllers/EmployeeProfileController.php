@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
-class PermanentProfileController extends Controller
+class EmployeeProfileController extends Controller
 {
     public function index()
     {
@@ -14,7 +14,7 @@ class PermanentProfileController extends Controller
         $employee = $user->employee;
 
         if (!$employee) {
-            return redirect()->route('permanent.dashboard')->with('error', 'Employee record not found.');
+            return redirect()->route('employee.dashboard')->with('error', 'Employee record not found.');
         }
 
         $employee->load(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'addresses', 'contacts', 'governmentIds']);
@@ -31,7 +31,7 @@ class PermanentProfileController extends Controller
             ->where('status', 'verified')
             ->count();
 
-        return view('permanent.profile.permanentProfile', compact('employee', 'yearsOfService', 'leaveBalance', 'trainingsCompleted'));
+        return view('employee.profile.employeeProfile', compact('employee', 'yearsOfService', 'leaveBalance', 'trainingsCompleted'));
     }
 
     public function update(Request $request)

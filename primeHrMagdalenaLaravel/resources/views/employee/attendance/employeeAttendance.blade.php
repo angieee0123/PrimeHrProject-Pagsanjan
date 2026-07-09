@@ -1,11 +1,11 @@
-@extends('layouts.permanent')
+@extends('layouts.employee')
 
 @section('title', 'Attendance · PRIME HRIS')
 
 @section('content')
 <div class="app-layout">
 
-    @include('permanent.topbar.mobileTopbar', [
+    @include('employee.topbar.mobileTopbar', [
         'mobileTopbarEyebrow' => 'Permanent Employee',
         'mobileTopbarTitle' => 'Attendance'
     ])
@@ -13,14 +13,14 @@
     {{-- Mobile Overlay --}}
     <div class="mobile-overlay" id="mobile-overlay"></div>
 
-    @include('permanent.sidebar.permanentSidebar')
+    @include('employee.sidebar.employeeSidebar')
 
     {{-- Main Content --}}
     <main class="main-content permanent-dashboard permanent-attendance glass-shell">
 
-        @include('permanent.notification.permanentNotification')
+        @include('employee.notification.employeeNotification')
 
-        @include('permanent.topbar.attendanceTopbar')
+        @include('employee.topbar.attendanceTopbar')
 
         {{-- Stats Grid --}}
         <div class="stats-grid stats-grid-4">
@@ -386,7 +386,7 @@
         const startDate = '{{ now()->startOfMonth()->format('Y-m-d') }}';
         const endDate = '{{ now()->endOfMonth()->format('Y-m-d') }}';
         
-        fetch(`{{ route('permanent.attendance.detailed') }}?start_date=${startDate}&end_date=${endDate}`)
+        fetch(`{{ route('employee.attendance.detailed') }}?start_date=${startDate}&end_date=${endDate}`)
             .then(response => response.json())
             .then(data => {
                 allRecords = data.records;
@@ -578,7 +578,7 @@
             </tr>
         `;
         
-        fetch(`{{ route('permanent.attendance.detailed') }}?start_date=${startDate}&end_date=${endDate}`)
+        fetch(`{{ route('employee.attendance.detailed') }}?start_date=${startDate}&end_date=${endDate}`)
             .then(response => response.json())
             .then(data => {
                 allDetailedRecords = data.records;
@@ -864,7 +864,7 @@
     }
 </script>
 
-@include('permanent.attendance.modals.detailedDtrModal')
-@include('permanent.chatbot.permanentChatbot')
+@include('employee.attendance.modals.detailedDtrModal')
+@include('employee.chatbot.employeeChatbot')
 
 @endsection

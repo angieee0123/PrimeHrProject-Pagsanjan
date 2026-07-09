@@ -1,11 +1,11 @@
-@extends('layouts.permanent')
+@extends('layouts.employee')
 
 @section('title', 'Pass Slip · PRIME HRIS')
 
 @section('content')
 <div class="app-layout">
 
-    @include('permanent.topbar.mobileTopbar', [
+    @include('employee.topbar.mobileTopbar', [
         'mobileTopbarEyebrow' => 'Permanent Employee',
         'mobileTopbarTitle' => 'Pass Slip'
     ])
@@ -13,14 +13,14 @@
     {{-- Mobile Overlay --}}
     <div class="mobile-overlay" id="mobile-overlay"></div>
 
-    @include('permanent.sidebar.permanentSidebar')
+    @include('employee.sidebar.employeeSidebar')
 
     {{-- Main Content --}}
     <main class="main-content permanent-dashboard permanent-leavebenefits glass-shell">
 
-        @include('permanent.notification.permanentNotification')
+        @include('employee.notification.employeeNotification')
 
-        @include('permanent.topbar.permanentTopbar')
+        @include('employee.topbar.employeeTopbar')
 
         {{-- Stats Grid --}}
         <div class="stats-grid stats-grid-4">
@@ -94,16 +94,16 @@
         </div>
 
         {{-- Tab Content --}}
-        @include('permanent.passSlip.partials.passslip-history-tab')
+        @include('employee.passSlip.partials.passslip-history-tab')
 
     </main>
 
 </div>
 
-@include('permanent.passSlip.modals.filePassSlipModal')
-@include('permanent.passSlip.modals.viewPassSlipModal')
+@include('employee.passSlip.modals.filePassSlipModal')
+@include('employee.passSlip.modals.viewPassSlipModal')
 
-@include('permanent.chatbot.permanentChatbot')
+@include('employee.chatbot.employeeChatbot')
 
 <script>
     const sidebar   = document.getElementById('sidebar');

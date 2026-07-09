@@ -1,11 +1,11 @@
-@extends('layouts.permanent')
+@extends('layouts.employee')
 
 @section('title', 'Settings · PRIME HRIS')
 
 @section('content')
 <div class="app-layout">
 
-    @include('permanent.topbar.mobileTopbar', [
+    @include('employee.topbar.mobileTopbar', [
         'mobileTopbarEyebrow' => 'Permanent Employee',
         'mobileTopbarTitle' => 'Settings'
     ])
@@ -13,12 +13,12 @@
     {{-- Mobile Overlay --}}
     <div class="mobile-overlay" id="mobile-overlay"></div>
 
-    @include('permanent.sidebar.permanentSidebar')
+    @include('employee.sidebar.employeeSidebar')
 
     {{-- Main Content --}}
     <main class="main-content glass-shell">
 
-        @include('permanent.notification.permanentNotification')
+        @include('employee.notification.employeeNotification')
 
         <div class="settings-container">
             <div class="settings-sidebar">
@@ -214,6 +214,7 @@
                                     <span class="settings-toggle-thumb"></span>
                                 </button>
                             </div>
+                            @if($isPermanent ?? false)
                             <div class="settings-row">
                                 <div class="settings-row-label">
                                     <p class="settings-row-title">Leave Status Update</p>
@@ -223,6 +224,7 @@
                                     <span class="settings-toggle-thumb"></span>
                                 </button>
                             </div>
+                            @endif
                             <div class="settings-row">
                                 <div class="settings-row-label">
                                     <p class="settings-row-title">DTR Deadline Reminder</p>
@@ -386,7 +388,7 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSavedModal(); });
 </script>
 
-@include('permanent.chatbot.permanentChatbot')
+@include('employee.chatbot.employeeChatbot')
 
 {{-- Settings Save Success Modal --}}
 <div class="modal-overlay settings-saved-modal" id="settingsSavedModal" onclick="closeSavedModal()">

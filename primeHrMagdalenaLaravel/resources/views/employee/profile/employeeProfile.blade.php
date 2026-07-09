@@ -1,24 +1,24 @@
-@extends('layouts.permanent')
+@extends('layouts.employee')
 
 @section('title', 'Profile · PRIME HRIS')
 
 @section('content')
 <div class="app-layout">
 
-    @include('permanent.topbar.mobileTopbar', [
+    @include('employee.topbar.mobileTopbar', [
         'mobileTopbarEyebrow' => 'Permanent Employee',
         'mobileTopbarTitle' => 'Profile'
     ])
 
     <div class="mobile-overlay" id="mobile-overlay"></div>
 
-    @include('permanent.sidebar.permanentSidebar')
+    @include('employee.sidebar.employeeSidebar')
 
     <main class="main-content permanent-dashboard permanent-profile glass-shell">
 
-        @include('permanent.notification.permanentNotification')
+        @include('employee.notification.employeeNotification')
 
-        @include('permanent.topbar.profileTopbar')
+        @include('employee.topbar.profileTopbar')
 
         {{-- Stats --}}
         <div class="stats-grid stats-grid-4 profile-stats-grid">
@@ -48,6 +48,7 @@
                     <p class="stat-sub">Latest evaluation</p>
                 </div>
             </div>
+            @if($isPermanent ?? false)
             <div class="stat-card">
                 <div class="stat-top">
                     <p class="stat-label">Leave Balance</p>
@@ -61,6 +62,7 @@
                     <p class="stat-sub">Days remaining</p>
                 </div>
             </div>
+            @endif
             <div class="stat-card">
                 <div class="stat-top">
                     <p class="stat-label">Trainings Completed</p>
@@ -240,7 +242,7 @@
     </div>
 </div>
 
-@include('permanent.chatbot.permanentChatbot')
+@include('employee.chatbot.employeeChatbot')
 
 @push('scripts')
 <script>
@@ -306,7 +308,7 @@ function saveProfile() {
         _token: '{{ csrf_token() }}'
     };
 
-    fetch('{{ route("permanent.profile.update") }}', {
+    fetch('{{ route("employee.profile.update") }}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
         body: JSON.stringify(data)

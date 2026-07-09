@@ -187,6 +187,7 @@
                             <option value="employee">Employee - Limited access to own records</option>
                             <option value="hr">HR - Full access to all employee records</option>
                             <option value="admin">Admin - System administrator access</option>
+                            <option value="mayor">Mayor - Read-only oversight dashboard</option>
                         </select>
                     </div>
                     <div class="wizard-requirements-box">

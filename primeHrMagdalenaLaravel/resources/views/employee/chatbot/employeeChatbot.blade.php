@@ -35,10 +35,12 @@
     </div>
 
     <div class="chatbot-quick-actions">
+        @if($isPermanent ?? false)
         <button class="chatbot-quick-btn" onclick="quickAskPermanent('How do I file a leave request?')">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
             Leave
         </button>
+        @endif
         <button class="chatbot-quick-btn" onclick="quickAskPermanent('Check my payslip')">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
             Payslip

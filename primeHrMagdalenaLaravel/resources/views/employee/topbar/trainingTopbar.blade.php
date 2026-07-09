@@ -25,7 +25,7 @@
         <span class="banner-badge outline" id="bannerPendingCount">{{ $stats['pending'] ?? 0 }} Pending</span>
         <div class="training-topbar-search">
             <svg class="training-topbar-search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="permanentTrainingSearch" class="training-topbar-search-input" placeholder="Search title or status..." oninput="filterPermanentTraining()">
+            <input type="text" id="employeeTrainingSearch" class="training-topbar-search-input" placeholder="Search title or status..." oninput="filterPermanentTraining()">
         </div>
     </div>
 </div>
