@@ -25,7 +25,7 @@ class LeaveApplicationSeeder extends Seeder
             return;
         }
 
-        $adminUserId = DB::table('users')->where('role', 'admin')->value('id') ?? 1;
+        $adminUserId = DB::table('users')->whereJsonContains('roles', 'admin')->value('id') ?? 1;
         $inserted    = 0;
         $skipped     = 0;
 

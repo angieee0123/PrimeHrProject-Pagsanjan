@@ -69,7 +69,13 @@ function updateWizardUI() {
 }
 
 function validateCurrentStep() {
-    // Validation can be added here if needed
+    if (currentStep === 2) {
+        const rolesContainer = document.querySelector('#step2-register:not([style*="display: none"]) .wizard-role-checkboxes, #step2-edit:not([style*="display: none"]) .wizard-role-checkboxes');
+        if (rolesContainer && !rolesContainer.querySelector('input[type="checkbox"]:checked')) {
+            alert('Please select at least one role / access level.');
+            return false;
+        }
+    }
     return true;
 }
 

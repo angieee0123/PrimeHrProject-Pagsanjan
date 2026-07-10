@@ -16,7 +16,9 @@ class NotificationService
         $employeeName = $employee->first_name . ' ' . $employee->last_name;
         
         // Notify all admin users
-        $admins = User::where('role', 'admin')->orWhere('role', 'hr')->get();
+        $admins = User::where(function ($q) {
+            $q->whereJsonContains('roles', 'admin')->orWhereJsonContains('roles', 'hr');
+        })->get();
         
         foreach ($admins as $admin) {
             Notification::create([
@@ -73,7 +75,9 @@ class NotificationService
         $employee = $training->employee;
         $employeeName = $employee->first_name . ' ' . $employee->last_name;
         
-        $admins = User::where('role', 'admin')->orWhere('role', 'hr')->get();
+        $admins = User::where(function ($q) {
+            $q->whereJsonContains('roles', 'admin')->orWhereJsonContains('roles', 'hr');
+        })->get();
         
         foreach ($admins as $admin) {
             Notification::create([
@@ -167,7 +171,7 @@ class NotificationService
         $query = User::query();
         
         if ($role) {
-            $query->where('role', $role);
+            $query->whereJsonContains('roles', $role);
         }
         
         $users = $query->get();
@@ -203,7 +207,9 @@ class NotificationService
         $employee = $request->employee;
         $employeeName = $employee->first_name . ' ' . $employee->last_name;
         
-        $admins = User::where('role', 'admin')->orWhere('role', 'hr')->get();
+        $admins = User::where(function ($q) {
+            $q->whereJsonContains('roles', 'admin')->orWhereJsonContains('roles', 'hr');
+        })->get();
         
         foreach ($admins as $admin) {
             Notification::create([
@@ -226,7 +232,9 @@ class NotificationService
         $employee = $request->employee;
         $employeeName = $employee->first_name . ' ' . $employee->last_name;
         
-        $admins = User::where('role', 'admin')->orWhere('role', 'hr')->get();
+        $admins = User::where(function ($q) {
+            $q->whereJsonContains('roles', 'admin')->orWhereJsonContains('roles', 'hr');
+        })->get();
         
         foreach ($admins as $admin) {
             Notification::create([
@@ -249,7 +257,9 @@ class NotificationService
         $employee = $request->employee;
         $employeeName = $employee->first_name . ' ' . $employee->last_name;
         
-        $admins = User::where('role', 'admin')->orWhere('role', 'hr')->get();
+        $admins = User::where(function ($q) {
+            $q->whereJsonContains('roles', 'admin')->orWhereJsonContains('roles', 'hr');
+        })->get();
         
         foreach ($admins as $admin) {
             Notification::create([

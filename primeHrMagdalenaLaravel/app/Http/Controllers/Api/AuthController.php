@@ -44,9 +44,9 @@ class AuthController extends Controller
         $userType = 'joborder';
         $isPermanent = false;
 
-        if ($user->email === 'admin@gmail.com' || $user->role === 'admin') {
+        if ($user->email === 'admin@gmail.com' || $user->hasRole('admin')) {
             $userType = 'admin';
-        } elseif ($user->role === 'hr') {
+        } elseif ($user->hasRole('hr')) {
             $userType = 'hr';
         } elseif ($user->employee && $user->employee->employmentDetail) {
             $employmentStatus = $user->employee->employmentDetail->employment_status;
@@ -58,7 +58,7 @@ class AuthController extends Controller
         }
 
         // Fallback for explicit permanent role or email (web.php lines 59-61)
-        if (!$isPermanent && ($user->role === 'permanent' || $user->email === 'permanent@gmail.com')) {
+        if (!$isPermanent && ($user->hasRole('permanent') || $user->email === 'permanent@gmail.com')) {
             $userType = 'permanent';
             $isPermanent = true;
         }
@@ -120,7 +120,8 @@ class AuthController extends Controller
                     'name' => $displayName,
                     'email' => $user->email,
                     'username' => $user->username,
-                    'role' => $user->role,
+                    'role' => $user->roles[0] ?? null,
+                    'roles' => $user->roles,
                     'employee_id' => $user->employee_id,
                     'status' => $user->status,
                 ],
@@ -187,9 +188,9 @@ class AuthController extends Controller
         $userType = 'joborder';
         $isPermanent = false;
 
-        if ($user->email === 'admin@gmail.com' || $user->role === 'admin') {
+        if ($user->email === 'admin@gmail.com' || $user->hasRole('admin')) {
             $userType = 'admin';
-        } elseif ($user->role === 'hr') {
+        } elseif ($user->hasRole('hr')) {
             $userType = 'hr';
         } elseif ($user->employee && $user->employee->employmentDetail) {
             if ($user->employee->employmentDetail->employment_status === 'Permanent') {
@@ -198,7 +199,7 @@ class AuthController extends Controller
             }
         }
 
-        if (!$isPermanent && ($user->role === 'permanent' || $user->email === 'permanent@gmail.com')) {
+        if (!$isPermanent && ($user->hasRole('permanent') || $user->email === 'permanent@gmail.com')) {
             $userType = 'permanent';
             $isPermanent = true;
         }
@@ -249,7 +250,8 @@ class AuthController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'username' => $user->username,
-                    'role' => $user->role,
+                    'role' => $user->roles[0] ?? null,
+                    'roles' => $user->roles,
                     'employee_id' => $user->employee_id,
                     'status' => $user->status,
                 ],

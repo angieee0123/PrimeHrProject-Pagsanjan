@@ -318,6 +318,8 @@ body { font-family: 'Poppins', sans-serif; background: #f7f6fc; color: #0b044d; 
 .user-role { font-size: 10.5px; color: rgba(255, 255, 255, 0.42); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .logout-btn { width: 30px; height: 30px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.58); }
 .logout-btn:hover { background: rgba(142, 30, 24, 0.28); color: #ff8787; }
+.switch-role-btn { width: 30px; height: 30px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.58); text-decoration: none; }
+.switch-role-btn:hover { background: rgba(11, 4, 77, 0.4); color: #9d97ff; }
 .sidebar.collapsed .logo-text-wrap,
 .sidebar.collapsed .nav-section-label,
 .sidebar.collapsed .nav-label,

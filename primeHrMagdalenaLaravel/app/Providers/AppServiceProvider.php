@@ -38,14 +38,20 @@ class AppServiceProvider extends ServiceProvider
                 $employee = $user->employee;
                 $employmentStatus = $employee->employmentDetail->employment_status ?? null;
 
+                $activeRole = session('active_role');
+                if (!$activeRole || !$user->hasRole($activeRole)) {
+                    $activeRole = $user->roles[0] ?? 'employee';
+                }
+
                 $userData = [
                     'authUser' => $user,
                     'authEmployee' => $employee,
                     'authFullName' => $employee ? trim($employee->first_name . ' ' . $employee->last_name) : 'User',
                     'authInitials' => $employee ? strtoupper(substr($employee->first_name, 0, 1) . substr($employee->last_name, 0, 1)) : 'U',
                     'authEmployeeId' => $employee->employee_id ?? 'N/A',
-                    'authRole' => ucfirst($user->role ?? 'Employee'),
-                    'isPermanent' => $employmentStatus === 'Permanent' || $user->role === 'permanent',
+                    'authRole' => ucfirst($activeRole),
+                    'authRoles' => $user->roles ?? [],
+                    'isPermanent' => $employmentStatus === 'Permanent' || $user->hasRole('permanent'),
                 ];
 
                 $view->with($userData);

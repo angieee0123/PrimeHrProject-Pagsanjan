@@ -151,10 +151,11 @@ ATTENDANCE & LEAVE POLICIES:
    4. Admin can verify the training record after review
 
    HOW TO MANAGE USER ACCOUNTS:
-   1. Go to Users > User List
-   2. Add a new user: enter username, password, role (Admin/Employee), and link to employee record
-   3. Activate or deactivate accounts under User Status
-   4. Roles control what modules the user can access
+   1. Go to Users > User List (or Personnel > Edit Employee)
+   2. Add a new user: enter username, password, role(s) (Employee/HR/Admin/Mayor), and link to employee record
+   3. An employee can hold multiple roles at once (e.g. HR + Mayor) via checkboxes in the Role / Access Level field
+   4. Activate or deactivate accounts under User Status
+   5. Roles control what modules the user can access; users with multiple roles choose which dashboard to use at login
 
    HOW TO GENERATE REPORTS:
    1. Go to Reports section
@@ -176,7 +177,7 @@ DATABASE KEY TABLES:
 - employee_deductions: Active deductions per employee
 - trainings: Training/seminar records with verification status
 - travel_orders: Travel order requests with approval status
-- users: User accounts with status (Active/Inactive) and role
+- users: User accounts with status (Active/Inactive) and roles (JSON array, e.g. ["hr","mayor"])
 TEXT;
 
     public function chat(Request $request)

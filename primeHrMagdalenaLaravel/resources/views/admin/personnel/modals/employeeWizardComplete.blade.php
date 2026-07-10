@@ -181,14 +181,26 @@
                         <input type="password" name="password_confirm" placeholder="••••••••" maxlength="255" class="wizard-input">
                     </div>
                     <div class="wizard-field">
-                        <label class="wizard-label-text">Role / Access Level *</label>
-                        <select name="role" class="wizard-select">
-                            <option value="">Select Role</option>
-                            <option value="employee">Employee - Limited access to own records</option>
-                            <option value="hr">HR - Full access to all employee records</option>
-                            <option value="admin">Admin - System administrator access</option>
-                            <option value="mayor">Mayor - Read-only oversight dashboard</option>
-                        </select>
+                        <label class="wizard-label-text">Role / Access Level * <span style="font-weight:400;color:#56547a;">(select one or more)</span></label>
+                        <div class="wizard-role-checkboxes" id="register-roles">
+                            <label class="wizard-role-checkbox">
+                                <input type="checkbox" name="roles[]" value="employee" checked>
+                                <span><strong>Employee</strong> — Limited access to own records</span>
+                            </label>
+                            <label class="wizard-role-checkbox">
+                                <input type="checkbox" name="roles[]" value="hr">
+                                <span><strong>HR</strong> — Full access to all employee records</span>
+                            </label>
+                            <label class="wizard-role-checkbox">
+                                <input type="checkbox" name="roles[]" value="admin">
+                                <span><strong>Admin</strong> — System administrator access</span>
+                            </label>
+                            <label class="wizard-role-checkbox">
+                                <input type="checkbox" name="roles[]" value="mayor">
+                                <span><strong>Mayor</strong> — Read-only oversight dashboard</span>
+                            </label>
+                        </div>
+                        <p class="wizard-hint">An employee can hold multiple roles at once, e.g. HR + Mayor.</p>
                     </div>
                     <div class="wizard-requirements-box">
                         <p class="wizard-requirements-title">✓ Password Requirements:</p>
@@ -208,14 +220,26 @@
                         <p class="wizard-info-text">Username, email, and password are managed separately.</p>
                     </div>
                     <div class="wizard-field">
-                        <label class="wizard-label-text">Role / Access Level *</label>
-                        <select name="role" id="edit-role" class="wizard-select">
-                            <option value="">Select Role</option>
-                            <option value="employee">Employee - Limited access to own records</option>
-                            <option value="hr">HR - Full access to all employee records</option>
-                            <option value="admin">Admin - System administrator access</option>
-                            <option value="mayor">Mayor - Read-only oversight dashboard</option>
-                        </select>
+                        <label class="wizard-label-text">Role / Access Level * <span style="font-weight:400;color:#56547a;">(select one or more)</span></label>
+                        <div class="wizard-role-checkboxes" id="edit-roles">
+                            <label class="wizard-role-checkbox">
+                                <input type="checkbox" name="roles[]" value="employee">
+                                <span><strong>Employee</strong> — Limited access to own records</span>
+                            </label>
+                            <label class="wizard-role-checkbox">
+                                <input type="checkbox" name="roles[]" value="hr">
+                                <span><strong>HR</strong> — Full access to all employee records</span>
+                            </label>
+                            <label class="wizard-role-checkbox">
+                                <input type="checkbox" name="roles[]" value="admin">
+                                <span><strong>Admin</strong> — System administrator access</span>
+                            </label>
+                            <label class="wizard-role-checkbox">
+                                <input type="checkbox" name="roles[]" value="mayor">
+                                <span><strong>Mayor</strong> — Read-only oversight dashboard</span>
+                            </label>
+                        </div>
+                        <p class="wizard-hint">An employee can hold multiple roles at once, e.g. HR + Mayor.</p>
                     </div>
                 </div>
             </div>
@@ -481,9 +505,14 @@ function editEmployee(id) {
             setVal('province',  addr.province);
             setVal('zip_code',  addr.zip_code);
 
-            // Step 2 — Role
-            const editRoleEl = document.getElementById('edit-role');
-            if (editRoleEl) editRoleEl.value = d.role || '';
+            // Step 2 — Roles
+            const editRolesEl = document.getElementById('edit-roles');
+            if (editRolesEl) {
+                const selectedRoles = Array.isArray(d.roles) ? d.roles : [];
+                editRolesEl.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = selectedRoles.includes(cb.value);
+                });
+            }
 
             // Step 5 — Gov IDs
             const gov = (d.government_ids || [])[0] || {};

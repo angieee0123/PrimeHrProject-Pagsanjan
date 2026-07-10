@@ -41,16 +41,20 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
         }
         $user->load('employee.employmentDetail.departmentRelation', 'employee.employmentDetail.designationRelation');
 
-        if ($user->email === 'admin@gmail.com' || $user->role === 'admin') {
+        if ($user->email === 'admin@gmail.com') {
+            session(['active_role' => 'admin']);
             return redirect()->route('admin.dashboard');
         }
 
-        if ($user->role === 'hr') {
-            return redirect()->route('admin.dashboard');
+        $dashboardRoutes = $user->dashboardRoutes();
+
+        if (count($dashboardRoutes) > 1) {
+            return redirect()->route('select-role');
         }
 
-        if ($user->role === 'mayor') {
-            return redirect()->route('mayor.dashboard');
+        if (count($dashboardRoutes) === 1) {
+            session(['active_role' => $user->roles[0] ?? null]);
+            return redirect()->route($dashboardRoutes[0]);
         }
 
         // Check if employee has permanent employment status
@@ -62,8 +66,8 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
             }
         }
 
-        // Fallback for explicit permanent role or email
-        if ($user->role === 'permanent' || $user->email === 'permanent@gmail.com') {
+        // Fallback for explicit legacy permanent role or email
+        if ($user->hasRole('permanent') || $user->email === 'permanent@gmail.com') {
             return redirect()->route('employee.dashboard');
         }
 
@@ -73,6 +77,49 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
     return back()->withInput($request->only('email'))
                  ->with('error', 'Invalid email or password. Please try again.');
 })->name('login.post');
+
+Route::get('/select-role', function () {
+    $user = Auth::user();
+    if (!$user instanceof User) {
+        return redirect()->route('login');
+    }
+
+    $dashboardRoutes = $user->dashboardRoutes();
+    if (count($dashboardRoutes) <= 1) {
+        return redirect()->route($dashboardRoutes[0] ?? 'employee.dashboard');
+    }
+
+    $options = collect($user->roles ?? [])
+        ->unique()
+        ->map(fn ($role) => ['role' => $role, 'route' => User::dashboardRouteForRole($role)])
+        ->filter(fn ($option) => $option['route'] !== null)
+        ->unique('route')
+        ->values();
+
+    return view('user.select-role', ['options' => $options]);
+})->middleware('auth')->name('select-role');
+
+Route::post('/select-role', function (\Illuminate\Http\Request $request) {
+    $user = Auth::user();
+    if (!$user instanceof User) {
+        return redirect()->route('login');
+    }
+
+    $role = $request->validate(['role' => ['required', 'in:' . implode(',', User::ROLES)]])['role'];
+
+    if (!$user->hasRole($role)) {
+        abort(403);
+    }
+
+    $routeName = User::dashboardRouteForRole($role);
+    if (!$routeName) {
+        abort(403);
+    }
+
+    session(['active_role' => $role]);
+
+    return redirect()->route($routeName);
+})->middleware('auth')->name('select-role.post');
 
 Route::get('/password/forgot', function () {
     return view('user.forgot-password');
@@ -734,7 +781,7 @@ Route::get('/admin/personnel/{id}/edit', function ($id) {
     ])->findOrFail($id);
 
     $data = $employee->toArray();
-    $data['role'] = $employee->user?->role;
+    $data['roles'] = $employee->user?->roles ?? [];
     return response()->json($data);
 })->middleware('auth')->name('admin.personnel.edit');
 
@@ -807,9 +854,12 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
         ]);
     }
 
-    if ($request->filled('role') && $employee->user) {
-        $request->validate(['role' => 'in:employee,hr,admin,mayor']);
-        $employee->user->update(['role' => $request->role]);
+    if ($request->has('roles') && $employee->user) {
+        $validated = $request->validate([
+            'roles' => ['required', 'array', 'min:1'],
+            'roles.*' => ['in:' . implode(',', User::ROLES)],
+        ]);
+        $employee->user->update(['roles' => array_values(array_unique($validated['roles']))]);
     }
 
     return redirect()->route('admin.personnel')->with('success', "Employee {$employee->first_name} {$employee->last_name} updated successfully!");

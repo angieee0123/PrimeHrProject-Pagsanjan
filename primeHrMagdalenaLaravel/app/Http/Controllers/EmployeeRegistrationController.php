@@ -29,7 +29,8 @@ class EmployeeRegistrationController extends Controller
                 'user_email' => ['required', 'email', 'max:255', 'unique:users,email'],
                 'password' => ['required', 'string', 'min:8'],
                 'password_confirm' => ['required', 'same:password'],
-                'role' => ['required', 'in:employee,hr,admin,mayor'],
+                'roles' => ['required', 'array', 'min:1'],
+                'roles.*' => ['in:' . implode(',', User::ROLES)],
                 'department' => ['required', 'exists:departments,id'],
                 'designation_id' => ['required', 'exists:designations,id'],
                 'employment_status' => ['required', 'in:Permanent,Casual,Contractual,Job Order'],
@@ -67,7 +68,7 @@ class EmployeeRegistrationController extends Controller
                 'email' => $request->user_email,
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
-                'role' => $request->role,
+                'roles' => array_values(array_unique($request->roles)),
             ]);
 
             // Create Employment Details
@@ -212,7 +213,7 @@ class EmployeeRegistrationController extends Controller
                         'email' => $data['email'] ?? $data['employee_id'] . '@lgu.gov.ph',
                         'username' => $data['employee_id'],
                         'password' => Hash::make('password123'),
-                        'role' => 'employee',
+                        'roles' => ['employee'],
                         'status' => 'Active',
                     ]);
 
