@@ -732,7 +732,10 @@ Route::get('/admin/personnel/{id}/edit', function ($id) {
         'governmentIds',
         'user'
     ])->findOrFail($id);
-    return response()->json($employee);
+
+    $data = $employee->toArray();
+    $data['role'] = $employee->user?->role;
+    return response()->json($data);
 })->middleware('auth')->name('admin.personnel.edit');
 
 Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $request, $id) {
@@ -802,6 +805,11 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
             'tin_no'        => $request->tin_no,
             'license_no'    => $request->license_no,
         ]);
+    }
+
+    if ($request->filled('role') && $employee->user) {
+        $request->validate(['role' => 'in:employee,hr,admin,mayor']);
+        $employee->user->update(['role' => $request->role]);
     }
 
     return redirect()->route('admin.personnel')->with('success', "Employee {$employee->first_name} {$employee->last_name} updated successfully!");

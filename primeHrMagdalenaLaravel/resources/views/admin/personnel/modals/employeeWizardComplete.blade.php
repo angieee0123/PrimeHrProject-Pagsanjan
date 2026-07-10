@@ -205,7 +205,17 @@
                     <h4 class="wizard-section-title">🔐 Account Info</h4>
                     <div class="wizard-info-box" style="background:#f2f1fb;border-color:#0b044d22;">
                         <p class="wizard-info-title"><strong>ℹ️ Account credentials cannot be changed here.</strong></p>
-                        <p class="wizard-info-text">Username, email, password and role are managed separately. Click Next to continue editing other details.</p>
+                        <p class="wizard-info-text">Username, email, and password are managed separately.</p>
+                    </div>
+                    <div class="wizard-field">
+                        <label class="wizard-label-text">Role / Access Level *</label>
+                        <select name="role" id="edit-role" class="wizard-select">
+                            <option value="">Select Role</option>
+                            <option value="employee">Employee - Limited access to own records</option>
+                            <option value="hr">HR - Full access to all employee records</option>
+                            <option value="admin">Admin - System administrator access</option>
+                            <option value="mayor">Mayor - Read-only oversight dashboard</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -470,6 +480,10 @@ function editEmployee(id) {
             setVal('city',      addr.city);
             setVal('province',  addr.province);
             setVal('zip_code',  addr.zip_code);
+
+            // Step 2 — Role
+            const editRoleEl = document.getElementById('edit-role');
+            if (editRoleEl) editRoleEl.value = d.role || '';
 
             // Step 5 — Gov IDs
             const gov = (d.government_ids || [])[0] || {};
