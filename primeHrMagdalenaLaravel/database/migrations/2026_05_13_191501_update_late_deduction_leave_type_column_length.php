@@ -11,6 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Deferred-safe: on a fresh install this ALTER is ordered before
+        // `accredited_hours_log` is created; skip so migrate runs, then a later catch-up migration
+        // (…apply_deferred_schema_changes) applies the final schema.
+        if (! Schema::hasTable('accredited_hours_log')) {
+            return;
+        }
+
         Schema::table('accredited_hours_log', function (Blueprint $table) {
             $table->string('late_deduction_leave_type', 50)->nullable()->change();
         });
@@ -21,6 +28,13 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Deferred-safe: on a fresh install this ALTER is ordered before
+        // `accredited_hours_log` is created; skip so migrate runs, then a later catch-up migration
+        // (…apply_deferred_schema_changes) applies the final schema.
+        if (! Schema::hasTable('accredited_hours_log')) {
+            return;
+        }
+
         Schema::table('accredited_hours_log', function (Blueprint $table) {
             $table->string('late_deduction_leave_type', 10)->nullable()->change();
         });

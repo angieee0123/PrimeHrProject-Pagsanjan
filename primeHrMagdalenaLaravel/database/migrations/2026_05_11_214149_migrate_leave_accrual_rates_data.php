@@ -10,6 +10,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // On a fresh install this data migration is ordered before the
+        // leave_accrual_rates table is created; there is nothing to transform, so skip.
+        if (! \Illuminate\Support\Facades\Schema::hasTable('leave_accrual_rates')) {
+            return;
+        }
+
         // Get existing data before modification
         $existingRates = DB::table('leave_accrual_rates')->get();
         
@@ -50,6 +56,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('leave_accrual_rates')) {
+            return;
+        }
+
         // Get existing data
         $existingRates = DB::table('leave_accrual_rates')->get();
         

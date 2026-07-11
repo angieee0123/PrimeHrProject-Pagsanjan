@@ -401,7 +401,20 @@
         
         document.querySelectorAll('#adminTrainingBody tr[data-id]').forEach(row => row.style.display = 'none');
         rows.forEach((row, i) => { if (i >= start && i < end) row.style.display = ''; });
-        
+
+        // No-results feedback — mirrors the "No records found matching your search." behavior on the Attendance page
+        let emptyRow = document.getElementById('adminTrainingNoResults');
+        if (total === 0) {
+            if (!emptyRow) {
+                emptyRow = document.createElement('tr');
+                emptyRow.id = 'adminTrainingNoResults';
+                emptyRow.innerHTML = '<td colspan="8" style="text-align:center;padding:40px;color:#56547a;">No records found matching your search.</td>';
+                document.getElementById('adminTrainingBody').appendChild(emptyRow);
+            }
+        } else if (emptyRow) {
+            emptyRow.remove();
+        }
+
         document.getElementById('adminRowStart').textContent = total ? start + 1 : 0;
         document.getElementById('adminRowEnd').textContent = end;
         document.getElementById('adminRowTotal').textContent = total;

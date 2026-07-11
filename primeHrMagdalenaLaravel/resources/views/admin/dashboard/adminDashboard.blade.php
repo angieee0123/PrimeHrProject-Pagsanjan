@@ -38,7 +38,7 @@
         </div>
         <p class="stat-value">{{ number_format($stats['present_today']) }}<span style="font-size:14px;color:#8f8daf;font-weight:500"> / {{ number_format($stats['total_employees']) }}</span></p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#22c55e"></span>
+            <span class="stat-dot" style="background:#15803d"></span>
             <p class="stat-sub">{{ $stats['attendance_rate'] }}% attendance rate</p>
         </div>
     </div>
@@ -88,20 +88,10 @@
     overflow: hidden;
     border-radius: 20px !important;
     border: 1px solid rgba(255, 255, 255, .18) !important;
-    background:
-        radial-gradient(340px 200px at 100% -20%, rgba(129, 140, 248, .35), transparent 70%),
-        linear-gradient(135deg, #0b044d 0%, #150c63 100%) !important;
+    background: #0b044d !important;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, .16),
         0 16px 40px rgba(11, 4, 77, .28) !important;
-}
-
-.welcome-banner::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(255, 255, 255, .08), transparent 45%);
-    pointer-events: none;
 }
 
 .banner-icon {
@@ -132,7 +122,7 @@
     --eh-soft: #f2f4f7;
     --eh-line: #e5e7eb;
     --eh-green: #15803d;
-    --eh-red: #b42318;
+    --eh-red: #8e1e18;
     --eh-amber: #b7791f;
     --eh-glass: rgba(255, 255, 255, .58);
     --eh-glass-strong: rgba(255, 255, 255, .78);
@@ -141,7 +131,7 @@
     color: var(--eh-ink);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Poppins', sans-serif;
     min-height: 100vh;
-    padding: 20px 0 28px;
+    padding: 0 0 28px;
     position: relative;
     isolation: isolate;
 }
@@ -151,11 +141,7 @@
     position: fixed;
     inset: 0;
     z-index: -1;
-    background:
-        radial-gradient(720px 480px at 6% -8%, rgba(99, 102, 241, .18), transparent 60%),
-        radial-gradient(640px 440px at 100% 0%, rgba(56, 189, 248, .16), transparent 60%),
-        radial-gradient(900px 620px at 50% 112%, rgba(236, 72, 153, .12), transparent 60%),
-        var(--eh-bg);
+    background: var(--eh-bg);
 }
 
 .enterprise-hr-dashboard,
@@ -234,7 +220,7 @@
     height: 8px;
     border: 2px solid #fff;
     border-radius: 50%;
-    background: #ef4444;
+    background: #8e1e18;
 }
 
 .enterprise-profile {
@@ -397,10 +383,14 @@
 
 .enterprise-secondary-grid {
     display: grid;
-    grid-template-columns: .78fr 1fr 360px;
+    grid-template-columns: minmax(0, .78fr) minmax(0, 1fr) minmax(0, 360px);
     gap: 18px;
     align-items: stretch;
     margin-bottom: 18px;
+}
+
+.enterprise-secondary-grid > * {
+    min-width: 0;
 }
 
 .enterprise-compact-grid {
@@ -409,6 +399,18 @@
     gap: 18px;
     margin-bottom: 18px;
 }
+
+/* Department Distribution — compact ranked rows instead of embedded-label bars,
+   so long department names truncate cleanly in this grid's narrow column. */
+.dept-dist-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+.dept-dist-swatch { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+.dept-dist-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.dept-dist-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.dept-dist-name { font-size: 12.5px; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dept-dist-count { font-size: 12px; font-weight: 700; color: #0b044d; flex-shrink: 0; white-space: nowrap; }
+.dept-dist-count em { font-style: normal; font-size: 10.5px; font-weight: 600; color: #94a3b8; margin-left: 5px; }
+.dept-dist-track { width: 100%; height: 5px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+.dept-dist-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
 
 .enterprise-card-body {
     padding: 16px 20px 20px;
@@ -654,7 +656,7 @@
 
 @media (max-width: 1024px) {
     .enterprise-secondary-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .enterprise-compact-grid {
@@ -934,7 +936,7 @@
                             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display:inline;margin-right:6px;vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg>
                             Approve
                         </button>
-                        <button onclick="disapproveLeave(event)" style="width:100%;padding:10px 12px;border:none;background:none;text-align:left;font-size:12px;color:#b42318;font-weight:600;cursor:pointer;border-bottom:1px solid #e5e7eb;transition:all 0.2s" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
+                        <button onclick="disapproveLeave(event)" style="width:100%;padding:10px 12px;border:none;background:none;text-align:left;font-size:12px;color:#8e1e18;font-weight:600;cursor:pointer;border-bottom:1px solid #e5e7eb;transition:all 0.2s" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
                             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display:inline;margin-right:6px;vertical-align:middle"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                             Disapprove
                         </button>
@@ -1018,7 +1020,7 @@
                             <span class="enterprise-metric">{{ $emp['rate'] }}%</span>
                         </div>
                         <div style="width:100%;height:6px;background:#eef2f6;border-radius:3px;overflow:hidden">
-                            <div style="width:{{ $emp['rate'] }}%;height:100%;background:linear-gradient(90deg,#3b82f6,#2563eb);border-radius:3px;transition:width 0.3s ease"></div>
+                            <div style="width:{{ $emp['rate'] }}%;height:100%;background:linear-gradient(90deg,#150c63,#0b044d);border-radius:3px;transition:width 0.3s ease"></div>
                         </div>
                     </div>
                 </div>
@@ -1044,7 +1046,7 @@
                             <span class="enterprise-metric">{{ $emp['rate'] }}%</span>
                         </div>
                         <div style="width:100%;height:6px;background:#eef2f6;border-radius:3px;overflow:hidden">
-                            <div style="width:{{ $emp['rate'] }}%;height:100%;background:linear-gradient(90deg,#3b82f6,#2563eb);border-radius:3px;transition:width 0.3s ease"></div>
+                            <div style="width:{{ $emp['rate'] }}%;height:100%;background:linear-gradient(90deg,#150c63,#0b044d);border-radius:3px;transition:width 0.3s ease"></div>
                         </div>
                     </div>
                 </div>
@@ -1083,7 +1085,7 @@
             <div style="display:flex;flex-direction:column;gap:12px">
                 @forelse($topEarners as $earner)
                     <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:{{ $earner['rank'] < 5 ? '1px solid #f1f5f9' : 'none' }}">
-                        <div style="min-width:26px;height:26px;border-radius:9px;text-align:center;display:inline-flex;align-items:center;justify-content:center;font-size:{{ $earner['rank'] <= 3 ? '13px' : '12px' }};font-weight:{{ $earner['rank'] === 1 ? '800' : '700' }};background:{{ $earner['rank'] <= 3 ? '#fef3c7' : '#f1f5f9' }};color:{{ $earner['rank'] <= 3 ? '#f59e0b' : '#94a3b8' }}">{{ $earner['rank'] }}</div>
+                        <div style="min-width:26px;height:26px;border-radius:9px;text-align:center;display:inline-flex;align-items:center;justify-content:center;font-size:{{ $earner['rank'] <= 3 ? '13px' : '12px' }};font-weight:{{ $earner['rank'] === 1 ? '800' : '700' }};background:{{ $earner['rank'] <= 3 ? '#fbf6e3' : '#f1f5f9' }};color:{{ $earner['rank'] <= 3 ? '#c9a227' : '#94a3b8' }}">{{ $earner['rank'] }}</div>
                         @if($earner['photo'])
                             <img src="{{ $earner['photo'] }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0">
                         @else
@@ -1136,7 +1138,7 @@
                         $padding = $rank === 1 ? '12px 0' : ($rank === 2 ? '10px 0' : '8px 0');
                     @endphp
                     <div class="bird-item" data-schedule='@json($bird['schedule'])' style="display:flex;align-items:center;gap:12px;padding:{{ $padding }};border-bottom:{{ $rank < 5 ? '1px solid #f1f5f9' : 'none' }}">
-                        <div style="min-width:26px;text-align:center;font-size:{{ $rank <= 3 ? '13px' : '12px' }};font-weight:{{ $rank === 1 ? '800' : '700' }};color:{{ $rank === 1 ? '#fbbf24' : ($rank === 2 ? '#94a3b8' : ($rank === 3 ? '#fb923c' : '#94a3b8')) }}">{{ $rank }}</div>
+                        <div style="min-width:26px;text-align:center;font-size:{{ $rank <= 3 ? '13px' : '12px' }};font-weight:{{ $rank === 1 ? '800' : '700' }};color:{{ $rank === 1 ? '#c9a227' : ($rank === 2 ? '#94a3b8' : ($rank === 3 ? '#b45309' : '#94a3b8')) }}">{{ $rank }}</div>
                         @if($bird['photo'])
                             <img src="{{ $bird['photo'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:10px;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0">
                         @else
@@ -1173,7 +1175,7 @@
                         $padding = $rank === 1 ? '12px 0' : ($rank === 2 ? '10px 0' : '8px 0');
                     @endphp
                     <div class="bird-item" data-schedule='@json($bird['schedule'])' style="display:flex;align-items:center;gap:12px;padding:{{ $padding }};border-bottom:{{ $rank < 5 ? '1px solid #fee2e2' : 'none' }}">
-                        <div style="min-width:26px;text-align:center;font-size:{{ $rank <= 3 ? '13px' : '12px' }};font-weight:700;color:#dc2626">{{ $rank }}</div>
+                        <div style="min-width:26px;text-align:center;font-size:{{ $rank <= 3 ? '13px' : '12px' }};font-weight:700;color:#8e1e18">{{ $rank }}</div>
                         @if($bird['photo'])
                             <img src="{{ $bird['photo'] }}" style="width:{{ $avatarSize }}px;height:{{ $avatarSize }}px;border-radius:10px;object-fit:cover;border:2px solid #fecaca;flex-shrink:0">
                         @else
@@ -1185,13 +1187,13 @@
                         </div>
                         <div style="text-align:right;flex-shrink:0;margin-right:16px">
                             <p style="font-size:{{ $timeSize }};font-weight:700;color:#0b044d;margin:0 0 3px">{{ $bird['time_in'] }}</p>
-                            <p style="font-size:10px;color:#dc2626;font-weight:600;margin:0">+{{ $bird['late_minutes'] }}m</p>
+                            <p style="font-size:10px;color:#8e1e18;font-weight:600;margin:0">+{{ $bird['late_minutes'] }}m</p>
                         </div>
                     </div>
                 @empty
                     <div style="text-align:center;padding:32px 24px">
                         <div style="width:48px;height:48px;border-radius:50%;background:#f0fdf4;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
-                            <svg width="22" height="22" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <svg width="22" height="22" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                         </div>
                         <p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 4px">No Late Arrivals Today</p>
                         <p style="font-size:12px;color:#94a3b8;margin:0">All employees arrived on time! 🎉</p>
@@ -1246,20 +1248,23 @@
         <div class="table-header">
             <div>
                 <p class="table-title">Department Distribution</p>
-                <p class="table-sub">Headcount by department</p>
+                <p class="table-sub">{{ $departments->count() }} departments · {{ number_format($stats['total_employees']) }} employees</p>
             </div>
         </div>
-        @php $total = $stats['total_employees']; $maxCount = $departments->max('count') ?? 1; @endphp
-        <div class="enterprise-card-body" style="padding:20px 24px;max-height:100%;overflow-y:auto" id="deptDistContainer">
+        @php $maxCount = $departments->max('count') ?? 1; @endphp
+        <div class="enterprise-card-body" style="padding:12px 20px 20px;max-height:100%;overflow-y:auto" id="deptDistContainer">
             @foreach($departments as $d)
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;height:46px">
-                <div style="min-width:110px;font-weight:700;color:#111827;font-size:12px">{{ $d['name'] }}</div>
-                <div style="flex:1;height:32px;background:#f3f4f6;border-radius:6px;position:relative;overflow:hidden">
-                    <div style="height:100%;background:{{ $d['color'] }};border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;transition:width 0.3s ease;width:{{ $maxCount > 0 ? round($d['count']/$maxCount*100) : 0 }}%">
-                        <span style="color:#fff;font-weight:800;font-size:11px;text-shadow:0 1px 2px rgba(0,0,0,0.15)">{{ $d['count'] }}</span>
+            <div class="dept-dist-row">
+                <span class="dept-dist-swatch" style="background:{{ $d['color'] }}"></span>
+                <div class="dept-dist-info">
+                    <div class="dept-dist-top">
+                        <span class="dept-dist-name">{{ $d['name'] }}</span>
+                        <span class="dept-dist-count">{{ $d['count'] }}<em>{{ $d['percentage'] }}%</em></span>
+                    </div>
+                    <div class="dept-dist-track">
+                        <div class="dept-dist-fill" style="width:{{ $maxCount > 0 ? round($d['count']/$maxCount*100) : 0 }}%;background:{{ $d['color'] }}"></div>
                     </div>
                 </div>
-                <div style="min-width:60px;text-align:right;color:#667085;font-weight:600;font-size:11px">{{ $d['percentage'] }}%</div>
             </div>
             @endforeach
         </div>
@@ -1401,25 +1406,25 @@
             <div style="background:linear-gradient(135deg, rgba(239,246,255,.85) 0%, rgba(219,234,254,.7) 100%);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);border:1px solid rgba(255,255,255,.6);border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 8px 24px rgba(59,130,246,.08)">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
                     <div>
-                        <p style="font-size:11px;color:#3b82f6;font-weight:700;letter-spacing:0.5px;margin:0 0 4px">ATTENDANCE PERFORMANCE</p>
+                        <p style="font-size:11px;color:#1e40af;font-weight:700;letter-spacing:0.5px;margin:0 0 4px">ATTENDANCE PERFORMANCE</p>
                         <p id="modalPeriodLabel" style="font-size:12px;color:#64748b;margin:0"></p>
                     </div>
                     <div style="text-align:right">
-                        <p id="modalAttendanceRate" style="font-size:42px;font-weight:800;color:#3b82f6;margin:0;line-height:1"></p>
-                        <p style="font-size:11px;color:#3b82f6;margin:6px 0 0;font-weight:600">Attendance Rate</p>
+                        <p id="modalAttendanceRate" style="font-size:42px;font-weight:800;color:#1e40af;margin:0;line-height:1"></p>
+                        <p style="font-size:11px;color:#1e40af;margin:6px 0 0;font-weight:600">Attendance Rate</p>
                     </div>
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
                     <div style="background:rgba(255,255,255,.65);backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);border:1px solid rgba(255,255,255,.7);border-radius:14px;padding:16px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 4px 14px rgba(15,23,42,.05)">
-                        <p style="font-size:28px;font-weight:800;color:#22c55e;margin:0" id="modalPresentDays"></p>
+                        <p style="font-size:28px;font-weight:800;color:#15803d;margin:0" id="modalPresentDays"></p>
                         <p style="font-size:11px;color:#64748b;margin:6px 0 0;font-weight:600">Days Present</p>
                     </div>
                     <div style="background:rgba(255,255,255,.65);backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);border:1px solid rgba(255,255,255,.7);border-radius:14px;padding:16px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 4px 14px rgba(15,23,42,.05)">
-                        <p style="font-size:28px;font-weight:800;color:#ef4444;margin:0" id="modalAbsentDays"></p>
+                        <p style="font-size:28px;font-weight:800;color:#8e1e18;margin:0" id="modalAbsentDays"></p>
                         <p style="font-size:11px;color:#64748b;margin:6px 0 0;font-weight:600">Days Absent</p>
                     </div>
                     <div style="background:rgba(255,255,255,.65);backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);border:1px solid rgba(255,255,255,.7);border-radius:14px;padding:16px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 4px 14px rgba(15,23,42,.05)">
-                        <p style="font-size:28px;font-weight:800;color:#f59e0b;margin:0" id="modalLateDays"></p>
+                        <p style="font-size:28px;font-weight:800;color:#c9a227;margin:0" id="modalLateDays"></p>
                         <p style="font-size:11px;color:#64748b;margin:6px 0 0;font-weight:600">Late Arrivals</p>
                     </div>
                 </div>
@@ -1435,17 +1440,17 @@
                         </div>
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
                             <span style="font-size:13px;color:#64748b;font-weight:500">Present Days</span>
-                            <span id="modalPresentDays2" style="font-size:15px;color:#22c55e;font-weight:700"></span>
+                            <span id="modalPresentDays2" style="font-size:15px;color:#15803d;font-weight:700"></span>
                         </div>
                         <div style="display:flex;justify-content:space-between;align-items:center">
                             <span style="font-size:13px;color:#64748b;font-weight:500">Absent Days</span>
-                            <span id="modalAbsentDays2" style="font-size:15px;color:#ef4444;font-weight:700"></span>
+                            <span id="modalAbsentDays2" style="font-size:15px;color:#8e1e18;font-weight:700"></span>
                         </div>
                     </div>
                     <div>
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
                             <span style="font-size:13px;color:#64748b;font-weight:500">Late Instances</span>
-                            <span id="modalLateDays2" style="font-size:15px;color:#f59e0b;font-weight:700"></span>
+                            <span id="modalLateDays2" style="font-size:15px;color:#c9a227;font-weight:700"></span>
                         </div>
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
                             <span style="font-size:13px;color:#64748b;font-weight:500">Performance Tier</span>
@@ -1453,7 +1458,7 @@
                         </div>
                         <div style="display:flex;justify-content:space-between;align-items:center">
                             <span style="font-size:13px;color:#64748b;font-weight:500">Attendance Rate</span>
-                            <span id="modalRate2" style="font-size:15px;color:#3b82f6;font-weight:700"></span>
+                            <span id="modalRate2" style="font-size:15px;color:#1e40af;font-weight:700"></span>
                         </div>
                     </div>
                 </div>
@@ -1691,15 +1696,15 @@ function initCharts() {
     const ctx2 = document.getElementById('attendanceChart').getContext('2d');
 
     gradientPayroll = ctx1.createLinearGradient(0, 0, 0, 300);
-    gradientPayroll.addColorStop(0, 'rgba(59, 130, 246, 0.25)');
-    gradientPayroll.addColorStop(1, 'rgba(59, 130, 246, 0.01)');
+    gradientPayroll.addColorStop(0, 'rgba(30, 64, 175, 0.25)');
+    gradientPayroll.addColorStop(1, 'rgba(30, 64, 175, 0.01)');
 
     // Create gradient for Attendance Chart
     const gradientAtt = ctx2.createLinearGradient(0, 0, 0, 400);
-    gradientAtt.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
-    gradientAtt.addColorStop(1, 'rgba(59, 130, 246, 0.01)');
+    gradientAtt.addColorStop(0, 'rgba(30, 64, 175, 0.3)');
+    gradientAtt.addColorStop(1, 'rgba(30, 64, 175, 0.01)');
 
-    const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+    const colors = ['#1e40af', '#6d28d9', '#9d174d', '#c9a227', '#065f46'];
 
     // Initialize with payroll by designation (week view)
     dynamicChart = new Chart(ctx1, {
@@ -1788,14 +1793,14 @@ function initCharts() {
                 {
                     label: 'Attendance Rate (%)',
                     data: attendanceData.week.data,
-                    borderColor: '#3b82f6',
+                    borderColor: '#1e40af',
                     backgroundColor: gradientAtt,
                     borderWidth: 2.5,
                     tension: 0.4,
                     fill: true,
                     pointRadius: 4,
                     pointHoverRadius: 6,
-                    pointBackgroundColor: '#3b82f6',
+                    pointBackgroundColor: '#1e40af',
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     order: 3
@@ -1803,14 +1808,14 @@ function initCharts() {
                 {
                     label: 'Late Arrivals (%)',
                     data: attendanceData.week.lateData,
-                    borderColor: '#ef4444',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderColor: '#8e1e18',
+                    backgroundColor: 'rgba(142, 30, 24, 0.1)',
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true,
                     pointRadius: 3,
                     pointHoverRadius: 5,
-                    pointBackgroundColor: '#ef4444',
+                    pointBackgroundColor: '#8e1e18',
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     order: 2
@@ -1818,14 +1823,14 @@ function initCharts() {
                 {
                     label: 'Absent (%)',
                     data: attendanceData.week.absentData,
-                    borderColor: '#8b5cf6',
-                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderColor: '#6d28d9',
+                    backgroundColor: 'rgba(109, 40, 217, 0.1)',
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true,
                     pointRadius: 3,
                     pointHoverRadius: 5,
-                    pointBackgroundColor: '#8b5cf6',
+                    pointBackgroundColor: '#6d28d9',
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     order: 1
@@ -2226,7 +2231,7 @@ function showPerformerDetails(emp, period, rank) {
         'excellent': 'background:#e8f9ef;color:#15803d',
         'good': 'background:#e8f9ef;color:#15803d',
         'needs_improvement': 'background:#fbf6e3;color:#c9a227',
-        'poor': 'background:#fde8e8;color:#dc2626'
+        'poor': 'background:#fde8e8;color:#8e1e18'
     };
     tierEl.textContent = tierLabels[emp.tier] || emp.tier;
     tierEl.style.cssText = 'font-size:12px;padding:4px 10px;border-radius:999px;font-weight:700;' + tierColors[emp.tier];

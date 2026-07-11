@@ -1,19 +1,61 @@
-<div style="background: linear-gradient(135deg, #0b044d 0%, #150c63 100%); padding: 24px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <div>
-        <h3 style="margin: 0 0 4px; font-size: 20px; font-weight: 700; color: #fff;">Leave & Benefits Management</h3>
-        <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.7);">{{ now()->format('l, F j, Y') }} · Municipal Government of Pagsanjan</p>
-    </div>
-    <div style="display: flex; align-items: center; gap: 12px;">
-        <!-- Search Bar -->
-        <div style="position: relative;">
-            <input type="text" id="leaveSearchInput" placeholder="Search by employee, leave type, or status..." style="width: 320px; padding: 10px 40px 10px 16px; border: none; border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; color: #0b044d; background: #fff;" oninput="searchLeaveRecords(this.value)" />
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8f8daf" stroke-width="2" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35"/>
+{{-- Leave & Benefits Page Header --}}
+<div class="welcome-banner">
+    <div class="banner-left">
+        <div class="banner-icon">
+            <svg width="22" height="22" fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
             </svg>
+        </div>
+        <div>
+            <h2>Leave & Benefits Management</h2>
+            <p>{{ now()->format('l, F j, Y') }} &nbsp;·&nbsp; Municipal Government of Pagsanjan</p>
+        </div>
+    </div>
+    <div class="banner-right">
+        <div class="topbar-search-wrap">
+            <svg class="topbar-search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="leaveSearchInput" class="topbar-search-input" placeholder="Search by employee, leave type, or status..." oninput="searchLeaveRecords(this.value)">
         </div>
     </div>
 </div>
+
+<style>
+/* ══ Solid welcome banner — matches the pattern used on the Attendance page ══ */
+.welcome-banner {
+    position: relative;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Poppins', sans-serif !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, .18) !important;
+    background: #0b044d !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .16),
+        0 16px 40px rgba(11, 4, 77, .28) !important;
+}
+.welcome-banner .banner-icon {
+    border: 1px solid rgba(255, 255, 255, .22) !important;
+    background: rgba(255, 255, 255, .12) !important;
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+}
+
+.topbar-search-wrap { position: relative; display: flex; align-items: center; }
+.topbar-search-icon { position: absolute; left: 12px; color: #8f8daf; pointer-events: none; }
+.topbar-search-input {
+    background: #fff; border: 1.5px solid transparent; border-radius: 9px;
+    padding: 9px 12px 9px 34px; font-size: 12.5px; color: #0b044d; outline: none; width: 260px;
+    font-family: inherit; box-shadow: 0 1px 3px rgba(11,4,77,.12);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.topbar-search-input::placeholder { color: #aaa8cc; }
+.topbar-search-input:focus { border-color: #0b044d; box-shadow: 0 0 0 3px rgba(11,4,77,.12); }
+
+@media (max-width: 768px) {
+    .banner-right { flex-wrap: wrap; }
+    .topbar-search-wrap { width: 100%; }
+    .topbar-search-input { width: 100%; }
+}
+</style>
 
 <script>
 function searchLeaveRecords(query) {

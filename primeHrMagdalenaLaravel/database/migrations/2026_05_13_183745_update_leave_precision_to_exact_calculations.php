@@ -13,6 +13,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Deferred-safe: on a fresh install this ALTER is ordered before
+        // `leave_balances` is created; skip so migrate runs, then a later catch-up migration
+        // (…apply_deferred_schema_changes) applies the final schema.
+        if (! Schema::hasTable('leave_balances')) {
+            return;
+        }
+
         // Update leave_balances table
         Schema::table('leave_balances', function (Blueprint $table) {
             $table->decimal('total_credits', 10, 6)->default(0)->change();
@@ -35,6 +42,13 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Deferred-safe: on a fresh install this ALTER is ordered before
+        // `leave_balances` is created; skip so migrate runs, then a later catch-up migration
+        // (…apply_deferred_schema_changes) applies the final schema.
+        if (! Schema::hasTable('leave_balances')) {
+            return;
+        }
+
         // Revert leave_balances table
         Schema::table('leave_balances', function (Blueprint $table) {
             $table->decimal('total_credits', 8, 2)->default(0)->change();

@@ -11,6 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Deferred-safe: on a fresh install this ALTER is ordered before
+        // `attendance` is created; skip so migrate runs, then a later catch-up migration
+        // (…apply_deferred_schema_changes) applies the final schema.
+        if (! Schema::hasTable('attendance')) {
+            return;
+        }
+
         Schema::table('attendance', function (Blueprint $table) {
             // Add attendance_type column to track different types of attendance
             $table->enum('attendance_type', ['REGULAR', 'LEAVE', 'TRAVEL_ORDER', 'HOLIDAY', 'ABSENT'])
@@ -27,6 +34,13 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Deferred-safe: on a fresh install this ALTER is ordered before
+        // `attendance` is created; skip so migrate runs, then a later catch-up migration
+        // (…apply_deferred_schema_changes) applies the final schema.
+        if (! Schema::hasTable('attendance')) {
+            return;
+        }
+
         Schema::table('attendance', function (Blueprint $table) {
             $table->dropColumn(['attendance_type', 'remarks']);
         });

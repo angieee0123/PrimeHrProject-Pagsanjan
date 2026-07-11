@@ -3,251 +3,81 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\Employee;
-use App\Models\Department;
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 
+/**
+ * Endpoint-contract test for the web chatbot route (POST /chatbot/chat).
+ *
+ * Only the deterministic, dependency-free paths are asserted here — the
+ * greeting handler and the empty-message validation — since the SQL/LLM
+ * paths require an external Groq API key and live data, which don't belong
+ * in an automated unit run. (The previous version of this test posted to a
+ * non-existent /api/chatbot route and failed every assertion with HTTP 404.)
+ */
 class ChatbotControllerTest extends TestCase
 {
-    public function testChatbotEndpoint()
+    protected function setUp(): void
     {
-        echo "\n\n";
-        echo "═══════════════════════════════════════════════════════════════\n";
-        echo "   PRIME HRIS CHATBOT - COMPREHENSIVE TESTING\n";
-        echo "═══════════════════════════════════════════════════════════════\n\n";
+        parent::setUp();
+        // The route is under the `web` group; skip CSRF for the JSON POST.
+        $this->withoutMiddleware(ValidateCsrfToken::class);
 
-        $testQuestions = [
-            // GREETINGS
-            [
-                'category' => '1. GREETINGS',
-                'questions' => [
-                    'Hello',
-                    'Hi there',
-                    'Good morning',
-                    'Kumusta',
-                ]
-            ],
-            
-            // COUNTING QUERIES
-            [
-                'category' => '2. COUNTING QUERIES - Total Employees',
-                'questions' => [
-                    'How many employees do we have?',
-                    'How many people work here?',
-                    'Total number of staff',
-                    'Count all employees',
-                    'Ilang empleyado meron tayo?',
-                ]
-            ],
-            
-            [
-                'category' => '3. COUNTING QUERIES - Active Employees',
-                'questions' => [
-                    'How many active employees?',
-                    'Count active staff',
-                    'Total active personnel',
-                    'Ilang aktibong empleyado?',
-                ]
-            ],
-            
-            [
-                'category' => '4. COUNTING QUERIES - Inactive Employees',
-                'questions' => [
-                    'How many inactive employees?',
-                    'Count inactive staff',
-                    'Total deactivated personnel',
-                ]
-            ],
-            
-            [
-                'category' => '5. COUNTING QUERIES - Permanent Employees',
-                'questions' => [
-                    'How many permanent employees?',
-                    'Count permanent staff',
-                    'Ilang permanenteng empleyado?',
-                ]
-            ],
-            
-            [
-                'category' => '6. COUNTING QUERIES - Job Order Employees',
-                'questions' => [
-                    'How many job order employees?',
-                    'Count contractual staff',
-                ]
-            ],
-            
-            [
-                'category' => '7. COUNTING QUERIES - Departments',
-                'questions' => [
-                    'How many departments do we have?',
-                    'Total number of offices',
-                    'Count all departments',
-                ]
-            ],
-            
-            // LISTING QUERIES
-            [
-                'category' => '8. LISTING QUERIES - All Employees',
-                'questions' => [
-                    'Show all employees',
-                    'List all staff',
-                    'Display all personnel',
-                    'Ipakita ang lahat ng empleyado',
-                ]
-            ],
-            
-            [
-                'category' => '9. LISTING QUERIES - Active Employees',
-                'questions' => [
-                    'Show active employees',
-                    'List active staff',
-                    'Display active personnel',
-                ]
-            ],
-            
-            [
-                'category' => '10. LISTING QUERIES - Inactive Employees',
-                'questions' => [
-                    'Show inactive employees',
-                    'List inactive staff',
-                ]
-            ],
-            
-            [
-                'category' => '11. LISTING QUERIES - Departments',
-                'questions' => [
-                    'List all departments',
-                    'Show all offices',
-                    'Display all departments',
-                ]
-            ],
-            
-            // SEARCH QUERIES
-            [
-                'category' => '12. SEARCH QUERIES - By Name',
-                'questions' => [
-                    'Find John Doe',
-                    'Who is Maria Santos?',
-                    'Search for Juan dela Cruz',
-                    'Hanap si Pedro Garcia',
-                ]
-            ],
-            
-            [
-                'category' => '13. SEARCH QUERIES - By Position',
-                'questions' => [
-                    'Find all administrators',
-                    'Who are the system administrators?',
-                    'Search for engineers',
-                ]
-            ],
-            
-            [
-                'category' => '14. SEARCH QUERIES - Employee Status',
-                'questions' => [
-                    'What is the status of John Doe?',
-                    'Check employee status',
-                ]
-            ],
-            
-            // DEPARTMENT QUERIES
-            [
-                'category' => '15. DEPARTMENT QUERIES - Department Head',
-                'questions' => [
-                    'Who is the head of Mayor office?',
-                    'Who heads the health office?',
-                    'Sino ang pinuno ng Mayor office?',
-                ]
-            ],
-            
-            [
-                'category' => '16. DEPARTMENT QUERIES - Department Personnel',
-                'questions' => [
-                    'Who works in Mayor office?',
-                    'Show employees in health office',
-                    'List staff in engineering department',
-                ]
-            ],
-            
-            // NATURAL LANGUAGE VARIATIONS
-            [
-                'category' => '17. NATURAL LANGUAGE VARIATIONS',
-                'questions' => [
-                    'How many workers do we have?',
-                    'Total people employed',
-                    'Show me all the people working here',
-                    'Find someone named administrator',
-                ]
-            ],
-            
-            // BILINGUAL (TAGLISH)
-            [
-                'category' => '18. BILINGUAL QUERIES (Taglish)',
-                'questions' => [
-                    'How many empleyado meron?',
-                    'Show me all aktibong staff',
-                    'Sino ang head ng engineering?',
-                ]
-            ],
-        ];
+        // The route requires auth. An in-memory user is enough — the greeting
+        // and validation paths never touch the database.
+        $user = new User();
+        $user->roles = ['employee'];
+        $this->actingAs($user);
+    }
 
-        $totalTests = 0;
-        $passedTests = 0;
-        $failedTests = 0;
+    public function test_route_exists(): void
+    {
+        // Anything other than 404/405 proves the route resolves.
+        $status = $this->postJson('/chatbot/chat', ['message' => 'Hello'])->status();
+        $this->assertNotSame(404, $status, 'chatbot/chat route should exist');
+        $this->assertNotSame(405, $status, 'chatbot/chat should accept POST');
+    }
 
-        foreach ($testQuestions as $category) {
-            echo "\n";
-            echo "───────────────────────────────────────────────────────────────\n";
-            echo "  {$category['category']}\n";
-            echo "───────────────────────────────────────────────────────────────\n";
+    public function test_requires_authentication(): void
+    {
+        // Fresh instance without the acting-as user from setUp.
+        $this->app['auth']->forgetGuards();
+        $this->refreshApplication();
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $this->postJson('/chatbot/chat', ['message' => 'Hello'])->assertStatus(401);
+    }
 
-            foreach ($category['questions'] as $question) {
-                $totalTests++;
-                
-                echo "\n📝 Question: \"{$question}\"\n";
-                
-                try {
-                    $response = $this->postJson('/api/chatbot', [
-                        'message' => $question
-                    ]);
+    public function test_greeting_returns_success_without_external_services(): void
+    {
+        $response = $this->postJson('/chatbot/chat', ['message' => 'Hello']);
 
-                    if ($response->status() === 200) {
-                        $data = $response->json();
-                        
-                        echo "✅ Status: SUCCESS\n";
-                        echo "🔍 Query Type: " . ($data['query_type'] ?? 'N/A') . "\n";
-                        echo "💬 Response: " . substr($data['response'], 0, 150) . "...\n";
-                        
-                        if (isset($data['follow_up_questions']) && count($data['follow_up_questions']) > 0) {
-                            echo "🔗 Follow-ups: " . implode(', ', array_slice($data['follow_up_questions'], 0, 2)) . "\n";
-                        }
-                        
-                        $passedTests++;
-                    } else {
-                        echo "❌ Status: FAILED (HTTP {$response->status()})\n";
-                        echo "⚠️  Error: " . ($response->json()['error'] ?? 'Unknown error') . "\n";
-                        $failedTests++;
-                    }
-                } catch (\Exception $e) {
-                    echo "❌ Status: EXCEPTION\n";
-                    echo "⚠️  Error: " . $e->getMessage() . "\n";
-                    $failedTests++;
-                }
-            }
+        $response->assertOk()
+            ->assertJson(['status' => 'success'])
+            ->assertJsonStructure(['response', 'status']);
+
+        $this->assertStringContainsString('PRIME HRIS', $response->json('response'));
+    }
+
+    public function test_various_greetings_are_recognized(): void
+    {
+        foreach (['Hi there', 'Good morning', 'Kumusta'] as $greeting) {
+            $response = $this->postJson('/chatbot/chat', ['message' => $greeting]);
+            $response->assertOk()->assertJson(['status' => 'success']);
+            $this->assertNotEmpty($response->json('response'), "empty response for: {$greeting}");
         }
+    }
 
-        // SUMMARY
-        echo "\n\n";
-        echo "═══════════════════════════════════════════════════════════════\n";
-        echo "   TEST SUMMARY\n";
-        echo "═══════════════════════════════════════════════════════════════\n";
-        echo "Total Tests:  {$totalTests}\n";
-        echo "✅ Passed:    {$passedTests}\n";
-        echo "❌ Failed:    {$failedTests}\n";
-        echo "Success Rate: " . round(($passedTests / $totalTests) * 100, 2) . "%\n";
-        echo "═══════════════════════════════════════════════════════════════\n\n";
+    public function test_empty_message_is_rejected(): void
+    {
+        $this->postJson('/chatbot/chat', ['message' => ''])
+            ->assertStatus(400)
+            ->assertJson(['error' => 'No message provided']);
+    }
 
-        $this->assertTrue($passedTests > 0, 'At least some tests should pass');
+    public function test_reset_with_empty_message_is_ok(): void
+    {
+        $this->postJson('/chatbot/chat', ['message' => '', 'reset' => true])
+            ->assertOk()
+            ->assertJson(['status' => 'success']);
     }
 }

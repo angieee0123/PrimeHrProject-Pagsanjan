@@ -27,19 +27,10 @@
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Poppins', sans-serif !important;
     border-radius: 20px !important;
     border: 1px solid rgba(255, 255, 255, .18) !important;
-    background:
-        radial-gradient(340px 200px at 100% -20%, rgba(129, 140, 248, .35), transparent 70%),
-        linear-gradient(135deg, #0b044d 0%, #150c63 100%) !important;
+    background: #0b044d !important;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, .16),
         0 16px 40px rgba(11, 4, 77, .28) !important;
-}
-.welcome-banner::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(255, 255, 255, .08), transparent 45%);
-    pointer-events: none;
 }
 .welcome-banner .banner-icon {
     border: 1px solid rgba(255, 255, 255, .22) !important;
@@ -49,15 +40,16 @@
 }
 
 .topbar-search-wrap { position: relative; display: flex; align-items: center; }
-.topbar-search-icon { position: absolute; left: 12px; color: rgba(255,255,255,.6); pointer-events: none; }
+.topbar-search-icon { position: absolute; left: 12px; color: #8f8daf; pointer-events: none; }
 .topbar-search-input {
-    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); border-radius: 999px;
-    backdrop-filter: blur(10px) saturate(180%); -webkit-backdrop-filter: blur(10px) saturate(180%);
-    padding: 9px 14px 9px 34px; font-size: 12.5px; color: #fff; outline: none; width: 260px;
-    font-family: inherit; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    background: #fff; border: 1.5px solid transparent; border-radius: 9px;
+    padding: 9px 12px 9px 34px; font-size: 12.5px; color: #0b044d; outline: none; width: 260px;
+    font-family: inherit; box-shadow: 0 1px 3px rgba(11,4,77,.12);
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
-.topbar-search-input::placeholder { color: rgba(255,255,255,.55); }
-.topbar-search-input:focus { border-color: rgba(255,255,255,.4); background: rgba(255,255,255,.18); box-shadow: 0 0 0 4px rgba(255,255,255,.1); }
+.topbar-search-input::placeholder { color: #aaa8cc; }
+.topbar-search-input:focus { border-color: #0b044d; box-shadow: 0 0 0 3px rgba(11,4,77,.12); }
+
 @media (max-width: 768px) {
     .banner-right { flex-wrap: wrap; }
     .topbar-search-wrap { width: 100%; }

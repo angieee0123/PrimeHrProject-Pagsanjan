@@ -20,7 +20,10 @@ return new class extends Migration
             $table->timestamp('processed_at')->nullable();
             $table->timestamps();
 
-            $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
+            // employee_id FK is added later in
+            // add_deferred_foreign_keys_for_fresh_install, since `employees`
+            // is created by a much later migration (2026_04_13) and doesn't
+            // exist yet at this point in a from-scratch migrate.
             $table->foreign('processed_by')->references('id')->on('users')->onDelete('set null');
             $table->index(['employee_id', 'status']);
             $table->index('created_at');

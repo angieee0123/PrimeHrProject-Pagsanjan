@@ -73,7 +73,7 @@ class MayorDashboardController extends Controller
         ];
 
         // Compact doughnut: workforce by department
-        $deptColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444'];
+        $deptColors = ['#1e40af', '#6d28d9', '#9d174d', '#b45309', '#065f46', '#b91c1c'];
         $departments = Department::where('status', 'Active')
             ->withCount(['employmentDetails as employee_count'])
             ->orderByDesc('employee_count')

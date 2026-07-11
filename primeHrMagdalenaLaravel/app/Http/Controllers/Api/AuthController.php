@@ -57,8 +57,8 @@ class AuthController extends Controller
             }
         }
 
-        // Fallback for explicit permanent role or email (web.php lines 59-61)
-        if (!$isPermanent && ($user->hasRole('permanent') || $user->email === 'permanent@gmail.com')) {
+        // Fallback for the legacy hardcoded permanent test account
+        if (!$isPermanent && $user->email === 'permanent@gmail.com') {
             $userType = 'permanent';
             $isPermanent = true;
         }
@@ -199,7 +199,7 @@ class AuthController extends Controller
             }
         }
 
-        if (!$isPermanent && ($user->hasRole('permanent') || $user->email === 'permanent@gmail.com')) {
+        if (!$isPermanent && $user->email === 'permanent@gmail.com') {
             $userType = 'permanent';
             $isPermanent = true;
         }

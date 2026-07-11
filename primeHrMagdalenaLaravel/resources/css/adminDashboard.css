@@ -133,7 +133,7 @@
 /* ── angie-resources/css/app.css — ADMIN DASHBOARD section ── */
 .welcome-banner {
   display: flex; align-items: center; justify-content: space-between;
-  background: linear-gradient(135deg, #0b044d 0%, #150c63 100%);
+  background: #0b044d;
   border-radius: 14px; padding: 20px 26px; margin-bottom: 22px;
   flex-wrap: wrap; gap: 14px;
 }

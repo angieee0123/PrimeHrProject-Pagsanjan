@@ -16,6 +16,13 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // SQLite cannot ALTER TABLE to add foreign keys after creation, and has
+        // no information_schema. FK columns still exist and work without the
+        // constraint, so we simply skip on that driver (used by the test suite).
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         if (Schema::hasTable('travel_orders')) {
             Schema::table('travel_orders', function (Blueprint $table) {
                 if (! $this->hasForeignKey('travel_orders', 'travel_orders_employee_id_foreign')) {
@@ -26,14 +33,32 @@ return new class extends Migration
                 }
             });
         }
+
+        if (Schema::hasTable('employee_requests')) {
+            Schema::table('employee_requests', function (Blueprint $table) {
+                if (! $this->hasForeignKey('employee_requests', 'employee_requests_employee_id_foreign')) {
+                    $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
+                }
+            });
+        }
     }
 
     public function down(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         if (Schema::hasTable('travel_orders')) {
             Schema::table('travel_orders', function (Blueprint $table) {
                 $table->dropForeign(['employee_id']);
                 $table->dropForeign(['approved_by']);
+            });
+        }
+
+        if (Schema::hasTable('employee_requests')) {
+            Schema::table('employee_requests', function (Blueprint $table) {
+                $table->dropForeign(['employee_id']);
             });
         }
     }

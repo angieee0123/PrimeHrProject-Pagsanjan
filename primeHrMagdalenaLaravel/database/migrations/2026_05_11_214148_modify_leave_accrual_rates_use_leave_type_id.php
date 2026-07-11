@@ -11,6 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Deferred-safe: on a fresh install this ALTER is ordered before
+        // `leave_accrual_rates` is created; skip so migrate runs, then a later catch-up migration
+        // (…apply_deferred_schema_changes) applies the final schema.
+        if (! Schema::hasTable('leave_accrual_rates')) {
+            return;
+        }
+
         Schema::table('leave_accrual_rates', function (Blueprint $table) {
             // Drop the old foreign key and column
             $table->dropForeign(['leave_code']);
@@ -27,6 +34,13 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Deferred-safe: on a fresh install this ALTER is ordered before
+        // `leave_accrual_rates` is created; skip so migrate runs, then a later catch-up migration
+        // (…apply_deferred_schema_changes) applies the final schema.
+        if (! Schema::hasTable('leave_accrual_rates')) {
+            return;
+        }
+
         Schema::table('leave_accrual_rates', function (Blueprint $table) {
             // Drop the new foreign key and column
             $table->dropForeign(['leave_type_id']);

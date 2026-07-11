@@ -11,6 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Deferred-safe: on a fresh install this ALTER is ordered before
+        // `attendance` is created; skip so migrate runs, then a later catch-up migration
+        // (…apply_deferred_schema_changes) applies the final schema.
+        if (! Schema::hasTable('attendance')) {
+            return;
+        }
+
         Schema::table('attendance', function (Blueprint $table) {
             // Change time columns to varchar to support 'TO', 'LEAVE', etc.
             $table->string('am_in', 10)->nullable()->change();
@@ -27,6 +34,13 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Deferred-safe: on a fresh install this ALTER is ordered before
+        // `attendance` is created; skip so migrate runs, then a later catch-up migration
+        // (…apply_deferred_schema_changes) applies the final schema.
+        if (! Schema::hasTable('attendance')) {
+            return;
+        }
+
         Schema::table('attendance', function (Blueprint $table) {
             // Revert back to time columns (this may cause data loss)
             $table->time('am_in')->nullable()->change();

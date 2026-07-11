@@ -56,26 +56,57 @@
             <p class="auth-page-sub">Your account has more than one role. Select the dashboard you want to access.</p>
         </div>
 
-        <div class="auth-card">
-            <form method="POST" action="{{ route('select-role.post') }}" class="auth-form">
+        <div class="auth-card role-select-card">
+            <form method="POST" action="{{ route('select-role.post') }}">
                 @csrf
                 @php
-                    $roleLabels = [
-                        'admin' => ['Administrator', 'Full system administration access'],
-                        'hr'    => ['HR Staff', 'Manage employee records and HR operations'],
-                        'mayor' => ['Municipal Mayor', 'Read-only oversight dashboard'],
-                        'employee' => ['Employee', 'Access your personal employee records'],
+                    $roleMeta = [
+                        'admin' => [
+                            'label' => 'Administrator', 'desc' => 'Full system administration access', 'accent' => 'var(--maroon)',
+                            'icon' => '<path d="M12 21s7-3.5 7-10V5l-7-3-7 3v6c0 6.5 7 10 7 10z"/><path d="m9 12 2 2 4-4"/>',
+                        ],
+                        'hr' => [
+                            'label' => 'HR Staff', 'desc' => 'Manage employee records and HR operations', 'accent' => 'var(--navy)',
+                            'icon' => '<path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+                        ],
+                        'mayor' => [
+                            'label' => 'Municipal Mayor', 'desc' => 'Read-only oversight dashboard', 'accent' => 'var(--gold)',
+                            'icon' => '<line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 21 7 3 7"/>',
+                        ],
+                        'employee' => [
+                            'label' => 'Employee', 'desc' => 'Access your personal employee records', 'accent' => '#15803d',
+                            'icon' => '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.6-8 8-8s8 3.5 8 8"/>',
+                        ],
+                    ];
+                    $fallback = [
+                        'label' => null, 'desc' => '', 'accent' => 'var(--navy)',
+                        'icon' => '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.6-8 8-8s8 3.5 8 8"/>',
                     ];
                 @endphp
-                @foreach($options as $option)
-                    @php [$label, $desc] = $roleLabels[$option['role']] ?? [ucfirst($option['role']), '']; @endphp
-                    <button type="submit" name="role" value="{{ $option['role'] }}" class="pub-hr-btn auth-submit" style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin-bottom:12px;">
-                        <span style="font-weight:700;">Continue as {{ $label }}</span>
-                        @if($desc)
-                            <span style="font-weight:400;font-size:12px;opacity:.85;">{{ $desc }}</span>
-                        @endif
-                    </button>
-                @endforeach
+                <div class="role-grid">
+                    @foreach($options as $option)
+                        @php
+                            $meta = $roleMeta[$option['role']] ?? $fallback;
+                            $label = $meta['label'] ?? ucfirst($option['role']);
+                        @endphp
+                        <button type="submit" name="role" value="{{ $option['role'] }}" class="role-card" style="--role-accent: {{ $meta['accent'] }};">
+                            <span class="role-card-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    {!! $meta['icon'] !!}
+                                </svg>
+                            </span>
+                            <span class="role-card-body">
+                                <span class="role-card-title">{{ $label }}</span>
+                                @if($meta['desc'])
+                                    <span class="role-card-desc">{{ $meta['desc'] }}</span>
+                                @endif
+                            </span>
+                            <svg class="role-card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </button>
+                    @endforeach
+                </div>
             </form>
         </div>
 

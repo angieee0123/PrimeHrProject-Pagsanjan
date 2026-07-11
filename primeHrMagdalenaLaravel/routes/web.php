@@ -66,8 +66,8 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
             }
         }
 
-        // Fallback for explicit legacy permanent role or email
-        if ($user->hasRole('permanent') || $user->email === 'permanent@gmail.com') {
+        // Fallback for the legacy hardcoded permanent test account
+        if ($user->email === 'permanent@gmail.com') {
             return redirect()->route('employee.dashboard');
         }
 

@@ -24,24 +24,55 @@
 
 .mayor-chart-card { padding: 16px 18px 18px; }
 .mayor-chart-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.mayor-chart-card-title { font-size: 13.5px; font-weight: 700; color: #1e293b; margin: 0 0 2px; }
+.mayor-chart-card-title { font-size: 13.5px; font-weight: 700; color: #0b044d; margin: 0 0 2px; }
 .mayor-chart-card-sub { font-size: 11px; color: #8f8daf; margin: 0; }
 
 .mayor-donut-row { display: flex; align-items: center; gap: 16px; }
 .mayor-donut-wrap { position: relative; width: 116px; height: 116px; flex-shrink: 0; }
 .mayor-donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
 .mayor-donut-center-value { font-size: 18px; font-weight: 800; color: #0b044d; line-height: 1.1; }
-.mayor-donut-center-label { font-size: 9px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .3px; }
+.mayor-donut-center-label { font-size: 9px; font-weight: 600; color: #8f8daf; text-transform: uppercase; letter-spacing: .3px; }
 
 .mayor-legend-list { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
 .mayor-legend-row { display: flex; align-items: center; gap: 8px; }
 .mayor-legend-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
-.mayor-legend-label { flex: 1; min-width: 0; font-size: 11.5px; font-weight: 600; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mayor-legend-value { font-size: 12px; font-weight: 700; color: #1e293b; }
+.mayor-legend-label { flex: 1; min-width: 0; font-size: 11.5px; font-weight: 600; color: #56547a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mayor-legend-value { font-size: 12px; font-weight: 700; color: #0b044d; }
 
 /* Highlights: single tabbed panel replaces admin's several separate list panels */
 .mayor-highlights-tabs { display: flex; gap: 6px; }
 .mayor-highlight-row { display: flex; align-items: center; gap: 11px; padding: 9px 0; }
+
+/* Dark pill tabs — matches the active-tab treatment used on the admin dashboard */
+.mayor-highlights-tabs .chart-tab {
+    border-radius: 999px;
+    font-weight: 700;
+    transition: all .22s cubic-bezier(.4, 0, .2, 1);
+}
+.mayor-highlights-tabs .chart-tab.active {
+    border-color: transparent;
+    background: linear-gradient(135deg, #1b1464, #0b044d);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 20px rgba(11,4,77,.35);
+}
+.mayor-highlights-tabs .chart-tab.active:hover {
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 10px 26px rgba(11,4,77,.42);
+}
+.mayor-highlights-tabs .chart-tab:not(.active):hover {
+    background: rgba(11,4,77,.06);
+}
+
+/* Top Attendance Performers — real data table with column headers, not card rows */
+.mayor-perf-table { width: 100%; border-collapse: collapse; }
+.mayor-perf-table thead th { text-align: left; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #8f8daf; padding: 0 10px 9px; border-bottom: 1.5px solid #ecebf6; }
+.mayor-perf-table tbody td { padding: 8px 10px; font-size: 12.5px; color: #0b044d; border-bottom: 1px solid #f7f6fc; vertical-align: middle; }
+.mayor-perf-table tbody tr:last-child td { border-bottom: none; }
+.mayor-perf-table tbody tr { transition: background 0.15s ease; }
+.mayor-perf-table tbody tr:hover { background: #f7f6fc; }
+.mayor-perf-rank-td { display: inline-flex; align-items: center; justify-content: center; min-width: 21px; height: 21px; border-radius: 7px; font-size: 10.5px; font-weight: 700; }
+.mayor-perf-bar-track { width: 64px; height: 4px; background: #ecebf6; border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+.mayor-perf-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #150c63, #0b044d); }
 </style>
 
 {{-- Stats Grid --}}
@@ -69,7 +100,7 @@
         </div>
         <p class="stat-value">{{ number_format($stats['present_today']) }}<span style="font-size:14px;color:#8f8daf;font-weight:500"> / {{ number_format($stats['total_employees']) }}</span></p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#22c55e"></span>
+            <span class="stat-dot" style="background:#15803d"></span>
             <p class="stat-sub">{{ $stats['attendance_rate'] }}% attendance rate</p>
         </div>
     </div>
@@ -126,7 +157,7 @@
         </div>
         @if($departments->isEmpty())
         <div style="text-align:center;padding:20px 0">
-            <p style="font-size:12px;color:#94a3b8;margin:0">No department data yet</p>
+            <p style="font-size:12px;color:#8f8daf;margin:0">No department data yet</p>
         </div>
         @else
         <div class="mayor-donut-row">
@@ -173,17 +204,17 @@
             </div>
             <div class="mayor-legend-list">
                 <div class="mayor-legend-row">
-                    <span class="mayor-legend-dot" style="background:#22c55e"></span>
+                    <span class="mayor-legend-dot" style="background:#15803d"></span>
                     <span class="mayor-legend-label">On Time</span>
                     <span class="mayor-legend-value">{{ $attendanceToday['on_time'] }}</span>
                 </div>
                 <div class="mayor-legend-row">
-                    <span class="mayor-legend-dot" style="background:#f59e0b"></span>
+                    <span class="mayor-legend-dot" style="background:#c9a227"></span>
                     <span class="mayor-legend-label">Late</span>
                     <span class="mayor-legend-value">{{ $attendanceToday['late'] }}</span>
                 </div>
                 <div class="mayor-legend-row">
-                    <span class="mayor-legend-dot" style="background:#ef4444"></span>
+                    <span class="mayor-legend-dot" style="background:#8e1e18"></span>
                     <span class="mayor-legend-label">Absent</span>
                     <span class="mayor-legend-value">{{ $attendanceToday['absent'] }}</span>
                 </div>
@@ -225,7 +256,7 @@
         @php $leaveTotal = array_sum($leaveBreakdown); @endphp
         @if($leaveTotal === 0)
         <div style="text-align:center;padding:20px 0">
-            <p style="font-size:12px;color:#94a3b8;margin:0">No leave requests filed this month</p>
+            <p style="font-size:12px;color:#8f8daf;margin:0">No leave requests filed this month</p>
         </div>
         @else
         <div class="mayor-donut-row">
@@ -238,17 +269,17 @@
             </div>
             <div class="mayor-legend-list">
                 <div class="mayor-legend-row">
-                    <span class="mayor-legend-dot" style="background:#22c55e"></span>
+                    <span class="mayor-legend-dot" style="background:#15803d"></span>
                     <span class="mayor-legend-label">Approved</span>
                     <span class="mayor-legend-value">{{ $leaveBreakdown['approved'] }}</span>
                 </div>
                 <div class="mayor-legend-row">
-                    <span class="mayor-legend-dot" style="background:#f59e0b"></span>
+                    <span class="mayor-legend-dot" style="background:#c9a227"></span>
                     <span class="mayor-legend-label">Pending</span>
                     <span class="mayor-legend-value">{{ $leaveBreakdown['pending'] }}</span>
                 </div>
                 <div class="mayor-legend-row">
-                    <span class="mayor-legend-dot" style="background:#ef4444"></span>
+                    <span class="mayor-legend-dot" style="background:#8e1e18"></span>
                     <span class="mayor-legend-label">Rejected</span>
                     <span class="mayor-legend-value">{{ $leaveBreakdown['rejected'] }}</span>
                 </div>
@@ -277,58 +308,72 @@
         </div>
     </div>
 
-    {{-- Top Performers panel --}}
-    <div id="panelHlPerformers" style="padding:6px 20px 18px">
-        <div style="display:flex;flex-direction:column">
-            @forelse($topPerformers as $i => $emp)
-            <div class="mayor-highlight-row" style="border-bottom:{{ $i < count($topPerformers) - 1 ? '1px solid #f1f5f9' : 'none' }}">
-                <span class="enterprise-rank">{{ $i + 1 }}</span>
-                @if($emp['photo'])
-                    <img src="{{ $emp['photo'] }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">
-                @else
-                    <div style="width:32px;height:32px;border-radius:50%;background:{{ $emp['color'] }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px">{{ $emp['initials'] }}</div>
-                @endif
-                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
-                    <div style="display:flex;justify-content:space-between;align-items:center">
-                        <div class="enterprise-person" style="margin:0">
-                            <strong>{{ $emp['name'] }}</strong>
-                            <span>{{ $emp['position'] }}</span>
+    {{-- Top Performers panel — real data table with column headers --}}
+    <div id="panelHlPerformers" style="padding:2px 20px 14px;overflow-x:auto">
+        <table class="mayor-perf-table">
+            <thead>
+                <tr>
+                    <th style="width:30px">#</th>
+                    <th>Employee</th>
+                    <th>Position</th>
+                    <th style="text-align:right">Attendance</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($topPerformers as $i => $emp)
+                <tr>
+                    <td>
+                        <span class="mayor-perf-rank-td" style="background:{{ $i < 3 ? '#fbf6e3' : '#ecebf6' }};color:{{ $i < 3 ? '#c9a227' : '#8f8daf' }}">{{ $i + 1 }}</span>
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:9px">
+                            @if($emp['photo'])
+                                <img src="{{ $emp['photo'] }}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;border:2px solid #e2e1f0;flex-shrink:0">
+                            @else
+                                <div style="width:26px;height:26px;border-radius:50%;background:{{ $emp['color'] }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:10px;border:2px solid #e2e1f0;flex-shrink:0">{{ $emp['initials'] }}</div>
+                            @endif
+                            <span style="font-weight:600;white-space:nowrap">{{ $emp['name'] }}</span>
                         </div>
-                        <span class="enterprise-metric">{{ $emp['rate'] }}%</span>
-                    </div>
-                    <div style="width:100%;height:5px;background:#eef2f6;border-radius:3px;overflow:hidden">
-                        <div style="width:{{ $emp['rate'] }}%;height:100%;background:linear-gradient(90deg,#3b82f6,#2563eb);border-radius:3px"></div>
-                    </div>
-                </div>
-            </div>
-            @empty
-            <p style="text-align:center;padding:20px 0;margin:0;font-size:12px;color:#94a3b8">No attendance data yet</p>
-            @endforelse
-        </div>
+                    </td>
+                    <td style="color:#8f8daf;white-space:nowrap">{{ $emp['position'] }}</td>
+                    <td>
+                        <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px">
+                            <div class="mayor-perf-bar-track">
+                                <div class="mayor-perf-bar-fill" style="width:{{ $emp['rate'] }}%"></div>
+                            </div>
+                            <span style="font-weight:700;min-width:32px;text-align:right">{{ $emp['rate'] }}%</span>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="4" style="text-align:center;padding:20px 0;font-size:12px;color:#8f8daf;border-bottom:none">No attendance data yet</td></tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 
     {{-- Top Earners panel --}}
     <div id="panelHlEarners" style="display:none;padding:6px 20px 18px">
         <div style="display:flex;flex-direction:column">
             @forelse($topEarners as $earner)
-            <div class="mayor-highlight-row" style="border-bottom:{{ $earner['rank'] < 5 ? '1px solid #f1f5f9' : 'none' }}">
-                <div style="min-width:24px;height:24px;border-radius:8px;text-align:center;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:{{ $earner['rank'] <= 3 ? '#fef3c7' : '#f1f5f9' }};color:{{ $earner['rank'] <= 3 ? '#f59e0b' : '#94a3b8' }}">{{ $earner['rank'] }}</div>
+            <div class="mayor-highlight-row" style="border-bottom:{{ $earner['rank'] < 5 ? '1px solid #ecebf6' : 'none' }}">
+                <div style="min-width:24px;height:24px;border-radius:8px;text-align:center;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:{{ $earner['rank'] <= 3 ? '#fbf6e3' : '#ecebf6' }};color:{{ $earner['rank'] <= 3 ? '#c9a227' : '#8f8daf' }}">{{ $earner['rank'] }}</div>
                 @if($earner['photo'])
-                    <img src="{{ $earner['photo'] }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0">
+                    <img src="{{ $earner['photo'] }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #e2e1f0;flex-shrink:0">
                 @else
-                    <div style="width:32px;height:32px;border-radius:50%;background:{{ $earner['color'] }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;border:2px solid #e2e8f0;flex-shrink:0">{{ $earner['initials'] }}</div>
+                    <div style="width:32px;height:32px;border-radius:50%;background:{{ $earner['color'] }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;border:2px solid #e2e1f0;flex-shrink:0">{{ $earner['initials'] }}</div>
                 @endif
                 <div style="flex:1;min-width:0">
-                    <p style="font-size:12.5px;font-weight:600;color:#1e293b;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $earner['name'] }}</p>
-                    <p style="font-size:11px;color:#64748b;margin:0;font-weight:500">{{ $earner['designation'] }}</p>
+                    <p style="font-size:12.5px;font-weight:600;color:#0b044d;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $earner['name'] }}</p>
+                    <p style="font-size:11px;color:#56547a;margin:0;font-weight:500">{{ $earner['designation'] }}</p>
                 </div>
                 <div style="text-align:right;flex-shrink:0">
                     <p style="font-size:13px;font-weight:700;color:#0b044d;margin:0">₱{{ number_format($earner['avg_earnings'], 2) }}</p>
-                    <p style="font-size:10px;color:#94a3b8;margin:2px 0 0;font-weight:500">avg/day</p>
+                    <p style="font-size:10px;color:#8f8daf;margin:2px 0 0;font-weight:500">avg/day</p>
                 </div>
             </div>
             @empty
-            <p style="text-align:center;padding:20px 0;margin:0;font-size:12px;color:#94a3b8">No salary data available</p>
+            <p style="text-align:center;padding:20px 0;margin:0;font-size:12px;color:#8f8daf">No salary data available</p>
             @endforelse
         </div>
     </div>
@@ -337,20 +382,20 @@
     <div id="panelHlLeave" style="display:none;padding:6px 20px 18px">
         <div style="display:flex;flex-direction:column">
             @forelse($recentLeaveFilers as $i => $filer)
-            <div class="mayor-highlight-row" style="border-bottom:{{ $i < count($recentLeaveFilers) - 1 ? '1px solid #f1f5f9' : 'none' }}">
+            <div class="mayor-highlight-row" style="border-bottom:{{ $i < count($recentLeaveFilers) - 1 ? '1px solid #ecebf6' : 'none' }}">
                 @if($filer['photo'])
-                    <img src="{{ $filer['photo'] }}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0">
+                    <img src="{{ $filer['photo'] }}" style="width:32px;height:32px;border-radius:9px;object-fit:cover;border:2px solid #e2e1f0;flex-shrink:0">
                 @else
-                    <div style="width:32px;height:32px;border-radius:9px;background:{{ $filer['color'] }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;border:2px solid #e2e8f0;flex-shrink:0">{{ $filer['initials'] }}</div>
+                    <div style="width:32px;height:32px;border-radius:9px;background:{{ $filer['color'] }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;border:2px solid #e2e1f0;flex-shrink:0">{{ $filer['initials'] }}</div>
                 @endif
                 <div style="flex:1;min-width:0">
-                    <p style="font-size:12.5px;font-weight:600;color:#1e293b;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $filer['name'] }}</p>
-                    <p style="font-size:11px;color:#64748b;margin:0;font-weight:500">{{ $filer['leave_type'] }} · {{ $filer['days'] }} day{{ $filer['days'] > 1 ? 's' : '' }}</p>
+                    <p style="font-size:12.5px;font-weight:600;color:#0b044d;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $filer['name'] }}</p>
+                    <p style="font-size:11px;color:#56547a;margin:0;font-weight:500">{{ $filer['leave_type'] }} · {{ $filer['days'] }} day{{ $filer['days'] > 1 ? 's' : '' }}</p>
                 </div>
                 <div style="font-size:10px;padding:4px 8px;border-radius:6px;font-weight:700;background:{{ $filer['status_bg'] }};color:{{ $filer['status_color'] }};flex-shrink:0">{{ $filer['status'] }}</div>
             </div>
             @empty
-            <p style="text-align:center;padding:20px 0;margin:0;font-size:12px;color:#94a3b8">No recent leave applications</p>
+            <p style="text-align:center;padding:20px 0;margin:0;font-size:12px;color:#8f8daf">No recent leave applications</p>
             @endforelse
         </div>
     </div>
@@ -383,7 +428,7 @@ function donutOptions() {
         responsive: true,
         maintainAspectRatio: false,
         cutout: '72%',
-        plugins: { legend: { display: false }, tooltip: { backgroundColor: '#fff', titleColor: '#0b044d', bodyColor: '#5a5888', borderColor: '#eceaf8', borderWidth: 1.5, padding: 10 } }
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: '#fff', titleColor: '#0b044d', bodyColor: '#56547a', borderColor: '#ecebf6', borderWidth: 1.5, padding: 10 } }
     };
 }
 
@@ -403,7 +448,7 @@ window.addEventListener('load', () => {
         type: 'doughnut',
         data: {
             labels: ['On Time', 'Late', 'Absent'],
-            datasets: [{ data: [attendanceToday.on_time, attendanceToday.late, attendanceToday.absent], backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'], borderWidth: 2, borderColor: '#fff' }]
+            datasets: [{ data: [attendanceToday.on_time, attendanceToday.late, attendanceToday.absent], backgroundColor: ['#15803d', '#c9a227', '#8e1e18'], borderWidth: 2, borderColor: '#fff' }]
         },
         options: donutOptions()
     });
@@ -420,7 +465,7 @@ window.addEventListener('load', () => {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: '#fff', titleColor: '#0b044d', bodyColor: '#5a5888', borderColor: '#eceaf8', borderWidth: 1.5, padding: 10,
+                    backgroundColor: '#fff', titleColor: '#0b044d', bodyColor: '#56547a', borderColor: '#ecebf6', borderWidth: 1.5, padding: 10,
                     callbacks: { label: (ctx) => '₱' + Number(ctx.raw).toLocaleString() }
                 }
             },
@@ -448,7 +493,7 @@ window.addEventListener('load', () => {
             type: 'doughnut',
             data: {
                 labels: ['Approved', 'Pending', 'Rejected'],
-                datasets: [{ data: [leaveBreakdown.approved, leaveBreakdown.pending, leaveBreakdown.rejected], backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'], borderWidth: 2, borderColor: '#fff' }]
+                datasets: [{ data: [leaveBreakdown.approved, leaveBreakdown.pending, leaveBreakdown.rejected], backgroundColor: ['#15803d', '#c9a227', '#8e1e18'], borderWidth: 2, borderColor: '#fff' }]
             },
             options: donutOptions()
         });

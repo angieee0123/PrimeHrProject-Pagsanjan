@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureRoleForArea;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -23,6 +24,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 Request::HEADER_X_FORWARDED_PORT |
                 Request::HEADER_X_FORWARDED_PROTO,
         );
+
+        // Area-based authorization: blocks authenticated users from entering an
+        // admin/ mayor/ employee/ URL area their roles don't permit. Runs on
+        // every web route (including ones added later) after the session loads.
+        $middleware->web(append: [
+            EnsureRoleForArea::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

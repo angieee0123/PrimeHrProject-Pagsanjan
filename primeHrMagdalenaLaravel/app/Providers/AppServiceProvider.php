@@ -51,7 +51,7 @@ class AppServiceProvider extends ServiceProvider
                     'authEmployeeId' => $employee->employee_id ?? 'N/A',
                     'authRole' => ucfirst($activeRole),
                     'authRoles' => $user->roles ?? [],
-                    'isPermanent' => $employmentStatus === 'Permanent' || $user->hasRole('permanent'),
+                    'isPermanent' => $employmentStatus === 'Permanent',
                 ];
 
                 $view->with($userData);

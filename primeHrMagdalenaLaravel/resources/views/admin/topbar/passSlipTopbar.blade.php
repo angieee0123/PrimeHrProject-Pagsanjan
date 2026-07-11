@@ -24,10 +24,16 @@
 
 <style>
 .topbar-search-wrap { position: relative; display: flex; align-items: center; }
-.topbar-search-icon { position: absolute; left: 10px; color: #56547a; pointer-events: none; }
-.topbar-search-input { background: #fff; border: 1.5px solid #e5e4f0; border-radius: 9px; padding: 8px 12px 8px 32px; font-size: 12.5px; color: #0b044d; outline: none; width: 260px; font-family: 'Poppins', sans-serif; transition: border-color 0.2s, box-shadow 0.2s; box-shadow: 0 1px 3px rgba(11,4,77,0.06); }
+.topbar-search-icon { position: absolute; left: 12px; color: #8f8daf; pointer-events: none; }
+.topbar-search-input {
+    background: #fff; border: 1.5px solid transparent; border-radius: 9px;
+    padding: 9px 12px 9px 34px; font-size: 12.5px; color: #0b044d; outline: none; width: 260px;
+    font-family: inherit; box-shadow: 0 1px 3px rgba(11,4,77,.12);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
 .topbar-search-input::placeholder { color: #aaa8cc; }
-.topbar-search-input:focus { border-color: #0b044d; box-shadow: 0 0 0 3px rgba(11,4,77,0.1); }
+.topbar-search-input:focus { border-color: #0b044d; box-shadow: 0 0 0 3px rgba(11,4,77,.12); }
+
 @media (max-width: 768px) {
     .banner-right { flex-wrap: wrap; }
     .topbar-search-wrap { width: 100%; }

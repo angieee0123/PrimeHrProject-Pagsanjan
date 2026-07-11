@@ -10,18 +10,33 @@
         </div>
     </div>
     <div class="banner-right">
-        <span class="banner-badge" id="adminBannerQueue">
-            <span class="banner-badge-dot banner-badge-dot-amber"></span>
-            <span id="adminBannerQueuePct">40%</span> queue cleared
-        </span>
-        <span class="banner-badge" id="adminBannerVerified">
-            <span class="banner-badge-dot banner-badge-dot-success"></span>
-            2 Verified
-        </span>
-        <span class="banner-badge outline" id="adminBannerPending">2 Pending</span>
-        <div class="training-topbar-search">
-            <svg class="training-topbar-search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="adminTrainingSearch" class="training-topbar-search-input" placeholder="Search employee or training..." oninput="filterAdminTraining()">
+        <div class="topbar-search-wrap">
+            <svg class="topbar-search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="adminTrainingSearch" class="topbar-search-input" placeholder="Search employee or training..." oninput="filterAdminTraining()">
         </div>
     </div>
 </div>
+
+<style>
+.topbar-search-wrap { position: relative; display: flex; align-items: center; }
+.topbar-search-icon { position: absolute; left: 12px; color: #8f8daf; pointer-events: none; }
+input.topbar-search-input[type="text"] {
+    background: rgba(255,255,255,.55) !important; border: 1.5px solid rgba(11,4,77,.12) !important; border-radius: 9px !important;
+    padding: 9px 12px 9px 34px; font-size: 12.5px; color: #0b044d !important; outline: none; width: 260px;
+    font-family: inherit; box-shadow: none;
+    backdrop-filter: blur(8px) saturate(160%) !important; -webkit-backdrop-filter: blur(8px) saturate(160%) !important;
+    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+input.topbar-search-input[type="text"]::placeholder { color: #aaa8cc; }
+input.topbar-search-input[type="text"]:focus {
+    background: #fff !important; border-color: #0b044d !important;
+    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+    box-shadow: 0 0 0 3px rgba(11,4,77,.12);
+}
+
+@media (max-width: 768px) {
+    .banner-right { flex-wrap: wrap; }
+    .topbar-search-wrap { width: 100%; }
+    .topbar-search-input { width: 100%; }
+}
+</style>

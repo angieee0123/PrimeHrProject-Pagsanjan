@@ -35,9 +35,7 @@
     overflow: hidden;
     border-radius: 20px !important;
     border: 1px solid rgba(255, 255, 255, .18) !important;
-    background:
-        radial-gradient(340px 200px at 100% -20%, rgba(129, 140, 248, .35), transparent 70%),
-        linear-gradient(135deg, #0b044d 0%, #150c63 100%) !important;
+    background: #0b044d !important;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 16px 40px rgba(11, 4, 77, .28) !important;
 }
 .banner-icon {

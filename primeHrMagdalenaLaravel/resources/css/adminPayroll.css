@@ -1,5 +1,5 @@
 /* ── Welcome Banner ── */
-.welcome-banner { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #0b044d 0%, #150c63 100%); border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; color: #fff; }
+.welcome-banner { display: flex; justify-content: space-between; align-items: center; background: #0b044d; border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; color: #fff; }
 .banner-left { display: flex; align-items: center; gap: 14px; }
 .banner-icon { width: 44px; height: 44px; border-radius: 10px; background: rgba(217,187,0,0.15); border: 1px solid rgba(217,187,0,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .banner-left h2 { font-size: 17px; font-weight: 700; color: #fff; margin: 0 0 3px; }
