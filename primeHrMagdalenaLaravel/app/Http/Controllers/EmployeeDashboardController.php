@@ -57,7 +57,8 @@ class EmployeeDashboardController extends Controller
         $monthStart = $currentDate->copy()->startOfMonth();
         $monthEnd = $currentDate->copy()->endOfMonth();
         
-        $attendanceRecords = Attendance::where('employee_id', $employee->id)
+        $attendanceRecords = Attendance::with('accreditedHoursLogs')
+            ->where('employee_id', $employee->id)
             ->whereBetween('date', [$monthStart, $monthEnd])
             ->get();
 
@@ -67,6 +68,30 @@ class EmployeeDashboardController extends Controller
             return $record->am_in !== null || $record->pm_in !== null;
         })->count();
         $attendanceRate = $totalDays > 0 ? round(($presentDays / $totalDays) * 100) : 0;
+
+        $lateDays = $attendanceRecords->filter(function($record) {
+            return ($record->accreditedHoursLogs->last()->late_minutes ?? 0) > 0;
+        })->count();
+
+        $lateMinutes = $attendanceRecords->sum(function($record) {
+            return $record->accreditedHoursLogs->last()->late_minutes ?? 0;
+        });
+
+        // Recent leave applications — powers the "My Requests" panel
+        $leaveRequests = \App\Models\LeaveApplication::where('employee_id', $employee->id)
+            ->with('leaveType')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $pendingLeaveCount = \App\Models\LeaveApplication::where('employee_id', $employee->id)
+            ->where('status', 'pending')
+            ->count();
+
+        $approvedLeaveCount = \App\Models\LeaveApplication::where('employee_id', $employee->id)
+            ->where('status', 'approved')
+            ->whereYear('start_date', $currentYear)
+            ->count();
 
         // Get payslip history (group by semi-monthly periods)
         $year = SqlCompat::year('work_date');
@@ -157,6 +182,12 @@ class EmployeeDashboardController extends Controller
             'leaveBalances',
             'attendanceRate',
             'presentDays',
+            'totalDays',
+            'lateDays',
+            'lateMinutes',
+            'leaveRequests',
+            'pendingLeaveCount',
+            'approvedLeaveCount',
             'payslips',
             'deductions',
             'startDate',

@@ -206,19 +206,42 @@
         </div>
         <div class="pagination">
             @if(isset($employeeTransactions) && $employeeTransactions->hasPages())
+                @php
+                    $current = $employeeTransactions->currentPage();
+                    $last = $employeeTransactions->lastPage();
+                    // Sliding window of 5 pages around the current one, clamped to the range
+                    $window = 2;
+                    $start = max(1, min($current - $window, $last - ($window * 2)));
+                    $end = min($last, max($current + $window, 1 + ($window * 2)));
+                @endphp
+
                 @if ($employeeTransactions->onFirstPage())
                     <button class="page-btn" disabled>‹</button>
                 @else
                     <button class="page-btn" onclick="navigateToEmployeeTransactionPage('{{ $employeeTransactions->previousPageUrl() }}')">‹</button>
                 @endif
 
-                @foreach ($employeeTransactions->getUrlRange(1, $employeeTransactions->lastPage()) as $page => $url)
-                    @if ($page == $employeeTransactions->currentPage())
+                @if ($start > 1)
+                    <button class="page-btn" onclick="navigateToEmployeeTransactionPage('{{ $employeeTransactions->url(1) }}')">1</button>
+                    @if ($start > 2)
+                        <span class="page-ellipsis">…</span>
+                    @endif
+                @endif
+
+                @foreach ($employeeTransactions->getUrlRange($start, $end) as $page => $url)
+                    @if ($page == $current)
                         <button class="page-btn active">{{ $page }}</button>
                     @else
                         <button class="page-btn" onclick="navigateToEmployeeTransactionPage('{{ $url }}')">{{ $page }}</button>
                     @endif
                 @endforeach
+
+                @if ($end < $last)
+                    @if ($end < $last - 1)
+                        <span class="page-ellipsis">…</span>
+                    @endif
+                    <button class="page-btn" onclick="navigateToEmployeeTransactionPage('{{ $employeeTransactions->url($last) }}')">{{ $last }}</button>
+                @endif
 
                 @if ($employeeTransactions->hasMorePages())
                     <button class="page-btn" onclick="navigateToEmployeeTransactionPage('{{ $employeeTransactions->nextPageUrl() }}')">›</button>
@@ -276,17 +299,29 @@
     </div>
 </div>
 
+<style>
+.page-ellipsis {
+    min-width: 20px;
+    color: #9999bb;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    user-select: none;
+}
+</style>
+
 <script>
 function sortEmployeeTransactionTable(column) {
     const url = new URL(window.location.href);
     const currentSort = url.searchParams.get('sort_by');
     const currentOrder = url.searchParams.get('sort_order') || 'desc';
     const newOrder = (currentSort === column && currentOrder === 'asc') ? 'desc' : 'asc';
-    
+
     url.searchParams.set('sort_by', column);
     url.searchParams.set('sort_order', newOrder);
     url.searchParams.set('tab', 'transactions');
-    
+    url.searchParams.delete('page');
+
     window.location.href = url.toString();
 }
 

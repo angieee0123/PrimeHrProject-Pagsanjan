@@ -395,6 +395,7 @@ class EmployeeAttendanceController extends Controller
             if ($isOnTravelOrder && !in_array($current->dayOfWeek, [0, 6])) {
                 $records[] = [
                     'date' => $current->format('M d, Y'),
+                    'date_key' => $dateKey,
                     'day' => $current->format('l'),
                     'am_in' => 'ON TRAVEL',
                     'am_out' => 'ON TRAVEL',
@@ -421,6 +422,7 @@ class EmployeeAttendanceController extends Controller
             if ($isOnLeave && !in_array($current->dayOfWeek, [0, 6])) {
                 $records[] = [
                     'date' => $current->format('M d, Y'),
+                    'date_key' => $dateKey,
                     'day' => $current->format('l'),
                     'am_in' => 'ON LEAVE',
                     'am_out' => 'ON LEAVE',
@@ -465,6 +467,7 @@ class EmployeeAttendanceController extends Controller
 
             $records[] = [
                 'date' => $current->format('M d, Y'),
+                'date_key' => $dateKey,
                 'day' => $current->format('l'),
                 'am_in' => $amIn,
                 'am_out' => $amOut,

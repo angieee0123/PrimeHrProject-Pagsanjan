@@ -26,61 +26,75 @@
             {{-- Stats Grid --}}
             <div class="stats-grid stats-grid-4 perm-stats">
 
-                <div class="stat-card perm-stat-hover">
+                <div class="stat-card perm-stat-hover" onclick="window.location.href='{{ route('employee.payslip') }}'">
                     <div class="stat-top">
                         <p class="stat-label">Basic Pay</p>
-                        <div class="stat-icon-wrap" style="background:#f0effe;border:1px solid #dbe0ea;border-radius:10px;width:40px;height:40px">
+                        <div class="stat-icon-wrap">
                             <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                         </div>
                     </div>
-                    <p class="stat-value" style="font-size:26px">₱{{ number_format($basicPay, 2) }}</p>
+                    <p class="stat-value">₱{{ number_format($basicPay, 2) }}</p>
                     <div class="stat-footer">
                         <span class="stat-dot" style="background:#0b044d"></span>
                         <p class="stat-sub">{{ $startDate->format('M d') }}–{{ $endDate->format('d, Y') }}</p>
                     </div>
                 </div>
 
-                <div class="stat-card perm-stat-hover">
+                <div class="stat-card perm-stat-hover" onclick="window.location.href='{{ route('employee.payslip') }}'">
                     <div class="stat-top">
                         <p class="stat-label">Net Pay</p>
-                        <div class="stat-icon-wrap" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;width:40px;height:40px">
+                        <div class="stat-icon-wrap">
                             <svg width="17" height="17" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                         </div>
                     </div>
-                    <p class="stat-value" style="font-size:26px">₱{{ number_format($netPay, 2) }}</p>
+                    <p class="stat-value">₱{{ number_format($netPay, 2) }}</p>
                     <div class="stat-footer">
                         <span class="stat-dot" style="background:#22c55e"></span>
-                        <p class="stat-sub">After deductions</p>
+                        <p class="stat-sub">₱{{ number_format($totalDeductions, 2) }} deducted</p>
                     </div>
                 </div>
 
                 @if($isPermanent ?? false)
-                <div class="stat-card perm-stat-hover">
+                <div class="stat-card perm-stat-hover" onclick="window.location.href='{{ route('employee.leave') }}'">
                     <div class="stat-top">
-                        <p class="stat-label">Leave Credits</p>
-                        <div class="stat-icon-wrap" style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;width:40px;height:40px">
+                        <p class="stat-label" style="display:flex;align-items:center;gap:6px">
+                            Leave Credits
+                            @if($pendingLeaveCount > 0)
+                                <span class="stat-pill-alert">{{ $pendingLeaveCount }}</span>
+                            @endif
+                        </p>
+                        <div class="stat-icon-wrap">
                             <svg width="17" height="17" fill="none" stroke="#a16207" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                         </div>
                     </div>
-                    <p class="stat-value" style="font-size:26px">{{ number_format($leaveBalances->sum('available_credits'), 1) }}<span style="font-size:14px;color:#9999bb;font-weight:500"> days</span></p>
+                    <p class="stat-value">{{ number_format($leaveBalances->sum('available_credits'), 1) }}<span style="font-size:14px;font-weight:500"> days</span></p>
                     <div class="stat-footer">
                         <span class="stat-dot" style="background:#d9bb00"></span>
-                        <p class="stat-sub">{{ $leaveBalances->count() }} leave type(s)</p>
+                        <p class="stat-sub">
+                            @if($pendingLeaveCount > 0)
+                                {{ $pendingLeaveCount }} request{{ $pendingLeaveCount != 1 ? 's' : '' }} pending
+                            @else
+                                {{ $approvedLeaveCount }} approved this year
+                            @endif
+                        </p>
                     </div>
                 </div>
                 @endif
 
-                <div class="stat-card perm-stat-hover">
+                <div class="stat-card perm-stat-hover" onclick="window.location.href='{{ route('employee.attendance') }}'">
                     <div class="stat-top">
                         <p class="stat-label">Attendance Rate</p>
-                        <div class="stat-icon-wrap" style="background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;width:40px;height:40px">
+                        <div class="stat-icon-wrap">
                             <svg width="17" height="17" fill="none" stroke="#8e1e18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         </div>
                     </div>
-                    <p class="stat-value" style="font-size:26px">{{ $attendanceRate }}<span style="font-size:14px;color:#9999bb;font-weight:500">%</span></p>
+                    <p class="stat-value">{{ $attendanceRate }}<span style="font-size:14px;font-weight:500">%</span></p>
                     <div class="stat-footer">
-                        <span class="stat-dot" style="background:#8e1e18"></span>
-                        <p class="stat-sub">{{ $presentDays }} days present</p>
+                        <span class="stat-dot" style="background:{{ $lateDays > 0 ? '#b7791f' : '#15803d' }}"></span>
+                        <p class="stat-sub">
+                            {{ $presentDays }} of {{ $totalDays }} days
+                            @if($lateDays > 0) · {{ $lateDays }} late @endif
+                        </p>
                     </div>
                 </div>
 
@@ -97,34 +111,38 @@
                         <p style="font-size:11px;color:#667085;margin:0">Frequently used HR workflows</p>
                     </div>
                 </div>
-                <button class="modal-btn-primary perm-quick-btn" onclick="showPayslip()">
+                <button class="modal-btn-primary perm-quick-btn" onclick="window.location.href='{{ route('employee.payslip') }}'">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                     View Payslip
                 </button>
                 @if($isPermanent ?? false)
-                <button class="btn-export perm-quick-btn">
+                <button class="btn-export perm-quick-btn" onclick="window.location.href='{{ route('employee.leave') }}'">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     File Leave
                 </button>
                 @endif
-                <button class="btn-export perm-quick-btn">
+                <button class="btn-export perm-quick-btn" onclick="window.location.href='{{ route('employee.attendance') }}'">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
                     Attendance
                 </button>
-                <button class="btn-export perm-quick-btn">
+                <button class="btn-export perm-quick-btn" onclick="window.location.href='{{ route('employee.passslip') }}'">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    Pass Slip
+                </button>
+                <button class="btn-export perm-quick-btn" onclick="window.location.href='{{ route('employee.profile') }}'">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     My Profile
                 </button>
             </div>
 
-            {{-- Charts Row --}}
-            <div class="charts-grid perm-charts">
+            {{-- Overview: wide attendance chart + my requests --}}
+            <div class="perm-overview-grid">
 
                 <div class="chart-card">
                     <div class="chart-header">
                         <div>
                             <p class="chart-title">Attendance Trends</p>
-                            <p class="chart-sub">Track your attendance patterns</p>
+                            <p class="chart-sub">Your attendance, late arrivals and absences</p>
                         </div>
                         <div class="chart-tabs">
                             <button class="chart-tab" onclick="switchAttendanceChart('week')">Week</button>
@@ -134,6 +152,58 @@
                     </div>
                     <canvas id="attendanceChart" style="max-height:260px;padding:0 16px 16px"></canvas>
                 </div>
+
+                <div class="table-section perm-section" style="margin:0">
+                    <div class="table-header">
+                        <div>
+                            <p class="table-title" style="display:flex;align-items:center;gap:8px">
+                                My Requests
+                                @if($pendingLeaveCount > 0)
+                                    <span class="stat-pill-alert">{{ $pendingLeaveCount }}</span>
+                                @endif
+                            </p>
+                            <p class="table-sub">Latest leave applications</p>
+                        </div>
+                        <button class="btn-export" style="font-size:11px;padding:6px 12px" onclick="window.location.href='{{ route('employee.leave') }}'">View all</button>
+                    </div>
+                    <div class="perm-card-body">
+                        @forelse($leaveRequests as $req)
+                            @php
+                                $statusStyles = [
+                                    'approved'  => ['bg' => '#e8f9ef', 'fg' => '#15803d', 'dot' => '#15803d'],
+                                    'pending'   => ['bg' => '#fefce8', 'fg' => '#a16207', 'dot' => '#c9a227'],
+                                    'rejected'  => ['bg' => '#fdedec', 'fg' => '#8e1e18', 'dot' => '#8e1e18'],
+                                    'cancelled' => ['bg' => '#f2f4f7', 'fg' => '#667085', 'dot' => '#98a2b3'],
+                                ];
+                                $s = $statusStyles[$req->status] ?? $statusStyles['cancelled'];
+                            @endphp
+                            <div class="perm-req-row">
+                                <span class="perm-req-dot" style="background:{{ $s['dot'] }}"></span>
+                                <div class="perm-req-info">
+                                    <p class="perm-req-title">{{ $req->leaveType->leave_name ?? $req->leave_code }}</p>
+                                    <p class="perm-req-sub">
+                                        {{ \Carbon\Carbon::parse($req->start_date)->format('M d') }}–{{ \Carbon\Carbon::parse($req->end_date)->format('M d, Y') }}
+                                        · {{ number_format($req->number_of_days, 1) }} day{{ $req->number_of_days != 1 ? 's' : '' }}
+                                    </p>
+                                </div>
+                                <span class="badge-status" style="background:{{ $s['bg'] }};color:{{ $s['fg'] }};text-transform:none">{{ ucfirst($req->status) }}</span>
+                            </div>
+                        @empty
+                            <div class="perm-empty">
+                                <div class="perm-empty-icon">
+                                    <svg width="22" height="22" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                </div>
+                                <p class="perm-empty-title">No Requests Yet</p>
+                                <p class="perm-empty-sub">Your leave applications will appear here</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+            </div>
+
+            {{-- Salary + Leave balance --}}
+            <div class="perm-secondary-grid" @if(!($isPermanent ?? false)) style="grid-template-columns:1fr" @endif>
 
                 <div class="chart-card">
                     <div class="chart-header">
@@ -150,10 +220,110 @@
                     <canvas id="salaryChart" style="max-height:260px;padding:0 16px 16px"></canvas>
                 </div>
 
+                @if($isPermanent ?? false)
+                <div class="table-section perm-section" style="margin:0">
+                    <div class="table-header">
+                        <div>
+                            <p class="table-title">Leave Balance</p>
+                            <p class="table-sub">Available credits by type</p>
+                        </div>
+                    </div>
+                    <div class="perm-card-body">
+                        @forelse($leaveBalances as $balance)
+                        @php
+                            $percent = $balance->total_credits > 0 ? ($balance->available_credits / $balance->total_credits) * 100 : 0;
+                            $colors = ['#0b044d','#8e1e18','#a16207','#15803d','#0e7490'];
+                            $color  = $colors[$loop->index % count($colors)];
+                        @endphp
+                        <div class="perm-balance-row">
+                            <div class="perm-balance-top">
+                                <div style="display:flex;align-items:center;gap:8px;min-width:0">
+                                    <span class="perm-req-dot" style="background:{{ $color }}"></span>
+                                    <span class="perm-balance-name">{{ $balance->leaveType->leave_name ?? 'Unknown' }}</span>
+                                </div>
+                                <span class="perm-balance-val" style="color:{{ $color }}">{{ number_format($balance->available_credits, 1) }} <em>/ {{ number_format($balance->total_credits, 1) }} days</em></span>
+                            </div>
+                            <div class="perm-balance-track">
+                                <div class="perm-balance-fill" style="width:{{ $percent }}%;background:{{ $color }}"></div>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="perm-empty">
+                            <div class="perm-empty-icon">
+                                <svg width="22" height="22" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            </div>
+                            <p class="perm-empty-title">No Leave Balances</p>
+                            <p class="perm-empty-sub">Leave balances will appear here</p>
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
+                @endif
+
+            </div>
+
+            {{-- Recent Payslips --}}
+            <div class="table-section perm-section">
+                <div class="table-header">
+                    <div>
+                        <p class="table-title">Recent Payslips</p>
+                        <p class="table-sub">Your last {{ $payslips->count() }} pay periods</p>
+                    </div>
+                    <div class="table-actions">
+                        <button class="modal-btn-primary" onclick="window.location.href='{{ route('employee.payslip') }}'">
+                            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            View All Payslips
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="payroll-table payslip-history-table">
+                        <thead>
+                            <tr>
+                                <th>Pay Period</th>
+                                <th>Basic Pay</th>
+                                <th>Deductions</th>
+                                <th>Net Pay</th>
+                                <th>Pay Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($payslips as $p)
+                            <tr>
+                                <td class="table-cell-period"><strong>{{ $p->period_label }}</strong></td>
+                                <td class="table-cell-basic">₱{{ number_format($p->basic_pay, 2) }}</td>
+                                <td class="table-cell-deduct">
+                                    @if($p->deductions > 0)
+                                        −₱{{ number_format($p->deductions, 2) }}
+                                        <br><span style="font-size:11px;color:#9999bb">late &amp; undertime</span>
+                                    @else
+                                        <span style="color:#9999bb">₱0.00</span>
+                                    @endif
+                                </td>
+                                <td style="font-weight:700;color:#15803d">₱{{ number_format($p->net_pay, 2) }}</td>
+                                <td class="table-cell-date">{{ \Carbon\Carbon::parse($p->pay_date)->format('M d, Y') }}</td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5">
+                                    <div class="perm-empty">
+                                        <div class="perm-empty-icon">
+                                            <svg width="22" height="22" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                                        </div>
+                                        <p class="perm-empty-title">No Payslips Yet</p>
+                                        <p class="perm-empty-sub">Your pay periods will appear here once payroll is processed</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {{-- Deductions Table --}}
-            <div class="table-section perm-section">
+            <div class="table-section perm-section" id="deductionsSection">
                 <div class="table-header">
                     <div>
                         <p class="table-title">My Deductions &amp; Loans</p>
@@ -360,91 +530,6 @@
                 </div>
             </div>
 
-            {{-- Bottom Row: Notifications + Leave Balance --}}
-            <div class="perm-bottom-grid" @if(!($isPermanent ?? false)) style="grid-template-columns: 1fr" @endif>
-
-                {{-- Notifications --}}
-                <div class="table-section perm-section" style="margin:0">
-                    <div class="table-header">
-                        <div>
-                            <p class="table-title">Notifications</p>
-                            <p class="table-sub">Recent HR updates</p>
-                        </div>
-                        <button class="btn-export" style="font-size:11px;padding:6px 12px">Mark all read</button>
-                    </div>
-                    <div style="padding:8px 0">
-                        @php
-                        $notifs = [
-                            ['title'=>'Leave Request Reminder','desc'=>'Your vacation leave request is pending approval.','time'=>'2 hours ago','status'=>'unread'],
-                            ['title'=>'Payroll Updated','desc'=>'June 16–30, 2025 payroll is now available.','time'=>'Yesterday','status'=>'unread'],
-                            ['title'=>'Training Schedule','desc'=>'CSC training scheduled for June 18, 2025.','time'=>'2 days ago','status'=>'read'],
-                        ];
-                        @endphp
-                        @foreach($notifs as $n)
-                        <div class="perm-notif-row">
-                            <div class="perm-notif-dot {{ $n['status'] === 'unread' ? 'perm-notif-unread' : 'perm-notif-read' }}"></div>
-                            <div style="flex:1;min-width:0">
-                                <p class="perm-notif-title">{{ $n['title'] }}</p>
-                                <p class="perm-notif-desc">{{ $n['desc'] }}</p>
-                            </div>
-                            <div style="text-align:right;flex-shrink:0">
-                                <p class="perm-notif-time">{{ $n['time'] }}</p>
-                                @if($n['status'] === 'unread')
-                                    <span class="badge-status pending" style="font-size:10px;padding:2px 8px">Unread</span>
-                                @else
-                                    <span class="badge-status processed" style="font-size:10px;padding:2px 8px">Read</span>
-                                @endif
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                {{-- Leave Balance --}}
-                @if($isPermanent ?? false)
-                <div class="table-section perm-section" style="margin:0">
-                    <div class="table-header">
-                        <div>
-                            <p class="table-title">Leave Balance</p>
-                            <p class="table-sub">Available credits by type</p>
-                        </div>
-                    </div>
-                    <div style="padding:16px 20px 20px">
-                        @forelse($leaveBalances as $balance)
-                        @php
-                            $percent = $balance->total_credits > 0 ? ($balance->available_credits / $balance->total_credits) * 100 : 0;
-                            $colors = ['#0b044d','#8e1e18','#a16207','#15803d','#0e7490'];
-                            $color  = $colors[$loop->index % count($colors)];
-                            $bgs    = ['#f0effe','#fff1f2','#fffbeb','#f0fdf4','#ecfeff'];
-                            $bg     = $bgs[$loop->index % count($bgs)];
-                        @endphp
-                        <div style="margin-bottom:18px">
-                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                                <div style="display:flex;align-items:center;gap:8px">
-                                    <div style="width:8px;height:8px;border-radius:50%;background:{{ $color }};flex-shrink:0"></div>
-                                    <span style="font-size:13px;font-weight:600;color:#111827">{{ $balance->leaveType->leave_name ?? 'Unknown' }}</span>
-                                </div>
-                                <span style="font-size:13px;font-weight:700;color:{{ $color }}">{{ number_format($balance->available_credits, 1) }} <span style="font-size:11px;color:#94a3b8;font-weight:500">/ {{ number_format($balance->total_credits, 1) }} days</span></span>
-                            </div>
-                            <div style="height:8px;background:#f1f5f9;border-radius:999px;overflow:hidden">
-                                <div style="width:{{ $percent }}%;height:100%;background:{{ $color }};border-radius:999px;transition:width 0.3s ease"></div>
-                            </div>
-                        </div>
-                        @empty
-                        <div style="text-align:center;padding:32px 24px">
-                            <div style="width:48px;height:48px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
-                                <svg width="22" height="22" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                            </div>
-                            <p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 4px">No Leave Balances</p>
-                            <p style="font-size:12px;color:#94a3b8;margin:0">Leave balances will appear here</p>
-                        </div>
-                        @endforelse
-                    </div>
-                </div>
-                @endif
-
-            </div>
-
         </div>
     </main>
 
@@ -490,91 +575,66 @@
 @include('employee.chatbot.employeeChatbot')
 
 <style>
+/* ══════════ EMPLOYEE DASHBOARD ══════════
+   Glass card system mirroring the admin dashboard (adminDashboard.blade.php). */
 .perm-dash {
     --eh-blue: #0b044d;
+    --eh-blue-2: #1b1464;
+    --eh-card: #ffffff;
     --eh-ink: #111827;
     --eh-muted: #667085;
     --eh-line: #e5e7eb;
-    --eh-card: #ffffff;
+    --eh-glass: rgba(255, 255, 255, .58);
+    --eh-glass-strong: rgba(255, 255, 255, .78);
+    --eh-glass-border: rgba(255, 255, 255, .65);
+    --eh-radius: 18px;
     padding-bottom: 28px;
     color: var(--eh-ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Poppins', sans-serif;
+    position: relative;
+    isolation: isolate;
 }
 
 .perm-dash * { letter-spacing: 0; }
 
-/* Header */
-.perm-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 22px;
-    padding: 22px 24px;
-    border: 1px solid var(--eh-line);
-    border-radius: 12px;
-    background: var(--eh-card);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .03);
+/* ── Glass surfaces ── */
+.perm-dash .stat-card,
+.perm-dash .table-section,
+.perm-dash .chart-card,
+.perm-action-bar {
+    border: 1px solid var(--eh-glass-border) !important;
+    border-radius: var(--eh-radius) !important;
+    background: linear-gradient(180deg, var(--eh-glass-strong), var(--eh-glass)) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .8),
+        0 1px 3px rgba(15, 23, 42, .04),
+        0 10px 30px rgba(15, 23, 42, .07) !important;
+    position: relative;
+    isolation: isolate;
 }
 
-.perm-kicker {
-    display: inline-flex;
-    margin-bottom: 7px;
-    color: var(--eh-blue);
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
+.perm-dash .stat-card:hover,
+.perm-dash .table-section:hover,
+.perm-dash .chart-card:hover {
+    border-color: rgba(255, 255, 255, .9) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .9),
+        0 2px 4px rgba(15, 23, 42, .05),
+        0 16px 40px rgba(11, 4, 77, .12) !important;
 }
 
-.perm-header h1 {
-    margin: 0;
-    color: var(--eh-ink);
-    font-size: clamp(24px, 3vw, 34px);
-    line-height: 1.1;
-    font-weight: 800;
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .perm-dash .stat-card,
+    .perm-dash .table-section,
+    .perm-dash .chart-card,
+    .perm-action-bar {
+        background: rgba(255, 255, 255, .96) !important;
+    }
 }
 
-.perm-header > div:first-child p {
-    margin: 8px 0 0;
-    color: var(--eh-muted);
-    font-size: 13px;
-}
-
-.perm-header-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.perm-profile {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 188px;
-    padding: 8px 12px 8px 8px;
-    border: 1px solid var(--eh-line);
-    border-radius: 10px;
-    background: #fff;
-}
-
-.perm-profile strong, .perm-profile span { display: block; white-space: nowrap; }
-.perm-profile strong { color: var(--eh-ink); font-size: 13px; font-weight: 750; }
-.perm-profile span { color: var(--eh-muted); font-size: 11px; }
-
-.perm-avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: var(--eh-blue);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 800;
-    flex-shrink: 0;
-}
-
-/* Stats */
+/* ── Stats ── */
 .perm-stats {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 16px;
@@ -583,23 +643,56 @@
 
 .perm-stat-hover {
     cursor: pointer;
-    transition: all 0.3s ease;
-    border: 1px solid var(--eh-line) !important;
-    border-radius: 12px !important;
-    background: var(--eh-card) !important;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .03) !important;
     min-height: 132px;
     padding: 20px !important;
     overflow: hidden;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
 }
 
-.perm-stat-hover:hover {
-    border-color: #cfd4dc !important;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, .08), 0 2px 4px rgba(15, 23, 42, .06) !important;
-    transform: translateY(-4px);
+.perm-stat-hover:hover { transform: translateY(-4px); }
+
+.perm-dash .stat-top { margin-bottom: 16px; }
+
+.perm-dash .stat-label {
+    color: var(--eh-muted) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
 }
 
-/* Action bar */
+.perm-dash .stat-value {
+    color: var(--eh-ink) !important;
+    font-size: 26px !important;
+    line-height: 1.05;
+}
+
+.perm-dash .stat-value span { color: var(--eh-muted) !important; }
+
+.perm-dash .stat-icon-wrap {
+    width: 40px !important;
+    height: 40px !important;
+    border: 1px solid rgba(255, 255, 255, .7);
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, .55) !important;
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+
+.perm-dash .stat-sub,
+.perm-dash .table-sub,
+.perm-dash .chart-sub { color: var(--eh-muted) !important; font-size: 12px !important; }
+
+.stat-pill-alert {
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #8e1e18;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+/* ── Action bar ── */
 .perm-action-bar {
     display: flex;
     align-items: center;
@@ -607,10 +700,6 @@
     flex-wrap: wrap;
     margin-bottom: 18px;
     padding: 14px 16px;
-    border: 1px solid var(--eh-line) !important;
-    border-radius: 12px !important;
-    background: #fff !important;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, .03);
 }
 
 .perm-action-spacer { margin-right: auto; }
@@ -622,150 +711,249 @@
     display: flex !important;
     align-items: center !important;
     gap: 6px !important;
-    border-radius: 8px !important;
     font-weight: 700 !important;
-    transition: all .18s ease !important;
 }
 
-/* Charts */
-.perm-charts {
+/* ── Controls: pills, gradient primary ── */
+.perm-dash .chart-tab,
+.perm-dash .btn-export,
+.perm-dash .modal-btn-primary,
+.perm-dash .filter-select {
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+    transition: all .22s cubic-bezier(.4, 0, .2, 1) !important;
+}
+
+.perm-dash .chart-tab.active,
+.perm-dash .modal-btn-primary {
+    border-color: transparent !important;
+    background: linear-gradient(135deg, var(--eh-blue-2), var(--eh-blue)) !important;
+    color: #fff !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .25),
+        0 8px 20px rgba(11, 4, 77, .35) !important;
+}
+
+.perm-dash .chart-tab.active:hover,
+.perm-dash .modal-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .3),
+        0 10px 26px rgba(11, 4, 77, .42) !important;
+}
+
+.perm-dash .btn-export,
+.perm-dash .filter-select {
+    border-color: rgba(15, 23, 42, .08) !important;
+    background: rgba(255, 255, 255, .55) !important;
+    backdrop-filter: blur(12px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+    color: #56547a !important;
+}
+
+.perm-dash .btn-export:hover {
+    background: rgba(255, 255, 255, .85) !important;
+    border-color: rgba(15, 23, 42, .12) !important;
+    transform: translateY(-1px);
+}
+
+.perm-dash .chart-tab:not(.active):hover { background: rgba(11, 4, 77, .06) !important; }
+
+/* ── Grids ── */
+.perm-overview-grid,
+.perm-secondary-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
     gap: 18px;
+    align-items: stretch;
     margin-bottom: 18px;
 }
 
-.perm-charts .chart-card {
-    border: 1px solid var(--eh-line) !important;
-    border-radius: 12px !important;
-    background: var(--eh-card) !important;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .03) !important;
-    padding: 0 !important;
-}
+.perm-overview-grid > *,
+.perm-secondary-grid > * { min-width: 0; }
 
-.perm-charts .chart-card:hover {
-    border-color: #cfd4dc !important;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, .08), 0 2px 4px rgba(15, 23, 42, .06) !important;
-}
+/* ── Section chrome ── */
+.perm-dash .table-section { margin-bottom: 18px; }
 
-.perm-charts .chart-header {
+.perm-dash .table-header,
+.perm-dash .chart-header {
     align-items: center;
     padding: 18px 20px !important;
-    border-bottom: 1px solid var(--eh-line) !important;
-    background: #fff !important;
+    border-bottom: 1px solid rgba(15, 23, 42, .06) !important;
+    background: transparent !important;
+    border-radius: var(--eh-radius) var(--eh-radius) 0 0 !important;
 }
 
-/* Sections */
-.perm-section {
-    border: 1px solid var(--eh-line) !important;
-    border-radius: 12px !important;
-    background: var(--eh-card) !important;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .03) !important;
+.perm-dash .table-title,
+.perm-dash .chart-title {
+    color: var(--eh-ink) !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
 }
 
-.perm-section:hover {
-    border-color: #cfd4dc !important;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, .08), 0 2px 4px rgba(15, 23, 42, .06) !important;
-}
+.perm-dash .chart-card { padding: 0 !important; }
 
-.perm-section .table-header {
-    align-items: center;
-    padding: 18px 20px !important;
-    border-bottom: 1px solid var(--eh-line) !important;
-    background: #fff !important;
-}
-
-.perm-section .payroll-table {
+.perm-dash .payroll-table {
     border-collapse: separate;
     border-spacing: 0;
 }
 
-.perm-section .table-wrapper {
+.perm-dash .table-wrapper {
     max-width: 100%;
     overflow: auto;
 }
 
-.perm-section .payroll-table thead th {
+.perm-dash .payroll-table thead th {
     position: sticky;
     top: 0;
     z-index: 2;
-    background: #f8fafc;
+    background: rgba(248, 250, 252, .75);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
     color: #667085;
     font-size: 10.5px;
     font-weight: 800;
     text-transform: uppercase;
 }
 
-.perm-section .payroll-table td { border-bottom: 1px solid #eef2f6; }
-.perm-section .payroll-table tbody tr:hover { background: #f9fafb; }
+.perm-dash .payroll-table td { border-bottom: 1px solid rgba(15, 23, 42, .05); }
+.perm-dash .payroll-table tbody tr:hover { background: rgba(11, 4, 77, .035); }
 
-/* Bottom grid */
-.perm-bottom-grid {
-    display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: 18px;
-    align-items: stretch;
-    margin-top: 18px;
+.perm-dash .dept-tag,
+.perm-dash .badge-status {
+    border-radius: 999px !important;
+    font-weight: 800 !important;
 }
 
-/* Notifications */
-.perm-notif-row {
+.perm-card-body { padding: 8px 20px 16px; }
+
+/* ── My Requests rows ── */
+.perm-req-row {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
-    padding: 14px 20px;
-    border-bottom: 1px solid #f1f5f9;
-    transition: background .15s;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(15, 23, 42, .05);
 }
 
-.perm-notif-row:last-child { border-bottom: none; }
-.perm-notif-row:hover { background: #f9fafb; }
+.perm-req-row:last-child { border-bottom: 0; }
 
-.perm-notif-dot {
+.perm-req-dot {
     width: 9px;
     height: 9px;
     border-radius: 50%;
-    margin-top: 5px;
     flex-shrink: 0;
 }
 
-.perm-notif-unread { background: #0b044d; }
-.perm-notif-read { background: #d1d5db; }
+.perm-req-info { flex: 1; min-width: 0; }
 
-.perm-notif-title { font-size: 13px; font-weight: 700; color: #111827; margin: 0 0 3px; }
-.perm-notif-desc { font-size: 12px; color: #6b7280; margin: 0; }
-.perm-notif-time { font-size: 11px; color: #9ca3af; margin: 0 0 5px; font-weight: 500; }
+.perm-req-title {
+    margin: 0 0 3px;
+    color: var(--eh-ink);
+    font-size: 12.5px;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
-/* Responsive */
+.perm-req-sub {
+    margin: 0;
+    color: var(--eh-muted);
+    font-size: 11px;
+}
+
+/* ── Leave balance bars ── */
+.perm-balance-row { margin-bottom: 16px; }
+.perm-balance-row:last-child { margin-bottom: 4px; }
+
+.perm-balance-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.perm-balance-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.perm-balance-val {
+    font-size: 12.5px;
+    font-weight: 800;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.perm-balance-val em {
+    font-style: normal;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.perm-balance-track {
+    height: 6px;
+    border-radius: 999px;
+    background: #eef2f6;
+    overflow: hidden;
+}
+
+.perm-balance-fill {
+    height: 100%;
+    border-radius: inherit;
+    transition: width .3s ease;
+}
+
+/* ── Empty states ── */
+.perm-empty { text-align: center; padding: 32px 24px; }
+
+.perm-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: #f1f5f9;
+}
+
+.perm-empty-title { margin: 0 0 4px; font-size: 13px; font-weight: 700; color: #475569; }
+.perm-empty-sub { margin: 0; font-size: 12px; color: #94a3b8; }
+
+/* ── Responsive ── */
 @media (max-width: 1200px) {
     .perm-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .perm-bottom-grid { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 1024px) {
-    .perm-charts { grid-template-columns: 1fr !important; }
-}
-
-@media (max-width: 900px) {
-    .perm-stats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    .perm-overview-grid,
+    .perm-secondary-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 760px) {
-    .perm-header,
-    .perm-header-right {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .perm-header { padding: 18px; }
-    .perm-profile { min-width: 0; width: 100%; box-sizing: border-box; }
     .perm-action-bar { flex-direction: column; align-items: stretch; }
     .perm-action-spacer { margin-right: 0; margin-bottom: 4px; }
     .perm-quick-btn { width: 100% !important; justify-content: center; }
     .perm-stats { grid-template-columns: 1fr !important; }
-    .perm-charts { grid-template-columns: 1fr !important; }
-    .perm-bottom-grid { grid-template-columns: 1fr; }
+
+    .perm-dash .table-header,
+    .perm-dash .table-actions,
+    .perm-dash .chart-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .perm-dash .table-actions > * { width: 100% !important; }
 }
 
 @media (max-width: 540px) {
-    .perm-stats { grid-template-columns: 1fr !important; }
+    .perm-dash .stat-value { font-size: 24px !important; }
     .perm-stat-hover { min-height: auto; }
 }
 </style>
@@ -963,7 +1151,7 @@ function switchSalaryChart(period) {
 function switchDeductionView(view) {
     event.stopPropagation();
     currentDeductionView = view;
-    document.querySelector('.perm-section .chart-tabs').querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#deductionsSection .chart-tab').forEach(t => t.classList.remove('active'));
     event.target.classList.add('active');
 
     const amountHeader = document.getElementById('deductionAmountHeader');
