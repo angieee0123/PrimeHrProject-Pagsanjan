@@ -20,7 +20,7 @@
 
         @include('employee.notification.employeeNotification')
 
-        @include('employee.topbar.employeeTopbar')
+        @include('employee.topbar.passSlipTopbar')
 
         {{-- Stats Grid --}}
         <div class="stats-grid stats-grid-4">

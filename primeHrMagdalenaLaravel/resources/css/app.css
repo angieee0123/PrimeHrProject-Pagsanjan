@@ -1285,7 +1285,7 @@ body.dark-mode .tab-btn.active { color: #ecebf6; border-bottom-color: var(--prim
 
 /* Navigation Theme Variables */
 :root {
-    --sidebar-bg: linear-gradient(180deg, #0b044d 0%, #150c63 100%);
+    --sidebar-bg: #0b044d;
     --sidebar-text: #ffffff;
     --sidebar-active-text: #ffffff;
     --sidebar-active-bg: rgba(255, 255, 255, 0.1);

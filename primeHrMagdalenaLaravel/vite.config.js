@@ -23,6 +23,7 @@ export default defineConfig({
                 'resources/css/adminChatbot.css',
                 'resources/css/adminPayroll.css',
                 'resources/css/adminLeaveAndBenefits.css',
+                'resources/css/topbarTheme.css',
                 'resources/js/app.js',
                 'resources/js/adminDashboard.js',
                 'resources/js/employeeWizard.js',

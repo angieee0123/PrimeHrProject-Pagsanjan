@@ -37,6 +37,17 @@ class AuthController extends Controller
             ]);
         }
 
+        // Auth::attempt only proves the password is right. An account the admin
+        // has not activated yet — or has deactivated — must not receive a token.
+        if (!$user->isActive()) {
+            Auth::logout();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account is inactive. Please contact your administrator to activate it.',
+            ], 403);
+        }
+
         // Load employee data with relationships (same as web login)
         $user->load('employee.employmentDetail.departmentRelation', 'employee.employmentDetail.designationRelation');
 

@@ -30,15 +30,27 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
     ]);
 
     if (Auth::attempt($credentials, $request->boolean('remember'))) {
-        $request->session()->regenerate();
-
-        // Eager load employee data with relationships
         $user = Auth::user();
         if (!$user instanceof User) {
             Auth::logout();
             return back()->withInput($request->only('email'))
                 ->with('error', 'Invalid email or password. Please try again.');
         }
+
+        // Auth::attempt only proves the password is right. An account the admin
+        // has not activated yet — or has deactivated — must not get a session.
+        if (!$user->isActive()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withInput($request->only('email'))
+                ->with('error', 'Your account is inactive. Please contact your administrator to activate it.');
+        }
+
+        $request->session()->regenerate();
+
+        // Eager load employee data with relationships
         $user->load('employee.employmentDetail.departmentRelation', 'employee.employmentDetail.designationRelation');
 
         if ($user->email === 'admin@gmail.com') {
@@ -762,6 +774,12 @@ Route::post('/admin/personnel/{id}/status', function (\Illuminate\Http\Request $
     $newStatus = $request->validate(['status' => 'required|in:Active,Inactive'])['status'];
 
     $employee->user->update(['status' => $newStatus]);
+
+    // Drop any live mobile tokens so a deactivated account loses API access now
+    // rather than whenever its token would have expired.
+    if ($newStatus === 'Inactive') {
+        $employee->user->tokens()->delete();
+    }
 
     $message = $newStatus === 'Active'
         ? 'Employee account activated successfully.'

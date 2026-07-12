@@ -78,39 +78,7 @@
 </div>
 
 <style>
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-.welcome-banner {
-    position: relative;
-    overflow: hidden;
-    border-radius: 20px !important;
-    border: 1px solid rgba(255, 255, 255, .18) !important;
-    background: #0b044d !important;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, .16),
-        0 16px 40px rgba(11, 4, 77, .28) !important;
-}
-
-.banner-icon {
-    border: 1px solid rgba(255, 255, 255, .22) !important;
-    background: rgba(255, 255, 255, .12) !important;
-    backdrop-filter: blur(10px) saturate(180%);
-    -webkit-backdrop-filter: blur(10px) saturate(180%);
-}
-
-.banner-badge {
-    border: 1px solid rgba(255, 255, 255, .16);
-    background: rgba(255, 255, 255, .12) !important;
-    backdrop-filter: blur(10px) saturate(180%);
-    -webkit-backdrop-filter: blur(10px) saturate(180%);
-}
-
-.banner-badge.outline {
-    background: transparent !important;
-}
+/* Banner, icon and badge theme now live in resources/css/topbarTheme.css, shared with employee and mayor. */
 
 .enterprise-hr-dashboard {
     --eh-blue: #0b044d;

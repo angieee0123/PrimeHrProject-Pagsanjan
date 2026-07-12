@@ -21,6 +21,15 @@ class User extends Authenticatable
     public const ROLES = ['employee', 'hr', 'admin', 'mayor'];
 
     /**
+     * Accounts start out Inactive (the users.status column defaults to it) and
+     * stay unusable until an admin activates them from the personnel page.
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'Active';
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

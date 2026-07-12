@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureRoleForArea;
+use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -25,11 +26,16 @@ return Application::configure(basePath: dirname(__DIR__))
                 Request::HEADER_X_FORWARDED_PROTO,
         );
 
-        // Area-based authorization: blocks authenticated users from entering an
-        // admin/ mayor/ employee/ URL area their roles don't permit. Runs on
-        // every web route (including ones added later) after the session loads.
+        // Account activation gate: ends access for a user who is deactivated
+        // while holding a live session or API token. Runs before the role check
+        // so an inactive admin is turned away rather than let into admin/.
         $middleware->web(append: [
+            EnsureUserIsActive::class,
             EnsureRoleForArea::class,
+        ]);
+
+        $middleware->api(append: [
+            EnsureUserIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

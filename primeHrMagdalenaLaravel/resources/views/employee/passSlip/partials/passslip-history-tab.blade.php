@@ -144,13 +144,18 @@ function changePassSlipRowsPerPage() {
     window.location.href = url.toString();
 }
 
+// Applies the status dropdown and the topbar search together, so neither one
+// re-shows rows the other has filtered out.
 function filterPassSlips() {
     const statusFilter = document.getElementById('filterPassSlipStatus').value;
+    const searchInput = document.getElementById('passSlipSearchInput');
+    const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
     const rows = document.querySelectorAll('.passslip-row');
 
     rows.forEach(row => {
-        const show = statusFilter === 'all' || row.dataset.status === statusFilter;
-        row.style.display = show ? '' : 'none';
+        const matchesStatus = statusFilter === 'all' || row.dataset.status === statusFilter;
+        const matchesQuery = query === '' || row.textContent.toLowerCase().includes(query);
+        row.style.display = (matchesStatus && matchesQuery) ? '' : 'none';
     });
 }
 

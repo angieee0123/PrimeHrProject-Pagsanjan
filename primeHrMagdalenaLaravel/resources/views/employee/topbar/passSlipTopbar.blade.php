@@ -1,18 +1,18 @@
-{{-- Permanent Leave & Benefits Topbar --}}
+{{-- Permanent Pass Slip Topbar --}}
 <div class="welcome-banner">
     <div class="banner-left">
         <div class="banner-icon">
-            <svg width="22" height="22" fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <svg width="22" height="22" fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         </div>
         <div>
-            <h2>Leave & Benefits</h2>
+            <h2>My Pass Slips</h2>
             <p><span data-live-datetime data-variant="datetime">{{ now()->timezone('Asia/Manila')->format('l, F j, Y g:i:s A') }}</span> &nbsp;·&nbsp; {{ $employee->employmentDetail->designationRelation->title ?? 'N/A' }} · {{ $employee->employmentDetail->departmentRelation->name ?? 'N/A' }} · {{ $employee->employee_id ?? 'N/A' }}</p>
         </div>
     </div>
     <div class="banner-right">
-        <div class="topbar-search-wrap">
+  <div class="topbar-search-wrap">
             <svg class="topbar-search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="leaveSearch" class="topbar-search-input" placeholder="Search leave type or status..." oninput="filterLeaveTable(this.value)">
+            <input type="text" id="passSlipSearchInput" class="topbar-search-input" placeholder="Search reason or status..." oninput="filterPassSlips()">
         </div>
     </div>
 </div>

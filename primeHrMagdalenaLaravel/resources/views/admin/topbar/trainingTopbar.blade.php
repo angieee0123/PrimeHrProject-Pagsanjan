@@ -18,8 +18,6 @@
 </div>
 
 <style>
-.topbar-search-wrap { position: relative; display: flex; align-items: center; }
-.topbar-search-icon { position: absolute; left: 12px; color: #8f8daf; pointer-events: none; }
 input.topbar-search-input[type="text"] {
     background: rgba(255,255,255,.55) !important; border: 1.5px solid rgba(11,4,77,.12) !important; border-radius: 9px !important;
     padding: 9px 12px 9px 34px; font-size: 12.5px; color: #0b044d !important; outline: none; width: 260px;
@@ -36,7 +34,7 @@ input.topbar-search-input[type="text"]:focus {
 
 @media (max-width: 768px) {
     .banner-right { flex-wrap: wrap; }
-    .topbar-search-wrap { width: 100%; }
-    .topbar-search-input { width: 100%; }
+    
+    
 }
 </style>

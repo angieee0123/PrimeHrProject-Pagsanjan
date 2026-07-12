@@ -144,13 +144,18 @@ function changeTravelRowsPerPage() {
     window.location.href = url.toString();
 }
 
+// Applies the status dropdown and the topbar search together, so neither one
+// re-shows rows the other has filtered out.
 function filterTravelOrders() {
     const statusFilter = document.getElementById('filterTravelStatus').value;
+    const searchInput = document.getElementById('travelOrderSearchInput');
+    const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
     const rows = document.querySelectorAll('.travel-order-row');
-    
+
     rows.forEach(row => {
-        const show = statusFilter === 'all' || row.dataset.status === statusFilter;
-        row.style.display = show ? '' : 'none';
+        const matchesStatus = statusFilter === 'all' || row.dataset.status === statusFilter;
+        const matchesQuery = query === '' || row.textContent.toLowerCase().includes(query);
+        row.style.display = (matchesStatus && matchesQuery) ? '' : 'none';
     });
 }
 
