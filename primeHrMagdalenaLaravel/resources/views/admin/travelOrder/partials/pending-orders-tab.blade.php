@@ -25,14 +25,10 @@
                 <tr class="pending-order-row" data-department="{{ $order->employee->employmentDetail->departmentRelation->name ?? '' }}" data-mode="{{ $order->transportation_mode ?? '' }}" data-travel-date="{{ $order->travel_date->format('Y-m-d') }}" style="transition: all 0.15s ease;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
                         <div class="emp-cell" style="display: flex; align-items: center; gap: 12px;">
-                            @if($order->employee->photo)
-                                <img src="{{ $order->employee->photo }}" alt="{{ $order->employee->first_name }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0; flex-shrink: 0;">
-                            @else
-                                <div style="background: {{ $colors[$loop->index % 6] }}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; border: 2px solid #e2e8f0; flex-shrink: 0;">{{ strtoupper(substr($order->employee->first_name, 0, 1) . substr($order->employee->last_name, 0, 1)) }}</div>
-                            @endif
+                            @include('partials.travel-party-avatars', ['order' => $order])
                             <div style="min-width: 0;">
                                 <p style="margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $order->employee->first_name }} {{ $order->employee->last_name }}</p>
-                                <p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 500;">{{ $order->employee->employee_id }}</p>
+                                <p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 500;">{{ $order->employee->employee_id }}@if($order->companions->count()) · +{{ $order->companions->count() }} {{ Str::plural('companion', $order->companions->count()) }}@endif</p>
                             </div>
                         </div>
                     </td>

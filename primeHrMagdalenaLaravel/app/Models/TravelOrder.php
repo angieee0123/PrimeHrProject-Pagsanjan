@@ -72,6 +72,36 @@ class TravelOrder extends Model
         return $this->belongsTo(User::class, 'filed_by');
     }
 
+    public function companions()
+    {
+        return $this->hasMany(TravelOrderCompanion::class);
+    }
+
+    public function histories()
+    {
+        return $this->hasMany(TravelOrderHistory::class)->orderBy('created_at');
+    }
+
+    /**
+     * Whether every invited companion has responded (accepted or rejected).
+     */
+    public function allCompanionsResponded(): bool
+    {
+        return !$this->companions()->where('status', 'pending')->exists();
+    }
+
+    /**
+     * Append an entry to this travel order's document history.
+     */
+    public function logHistory(string $action, ?string $remarks = null, ?int $userId = null): TravelOrderHistory
+    {
+        return $this->histories()->create([
+            'action' => $action,
+            'remarks' => $remarks,
+            'performed_by' => $userId ?? auth()->id(),
+        ]);
+    }
+
     /**
      * Generate unique travel order number
      */

@@ -7,6 +7,7 @@
         <div class="table-actions">
             <select class="filter-select" id="filterTravelStatus" onchange="filterTravelOrders()">
                 <option value="all">All Status</option>
+                <option value="awaiting_companions">Awaiting Companions</option>
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
@@ -54,6 +55,7 @@
             <thead>
                 <tr>
                     <th onclick="sortTravelOrders('destination')" style="cursor: pointer;">Destination {!! $sortIcon !!}</th>
+                    <th>Travel Party</th>
                     <th onclick="sortTravelOrders('purpose')" style="cursor: pointer;">Purpose {!! $sortIcon !!}</th>
                     <th onclick="sortTravelOrders('travel_date')" style="cursor: pointer;">Travel Date {!! $sortIcon !!}</th>
                     <th style="text-align: center;">Duration</th>
@@ -73,11 +75,20 @@
                             {{ $order->destination }}
                         </div>
                     </td>
+                    <td data-label="Travel Party">
+                        @include('partials.travel-party-avatars', ['order' => $order])
+                    </td>
                     <td data-label="Purpose" style="font-size: 13px; color: #6b6a8a;">{{ Str::limit($order->purpose, 50) }}</td>
                     <td data-label="Travel Date" style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ \Carbon\Carbon::parse($order->travel_date)->format('M d, Y') }}</td>
                     <td data-label="Duration" style="text-align: center; font-weight: 600; color: #0b044d;">{{ $order->duration }} days</td>
                     <td data-label="Status" style="text-align: center;">
-                        @if($order->status === 'pending')
+                        @if($order->status === 'awaiting_companions')
+                            @php
+                                $companionTotal = $order->companions->count();
+                                $companionResponded = $order->companions->where('status', '!=', 'pending')->count();
+                            @endphp
+                            <span class="badge-status pending" style="background: #ede9fe; color: #6d28d9;" title="{{ $companionResponded }} of {{ $companionTotal }} companions responded">Awaiting Companions ({{ $companionResponded }}/{{ $companionTotal }})</span>
+                        @elseif($order->status === 'pending')
                             <span class="badge-status pending">Pending</span>
                         @elseif($order->status === 'approved')
                             <span class="badge-status processed">Approved</span>
@@ -90,7 +101,13 @@
                     <td data-label="Actions">
                         <div class="row-actions">
                             <button class="btn-view" onclick="viewTravelOrder({{ $order->id }})">View</button>
-                            @if($order->status === 'pending')
+                            @if($order->status === 'awaiting_companions' && !$order->companions->where('status', 'pending')->count())
+                                <form method="POST" action="{{ route('travelorder.forward', $order->id) }}" style="display: inline;" onsubmit="return confirm('Forward this travel order to HR for approval?');">
+                                    @csrf
+                                    <button type="submit" class="btn-edit" style="background: #15803d; border-color: #15803d;">Forward to HR</button>
+                                </form>
+                            @endif
+                            @if(in_array($order->status, ['pending', 'awaiting_companions']))
                                 <form method="POST" action="{{ route('travelorder.delete', $order->id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to cancel this travel order?');">
                                     @csrf
                                     @method('DELETE')
@@ -102,7 +119,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 40px; color: #6b6a8a;">
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #6b6a8a;">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" style="margin: 0 auto 12px;">
                             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                             <circle cx="12" cy="10" r="3"/>

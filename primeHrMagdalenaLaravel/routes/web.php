@@ -380,17 +380,37 @@ Route::get('/employee/travelorder', function () {
 
     if (!$employee) {
         $travelOrders = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10, 1);
-        return view('employee.travelOrder.employeeTravelOrder', compact('travelOrders'));
+        $companionOptions = collect();
+        $companionInvitations = collect();
+        return view('employee.travelOrder.employeeTravelOrder', compact('travelOrders', 'companionOptions', 'companionInvitations'));
     }
 
     $employee->load('employmentDetail.designationRelation', 'employmentDetail.departmentRelation');
 
     $perPage = request('per_page', 10);
     $travelOrders = \App\Models\TravelOrder::where('employee_id', $employee->id)
+        ->with('companions.employee')
         ->orderBy('created_at', 'desc')
         ->paginate($perPage);
 
-    return view('employee.travelOrder.employeeTravelOrder', compact('employee', 'travelOrders'));
+    // Employees selectable as travel companions (must have a user account to respond)
+    $companionOptions = \App\Models\Employee::where('id', '!=', $employee->id)
+        ->whereHas('user')
+        ->orderBy('first_name')
+        ->orderBy('last_name')
+        ->get(['id', 'employee_id', 'first_name', 'last_name', 'photo']);
+
+    // Travel orders where this employee is invited as a companion
+    $companionInvitations = \App\Models\TravelOrderCompanion::where('employee_id', $employee->id)
+        ->with(['travelOrder.employee', 'travelOrder.companions.employee'])
+        ->whereHas('travelOrder', function ($q) {
+            $q->whereNotIn('status', ['cancelled']);
+        })
+        ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    return view('employee.travelOrder.employeeTravelOrder', compact('employee', 'travelOrders', 'companionOptions', 'companionInvitations'));
 })->middleware('auth')->name('employee.travelorder');
 
 Route::post('/employee/travelorder', function (\Illuminate\Http\Request $request) {
@@ -409,28 +429,138 @@ Route::post('/employee/travelorder', function (\Illuminate\Http\Request $request
         'transportation_mode' => 'nullable|string|max:100',
         'estimated_budget' => 'nullable|numeric|min:0',
         'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        'companions' => 'nullable|array',
+        'companions.*' => 'integer|exists:employees,id',
     ]);
+
+    // Companions must be other employees with user accounts (so they can respond)
+    $companionIds = collect($data['companions'] ?? [])
+        ->unique()
+        ->reject(fn ($id) => (int) $id === $employee->id)
+        ->filter(fn ($id) => \App\Models\Employee::where('id', $id)->whereHas('user')->exists())
+        ->values();
 
     $attachmentPath = null;
     if ($request->hasFile('attachment')) {
         $attachmentPath = $request->file('attachment')->store('travel_orders', 'public');
     }
 
-    \App\Models\TravelOrder::create([
-        'employee_id' => $employee->id,
-        'destination' => $data['destination'],
-        'purpose' => $data['purpose'],
-        'travel_date' => $data['travel_date'],
-        'return_date' => $data['return_date'],
-        'duration' => $data['duration'],
-        'transportation_mode' => $data['transportation_mode'] ?? null,
-        'estimated_budget' => $data['estimated_budget'] ?? null,
-        'attachment' => $attachmentPath,
-        'status' => 'pending',
+    $travelOrder = \Illuminate\Support\Facades\DB::transaction(function () use ($data, $employee, $attachmentPath, $companionIds) {
+        // With companions the order waits for their responses before it can be
+        // forwarded to HR; without companions it goes straight to HR as pending.
+        $travelOrder = \App\Models\TravelOrder::create([
+            'employee_id' => $employee->id,
+            'destination' => $data['destination'],
+            'purpose' => $data['purpose'],
+            'travel_date' => $data['travel_date'],
+            'return_date' => $data['return_date'],
+            'duration' => $data['duration'],
+            'transportation_mode' => $data['transportation_mode'] ?? null,
+            'estimated_budget' => $data['estimated_budget'] ?? null,
+            'attachment' => $attachmentPath,
+            'status' => $companionIds->isNotEmpty() ? 'awaiting_companions' : 'pending',
+            'filed_by' => Auth::id(),
+        ]);
+
+        $travelOrder->logHistory('filed', 'Travel order filed by ' . $employee->first_name . ' ' . $employee->last_name . '.');
+
+        foreach ($companionIds as $companionId) {
+            $companion = $travelOrder->companions()->create([
+                'employee_id' => $companionId,
+                'status' => 'pending',
+            ]);
+            $companionEmployee = $companion->employee;
+            $travelOrder->logHistory('companion_invited', $companionEmployee->first_name . ' ' . $companionEmployee->last_name . ' was invited as a companion.');
+        }
+
+        return $travelOrder;
+    });
+
+    foreach ($travelOrder->companions as $companion) {
+        \App\Services\NotificationService::travelOrderCompanionInvited($travelOrder, $companion);
+    }
+
+    if ($companionIds->isEmpty()) {
+        // No companions to wait for — it is already with HR
+        $travelOrder->logHistory('forwarded_to_hr', 'Travel order submitted to HR/Admin for approval.');
+        \App\Services\NotificationService::travelOrderForwarded($travelOrder);
+        $message = 'Travel order submitted successfully.';
+    } else {
+        $message = 'Travel order filed. Your companions have been notified — once all of them respond, you can forward it to HR.';
+    }
+
+    return redirect()->route('employee.travelorder')->with('success', $message);
+})->middleware('auth')->name('travelorder.store');
+
+Route::post('/employee/travelorder/{id}/companion-response', function (\Illuminate\Http\Request $request, $id) {
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
+    if (!$employee) {
+        return redirect()->route('employee.travelorder')->with('error', 'No employee record found.');
+    }
+
+    $data = $request->validate([
+        'response' => 'required|in:accepted,rejected',
+        'response_note' => 'nullable|string|max:300',
     ]);
 
-    return redirect()->route('employee.travelorder')->with('success', 'Travel order submitted successfully.');
-})->middleware('auth')->name('travelorder.store');
+    $companion = \App\Models\TravelOrderCompanion::where('travel_order_id', $id)
+        ->where('employee_id', $employee->id)
+        ->firstOrFail();
+
+    if ($companion->status !== 'pending') {
+        return redirect()->route('employee.travelorder')->with('error', 'You have already responded to this companion request.');
+    }
+
+    $travelOrder = $companion->travelOrder;
+
+    if ($travelOrder->status !== 'awaiting_companions') {
+        return redirect()->route('employee.travelorder')->with('error', 'This travel order is no longer accepting companion responses.');
+    }
+
+    $companion->update([
+        'status' => $data['response'],
+        'response_note' => $data['response_note'] ?? null,
+        'responded_at' => now(),
+    ]);
+
+    $travelOrder->logHistory(
+        'companion_' . $data['response'],
+        $employee->first_name . ' ' . $employee->last_name . ' ' . $data['response'] . ' the companion request.'
+            . (!empty($data['response_note']) ? ' Note: ' . $data['response_note'] : '')
+    );
+
+    \App\Services\NotificationService::travelOrderCompanionResponded($travelOrder, $companion->fresh('employee'));
+
+    return redirect()->route('employee.travelorder')->with('success', 'You have ' . $data['response'] . ' the companion request.');
+})->middleware('auth')->name('travelorder.companion.respond');
+
+Route::post('/employee/travelorder/{id}/forward', function ($id) {
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
+    if (!$employee) {
+        return redirect()->route('employee.travelorder')->with('error', 'No employee record found.');
+    }
+
+    $travelOrder = \App\Models\TravelOrder::where('id', $id)
+        ->where('employee_id', $employee->id)
+        ->firstOrFail();
+
+    if ($travelOrder->status !== 'awaiting_companions') {
+        return redirect()->route('employee.travelorder')->with('error', 'Only travel orders awaiting companion responses can be forwarded.');
+    }
+
+    if (!$travelOrder->allCompanionsResponded()) {
+        return redirect()->route('employee.travelorder')->with('error', 'All companions must accept or reject the request before you can forward it to HR.');
+    }
+
+    $travelOrder->update(['status' => 'pending']);
+    $travelOrder->logHistory('forwarded_to_hr', 'Travel order forwarded to HR/Admin for approval by ' . $employee->first_name . ' ' . $employee->last_name . '.');
+
+    \App\Services\NotificationService::travelOrderForwarded($travelOrder);
+
+    return redirect()->route('employee.travelorder')->with('success', 'Travel order forwarded to HR for approval.');
+})->middleware('auth')->name('travelorder.forward');
 
 Route::get('/employee/travelorder/{id}', function ($id) {
     $user = Auth::user();
@@ -439,9 +569,13 @@ Route::get('/employee/travelorder/{id}', function ($id) {
         abort(403, 'No employee record found.');
     }
 
+    // The filer or an invited companion may view the travel order
     $travelOrder = \App\Models\TravelOrder::where('id', $id)
-        ->where('employee_id', $employee->id)
-        ->with('approver')
+        ->where(function ($q) use ($employee) {
+            $q->where('employee_id', $employee->id)
+              ->orWhereHas('companions', fn ($c) => $c->where('employee_id', $employee->id));
+        })
+        ->with(['approver', 'employee', 'companions.employee', 'histories.performer.employee'])
         ->firstOrFail();
 
     return response()->json($travelOrder);
@@ -456,8 +590,21 @@ Route::delete('/employee/travelorder/{id}', function ($id) {
 
     $travelOrder = \App\Models\TravelOrder::where('id', $id)
         ->where('employee_id', $employee->id)
-        ->where('status', 'pending')
+        ->whereIn('status', ['pending', 'awaiting_companions'])
         ->firstOrFail();
+
+    // Let invited companions know the trip was called off before deleting
+    foreach ($travelOrder->companions()->with('employee.user')->get() as $companion) {
+        if ($companion->employee && $companion->employee->user) {
+            \App\Models\Notification::create([
+                'user_id' => $companion->employee->user->id,
+                'type' => 'travel_order',
+                'title' => 'Travel Order Cancelled',
+                'message' => "Travel order {$travelOrder->order_number} to {$travelOrder->destination}, where you were invited as a companion, has been cancelled by the filer.",
+                'link' => route('employee.travelorder'),
+            ]);
+        }
+    }
 
     if ($travelOrder->attachment) {
         \Illuminate\Support\Facades\Storage::disk('public')->delete($travelOrder->attachment);
@@ -970,17 +1117,17 @@ Route::get('/admin/leave', [LeaveController::class, 'index'])->middleware('auth'
 Route::get('/admin/travelorder', function (\Illuminate\Http\Request $request) {
     $perPage = $request->input('per_page', 10);
     
-    $pendingOrders = \App\Models\TravelOrder::with(['employee.employmentDetail.departmentRelation'])
+    $pendingOrders = \App\Models\TravelOrder::with(['employee.employmentDetail.departmentRelation', 'companions.employee'])
         ->where('status', 'pending')
         ->orderBy('created_at', 'desc')
         ->paginate($perPage, ['*'], 'pending_page');
-    
-    $approvedOrders = \App\Models\TravelOrder::with(['employee.employmentDetail.departmentRelation', 'approver'])
+
+    $approvedOrders = \App\Models\TravelOrder::with(['employee.employmentDetail.departmentRelation', 'approver', 'companions.employee'])
         ->where('status', 'approved')
         ->orderBy('approved_at', 'desc')
         ->paginate($perPage, ['*'], 'approved_page');
-    
-    $disapprovedOrders = \App\Models\TravelOrder::with(['employee.employmentDetail.departmentRelation', 'approver'])
+
+    $disapprovedOrders = \App\Models\TravelOrder::with(['employee.employmentDetail.departmentRelation', 'approver', 'companions.employee'])
         ->where('status', 'rejected')
         ->orderBy('updated_at', 'desc')
         ->paginate($perPage, ['*'], 'disapproved_page');
@@ -992,38 +1139,44 @@ Route::get('/admin/travelorder', function (\Illuminate\Http\Request $request) {
 
 Route::post('/admin/travelorder/{id}/approve', function ($id) {
     $travelOrder = \App\Models\TravelOrder::findOrFail($id);
-    
+
     $travelOrder->update([
         'status' => 'approved',
         'approved_by' => Auth::id(),
         'approved_at' => now(),
         'remarks' => null,
     ]);
-    
+
+    $travelOrder->logHistory('approved', 'Travel order approved by HR/Admin.');
+    \App\Services\NotificationService::travelOrderStatusChanged($travelOrder, 'approved');
+
     return redirect()->route('admin.travelorder', ['tab' => 'approved'])
         ->with('success', 'Travel order approved successfully.');
 })->middleware('auth')->name('admin.travelorder.approve');
 
 Route::post('/admin/travelorder/{id}/disapprove', function (\Illuminate\Http\Request $request, $id) {
     $request->validate(['reason' => 'required|string|max:500']);
-    
+
     $travelOrder = \App\Models\TravelOrder::findOrFail($id);
-    
+
     $travelOrder->update([
         'status' => 'rejected',
         'approved_by' => Auth::id(),
         'approved_at' => now(),
         'remarks' => $request->reason,
     ]);
-    
+
+    $travelOrder->logHistory('disapproved', 'Travel order disapproved by HR/Admin. Reason: ' . $request->reason);
+    \App\Services\NotificationService::travelOrderStatusChanged($travelOrder, 'disapproved');
+
     return redirect()->route('admin.travelorder', ['tab' => 'disapproved'])
         ->with('success', 'Travel order disapproved.');
 })->middleware('auth')->name('admin.travelorder.disapprove');
 
 Route::get('/admin/travelorder/{id}', function ($id) {
-    $travelOrder = \App\Models\TravelOrder::with(['employee.employmentDetail.departmentRelation', 'approver'])
+    $travelOrder = \App\Models\TravelOrder::with(['employee.employmentDetail.departmentRelation', 'approver', 'companions.employee', 'histories.performer.employee'])
         ->findOrFail($id);
-    
+
     return response()->json($travelOrder);
 })->middleware('auth')->name('admin.travelorder.view');
 

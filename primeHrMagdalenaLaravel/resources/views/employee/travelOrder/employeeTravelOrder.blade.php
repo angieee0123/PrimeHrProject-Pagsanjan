@@ -91,6 +91,9 @@
             </div>
         </div>
 
+        {{-- Companion Requests (invitations from other employees) --}}
+        @include('employee.travelOrder.partials.companion-invitations')
+
         {{-- Tab Content --}}
         @include('employee.travelOrder.partials.travel-history-tab')
 

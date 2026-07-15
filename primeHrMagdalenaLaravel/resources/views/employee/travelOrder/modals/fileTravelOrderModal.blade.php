@@ -110,6 +110,65 @@
                     </div>
                 </div>
 
+                {{-- Travel Companions --}}
+                <div class="form-field" style="margin-bottom: 20px; position: relative;">
+                    <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; color: #0b044d; margin-bottom: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        Travel Companions (Optional)
+                    </label>
+                    <div id="companionSelectBox" onclick="toggleCompanionDropdown(event)" style="min-height: 48px; width: 100%; border: 2px solid #e5e7eb; border-radius: 8px; padding: 6px 36px 6px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; cursor: pointer; background: white; position: relative;">
+                        <span id="companionPlaceholder" style="color: #9ca3af; font-size: 13px; padding: 4px 6px;">Select employees joining this travel...</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </div>
+                    <div id="companionDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 50; background: white; border: 2px solid #e5e7eb; border-radius: 8px; margin-top: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); overflow: hidden;">
+                        <div style="padding: 8px; border-bottom: 1px solid #f3f4f6;">
+                            <input type="text" id="companionSearch" oninput="filterCompanionOptions()" placeholder="Search by name or employee ID..." autocomplete="off" style="width: 100%; padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 13px; font-family: inherit;">
+                        </div>
+                        <div id="companionOptionsList" style="max-height: 210px; overflow-y: auto;">
+                            @forelse($companionOptions ?? [] as $companionOption)
+                            @php
+                                // employees.photo may hold a ready URL path ("/storage/...") or a bare storage path
+                                $companionPhotoUrl = $companionOption->photo
+                                    ? (\Illuminate\Support\Str::startsWith($companionOption->photo, ['/', 'http']) ? $companionOption->photo : asset('storage/' . $companionOption->photo))
+                                    : '';
+                            @endphp
+                            <div class="companion-option"
+                                data-id="{{ $companionOption->id }}"
+                                data-name="{{ $companionOption->first_name }} {{ $companionOption->last_name }}"
+                                data-empid="{{ $companionOption->employee_id }}"
+                                data-photo="{{ $companionPhotoUrl }}"
+                                onclick="toggleCompanionSelection(this)"
+                                style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; transition: background 0.15s;"
+                                onmouseover="this.style.background='#f7f6ff'" onmouseout="this.style.background=this.classList.contains('selected') ? '#f0f9ff' : 'white'">
+                                @if($companionPhotoUrl)
+                                    <img src="{{ $companionPhotoUrl }}" alt="{{ $companionOption->first_name }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid #e5e7eb;">
+                                @else
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #0b044d, #4338ca); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0;">{{ strtoupper(substr($companionOption->first_name, 0, 1) . substr($companionOption->last_name, 0, 1)) }}</div>
+                                @endif
+                                <div style="flex: 1; min-width: 0;">
+                                    <p style="margin: 0; font-size: 13px; font-weight: 600; color: #0b044d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $companionOption->first_name }} {{ $companionOption->last_name }}</p>
+                                    <p style="margin: 0; font-size: 11px; color: #9ca3af;">{{ $companionOption->employee_id }}</p>
+                                </div>
+                                <span class="companion-check" style="display: none; color: #0369a1; flex-shrink: 0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                            </div>
+                            @empty
+                            <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 13px;">No other employees available</div>
+                            @endforelse
+                        </div>
+                    </div>
+                    <div id="companionHiddenInputs"></div>
+                    <p style="margin: 8px 0 0 0; font-size: 11px; color: #9ca3af;">Selected employees will be notified and must accept your request before this travel order can be forwarded to HR.</p>
+                </div>
+
                 {{-- Supporting Document --}}
                 <div class="form-field" style="margin-bottom: 20px;">
                     <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; color: #0b044d; margin-bottom: 8px;">
@@ -169,7 +228,127 @@ function closeTravelOrderModal() {
     document.getElementById('travelFileNameDisplay').style.display = 'none';
     document.getElementById('travelErrorMessage').style.display = 'none';
     document.body.style.overflow = '';
+    clearCompanionSelection();
+    closeCompanionDropdown();
 }
+
+// ===== Travel companions multi-select =====
+let selectedCompanions = {}; // id -> { name, empid, photo }
+
+function toggleCompanionDropdown(event) {
+    // Ignore clicks on chip remove buttons
+    if (event.target.closest('.companion-chip-remove')) return;
+    const dropdown = document.getElementById('companionDropdown');
+    const isOpen = dropdown.style.display === 'block';
+    dropdown.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) {
+        const search = document.getElementById('companionSearch');
+        search.value = '';
+        filterCompanionOptions();
+        search.focus();
+    }
+}
+
+function closeCompanionDropdown() {
+    document.getElementById('companionDropdown').style.display = 'none';
+}
+
+function filterCompanionOptions() {
+    const query = document.getElementById('companionSearch').value.toLowerCase().trim();
+    document.querySelectorAll('.companion-option').forEach(option => {
+        const haystack = (option.dataset.name + ' ' + option.dataset.empid).toLowerCase();
+        option.style.display = haystack.includes(query) ? 'flex' : 'none';
+    });
+}
+
+function toggleCompanionSelection(option) {
+    const id = option.dataset.id;
+    if (selectedCompanions[id]) {
+        delete selectedCompanions[id];
+        option.classList.remove('selected');
+        option.style.background = 'white';
+        option.querySelector('.companion-check').style.display = 'none';
+    } else {
+        selectedCompanions[id] = {
+            name: option.dataset.name,
+            empid: option.dataset.empid,
+            photo: option.dataset.photo
+        };
+        option.classList.add('selected');
+        option.style.background = '#f0f9ff';
+        option.querySelector('.companion-check').style.display = 'inline-flex';
+    }
+    renderCompanionChips();
+}
+
+function removeCompanion(id) {
+    delete selectedCompanions[id];
+    const option = document.querySelector(`.companion-option[data-id="${id}"]`);
+    if (option) {
+        option.classList.remove('selected');
+        option.style.background = 'white';
+        option.querySelector('.companion-check').style.display = 'none';
+    }
+    renderCompanionChips();
+}
+
+function clearCompanionSelection() {
+    selectedCompanions = {};
+    document.querySelectorAll('.companion-option').forEach(option => {
+        option.classList.remove('selected');
+        option.style.background = 'white';
+        option.querySelector('.companion-check').style.display = 'none';
+    });
+    renderCompanionChips();
+}
+
+function companionAvatarHtml(companion) {
+    if (companion.photo) {
+        return `<img src="${companion.photo}" alt="" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;">`;
+    }
+    const initials = companion.name.split(' ').filter(Boolean).map(part => part[0]).slice(0, 2).join('').toUpperCase();
+    return `<span style="width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, #0b044d, #4338ca); color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700;">${initials}</span>`;
+}
+
+function renderCompanionChips() {
+    const box = document.getElementById('companionSelectBox');
+    const placeholder = document.getElementById('companionPlaceholder');
+    const hiddenInputs = document.getElementById('companionHiddenInputs');
+
+    box.querySelectorAll('.companion-chip').forEach(chip => chip.remove());
+    hiddenInputs.innerHTML = '';
+
+    const ids = Object.keys(selectedCompanions);
+    placeholder.style.display = ids.length ? 'none' : 'inline';
+
+    ids.forEach(id => {
+        const companion = selectedCompanions[id];
+
+        const chip = document.createElement('span');
+        chip.className = 'companion-chip';
+        chip.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; background: #eef2ff; border: 1px solid #d9d9ee; border-radius: 999px; padding: 3px 8px 3px 4px; font-size: 12px; font-weight: 600; color: #0b044d;';
+        chip.innerHTML = companionAvatarHtml(companion) +
+            `<span>${companion.name}</span>` +
+            `<button type="button" class="companion-chip-remove" onclick="removeCompanion('${id}')" style="border: none; background: none; cursor: pointer; color: #6b7280; display: inline-flex; padding: 0;" title="Remove">` +
+            `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+        box.insertBefore(chip, box.lastElementChild);
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'companions[]';
+        input.value = id;
+        hiddenInputs.appendChild(input);
+    });
+}
+
+// Close the companion dropdown when clicking anywhere else in the modal
+document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('companionDropdown');
+    if (!dropdown || dropdown.style.display !== 'block') return;
+    if (!e.target.closest('#companionDropdown') && !e.target.closest('#companionSelectBox')) {
+        closeCompanionDropdown();
+    }
+});
 
 function openTravelOrderModal() {
     document.getElementById('fileTravelOrderModal').style.display = 'flex';

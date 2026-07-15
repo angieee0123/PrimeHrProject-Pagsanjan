@@ -275,6 +275,126 @@ class NotificationService
     }
 
     /**
+     * Notify an employee that they were included as a companion on a travel order
+     */
+    public static function travelOrderCompanionInvited($travelOrder, $companion)
+    {
+        $companionEmployee = $companion->employee;
+
+        if (!$companionEmployee || !$companionEmployee->user) return;
+
+        $filer = $travelOrder->employee;
+        $filerName = $filer->first_name . ' ' . $filer->last_name;
+        $dates = $travelOrder->formatted_dates;
+
+        Notification::create([
+            'user_id' => $companionEmployee->user->id,
+            'type' => 'travel_order',
+            'title' => 'Travel Order Companion Request',
+            'message' => "{$filerName} included you as a companion on travel order {$travelOrder->order_number} to {$travelOrder->destination} ({$dates}). Please accept or reject the request.",
+            'link' => route('employee.travelorder'),
+            'related_id' => $travelOrder->id,
+            'related_type' => 'App\\Models\\TravelOrder',
+        ]);
+    }
+
+    /**
+     * Notify the filer that a companion accepted/rejected the travel order request
+     */
+    public static function travelOrderCompanionResponded($travelOrder, $companion)
+    {
+        $filer = $travelOrder->employee;
+
+        if (!$filer || !$filer->user) return;
+
+        $companionName = $companion->employee->first_name . ' ' . $companion->employee->last_name;
+        $statusText = ucfirst($companion->status);
+        $message = "{$companionName} has {$companion->status} your companion request for travel order {$travelOrder->order_number}.";
+
+        if ($travelOrder->allCompanionsResponded()) {
+            $message .= ' All companions have responded — you can now forward it to HR for approval.';
+        }
+
+        Notification::create([
+            'user_id' => $filer->user->id,
+            'type' => 'travel_order',
+            'title' => "Companion Request {$statusText}",
+            'message' => $message,
+            'link' => route('employee.travelorder'),
+            'related_id' => $travelOrder->id,
+            'related_type' => 'App\\Models\\TravelOrder',
+        ]);
+    }
+
+    /**
+     * Notify admin/HR users that a travel order was forwarded for approval
+     */
+    public static function travelOrderForwarded($travelOrder)
+    {
+        $filer = $travelOrder->employee;
+        $filerName = $filer->first_name . ' ' . $filer->last_name;
+        $companionCount = $travelOrder->companions()->where('status', 'accepted')->count();
+        $companionText = $companionCount > 0 ? " with {$companionCount} companion(s)" : '';
+
+        $admins = User::where(function ($q) {
+            $q->whereJsonContains('roles', 'admin')->orWhereJsonContains('roles', 'hr');
+        })->get();
+
+        foreach ($admins as $admin) {
+            Notification::create([
+                'user_id' => $admin->id,
+                'type' => 'travel_order',
+                'title' => 'New Travel Order Request',
+                'message' => "{$filerName} submitted travel order {$travelOrder->order_number} to {$travelOrder->destination}{$companionText}.",
+                'link' => route('admin.travelorder'),
+                'related_id' => $travelOrder->id,
+                'related_type' => 'App\\Models\\TravelOrder',
+            ]);
+        }
+    }
+
+    /**
+     * Notify the filer and accepted companions that HR approved/disapproved the travel order
+     */
+    public static function travelOrderStatusChanged($travelOrder, $status)
+    {
+        $statusText = ucfirst($status);
+        $reasonText = $travelOrder->remarks ?? $travelOrder->disapproval_reason;
+        $reason = ($status !== 'approved' && $reasonText) ? " Reason: {$reasonText}" : '';
+
+        $recipients = collect();
+
+        if ($travelOrder->employee && $travelOrder->employee->user) {
+            $recipients->push([
+                'user_id' => $travelOrder->employee->user->id,
+                'message' => "Your travel order {$travelOrder->order_number} to {$travelOrder->destination} has been {$status}.{$reason}",
+            ]);
+        }
+
+        $acceptedCompanions = $travelOrder->companions()->where('status', 'accepted')->with('employee.user')->get();
+        foreach ($acceptedCompanions as $companion) {
+            if ($companion->employee && $companion->employee->user) {
+                $recipients->push([
+                    'user_id' => $companion->employee->user->id,
+                    'message' => "Travel order {$travelOrder->order_number} to {$travelOrder->destination}, where you are a companion, has been {$status}.{$reason}",
+                ]);
+            }
+        }
+
+        foreach ($recipients as $recipient) {
+            Notification::create([
+                'user_id' => $recipient['user_id'],
+                'type' => 'travel_order',
+                'title' => "Travel Order {$statusText}",
+                'message' => $recipient['message'],
+                'link' => route('employee.travelorder'),
+                'related_id' => $travelOrder->id,
+                'related_type' => 'App\\Models\\TravelOrder',
+            ]);
+        }
+    }
+
+    /**
      * Create a request status notification for employee
      */
     public static function requestStatusChanged($request, $status)
