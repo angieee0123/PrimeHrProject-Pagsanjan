@@ -12,7 +12,10 @@
    would otherwise trap position:fixed modals below the sidebar's z-index.
    ══════════════════════════════════════════════════════════════════════ */
 
-.glass-shell {
+:root {
+    /* Core brand palette — previously scoped to .glass-shell, so only pages
+       using that class could reference them. Promoted here so any stylesheet
+       or component can consume var(--gp-*) regardless of page wrapper. */
     --gp-pri: #0b044d;
     --gp-pri-2: #150c63;
     --gp-bg: #F7F8FC;
@@ -23,6 +26,22 @@
     --gp-glass-border: rgba(255, 255, 255, .65);
     --gp-radius-card: 18px;
     --gp-radius-table: 20px;
+
+    /* Secondary text/background/status tones — named from the values already
+       hardcoded across the per-page stylesheets (see adminAttendance.css etc.),
+       not new colors. --gp-muted above and --gp-text-soft below are distinct
+       existing greys (#7C839D vs #8f8daf), kept separate rather than merged. */
+    --gp-text-soft: #8f8daf;
+    --gp-text-mid: #56547a;
+    --gp-bg-tint: #f7f6fc;
+    --gp-bg-tint-2: #f2f1fb;
+    --gp-border: #ecebf6;
+    --gp-accent-gold: #c9a227;
+    --gp-good: #15803d;
+    --gp-bad: #8e1e18;
+}
+
+.glass-shell {
     color: var(--gp-ink);
     min-height: 100vh;
     padding: 0 0 48px;
