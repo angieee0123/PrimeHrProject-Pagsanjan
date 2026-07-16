@@ -1,89 +1,85 @@
-<div id="payrollResultModal" class="modal-overlay" style="display: none;">
-    <div class="modal-container" style="max-width: 95%; width: 1400px;">
-        <div class="modal-header">
-            <h3 class="modal-title">Generated Payroll Summary</h3>
-            <button type="button" class="modal-close" onclick="closePayrollModal()">&times;</button>
-        </div>
-        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-            <div class="payroll-info-bar">
-                <div class="info-item">
-                    <span class="info-label">Period:</span>
-                    <strong id="modalPeriod">-</strong>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Pay Date:</span>
-                    <strong id="modalPayDate">-</strong>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Payroll Type:</span>
-                    <strong id="modalPayrollType">-</strong>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Total Employees:</span>
-                    <strong id="modalEmployeeCount">0</strong>
-                </div>
-            </div>
+<x-modal id="payrollResultModal" container-class="modal-container" box-style="max-width: 95%; width: 1400px;" close="closePayrollModal" title="Generated Payroll Summary">
+    <x-slot:closeIcon>&times;</x-slot:closeIcon>
 
-            <div class="table-wrapper" style="margin-top: 20px;">
-                <table class="payroll-summary-table">
-                    <thead>
-                        <tr>
-                            <th rowspan="2">No.</th>
-                            <th rowspan="2">Employee Name</th>
-                            <th rowspan="2">Position</th>
-                            <th rowspan="2">Department</th>
-                            <th rowspan="2">Days Worked</th>
-                            <th rowspan="2">Daily Rate</th>
-                            <th colspan="2">Earnings</th>
-                            <th colspan="4">Deductions</th>
-                            <th rowspan="2">Total Deductions</th>
-                            <th rowspan="2">Net Pay</th>
-                        </tr>
-                        <tr>
-                            <th>Basic Pay</th>
-                            <th>OT Pay</th>
-                            <th>Late</th>
-                            <th>Undertime</th>
-                            <th>SSS/GSIS</th>
-                            <th>Loans</th>
-                        </tr>
-                    </thead>
-                    <tbody id="payrollTableBody">
-                        <tr>
-                            <td colspan="14" style="text-align: center; padding: 40px; color: #8f8daf;">
-                                Loading payroll data...
-                            </td>
-                        </tr>
-                    </tbody>
-                    <tfoot>
-                        <tr class="total-row">
-                            <td colspan="6" style="text-align: right; font-weight: 700;">TOTAL:</td>
-                            <td id="totalBasicPay">₱0.00</td>
-                            <td id="totalOtPay">₱0.00</td>
-                            <td id="totalLate">₱0.00</td>
-                            <td id="totalUndertime">₱0.00</td>
-                            <td id="totalMandatory">₱0.00</td>
-                            <td id="totalLoans">₱0.00</td>
-                            <td id="totalDeductions">₱0.00</td>
-                            <td id="totalNetPay">₱0.00</td>
-                        </tr>
-                    </tfoot>
-                </table>
+    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+        <div class="payroll-info-bar">
+            <div class="info-item">
+                <span class="info-label">Period:</span>
+                <strong id="modalPeriod">-</strong>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Pay Date:</span>
+                <strong id="modalPayDate">-</strong>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Payroll Type:</span>
+                <strong id="modalPayrollType">-</strong>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Total Employees:</span>
+                <strong id="modalEmployeeCount">0</strong>
             </div>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn-secondary" onclick="closePayrollModal()">Close</button>
-            <button type="button" class="btn-export-excel" onclick="exportToExcel()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export to Excel
-            </button>
-            <button type="button" class="btn-primary" onclick="confirmPayroll()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                Confirm & Save
-            </button>
+
+        <div class="table-wrapper" style="margin-top: 20px;">
+            <table class="payroll-summary-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2">No.</th>
+                        <th rowspan="2">Employee Name</th>
+                        <th rowspan="2">Position</th>
+                        <th rowspan="2">Department</th>
+                        <th rowspan="2">Days Worked</th>
+                        <th rowspan="2">Daily Rate</th>
+                        <th colspan="2">Earnings</th>
+                        <th colspan="4">Deductions</th>
+                        <th rowspan="2">Total Deductions</th>
+                        <th rowspan="2">Net Pay</th>
+                    </tr>
+                    <tr>
+                        <th>Basic Pay</th>
+                        <th>OT Pay</th>
+                        <th>Late</th>
+                        <th>Undertime</th>
+                        <th>SSS/GSIS</th>
+                        <th>Loans</th>
+                    </tr>
+                </thead>
+                <tbody id="payrollTableBody">
+                    <tr>
+                        <td colspan="14" style="text-align: center; padding: 40px; color: #8f8daf;">
+                            Loading payroll data...
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="6" style="text-align: right; font-weight: 700;">TOTAL:</td>
+                        <td id="totalBasicPay">₱0.00</td>
+                        <td id="totalOtPay">₱0.00</td>
+                        <td id="totalLate">₱0.00</td>
+                        <td id="totalUndertime">₱0.00</td>
+                        <td id="totalMandatory">₱0.00</td>
+                        <td id="totalLoans">₱0.00</td>
+                        <td id="totalDeductions">₱0.00</td>
+                        <td id="totalNetPay">₱0.00</td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
     </div>
-</div>
+    <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closePayrollModal()">Close</button>
+        <button type="button" class="btn-export-excel" onclick="exportToExcel()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export to Excel
+        </button>
+        <button type="button" class="btn-primary" onclick="confirmPayroll()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Confirm & Save
+        </button>
+    </div>
+</x-modal>
 
 <style>
 .modal-overlay {
@@ -262,7 +258,7 @@ function closePayrollModal() {
 
 function showPayrollModal(data) {
     currentPayrollData = data;
-    
+
     // Populate modal info
     document.getElementById('modalPeriod').textContent = data.period;
     document.getElementById('modalPayDate').textContent = data.pay_date;
@@ -273,7 +269,7 @@ function showPayrollModal(data) {
     const thead = document.querySelector('.payroll-summary-table thead');
     const deductionTypes = data.deduction_types || [];
     const deductionNames = data.deduction_names || {};
-    
+
     thead.innerHTML = `
         <tr>
             <th rowspan="2">No.</th>
@@ -309,7 +305,7 @@ function showPayrollModal(data) {
         totalDeductions: 0,
         netPay: 0
     };
-    
+
     // Initialize deduction totals
     deductionTypes.forEach(code => {
         totals.deductions[code] = 0;
@@ -317,12 +313,12 @@ function showPayrollModal(data) {
 
     data.employees.forEach((emp, index) => {
         const row = document.createElement('tr');
-        
+
         // Calculate total deductions - ensure all values are numbers
         const late = parseFloat(emp.late) || 0;
         const undertime = parseFloat(emp.undertime) || 0;
         let deductionSum = 0;
-        
+
         // Sum all deduction amounts
         if (emp.deductions && typeof emp.deductions === 'object') {
             Object.values(emp.deductions).forEach(amount => {
@@ -330,7 +326,7 @@ function showPayrollModal(data) {
                 deductionSum += deductAmount;
             });
         }
-        
+
         const totalDeductions = late + undertime + deductionSum;
         const basicPay = parseFloat(emp.basic_pay) || 0;
         const otPay = parseFloat(emp.ot_pay) || 0;
@@ -343,7 +339,7 @@ function showPayrollModal(data) {
         totals.undertime += undertime;
         totals.totalDeductions += totalDeductions;
         totals.netPay += netPay;
-        
+
         // Update deduction totals
         deductionTypes.forEach(code => {
             const amount = parseFloat(emp.deductions[code]) || 0;
@@ -380,7 +376,7 @@ function showPayrollModal(data) {
         const total = totals.deductions[code] || 0;
         return `<td id="total_${code}">₱${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`;
     }).join('');
-    
+
     tfoot.innerHTML = `
         <tr class="total-row">
             <td colspan="6" style="text-align: right; font-weight: 700;">TOTAL:</td>
@@ -402,7 +398,7 @@ function exportToExcel() {
     // Get form data
     const form = document.getElementById('generatePayrollForm');
     const formData = new FormData(form);
-    
+
     // Create URL with parameters
     const params = new URLSearchParams(formData);
     window.location.href = '{{ route("admin.payroll.export") }}?' + params.toString();
@@ -425,14 +421,14 @@ function closeConfirmPayrollModal() {
 
 function proceedSavePayroll() {
     closeConfirmPayrollModal();
-    
+
     const confirmBtn = document.querySelector('#payrollResultModal .btn-primary');
     confirmBtn.disabled = true;
     confirmBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Saving...';
-    
+
     const form = document.getElementById('generatePayrollForm');
     const formData = new FormData(form);
-    
+
     // Submit to save endpoint
     fetch('{{ route("admin.payroll.generate") }}', {
         method: 'POST',
@@ -451,7 +447,7 @@ function proceedSavePayroll() {
     .then(data => {
         // Close the preview modal
         closePayrollModal();
-        
+
         if (data.success) {
             showSuccessModal({
                 message: data.message || 'Payroll has been successfully generated and saved.',

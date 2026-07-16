@@ -22,14 +22,16 @@
     'maxWidth' => null,
     'close' => null,
     'closeOnOverlayClick' => true,
+    'overlayClass' => 'modal-overlay',
+    'containerClass' => 'modal-container',
     'title' => null,
     'titleId' => null,
     'subtitle' => null,
     'subtitleId' => null,
 ])
 
-<div id="{{ $id }}" {{ $attributes->class(['modal-overlay']) }} @if($close && $closeOnOverlayClick) onclick="{{ $close }}(event)" @endif>
-    <div class="modal-container" onclick="event.stopPropagation()" @if($maxWidth) style="max-width: {{ $maxWidth }};" @endif>
+<div id="{{ $id }}" {{ $attributes->class([$overlayClass]) }} @if($close && $closeOnOverlayClick) onclick="{{ $close }}(event)" @endif>
+    <div class="{{ $containerClass }}" onclick="event.stopPropagation()" @if($maxWidth) style="max-width: {{ $maxWidth }};" @endif>
         @if($title || $titleId)
             <div class="modal-header">
                 <div>
@@ -40,7 +42,11 @@
                 </div>
                 @if($close)
                     <button type="button" class="modal-close" onclick="{{ $close }}()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        @isset($closeIcon)
+                            {{ $closeIcon }}
+                        @else
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        @endisset
                     </button>
                 @endif
             </div>

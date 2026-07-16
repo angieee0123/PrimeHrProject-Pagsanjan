@@ -1,106 +1,97 @@
 <!-- Assign Deduction Schedule Modal -->
-<div id="assignDeductionScheduleModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
-    <div style="background:#fff; border-radius:12px; width:100%; max-width:650px; max-height:90vh; box-shadow:0 8px 32px rgba(11,4,77,0.2); overflow:hidden; display:flex; flex-direction:column;">
-        <div style="background:linear-gradient(135deg, #0b044d 0%, #150c63 100%); padding:20px 24px; display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:12px;">
-                <div style="width:40px; height:40px; background:rgba(255,255,255,0.12); border-radius:10px; display:flex; align-items:center; justify-content:center;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
-                </div>
-                <div>
-                    <p style="margin:0; font-size:10px; font-weight:700; letter-spacing:1.5px; color:rgba(255,255,255,0.5);">DEDUCTION SCHEDULE</p>
-                    <h3 style="margin:0; font-size:16px; font-weight:700; color:#fff;" id="deductionScheduleEmployeeName">Employee Name</h3>
+<x-schedule-modal id="assignDeductionScheduleModal" close="closeAssignDeductionScheduleModal" max-width="650px"
+                   box-style="max-height:90vh; display:flex; flex-direction:column;"
+                   eyebrow="DEDUCTION SCHEDULE" title="Employee Name" title-id="deductionScheduleEmployeeName">
+    <x-slot:icon>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+    </x-slot:icon>
+
+    <form id="assignDeductionScheduleForm" onsubmit="handleDeductionScheduleSubmit(event)">
+        <input type="hidden" name="employee_id" id="deductionScheduleEmployeeId">
+
+        <div style="padding:24px; overflow-y:auto; flex:1; max-height:calc(90vh - 200px);">
+            <div style="margin-bottom:20px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:8px;">
+                    Effective Period <span style="color:#8e1e18;">*</span>
+                </label>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:600; color:#56547a; margin-bottom:6px;">From Month</label>
+                        <input type="month" name="start_month" id="startMonth" required style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:600; color:#56547a; margin-bottom:6px;">To Month</label>
+                        <input type="month" name="end_month" id="endMonth" required style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                    </div>
                 </div>
             </div>
-            <button onclick="closeAssignDeductionScheduleModal()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:20px;">&times;</button>
+
+            <div id="existingSchedulesSection" style="display:none; margin-bottom:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <label style="font-size:12px; font-weight:600; color:#0b044d;">Existing Schedules</label>
+                    <button type="button" onclick="toggleScheduleHistory()" style="background:transparent; border:none; color:#0b044d; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px;">
+                        <span id="toggleScheduleText">Show History</span>
+                        <svg id="toggleScheduleIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="scheduleHistoryList" style="display:none; background:#f7f6fc; border:1.5px solid #ecebf6; border-radius:8px; padding:12px; max-height:200px; overflow-y:auto;">
+                    <!-- Schedule history will be loaded here -->
+                </div>
+            </div>
+
+            <div style="background:#f7f6fc; border:1.5px solid #ecebf6; border-radius:10px; padding:16px; margin-bottom:20px;">
+                <p style="margin:0 0 12px; font-size:11px; font-weight:700; letter-spacing:1px; color:#8f8daf;">EMPLOYEE DEDUCTIONS & LOANS</p>
+
+                <div id="deductionsList" style="display:flex; flex-direction:column; gap:10px; max-height:400px; overflow-y:auto; padding-right:8px;">
+                    <!-- Deductions will be loaded here dynamically -->
+                    <p style="margin:0; font-size:13px; color:#8f8daf; text-align:center; padding:20px;">
+                        Loading deductions...
+                    </p>
+                </div>
+            </div>
+
+            <div style="background:#e8f5e9; border:1.5px solid #a5d6a7; border-radius:10px; padding:12px; display:flex; align-items:start; gap:10px; margin-bottom:16px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <p style="margin:0; font-size:12px; color:#1b5e20; line-height:1.5;">
+                    <strong>Non-Destructive Scheduling:</strong> Creating a new schedule will not delete previous schedules. All historical schedules are preserved for audit purposes.
+                </p>
+            </div>
+
+            <div style="background:#fbf6e3; border:1.5px solid #ecdca4; border-radius:10px; padding:12px; display:flex; align-items:start; gap:10px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <p style="margin:0; font-size:12px; color:#c9a227; line-height:1.5;">
+                    Set the period for this deduction schedule. The selected cutoff configuration will apply to all months within the specified range. You can create different schedules for different periods.
+                </p>
+            </div>
         </div>
 
-        <form id="assignDeductionScheduleForm" onsubmit="handleDeductionScheduleSubmit(event)">
-            <input type="hidden" name="employee_id" id="deductionScheduleEmployeeId">
-
-            <div style="padding:24px; overflow-y:auto; flex:1; max-height:calc(90vh - 200px);">
-                <div style="margin-bottom:20px;">
-                    <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:8px;">
-                        Effective Period <span style="color:#8e1e18;">*</span>
-                    </label>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
-                        <div>
-                            <label style="display:block; font-size:11px; font-weight:600; color:#56547a; margin-bottom:6px;">From Month</label>
-                            <input type="month" name="start_month" id="startMonth" required style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
-                        </div>
-                        <div>
-                            <label style="display:block; font-size:11px; font-weight:600; color:#56547a; margin-bottom:6px;">To Month</label>
-                            <input type="month" name="end_month" id="endMonth" required style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
-                        </div>
-                    </div>
-                </div>
-
-                <div id="existingSchedulesSection" style="display:none; margin-bottom:20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <label style="font-size:12px; font-weight:600; color:#0b044d;">Existing Schedules</label>
-                        <button type="button" onclick="toggleScheduleHistory()" style="background:transparent; border:none; color:#0b044d; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px;">
-                            <span id="toggleScheduleText">Show History</span>
-                            <svg id="toggleScheduleIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div id="scheduleHistoryList" style="display:none; background:#f7f6fc; border:1.5px solid #ecebf6; border-radius:8px; padding:12px; max-height:200px; overflow-y:auto;">
-                        <!-- Schedule history will be loaded here -->
-                    </div>
-                </div>
-
-                <div style="background:#f7f6fc; border:1.5px solid #ecebf6; border-radius:10px; padding:16px; margin-bottom:20px;">
-                    <p style="margin:0 0 12px; font-size:11px; font-weight:700; letter-spacing:1px; color:#8f8daf;">EMPLOYEE DEDUCTIONS & LOANS</p>
-
-                    <div id="deductionsList" style="display:flex; flex-direction:column; gap:10px; max-height:400px; overflow-y:auto; padding-right:8px;">
-                        <!-- Deductions will be loaded here dynamically -->
-                        <p style="margin:0; font-size:13px; color:#8f8daf; text-align:center; padding:20px;">
-                            Loading deductions...
-                        </p>
-                    </div>
-                </div>
-
-                <div style="background:#e8f5e9; border:1.5px solid #a5d6a7; border-radius:10px; padding:12px; display:flex; align-items:start; gap:10px; margin-bottom:16px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <polyline points="22 4 12 14.01 9 11.01"/>
-                    </svg>
-                    <p style="margin:0; font-size:12px; color:#1b5e20; line-height:1.5;">
-                        <strong>Non-Destructive Scheduling:</strong> Creating a new schedule will not delete previous schedules. All historical schedules are preserved for audit purposes.
-                    </p>
-                </div>
-
-                <div style="background:#fbf6e3; border:1.5px solid #ecdca4; border-radius:10px; padding:12px; display:flex; align-items:start; gap:10px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                    <p style="margin:0; font-size:12px; color:#c9a227; line-height:1.5;">
-                        Set the period for this deduction schedule. The selected cutoff configuration will apply to all months within the specified range. You can create different schedules for different periods.
-                    </p>
-                </div>
-            </div>
-
-            <div style="padding:16px 24px; border-top:1px solid #f2f1fb; display:flex; justify-content:flex-end; gap:10px;">
-                <button type="button" onclick="closeAssignDeductionScheduleModal()" style="padding:10px 24px; background:#fff; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-weight:600; color:#56547a; cursor:pointer; font-family:'Poppins',sans-serif;">
-                    Cancel
-                </button>
-                <button type="submit" style="padding:10px 24px; background:#0b044d; border:none; border-radius:8px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:8px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    Save Schedule
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+        <div style="padding:16px 24px; border-top:1px solid #f2f1fb; display:flex; justify-content:flex-end; gap:10px;">
+            <button type="button" onclick="closeAssignDeductionScheduleModal()" style="padding:10px 24px; background:#fff; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-weight:600; color:#56547a; cursor:pointer; font-family:'Poppins',sans-serif;">
+                Cancel
+            </button>
+            <button type="submit" style="padding:10px 24px; background:#0b044d; border:none; border-radius:8px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Save Schedule
+            </button>
+        </div>
+    </form>
+</x-schedule-modal>
 
 <style>
 .deduction-schedule-item {
@@ -405,7 +396,7 @@ function handleDeductionScheduleSubmit(event) {
     submitData.append('employee_id', employeeId);
     submitData.append('start_month', startMonth);
     submitData.append('end_month', endMonth);
-    
+
     schedules.forEach((schedule, index) => {
         submitData.append(`schedules[${index}][deduction_id]`, schedule.deduction_id);
         submitData.append(`schedules[${index}][cutoff]`, schedule.cutoff);

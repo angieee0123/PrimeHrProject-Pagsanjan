@@ -1,44 +1,35 @@
 <!-- View Employee Schedules Modal -->
-<div id="viewSchedulesModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; overflow-y:auto;">
-    <div style="background:#fff; border-radius:12px; width:100%; max-width:900px; margin:20px; box-shadow:0 8px 32px rgba(11,4,77,0.2); max-height:90vh; display:flex; flex-direction:column;">
-        <div style="background:linear-gradient(135deg, #0b044d 0%, #150c63 100%); padding:20px 24px; border-radius:12px 12px 0 0; display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:12px;">
-                <div style="width:40px; height:40px; background:rgba(255,255,255,0.12); border-radius:10px; display:flex; align-items:center; justify-content:center;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
-                </div>
-                <div>
-                    <p style="margin:0; font-size:10px; font-weight:700; letter-spacing:1.5px; color:rgba(255,255,255,0.5);">WORK SCHEDULES</p>
-                    <h3 style="margin:0; font-size:16px; font-weight:700; color:#fff;" id="viewSchedulesEmployeeName">Employee Name</h3>
-                </div>
-            </div>
-            <button onclick="closeViewSchedulesModal()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:20px;">&times;</button>
-        </div>
+<x-schedule-modal id="viewSchedulesModal" close="closeViewSchedulesModal" max-width="900px"
+                   overlay-style="overflow-y:auto;" box-style="margin:20px; max-height:90vh; display:flex; flex-direction:column;"
+                   eyebrow="WORK SCHEDULES" title="Employee Name" title-id="viewSchedulesEmployeeName">
+    <x-slot:icon>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+    </x-slot:icon>
 
-        <div style="padding:24px; overflow-y:auto; flex:1;">
-            <div id="schedulesListContainer">
-                <!-- Schedules will be loaded here -->
-            </div>
-        </div>
-
-        <div style="padding:16px 24px; border-top:1px solid #f2f1fb; display:flex; justify-content:flex-end; gap:10px;">
-            <button onclick="closeViewSchedulesModal()" style="padding:10px 24px; background:#fff; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-weight:600; color:#56547a; cursor:pointer; font-family:'Poppins',sans-serif;">
-                Close
-            </button>
-            <button onclick="openAddScheduleFromView()" style="padding:10px 24px; background:#0b044d; border:none; border-radius:8px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:8px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                Add New Schedule
-            </button>
+    <div style="padding:24px; overflow-y:auto; flex:1;">
+        <div id="schedulesListContainer">
+            <!-- Schedules will be loaded here -->
         </div>
     </div>
-</div>
+
+    <div style="padding:16px 24px; border-top:1px solid #f2f1fb; display:flex; justify-content:flex-end; gap:10px;">
+        <button onclick="closeViewSchedulesModal()" style="padding:10px 24px; background:#fff; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-weight:600; color:#56547a; cursor:pointer; font-family:'Poppins',sans-serif;">
+            Close
+        </button>
+        <button onclick="openAddScheduleFromView()" style="padding:10px 24px; background:#0b044d; border:none; border-radius:8px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:8px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add New Schedule
+        </button>
+    </div>
+</x-schedule-modal>
 
 <script>
 let currentViewEmployeeId = null;
@@ -47,11 +38,11 @@ let currentViewEmployeeName = null;
 function viewEmployeeSchedules(employeeId, employeeName) {
     currentViewEmployeeId = employeeId;
     currentViewEmployeeName = employeeName;
-    
+
     document.getElementById('viewSchedulesEmployeeName').textContent = employeeName;
     document.getElementById('viewSchedulesModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
-    
+
     // Fetch schedules
     fetch(`/admin/schedules/employee/${employeeId}`)
         .then(response => response.json())
@@ -70,7 +61,7 @@ function viewEmployeeSchedules(employeeId, employeeName) {
 
 function displaySchedules(schedules) {
     const container = document.getElementById('schedulesListContainer');
-    
+
     if (schedules.length === 0) {
         container.innerHTML = `
             <div style="text-align:center; padding:40px; color:#56547a;">
@@ -86,18 +77,18 @@ function displaySchedules(schedules) {
         `;
         return;
     }
-    
+
     const today = new Date().toISOString().split('T')[0];
-    
+
     let html = '';
     schedules.forEach((schedule, index) => {
         const isActive = schedule.start_date <= today && schedule.end_date >= today;
         const isPast = schedule.end_date < today;
         const isFuture = schedule.start_date > today;
-        
+
         let statusBadge = '';
         let statusColor = '';
-        
+
         if (isActive) {
             statusBadge = 'Active';
             statusColor = '#15803d';
@@ -108,7 +99,7 @@ function displaySchedules(schedules) {
             statusBadge = 'Expired';
             statusColor = '#56547a';
         }
-        
+
         html += `
             <div style="background:${isActive ? '#f0fdf4' : '#f7f6fc'}; border:1.5px solid ${isActive ? '#bbf7d0' : '#ecebf6'}; border-radius:10px; padding:16px; margin-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:12px;">
@@ -131,7 +122,7 @@ function displaySchedules(schedules) {
                         </button>
                     </div>
                 </div>
-                
+
                 <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px;">
                     <div style="background:#fff; border-radius:8px; padding:12px;">
                         <p style="margin:0 0 8px; font-size:10px; font-weight:700; letter-spacing:1px; color:#8f8daf;">MORNING SHIFT</p>
@@ -146,7 +137,7 @@ function displaySchedules(schedules) {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div style="background:#fff; border-radius:8px; padding:12px;">
                         <p style="margin:0 0 8px; font-size:10px; font-weight:700; letter-spacing:1px; color:#8f8daf;">AFTERNOON SHIFT</p>
                         <div style="display:flex; gap:12px;">
@@ -164,7 +155,7 @@ function displaySchedules(schedules) {
             </div>
         `;
     });
-    
+
     container.innerHTML = html;
 }
 
@@ -210,17 +201,17 @@ function confirmDeleteSchedule(scheduleId, startDate, endDate) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/admin/schedules/${scheduleId}/delete`;
-        
+
         const csrfToken = document.createElement('input');
         csrfToken.type = 'hidden';
         csrfToken.name = '_token';
         csrfToken.value = '{{ csrf_token() }}';
-        
+
         const methodField = document.createElement('input');
         methodField.type = 'hidden';
         methodField.name = '_method';
         methodField.value = 'DELETE';
-        
+
         form.appendChild(csrfToken);
         form.appendChild(methodField);
         document.body.appendChild(form);

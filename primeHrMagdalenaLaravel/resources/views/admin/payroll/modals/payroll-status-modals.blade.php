@@ -1,53 +1,49 @@
 <!-- Success Modal -->
-<div id="payrollSuccessModal" class="status-modal-overlay" style="display: none;">
-    <div class="status-modal-container success">
-        <div class="status-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="9 12 11 14 15 10"/>
-            </svg>
-        </div>
-        <h3 class="status-title">Payroll Generated Successfully!</h3>
-        <p class="status-message" id="successMessage">
-            Payroll has been successfully generated and saved to the database.
-        </p>
-        <div class="status-details" id="successDetails"></div>
-        <div class="status-actions">
-            <button type="button" class="btn-primary" onclick="closeSuccessModal()">
-                Close
-            </button>
-            <button type="button" class="btn-secondary" onclick="viewPayrollRecords()">
-                View Records
-            </button>
-        </div>
+<x-modal id="payrollSuccessModal" overlay-class="status-modal-overlay" container-class="status-modal-container" box-class="success">
+    <div class="status-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="9 12 11 14 15 10"/>
+        </svg>
     </div>
-</div>
+    <h3 class="status-title">Payroll Generated Successfully!</h3>
+    <p class="status-message" id="successMessage">
+        Payroll has been successfully generated and saved to the database.
+    </p>
+    <div class="status-details" id="successDetails"></div>
+    <div class="status-actions">
+        <button type="button" class="btn-primary" onclick="closeSuccessModal()">
+            Close
+        </button>
+        <button type="button" class="btn-secondary" onclick="viewPayrollRecords()">
+            View Records
+        </button>
+    </div>
+</x-modal>
 
 <!-- Failed Modal -->
-<div id="payrollFailedModal" class="status-modal-overlay" style="display: none;">
-    <div class="status-modal-container failed">
-        <div class="status-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="15" y1="9" x2="9" y2="15"/>
-                <line x1="9" y1="9" x2="15" y2="15"/>
-            </svg>
-        </div>
-        <h3 class="status-title">Payroll Generation Failed</h3>
-        <p class="status-message" id="failedMessage">
-            An error occurred while generating the payroll.
-        </p>
-        <div class="error-details" id="errorDetails"></div>
-        <div class="status-actions">
-            <button type="button" class="btn-primary" onclick="closeFailedModal()">
-                Close
-            </button>
-            <button type="button" class="btn-secondary" onclick="retryPayroll()">
-                Try Again
-            </button>
-        </div>
+<x-modal id="payrollFailedModal" overlay-class="status-modal-overlay" container-class="status-modal-container" box-class="failed">
+    <div class="status-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
     </div>
-</div>
+    <h3 class="status-title">Payroll Generation Failed</h3>
+    <p class="status-message" id="failedMessage">
+        An error occurred while generating the payroll.
+    </p>
+    <div class="error-details" id="errorDetails"></div>
+    <div class="status-actions">
+        <button type="button" class="btn-primary" onclick="closeFailedModal()">
+            Close
+        </button>
+        <button type="button" class="btn-secondary" onclick="retryPayroll()">
+            Try Again
+        </button>
+    </div>
+</x-modal>
 
 <style>
 .status-modal-overlay {
@@ -223,12 +219,12 @@ function showSuccessModal(data) {
     const modal = document.getElementById('payrollSuccessModal');
     const message = document.getElementById('successMessage');
     const details = document.getElementById('successDetails');
-    
+
     // Set message
     if (data.message) {
         message.textContent = data.message;
     }
-    
+
     // Set details
     if (data.details) {
         let detailsHtml = '';
@@ -266,7 +262,7 @@ function showSuccessModal(data) {
         }
         details.innerHTML = detailsHtml;
     }
-    
+
     modal.style.display = 'flex';
 }
 
@@ -274,12 +270,12 @@ function showFailedModal(error) {
     const modal = document.getElementById('payrollFailedModal');
     const message = document.getElementById('failedMessage');
     const errorDetails = document.getElementById('errorDetails');
-    
+
     // Set message
     if (error.message) {
         message.textContent = error.message;
     }
-    
+
     // Set error details
     if (error.errors && Array.isArray(error.errors)) {
         let errorsHtml = '';
@@ -290,7 +286,7 @@ function showFailedModal(error) {
     } else if (error.error) {
         errorDetails.innerHTML = `<div class="error-item">${error.error}</div>`;
     }
-    
+
     modal.style.display = 'flex';
 }
 
