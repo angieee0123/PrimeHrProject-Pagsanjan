@@ -23,16 +23,20 @@
     'close' => null,
     'closeOnOverlayClick' => true,
     'title' => null,
+    'titleId' => null,
     'subtitle' => null,
+    'subtitleId' => null,
 ])
 
 <div id="{{ $id }}" {{ $attributes->class(['modal-overlay']) }} @if($close && $closeOnOverlayClick) onclick="{{ $close }}(event)" @endif>
     <div class="modal-container" onclick="event.stopPropagation()" @if($maxWidth) style="max-width: {{ $maxWidth }};" @endif>
-        @if($title)
+        @if($title || $titleId)
             <div class="modal-header">
                 <div>
-                    <h3 class="modal-title">{{ $title }}</h3>
-                    @isset($subtitle)<p class="modal-subtitle">{{ $subtitle }}</p>@endisset
+                    <h3 class="modal-title" @if($titleId) id="{{ $titleId }}" @endif>{{ $title }}</h3>
+                    @if($subtitle || $subtitleId)
+                        <p class="modal-subtitle" @if($subtitleId) id="{{ $subtitleId }}" @endif>{{ $subtitle }}</p>
+                    @endif
                 </div>
                 @if($close)
                     <button type="button" class="modal-close" onclick="{{ $close }}()">
