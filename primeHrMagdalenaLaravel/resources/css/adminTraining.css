@@ -366,33 +366,6 @@
 .training-verified-strong { color: var(--gp-good); }
 .training-pending-strong { color: var(--gp-accent-gold); }
 
-.modal-btn-danger {
-    padding: 10px 18px;
-    border-radius: 8px;
-    border: none;
-    background: var(--gp-bad);
-    color: #fff;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    transition: background 0.2s;
-}
-.modal-btn-danger:hover { background: #6b1510; }
-.modal-btn-danger-outline {
-    padding: 10px 18px;
-    border-radius: 8px;
-    border: 1.5px solid #fecaca;
-    background: #fff;
-    color: var(--gp-bad);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    transition: all 0.2s;
-}
-.modal-btn-danger-outline:hover { background: #fdf0ef; border-color: var(--gp-bad); }
-
 #reviewModal,
 #rejectModal,
 #approveModal,

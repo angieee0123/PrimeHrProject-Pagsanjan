@@ -199,7 +199,6 @@
     background: rgba(255, 255, 255, .85);
     transform: translateY(-1px);
 }
-.glass-shell .modal-btn-primary,
 .glass-shell .btn-solid,
 .glass-shell .btn-primary,
 .glass-shell .btn-filter-main {
@@ -211,13 +210,60 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 8px 20px rgba(11, 4, 77, .3) !important;
     transition: all .22s cubic-bezier(.4, 0, .2, 1) !important;
 }
-.glass-shell .modal-btn-primary:hover,
 .glass-shell .btn-solid:hover,
 .glass-shell .btn-primary:hover,
 .glass-shell .btn-filter-main:hover {
     transform: translateY(-1px);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 10px 26px rgba(11, 4, 77, .38) !important;
 }
+
+/* ---------- Modal footer action buttons ----------
+   Canonical definition for every page — replaces ~10 divergent per-page
+   redefinitions (see resources/views/components/modal-btn.blade.php). This
+   is intentionally NOT scoped to .glass-shell: modals are documented to live
+   as DOM siblings of .glass-shell, not children, so a .glass-shell-scoped
+   rule would never reach them on compliant pages. glassSystem.css is
+   @import-ed at the top of app.css, and app.css is loaded by every layout,
+   so this reaches admin, employee, mayor, and joborder pages alike. */
+.modal-btn-primary,
+.modal-btn-ghost,
+.modal-btn-danger,
+.modal-btn-danger-outline,
+.modal-btn-success {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease, color .2s ease;
+}
+.modal-btn-primary,
+.modal-btn-danger,
+.modal-btn-success { border: none; color: #fff; }
+.modal-btn-ghost,
+.modal-btn-danger-outline { border: 1px solid var(--gp-border); background: #fff; }
+
+.modal-btn-primary { background: linear-gradient(135deg, var(--gp-pri), var(--gp-pri-2)); box-shadow: 0 2px 8px rgba(11, 4, 77, .25); }
+.modal-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(11, 4, 77, .35); }
+
+.modal-btn-ghost { color: var(--gp-text-mid); font-weight: 600; }
+.modal-btn-ghost:hover { background: var(--gp-bg-tint); border-color: var(--gp-pri); color: var(--gp-pri); }
+
+.modal-btn-danger { background: var(--gp-bad); }
+.modal-btn-danger:hover { background: #6b1510; }
+
+.modal-btn-danger-outline { border-color: #fecaca; color: var(--gp-bad); }
+.modal-btn-danger-outline:hover { background: #fdf0ef; border-color: var(--gp-bad); }
+
+.modal-btn-success { background: linear-gradient(135deg, var(--gp-good) 0%, #22c55e 100%); box-shadow: 0 2px 8px rgba(21, 128, 61, .3); }
+.modal-btn-success:hover { box-shadow: 0 4px 12px rgba(21, 128, 61, .4); }
+
+.modal-btn-primary:active,
+.modal-btn-ghost:active { transform: scale(.97); }
 
 /* ---------- Filter card (top-level glass filter toolbar) ---------- */
 .glass-shell .filter-card {

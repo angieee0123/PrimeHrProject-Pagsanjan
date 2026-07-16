@@ -74,15 +74,6 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
   color: var(--gp-pri); cursor: pointer; transition: all 0.2s;
 }
 .btn-export:hover { border-color: var(--gp-pri); background: #f4f3ff; }
-.modal-btn-primary {
-  display: flex; align-items: center; gap: 6px;
-  height: 34px; padding: 0 16px; border: none; border-radius: 8px;
-  background: var(--gp-pri); color: #ffffff;
-  font-size: 12.5px; font-weight: 600; font-family: 'Poppins', sans-serif;
-  cursor: pointer; transition: background 0.2s;
-}
-.modal-btn-primary:hover { background: var(--gp-bad); }
-
 .table-wrapper { overflow-x: auto; }
 .payroll-table { width: 100%; border-collapse: collapse; }
 .payroll-table thead tr { background: var(--gp-bg-tint-2); }

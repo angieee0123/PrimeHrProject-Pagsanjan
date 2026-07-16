@@ -83,10 +83,6 @@
 .modal-net-row span { font-size: 11px; font-weight: 700; color: var(--gp-text-soft); letter-spacing: 0.5px; }
 .modal-net-row strong { font-size: 18px; color: var(--gp-pri); font-weight: 700; }
 .modal-footer { padding: 16px 24px; border-top: 1px solid var(--gp-bg-tint-2); display: flex; gap: 8px; justify-content: flex-end; }
-.modal-btn-ghost { padding: 10px 20px; background: #fff; color: var(--gp-text-mid); border: 1px solid var(--gp-border); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
-.modal-btn-ghost:hover { background: var(--gp-bg-tint); }
-.modal-btn-primary { padding: 10px 20px; background: var(--gp-pri); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
-.modal-btn-primary:hover { background: var(--gp-pri-2); }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .form-field label { display: block; font-size: 12px; font-weight: 600; color: var(--gp-text-mid); margin-bottom: 6px; }
 .form-input { width: 100%; padding: 10px 12px; border: 1px solid var(--gp-border); border-radius: 9px; font-size: 13px; font-family: 'Poppins', sans-serif; transition: border-color .2s cubic-bezier(.4,0,.2,1), box-shadow .2s cubic-bezier(.4,0,.2,1); }

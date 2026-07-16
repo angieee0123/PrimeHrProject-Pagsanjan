@@ -834,10 +834,10 @@
             <p style="font-size:11px;color:#667085;margin:0">Frequently used HR workflows</p>
         </div>
     </div>
-    <button class="modal-btn-primary" onclick="openAddEmployee()" style="font-size:11px;padding:0 14px;height:34px;display:flex;align-items:center;gap:6px">
+    <x-modal-btn onclick="openAddEmployee()" style="font-size:11px;padding:0 14px;height:34px;display:flex;align-items:center;gap:6px">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
         Add Employee
-    </button>
+    </x-modal-btn>
     <button class="btn-export" onclick="window.location.href='/admin/attendance'" style="font-size:11px;padding:0 14px;height:34px">Attendance</button>
     <button class="btn-export" onclick="window.location.href='/admin/leave'" style="font-size:11px;padding:0 14px;height:34px">Leave Request</button>
     <button class="btn-export" onclick="window.location.href='/admin/payroll'" style="font-size:11px;padding:0 14px;height:34px">Payroll</button>
@@ -1269,10 +1269,10 @@
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
-            <button class="modal-btn-primary" onclick="openAddEmployee()">
+            <x-modal-btn onclick="openAddEmployee()">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Employee
-            </button>
+            </x-modal-btn>
         </div>
     </div>
 
@@ -1546,11 +1546,11 @@
             </form>
         </div>
         <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:16px 24px 24px;border-top:1px solid #e5e4f0">
-            <button class="modal-btn-ghost" onclick="closeAddEmployee()">Cancel</button>
-            <button class="modal-btn-primary" onclick="submitAddEmployee(event)">
+            <x-modal-btn variant="ghost" onclick="closeAddEmployee()">Cancel</x-modal-btn>
+            <x-modal-btn onclick="submitAddEmployee(event)">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                 Save Employee
-            </button>
+            </x-modal-btn>
         </div>
     </div>
 </div>

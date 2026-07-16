@@ -267,8 +267,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="modal-btn-ghost" onclick="closeExemptionModal()">Cancel</button>
-                <button type="submit" class="modal-btn-primary">Save Exemption</button>
+                <x-modal-btn variant="ghost" onclick="closeExemptionModal()">Cancel</x-modal-btn>
+                <x-modal-btn type="submit">Save Exemption</x-modal-btn>
             </div>
         </form>
     </div>

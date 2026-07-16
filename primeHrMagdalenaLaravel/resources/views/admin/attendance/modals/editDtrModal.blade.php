@@ -41,8 +41,8 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button class="modal-btn-ghost" onclick="closeEditModal()">Cancel</button>
-        <button class="modal-btn-primary" onclick="saveEdit()">Save Changes</button>
+        <x-modal-btn variant="ghost" onclick="closeEditModal()">Cancel</x-modal-btn>
+        <x-modal-btn onclick="saveEdit()">Save Changes</x-modal-btn>
     </div>
 </x-modal>
 

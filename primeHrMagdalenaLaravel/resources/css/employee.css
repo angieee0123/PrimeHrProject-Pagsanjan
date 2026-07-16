@@ -229,9 +229,6 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
 .btn-filter-main:hover { background: var(--gp-pri-2); }
 .btn-export { height: 34px; padding: 0 14px; background: #fff; border: 1.5px solid var(--gp-border); border-radius: 8px; font-size: 12.5px; font-weight: 600; color: var(--gp-pri); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
 .btn-export:hover { border-color: var(--gp-pri); background: #f4f3ff; }
-.modal-btn-primary { height: 34px; padding: 0 16px; background: var(--gp-pri); color: #fff; border: none; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; transition: background 0.2s; }
-.modal-btn-primary:hover { background: var(--gp-bad); }
-
 .table-wrapper { overflow-x: auto; }
 .payroll-table { width: 100%; border-collapse: collapse; }
 .payroll-table thead tr { background: var(--gp-bg-tint-2); }
@@ -434,9 +431,6 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
 .modal-net-row span { font-size:13px; color:var(--gp-good); font-weight:700; }
 .modal-net-row strong { font-size:18px; color:var(--gp-good); }
 .modal-footer { display:flex; justify-content:flex-end; gap:10px; padding:16px 24px 24px; }
-.modal-btn-ghost { padding:9px 18px; border-radius:9px; border:1.5px solid #e2e1f0; background:#fff; font-size:13px; font-weight:600; color:var(--gp-text-mid); cursor:pointer; font-family: 'Poppins', sans-serif; }
-.modal-btn-ghost:hover { border-color:var(--gp-pri); color:var(--gp-pri); }
-.modal-footer .modal-btn-primary { padding: 9px 18px; height: auto; border-radius: 9px; background: linear-gradient(135deg,var(--gp-pri),var(--gp-pri-2)); font-weight: 700; }
 .modal-emp-avatar { background: var(--gp-bad); width: 48px; height: 48px; border-radius: 12px; font-size: 16px; }
 .modal-section-deductions { margin-top: 16px; }
 .dashboard-notif-dot { width:8px; height:8px; border-radius:50%; margin-top:5px; flex-shrink:0; }

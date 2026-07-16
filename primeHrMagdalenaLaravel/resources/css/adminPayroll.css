@@ -110,9 +110,5 @@
 .modal-net-row span { font-size: 11px; font-weight: 700; color: var(--gp-good); letter-spacing: 1px; }
 .modal-net-row strong { font-size: 20px; font-weight: 800; color: var(--gp-good); }
 .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px 24px; border-top: 1px solid #e5e4f0; flex-shrink: 0; }
-.modal-btn-ghost { padding: 9px 18px; border-radius: 9px; border: 1.5px solid #e2e1f0; background: #fff; font-size: 13px; font-weight: 600; color: var(--gp-text-mid); cursor: pointer; font-family: 'Poppins', sans-serif; transition: border-color .2s cubic-bezier(.4,0,.2,1), color .2s cubic-bezier(.4,0,.2,1), transform .15s ease; }
-.modal-btn-ghost:hover { border-color: var(--gp-pri); color: var(--gp-pri); }
-.modal-btn-ghost:active, .modal-btn-primary:active { transform: scale(.97); }
-.modal-btn-primary { padding: 9px 18px; border-radius: 9px; border: none; background: linear-gradient(135deg, var(--gp-pri), var(--gp-pri-2)); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Poppins', sans-serif; display: inline-flex; align-items: center; gap: 6px; transition: transform .15s ease, box-shadow .2s cubic-bezier(.4,0,.2,1); }
 .pmodal-badges { display: flex; gap: 6px; margin-top: 8px; }
 @media (max-width: 480px) { .modal-overlay { padding: 12px; align-items: flex-end; } .modal-box { border-radius: 18px 18px 0 0; } .modal-footer button { flex: 1; justify-content: center; } }

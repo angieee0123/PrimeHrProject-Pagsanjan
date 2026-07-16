@@ -1013,8 +1013,6 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
 .table-actions { display: flex; gap: 10px; }
 .filter-select { padding: 7px 14px; border: 1.5px solid var(--gp-border); border-radius: 8px; font-size: 12.5px; font-family: 'Poppins', sans-serif; color: var(--gp-pri); background: #fff; cursor: pointer; }
 .btn-export { padding: 7px 16px; background: #fff; border: 1.5px solid var(--gp-border); border-radius: 8px; font-size: 12.5px; font-weight: 600; color: var(--gp-pri); cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; }
-.modal-btn-primary { background: var(--gp-pri); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; }
-
 .table-wrapper { overflow-x: auto; }
 .payroll-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .payroll-table th { text-align: left; padding: 14px 20px; font-size: 11.5px; font-weight: 700; color: var(--gp-text-mid); text-transform: uppercase; letter-spacing: 0.5px; background: var(--gp-bg-tint); border-bottom: 1px solid var(--gp-bg-tint-2); }

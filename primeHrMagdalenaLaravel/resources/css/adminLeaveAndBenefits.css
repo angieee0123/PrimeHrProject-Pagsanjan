@@ -320,22 +320,6 @@
     padding: 20px 24px; border-top: 1px solid var(--gp-bg-tint-2);
     display: flex; gap: 10px; justify-content: flex-end;
 }
-.modal-btn-ghost {
-    padding: 10px 20px; background: var(--gp-bg-tint); color: var(--gp-pri);
-    border: 1px solid var(--gp-border); border-radius: 9px;
-    font-size: 13px; font-weight: 600; cursor: pointer;
-    font-family: 'Poppins', sans-serif; transition: background .2s cubic-bezier(.4,0,.2,1), transform .15s ease;
-}
-.modal-btn-ghost:hover { background: var(--gp-border); }
-.modal-btn-primary {
-    padding: 10px 20px; background: var(--gp-pri); color: #fff;
-    border: none; border-radius: 9px;
-    font-size: 13px; font-weight: 600; cursor: pointer;
-    font-family: 'Poppins', sans-serif; transition: background .2s cubic-bezier(.4,0,.2,1), transform .15s ease;
-    display: flex; align-items: center; gap: 6px;
-}
-.modal-btn-primary:hover { background: var(--gp-pri-2); }
-.modal-btn-ghost:active, .modal-btn-primary:active { transform: scale(.97); }
 #types-tab .payroll-table td {
     vertical-align: middle;
     padding: 10px 14px;
