@@ -11,14 +11,14 @@
     font-size: 13px;
     font-weight: 600;
     font-family: 'Poppins', sans-serif;
-    border: 1.5px solid #ecebf6;
+    border: 1.5px solid var(--gp-border);
     background: #fff;
     color: #5a5888;
     transition: all 0.18s;
     white-space: nowrap;
 }
-.report-tab:hover:not(.active) { border-color: #0b044d; background: #f2f1fb; }
-.report-tab.active { border: 2px solid #0b044d; background: #0b044d; color: #fff; }
+.report-tab:hover:not(.active) { border-color: var(--gp-pri); background: var(--gp-bg-tint-2); }
+.report-tab.active { border: 2px solid var(--gp-pri); background: var(--gp-pri); color: #fff; }
 .report-tab.active svg { stroke: #fff; }
 
 .report-tabs-wrap {
@@ -35,49 +35,49 @@
     gap: 8px;
     height: 34px;
     padding: 0 12px;
-    border: 1.5px solid #ecebf6;
+    border: 1.5px solid var(--gp-border);
     border-radius: 8px;
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
     transition: border-color 0.2s;
 }
-.rp-search-box:focus-within { border-color: #0b044d; background: #fff; }
+.rp-search-box:focus-within { border-color: var(--gp-pri); background: #fff; }
 .rp-search-box input {
     border: none;
     background: transparent;
     outline: none;
     font-size: 12.5px;
     font-family: 'Poppins', sans-serif;
-    color: #0b044d;
+    color: var(--gp-pri);
     width: 160px;
 }
 .rp-search-box input::placeholder { color: #c0bedd; }
 
 /* Stat icon colours */
-.rp-icon-primary { background: #f2f1fb; }
+.rp-icon-primary { background: var(--gp-bg-tint-2); }
 .rp-icon-success { background: #e8f9ef; }
 .rp-icon-danger  { background: #fdf0ef; }
 .rp-icon-warning { background: #fbf6e3; }
 
 /* Stat dot colours */
-.rp-dot-primary { background: #0b044d; }
+.rp-dot-primary { background: var(--gp-pri); }
 .rp-dot-success { background: #22c55e; }
-.rp-dot-danger  { background: #8e1e18; }
+.rp-dot-danger  { background: var(--gp-bad); }
 .rp-dot-warning { background: #f59e0b; }
 
 /* Stat value compact */
 .stat-value-compact { font-size: 20px; }
 
 /* Table footer row */
-.rp-tfoot-row { font-weight: 700; background: #f7f6fc; }
+.rp-tfoot-row { font-weight: 700; background: var(--gp-bg-tint); }
 .rp-tfoot-label { padding: 10px 14px; font-size: 13px; }
-.rp-tfoot-pct   { padding: 10px 14px; font-size: 13px; color: #56547a; }
+.rp-tfoot-pct   { padding: 10px 14px; font-size: 13px; color: var(--gp-text-mid); }
 
 /* Table cell helpers */
-.rp-headcount-cell { font-weight: 600; color: #0b044d; }
+.rp-headcount-cell { font-weight: 600; color: var(--gp-pri); }
 .rp-center-cell    { text-align: center; }
-.rp-date-cell      { font-size: 12.5px; color: #56547a; white-space: nowrap; }
-.rp-rating-cell    { font-weight: 700; color: #15803d; text-align: center; }
-.rp-not-rated      { font-size: 12.5px; color: #8f8daf; }
+.rp-date-cell      { font-size: 12.5px; color: var(--gp-text-mid); white-space: nowrap; }
+.rp-rating-cell    { font-weight: 700; color: var(--gp-good); text-align: center; }
+.rp-not-rated      { font-size: 12.5px; color: var(--gp-text-soft); }
 
 /* Department % bar */
 .rp-pct-wrap {
@@ -93,8 +93,8 @@
     overflow: hidden;
     min-width: 40px;
 }
-.rp-pct-fill { height: 100%; background: #0b044d; border-radius: 4px; }
-.rp-pct-label { font-size: 12px; color: #56547a; min-width: 32px; }
+.rp-pct-fill { height: 100%; background: var(--gp-pri); border-radius: 4px; }
+.rp-pct-label { font-size: 12px; color: var(--gp-text-mid); min-width: 32px; }
 
 /* Summary mini-cards (deductions / headcount / recruitment / training / performance) */
 .rp-mini-grid {
@@ -109,7 +109,7 @@
     border-radius: 12px;
     padding: 16px 18px;
 }
-.rp-mini-label { font-size: 11.5px; color: #8f8daf; font-weight: 600; margin: 0 0 6px; }
+.rp-mini-label { font-size: 11.5px; color: var(--gp-text-soft); font-weight: 600; margin: 0 0 6px; }
 .rp-mini-value { font-size: 28px; font-weight: 800; margin: 0 0 8px; }
 .rp-mini-value-sm { font-size: 17px; font-weight: 800; margin: 0 0 8px; }
 .rp-mini-track {
@@ -122,16 +122,16 @@
 .rp-mini-fill { height: 100%; border-radius: 4px; }
 .rp-mini-sub  { font-size: 11px; color: #aaa8cc; margin: 0; }
 
-.rp-color-primary { color: #0b044d; }
-.rp-color-success { color: #15803d; }
-.rp-color-danger  { color: #8e1e18; }
-.rp-color-warning { color: #c9a227; }
+.rp-color-primary { color: var(--gp-pri); }
+.rp-color-success { color: var(--gp-good); }
+.rp-color-danger  { color: var(--gp-bad); }
+.rp-color-warning { color: var(--gp-accent-gold); }
 .rp-color-hired   { color: #1a6e3c; }
 
-.rp-fill-primary { background: #0b044d; }
-.rp-fill-danger  { background: #8e1e18; }
-.rp-fill-warning { background: #c9a227; }
-.rp-fill-success { background: #15803d; }
+.rp-fill-primary { background: var(--gp-pri); }
+.rp-fill-danger  { background: var(--gp-bad); }
+.rp-fill-warning { background: var(--gp-accent-gold); }
+.rp-fill-success { background: var(--gp-good); }
 
 /* ── Responsive ── */
 @media (max-width: 900px) {

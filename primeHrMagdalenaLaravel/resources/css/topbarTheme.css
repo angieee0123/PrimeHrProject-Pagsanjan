@@ -19,7 +19,7 @@
     overflow: hidden;
     border-radius: 20px !important;
     border: 1px solid rgba(255, 255, 255, .18) !important;
-    background: #0b044d !important;
+    background: var(--gp-pri) !important;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, .16),
         0 16px 40px rgba(11, 4, 77, .28) !important;
@@ -108,7 +108,7 @@
 .topbar-search-input:not(:placeholder-shown) {
     background: #fff;
     border-color: #fff;
-    color: #0b044d;
+    color: var(--gp-pri);
     box-shadow: 0 0 0 3px rgba(255, 255, 255, .18);
 }
 
@@ -123,7 +123,7 @@
    stays legible either way. */
 .topbar-search-wrap:focus-within .topbar-search-icon,
 .topbar-search-wrap:has(.topbar-search-input:not(:placeholder-shown)) .topbar-search-icon {
-    color: #8f8daf;
+    color: var(--gp-text-soft);
 }
 
 @media (max-width: 768px) {

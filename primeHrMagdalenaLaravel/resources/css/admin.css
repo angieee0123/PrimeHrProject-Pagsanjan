@@ -3,28 +3,28 @@
 ══════════════════════════════════════════════════════ */
 :root {
   /* Brand colors — Pagsanjan municipal palette (navy / maroon / gold) */
-  --c-blue:        #0b044d;
-  --c-blue-2:      #150c63;
-  --c-blue-light:  #f2f1fb;
-  --c-blue-soft:   #f2f1fb;
+  --c-blue:        var(--gp-pri);
+  --c-blue-2:      var(--gp-pri-2);
+  --c-blue-light:  var(--gp-bg-tint-2);
+  --c-blue-soft:   var(--gp-bg-tint-2);
 
   /* Semantic colors */
-  --c-ink:         #0b044d;
-  --c-muted:       #56547a;
-  --c-subtle:      #8f8daf;
-  --c-bg:          #f7f6fc;
+  --c-ink:         var(--gp-pri);
+  --c-muted:       var(--gp-text-mid);
+  --c-subtle:      var(--gp-text-soft);
+  --c-bg:          var(--gp-bg-tint);
   --c-card:        #ffffff;
-  --c-line:        #ecebf6;
-  --c-soft:        #f2f1fb;
+  --c-line:        var(--gp-border);
+  --c-soft:        var(--gp-bg-tint-2);
 
   /* Status colors */
-  --c-green:       #15803d;
+  --c-green:       var(--gp-good);
   --c-green-bg:    #e8f9ef;
-  --c-red:         #8e1e18;
+  --c-red:         var(--gp-bad);
   --c-red-bg:      #fdedec;
-  --c-amber:       #c9a227;
+  --c-amber:       var(--gp-accent-gold);
   --c-amber-bg:    #fbf6e3;
-  --c-yellow:      #c9a227;
+  --c-yellow:      var(--gp-accent-gold);
 
   /* Glass / surface */
   --c-glass:       rgba(255,255,255,.58);
@@ -81,7 +81,7 @@ body {
 /* Sidebar */
 .sidebar {
   width: 240px; height: 100vh;
-  background: #0b044d; display: flex; flex-direction: column;
+  background: var(--gp-pri); display: flex; flex-direction: column;
   flex-shrink: 0; transition: width 0.22s ease;
   position: fixed; left: 0; top: 0; z-index: 200;
   overflow: hidden;
@@ -131,7 +131,7 @@ body {
 .nav-label { overflow: hidden; text-overflow: ellipsis; }
 .nav-active-bar {
   position: absolute; right: 0; top: 50%; transform: translateY(-50%);
-  width: 3px; height: 18px; background: #c9a227; border-radius: 3px 0 0 3px;
+  width: 3px; height: 18px; background: var(--gp-accent-gold); border-radius: 3px 0 0 3px;
 }
 
 /* Sidebar Footer */
@@ -146,12 +146,12 @@ body {
   width: 34px; height: 34px; border-radius: 9px;
   background: rgba(217,187,0,0.2); border: 1.5px solid rgba(217,187,0,0.35);
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; color: #c9a227;
+  font-size: 11px; font-weight: 700; color: var(--gp-accent-gold);
 }
 .user-status-dot {
   position: absolute; bottom: -2px; right: -2px;
   width: 9px; height: 9px; border-radius: 50%;
-  background: #22c55e; border: 2px solid #0b044d;
+  background: #22c55e; border: 2px solid var(--gp-pri);
 }
 .user-info { flex: 1; overflow: hidden; }
 .user-name { font-size: 12.5px; font-weight: 700; color: #ffffff; margin: 0 0 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -183,7 +183,7 @@ body {
 /* Mobile */
 .mobile-menu-btn {
   display: none; position: fixed; top: 14px; left: 14px; z-index: 300;
-  background: #0b044d; color: #ffffff; border: none;
+  background: var(--gp-pri); color: #ffffff; border: none;
   width: 40px; height: 40px; border-radius: 10px; cursor: pointer;
   align-items: center; justify-content: center;
 }
@@ -383,7 +383,7 @@ p { color: var(--c-muted); font-size: var(--fs-md); }
 }
 .modal-btn-ghost:hover {
   background: var(--c-soft);
-  border-color: #ecebf6;
+  border-color: var(--gp-border);
   color: var(--c-ink);
 }
 
@@ -394,7 +394,7 @@ p { color: var(--c-muted); font-size: var(--fs-md); }
   background: rgba(255,255,255,.55);
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
-  color: #56547a;
+  color: var(--gp-text-mid);
   font-family: var(--font);
   font-size: var(--fs-sm);
   font-weight: var(--fw-bold);

@@ -1,7 +1,7 @@
 /* ══════════ EMPLOYEE DASHBOARD ══════════
    Glass card system mirroring the admin dashboard (adminDashboard.blade.php). */
 .perm-dash {
-    --eh-blue: #0b044d;
+    --eh-blue: var(--gp-pri);
     --eh-blue-2: #1b1464;
     --eh-card: #ffffff;
     --eh-ink: #111827;
@@ -145,7 +145,7 @@
 .stat-pill-alert {
     padding: 2px 7px;
     border-radius: 999px;
-    background: #8e1e18;
+    background: var(--gp-bad);
     color: #fff;
     font-size: 10px;
     font-weight: 700;
@@ -288,7 +288,7 @@
     background: rgba(255, 255, 255, .55) !important;
     backdrop-filter: blur(12px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
-    color: #56547a !important;
+    color: var(--gp-text-mid) !important;
 }
 
 .perm-dash .btn-export:hover {

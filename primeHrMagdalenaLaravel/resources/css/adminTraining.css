@@ -5,7 +5,7 @@
 .admin-training .training-stat-hero .stat-value { margin-bottom: 8px; }
 .admin-training .training-goal-track {
     height: 6px;
-    background: #f2f1fb;
+    background: var(--gp-bg-tint-2);
     border-radius: 99px;
     overflow: hidden;
     margin-bottom: 10px;
@@ -13,18 +13,18 @@
 .admin-training .training-goal-fill {
     height: 100%;
     border-radius: 99px;
-    background: linear-gradient(90deg, #0b044d, #150c63);
+    background: linear-gradient(90deg, var(--gp-pri), var(--gp-pri-2));
     transition: width 0.35s ease;
 }
 .admin-training .training-goal-fill-queue {
-    background: linear-gradient(90deg, #c9a227, #f59e0b);
+    background: linear-gradient(90deg, var(--gp-accent-gold), #f59e0b);
 }
 
-.admin-training .stat-icon-wrap-primary { background: #f2f1fb; }
+.admin-training .stat-icon-wrap-primary { background: var(--gp-bg-tint-2); }
 .admin-training .stat-icon-wrap-success { background: #e8f9ef; }
 .admin-training .stat-icon-wrap-warning { background: #fbf6e3; }
 .admin-training .stat-icon-wrap-danger { background: #fdf0ef; }
-.admin-training .stat-dot-primary { background: #0b044d; }
+.admin-training .stat-dot-primary { background: var(--gp-pri); }
 .admin-training .stat-dot-success { background: #22c55e; }
 .admin-training .stat-dot-amber { background: #f59e0b; }
 .admin-training .stat-dot-danger { background: #ef4444; }
@@ -40,7 +40,7 @@
 .admin-training .training-breakdown-panel-title {
     font-size: 12px;
     font-weight: 700;
-    color: #8f8daf;
+    color: var(--gp-text-soft);
     text-transform: uppercase;
     letter-spacing: 0.6px;
     margin: 0 0 14px;
@@ -51,10 +51,10 @@
     gap: 14px;
 }
 .admin-training .training-breakdown-card {
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
     border-radius: 10px;
     padding: 12px 14px;
-    border: 1px solid #f2f1fb;
+    border: 1px solid var(--gp-bg-tint-2);
 }
 .admin-training .training-breakdown-card-head {
     display: flex;
@@ -68,19 +68,19 @@
     border-radius: 50%;
     flex-shrink: 0;
 }
-.admin-training .training-breakdown-dot.leadership { background: #56547a; }
-.admin-training .training-breakdown-dot.technical { background: #15803d; }
-.admin-training .training-breakdown-dot.core { background: #c9a227; }
+.admin-training .training-breakdown-dot.leadership { background: var(--gp-text-mid); }
+.admin-training .training-breakdown-dot.technical { background: var(--gp-good); }
+.admin-training .training-breakdown-dot.core { background: var(--gp-accent-gold); }
 .admin-training .training-breakdown-card-label {
     font-size: 12px;
     font-weight: 600;
-    color: #56547a;
+    color: var(--gp-text-mid);
     flex: 1;
 }
 .admin-training .training-breakdown-card-hours {
     font-size: 12.5px;
     font-weight: 700;
-    color: #0b044d;
+    color: var(--gp-pri);
 }
 .admin-training .training-mini-bar {
     height: 5px;
@@ -93,9 +93,9 @@
     border-radius: 99px;
     transition: width 0.35s ease;
 }
-.admin-training .training-mini-bar-fill.leadership { background: #56547a; }
-.admin-training .training-mini-bar-fill.technical { background: #15803d; }
-.admin-training .training-mini-bar-fill.core { background: #c9a227; }
+.admin-training .training-mini-bar-fill.leadership { background: var(--gp-text-mid); }
+.admin-training .training-mini-bar-fill.technical { background: var(--gp-good); }
+.admin-training .training-mini-bar-fill.core { background: var(--gp-accent-gold); }
 
 /* Workflow note (same as permanent enroll note) */
 .admin-training .training-enroll-note {
@@ -111,7 +111,7 @@
 .admin-training .training-enroll-note-icon { flex-shrink: 0; margin-top: 1px; }
 .admin-training .training-enroll-note-text {
     font-size: 12.5px;
-    color: #c9a227;
+    color: var(--gp-accent-gold);
     margin: 0;
     line-height: 1.5;
 }
@@ -120,7 +120,7 @@
     border-color: #fecaca;
     margin: 14px 0;
 }
-.admin-training .admin-reject-note .training-enroll-note-text { color: #8e1e18; }
+.admin-training .admin-reject-note .training-enroll-note-text { color: var(--gp-bad); }
 
 /* Filter bar */
 .admin-training .training-filter-bar {
@@ -130,8 +130,8 @@
     gap: 12px;
     flex-wrap: wrap;
     padding: 12px 24px;
-    border-bottom: 1.5px solid #f2f1fb;
-    background: #f7f6fc;
+    border-bottom: 1.5px solid var(--gp-bg-tint-2);
+    background: var(--gp-bg-tint);
 }
 .admin-training .training-filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .admin-training .training-filter-chip {
@@ -141,15 +141,15 @@
     background: #fff;
     font-size: 12px;
     font-weight: 600;
-    color: #56547a;
+    color: var(--gp-text-mid);
     cursor: pointer;
     font-family: 'Poppins', sans-serif;
     transition: all 0.2s;
 }
-.admin-training .training-filter-chip:hover { border-color: #0b044d; color: #0b044d; }
+.admin-training .training-filter-chip:hover { border-color: var(--gp-pri); color: var(--gp-pri); }
 .admin-training .training-filter-chip.active {
-    background: #0b044d;
-    border-color: #0b044d;
+    background: var(--gp-pri);
+    border-color: var(--gp-pri);
     color: #fff;
 }
 .admin-training .training-position-filter { min-width: 180px; }
@@ -157,13 +157,13 @@
 /* Table */
 .admin-training .training-pds-table th:nth-child(2) { min-width: 220px; }
 .admin-training .admin-employee-cell { display: flex; flex-direction: column; gap: 3px; min-width: 140px; }
-.admin-training .admin-employee-name { font-size: 13.5px; font-weight: 600; color: #0b044d; line-height: 1.35; }
-.admin-training .admin-employee-meta { font-size: 11px; color: #8f8daf; font-weight: 500; }
+.admin-training .admin-employee-name { font-size: 13.5px; font-weight: 600; color: var(--gp-pri); line-height: 1.35; }
+.admin-training .admin-employee-meta { font-size: 11px; color: var(--gp-text-soft); font-weight: 500; }
 
 .admin-training .training-title-wrap { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.admin-training .training-title-text { font-size: 13.5px; font-weight: 600; color: #0b044d; line-height: 1.35; }
-.admin-training .training-ref-doc { font-size: 11px; color: #8f8daf; font-weight: 500; }
-.admin-training .training-table-date { font-size: 12.5px; color: #56547a; white-space: nowrap; }
+.admin-training .training-title-text { font-size: 13.5px; font-weight: 600; color: var(--gp-pri); line-height: 1.35; }
+.admin-training .training-ref-doc { font-size: 11px; color: var(--gp-text-soft); font-weight: 500; }
+.admin-training .training-table-date { font-size: 12.5px; color: var(--gp-text-mid); white-space: nowrap; }
 .admin-training .training-date-sep { margin: 0 4px; color: #aaa8cc; }
 
 .admin-training .training-hours-pill {
@@ -175,14 +175,14 @@
     border-radius: 20px;
     font-size: 12.5px;
     font-weight: 700;
-    color: #0b044d;
-    background: #f2f1fb;
+    color: var(--gp-pri);
+    background: var(--gp-bg-tint-2);
 }
-.admin-training .training-hours-pill-pending { background: #fbf6e3; color: #c9a227; }
-.admin-training .training-hours-pill-muted { background: #f7f6fc; color: #aaa8cc; }
+.admin-training .training-hours-pill-pending { background: #fbf6e3; color: var(--gp-accent-gold); }
+.admin-training .training-hours-pill-muted { background: var(--gp-bg-tint); color: #aaa8cc; }
 
 .admin-training .payroll-table tbody tr.training-row-verified { border-left: 3px solid #22c55e; }
-.admin-training .payroll-table tbody tr.training-row-pending { border-left: 3px solid #c9a227; }
+.admin-training .payroll-table tbody tr.training-row-pending { border-left: 3px solid var(--gp-accent-gold); }
 .admin-training .payroll-table tbody tr.training-row-rejected { border-left: 3px solid #ef4444; }
 .admin-training .payroll-table tbody tr.training-row-verified:hover { background: #f8fdf9; }
 .admin-training .payroll-table tbody tr.training-row-pending:hover { background: #fffef5; }
@@ -196,10 +196,10 @@
     display: inline-block;
     white-space: nowrap;
 }
-.admin-training .type-badge.managerial { background: #f2f1fb; color: #56547a; }
+.admin-training .type-badge.managerial { background: var(--gp-bg-tint-2); color: var(--gp-text-mid); }
 .admin-training .type-badge.supervisory { background: #e8f4fd; color: #0369a1; }
-.admin-training .type-badge.technical { background: #e8f9ef; color: #15803d; }
-.admin-training .type-badge.clerical { background: #fbf6e3; color: #c9a227; }
+.admin-training .type-badge.technical { background: #e8f9ef; color: var(--gp-good); }
+.admin-training .type-badge.clerical { background: #fbf6e3; color: var(--gp-accent-gold); }
 
 .admin-training .verify-badge {
     display: inline-flex;
@@ -218,11 +218,11 @@
     border-radius: 50%;
     flex-shrink: 0;
 }
-.admin-training .verify-badge.pending { background: #fbf6e3; color: #c9a227; }
-.admin-training .verify-badge.pending::before { background: #c9a227; }
-.admin-training .verify-badge.verified { background: #e8f9ef; color: #15803d; }
+.admin-training .verify-badge.pending { background: #fbf6e3; color: var(--gp-accent-gold); }
+.admin-training .verify-badge.pending::before { background: var(--gp-accent-gold); }
+.admin-training .verify-badge.verified { background: #e8f9ef; color: var(--gp-good); }
 .admin-training .verify-badge.verified::before { background: #22c55e; }
-.admin-training .verify-badge.rejected { background: #fdf0ef; color: #8e1e18; cursor: help; }
+.admin-training .verify-badge.rejected { background: #fdf0ef; color: var(--gp-bad); cursor: help; }
 .admin-training .verify-badge.rejected::before { background: #ef4444; }
 
 /* Action buttons — same footprint as permanent btn-view-cert */
@@ -239,7 +239,7 @@
     border-radius: 8px;
     border: 1.5px solid #e5e4f0;
     background: #fff;
-    color: #0b044d;
+    color: var(--gp-pri);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -250,16 +250,16 @@
 }
 .admin-training .btn-view-cert:hover,
 .admin-training .btn-admin-review:hover {
-    border-color: #0b044d;
+    border-color: var(--gp-pri);
     background: #f4f3ff;
 }
 .admin-training .btn-admin-review {
     height: 34px;
     padding: 0 12px;
     border-radius: 8px;
-    border: 1.5px solid #0b044d;
+    border: 1.5px solid var(--gp-pri);
     background: #fff;
-    color: #0b044d;
+    color: var(--gp-pri);
     font-size: 11.5px;
     font-weight: 700;
     cursor: pointer;
@@ -267,35 +267,35 @@
     transition: all 0.2s;
     white-space: nowrap;
 }
-.admin-training .btn-admin-review:hover { background: #0b044d; color: #fff; }
+.admin-training .btn-admin-review:hover { background: var(--gp-pri); color: #fff; }
 .admin-training .btn-admin-review-muted {
     border-color: #e5e4f0;
-    color: #56547a;
+    color: var(--gp-text-mid);
 }
 .admin-training .btn-admin-review-muted:hover {
     background: #f4f3ff;
-    color: #0b044d;
-    border-color: #0b044d;
+    color: var(--gp-pri);
+    border-color: var(--gp-pri);
 }
 .admin-training .btn-admin-approve {
     background: #e8f9ef;
-    color: #15803d;
+    color: var(--gp-good);
     border-color: #bbf7d0;
 }
 .admin-training .btn-admin-approve:hover {
-    background: #15803d;
+    background: var(--gp-good);
     color: #fff;
-    border-color: #15803d;
+    border-color: var(--gp-good);
 }
 .admin-training .btn-admin-reject {
     background: #fdf0ef;
-    color: #8e1e18;
+    color: var(--gp-bad);
     border-color: #fecaca;
 }
 .admin-training .btn-admin-reject:hover {
-    background: #8e1e18;
+    background: var(--gp-bad);
     color: #fff;
-    border-color: #8e1e18;
+    border-color: var(--gp-bad);
 }
 
 /* Topbar search (shared with permanent) */
@@ -328,7 +328,7 @@
     background: rgba(255, 255, 255, 0.14);
 }
 .banner-badge-dot-success { background: #22c55e; }
-.banner-badge-dot-amber { background: #c9a227; }
+.banner-badge-dot-amber { background: var(--gp-accent-gold); }
 
 /* Toast */
 .training-toast {
@@ -338,7 +338,7 @@
     z-index: 1100;
     max-width: 360px;
     padding: 14px 18px;
-    background: #0b044d;
+    background: var(--gp-pri);
     color: #fff;
     font-size: 13px;
     font-weight: 600;
@@ -360,17 +360,17 @@
 /* Modal helpers */
 .pmodal-hero { display: flex; gap: 16px; align-items: flex-start; flex: 1; min-width: 0; }
 .pmodal-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-.training-hero-icon { background: linear-gradient(135deg, #0b044d, #150c63); }
-.admin-reject-hero-icon { background: linear-gradient(135deg, #8e1e18, #b91c1c); }
+.training-hero-icon { background: linear-gradient(135deg, var(--gp-pri), var(--gp-pri-2)); }
+.admin-reject-hero-icon { background: linear-gradient(135deg, var(--gp-bad), #b91c1c); }
 
-.training-verified-strong { color: #15803d; }
-.training-pending-strong { color: #c9a227; }
+.training-verified-strong { color: var(--gp-good); }
+.training-pending-strong { color: var(--gp-accent-gold); }
 
 .modal-btn-danger {
     padding: 10px 18px;
     border-radius: 8px;
     border: none;
-    background: #8e1e18;
+    background: var(--gp-bad);
     color: #fff;
     font-size: 13px;
     font-weight: 700;
@@ -384,14 +384,14 @@
     border-radius: 8px;
     border: 1.5px solid #fecaca;
     background: #fff;
-    color: #8e1e18;
+    color: var(--gp-bad);
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
     font-family: 'Poppins', sans-serif;
     transition: all 0.2s;
 }
-.modal-btn-danger-outline:hover { background: #fdf0ef; border-color: #8e1e18; }
+.modal-btn-danger-outline:hover { background: #fdf0ef; border-color: var(--gp-bad); }
 
 #reviewModal,
 #rejectModal,
@@ -410,7 +410,7 @@
 }
 #adminFlashSuccessModal .admin-success-modal-accent {
     height: 6px;
-    background: linear-gradient(90deg, #0b044d 0%, #150c63 40%, #15803d 100%);
+    background: linear-gradient(90deg, var(--gp-pri) 0%, var(--gp-pri-2) 40%, var(--gp-good) 100%);
 }
 #adminFlashSuccessModal .admin-success-modal-body {
     text-align: center;
@@ -453,20 +453,20 @@
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 1.2px;
-    color: #8f8daf;
+    color: var(--gp-text-soft);
     text-transform: uppercase;
     margin-bottom: 6px;
 }
 #adminFlashSuccessModal .admin-success-title {
     font-size: 22px;
     font-weight: 700;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin: 0 0 10px;
     line-height: 1.25;
 }
 #adminFlashSuccessModal .admin-success-message {
     font-size: 14px;
-    color: #56547a;
+    color: var(--gp-text-mid);
     line-height: 1.55;
     margin: 0 auto;
     max-width: 340px;
@@ -475,7 +475,7 @@
     justify-content: center;
     padding: 20px 28px 28px;
     border-top: none;
-    background: linear-gradient(180deg, transparent 0%, #f7f6fc 100%);
+    background: linear-gradient(180deg, transparent 0%, var(--gp-bg-tint) 100%);
 }
 #adminFlashSuccessModal .admin-success-btn {
     width: 100%;
@@ -505,7 +505,7 @@
 #reviewModal .training-modal-meta,
 #approveModal .training-modal-meta {
     text-align: left;
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
     border-radius: 12px;
     padding: 14px 16px;
 }
@@ -513,7 +513,7 @@
 #reviewModal .training-cert-preview {
     text-align: center;
     padding: 24px 20px;
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
     border-radius: 12px;
     border: 1.5px dashed #e5e4f0;
 }
@@ -526,13 +526,13 @@
 #reviewModal .training-cert-preview-name {
     font-size: 14px;
     font-weight: 700;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin: 0 0 6px;
     word-break: break-all;
 }
 #reviewModal .training-cert-preview-note {
     font-size: 12px;
-    color: #56547a;
+    color: var(--gp-text-mid);
     margin: 0;
 }
 #reviewModal .pmodal-badges { margin-top: 8px; }
@@ -541,17 +541,17 @@
     display: block;
     font-size: 12px;
     font-weight: 600;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin-bottom: 6px;
 }
-#rejectModal .training-form-field .req { color: #8e1e18; }
+#rejectModal .training-form-field .req { color: var(--gp-bad); }
 #rejectModal .training-form-field textarea {
     width: 100%;
     padding: 10px 12px;
     border: 1.5px solid #e5e4f0;
     border-radius: 8px;
     font-size: 13px;
-    color: #0b044d;
+    color: var(--gp-pri);
     font-family: 'Poppins', sans-serif;
     background: #fff;
     box-sizing: border-box;
@@ -560,12 +560,12 @@
 }
 #rejectModal .training-form-field textarea:focus {
     outline: none;
-    border-color: #0b044d;
+    border-color: var(--gp-pri);
     box-shadow: 0 0 0 3px rgba(11, 4, 77, 0.08);
 }
 #rejectModal .training-field-hint {
     font-size: 11px;
-    color: #8f8daf;
+    color: var(--gp-text-soft);
     margin: 6px 0 0;
     line-height: 1.4;
 }
@@ -585,7 +585,7 @@
 #approveModal .training-modal-title-gap { margin-bottom: 6px; }
 #approveModal .training-modal-text {
     font-size: 13px;
-    color: #56547a;
+    color: var(--gp-text-mid);
     margin-bottom: 18px;
 }
 #approveModal .training-modal-row-last { border: none; }

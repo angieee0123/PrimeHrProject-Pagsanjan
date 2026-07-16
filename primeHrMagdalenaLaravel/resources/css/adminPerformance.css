@@ -7,27 +7,27 @@
 .pf-icon-purple  { background: rgba(107,63,160,0.1); }
 
 /* Stat dot colours */
-.pf-dot-primary { background: #0b044d; }
-.pf-dot-success { background: #15803d; }
-.pf-dot-warning { background: #c9a227; }
-.pf-dot-purple  { background: #56547a; }
+.pf-dot-primary { background: var(--gp-pri); }
+.pf-dot-success { background: var(--gp-good); }
+.pf-dot-warning { background: var(--gp-accent-gold); }
+.pf-dot-purple  { background: var(--gp-text-mid); }
 
 /* Table cell helpers */
-.pf-period-cell    { font-size: 12.5px; color: #56547a; white-space: nowrap; }
-.pf-evaluator-cell { font-size: 12.5px; color: #56547a; }
+.pf-period-cell    { font-size: 12.5px; color: var(--gp-text-mid); white-space: nowrap; }
+.pf-evaluator-cell { font-size: 12.5px; color: var(--gp-text-mid); }
 
 /* Star rating */
 .pf-rating-wrap  { display: flex; align-items: center; gap: 6px; }
 .pf-stars        { display: flex; gap: 2px; }
-.pf-rating-value { font-size: 13px; color: #0b044d; font-weight: 600; }
-.pf-not-rated    { font-size: 12.5px; color: #8f8daf; }
+.pf-rating-value { font-size: 13px; color: var(--gp-pri); font-weight: 600; }
+.pf-not-rated    { font-size: 12.5px; color: var(--gp-text-soft); }
 
 /* Evaluate button */
 .btn-evaluate {
     padding: 5px 14px;
-    border: 1.5px solid #0b044d;
+    border: 1.5px solid var(--gp-pri);
     border-radius: 7px;
-    background: #0b044d;
+    background: var(--gp-pri);
     font-size: 12px;
     font-weight: 600;
     font-family: 'Poppins', sans-serif;
@@ -35,11 +35,11 @@
     cursor: pointer;
     transition: all 0.2s;
 }
-.btn-evaluate:hover { background: #150c63; border-color: #150c63; }
+.btn-evaluate:hover { background: var(--gp-pri-2); border-color: var(--gp-pri-2); }
 
 /* Empty state */
 .empty-state { text-align: center; padding: 40px 20px; }
-.empty-sub   { font-size: 13px; color: #8f8daf; margin: 0; }
+.empty-sub   { font-size: 13px; color: var(--gp-text-soft); margin: 0; }
 
 /* View modal — employee row */
 .pf-modal-emp-row {
@@ -48,10 +48,10 @@
     gap: 16px;
     margin-bottom: 20px;
     padding: 16px;
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
     border-radius: 12px;
 }
-.pf-modal-emp-id { font-size: 11px; color: #8f8daf; margin: 0 0 4px; }
+.pf-modal-emp-id { font-size: 11px; color: var(--gp-text-soft); margin: 0 0 4px; }
 
 /* Avatar size variant */
 .emp-avatar-lg {
@@ -65,14 +65,14 @@
 .form-field textarea {
     width: 100%;
     padding: 9px 12px;
-    border: 1.5px solid #ecebf6;
+    border: 1.5px solid var(--gp-border);
     border-radius: 9px;
     font-size: 13px;
     font-family: 'Poppins', sans-serif;
-    color: #0b044d;
+    color: var(--gp-pri);
     outline: none;
     box-sizing: border-box;
     background: #fff;
     resize: vertical;
 }
-.form-field textarea:focus { border-color: #0b044d; }
+.form-field textarea:focus { border-color: var(--gp-pri); }
