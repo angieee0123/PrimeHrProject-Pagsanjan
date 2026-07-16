@@ -1,7 +1,0 @@
-Add this import to routes/web.php (after line 7 with other imports):
-
-use App\Http\Controllers\PermanentLeaveBalanceController;
-
-Then replace lines 164-212 in routes/web.php with:
-
-Route::get('/permanent/leave', [PermanentLeaveBalanceController::class, 'show'])->middleware('auth')->name('permanent.leave');
