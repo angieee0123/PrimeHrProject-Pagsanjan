@@ -1,66 +1,55 @@
 {{-- View Pass Slip Detail Modal --}}
-<div class="modal-overlay" id="viewPassSlipDetailModal" onclick="closePassSlipDetailModal()" style="display: none;">
-    <div class="modal-box" onclick="event.stopPropagation()">
-        <div class="modal-header">
+<x-modal id="viewPassSlipDetailModal" close="closePassSlipDetailModal" title="-" title-id="detailReason" subtitle="-" subtitle-id="detailSlipDate">
+    <x-slot:eyebrow>PASS SLIP · PS-<span id="detailSlipId">-</span></x-slot:eyebrow>
+    <div class="modal-body">
+        <div class="modal-emp-row">
+            <div class="emp-avatar modal-emp-avatar">{{ strtoupper(substr(auth()->user()->employee->first_name ?? 'E', 0, 1) . substr(auth()->user()->employee->last_name ?? 'E', 0, 1)) }}</div>
             <div>
-                <span class="modal-eyebrow">PASS SLIP · PS-<span id="detailSlipId">-</span></span>
-                <h3 class="modal-title" id="detailReason">-</h3>
-                <p class="modal-sub" id="detailSlipDate">-</p>
-            </div>
-            <button class="modal-close" onclick="closePassSlipDetailModal()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="modal-emp-row">
-                <div class="emp-avatar modal-emp-avatar">{{ strtoupper(substr(auth()->user()->employee->first_name ?? 'E', 0, 1) . substr(auth()->user()->employee->last_name ?? 'E', 0, 1)) }}</div>
-                <div>
-                    <p class="modal-emp-id">{{ auth()->user()->employee->employee_id ?? 'N/A' }}</p>
-                    <span class="badge-status" id="detailPassSlipStatus">-</span>
-                </div>
-            </div>
-
-            <span class="modal-section-label">PASS SLIP DETAILS</span>
-            <div class="modal-row"><span>Reason</span><strong id="detailReasonFull">-</strong></div>
-            <div class="modal-row"><span>Destination</span><strong id="detailDestination">-</strong></div>
-            <div class="modal-row"><span>Date</span><strong id="detailDate">-</strong></div>
-            <div class="modal-row"><span>Time Out</span><strong id="detailTimeOut">-</strong></div>
-            <div class="modal-row"><span>Time In</span><strong id="detailTimeIn">-</strong></div>
-
-            <div id="detailApprovalSection" style="display: none;">
-                <span class="modal-section-label modal-section-deductions">APPROVAL INFORMATION</span>
-                <div class="modal-row"><span>Processed By</span><strong id="detailApprovedBy">-</strong></div>
-                <div class="modal-row"><span>Date Processed</span><strong id="detailApprovedAt">-</strong></div>
-            </div>
-
-            <div id="detailRemarksSection" style="display: none;">
-                <span class="modal-section-label modal-section-deductions">REMARKS</span>
-                <div class="modal-row"><span id="detailRemarks" style="color: #991b1b; font-style: italic; line-height: 1.6;">-</span></div>
-            </div>
-
-            <div id="detailAttachmentSection" style="display: none; margin-top: 16px;">
-                <span class="modal-section-label">SUPPORTING DOCUMENT</span>
-                <a id="detailAttachmentLink" href="#" target="_blank" class="document-link" style="margin-top: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-                    </svg>
-                    View Attachment
-                </a>
+                <p class="modal-emp-id">{{ auth()->user()->employee->employee_id ?? 'N/A' }}</p>
+                <span class="badge-status" id="detailPassSlipStatus">-</span>
             </div>
         </div>
-        <div class="modal-footer">
-            <button class="modal-btn-ghost" onclick="closePassSlipDetailModal()">Close</button>
-            <button class="modal-btn-primary" id="detailPassSlipCancelBtn" style="display: none; background: #dc2626;" onclick="cancelPassSlip()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="15" y1="9" x2="9" y2="15"/>
-                    <line x1="9" y1="9" x2="15" y2="15"/>
+
+        <span class="modal-section-label">PASS SLIP DETAILS</span>
+        <div class="modal-row"><span>Reason</span><strong id="detailReasonFull">-</strong></div>
+        <div class="modal-row"><span>Destination</span><strong id="detailDestination">-</strong></div>
+        <div class="modal-row"><span>Date</span><strong id="detailDate">-</strong></div>
+        <div class="modal-row"><span>Time Out</span><strong id="detailTimeOut">-</strong></div>
+        <div class="modal-row"><span>Time In</span><strong id="detailTimeIn">-</strong></div>
+
+        <div id="detailApprovalSection" style="display: none;">
+            <span class="modal-section-label modal-section-deductions">APPROVAL INFORMATION</span>
+            <div class="modal-row"><span>Processed By</span><strong id="detailApprovedBy">-</strong></div>
+            <div class="modal-row"><span>Date Processed</span><strong id="detailApprovedAt">-</strong></div>
+        </div>
+
+        <div id="detailRemarksSection" style="display: none;">
+            <span class="modal-section-label modal-section-deductions">REMARKS</span>
+            <div class="modal-row"><span id="detailRemarks" style="color: #991b1b; font-style: italic; line-height: 1.6;">-</span></div>
+        </div>
+
+        <div id="detailAttachmentSection" style="display: none; margin-top: 16px;">
+            <span class="modal-section-label">SUPPORTING DOCUMENT</span>
+            <a id="detailAttachmentLink" href="#" target="_blank" class="document-link" style="margin-top: 8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
                 </svg>
-                Cancel Pass Slip
-            </button>
+                View Attachment
+            </a>
         </div>
     </div>
-</div>
+    <div class="modal-footer">
+        <button class="modal-btn-ghost" onclick="closePassSlipDetailModal()">Close</button>
+        <button class="modal-btn-primary" id="detailPassSlipCancelBtn" style="display: none; background: #dc2626;" onclick="cancelPassSlip()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            Cancel Pass Slip
+        </button>
+    </div>
+</x-modal>
 
 <script>
 let currentPassSlipId = null;

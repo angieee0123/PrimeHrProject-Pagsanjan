@@ -31,6 +31,7 @@
     'id',
     'maxWidth' => null,
     'boxStyle' => null,
+    'boxClass' => null,
     'close' => null,
     'eyebrow' => null,
     'title' => null,
@@ -39,8 +40,8 @@
     'subtitleId' => null,
 ])
 
-<div id="{{ $id }}" class="modal-overlay" style="display: none;" @if($close) onclick="{{ $close }}()" @endif>
-    <div class="modal-box" @if($close) onclick="event.stopPropagation()" @endif @if($maxWidth || $boxStyle) style="@if($maxWidth)max-width: {{ $maxWidth }};@endif {{ $boxStyle }}" @endif>
+<div id="{{ $id }}" {{ $attributes->class(['modal-overlay']) }} style="display: none;" @if($close) onclick="{{ $close }}()" @endif>
+    <div class="modal-box @if($boxClass) {{ $boxClass }} @endif" @if($close) onclick="event.stopPropagation()" @endif @if($maxWidth || $boxStyle) style="@if($maxWidth)max-width: {{ $maxWidth }};@endif {{ $boxStyle }}" @endif>
         @if($title || $titleId)
             <div class="modal-header">
                 <div>
