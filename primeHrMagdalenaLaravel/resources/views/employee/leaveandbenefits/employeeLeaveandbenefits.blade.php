@@ -21,66 +21,10 @@
         @include('employee.notification.employeeNotification')
 
         @include('employee.topbar.leaveandbenefitsTopbar')
-        {{-- Stats Grid --}}
-        <div class="stats-grid stats-grid-4">
-            <div class="stat-card">
-                <div class="stat-top">
-                    <p class="stat-label">Total Leave Filed</p>
-                    <div class="stat-icon-wrap stat-icon-wrap-primary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0b044d" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-                </div>
-                <h2 class="stat-value">{{ $leaveApplications->count() }}</h2>
-                <div class="stat-footer">
-                    <span class="stat-dot stat-dot-primary"></span>
-                    <p class="stat-sub">All time</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-top">
-                    <p class="stat-label">Total Days Used</p>
-                    <div class="stat-icon-wrap stat-icon-wrap-danger"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8e1e18" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-                </div>
-                <h2 class="stat-value">{{ number_format($leaveApplications->where('status', 'approved')->sum('number_of_days'), 0) }}</h2>
-                <div class="stat-footer">
-                    <span class="stat-dot stat-dot-danger"></span>
-                    <p class="stat-sub">Across all types</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-top">
-                    <p class="stat-label">Pending Requests</p>
-                    <div class="stat-icon-wrap stat-icon-wrap-warning"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a16207" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-                </div>
-                <h2 class="stat-value">{{ $leaveApplications->where('status', 'pending')->count() }}</h2>
-                <div class="stat-footer">
-                    <span class="stat-dot stat-dot-amber"></span>
-                    <p class="stat-sub">Awaiting approval</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-top">
-                    <p class="stat-label">VL + SL Balance</p>
-                    <div class="stat-icon-wrap stat-icon-wrap-success"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-                </div>
-                @php
-                    $vlBalance = $leaveTypes->firstWhere('leave_code', 'VL')?->leaveBalances->first()?->available_credits ?? 0;
-                    $slBalance = $leaveTypes->firstWhere('leave_code', 'SL')?->leaveBalances->first()?->available_credits ?? 0;
-                    $totalBalance = $vlBalance + $slBalance;
-                @endphp
-                <h2 class="stat-value">{{ number_format($totalBalance, 0) }}</h2>
-                <div class="stat-footer">
-                    <span class="stat-dot stat-dot-success"></span>
-                    <p class="stat-sub">{{ number_format($vlBalance, 0) }} VL · {{ number_format($slBalance, 0) }} SL</p>
-                </div>
-            </div>
-        </div>
 
-        {{-- Tabs --}}
-        <div class="lb-tabs">
-            <button class="tab-btn active" onclick="switchTab('leave', this)">My Leave Requests</button>
-            <button class="tab-btn" onclick="switchTab('credits', this)">Leave Credits</button>
-            <button class="tab-btn" onclick="switchTab('transactions', this)">Transaction History</button>
-            <button class="tab-btn" onclick="switchTab('benefits', this)">My Benefits</button>
-        </div>
+        @include('employee.leaveandbenefits.partials.stats-grid')
+
+        @include('employee.leaveandbenefits.partials.tab-nav')
 
         {{-- Tab Content --}}
         <div id="tab-leave" class="tab-content">
@@ -106,6 +50,7 @@
 @include('employee.leaveandbenefits.modals.leaveDetailModal')
 @include('employee.leaveandbenefits.modals.fileLeaveModal')
 
+@push('scripts')
 <script>
     const sidebar   = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggle-btn');
@@ -190,13 +135,13 @@
     function changeItemsPerPage() {
         const select = document.getElementById('itemsPerPage');
         const value = select.value;
-        
+
         if (value === 'all') {
             leaveCreditsRowsPerPage = 999999; // Show all
         } else {
             leaveCreditsRowsPerPage = parseInt(value);
         }
-        
+
         leaveCreditsCurrentPage = 1;
         displayLeaveCreditsPage();
         updateLeaveCreditsPageButtons();
@@ -295,37 +240,37 @@
     // Initialize pagination when credits tab is shown
     document.addEventListener('DOMContentLoaded', function() {
         initLeaveCreditsTable();
-        
+
         // Check URL for tab parameter and switch to that tab
         const urlParams = new URLSearchParams(window.location.search);
         const activeTab = urlParams.get('tab');
-        
+
         if (activeTab && ['leave', 'credits', 'transactions', 'benefits'].includes(activeTab)) {
             // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(c => {
                 c.classList.add('hidden');
                 c.style.display = 'none';
             });
-            
+
             // Show the active tab
             const tabContent = document.getElementById('tab-' + activeTab);
             if (tabContent) {
                 tabContent.classList.remove('hidden');
                 tabContent.style.display = 'block';
             }
-            
+
             // Update tab button states
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             // Find and activate the correct button
             const buttons = document.querySelectorAll('.tab-btn');
             const tabIndex = ['leave', 'credits', 'transactions', 'benefits'].indexOf(activeTab);
             if (buttons[tabIndex]) {
                 buttons[tabIndex].classList.add('active');
             }
-            
+
             // Initialize pagination for credits tab
             if (activeTab === 'credits') {
                 setTimeout(() => initLeaveCreditsTable(), 100);
@@ -363,17 +308,17 @@
         document.getElementById('detailDays').textContent = days + ' day' + (days > 1 ? 's' : '');
         document.getElementById('detailReason').textContent = reason;
         document.getElementById('detailDates').textContent = from + ' — ' + to;
-        
+
         const statusBadge = document.getElementById('detailStatus');
         statusBadge.textContent = status;
-        statusBadge.className = 'badge-status ' + 
-            (status === 'Approved' ? 'processed' : 
-             status === 'Pending' ? 'pending' : 
+        statusBadge.className = 'badge-status ' +
+            (status === 'Approved' ? 'processed' :
+             status === 'Pending' ? 'pending' :
              status === 'Rejected' ? 'rejected' : 'cancelled');
-        
+
         const modalEyebrow = document.querySelector('#detailModal .modal-eyebrow');
         modalEyebrow.textContent = 'LEAVE REQUEST · ' + appNumber;
-        
+
         // Handle remarks section
         const remarksSection = document.getElementById('remarksSection');
         const remarksText = document.getElementById('remarksText');
@@ -383,18 +328,18 @@
         } else {
             remarksSection.style.display = 'none';
         }
-        
+
         // Handle download button
         const downloadBtn = document.getElementById('downloadBtn');
         const cancelBtn = document.getElementById('cancelBtn');
-        
+
         if (attachmentUrl && attachmentUrl.trim() !== '') {
             downloadBtn.style.display = 'flex';
             downloadBtn.onclick = () => window.open(attachmentUrl, '_blank');
         } else {
             downloadBtn.style.display = 'none';
         }
-        
+
         // Show cancel button only for pending requests
         if (status === 'Pending') {
             cancelBtn.style.display = 'flex';
@@ -402,7 +347,7 @@
         } else {
             cancelBtn.style.display = 'none';
         }
-        
+
         document.getElementById('detailModal').style.display = 'flex';
     }
 
@@ -558,7 +503,7 @@
             } else {
                 leaveTypeInfo.style.display = 'none';
             }
-            
+
             // Recalculate days when leave type changes
             calculateDays();
         } else {
@@ -742,6 +687,7 @@
         });
     }
 </script>
+@endpush
 
 @include('employee.chatbot.employeeChatbot')
 
