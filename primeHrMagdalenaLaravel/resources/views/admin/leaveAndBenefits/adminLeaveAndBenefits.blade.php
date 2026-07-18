@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('styles')
+    @vite('resources/css/adminLeaveAndBenefits.css')
+@endpush
+
 @section('content')
 @php
 $avatarColors = ['#0b044d', '#8e1e18', '#150c63', '#a52820', '#150c63', '#56547a'];
@@ -355,161 +359,7 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 
 @include('admin.leaveAndBenefits.modals.migrate-leave-records-modal')
 
-@vite(['resources/css/adminLeaveAndBenefits.css', 'resources/js/adminLeaveAndBenefits.js'])
-
-<script>
-// Success Modal Functions
-window.successModalRedirectUrl = null;
-
-window.openSuccessModal = function(message, redirectUrl) {
-    const modal = document.getElementById('successModal');
-    const messageEl = document.getElementById('successMessage');
-
-    if (redirectUrl !== undefined) {
-        window.successModalRedirectUrl = redirectUrl;
-    }
-
-    if (messageEl && message) {
-        messageEl.textContent = message;
-    }
-
-    if (modal) {
-        modal.classList.add('active');
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-};
-
-window.closeSuccessModal = function(event) {
-    if (!event || event.target.id === 'successModal' || event.type === 'click') {
-        const modal = document.getElementById('successModal');
-        if (modal) {
-            modal.classList.remove('active');
-            modal.style.display = 'none';
-            document.body.style.overflow = '';
-
-            const redirectUrl = window.successModalRedirectUrl
-                || '{{ route('admin.leave', ['tab' => 'types']) }}';
-            window.successModalRedirectUrl = null;
-            window.location.href = redirectUrl;
-        }
-    }
-};
-
-// Error Modal Functions
-window.openErrorModal = function(message) {
-    const modal = document.getElementById('errorModal');
-    const messageEl = document.getElementById('errorMessage');
-
-    if (messageEl && message) {
-        messageEl.textContent = message;
-    }
-
-    if (modal) {
-        modal.classList.add('active');
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-};
-
-window.closeErrorModal = function(event) {
-    if (!event || event.target.id === 'errorModal' || event.type === 'click') {
-        const modal = document.getElementById('errorModal');
-        if (modal) {
-            modal.classList.remove('active');
-            modal.style.display = 'none';
-            document.body.style.overflow = '';
-        }
-    }
-};
-
-// Handle form submission with AJAX
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('addLeaveTypeForm');
-
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const submitBtn = form.querySelector('.btn-submit');
-            const originalText = submitBtn.textContent;
-
-            // Disable submit button and show loading
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Saving...';
-
-            // Create FormData object
-            const formData = new FormData(form);
-
-            // Send AJAX request
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw data;
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Close add modal
-                closeAddLeaveTypeModal();
-
-                // Show success modal
-                openSuccessModal(data.message || 'Leave type registered successfully!', '{{ route('admin.leave', ['tab' => 'types']) }}');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-
-                // Re-enable submit button
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-
-                // Close add modal
-                closeAddLeaveTypeModal();
-
-                // Show error modal
-                let errorMessage = 'Failed to register leave type. Please try again.';
-
-                if (error.errors) {
-                    // Laravel validation errors
-                    const firstError = Object.values(error.errors)[0];
-                    errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
-                } else if (error.message) {
-                    errorMessage = error.message;
-                }
-
-                openErrorModal(errorMessage);
-            });
-        });
-    }
-
-    // Check URL parameter and switch to correct tab on page load
-    const urlParams = new URLSearchParams(window.location.search);
-    const activeTab = urlParams.get('tab');
-
-    if (activeTab === 'types') {
-        switchTab('types');
-    } else if (activeTab === 'benefits') {
-        switchTab('benefits');
-    } else if (activeTab === 'leave') {
-        switchTab('leave');
-    } else if (activeTab === 'accrual') {
-        switchTab('accrual');
-    } else if (activeTab === 'transactions') {
-        switchTab('transactions');
-    } else if (activeTab === 'import') {
-        switchTab('import');
-    } else if (activeTab === 'leave-credits') {
-        switchTab('leave-credits');
-    }
-});
-</script>
+@push('scripts')
+    @vite('resources/js/leaveAndBenefits/adminLeaveAndBenefits.js')
+@endpush
 @endsection

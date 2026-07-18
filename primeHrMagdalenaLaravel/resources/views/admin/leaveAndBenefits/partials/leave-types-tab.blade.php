@@ -160,27 +160,7 @@
 }
 </style>
 
-<script>
-function changeLeaveTypesRowsPerPage() {
-    const perPage = document.getElementById('leaveTypesRowsPerPage').value;
-    const url = new URL(window.location.href);
-    url.searchParams.set('per_page', perPage);
-    url.searchParams.set('tab', 'types');
-    url.searchParams.delete('page');
-    window.location.href = url.toString();
-}
-
-function toggleLeaveTypeActionMenu(event, btn) {
-    event.stopPropagation();
-    const menu = btn.nextElementSibling;
-    document.querySelectorAll('.lt-action-menu').forEach(m => {
-        if (m !== menu) m.style.display = 'none';
-    });
-    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-}
-
-document.addEventListener('click', () => {
-    document.querySelectorAll('.lt-action-menu').forEach(m => m.style.display = 'none');
-});
-</script>
+@push('scripts')
+    @vite('resources/js/leaveAndBenefits/leave-types-tab.js')
+@endpush
 </section>

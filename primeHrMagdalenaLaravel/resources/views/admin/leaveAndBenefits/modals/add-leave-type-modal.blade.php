@@ -77,3 +77,7 @@
         </div>
     </form>
 </x-modal-container>
+
+@push('scripts')
+    @vite('resources/js/leaveAndBenefits/add-leave-type-modal.js')
+@endpush

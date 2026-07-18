@@ -1,4 +1,4 @@
-<section class="table-section" id="benefits-tab" style="display: none;">
+<section class="table-section" id="benefits-tab" style="display: none;" data-total-rows="{{ count($benefitsData) }}">
     <div class="table-header">
         <div>
             <h3 class="table-title">Benefits Summary — June 2025</h3>
@@ -75,65 +75,6 @@
     </div>
 </section>
 
-<script>
-let benefitsCurrentPage = 1;
-let benefitsRowsPerPage = 10;
-const benefitsTotalRows = {{ count($benefitsData) }};
-
-function changeBenefitsRowsPerPage() {
-    benefitsRowsPerPage = parseInt(document.getElementById('benefitsRowsPerPage').value);
-    benefitsCurrentPage = 1;
-    renderBenefitsPagination();
-    paginateBenefitsTable();
-}
-
-function renderBenefitsPagination() {
-    const totalPages = Math.ceil(benefitsTotalRows / benefitsRowsPerPage);
-    const paginationControls = document.getElementById('benefitsPaginationControls');
-    let html = '';
-    
-    html += `<button class="page-btn" ${benefitsCurrentPage === 1 ? 'disabled' : ''} onclick="changeBenefitsPage(${benefitsCurrentPage - 1})">‹</button>`;
-    
-    for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="page-btn ${i === benefitsCurrentPage ? 'active' : ''}" onclick="changeBenefitsPage(${i})">${i}</button>`;
-    }
-    
-    html += `<button class="page-btn" ${benefitsCurrentPage === totalPages ? 'disabled' : ''} onclick="changeBenefitsPage(${benefitsCurrentPage + 1})">›</button>`;
-    
-    paginationControls.innerHTML = html;
-}
-
-function changeBenefitsPage(page) {
-    const totalPages = Math.ceil(benefitsTotalRows / benefitsRowsPerPage);
-    if (page < 1 || page > totalPages) return;
-    benefitsCurrentPage = page;
-    renderBenefitsPagination();
-    paginateBenefitsTable();
-}
-
-function paginateBenefitsTable() {
-    const tbody = document.querySelector('#benefits-tab tbody');
-    const rows = tbody.querySelectorAll('tr');
-    const start = (benefitsCurrentPage - 1) * benefitsRowsPerPage;
-    const end = start + benefitsRowsPerPage;
-    
-    rows.forEach((row, index) => {
-        if (index >= start && index < end) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-    
-    const visibleCount = Math.min(end, benefitsTotalRows) - start;
-    document.getElementById('benefitsRowStart').textContent = visibleCount > 0 ? start + 1 : 0;
-    document.getElementById('benefitsRowEnd').textContent = start + visibleCount;
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('benefits-tab')) {
-        renderBenefitsPagination();
-        paginateBenefitsTable();
-    }
-});
-</script>
+@push('scripts')
+    @vite('resources/js/leaveAndBenefits/benefits-summary-tab.js')
+@endpush

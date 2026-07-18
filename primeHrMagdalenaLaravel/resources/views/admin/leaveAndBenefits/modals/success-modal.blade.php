@@ -1,4 +1,4 @@
-<x-modal id="successModal" close="closeSuccessModal" max-width="500px">
+<x-modal id="successModal" close="closeSuccessModal" max-width="500px" data-default-redirect="{{ route('admin.leave', ['tab' => 'types']) }}">
     <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
         <div style="width: 100%; text-align: center;">
             <div style="width: 80px; height: 80px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
