@@ -1,5 +1,17 @@
 // Admin Personnel Page Scripts
 
+// Tab switching functionality
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById(this.dataset.tab).classList.add('active');
+        });
+    });
+});
+
 // Pagination and Sorting
 let currentPage = 1;
 let rowsPerPage = 10;
@@ -533,7 +545,6 @@ window.generateQRCode = generateQRCode;
 window.closeQRModal = closeQRModal;
 window.downloadQRCode = downloadQRCode;
 window.printQRCode = printQRCode;
-window.editEmployee = editEmployee;
 
 // QR Code Functions
 let currentQRData = null;
@@ -966,6 +977,90 @@ window.addEventListener('resize', debounce(updateResponsivePagination, 250));
 window.toggleActionMenu = toggleActionMenu;
 window.updateResponsivePagination = updateResponsivePagination;
 
+
+// Schedule Tab Functions
+function applyScheduleFilters() {
+    const deptFilter = document.getElementById('schedDepartmentFilter').value;
+    const rows = document.querySelectorAll('#scheduleTableBody tr');
+
+    rows.forEach(row => {
+        const deptCell = row.querySelector('.dept-tag');
+        if (!deptCell) return;
+
+        const deptMatch = !deptFilter || deptCell.textContent.trim() === deptFilter;
+        row.style.display = deptMatch ? '' : 'none';
+    });
+}
+
+function changeScheduleRowsPerPage(value) {
+    // Implement pagination logic similar to main table
+    console.log('Change schedule rows per page:', value);
+}
+
+function exportSchedules(btn) {
+    window.location.href = btn.dataset.exportUrl;
+}
+
+function openBulkScheduleModal() {
+    document.getElementById('bulkScheduleModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function openAssignScheduleModal(employeeId, employeeName, schedule) {
+    document.getElementById('scheduleEmployeeId').value = employeeId;
+    document.getElementById('scheduleEmployeeName').textContent = employeeName;
+
+    if (schedule) {
+        document.getElementById('scheduleId').value = schedule.id || '';
+        document.getElementById('scheduleStartDate').value = schedule.start_date || '';
+        document.getElementById('scheduleEndDate').value = schedule.end_date || '';
+        document.getElementById('scheduleAmIn').value = schedule.am_in || '';
+        document.getElementById('scheduleAmOut').value = schedule.am_out || '';
+        document.getElementById('schedulePmIn').value = schedule.pm_in || '';
+        document.getElementById('schedulePmOut').value = schedule.pm_out || '';
+    } else {
+        document.getElementById('scheduleId').value = '';
+        document.getElementById('scheduleStartDate').value = '';
+        document.getElementById('scheduleEndDate').value = '';
+        document.getElementById('scheduleAmIn').value = '';
+        document.getElementById('scheduleAmOut').value = '';
+        document.getElementById('schedulePmIn').value = '';
+        document.getElementById('schedulePmOut').value = '';
+    }
+
+    document.getElementById('assignScheduleModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function confirmRemoveSchedule(employeeId, employeeName) {
+    if (confirm(`Are you sure you want to remove the schedule for ${employeeName}?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/schedules/${employeeId}/remove`;
+
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = document.querySelector('meta[name="csrf-token"]').content;
+
+        const methodField = document.createElement('input');
+        methodField.type = 'hidden';
+        methodField.name = '_method';
+        methodField.value = 'DELETE';
+
+        form.appendChild(csrfToken);
+        form.appendChild(methodField);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+window.applyScheduleFilters = applyScheduleFilters;
+window.changeScheduleRowsPerPage = changeScheduleRowsPerPage;
+window.exportSchedules = exportSchedules;
+window.openBulkScheduleModal = openBulkScheduleModal;
+window.openAssignScheduleModal = openAssignScheduleModal;
+window.confirmRemoveSchedule = confirmRemoveSchedule;
 
 // Bulk Import Functions
 function openBulkImportModal() {

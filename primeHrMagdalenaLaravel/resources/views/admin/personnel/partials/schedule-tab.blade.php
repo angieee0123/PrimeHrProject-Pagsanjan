@@ -12,7 +12,7 @@
                     <option value="{{ $department->name }}">{{ $department->name }}</option>
                 @endforeach
             </select>
-            <button class="btn-export" onclick="exportSchedules()">
+            <button class="btn-export" data-export-url="{{ route('admin.schedules.export') }}" onclick="exportSchedules(this)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="7 10 12 15 17 10"/>

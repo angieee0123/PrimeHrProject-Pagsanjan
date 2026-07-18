@@ -13,8 +13,8 @@ window.closeEmployeeWizard = function() {
     currentStep = 1;
     document.getElementById('employeeWizardForm').reset();
     // delegate to blade-defined closeEmployeeWizard for edit-mode reset if present
-    if (typeof wizardIsEditMode !== 'undefined' && wizardIsEditMode) {
-        wizardIsEditMode = false;
+    if (window.wizardIsEditMode) {
+        window.wizardIsEditMode = false;
         const form = document.getElementById('employeeWizardForm');
         form.action = form.dataset.storeAction || form.action;
         document.getElementById('wizardEditId').value = '';
@@ -63,7 +63,7 @@ function updateWizardUI() {
     document.getElementById('stepIndicator').textContent = `Step ${currentStep} of ${totalSteps}`;
     document.getElementById('prevBtn').style.display = currentStep > 1 ? 'block' : 'none';
     document.getElementById('nextBtn').style.display   = currentStep < totalSteps ? 'block' : 'none';
-    const isEdit = typeof wizardIsEditMode !== 'undefined' && wizardIsEditMode;
+    const isEdit = !!window.wizardIsEditMode;
     document.getElementById('submitBtn').style.display  = (!isEdit && currentStep === totalSteps) ? 'block' : 'none';
     document.getElementById('updateBtn').style.display  = (isEdit  && currentStep === totalSteps) ? 'block' : 'none';
 }
