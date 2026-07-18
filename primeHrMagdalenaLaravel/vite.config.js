@@ -28,7 +28,8 @@ export default defineConfig({
                 'resources/js/employeeWizard.js',
                 'resources/js/adminPersonnel.js',
                 'resources/js/adminAttendance.js',
-                'resources/js/adminLeaveAndBenefits.js'
+                'resources/js/adminLeaveAndBenefits.js',
+                'resources/js/adminDashboard.js'
             ],
             refresh: true,
         }),
