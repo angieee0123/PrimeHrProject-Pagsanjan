@@ -24,11 +24,9 @@ export default defineConfig({
                 'resources/css/adminLeaveAndBenefits.css',
                 'resources/css/topbarTheme.css',
                 'resources/js/app.js',
-                'resources/js/adminDashboard.js',
                 'resources/js/employeeDashboard.js',
                 'resources/js/employeeWizard.js',
                 'resources/js/adminPersonnel.js',
-                'resources/js/personnelTopbar.js',
                 'resources/js/adminAttendance.js',
                 'resources/js/adminLeaveAndBenefits.js'
             ],

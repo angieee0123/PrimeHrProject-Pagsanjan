@@ -68,20 +68,7 @@
                 </tr>
             </thead>
             <tbody id="personnelTableBody">
-                @php
-                $avatarColors = ['#0b044d', '#8e1e18', '#150c63', '#a52820', '#c9a227', '#56547a'];
-                function getInitials($name) {
-                    $parts = explode(' ', $name);
-                    $initials = '';
-                    foreach ($parts as $part) {
-                        if (preg_match('/^[A-Z]/', $part)) {
-                            $initials .= $part[0];
-                        }
-                    }
-                    return strtoupper(substr($initials, 0, 2));
-                }
-                @endphp
-
+                {{-- $avatarColors and getInitials() are declared in adminPersonnel.blade.php (the parent), since this partial's sibling schedule-tab.blade.php needs them too. --}}
                 @forelse($employees as $index => $employee)
                 @php
                     $fullName = trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name . ($employee->suffix ? ' ' . $employee->suffix : ''));

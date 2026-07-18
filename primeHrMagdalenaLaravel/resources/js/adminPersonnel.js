@@ -252,6 +252,23 @@ function updateFilteredPaginationButtons(visibleRows) {
     }
 }
 
+function searchPersonnel(query) {
+    const searchTerm = query.toLowerCase().trim();
+    const rows = window.allRows || allRows;
+
+    rows.forEach(row => {
+        const name = row.querySelector('.emp-name')?.textContent.toLowerCase() || '';
+        const id = row.querySelector('.emp-id')?.textContent.toLowerCase() || '';
+        const position = row.querySelector('.position-cell')?.textContent.toLowerCase() || '';
+        const matches = !searchTerm || name.includes(searchTerm) || id.includes(searchTerm) || position.includes(searchTerm);
+        row.style.display = matches ? '' : 'none';
+    });
+
+    const visibleRows = rows.filter(row => row.style.display !== 'none');
+    currentPage = 1;
+    displayFilteredPage(visibleRows);
+}
+
 function exportTableData() {
     try {
         if (allRows.length === 0) {
@@ -501,6 +518,7 @@ window.displayPage = displayPage;
 window.changePage = changePage;
 window.changeRowsPerPage = changeRowsPerPage;
 window.applyFilters = applyFilters;
+window.searchPersonnel = searchPersonnel;
 window.exportTableData = exportTableData;
 window.closeExportSuccessModal = closeExportSuccessModal;
 window.closeExportErrorModal = closeExportErrorModal;

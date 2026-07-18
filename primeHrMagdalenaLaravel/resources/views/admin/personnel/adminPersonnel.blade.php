@@ -16,6 +16,23 @@
 
 <div class="glass-shell">
 
+@php
+    // Shared by employee-records-tab and schedule-tab — declared here (not in either
+    // partial) because Blade's @include only passes variables down from parent to
+    // child; it does not share state between sibling @includes.
+    $avatarColors = ['#0b044d', '#8e1e18', '#150c63', '#a52820', '#c9a227', '#56547a'];
+    function getInitials($name) {
+        $parts = explode(' ', $name);
+        $initials = '';
+        foreach ($parts as $part) {
+            if (preg_match('/^[A-Z]/', $part)) {
+                $initials .= $part[0];
+            }
+        }
+        return strtoupper(substr($initials, 0, 2));
+    }
+@endphp
+
 @include('admin.personnel.partials.stats-grid')
 
 {{-- Filter Toolbar --}}
