@@ -86,6 +86,15 @@
         if (!anyOpen) document.body.style.overflow = '';
     }
 
+    // The shared modal component's "close" prop is always called with no
+    // arguments (renders as onclick="fn()"), so each modal using the generic
+    // closeModal(id) needs its own zero-arg wrapper to plug into that contract.
+    function closeFlashSuccessModal() { closeModal('trainingFlashSuccessModal'); }
+    function closeTrainingSubmitModal() { closeModal('trainingSubmitModal'); }
+    function closePdsExportModal() { closeModal('pdsExportModal'); }
+    function closeViewCertModal() { closeModal('viewCertModal'); }
+    function closeAddTrainingModal() { closeModal('addTrainingModal'); }
+
     function showTrainingToast(msg) {
         const t = document.getElementById('trainingToast');
         if (!t) return;

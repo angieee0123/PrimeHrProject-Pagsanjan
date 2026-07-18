@@ -83,6 +83,10 @@
         document.getElementById(id).style.display = 'none';
     }
 
+    // The shared modal component's "close" prop is always called with no
+    // arguments, so the generic closeModal(id) needs a zero-arg wrapper.
+    function closePayslipModal() { closeModal('payslipModal'); }
+
     function filterPermanentPayslip(query) {
         const q = query.toLowerCase();
         document.querySelectorAll('.payroll-table tbody tr').forEach(row => {

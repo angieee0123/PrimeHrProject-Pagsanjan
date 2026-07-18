@@ -1,6 +1,5 @@
 {{-- Add New Training Modal --}}
-<div class="modal-overlay training-modal-overlay" id="addTrainingModal" onclick="closeModal('addTrainingModal')">
-    <div class="modal-box training-add-modal" onclick="event.stopPropagation()">
+<x-modal id="addTrainingModal" class="training-modal-overlay" box-class="training-add-modal" close="closeAddTrainingModal">
         <form id="addTrainingForm" class="training-modal-form" method="POST" action="{{ route('employee.training.store') }}" enctype="multipart/form-data" onsubmit="submitTraining(event)">
         @csrf
         <div class="modal-header">
@@ -14,7 +13,7 @@
                     <p class="modal-sub" id="modalStepSub">Step 1 of 2 — Upload your certificate to auto-fill details.</p>
                             </div>
                         </div>
-            <button type="button" class="modal-close" onclick="closeModal('addTrainingModal')" aria-label="Close">
+            <button type="button" class="modal-close" onclick="closeAddTrainingModal()" aria-label="Close">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
                             </div>
@@ -146,12 +145,11 @@
         </div>
 
             <div class="modal-footer training-modal-footer-sticky">
-                <button type="button" class="modal-btn-ghost" onclick="closeModal('addTrainingModal')">Cancel</button>
+                <button type="button" class="modal-btn-ghost" onclick="closeAddTrainingModal()">Cancel</button>
                 <button type="submit" class="modal-btn-primary" id="certSubmitBtn" style="display:none;">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     Submit for Verification
                 </button>
         </div>
         </form>
-    </div>
-</div>
+</x-modal>

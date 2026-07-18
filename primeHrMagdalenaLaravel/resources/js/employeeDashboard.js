@@ -395,6 +395,10 @@ function exportDeductions() {
 
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
+// <x-modal>'s close prop is always called with no arguments, so the
+// generic closeModal(id) needs a zero-arg wrapper to plug into it.
+function closeDeductionModal() { closeModal('deductionModal'); }
+
 /* Sidebar toggle lives in app.js, which the employee layout loads on every
    page — binding it again here would toggle twice per click and cancel out. */
 
@@ -408,6 +412,7 @@ window.showDeductionSummary  = showDeductionSummary;
 window.showDeductionModal    = showDeductionModal;
 window.exportDeductions      = exportDeductions;
 window.closeModal            = closeModal;
+window.closeDeductionModal   = closeDeductionModal;
 
 window.addEventListener('load', () => {
     initCharts();

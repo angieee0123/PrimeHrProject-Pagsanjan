@@ -1,6 +1,7 @@
-{{-- Payslip Detail Modal --}}
-<div id="payslipDetailModal" class="modal-overlay" style="display: none;">
-    <div class="modal-container" style="max-width: 800px;">
+{{-- Payslip Detail Modal — no close prop passed to the modal component: the original
+     overlay has no click-outside-to-close, only the explicit header/footer close
+     buttons, and the component's close prop would add both together. --}}
+<x-modal id="payslipDetailModal" container-class="modal-container" max-width="800px">
         <div class="modal-header">
             <h3 class="modal-title">Payslip Details</h3>
             <button type="button" class="modal-close" onclick="closePayslipDetailModal()">&times;</button>
@@ -150,8 +151,7 @@
                 Print Payslip
             </button>
         </div>
-    </div>
-</div>
+</x-modal>
 
 <style>
 .row-actions {
