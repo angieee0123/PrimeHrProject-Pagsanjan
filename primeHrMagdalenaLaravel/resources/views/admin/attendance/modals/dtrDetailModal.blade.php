@@ -4,37 +4,37 @@
     <x-slot:subtitle><span id="dtrPosition"></span> · <span id="dtrDept"></span></x-slot:subtitle>
     <div class="modal-body">
         <div class="modal-emp-row">
-            <div class="emp-avatar lg" id="dtrAvatar" style="width: 60px; height: 60px; font-size: 20px;"></div>
+            <div class="emp-avatar lg" id="dtrAvatar"></div>
             <div>
                 <p class="modal-emp-id" id="dtrEmpId"></p>
                 <span class="badge-status" id="dtrStatus"></span>
             </div>
         </div>
 
-        <div class="modal-section-label" style="margin-bottom: 12px;">SELECT DATE RANGE</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+        <div class="modal-section-label">SELECT DATE RANGE</div>
+        <div class="dtr-date-grid">
             <div>
-                <label style="font-size: 12px; color: #56547a; font-weight: 600; display: block; margin-bottom: 6px;">Start Date</label>
-                <input type="date" id="dtrStartDate" style="width: 100%; padding: 8px; border: 1px solid #ecebf6; border-radius: 6px; font-size: 13px;">
+                <label class="dtr-field-label">Start Date</label>
+                <input type="date" id="dtrStartDate" class="dtr-date-input">
             </div>
             <div>
-                <label style="font-size: 12px; color: #56547a; font-weight: 600; display: block; margin-bottom: 6px;">End Date</label>
-                <input type="date" id="dtrEndDate" style="width: 100%; padding: 8px; border: 1px solid #ecebf6; border-radius: 6px; font-size: 13px;">
+                <label class="dtr-field-label">End Date</label>
+                <input type="date" id="dtrEndDate" class="dtr-date-input">
             </div>
         </div>
-        <button onclick="loadDTRSummary()" style="width: 100%; padding: 8px; background: #0b044d; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 20px; font-size: 13px;">Load Data</button>
+        <button onclick="loadDTRSummary()" class="dtr-load-btn">Load Data</button>
 
-        <div class="modal-section-label" style="margin-top: 20px; margin-bottom: 12px;">ATTENDANCE SUMMARY</div>
+        <div class="modal-section-label gp-mt-20">ATTENDANCE SUMMARY</div>
         <div class="modal-row"><span>Working Days</span><strong id="dtrWorkingDays"></strong></div>
-        <div class="modal-row"><span>Days Present</span><strong style="color: #15803d;" id="dtrPresent"></strong></div>
-        <div class="modal-row"><span>Days Absent</span><strong style="color: #8e1e18;" id="dtrAbsent"></strong></div>
-        <div class="modal-row"><span>Late Arrivals</span><strong style="color: #c9a227;" id="dtrLate"></strong></div>
-        <div class="modal-row"><span>Half Days</span><strong style="color: #c9a227;" id="dtrHalfday"></strong></div>
+        <div class="modal-row"><span>Days Present</span><strong class="text-success" id="dtrPresent"></strong></div>
+        <div class="modal-row"><span>Days Absent</span><strong class="text-danger" id="dtrAbsent"></strong></div>
+        <div class="modal-row"><span>Late Arrivals</span><strong class="text-warning" id="dtrLate"></strong></div>
+        <div class="modal-row"><span>Half Days</span><strong class="text-warning" id="dtrHalfday"></strong></div>
 
-        <div class="modal-section-label" style="margin-top: 16px;">OVERTIME</div>
-        <div class="modal-row"><span>Total OT Hours</span><strong style="color: #0b044d;" id="dtrOT"></strong></div>
+        <div class="modal-section-label gp-mt-16">OVERTIME</div>
+        <div class="modal-row"><span>Total OT Hours</span><strong class="text-primary-ink" id="dtrOT"></strong></div>
 
-        <div class="modal-net-row" style="margin-top: 16px;">
+        <div class="modal-net-row gp-mt-16">
             <span>ATTENDANCE RATE</span>
             <strong id="dtrRate"></strong>
         </div>
@@ -47,14 +47,3 @@
         </x-modal-btn>
     </div>
 </x-modal>
-
-<style>
-/* Standalone modal — give it the same explicit base z-index as the
-   other top-level attendance modals instead of leaving it to whichever
-   admin CSS file happens to load last (see detailedDtrModal.blade.php
-   for the full cascade explanation). */
-#dtrModal.modal-overlay {
-    z-index: 3000 !important;
-    position: fixed !important;
-}
-</style>

@@ -1,4 +1,4 @@
-<div id="settings-tab" style="display: none;">
+<div id="settings-tab">
     <section class="table-section">
         <div class="table-header">
             <div>
@@ -6,7 +6,7 @@
                 <p class="table-sub">Configure which time punches are not required, with optional effectivity dates</p>
             </div>
             <div class="table-actions">
-                <button class="btn-primary" onclick="openAddExemptionModal()" style="display: flex; align-items: center; gap: 6px;">
+                <button class="btn-primary" onclick="openAddExemptionModal()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <line x1="12" y1="5" x2="12" y2="19"/>
                         <line x1="5" y1="12" x2="19" y2="12"/>
@@ -17,23 +17,23 @@
         </div>
 
         <div class="table-wrapper">
-            <table class="payroll-table">
+            <table class="payroll-table exemptions-table">
                 <thead>
                     <tr>
-                        <th style="text-align: center;">Type</th>
-                        <th style="text-align: left;">Name</th>
-                        <th style="text-align: center;">Effectivity</th>
-                        <th style="text-align: center;">Not Required</th>
-                        <th style="text-align: center;">Legacy Flags</th>
-                        <th style="text-align: left;">Reason</th>
-                        <th style="text-align: center;">Created By</th>
-                        <th style="text-align: center;">Actions</th>
+                        <th>Type</th>
+                        <th>Name</th>
+                        <th>Effectivity</th>
+                        <th>Not Required</th>
+                        <th>Legacy Flags</th>
+                        <th>Reason</th>
+                        <th>Created By</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="exemptionsTableBody">
                     @forelse($exemptions ?? [] as $exemption)
                     <tr>
-                        <td data-label="Type" style="text-align: center;">
+                        <td data-label="Type">
                             @if($exemption->exemption_type === 'employee')
                                 <span class="badge-status processed">Employee</span>
                             @elseif($exemption->exemption_type === 'department')
@@ -42,8 +42,8 @@
                                 <span class="badge-status on-hold">Designation</span>
                             @endif
                         </td>
-                        <td data-label="Name" style="text-align: left;">
-                            <div style="display:flex;align-items:center;gap:10px">
+                        <td data-label="Name">
+                            <div class="exemption-ref-cell">
                                 @if($exemption->exemption_type === 'employee')
                                     @php
                                         $emp = $exemption->employee;
@@ -54,35 +54,35 @@
                                         $color = $colors[$exemption->id % count($colors)];
                                     @endphp
                                     @if($photo)
-                                        <img src="{{ $photo }}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid #ecebf6;flex-shrink:0">
+                                        <img src="{{ $photo }}" class="exemption-avatar">
                                     @else
-                                        <div style="width:34px;height:34px;border-radius:50%;background:{{ $color }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;flex-shrink:0;border:2px solid #ecebf6">{{ $initials }}</div>
+                                        <div class="exemption-avatar-fallback" style="background:{{ $color }}">{{ $initials }}</div>
                                     @endif
                                 @elseif($exemption->exemption_type === 'department')
-                                    <div style="width:34px;height:34px;border-radius:10px;background:#eef2ff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                    <div class="exemption-icon-wrap department">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
                                     </div>
                                 @else
-                                    <div style="width:34px;height:34px;border-radius:10px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                    <div class="exemption-icon-wrap designation">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                                     </div>
                                 @endif
-                                <strong style="font-size:13px">{{ $exemption->reference_name }}</strong>
+                                <strong class="exemption-ref-name">{{ $exemption->reference_name }}</strong>
                             </div>
                         </td>
-                        <td data-label="Effectivity" style="text-align: center; font-size: 12px; white-space: nowrap;">
+                        <td data-label="Effectivity">
                             @if($exemption->start_date || $exemption->end_date)
-                                <span style="color: #56547a;">
+                                <span class="text-muted-sm">
                                     {{ $exemption->start_date ? $exemption->start_date->format('M d, Y') : 'No start' }}
                                     &rarr;
                                     {{ $exemption->end_date ? $exemption->end_date->format('M d, Y') : 'No end' }}
                                 </span>
                             @else
-                                <span style="color: #9ca3af;">Permanent</span>
+                                <span class="text-faint">Permanent</span>
                             @endif
                         </td>
-                        <td data-label="Not Required" style="text-align: center; font-size: 11px;">
-                            <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: nowrap;">
+                        <td data-label="Not Required">
+                            <div class="pill-row">
                                 @if($exemption->am_in_not_required)
                                     <span class="exempt-pill">AM IN</span>
                                 @endif
@@ -96,34 +96,34 @@
                                     <span class="exempt-pill">PM OUT</span>
                                 @endif
                                 @if(!$exemption->am_in_not_required && !$exemption->am_out_not_required && !$exemption->pm_in_not_required && !$exemption->pm_out_not_required)
-                                    <span style="color: #9ca3af;">None</span>
+                                    <span class="text-faint">None</span>
                                 @endif
                             </div>
                         </td>
-                        <td data-label="Legacy" style="text-align: center; font-size: 11px; white-space: nowrap;">
+                        <td data-label="Legacy">
                             @if($exemption->exempt_from_abandoned || $exemption->exempt_from_incomplete)
-                                <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: nowrap;">
+                                <div class="pill-row">
                                     @if($exemption->exempt_from_abandoned)
-                                        <span style="color: #56547a;">Abandoned</span>
+                                        <span class="text-muted-sm">Abandoned</span>
                                     @endif
                                     @if($exemption->exempt_from_abandoned && $exemption->exempt_from_incomplete)
-                                        <span style="color: #d1d5db;">·</span>
+                                        <span class="text-divider-dot">·</span>
                                     @endif
                                     @if($exemption->exempt_from_incomplete)
-                                        <span style="color: #56547a;">Incomplete</span>
+                                        <span class="text-muted-sm">Incomplete</span>
                                     @endif
                                 </div>
                             @else
-                                <span style="color: #9ca3af;">-</span>
+                                <span class="text-faint">-</span>
                             @endif
                         </td>
-                        <td data-label="Reason" style="text-align: left; font-size: 13px; color: #56547a;">
+                        <td data-label="Reason">
                             {{ $exemption->reason ?? 'N/A' }}
                         </td>
-                        <td data-label="Created By" style="text-align: center; font-size: 13px;">
+                        <td data-label="Created By">
                             {{ $exemption->creator->username ?? 'System' }}
                         </td>
-                        <td data-label="Actions" style="text-align: center;">
+                        <td data-label="Actions">
                             <div class="row-actions">
                                 <button class="btn-edit" onclick="editExemption({{ $exemption->id }})" title="Edit">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -142,13 +142,13 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" style="text-align: center; padding: 60px 20px;">
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" style="margin: 0 auto 16px; display: block;">
+                        <td colspan="8" class="empty-state-cell">
+                            <svg class="empty-state-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5">
                                 <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
                                 <path d="M12 6v6l4 2"/>
                             </svg>
-                            <p style="margin: 0; font-size: 15px; color: #6b7280; font-weight: 500;">No exemptions configured</p>
-                            <p style="margin: 8px 0 0 0; font-size: 13px; color: #9ca3af;">Add exemptions for employees with flexible work arrangements</p>
+                            <p class="empty-state-title">No exemptions configured</p>
+                            <p class="empty-state-sub">Add exemptions for employees with flexible work arrangements</p>
                         </td>
                     </tr>
                     @endforelse
@@ -159,8 +159,8 @@
 </div>
 
 {{-- Add/Edit Exemption Modal --}}
-<div class="modal-overlay" id="exemptionModal" onclick="closeExemptionModal()" style="display: none;">
-    <div class="modal-box" onclick="event.stopPropagation()" style="max-width: 640px; max-height: 90vh; overflow-y: auto;">
+<div class="modal-overlay" id="exemptionModal" onclick="closeExemptionModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
         <div class="modal-header">
             <div>
                 <span class="modal-eyebrow">ATTENDANCE CONFIGURATION</span>
@@ -177,10 +177,10 @@
             <input type="hidden" id="exemptionId" name="exemption_id">
             <div class="modal-body">
                 <span class="modal-section-label">EXEMPTION DETAILS</span>
-                
-                <div class="modal-row" style="display: block;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #0b044d;">Exemption Type</label>
-                    <select id="exemptionType" name="exemption_type" class="filter-select" style="width: 100%;" onchange="loadExemptionOptions()" required>
+
+                <div class="modal-row modal-row-block">
+                    <label class="modal-field-label">Exemption Type</label>
+                    <select id="exemptionType" name="exemption_type" class="filter-select modal-select-full" onchange="loadExemptionOptions()" required>
                         <option value="">Select Type</option>
                         <option value="employee">Employee</option>
                         <option value="department">Department</option>
@@ -188,82 +188,82 @@
                     </select>
                 </div>
 
-                <div class="modal-row" style="display: block; margin-top: 16px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #0b044d;">Select <span id="exemptionTypeLabel">Item</span></label>
-                    <select id="exemptionReference" name="reference_id" class="filter-select" style="width: 100%;" required>
+                <div class="modal-row modal-row-block mt">
+                    <label class="modal-field-label">Select <span id="exemptionTypeLabel">Item</span></label>
+                    <select id="exemptionReference" name="reference_id" class="filter-select modal-select-full" required>
                         <option value="">Select an option</option>
                     </select>
                 </div>
 
-                <div class="modal-row" style="display: block; margin-top: 16px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #0b044d;">Effectivity Period</label>
-                    <p style="margin: 0 0 8px; font-size: 12px; color: #6b7280;">Leave blank for a permanent exemption with no date limits.</p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="modal-row modal-row-block mt">
+                    <label class="modal-field-label">Effectivity Period</label>
+                    <p class="modal-field-hint">Leave blank for a permanent exemption with no date limits.</p>
+                    <div class="form-grid-2">
                         <div>
-                            <label style="display: block; margin-bottom: 4px; font-size: 12px; color: #6b7280;">Start Date</label>
+                            <label class="modal-field-label-sm">Start Date</label>
                             <input type="date" id="exemptionStartDate" name="start_date" class="form-input">
                         </div>
                         <div>
-                            <label style="display: block; margin-bottom: 4px; font-size: 12px; color: #6b7280;">End Date</label>
+                            <label class="modal-field-label-sm">End Date</label>
                             <input type="date" id="exemptionEndDate" name="end_date" class="form-input">
                         </div>
                     </div>
                 </div>
 
-                <div class="modal-row" style="display: block; margin-top: 16px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #0b044d;">Time Punches Not Required</label>
-                    <p style="margin: 0 0 8px; font-size: 12px; color: #6b7280;">Checked punches are optional. Missing punches are auto-filled from the employee's schedule for DTR and accredited hours.</p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="amInNotRequired" name="am_in_not_required" value="1" style="width: 16px; height: 16px; accent-color: #0b044d;">
+                <div class="modal-row modal-row-block mt">
+                    <label class="modal-field-label">Time Punches Not Required</label>
+                    <p class="modal-field-hint">Checked punches are optional. Missing punches are auto-filled from the employee's schedule for DTR and accredited hours.</p>
+                    <div class="checkbox-grid-2">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="amInNotRequired" name="am_in_not_required" value="1" class="checkbox-input">
                             <span>AM In</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="amOutNotRequired" name="am_out_not_required" value="1" style="width: 16px; height: 16px; accent-color: #0b044d;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="amOutNotRequired" name="am_out_not_required" value="1" class="checkbox-input">
                             <span>AM Out</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="pmInNotRequired" name="pm_in_not_required" value="1" style="width: 16px; height: 16px; accent-color: #0b044d;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="pmInNotRequired" name="pm_in_not_required" value="1" class="checkbox-input">
                             <span>PM In</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="pmOutNotRequired" name="pm_out_not_required" value="1" style="width: 16px; height: 16px; accent-color: #0b044d;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="pmOutNotRequired" name="pm_out_not_required" value="1" class="checkbox-input">
                             <span>PM Out</span>
                         </label>
                     </div>
                 </div>
 
-                <div class="modal-row" style="display: block; margin-top: 16px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #0b044d;">Auto-fill from Schedule</label>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="autoFillAmOut" name="auto_fill_am_out" value="1" checked style="width: 16px; height: 16px; accent-color: #0b044d;">
+                <div class="modal-row modal-row-block mt">
+                    <label class="modal-field-label">Auto-fill from Schedule</label>
+                    <div class="checkbox-col">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="autoFillAmOut" name="auto_fill_am_out" value="1" checked class="checkbox-input">
                             <span>Auto-fill AM Out with schedule default when not required</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="autoFillPmIn" name="auto_fill_pm_in" value="1" checked style="width: 16px; height: 16px; accent-color: #0b044d;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="autoFillPmIn" name="auto_fill_pm_in" value="1" checked class="checkbox-input">
                             <span>Auto-fill PM In with schedule default when not required</span>
                         </label>
                     </div>
                 </div>
 
-                <div class="modal-row" style="display: block; margin-top: 16px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #0b044d;">Legacy Flag Overrides <span style="font-weight: 400; color: #9ca3af;">(optional)</span></label>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="exemptAbandoned" name="exempt_from_abandoned" value="1" style="width: 16px; height: 16px; accent-color: #0b044d;">
+                <div class="modal-row modal-row-block mt">
+                    <label class="modal-field-label">Legacy Flag Overrides <span class="modal-field-optional">(optional)</span></label>
+                    <div class="checkbox-col">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="exemptAbandoned" name="exempt_from_abandoned" value="1" class="checkbox-input">
                             <span>Exempt from "Abandoned" flag</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="exemptIncomplete" name="exempt_from_incomplete" value="1" style="width: 16px; height: 16px; accent-color: #0b044d;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="exemptIncomplete" name="exempt_from_incomplete" value="1" class="checkbox-input">
                             <span>Exempt from "Incomplete" flag</span>
                         </label>
                     </div>
                 </div>
 
-                <div class="modal-row" style="display: block; margin-top: 16px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #0b044d;">Reason for Exemption</label>
-                    <textarea id="exemptionReason" name="reason" rows="3" class="form-input" style="resize: vertical;" placeholder="e.g., Field worker with flexible schedule"></textarea>
+                <div class="modal-row modal-row-block mt">
+                    <label class="modal-field-label">Reason for Exemption</label>
+                    <textarea id="exemptionReason" name="reason" rows="3" class="form-input" placeholder="e.g., Field worker with flexible schedule"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -277,5 +277,3 @@
 @push('scripts')
     @vite('resources/js/attendance/attendance-settings-tab.js')
 @endpush
-
-
