@@ -84,3 +84,7 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+    @vite('resources/js/dashboard/performerDetailsModal.js')
+@endpush

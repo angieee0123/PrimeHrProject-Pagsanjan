@@ -110,3 +110,7 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+    @vite('resources/js/dashboard/employee-directory.js')
+@endpush

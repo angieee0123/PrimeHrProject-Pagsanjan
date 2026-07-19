@@ -24,3 +24,7 @@
         @endforeach
     </div>
 </div>
+
+@push('scripts')
+    @vite('resources/js/dashboard/department-distribution-card.js')
+@endpush

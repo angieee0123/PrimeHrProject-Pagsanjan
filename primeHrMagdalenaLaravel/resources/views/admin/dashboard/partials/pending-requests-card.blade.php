@@ -80,3 +80,7 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+    @vite('resources/js/dashboard/pending-requests-card.js')
+@endpush

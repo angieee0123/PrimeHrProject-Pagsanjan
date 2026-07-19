@@ -13,3 +13,7 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+    @vite('resources/js/dashboard/viewEmployeeDashboardModal.js')
+@endpush

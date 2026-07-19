@@ -19,3 +19,8 @@
     </div>
     <canvas id="dynamicChart" style="max-height:310px"></canvas>
 </div>
+
+{{-- Also drives the attendance trend chart card (#attendanceChart) — the two share initCharts(). --}}
+@push('scripts')
+    @vite('resources/js/dashboard/charts.js')
+@endpush

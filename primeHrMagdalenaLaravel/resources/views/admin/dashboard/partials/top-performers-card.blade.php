@@ -76,3 +76,7 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+    @vite('resources/js/dashboard/top-performers-card.js')
+@endpush
