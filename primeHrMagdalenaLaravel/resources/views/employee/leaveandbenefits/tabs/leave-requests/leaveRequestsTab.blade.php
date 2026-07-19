@@ -21,7 +21,7 @@
             <button class="btn-export" onclick="openFileModal()">+ File Leave</button>
         </div>
     </div>
-    
+
     <div class="table-wrapper">
         <table class="payroll-table">
             <thead>
@@ -71,19 +71,19 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 60px 20px;">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" style="margin: 0 auto 16px; display: block;">
+                    <td colspan="7" class="lb-empty-cell">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" class="lb-empty-icon">
                             <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        <p style="margin: 0; font-size: 15px; color: #6b7280; font-weight: 500;">No leave requests found</p>
-                        <p style="margin: 8px 0 0 0; font-size: 13px; color: #9ca3af;">Your leave applications will appear here</p>
+                        <p class="lb-empty-title">No leave requests found</p>
+                        <p class="lb-empty-sub">Your leave applications will appear here</p>
                     </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    
+
     <div class="table-footer">
         <p id="leaveCount">Showing <strong>{{ $leaveApplications->count() }}</strong> of <strong>{{ $leaveApplications->count() }}</strong> records</p>
         <div class="pagination">

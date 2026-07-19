@@ -15,14 +15,14 @@
         <div class="modal-row"><span>No. of Days</span><strong id="detailDays">2 days</strong></div>
         <span class="modal-section-label modal-section-deductions">REASON</span>
         <div class="modal-row"><span id="detailReason">Medical consultation</span></div>
-        <div id="remarksSection" style="display: none;">
+        <div id="remarksSection" class="lb-hidden">
             <span class="modal-section-label modal-section-deductions">APPROVER REMARKS</span>
-            <div class="modal-row"><span id="remarksText" style="color: #6b7280; font-style: italic;"></span></div>
+            <div class="modal-row"><span id="remarksText" class="lb-remarks-text"></span></div>
         </div>
     </div>
     <div class="modal-footer">
         <button class="modal-btn-ghost" onclick="closeModal()">Close</button>
-        <button class="modal-btn-primary" id="cancelBtn" style="display: none; background: #dc2626;">
+        <button class="modal-btn-primary lb-btn-danger lb-hidden" id="cancelBtn">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="15" y1="9" x2="9" y2="15"/>
@@ -30,7 +30,7 @@
             </svg>
             Cancel Request
         </button>
-        <button class="modal-btn-primary" id="downloadBtn" style="display: none;">
+        <button class="modal-btn-primary lb-hidden" id="downloadBtn">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Download Attachment
         </button>
