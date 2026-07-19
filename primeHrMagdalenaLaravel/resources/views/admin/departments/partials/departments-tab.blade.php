@@ -6,11 +6,11 @@
             <p class="table-sub">Municipal Government of Pagsanjan · Province of Laguna · {{ $departments->count() }} offices</p>
         </div>
         <div class="table-actions">
-            <button class="btn-export" style="color:#15803d;border-color:#15803d;" onclick="openBulkImportModal()">
+            <button class="btn-export btn-export-green" onclick="openBulkImportModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Bulk Import
             </button>
-            <button class="modal-btn-primary" style="padding:7px 16px;font-size:12.5px;" onclick="openAddModal()">
+            <button class="modal-btn-primary modal-btn-primary-sm" onclick="openAddModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Department
             </button>
@@ -32,9 +32,9 @@
         </table>
     </div>
     <div class="table-footer">
-        <div style="display:flex;align-items:center;gap:8px;">
+        <div class="dep-footer-inner">
             <p>Showing <strong><span id="showing-start">1</span>–<span id="showing-end">10</span></strong> of <strong><span id="showing-total">{{ $departments->count() }}</span></strong> offices</p>
-            <select id="dept-rows-select" onchange="changeRowsDept(this.value)" style="font-size:13px;padding:6px 12px;border:none;border-radius:8px;color:#0b044d;background:#f7f6fc;font-family:'Poppins',sans-serif;outline:none;cursor:pointer;">
+            <select id="dept-rows-select" onchange="changeRowsDept(this.value)" class="dep-rows-select">
                 <option value="10">10 rows</option>
                 <option value="25">25 rows</option>
                 <option value="50">50 rows</option>

@@ -50,21 +50,21 @@
     <span class="fb-eyebrow fb-eyebrow-success">IMPORT COMPLETE</span>
     <h3 class="fb-title" id="import-summary-title">Import Summary</h3>
 
-    <div style="display:flex;gap:12px;justify-content:center;margin:12px 0;">
-        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 20px;text-align:center;">
-            <p style="font-size:22px;font-weight:800;color:#15803d;margin:0;" id="import-count">0</p>
-            <p style="font-size:11px;color:#56547a;margin:2px 0 0;">Imported</p>
+    <div class="ism-counts">
+        <div class="ism-count-box ism-count-imported">
+            <p class="ism-count-val ism-count-val-green" id="import-count">0</p>
+            <p class="ism-count-caption">Imported</p>
         </div>
-        <div style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:10px;padding:12px 20px;text-align:center;">
-            <p style="font-size:22px;font-weight:800;color:#8e1e18;margin:0;" id="skipped-count">0</p>
-            <p style="font-size:11px;color:#56547a;margin:2px 0 0;">Skipped</p>
+        <div class="ism-count-box ism-count-skipped">
+            <p class="ism-count-val ism-count-val-red" id="skipped-count">0</p>
+            <p class="ism-count-caption">Skipped</p>
         </div>
     </div>
 
-    <div id="skipped-list-wrap" style="display:none;width:100%;">
-        <p style="font-size:11px;font-weight:700;color:#8e1e18;margin-bottom:6px;letter-spacing:.4px;text-align:left;">SKIPPED RECORDS</p>
-        <div id="skipped-list" style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:8px;padding:10px 12px;max-height:160px;overflow-y:auto;text-align:left;"></div>
+    <div id="skipped-list-wrap" class="ism-skipped-wrap" style="display:none;">
+        <p class="ism-skipped-label">SKIPPED RECORDS</p>
+        <div id="skipped-list" class="ism-skipped-list"></div>
     </div>
 
-    <button class="fb-btn fb-btn-success" style="margin-top:16px;" onclick="closeImportSummaryModal()">Done</button>
+    <button class="fb-btn fb-btn-success ism-btn-mt" onclick="closeImportSummaryModal()">Done</button>
 </x-modal>

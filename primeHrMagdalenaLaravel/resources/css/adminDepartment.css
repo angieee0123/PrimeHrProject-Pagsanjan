@@ -146,3 +146,105 @@
     .fb-title { font-size: 15px; }
     .fb-btn { padding: 10px; font-size: 13px; }
 }
+
+/* ── Stats grid ── */
+.dep-stats-grid { margin-bottom: 20px; }
+.dep-icon-purple { background: #f2f1fb; }
+.dep-icon-green { background: #e8f9ef; }
+.dep-icon-yellow { background: #fbf6e3; }
+.dep-icon-red { background: #fdf0ef; }
+.dep-dot-purple { background: #0b044d; }
+.dep-dot-green { background: #15803d; }
+.dep-dot-yellow { background: #c9a227; }
+.dep-dot-red { background: #8e1e18; }
+
+/* ── Tab table headers/footers ── */
+.btn-export-green { color: #15803d; border-color: #15803d; }
+.modal-btn-primary-sm { padding: 7px 16px; font-size: 12.5px; }
+.dep-footer-inner { display: flex; align-items: center; gap: 8px; }
+.dep-rows-select {
+    font-size: 13px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    color: #0b044d;
+    background: #f7f6fc;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    cursor: pointer;
+}
+.dep-hidden { display: none; }
+
+/* ── Add Department / Designation forms ── */
+.adm-uppercase { text-transform: uppercase; }
+.adm-accent-green { background: #15803d; }
+.adm-accent-purple { background: #150c63; }
+
+/* ── Bulk Import modal ── */
+.bim-step1-box {
+    background: #f0fdf4;
+    border: 1.5px solid #bbf7d0;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.bim-step1-left { display: flex; align-items: center; gap: 12px; }
+.bim-step1-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    background: #15803d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.bim-step1-title { font-size: 13px; font-weight: 700; color: #15803d; margin-bottom: 2px; }
+.bim-step1-desc { font-size: 12px; color: #56547a; }
+.bim-download-link { white-space: nowrap; text-decoration: none; display: flex; align-items: center; gap: 6px; font-size: 12.5px; }
+.bim-step2-label { font-size: 12px; font-weight: 700; color: #0b044d; margin-bottom: 8px; letter-spacing: .4px; }
+.bim-drop-zone { border: 2px dashed #c7c5e8; border-radius: 10px; padding: 28px; text-align: center; cursor: pointer; transition: border-color .2s; }
+.bim-drop-icon { margin-bottom: 8px; }
+.bim-drop-label { font-size: 13px; font-weight: 600; color: #0b044d; margin-bottom: 4px; }
+.bim-drop-sub { font-size: 12px; color: #8f8daf; }
+.bim-columns-box { background: #f7f6fc; border-radius: 10px; padding: 14px 16px; margin-top: 4px; }
+.bim-columns-label { font-size: 11px; font-weight: 700; color: #0b044d; margin-bottom: 8px; letter-spacing: .4px; }
+.bim-columns-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+.bim-column-chip { background: #fff; border-radius: 6px; padding: 6px 10px; font-size: 11.5px; font-weight: 600; color: #150c63; border: 1px solid #e8e6f8; }
+.bim-columns-note { font-size: 11px; color: #8f8daf; margin-top: 8px; }
+.bim-footer { margin-top: 16px; padding: 0; }
+
+/* ── View Department modal ── */
+.vdm-stat-icon-navy { background: linear-gradient(135deg,#0b044d,#150c63); }
+.vdm-stat-icon-green { background: linear-gradient(135deg,#15803d,#22c55e); }
+.vdm-stat-icon-gold { background: linear-gradient(135deg,#c9a227,#fbbf24); }
+.vdm-stat-val-green { color: #15803d; }
+.vdm-desc-val { color: #56547a; font-size: 12.5px; text-align: right; max-width: 60%; }
+
+/* ── Import Summary modal ── */
+.ism-counts { display: flex; gap: 12px; justify-content: center; margin: 12px 0; }
+.ism-count-box { border-radius: 10px; padding: 12px 20px; text-align: center; }
+.ism-count-imported { background: #f0fdf4; border: 1.5px solid #bbf7d0; }
+.ism-count-skipped { background: #fff5f5; border: 1.5px solid #fecaca; }
+.ism-count-val { font-size: 22px; font-weight: 800; margin: 0; }
+.ism-count-val-green { color: #15803d; }
+.ism-count-val-red { color: #8e1e18; }
+.ism-count-caption { font-size: 11px; color: #56547a; margin: 2px 0 0; }
+.ism-skipped-wrap { width: 100%; }
+.ism-skipped-label { font-size: 11px; font-weight: 700; color: #8e1e18; margin-bottom: 6px; letter-spacing: .4px; text-align: left; }
+.ism-skipped-list { background: #fff5f5; border: 1.5px solid #fecaca; border-radius: 8px; padding: 10px 12px; max-height: 160px; overflow-y: auto; text-align: left; }
+.ism-skipped-item { font-size: 12px; color: #8e1e18; margin: 0 0 4px; padding-bottom: 4px; border-bottom: 1px solid #fecaca; }
+.ism-btn-mt { margin-top: 16px; }
+
+/* ── Client-rendered table rows (departments/designations) ── */
+.dep-avatar-sm { font-size: 11px; }
+.dept-tag-purple { background: #f2f1fb; color: #150c63; }
+.dep-td-accent { font-size: 13px; color: #0b044d; }
+.dep-td-green { font-size: 13px; font-weight: 600; color: #15803d; }
+.dep-empty-td { text-align: center; color: #8f8daf; padding: 32px; font-size: 13px; }
+.dep-page-ellipsis { padding: 0 4px; color: #8f8daf; }
+.page-btn:disabled { opacity: .5; cursor: not-allowed; }

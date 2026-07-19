@@ -12,7 +12,7 @@
             <div class="adm-row-2">
                 <div class="adm-field">
                     <label>Department Code <span class="adm-req">*</span></label>
-                    <input type="text" name="code" placeholder="e.g. MHO" value="{{ old('code') }}" required style="text-transform:uppercase">
+                    <input type="text" name="code" placeholder="e.g. MHO" value="{{ old('code') }}" required class="adm-uppercase">
                     @error('code')<span class="adm-field-err">{{ $message }}</span>@enderror
                 </div>
                 <div class="adm-field">
