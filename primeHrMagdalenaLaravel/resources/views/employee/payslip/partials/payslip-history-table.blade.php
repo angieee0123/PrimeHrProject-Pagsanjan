@@ -58,7 +58,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 2rem;">No payslip records found</td>
+                    <td colspan="7" class="eh-empty-cell">No payslip records found</td>
                 </tr>
                 @endforelse
             </tbody>
