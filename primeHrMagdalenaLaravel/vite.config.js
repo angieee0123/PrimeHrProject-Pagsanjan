@@ -83,7 +83,14 @@ export default defineConfig({
                 'resources/js/admin/deductions/employee-deductions.js',
                 'resources/js/admin/deductions/loan-types.js',
                 'resources/js/admin/deductions/loans.js',
-                'resources/js/admin/deductions/schedules.js'
+                'resources/js/admin/deductions/schedules.js',
+                'resources/js/admin/payroll/adminPayroll.js',
+                'resources/js/admin/payroll/payroll-register.js',
+                'resources/js/admin/payroll/payslip-management.js',
+                'resources/js/admin/payroll/generate-payroll.js',
+                'resources/js/admin/payroll/payroll-result-modal.js',
+                'resources/js/admin/payroll/payroll-status-modals.js',
+                'resources/js/admin/payroll/payslip-detail-modal.js'
             ],
             refresh: true,
         }),

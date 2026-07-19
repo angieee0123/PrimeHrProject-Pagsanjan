@@ -28,7 +28,7 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
     </div>
 </div>
 
-<div class="payroll-summary-bar" style="margin-top: 0; margin-bottom: 16px;">
+<div class="payroll-summary-bar pr-summary-bar-tight">
     <div class="psummary-item">
         <span>Gross Total</span>
         <strong>{{ peso($grossPayroll) }}</strong>
@@ -59,27 +59,27 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
     <table class="payroll-table payroll-register-table">
         <thead>
             <tr>
-                <th style="width: 20%;">Employee</th>
-                <th style="width: 13%;">Department</th>
+                <th class="pr-w-20">Employee</th>
+                <th class="pr-w-13">Department</th>
                 @if($viewMode === 'daily')
-                    <th style="width: 10%; text-align: center;">Date</th>
-                    <th style="width: 8%; text-align: right;">Rate</th>
+                    <th class="pr-w-10 pr-th-center">Date</th>
+                    <th class="pr-w-8 pr-th-right">Rate</th>
                 @else
-                    <th style="width: 8%; text-align: center;">Days</th>
-                    <th style="width: 8%; text-align: right;">Rate</th>
+                    <th class="pr-w-8 pr-th-center">Days</th>
+                    <th class="pr-w-8 pr-th-right">Rate</th>
                 @endif
-                <th style="width: 9%; text-align: right;">Basic</th>
-                <th style="width: 7%; text-align: right;">OT</th>
-                <th style="width: 7%; text-align: right;">Late</th>
-                <th style="width: 7%; text-align: right;">UT</th>
+                <th class="pr-w-9 pr-th-right">Basic</th>
+                <th class="pr-w-7 pr-th-right">OT</th>
+                <th class="pr-w-7 pr-th-right">Late</th>
+                <th class="pr-w-7 pr-th-right">UT</th>
                 @if(isset($deductionTypes) && $deductionTypes->isNotEmpty())
                     @foreach($deductionTypes as $code)
-                        <th class="deduction-col-hide" style="width: 7%; text-align: right;">{{ $deductionTypeNames[$code] ?? $code }}</th>
+                        <th class="deduction-col-hide pr-w-7 pr-th-right">{{ $deductionTypeNames[$code] ?? $code }}</th>
                     @endforeach
                 @endif
-                <th class="deduction-col-show" style="display: none; width: 5%; text-align: center;">Ded.</th>
-                <th style="width: 9%; text-align: right;">Total Ded.</th>
-                <th style="width: 10%; text-align: right;">Net Pay</th>
+                <th class="deduction-col-show pr-hidden pr-w-5 pr-th-center">Ded.</th>
+                <th class="pr-w-9 pr-th-right">Total Ded.</th>
+                <th class="pr-w-10 pr-th-right">Net Pay</th>
             </tr>
         </thead>
         <tbody id="payrollRegisterBody">
@@ -105,9 +105,9 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
                 <td>
                     <div class="emp-cell">
                         @if($record['photo'] ?? false)
-                            <img src="{{ $record['photo'] }}" alt="{{ $record['name'] }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
+                            <img src="{{ $record['photo'] }}" alt="{{ $record['name'] }}" class="pr-avatar-img">
                         @else
-                            <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #ecebf6;">
+                            <div class="emp-avatar pr-avatar-img" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px;">
                                 {{ getInitials($record['name']) }}
                             </div>
                         @endif
@@ -119,26 +119,26 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
                 </td>
                 <td><span class="dept-tag">{{ $record['dept'] }}</span></td>
                 @if($viewMode === 'daily')
-                    <td class="work-date" style="text-align: center;">{{ date('M d, Y', strtotime($record['work_date'])) }}</td>
-                    <td class="daily-rate" style="text-align: right;">{{ peso($record['daily_rate']) }}</td>
+                    <td class="work-date pr-th-center">{{ date('M d, Y', strtotime($record['work_date'])) }}</td>
+                    <td class="daily-rate pr-th-right">{{ peso($record['daily_rate']) }}</td>
                 @else
-                    <td style="text-align: center;"><span class="days-count">{{ $record['days_count'] }}</span></td>
-                    <td class="daily-rate" style="text-align: right;">{{ peso($record['daily_rate']) }}</td>
+                    <td class="pr-th-center"><span class="days-count">{{ $record['days_count'] }}</span></td>
+                    <td class="daily-rate pr-th-right">{{ peso($record['daily_rate']) }}</td>
                 @endif
-                <td class="pay-cell" style="text-align: right;">{{ peso($basicPay) }}</td>
-                <td class="ot-pay" style="text-align: right;">{{ peso($otPay) }}</td>
-                <td class="deduction" style="text-align: right;">{{ peso($lateDeduction) }}</td>
-                <td class="deduction" style="text-align: right;">{{ peso($undertimeDeduction) }}</td>
+                <td class="pay-cell pr-th-right">{{ peso($basicPay) }}</td>
+                <td class="ot-pay pr-th-right">{{ peso($otPay) }}</td>
+                <td class="deduction pr-th-right">{{ peso($lateDeduction) }}</td>
+                <td class="deduction pr-th-right">{{ peso($undertimeDeduction) }}</td>
                 @if(isset($deductionTypes) && $deductionTypes->isNotEmpty())
                     @foreach($deductionTypes as $code)
-                        <td class="deduction deduction-col-hide" style="text-align: right;">{{ peso($record['deductions'][$code] ?? 0) }}</td>
+                        <td class="deduction deduction-col-hide pr-th-right">{{ peso($record['deductions'][$code] ?? 0) }}</td>
                     @endforeach
                 @endif
-                <td class="deduction-col-show" style="display: none; text-align: center;">
+                <td class="deduction-col-show pr-hidden pr-th-center">
                     <button class="btn-deductions-modal" onclick="showDeductionsModal({{ $index }})">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                     </button>
-                    <div class="deductions-data" data-index="{{ $index }}" style="display: none;">
+                    <div class="deductions-data pr-hidden" data-index="{{ $index }}">
                         @if(isset($deductionTypes) && $deductionTypes->isNotEmpty())
                             @foreach($deductionTypes as $code)
                                 <span data-type="{{ $deductionTypeNames[$code] ?? $code }}" data-amount="{{ peso($record['deductions'][$code] ?? 0) }}"></span>
@@ -146,10 +146,10 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
                         @endif
                     </div>
                 </td>
-                <td style="text-align: right;">
+                <td class="pr-th-right">
                     <span class="badge-deduction">{{ peso($totalDeductionsRow) }}</span>
                 </td>
-                <td style="text-align: right;">
+                <td class="pr-th-right">
                     <span class="badge-netpay">{{ peso($netPay) }}</span>
                 </td>
             </tr>
@@ -159,9 +159,9 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
 </div>
 
 <div class="table-footer">
-    <div style="display:flex;align-items:center;gap:12px;">
+    <div class="pr-footer-flex">
         <p id="payrollRegisterFooter">Showing <strong id="payrollRowStart">1</strong>-<strong id="payrollRowEnd">{{ min(10, $payrollRecords->count()) }}</strong> of <strong id="payrollRowTotal">{{ $payrollRecords->count() }}</strong> records</p>
-        <select id="payrollRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changePayrollRowsPerPage()">
+        <select id="payrollRowsPerPage" class="filter-select pr-rows-select" onchange="changePayrollRowsPerPage()">
             <option value="10">10 rows</option>
             <option value="25">25 rows</option>
             <option value="50">50 rows</option>
@@ -173,10 +173,10 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
 
 <!-- Deductions Modal -->
 <div id="deductionsModal" class="adm-overlay" onclick="closeDeductionsModal()">
-    <div class="adm-box" style="max-width:480px;" onclick="event.stopPropagation()">
-        <div class="adm-header" style="background: linear-gradient(135deg, #8e1e18, #dc2626); border-bottom: none;">
+    <div class="adm-box pr-modal-md" onclick="event.stopPropagation()">
+        <div class="adm-header pr-header-red">
             <div class="adm-header-left">
-                <div class="vdm-avatar" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                <div class="vdm-avatar pr-header-icon-frost">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="8" y1="12" x2="16" y2="12"/>
@@ -187,12 +187,12 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
                     <h3 class="adm-title">Deduction Breakdown</h3>
                 </div>
             </div>
-            <button class="adm-close" style="color: rgba(255,255,255,0.8);" onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.color='#fff'" onmouseout="this.style.background='transparent'; this.style.color='rgba(255,255,255,0.8)'" onclick="closeDeductionsModal()">
+            <button class="adm-close pr-close-frost" onclick="closeDeductionsModal()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
-        <div class="vdm-body" style="padding: 24px;" id="deductionsModalBody"></div>
-        <div class="adm-footer" style="background: #f7f6fc;">
+        <div class="vdm-body pr-body-pad24" id="deductionsModalBody"></div>
+        <div class="adm-footer pr-footer-tint">
             <button class="adm-btn-primary" onclick="closeDeductionsModal()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 Got it
@@ -201,327 +201,6 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
     </div>
 </div>
 
-<style>
-/* Responsive deduction columns */
-@media screen and (max-width: 1920px) {
-    .deduction-col-hide { display: none !important; }
-    .deduction-col-show { display: table-cell !important; }
-}
-
-.btn-deductions-modal {
-    background: #f0eeff;
-    border: 1px solid #d0c9ff;
-    border-radius: 6px;
-    padding: 6px 10px;
-    cursor: pointer;
-    color: #0b044d;
-    transition: all 0.2s;
-}
-
-.btn-deductions-modal:hover {
-    background: #e0d9ff;
-    border-color: #0b044d;
-}
-
-.adm-overlay {
-    display: none;
-    position: fixed;
-    z-index: 9999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(11, 4, 77, 0.4);
-    backdrop-filter: blur(4px);
-}
-
-.adm-overlay.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.adm-box {
-    background: white;
-    border-radius: 16px;
-    width: 90%;
-    box-shadow: 0 20px 60px rgba(11, 4, 77, 0.3);
-    animation: modalSlideIn 0.3s ease;
-    overflow: hidden;
-}
-
-@keyframes modalSlideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-.adm-header {
-    padding: 24px;
-    border-bottom: 1px solid #e8e6f5;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.adm-header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.vdm-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.adm-eyebrow {
-    font-size: 10px;
-    font-weight: 700;
-    color: #ffffff !important;
-    letter-spacing: 0.5px;
-    display: block;
-    margin-bottom: 2px;
-}
-
-.adm-title {
-    margin: 0;
-    color: #ffffff !important;
-    font-size: 19px;
-    font-weight: 600;
-    line-height: 1.2;
-}
-
-.adm-close {
-    background: none;
-    border: none;
-    color: #8f8daf;
-    cursor: pointer;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    transition: all 0.2s;
-}
-
-.adm-close:hover {
-    background: #f0eeff;
-    color: #0b044d;
-}
-
-.vdm-body {
-    padding: 20px 24px;
-}
-
-.vdm-section-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #8f8daf;
-    letter-spacing: 0.8px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.vdm-section-label::before {
-    content: '';
-    width: 3px;
-    height: 14px;
-    background: linear-gradient(135deg, #8e1e18, #dc2626);
-    border-radius: 2px;
-}
-
-.vdm-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 18px;
-    background: #ffffff;
-    border: 1px solid #f2f1fb;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    transition: all 0.2s;
-}
-
-.vdm-row:hover {
-    background: #fef8f8;
-    border-color: #fdd;
-    transform: translateX(2px);
-}
-
-.vdm-row:last-child {
-    margin-bottom: 0;
-}
-
-.vdm-row-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #5a5a7a !important;
-    font-size: 13.5px;
-    font-weight: 500;
-}
-
-.vdm-row-label svg {
-    flex-shrink: 0;
-}
-
-.vdm-row-amount {
-    color: #8e1e18 !important;
-    font-size: 15px;
-    font-weight: 700;
-    font-family: 'Poppins', monospace;
-}
-
-.adm-footer {
-    padding: 20px 24px;
-    border-top: 1px solid #e8e6f5;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-.adm-btn-ghost {
-    padding: 8px 20px;
-    background: transparent;
-    color: #56547a;
-    border: 1px solid #ecebf6;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    transition: all 0.2s;
-}
-
-.adm-btn-ghost:hover {
-    background: #f7f6fc;
-    color: #0b044d;
-    border-color: #d0c9ff;
-}
-
-.adm-btn-primary {
-    padding: 10px 24px;
-    background: linear-gradient(135deg, #0b044d, #150c63);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 12px rgba(11, 4, 77, 0.2);
-}
-
-.adm-btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(11, 4, 77, 0.3);
-}
-
-.adm-btn-primary:active {
-    transform: translateY(0);
-}
-
-.badge-deduction {
-    display: inline-block;
-    padding: 5px 12px;
-    background: #fee;
-    color: #8e1e18;
-    border: 1px solid #fcc;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 700;
-}
-
-.badge-netpay {
-    display: inline-block;
-    padding: 5px 12px;
-    background: #e7f5e9;
-    color: #15803d;
-    border: 1px solid #b7e4c7;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 700;
-}
-</style>
-
-<script>
-function showDeductionsModal(index) {
-    const dataContainer = document.querySelector(`.deductions-data[data-index="${index}"]`);
-    const modal = document.getElementById('deductionsModal');
-    const modalBody = document.getElementById('deductionsModalBody');
-    
-    if (!dataContainer) return;
-    
-    const deductions = dataContainer.querySelectorAll('span[data-type]');
-    let html = '<p class="vdm-section-label">BREAKDOWN</p>';
-    
-    let totalAmount = 0;
-    deductions.forEach(deduction => {
-        const type = deduction.getAttribute('data-type');
-        const amountStr = deduction.getAttribute('data-amount');
-        const amount = parseFloat(amountStr.replace(/[₱,]/g, '')) || 0;
-        totalAmount += amount;
-        
-        html += `
-            <div class="vdm-row">
-                <span class="vdm-row-label">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e1e18" stroke-width="2.5">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="8" y1="12" x2="16" y2="12"/>
-                    </svg>
-                    ${type}
-                </span>
-                <strong class="vdm-row-amount">${amountStr}</strong>
-            </div>
-        `;
-    });
-    
-    if (deductions.length === 0) {
-        html = '<div style="text-align: center; padding: 40px 20px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d0c9ff" stroke-width="1.5" style="margin-bottom: 12px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p style="color: #8f8daf; font-size: 14px; margin: 0;">No deductions found</p></div>';
-    } else {
-        // Add total row
-        html += `
-            <div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid #f2f1fb;">
-                <div class="vdm-row" style="background: linear-gradient(135deg, #fef8f8, #fff); border: 2px solid #fdd;">
-                    <span class="vdm-row-label" style="font-weight: 700; color: #0b044d !important;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e1e18" stroke-width="2.5">
-                            <rect x="3" y="3" width="18" height="18" rx="2"/>
-                            <line x1="3" y1="9" x2="21" y2="9"/>
-                        </svg>
-                        Total Deductions
-                    </span>
-                    <strong class="vdm-row-amount" style="font-size: 16px;">₱${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
-                </div>
-            </div>
-        `;
-    }
-    
-    modalBody.innerHTML = html;
-    modal.classList.add('active');
-}
-
-function closeDeductionsModal() {
-    const modal = document.getElementById('deductionsModal');
-    modal.classList.remove('active');
-}
-
-// Close modal on ESC key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeDeductionsModal();
-    }
-});
-</script>
+@push('scripts')
+    @vite('resources/js/admin/payroll/payroll-register.js')
+@endpush

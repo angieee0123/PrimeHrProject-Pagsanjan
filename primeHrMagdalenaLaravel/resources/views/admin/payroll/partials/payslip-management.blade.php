@@ -39,13 +39,13 @@
                 <td>
                     <div class="emp-cell">
                         @if($computation->employee->photo ?? false)
-                            <img src="{{ $computation->employee->photo }}" alt="{{ $computation->employee->first_name }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
+                            <img src="{{ $computation->employee->photo }}" alt="{{ $computation->employee->first_name }}" class="pr-avatar-img">
                         @else
                             @php
                                 $colors = ['#0b044d', '#8e1e18', '#150c63', '#a52820', '#150c63', '#56547a'];
                                 $empIndex = $loop->index % 6;
                             @endphp
-                            <div style="width:40px; height:40px; background: {{ $colors[$empIndex] }}; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #ecebf6;">
+                            <div class="pr-emp-avatar" style="background: {{ $colors[$empIndex] }};">
                                 {{ strtoupper(substr($computation->employee->first_name ?? 'N', 0, 1)) }}{{ strtoupper(substr($computation->employee->last_name ?? 'A', 0, 1)) }}
                             </div>
                         @endif
@@ -92,7 +92,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="9" style="text-align: center; padding: 40px; color: #8f8daf;">
+                <td colspan="9" class="pr-empty-cell">
                     No payslips generated yet. Go to "Generate Payroll" tab to create payslips.
                 </td>
             </tr>
@@ -124,161 +124,6 @@
 </div>
 @endif
 
-<style>
-.filter-select {
-    padding: 8px 12px;
-    border: 1px solid #ecebf6;
-    border-radius: 6px;
-    font-size: 13px;
-    font-family: 'Poppins', sans-serif;
-    color: #0b044d;
-    background: #fff;
-    cursor: pointer;
-}
-
-.filter-select:focus {
-    outline: none;
-    border-color: #0b044d;
-}
-
-.btn-action {
-    padding: 6px 8px;
-    border: 1px solid #ecebf6;
-    border-radius: 6px;
-    background: #fff;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-view {
-    color: #0b044d;
-}
-
-.btn-view:hover {
-    background: #f7f6fc;
-    border-color: #0b044d;
-}
-
-.btn-approve {
-    color: #15803d;
-}
-
-.btn-approve:hover {
-    background: #f0fdf4;
-    border-color: #15803d;
-}
-
-.btn-reject {
-    color: #8e1e18;
-}
-
-.btn-reject:hover {
-    background: #fef2f2;
-    border-color: #8e1e18;
-}
-
-.btn-print {
-    color: #15803d;
-}
-
-.btn-print:hover {
-    background: #f0fdf4;
-    border-color: #15803d;
-}
-
-.badge-status.approved {
-    background: #f0fdf4;
-    color: #15803d;
-    border: 1px solid #bbf7d0;
-}
-
-.badge-status.rejected {
-    background: #fef2f2;
-    color: #8e1e18;
-    border: 1px solid #fecaca;
-}
-</style>
-
-<script>
-function filterPayslips() {
-    const status = document.getElementById('statusFilter').value.toLowerCase();
-    const rows = document.querySelectorAll('#payslipsTableBody tr[data-status]');
-    
-    rows.forEach(row => {
-        const rowStatus = row.getAttribute('data-status');
-        // Treat 'draft' as 'pending' for filtering
-        const normalizedStatus = rowStatus === 'draft' ? 'pending' : rowStatus;
-        
-        if (status === '' || normalizedStatus === status) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
-
-function approvePayslip(id) {
-    if (confirm('Are you sure you want to approve this payslip?')) {
-        fetch(`/admin/payroll/payslip/${id}/approve`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + (data.message || 'Failed to approve payslip'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to approve payslip');
-        });
-    }
-}
-
-function rejectPayslip(id) {
-    const reason = prompt('Please enter rejection reason:');
-    if (reason) {
-        fetch(`/admin/payroll/payslip/${id}/reject`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ reason: reason })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + (data.message || 'Failed to reject payslip'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to reject payslip');
-        });
-    }
-}
-
-function exportPayslips() {
-    const status = document.getElementById('statusFilter').value;
-    window.location.href = `/admin/payroll/payslips/export?status=${status}`;
-}
-
-function printPayslipDirect(id) {
-    viewPayslipDetail(id);
-    setTimeout(() => {
-        window.print();
-    }, 500);
-}
-</script>
+@push('scripts')
+    @vite('resources/js/admin/payroll/payslip-management.js')
+@endpush

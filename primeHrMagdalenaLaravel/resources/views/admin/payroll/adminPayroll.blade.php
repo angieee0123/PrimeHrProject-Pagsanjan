@@ -42,66 +42,66 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
 <div class="glass-shell">
 
 @if(session('success'))
-<div style="margin-bottom: 20px; padding: 12px 16px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; color: #155724; font-size: 13px;">
+<div class="pr-flash is-success">
     <strong>✓</strong> {{ session('success') }}
 </div>
 @endif
 @if(session('error'))
-<div style="margin-bottom: 20px; padding: 12px 16px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 6px; color: #721c24; font-size: 13px;">
+<div class="pr-flash is-error">
     <strong>✗</strong> {{ session('error') }}
 </div>
 @endif
 
-<div class="stats-grid" style="margin-bottom: 20px;">
+<div class="stats-grid pr-mb-20">
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Gross Payroll</p>
-            <div class="stat-icon-wrap" style="background: #0b044d18; color: #0b044d;">
+            <div class="stat-icon-wrap pr-icon-wrap-blue">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><text x="3" y="19" font-size="17" font-weight="bold" font-family="Arial, sans-serif">₱</text></svg>
             </div>
         </div>
-        <h2 class="stat-value" style="font-size: 18px;">{{ peso($grossPayroll) }}</h2>
+        <h2 class="stat-value pr-stat-value-sm">{{ peso($grossPayroll) }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #0b044d;"></span>
+            <span class="stat-dot pr-dot-blue"></span>
             <p class="stat-sub">{{ $periodDisplay }}</p>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Net Pay</p>
-            <div class="stat-icon-wrap" style="background: #15803d18; color: #15803d;">
+            <div class="stat-icon-wrap pr-icon-wrap-green">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
             </div>
         </div>
-        <h2 class="stat-value" style="font-size: 18px;">{{ peso($totalNet) }}</h2>
+        <h2 class="stat-value pr-stat-value-sm">{{ peso($totalNet) }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #15803d;"></span>
+            <span class="stat-dot pr-dot-green"></span>
             <p class="stat-sub">After deductions</p>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Deductions</p>
-            <div class="stat-icon-wrap" style="background: #8e1e1818; color: #8e1e18;">
+            <div class="stat-icon-wrap pr-icon-wrap-red">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </div>
         </div>
-        <h2 class="stat-value" style="font-size: 18px;">{{ peso($totalDeductions) }}</h2>
+        <h2 class="stat-value pr-stat-value-sm">{{ peso($totalDeductions) }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #8e1e18;"></span>
+            <span class="stat-dot pr-dot-red"></span>
             <p class="stat-sub">All deductions included</p>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Pending Records</p>
-            <div class="stat-icon-wrap" style="background: #c9a22718; color: #c9a227;">
+            <div class="stat-icon-wrap pr-icon-wrap-gold">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
         </div>
         <h2 class="stat-value">{{ $pendingCount }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #c9a227;"></span>
+            <span class="stat-dot pr-dot-gold"></span>
             <p class="stat-sub">{{ $processedCount }} processed</p>
         </div>
     </div>
@@ -110,7 +110,7 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
 @if($activeTab === 'register')
 {{-- Filter Toolbar --}}
 <div class="filter-card">
-    <form method="GET" action="{{ route('admin.payroll') }}" id="filterForm" style="display: contents;">
+    <form method="GET" action="{{ route('admin.payroll') }}" id="filterForm" class="pr-filter-contents">
         <input type="hidden" name="tab" value="register">
         <div class="filter-card-fields">
             <div class="fld">
@@ -207,191 +207,19 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
 @include('admin.payroll.modals.payroll-status-modals')
 @include('admin.payroll.modals.payslip-detail-modal')
 
-<style>
-.payroll-tabs {
-    display: inline-flex;
-    gap: 4px;
-    padding: 5px;
-    background: #f2f1fb;
-    border: 1px solid #e2e1f0;
-    border-radius: 14px;
-    margin-bottom: 20px;
-}
-
-.tab-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 9px 18px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #56547a;
-    text-decoration: none;
-    border-radius: 10px;
-    transition: all 0.2s;
-}
-
-.tab-link:hover:not(.active) {
-    color: #0b044d;
-}
-
-.tab-link.active {
-    color: #fff;
-    background: linear-gradient(135deg, #150c63, #0b044d);
-    box-shadow: 0 4px 12px rgba(11,4,77,.25);
-}
-
-.tab-link svg {
-    width: 16px;
-    height: 16px;
-}
-
-.badge-emptype {
-    font-size: 11px; color: #0b044d; background: #f2f1fb;
-    padding: 3px 10px; border-radius: 20px; font-weight: 600;
-    border: 1px solid #e2e1f0;
-}
-.btn-edit {
-    padding: 6px 16px; background: #f7f6fc; color: #0b044d;
-    border: 1px solid #ecebf6; border-radius: 6px;
-    font-size: 12px; font-weight: 600; cursor: pointer;
-    font-family: 'Poppins', sans-serif; transition: all 0.2s;
-}
-.btn-edit:hover { background: #ecebf6; }
-.row-actions { display: flex; gap: 6px; }
-.table-footer {
-    padding: 16px 24px; border-top: 1px solid #f2f1fb;
-    display: flex; justify-content: space-between; align-items: center;
-}
-.table-footer p { font-size: 13px; color: #56547a; }
-.pagination { display: flex; gap: 6px; }
-.page-btn {
-    width: 32px; height: 32px; border: 1px solid #ecebf6;
-    border-radius: 6px; background: #fff; color: #56547a;
-    font-size: 13px; font-weight: 600; cursor: pointer;
-    font-family: 'Poppins', sans-serif; transition: all 0.2s;
-}
-.page-btn.active { background: #0b044d; color: #fff; border-color: #0b044d; }
-.page-btn:hover { background: #f7f6fc; }
-.payroll-summary-bar {
-    display: flex; align-items: center; gap: 20px;
-    padding: 14px 24px; background: #f7f6fc;
-    border: 1px solid #f2f1fb; border-radius: 8px;
-}
-.psummary-item { display: flex; flex-direction: column; gap: 2px; }
-.psummary-item span { font-size: 11px; color: #8f8daf; font-weight: 500; }
-.psummary-item strong { font-size: 13px; color: #0b044d; font-weight: 600; }
-.psummary-divider { width: 1px; height: 28px; background: #ecebf6; }
-.pay-cell {
-    font-size: 13px; color: #0b044d; font-weight: 600;
-}
-.ot-pay {
-    font-size: 13px; color: #15803d; font-weight: 600;
-}
-.deduction {
-    font-size: 13px; color: #8e1e18; font-weight: 600;
-}
-.net-pay {
-    font-size: 13px; color: #15803d; font-weight: 700;
-}
-.daily-rate {
-    font-size: 13px; color: #a52820; font-weight: 600;
-}
-.work-date {
-    font-size: 12.5px; color: #56547a; font-weight: 500;
-}
-.days-count {
-    font-size: 12.5px; color: #0b044d; font-weight: 600;
-    background: #f2f1fb; padding: 4px 10px; border-radius: 4px;
-}
-.btn-filter-main {
-    padding: 7px 16px; background: #0b044d; color: #fff;
-    border: none; border-radius: 6px; font-size: 12.5px;
-    font-weight: 600; cursor: pointer; display: flex;
-    align-items: center; gap: 6px; font-family: 'Poppins', sans-serif;
-    transition: all 0.2s;
-}
-.btn-filter-main:hover { background: #150c63; }
-</style>
-
+@push('scripts')
 <script>
-// Payroll Register Pagination
-window._payrollCurrentPage = 1;
-window._payrollRowsPerPage = 10;
-
-window.filterPayrollRegister = function () {
-    const allRows = document.querySelectorAll('#payrollRegisterBody tr[data-id]');
-    const filtered = [];
-    
-    allRows.forEach(row => {
-        filtered.push(row);
-    });
-    
-    window._payrollFilteredRows = filtered;
-    window._payrollCurrentPage = 1;
-    updatePayrollPagination();
-};
-
-window.updatePayrollPagination = function () {
-    const rows = window._payrollFilteredRows || [];
-    const total = rows.length;
-    const perPage = window._payrollRowsPerPage;
-    const totalPages = Math.ceil(total / perPage) || 1;
-    const page = Math.min(window._payrollCurrentPage, totalPages);
-    window._payrollCurrentPage = page;
-    
-    const start = (page - 1) * perPage;
-    const end = Math.min(start + perPage, total);
-    
-    document.querySelectorAll('#payrollRegisterBody tr[data-id]').forEach(row => row.style.display = 'none');
-    rows.forEach((row, i) => { if (i >= start && i < end) row.style.display = ''; });
-    
-    document.getElementById('payrollRowStart').textContent = total ? start + 1 : 0;
-    document.getElementById('payrollRowEnd').textContent = end;
-    document.getElementById('payrollRowTotal').textContent = total;
-    
-    const controls = document.getElementById('payrollPaginationControls');
-    if (totalPages <= 1) { controls.innerHTML = ''; return; }
-    
-    let html = '';
-    const maxVisible = 5;
-    let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-    if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
-    
-    if (page > 1) html += '<button class="page-btn" onclick="goToPayrollPage(' + (page - 1) + ')">‹</button>';
-    if (startPage > 1) {
-        html += '<button class="page-btn" onclick="goToPayrollPage(1)">1</button>';
-        if (startPage > 2) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
-    }
-    for (let i = startPage; i <= endPage; i++) {
-        html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToPayrollPage(' + i + ')">' + i + '</button>';
-    }
-    if (endPage < totalPages) {
-        if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
-        html += '<button class="page-btn" onclick="goToPayrollPage(' + totalPages + ')">' + totalPages + '</button>';
-    }
-    if (page < totalPages) html += '<button class="page-btn" onclick="goToPayrollPage(' + (page + 1) + ')">›</button>';
-    
-    controls.innerHTML = html;
-};
-
-window.goToPayrollPage = function (page) {
-    window._payrollCurrentPage = page;
-    updatePayrollPagination();
-};
-
-window.changePayrollRowsPerPage = function () {
-    window._payrollRowsPerPage = parseInt(document.getElementById('payrollRowsPerPage').value) || 10;
-    window._payrollCurrentPage = 1;
-    updatePayrollPagination();
-};
-
-// Initialize pagination on page load
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('payrollRegisterBody')) {
-        filterPayrollRegister();
-    }
-});
+    window.payrollRoutes = {
+        preview: @json(route('admin.payroll.preview')),
+        calculate: @json(route('admin.payroll.calculate')),
+        export: @json(route('admin.payroll.export')),
+        generate: @json(route('admin.payroll.generate')),
+        payslipsTab: @json(route('admin.payroll', ['tab' => 'payslips'])),
+        payslipDetails: @json(url('/admin/payroll/payslip')),
+        payslipApprove: @json(url('/admin/payroll/payslip')),
+        payslipsExport: @json(url('/admin/payroll/payslips/export')),
+    };
 </script>
+    @vite('resources/js/admin/payroll/adminPayroll.js')
+@endpush
 @endsection
