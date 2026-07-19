@@ -250,144 +250,7 @@ function applyLeaveFilters() {
             : 'Showing <strong>' + visible + '</strong> of <strong>' + total + '</strong> records';
 }
 
-// NOTE: filterLeaveCredits() and the whole leave-credits pagination block below
-// (initLeaveCreditsTable..goToLeaveCreditsPage) target #filterLeaveCategory,
-// #itemsPerPage and #leaveCreditspagination — none of which exist in the current
-// leaveCreditsTab markup. This was already dead/orphaned before this refactor;
-// kept as-is (moved verbatim) rather than removed.
-function filterLeaveCredits() {
-    const category = document.getElementById('filterLeaveCategory').value;
-    const rows = document.querySelectorAll('.leave-credit-row');
-    let visible = 0;
-
-    rows.forEach(row => {
-        let show = true;
-
-        if (category === 'accrued') {
-            show = row.dataset.type === 'accrued';
-        } else if (category === 'fixed') {
-            show = row.dataset.type === 'fixed';
-        } else if (category === 'available') {
-            show = parseFloat(row.dataset.available) > 0;
-        }
-
-        row.style.display = show ? '' : 'none';
-        if (show) visible++;
-    });
-
-    // Reset pagination after filter
-    initLeaveCreditsTable();
-}
-
-function changeItemsPerPage() {
-    const select = document.getElementById('itemsPerPage');
-    const value = select.value;
-
-    if (value === 'all') {
-        leaveCreditsRowsPerPage = 999999; // Show all
-    } else {
-        leaveCreditsRowsPerPage = parseInt(value);
-    }
-
-    leaveCreditsCurrentPage = 1;
-    displayLeaveCreditsPage();
-    updateLeaveCreditsPageButtons();
-}
-
-// Leave Credits Table Pagination
-let leaveCreditsCurrentPage = 1;
-let leaveCreditsRowsPerPage = 20; // Increased from 10 to 20 to show all leave types
-let leaveCreditsVisibleRows = [];
-
-function initLeaveCreditsTable() {
-    const allRows = document.querySelectorAll('.leave-credit-row');
-    leaveCreditsVisibleRows = Array.from(allRows).filter(row => row.style.display !== 'none');
-    leaveCreditsCurrentPage = 1;
-    displayLeaveCreditsPage();
-    updateLeaveCreditsPageButtons();
-}
-
-function displayLeaveCreditsPage() {
-    const startIndex = (leaveCreditsCurrentPage - 1) * leaveCreditsRowsPerPage;
-    const endIndex = startIndex + leaveCreditsRowsPerPage;
-
-    leaveCreditsVisibleRows.forEach((row, index) => {
-        if (index >= startIndex && index < endIndex) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-
-    updateLeaveCreditsCounter();
-}
-
-function updateLeaveCreditsCounter() {
-    const total = leaveCreditsVisibleRows.length;
-    const startIndex = (leaveCreditsCurrentPage - 1) * leaveCreditsRowsPerPage + 1;
-    const endIndex = Math.min(leaveCreditsCurrentPage * leaveCreditsRowsPerPage, total);
-
-    const counter = document.getElementById('leaveCreditsCount');
-    if (counter) {
-        if (total === 0) {
-            counter.innerHTML = 'No leave types found';
-        } else {
-            counter.innerHTML = `Showing <strong>${startIndex}</strong> to <strong>${endIndex}</strong> of <strong>${total}</strong> leave types`;
-        }
-    }
-}
-
-function updateLeaveCreditsPageButtons() {
-    const totalPages = Math.ceil(leaveCreditsVisibleRows.length / leaveCreditsRowsPerPage);
-    const pagination = document.getElementById('leaveCreditspagination');
-    const prevBtn = document.getElementById('prevPageBtn');
-    const nextBtn = document.getElementById('nextPageBtn');
-
-    if (!pagination) return;
-
-    // Update prev/next buttons
-    prevBtn.disabled = leaveCreditsCurrentPage === 1;
-    nextBtn.disabled = leaveCreditsCurrentPage === totalPages || totalPages === 0;
-
-    // Clear existing page buttons (except prev/next)
-    const pageButtons = pagination.querySelectorAll('.page-btn:not(#prevPageBtn):not(#nextPageBtn)');
-    pageButtons.forEach(btn => btn.remove());
-
-    // Add page buttons
-    if (totalPages > 0) {
-        for (let i = 1; i <= totalPages; i++) {
-            const pageBtn = document.createElement('button');
-            pageBtn.className = 'page-btn' + (i === leaveCreditsCurrentPage ? ' active' : '');
-            pageBtn.textContent = i;
-            pageBtn.onclick = () => goToLeaveCreditsPage(i);
-            pagination.insertBefore(pageBtn, nextBtn);
-        }
-    }
-}
-
-function changeLeaveCreditsPage(direction) {
-    const totalPages = Math.ceil(leaveCreditsVisibleRows.length / leaveCreditsRowsPerPage);
-
-    if (direction === 'prev' && leaveCreditsCurrentPage > 1) {
-        leaveCreditsCurrentPage--;
-    } else if (direction === 'next' && leaveCreditsCurrentPage < totalPages) {
-        leaveCreditsCurrentPage++;
-    }
-
-    displayLeaveCreditsPage();
-    updateLeaveCreditsPageButtons();
-}
-
-function goToLeaveCreditsPage(page) {
-    leaveCreditsCurrentPage = page;
-    displayLeaveCreditsPage();
-    updateLeaveCreditsPageButtons();
-}
-
-// Initialize pagination when credits tab is shown
 document.addEventListener('DOMContentLoaded', function() {
-    initLeaveCreditsTable();
-
     // Check URL for tab parameter and switch to that tab
     const urlParams = new URLSearchParams(window.location.search);
     const activeTab = urlParams.get('tab');
@@ -417,11 +280,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (buttons[tabIndex]) {
             buttons[tabIndex].classList.add('active');
         }
-
-        // Initialize pagination for credits tab
-        if (activeTab === 'credits') {
-            setTimeout(() => initLeaveCreditsTable(), 100);
-        }
     }
 });
 
@@ -440,11 +298,6 @@ function switchTab(tabId, btn) {
     const url = new URL(window.location.href);
     url.searchParams.set('tab', tabId);
     window.history.pushState({}, '', url.toString());
-
-    // Initialize pagination when switching to credits tab
-    if (tabId === 'credits') {
-        setTimeout(() => initLeaveCreditsTable(), 100);
-    }
 }
 
 // ── Leave detail modal ──
