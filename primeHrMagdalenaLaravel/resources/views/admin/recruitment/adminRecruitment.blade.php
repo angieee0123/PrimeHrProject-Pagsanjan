@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @push('styles')
-@vite('resources/css/adminRecruitment.css')
+@vite('resources/css/admin/adminRecruitment.css')
 @endpush
 
 @section('content')

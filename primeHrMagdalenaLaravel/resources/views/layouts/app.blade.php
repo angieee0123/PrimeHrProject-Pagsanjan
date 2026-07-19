@@ -7,7 +7,7 @@
     <title>PRIME HRIS - Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    @vite(['resources/css/app.css', 'resources/css/admin.css', 'resources/css/adminDashboard.css', 'resources/css/adminAttendance.css', 'resources/css/adminRecruitment.css', 'resources/css/adminTraining.css', 'resources/css/adminPerformance.css', 'resources/css/adminDepartment.css', 'resources/css/employeeWizard.css', 'resources/css/adminChatbot.css', 'resources/css/adminPayroll.css', 'resources/css/topbarTheme.css'])
+    @vite(['resources/css/app.css', 'resources/css/admin/admin.css', 'resources/css/admin/adminDashboard.css', 'resources/css/admin/adminAttendance.css', 'resources/css/admin/adminRecruitment.css', 'resources/css/admin/adminTraining.css', 'resources/css/admin/adminPerformance.css', 'resources/css/admin/adminDepartment.css', 'resources/css/admin/employeeWizard.css', 'resources/css/admin/adminChatbot.css', 'resources/css/admin/adminPayroll.css', 'resources/css/topbarTheme.css'])
     @stack('styles')
 </head>
 <body>
