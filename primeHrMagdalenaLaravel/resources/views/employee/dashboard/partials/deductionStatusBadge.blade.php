@@ -1,5 +1,5 @@
 @if($status === 'active')
-    <span class="badge-status" style="background:#e8f9ef;color:#15803d;border:1px solid #bbf7d0;text-transform:none">Active</span>
+    <span class="badge-status processed eh-no-transform">Active</span>
 @elseif($status === 'pending')
     <span class="badge-status pending">Pending</span>
 @else

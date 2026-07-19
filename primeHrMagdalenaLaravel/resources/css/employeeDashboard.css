@@ -553,3 +553,28 @@
 
     .perm-tab svg { display: none; }
 }
+
+/* ══════════ Utility classes (replacing inline style="") ══════════ */
+.eh-dot-blue { background: #0b044d; }
+.eh-dot-green { background: #22c55e; }
+.eh-dot-gold { background: #d9bb00; }
+.eh-flex-row-6 { display: flex; align-items: center; gap: 6px; }
+.eh-flex-row-8 { display: flex; align-items: center; gap: 8px; }
+.eh-flex-row-8-mw0 { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.eh-flex-row-10 { display: flex; align-items: center; gap: 10px; }
+.eh-unit-label { font-size: 14px; font-weight: 500; }
+.eh-quick-icon { width: 34px; height: 34px; border-radius: 10px; background: #eef2ff; display: flex; align-items: center; justify-content: center; color: #0b044d; flex-shrink: 0; }
+.eh-quick-title { font-size: 13px; font-weight: 800; color: #111827; margin: 0; }
+.eh-quick-sub { font-size: 11px; color: #667085; margin: 0; }
+.eh-m0 { margin: 0; }
+.eh-btn-export-sm { font-size: 11px; padding: 6px 12px; }
+.eh-secondary-grid-single { grid-template-columns: 1fr; }
+.eh-cursor-pointer { cursor: pointer; }
+.eh-subtext { font-size: 11px; color: #9999bb; }
+.eh-pending-note { color: #a16207; font-size: 12px; }
+.eh-tbd-note { color: #9999bb; font-size: 12px; }
+.eh-na-note { color: #9999bb; }
+.eh-hidden { display: none; }
+.eh-remark-text { font-size: 12px; color: #6b6a8a; }
+.eh-net-pay-cell { font-weight: 700; color: #15803d; }
+.eh-no-transform { text-transform: none; }

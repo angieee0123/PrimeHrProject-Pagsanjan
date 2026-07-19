@@ -30,7 +30,7 @@
         <div class="modal-section-label modal-section-deductions">SCHEDULE</div>
         <div class="modal-row"><span>Start Date</span><span id="deductionStartDate">N/A</span></div>
         <div class="modal-row"><span>End Date</span><span id="deductionEndDate">N/A</span></div>
-        <div class="modal-row" id="deductionRemarksRow" style="display:none"><span>Remarks</span><span id="deductionRemarks" style="font-size:12px;color:#6b6a8a">N/A</span></div>
+        <div class="modal-row eh-hidden" id="deductionRemarksRow"><span>Remarks</span><span id="deductionRemarks" class="eh-remark-text">N/A</span></div>
     </div>
     <div class="modal-footer">
         <button class="modal-btn-ghost" onclick="closeDeductionModal()">Close</button>

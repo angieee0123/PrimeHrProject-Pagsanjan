@@ -32,12 +32,12 @@
                     <td class="table-cell-deduct">
                         @if($p->deductions > 0)
                             −₱{{ number_format($p->deductions, 2) }}
-                            <br><span style="font-size:11px;color:#9999bb">late &amp; undertime</span>
+                            <br><span class="eh-subtext">late &amp; undertime</span>
                         @else
-                            <span style="color:#9999bb">₱0.00</span>
+                            <span class="eh-na-note">₱0.00</span>
                         @endif
                     </td>
-                    <td style="font-weight:700;color:#15803d">₱{{ number_format($p->net_pay, 2) }}</td>
+                    <td class="eh-net-pay-cell">₱{{ number_format($p->net_pay, 2) }}</td>
                     <td class="table-cell-date">{{ \Carbon\Carbon::parse($p->pay_date)->format('M d, Y') }}</td>
                 </tr>
                 @empty

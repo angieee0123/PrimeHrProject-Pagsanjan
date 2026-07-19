@@ -18,10 +18,10 @@
         </div>
     </div>
 
-    <div class="table-section perm-section" style="margin:0">
+    <div class="table-section perm-section eh-m0">
         <div class="table-header">
             <div>
-                <p class="table-title" style="display:flex;align-items:center;gap:8px">
+                <p class="table-title eh-flex-row-8">
                     My Requests
                     @if($pendingLeaveCount > 0)
                         <span class="stat-pill-alert">{{ $pendingLeaveCount }}</span>
@@ -29,7 +29,7 @@
                 </p>
                 <p class="table-sub">Latest leave applications</p>
             </div>
-            <button class="btn-export" style="font-size:11px;padding:6px 12px" onclick="window.location.href='{{ route('employee.leave') }}'">View all</button>
+            <button class="btn-export eh-btn-export-sm" onclick="window.location.href='{{ route('employee.leave') }}'">View all</button>
         </div>
         <div class="perm-card-body">
             @forelse($leaveRequests as $req)
@@ -68,7 +68,7 @@
 </div>
 
 {{-- Salary + Leave balance --}}
-<div class="perm-secondary-grid" @if(!($isPermanent ?? false)) style="grid-template-columns:1fr" @endif>
+<div class="perm-secondary-grid @if(!($isPermanent ?? false)) eh-secondary-grid-single @endif">
 
     <div class="chart-card">
         <div class="chart-header">
@@ -88,7 +88,7 @@
     </div>
 
     @if($isPermanent ?? false)
-    <div class="table-section perm-section" style="margin:0">
+    <div class="table-section perm-section eh-m0">
         <div class="table-header">
             <div>
                 <p class="table-title">Leave Balance</p>
@@ -104,7 +104,7 @@
             @endphp
             <div class="perm-balance-row">
                 <div class="perm-balance-top">
-                    <div style="display:flex;align-items:center;gap:8px;min-width:0">
+                    <div class="eh-flex-row-8-mw0">
                         <span class="perm-req-dot" style="background:{{ $color }}"></span>
                         <span class="perm-balance-name">{{ $balance->leaveType->leave_name ?? 'Unknown' }}</span>
                     </div>

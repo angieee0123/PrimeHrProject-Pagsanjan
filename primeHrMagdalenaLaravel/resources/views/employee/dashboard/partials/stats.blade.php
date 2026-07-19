@@ -10,7 +10,7 @@
         </div>
         <p class="stat-value">₱{{ number_format($basicPay, 2) }}</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#0b044d"></span>
+            <span class="stat-dot eh-dot-blue"></span>
             <p class="stat-sub">{{ $startDate->format('M d') }}–{{ $endDate->format('d, Y') }}</p>
         </div>
     </div>
@@ -24,7 +24,7 @@
         </div>
         <p class="stat-value">₱{{ number_format($netPay, 2) }}</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#22c55e"></span>
+            <span class="stat-dot eh-dot-green"></span>
             <p class="stat-sub">₱{{ number_format($totalDeductions, 2) }} deducted</p>
         </div>
     </div>
@@ -32,7 +32,7 @@
     @if($isPermanent ?? false)
     <div class="stat-card perm-stat-hover" onclick="window.location.href='{{ route('employee.leave') }}'">
         <div class="stat-top">
-            <p class="stat-label" style="display:flex;align-items:center;gap:6px">
+            <p class="stat-label eh-flex-row-6">
                 Leave Credits
                 @if($pendingLeaveCount > 0)
                     <span class="stat-pill-alert">{{ $pendingLeaveCount }}</span>
@@ -42,9 +42,9 @@
                 <svg width="17" height="17" fill="none" stroke="#a16207" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             </div>
         </div>
-        <p class="stat-value">{{ number_format($leaveBalances->sum('available_credits'), 1) }}<span style="font-size:14px;font-weight:500"> days</span></p>
+        <p class="stat-value">{{ number_format($leaveBalances->sum('available_credits'), 1) }}<span class="eh-unit-label"> days</span></p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#d9bb00"></span>
+            <span class="stat-dot eh-dot-gold"></span>
             <p class="stat-sub">
                 @if($pendingLeaveCount > 0)
                     {{ $pendingLeaveCount }} request{{ $pendingLeaveCount != 1 ? 's' : '' }} pending
@@ -63,7 +63,7 @@
                 <svg width="17" height="17" fill="none" stroke="#8e1e18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
         </div>
-        <p class="stat-value">{{ $attendanceRate }}<span style="font-size:14px;font-weight:500">%</span></p>
+        <p class="stat-value">{{ $attendanceRate }}<span class="eh-unit-label">%</span></p>
         <div class="stat-footer">
             <span class="stat-dot" style="background:{{ $lateDays > 0 ? '#b7791f' : '#15803d' }}"></span>
             <p class="stat-sub">
@@ -77,13 +77,13 @@
 
 {{-- Quick Actions Bar --}}
 <div class="perm-action-bar">
-    <div style="display:flex;align-items:center;gap:10px" class="perm-action-spacer">
-        <div style="width:34px;height:34px;border-radius:10px;background:#eef2ff;display:flex;align-items:center;justify-content:center;color:#0b044d;flex-shrink:0">
+    <div class="perm-action-spacer eh-flex-row-10">
+        <div class="eh-quick-icon">
             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </div>
         <div>
-            <p style="font-size:13px;font-weight:800;color:#111827;margin:0">Quick Actions</p>
-            <p style="font-size:11px;color:#667085;margin:0">Frequently used HR workflows</p>
+            <p class="eh-quick-title">Quick Actions</p>
+            <p class="eh-quick-sub">Frequently used HR workflows</p>
         </div>
     </div>
     <button class="modal-btn-primary perm-quick-btn" onclick="window.location.href='{{ route('employee.payslip') }}'">

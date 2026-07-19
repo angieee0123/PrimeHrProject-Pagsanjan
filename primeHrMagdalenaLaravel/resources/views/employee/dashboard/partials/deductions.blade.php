@@ -77,11 +77,11 @@
             <tbody id="deductionsTableBody">
                 @forelse($deductionRows as $row)
                 @php $d = $row->model; @endphp
-                <tr onclick="showDeductionModal({{ $d->id }})" style="cursor:pointer" data-deduction-id="{{ $d->id }}">
+                <tr onclick="showDeductionModal({{ $d->id }})" class="eh-cursor-pointer" data-deduction-id="{{ $d->id }}">
                     <td class="table-cell-period">
                         <strong>{{ $row->type->name ?? 'N/A' }}</strong>
                         @if($row->type->code)
-                            <br><span style="font-size:11px;color:#9999bb">{{ $row->type->code }}</span>
+                            <br><span class="eh-subtext">{{ $row->type->code }}</span>
                         @endif
                     </td>
                     <td>
@@ -90,22 +90,22 @@
                     <td class="table-cell-basic deduction-amount-cell" data-per-cutoff="{{ $row->perCutoff }}">
                         @if($row->monthly > 0)
                             <span class="deduction-amount">₱{{ number_format($row->monthly, 2) }}</span>
-                            <br><span style="font-size:11px;color:#9999bb" class="deduction-period">per month</span>
+                            <br><span class="eh-subtext deduction-period">per month</span>
                         @elseif($row->isPercentagePending)
-                            <span style="color:#a16207;font-size:12px">{{ $row->type->percentage_rate }}% of salary</span>
-                            <br><span style="font-size:11px;color:#9999bb">Pending computation</span>
+                            <span class="eh-pending-note">{{ $row->type->percentage_rate }}% of salary</span>
+                            <br><span class="eh-subtext">Pending computation</span>
                         @else
-                            <span style="color:#9999bb;font-size:12px">To be computed</span>
+                            <span class="eh-tbd-note">To be computed</span>
                         @endif
                     </td>
                     <td class="table-cell-deduct">
                         @if($d->remaining_balance !== null)
                             ₱{{ number_format($d->remaining_balance, 2) }}
                             @if($d->total_amount)
-                                <br><span style="font-size:11px;color:#9999bb">of ₱{{ number_format($d->total_amount, 2) }}</span>
+                                <br><span class="eh-subtext">of ₱{{ number_format($d->total_amount, 2) }}</span>
                             @endif
                         @else
-                            <span style="color:#9999bb">N/A</span>
+                            <span class="eh-na-note">N/A</span>
                         @endif
                     </td>
                     <td class="table-cell-date deduction-date-cell" data-start-date="{{ $row->startDate }}">
