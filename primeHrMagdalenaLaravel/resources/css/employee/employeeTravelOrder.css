@@ -1,0 +1,103 @@
+/* Employee Travel Order — extracted from inline styles.
+   Scoped under .permanent-leavebenefits (this page's <main> wrapper class,
+   reused from the leave & benefits page's layout). "to-" = travel order. */
+
+.permanent-leavebenefits .to-mb-12 { margin-bottom: 12px; }
+.permanent-leavebenefits .to-mb-20 { margin-bottom: 20px; }
+.permanent-leavebenefits .to-mb-24 { margin-bottom: 24px; }
+.permanent-leavebenefits .to-mt-8 { margin-top: 8px; }
+.permanent-leavebenefits .to-mt-16 { margin-top: 16px; }
+.permanent-leavebenefits .to-relative { position: relative; }
+.permanent-leavebenefits .to-hidden { display: none; }
+.permanent-leavebenefits .to-cursor-pointer { cursor: pointer; }
+.permanent-leavebenefits .to-inline { display: inline; }
+.permanent-leavebenefits .to-line-tall { line-height: 1.6; }
+
+.permanent-leavebenefits .to-flex-between { display: flex; align-items: center; justify-content: space-between; }
+.permanent-leavebenefits .to-flex-between-mt4 { display: flex; justify-content: space-between; margin-top: 4px; }
+.permanent-leavebenefits .to-flex-start-8 { display: flex; align-items: flex-start; gap: 8px; }
+.permanent-leavebenefits .to-flex-gap-8 { display: flex; align-items: center; gap: 8px; }
+.permanent-leavebenefits .to-flex-gap-10 { display: flex; align-items: center; gap: 10px; }
+.permanent-leavebenefits .to-flex-gap-12 { display: flex; align-items: center; gap: 12px; }
+.permanent-leavebenefits .to-flex-1-minw0 { flex: 1; min-width: 0; }
+.permanent-leavebenefits .to-gap-12 { gap: 12px; }
+.permanent-leavebenefits .to-justify-center { justify-content: center; }
+.permanent-leavebenefits .to-ta-center { text-align: center; }
+.permanent-leavebenefits .to-icon-inline { display: inline-block; vertical-align: middle; margin-right: 4px; }
+.permanent-leavebenefits .to-icon-top { flex-shrink: 0; margin-top: 2px; }
+.permanent-leavebenefits .to-icon-center { margin: 0 auto 12px; display: block; }
+
+.permanent-leavebenefits .to-required { color: #8e1e18; }
+.permanent-leavebenefits .to-field-label { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #0b044d; margin-bottom: 8px; }
+.permanent-leavebenefits .to-panel-label { display: block; font-weight: 600; color: #0b044d; margin-bottom: 12px; font-size: 13px; }
+.permanent-leavebenefits .to-sublabel { font-size: 12px; color: #6b7280; margin-bottom: 6px; display: block; }
+.permanent-leavebenefits .to-text-muted-11 { color: #9ca3af; font-size: 11px; }
+.permanent-leavebenefits .to-text-muted-12 { color: #9ca3af; font-size: 12px; }
+.permanent-leavebenefits .to-hint { margin: 8px 0 0 0; font-size: 11px; color: #9ca3af; }
+.permanent-leavebenefits .to-hint-tight { margin: 0; font-size: 11px; color: #9ca3af; }
+.permanent-leavebenefits .to-days-label { font-size: 13px; color: #6b7280; font-weight: 500; }
+.permanent-leavebenefits .to-upload-title { margin: 0 0 4px 0; font-size: 13px; color: #374151; font-weight: 500; }
+.permanent-leavebenefits .to-error-text { margin: 0; color: #991b1b; font-size: 13px; line-height: 1.5; }
+.permanent-leavebenefits .to-remarks-text { color: #991b1b; font-style: italic; line-height: 1.6; }
+
+.permanent-leavebenefits .to-panel { background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px; }
+.permanent-leavebenefits .to-days-box { margin-top: 12px; padding: 12px; background: #fff; border-radius: 6px; border: 2px dashed #d1d5db; }
+.permanent-leavebenefits .to-days-input { width: 70px; padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 14px; font-weight: 700; color: #0b044d; text-align: center; background: #f9fafb; }
+.permanent-leavebenefits .to-dropzone { border: 2px dashed #d1d5db; border-radius: 8px; padding: 20px; text-align: center; background: #fafafa; transition: all 0.2s; }
+.permanent-leavebenefits .to-file-name-box { margin-top: 12px; padding: 8px 12px; background: #f0f9ff; border-radius: 4px; font-size: 12px; color: #0369a1; }
+.permanent-leavebenefits .to-error-box { padding: 12px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 6px; margin-bottom: 16px; }
+.permanent-leavebenefits .to-session-alert-success { padding: 12px 16px; background: #d1fae5; border-left: 3px solid #10b981; border-radius: 6px; margin-bottom: 16px; }
+.permanent-leavebenefits .to-session-alert-error { padding: 12px 16px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 6px; margin-bottom: 16px; }
+.permanent-leavebenefits .to-flash-text-success { margin: 0; color: #065f46; font-size: 13px; font-weight: 500; }
+.permanent-leavebenefits .to-flash-text-error { margin: 0; color: #991b1b; font-size: 13px; font-weight: 500; }
+
+.permanent-leavebenefits .to-input-lg { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-family: inherit; }
+.permanent-leavebenefits .to-input-md { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px; font-family: inherit; }
+.permanent-leavebenefits .to-select-md { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px; font-family: inherit; background: #fff; cursor: pointer; }
+.permanent-leavebenefits .to-textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical; line-height: 1.6; }
+.permanent-leavebenefits .to-input-currency { width: 100%; padding: 10px 10px 10px 28px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px; font-family: inherit; }
+.permanent-leavebenefits .to-currency-symbol { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 13px; font-weight: 600; }
+
+.permanent-leavebenefits .to-select-box { min-height: 48px; width: 100%; border: 2px solid #e5e7eb; border-radius: 8px; padding: 6px 36px 6px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; cursor: pointer; background: #fff; position: relative; }
+.permanent-leavebenefits .to-placeholder { color: #9ca3af; font-size: 13px; padding: 4px 6px; }
+.permanent-leavebenefits .to-select-arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.permanent-leavebenefits .to-dropdown { position: absolute; top: 100%; left: 0; right: 0; z-index: 50; background: #fff; border: 2px solid #e5e7eb; border-radius: 8px; margin-top: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); overflow: hidden; }
+.permanent-leavebenefits .to-dropdown-search-wrap { padding: 8px; border-bottom: 1px solid #f3f4f6; }
+.permanent-leavebenefits .to-options-list { max-height: 210px; overflow-y: auto; }
+.permanent-leavebenefits .to-option-name { margin: 0; font-size: 13px; font-weight: 600; color: #0b044d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.permanent-leavebenefits .to-option-id { margin: 0; font-size: 11px; color: #9ca3af; }
+.permanent-leavebenefits .to-avatar-sm { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid #e5e7eb; }
+.permanent-leavebenefits .to-avatar-initials-sm { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #0b044d, #4338ca); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+
+.permanent-leavebenefits .companion-option { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; transition: background 0.15s; background: #fff; }
+.permanent-leavebenefits .companion-option:hover { background: #f7f6ff; }
+.permanent-leavebenefits .companion-option.selected { background: #f0f9ff; }
+.permanent-leavebenefits .companion-check { display: none; color: #0369a1; flex-shrink: 0; }
+
+.permanent-leavebenefits .to-companion-chip { display: inline-flex; align-items: center; gap: 6px; background: #eef2ff; border: 1px solid #d9d9ee; border-radius: 999px; padding: 3px 8px 3px 4px; font-size: 12px; font-weight: 600; color: #0b044d; }
+.permanent-leavebenefits .to-chip-avatar-img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
+.permanent-leavebenefits .to-chip-avatar-initials { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, #0b044d, #4338ca); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
+.permanent-leavebenefits .to-chip-remove { border: none; background: none; cursor: pointer; color: #6b7280; display: inline-flex; padding: 0; }
+
+.permanent-leavebenefits .to-modal-footer { border-top: 1px solid #e5e7eb; padding: 16px 24px; background: #f9fafb; }
+.permanent-leavebenefits .to-btn-pad-sm { padding: 10px 20px; }
+.permanent-leavebenefits .to-btn-submit { padding: 10px 24px; display: flex; align-items: center; gap: 8px; }
+.permanent-leavebenefits .to-btn-danger { background: #dc2626; }
+.permanent-leavebenefits .to-btn-primary-solid { background: #0b044d; color: #fff; border-color: #0b044d; }
+.permanent-leavebenefits .to-btn-accept { background: #15803d; border-color: #15803d; }
+.permanent-leavebenefits .to-btn-reject { background: #dc2626; border-color: #dc2626; }
+.permanent-leavebenefits .to-btn-empty-cta { margin-top: 12px; padding: 8px 16px; background: #0b044d; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
+.permanent-leavebenefits .to-select-inline { width: auto; padding: 6px 10px; font-size: 13px; }
+
+.permanent-leavebenefits .to-pill-amber { background: #fef3c7; color: #a16207; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 999px; }
+.permanent-leavebenefits .to-badge-awaiting { background: #ede9fe; color: #6d28d9; }
+.permanent-leavebenefits .to-badge-cancelled { background: #f3f4f6; color: #6b7280; }
+.permanent-leavebenefits .to-sort-icon { display: inline-block; vertical-align: middle; margin-left: 4px; }
+.permanent-leavebenefits .to-th-sort { cursor: pointer; }
+.permanent-leavebenefits .to-td-bold { font-size: 13px; color: #0b044d; font-weight: 700; }
+.permanent-leavebenefits .to-td-semibold { font-size: 13px; color: #0b044d; font-weight: 600; }
+.permanent-leavebenefits .to-td-muted { font-size: 13px; color: #6b6a8a; }
+.permanent-leavebenefits .to-td-duration { text-align: center; font-weight: 600; color: #0b044d; }
+.permanent-leavebenefits .to-empty-cell { text-align: center; padding: 40px; color: #6b6a8a; }
+.permanent-leavebenefits .to-empty-title { margin: 0; font-size: 14px; }
+.permanent-leavebenefits .to-companions-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
