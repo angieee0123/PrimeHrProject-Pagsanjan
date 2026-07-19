@@ -1,14 +1,14 @@
                 {{-- ── TABLE ── --}}
                 <div class="ddtr-table-card">
                     <div id="detailedDTRLoading" class="ddtr-loading">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9aa1b5" stroke-width="2.5" style="animation:spin 1s linear infinite">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9aa1b5" stroke-width="2.5" class="ddtr-spin">
                             <circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" opacity=".75"/>
                         </svg>
                         <p>Loading attendance records…</p>
                     </div>
 
                     <div class="ddtr-table-scroll">
-                        <table class="detailed-dtr-table" id="detailedDTRTable" style="display:none;">
+                        <table class="detailed-dtr-table ddtr-hidden" id="detailedDTRTable">
                             <thead>
                                 <tr>
                                     <th>Date</th>

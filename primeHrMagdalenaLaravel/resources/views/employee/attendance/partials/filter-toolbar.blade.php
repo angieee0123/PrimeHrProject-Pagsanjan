@@ -36,19 +36,19 @@
                             <div class="ddtr-dd-sep"></div>
                             <div class="ddtr-dd-section">By Status</div>
                             <button class="ddtr-dd-item" data-chip="present">
-                                <span class="ddtr-dd-dot" style="background:#2fa860"></span>Present
+                                <span class="ddtr-dd-dot tl-present"></span>Present
                             </button>
                             <button class="ddtr-dd-item" data-chip="absent">
-                                <span class="ddtr-dd-dot" style="background:#e5484d"></span>Absent
+                                <span class="ddtr-dd-dot tl-absent"></span>Absent
                             </button>
                             <button class="ddtr-dd-item" data-chip="late">
-                                <span class="ddtr-dd-dot" style="background:#eba417"></span>Late
+                                <span class="ddtr-dd-dot tl-late"></span>Late
                             </button>
                             <button class="ddtr-dd-item" data-chip="leave">
-                                <span class="ddtr-dd-dot" style="background:#4F7CFF"></span>On Leave
+                                <span class="ddtr-dd-dot tl-leave"></span>On Leave
                             </button>
                             <button class="ddtr-dd-item" data-chip="incomplete">
-                                <span class="ddtr-dd-dot" style="background:#7C5CFF"></span>Incomplete
+                                <span class="ddtr-dd-dot tl-review"></span>Incomplete
                             </button>
                         </div>
                     </div>
