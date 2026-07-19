@@ -60,42 +60,12 @@
 @include('admin.personnel.modals.bulkImportModal')
 
 @push('scripts')
-@if(session('success'))
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('successMessage').textContent = "{{ session('success') }}";
-    document.getElementById('successModal').style.display = 'flex';
-    if (document.getElementById('employeeWizardModal')) {
-        document.getElementById('employeeWizardModal').style.display = 'none';
-    }
-});
+    window.personnelFlash = {
+        success: @json(session('success')),
+        error: @json(session('error')),
+        activeTab: @json(session('active_tab')),
+    };
 </script>
-@endif
-
-@if(session('error'))
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('errorMessage').textContent = "{{ session('error') }}";
-    document.getElementById('errorModal').style.display = 'flex';
-});
-</script>
-@endif
-
-@if(session('active_tab') === 'schedules')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-    const schedulesTabBtn = document.querySelector('.tab-btn[data-tab="schedules"]');
-    const schedulesTabContent = document.getElementById('schedules');
-
-    if (schedulesTabBtn && schedulesTabContent) {
-        schedulesTabBtn.classList.add('active');
-        schedulesTabContent.classList.add('active');
-    }
-});
-</script>
-@endif
 @endpush
 @endsection

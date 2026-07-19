@@ -1,5 +1,37 @@
 // Admin Personnel Page Scripts
 
+// Session flash handling — window.personnelFlash is set by an inline script
+// in adminPersonnel.blade.php (@json(session('success' | 'error' | 'active_tab'))).
+document.addEventListener('DOMContentLoaded', function() {
+    const flash = window.personnelFlash || {};
+
+    if (flash.success) {
+        document.getElementById('successMessage').textContent = flash.success;
+        document.getElementById('successModal').style.display = 'flex';
+        if (document.getElementById('employeeWizardModal')) {
+            document.getElementById('employeeWizardModal').style.display = 'none';
+        }
+    }
+
+    if (flash.error) {
+        document.getElementById('errorMessage').textContent = flash.error;
+        document.getElementById('errorModal').style.display = 'flex';
+    }
+
+    if (flash.activeTab === 'schedules') {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+        const schedulesTabBtn = document.querySelector('.tab-btn[data-tab="schedules"]');
+        const schedulesTabContent = document.getElementById('schedules');
+
+        if (schedulesTabBtn && schedulesTabContent) {
+            schedulesTabBtn.classList.add('active');
+            schedulesTabContent.classList.add('active');
+        }
+    }
+});
+
 // Tab switching functionality
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
