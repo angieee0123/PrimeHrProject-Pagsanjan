@@ -80,7 +80,6 @@ export default defineConfig({
                 'resources/js/admin/deductions/assignDeductionModal.js',
                 'resources/js/admin/deductions/assignDeductionScheduleModal.js',
                 'resources/js/admin/deductions/editEmployeeDeductionModal.js',
-                'resources/js/admin/deductions/editScheduleModal.js',
                 'resources/js/admin/deductions/employee-deductions.js',
                 'resources/js/admin/deductions/loan-types.js',
                 'resources/js/admin/deductions/loans.js',
