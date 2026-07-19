@@ -3,7 +3,7 @@
 @section('title', 'Attendance · PRIME HRIS')
 
 @push('styles')
-    @vite('resources/css/employeeAttendance.css')
+    @vite('resources/css/employee/employeeAttendance.css')
 @endpush
 
 @section('content')
@@ -55,7 +55,7 @@
         employeeId: @json($employee->employee_id),
     };
 </script>
-    @vite('resources/js/employeeAttendance.js')
+    @vite('resources/js/employee/employeeAttendance.js')
 @endpush
 
 @include('employee.chatbot.employeeChatbot')

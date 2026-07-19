@@ -3,7 +3,7 @@
 @section('title', 'Dashboard · PRIME HRIS')
 
 @push('styles')
-    @vite('resources/css/employeeDashboard.css')
+    @vite('resources/css/employee/employeeDashboard.css')
 @endpush
 
 @section('content')
@@ -117,5 +117,5 @@
         salary:     @json($chartData['salary']),
     };
 </script>
-@vite('resources/js/employeeDashboard.js')
+@vite('resources/js/employee/employeeDashboard.js')
 @endpush

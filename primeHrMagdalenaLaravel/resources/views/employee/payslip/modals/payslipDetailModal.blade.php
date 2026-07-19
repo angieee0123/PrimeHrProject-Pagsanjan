@@ -154,5 +154,5 @@
 </x-modal>
 
 @push('styles')
-    @vite('resources/css/employeePayslip.css')
+    @vite('resources/css/employee/employeePayslip.css')
 @endpush

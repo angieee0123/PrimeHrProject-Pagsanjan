@@ -37,7 +37,7 @@
 @include('employee.payslip.modals.payslipDetailModal')
 
 @push('scripts')
-    @vite('resources/js/employeePayslip.js')
+    @vite('resources/js/employee/employeePayslip.js')
 @endpush
 
 @endsection
