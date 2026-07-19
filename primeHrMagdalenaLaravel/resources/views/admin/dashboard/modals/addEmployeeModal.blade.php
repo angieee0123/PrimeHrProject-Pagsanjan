@@ -98,5 +98,5 @@
 </div>
 
 @push('scripts')
-    @vite('resources/js/dashboard/addEmployeeModal.js')
+    @vite('resources/js/admin/dashboard/addEmployeeModal.js')
 @endpush

@@ -15,5 +15,5 @@
 </div>
 
 @push('scripts')
-    @vite('resources/js/dashboard/viewEmployeeDashboardModal.js')
+    @vite('resources/js/admin/dashboard/viewEmployeeDashboardModal.js')
 @endpush

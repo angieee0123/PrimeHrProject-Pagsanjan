@@ -59,5 +59,5 @@
 </x-modal>
 
 @push('scripts')
-    @vite('resources/js/travelOrder/viewTravelOrderModal.js')
+    @vite('resources/js/admin/travelOrder/viewTravelOrderModal.js')
 @endpush

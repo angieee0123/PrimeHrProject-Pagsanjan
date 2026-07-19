@@ -89,5 +89,5 @@
 </section>
 
 @push('scripts')
-    @vite('resources/js/travelOrder/approved-orders-tab.js')
+    @vite('resources/js/admin/travelOrder/approved-orders-tab.js')
 @endpush

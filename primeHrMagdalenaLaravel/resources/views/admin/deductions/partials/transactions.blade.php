@@ -1,4 +1,4 @@
-<div id="transactions-tab" style="display: none;">
+<div id="transactions-tab" class="ded-hidden">
 <section class="table-section">
     <div class="table-header">
         <div>
@@ -20,7 +20,7 @@
             </tr>
         </thead>
             <tr>
-                <td colspan="6" style="text-align: center; padding: 40px; color: #8f8daf;">
+                <td colspan="6" class="ded-empty-cell">
                     No transactions found. Transactions will appear here after processing payroll.
                 </td>
             </tr>

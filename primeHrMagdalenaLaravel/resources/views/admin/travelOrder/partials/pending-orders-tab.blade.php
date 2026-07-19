@@ -106,5 +106,5 @@
 </section>
 
 @push('scripts')
-    @vite('resources/js/travelOrder/pending-orders-tab.js')
+    @vite('resources/js/admin/travelOrder/pending-orders-tab.js')
 @endpush

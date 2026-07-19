@@ -87,5 +87,5 @@
 </section>
 
 @push('scripts')
-    @vite('resources/js/travelOrder/disapproved-orders-tab.js')
+    @vite('resources/js/admin/travelOrder/disapproved-orders-tab.js')
 @endpush

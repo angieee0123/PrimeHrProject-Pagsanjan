@@ -1,0 +1,657 @@
+/* ══════════ Deductions — Shared Modal System ══════════
+   Used by every modal in admin/deductions/modals/*.blade.php. Previously each
+   modal file redeclared this block itself (editDeductionTypeModal and
+   editLoanTypeModal already relied on a sibling modal's copy instead of
+   redeclaring it — the duplication was accidental, not by design), and being
+   inline <style> tags, the LAST one to render in the DOM won the cascade for
+   the whole page regardless of which file it came from. Consolidating here
+   preserves that already-in-effect behavior (assignDeductionModal rendered
+   last, so its values — max-width:600px, .form-group margin-bottom:16px — are
+   what actually applied to every modal already) while removing the fragile
+   implicit dependency. */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(11, 4, 77, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-container {
+    background: #fff;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(11, 4, 77, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 24px;
+    border-bottom: 1px solid #f2f1fb;
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0b044d;
+    margin: 0 0 4px 0;
+}
+
+.modal-subtitle {
+    font-size: 12px;
+    color: #56547a;
+    margin: 0;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: #56547a;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: #f7f6fc;
+    color: #0b044d;
+}
+
+.modal-body {
+    padding: 24px;
+    max-height: calc(90vh - 140px);
+    overflow-y: auto;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.form-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #0b044d;
+    margin-bottom: 6px;
+}
+
+.form-input {
+    padding: 10px 12px;
+    border: 1px solid #e5e3f8;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #0b044d;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #0b044d;
+    box-shadow: 0 0 0 3px rgba(11, 4, 77, 0.1);
+}
+
+.form-input::placeholder {
+    color: #b3b1c8;
+}
+
+.field-hint {
+    font-size: 11px;
+    color: #56547a;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+textarea.form-input {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #f2f1fb;
+}
+
+.btn-cancel {
+    padding: 10px 20px;
+    border: 1px solid #e5e3f8;
+    background: #fff;
+    color: #56547a;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-cancel:hover {
+    background: #f7f6fc;
+    border-color: #0b044d;
+    color: #0b044d;
+}
+
+.btn-submit {
+    padding: 10px 20px;
+    border: none;
+    background: #0b044d;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-submit:hover {
+    background: #150c63;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(11, 4, 77, 0.3);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+    }
+}
+
+/* ══════════ assignDeductionModal — checkbox list ══════════ */
+.checkbox-group {
+    border: 1px solid #e5e3f8;
+    border-radius: 6px;
+    padding: 12px;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.checkbox-category {
+    margin-bottom: 16px;
+}
+
+.checkbox-category:last-child {
+    margin-bottom: 0;
+}
+
+.category-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #0b044d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #f2f1fb;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    margin-bottom: 4px;
+}
+
+.checkbox-label:hover {
+    background: #f7f6fc;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #0b044d;
+}
+
+.checkbox-text {
+    font-size: 13px;
+    color: #0b044d;
+    user-select: none;
+}
+
+.warning-box {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: #fff8e1;
+    border: 1px solid #ffd54f;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #56547a;
+}
+
+.warning-box svg {
+    color: #f9a825;
+}
+
+.checkbox-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: #0b044d;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-link:hover {
+    background: #f7f6fc;
+}
+
+/* ══════════ editEmployeeDeductionModal ══════════ */
+.ded-info-box {
+    background: #f7f6fc;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.ded-info-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.ded-info-row + .ded-info-row {
+    margin-top: 4px;
+}
+
+.ded-info-label {
+    font-size: 11px;
+    color: #56547a;
+    font-weight: 600;
+}
+
+.ded-info-value {
+    font-size: 13px;
+    color: #0b044d;
+    font-weight: 600;
+}
+
+/* ══════════ editScheduleModal ══════════
+   Not @include'd anywhere in adminDeductions.blade.php — dead code left over
+   from an earlier iteration (assignDeductionScheduleModal replaced it). Kept
+   here (unreachable, same as before) rather than deleted since removal wasn't
+   requested. */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    border: 2px solid #e5e3f8;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.radio-label:hover {
+    border-color: #0b044d;
+    background: #f7f6fc;
+}
+
+.radio-label input[type="radio"] {
+    margin-top: 2px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #0b044d;
+    flex-shrink: 0;
+}
+
+.radio-label input[type="radio"]:checked + .radio-content {
+    color: #0b044d;
+}
+
+.radio-label:has(input[type="radio"]:checked) {
+    border-color: #0b044d;
+    background: #f7f6fc;
+}
+
+.radio-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.radio-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0b044d;
+}
+
+.radio-desc {
+    font-size: 12px;
+    color: #56547a;
+}
+
+@media (max-width: 768px) {
+    .radio-label {
+        padding: 12px;
+    }
+}
+
+/* ══════════ assignDeductionScheduleModal ══════════ */
+.deduction-schedule-item {
+    background: #fff;
+    border: 1.5px solid #ecebf6;
+    border-radius: 8px;
+    padding: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.deduction-schedule-item:hover {
+    border-color: #0b044d;
+    box-shadow: 0 2px 8px rgba(11, 4, 77, 0.1);
+}
+
+.deduction-info {
+    flex: 1;
+}
+
+.deduction-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0b044d;
+    margin: 0 0 4px 0;
+}
+
+.deduction-details {
+    font-size: 11px;
+    color: #8f8daf;
+    margin: 0;
+}
+
+.cutoff-selector {
+    display: flex;
+    gap: 8px;
+}
+
+.cutoff-radio {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1.5px solid #ecebf6;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 12px;
+    font-weight: 600;
+    color: #56547a;
+}
+
+.cutoff-radio:hover {
+    border-color: #0b044d;
+    background: #f7f6fc;
+}
+
+.cutoff-radio input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #0b044d;
+}
+
+.cutoff-radio input[type="radio"]:checked + span {
+    color: #0b044d;
+}
+
+.cutoff-radio:has(input[type="radio"]:checked) {
+    border-color: #0b044d;
+    background: #f7f6fc;
+    color: #0b044d;
+}
+
+.schedule-history-item {
+    background: #fff;
+    border: 1px solid #ecebf6;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.schedule-history-item:last-child {
+    margin-bottom: 0;
+}
+
+.schedule-period {
+    font-weight: 600;
+    color: #0b044d;
+    margin-bottom: 4px;
+}
+
+.schedule-details {
+    color: #56547a;
+    font-size: 11px;
+}
+
+.schedule-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.schedule-status.active {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.schedule-status.past {
+    background: #f5f5f5;
+    color: #757575;
+}
+
+.schedule-status.future {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+#deductionsList::-webkit-scrollbar,
+#scheduleHistoryList::-webkit-scrollbar {
+    width: 8px;
+}
+
+#deductionsList::-webkit-scrollbar-track,
+#scheduleHistoryList::-webkit-scrollbar-track {
+    background: #f7f6fc;
+    border-radius: 10px;
+}
+
+#deductionsList::-webkit-scrollbar-thumb,
+#scheduleHistoryList::-webkit-scrollbar-thumb {
+    background: #c5c3e0;
+    border-radius: 10px;
+    transition: background 0.2s;
+}
+
+#deductionsList::-webkit-scrollbar-thumb:hover,
+#scheduleHistoryList::-webkit-scrollbar-thumb:hover {
+    background: #0b044d;
+}
+
+#deductionsList {
+    position: relative;
+}
+
+#deductionsList::after {
+    content: '';
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(to top, #f7f6fc, transparent);
+    pointer-events: none;
+    display: block;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.ded-sched-panel { padding: 24px; overflow-y: auto; flex: 1; max-height: calc(90vh - 200px); }
+.ded-sched-block { margin-bottom: 20px; }
+.ded-sched-label { display: block; font-size: 12px; font-weight: 600; color: #0b044d; margin-bottom: 8px; }
+.ded-sched-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ded-sched-sublabel { display: block; font-size: 11px; font-weight: 600; color: #56547a; margin-bottom: 6px; }
+.ded-sched-input { width: 100%; padding: 10px 12px; border: 1.5px solid #ecebf6; border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; color: #0b044d; background: #fff; box-sizing: border-box; }
+.ded-sched-history-section { display: none; margin-bottom: 20px; }
+.ded-sched-history-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.ded-sched-history-label { font-size: 12px; font-weight: 600; color: #0b044d; }
+.ded-sched-toggle-btn { background: transparent; border: none; color: #0b044d; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.ded-sched-history-list { display: none; background: #f7f6fc; border: 1.5px solid #ecebf6; border-radius: 8px; padding: 12px; max-height: 200px; overflow-y: auto; }
+.ded-sched-deductions-box { background: #f7f6fc; border: 1.5px solid #ecebf6; border-radius: 10px; padding: 16px; margin-bottom: 20px; }
+.ded-sched-deductions-label { margin: 0 0 12px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #8f8daf; }
+.ded-sched-deductions-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding-right: 8px; }
+.ded-sched-loading { margin: 0; font-size: 13px; color: #8f8daf; text-align: center; padding: 20px; }
+.ded-sched-note-box { border-radius: 10px; padding: 12px; display: flex; align-items: start; gap: 10px; margin-bottom: 16px; }
+.ded-sched-note-box.is-green { background: #e8f5e9; border: 1.5px solid #a5d6a7; }
+.ded-sched-note-box.is-gold { background: #fbf6e3; border: 1.5px solid #ecdca4; }
+.ded-sched-note-icon { flex-shrink: 0; margin-top: 2px; }
+.ded-sched-note-text { margin: 0; font-size: 12px; line-height: 1.5; }
+.ded-sched-note-text.is-green { color: #1b5e20; }
+.ded-sched-note-text.is-gold { color: #c9a227; }
+.ded-sched-footer { padding: 16px 24px; border-top: 1px solid #f2f1fb; display: flex; justify-content: flex-end; gap: 10px; }
+.ded-sched-btn-cancel { padding: 10px 24px; background: #fff; border: 1.5px solid #ecebf6; border-radius: 8px; font-size: 13px; font-weight: 600; color: #56547a; cursor: pointer; font-family: 'Poppins', sans-serif; }
+.ded-sched-btn-submit { padding: 10px 24px; background: #0b044d; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 8px; }
+.ded-deduction-badge-inline { display: inline-block; padding: 2px 8px; background: #f2f1fb; border-radius: 4px; font-size: 10px; font-weight: 600; color: #0b044d; margin-right: 6px; }
+
+/* ══════════ Page-wide utility classes (replacing inline style="") ══════════ */
+.ded-mb-20 { margin-bottom: 20px; }
+.ded-icon-wrap-blue { background: #0b044d18; color: #0b044d; }
+.ded-icon-wrap-gold { background: #c9a22718; color: #c9a227; }
+.ded-icon-wrap-red { background: #8e1e1818; color: #8e1e18; }
+.ded-icon-wrap-green { background: #15803d18; color: #15803d; }
+.ded-dot-blue { background: #0b044d; }
+.ded-dot-gold { background: #c9a227; }
+.ded-dot-red { background: #8e1e18; }
+.ded-dot-green { background: #15803d; }
+.ded-stat-value-sm { font-size: 18px; }
+.ded-filter-contents { display: contents; }
+.ded-hidden { display: none; }
+.ded-required { color: #8e1e18; }
+.ded-col { flex: 1; }
+.ded-col-2 { flex: 2; }
+.ded-btn-sm { padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px; }
+.ded-readonly-input { background: #f7f6fc; cursor: not-allowed; }
+.ded-field-note { font-size: 11px; color: #56547a; margin: 4px 0 0 0; }
+.ded-field-hint-hidden { font-size: 11px; color: #56547a; margin: 4px 0 0 0; display: none; }
+.ded-uppercase { text-transform: uppercase; }
+.ded-inline-note { display: block; margin-top: 6px; }
+.ded-info-banner { border-radius: 8px; padding: 12px; display: flex; align-items: start; gap: 10px; margin-top: 16px; }
+.ded-info-banner.is-blue { background: #e3f2fd; border: 1px solid #90caf9; }
+.ded-info-icon { flex-shrink: 0; margin-top: 2px; }
+.ded-info-text { margin: 0; font-size: 12px; line-height: 1.5; }
+.ded-info-text.is-blue { color: #0d47a1; }
+.ded-warn-box { display: none; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 12px; margin-top: 16px; }
+.ded-warn-body { display: flex; align-items: start; gap: 10px; }
+.ded-warn-text { margin: 0; font-size: 12px; color: #856404; line-height: 1.5; }
+.ded-avatar-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #ecebf6; }
+.ded-row-flex { display: flex; align-items: center; gap: 10px; }
+.ded-cell-title { font-weight: 600; color: #0b044d; margin: 0; font-size: 13px; }
+.ded-cell-sub { color: #8f8daf; margin: 0; font-size: 11px; }
+.ded-text-sm { font-size: 13px; color: #56547a; }
+.ded-text-muted-sm { font-size: 12px; color: #56547a; }
+.ded-text-faint-sm { font-size: 13px; color: #8f8daf; }
+.ded-empty-cell { text-align: center; padding: 40px; color: #8f8daf; }
+.ded-ellipsis { padding: 0 8px; color: #8f8daf; }
+.ded-actions { display: flex; gap: 6px; }
+.ded-danger-btn { color: #8e1e18; }
+.ded-disabled-btn { opacity: 0.3; cursor: not-allowed; }
+.ded-mono-code { font-family: 'Courier New', monospace; font-size: 12px; color: #56547a; background: #f7f6fc; padding: 4px 8px; border-radius: 4px; }
+.ded-min-w-120 { min-width: 120px; }
+.ded-min-w-16 { min-width: 16px; }
+.ded-progress-track { display: flex; flex-direction: column; gap: 4px; }
+.ded-progress-bar { width: 100%; height: 6px; background: #f2f1fb; border-radius: 3px; overflow: hidden; }
+.ded-progress-fill { height: 100%; transition: width 0.3s; }
+.ded-progress-pct { font-size: 11px; color: #56547a; }
+.ded-badge-count { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+.ded-badge-count.is-blue { background: #f2f1fb; color: #0b044d; }
+.ded-badge-count.is-gold { background: #fbf6e3; color: #c9a227; }
+.ded-footer-flex { display: flex; align-items: center; gap: 12px; }
+.ded-rows-select { width: auto; padding: 6px 10px; font-size: 13px; }
+.ded-selected-count { color: #56547a; font-weight: 400; margin-left: 8px; }
+.ded-existing-list { margin: 4px 0 0 0; font-size: 12px; }
+.ded-checkbox-value { color: #8f8daf; font-size: 11px; }
+.ded-checkbox-rate { color: #56547a; font-size: 11px; }
+.ded-badge-employee-share { background: #fff3e0; color: #e65100; }
+.ded-badge-employer-share { background: #e8f5e9; color: #2e7d32; }
+.ded-badge-active { background: #15803d18; color: #15803d; }
+.ded-badge-inactive { background: #56547a18; color: #56547a; }
+.ded-notice-banner { background: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: #1565c0; }
+.ded-notice-text { font-size: 13px; }
+.ded-notice-banner-teal { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: #1e40af; }

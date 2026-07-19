@@ -3,7 +3,7 @@
     <form id="addLoanForm" action="{{ route('admin.deductions.employee.store') }}" method="POST">
         @csrf
         <div class="form-group">
-            <label class="form-label">Employee <span style="color: #8e1e18;">*</span></label>
+            <label class="form-label">Employee <span class="ded-required">*</span></label>
             <select name="employee_id" class="form-input" required>
                 <option value="">Select Employee</option>
                 @foreach(\App\Models\Employee::with('employmentDetail.departmentRelation')->orderBy('last_name')->get() as $emp)
@@ -18,8 +18,8 @@
         </div>
 
         <div class="form-row">
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">Loan Type <span style="color: #8e1e18;">*</span></label>
+            <div class="form-group ded-col">
+                <label class="form-label">Loan Type <span class="ded-required">*</span></label>
                 <select name="deduction_type_id" id="loanProvider" class="form-input" required onchange="handleLoanTypeChange()">
                     <option value="">Select Loan Type</option>
                     @php
@@ -75,48 +75,48 @@
                     <option value="OTHER" data-provider="CUSTOM">Other (External Provider)</option>
                 </select>
             </div>
-            <div class="form-group" style="flex: 1;" id="loanProviderDisplay">
+            <div class="form-group ded-col" id="loanProviderDisplay">
                 <label class="form-label">Provider</label>
-                <input type="text" id="providerName" class="form-input" readonly placeholder="Select loan type first" style="background: #f7f6fc; cursor: not-allowed;">
+                <input type="text" id="providerName" class="form-input ded-readonly-input" readonly placeholder="Select loan type first">
             </div>
         </div>
 
-        <div class="form-row" id="otherProviderFields" style="display: none;">
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">Provider Name <span style="color: #8e1e18;">*</span></label>
+        <div class="form-row ded-hidden" id="otherProviderFields">
+            <div class="form-group ded-col">
+                <label class="form-label">Provider Name <span class="ded-required">*</span></label>
                 <input type="text" name="other_provider_name" id="otherProviderName" class="form-input" placeholder="e.g., SSS, Private Bank, Cooperative">
             </div>
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">Loan Description <span style="color: #8e1e18;">*</span></label>
+            <div class="form-group ded-col">
+                <label class="form-label">Loan Description <span class="ded-required">*</span></label>
                 <input type="text" name="other_loan_type" id="otherLoanType" class="form-input" placeholder="e.g., Personal Loan, Emergency Loan">
             </div>
         </div>
 
         <div class="form-row">
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">Total Loan Amount <span style="color: #8e1e18;">*</span></label>
+            <div class="form-group ded-col">
+                <label class="form-label">Total Loan Amount <span class="ded-required">*</span></label>
                 <input type="number" name="total_amount" id="loanTotalAmount" class="form-input" placeholder="e.g., 50000.00" step="0.01" min="0" required onchange="calculateLoanInstallment()">
-                <p id="maxAmountHint" style="font-size: 11px; color: #56547a; margin: 4px 0 0 0; display: none;"></p>
+                <p id="maxAmountHint" class="ded-field-hint-hidden"></p>
             </div>
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">Monthly Installment <span style="color: #8e1e18;">*</span></label>
+            <div class="form-group ded-col">
+                <label class="form-label">Monthly Installment <span class="ded-required">*</span></label>
                 <input type="number" name="installment_amount" id="loanInstallment" class="form-input" placeholder="e.g., 2500.00" step="0.01" min="0" required>
             </div>
         </div>
 
         <div class="form-row">
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">Start Date <span style="color: #8e1e18;">*</span></label>
+            <div class="form-group ded-col">
+                <label class="form-label">Start Date <span class="ded-required">*</span></label>
                 <input type="date" name="start_date" id="loanStartDate" class="form-input" required value="{{ date('Y-m-d') }}" onchange="calculateLoanInstallment()">
             </div>
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">End Date <span style="color: #8e1e18;">*</span></label>
+            <div class="form-group ded-col">
+                <label class="form-label">End Date <span class="ded-required">*</span></label>
                 <input type="date" name="end_date" id="loanEndDate" class="form-input" required onchange="calculateLoanInstallment()">
             </div>
         </div>
 
         <div class="form-group">
-            <label class="form-label">Status <span style="color: #8e1e18;">*</span></label>
+            <label class="form-label">Status <span class="ded-required">*</span></label>
             <select name="status" class="form-input" required>
                 <option value="ACTIVE">Active</option>
                 <option value="SUSPENDED">Suspended</option>
@@ -136,283 +136,6 @@
     </form>
 </x-modal-container>
 
-<style>
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(11, 4, 77, 0.4);
-    backdrop-filter: blur(4px);
-    z-index: 9999;
-    animation: fadeIn 0.2s ease;
-}
-
-.modal-overlay.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-container {
-    background: #fff;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(11, 4, 77, 0.3);
-    animation: slideUp 0.3s ease;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 24px;
-    border-bottom: 1px solid #f2f1fb;
-}
-
-.modal-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #0b044d;
-    margin: 0 0 4px 0;
-}
-
-.modal-subtitle {
-    font-size: 12px;
-    color: #56547a;
-    margin: 0;
-}
-
-.modal-close {
-    background: transparent;
-    border: none;
-    color: #56547a;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    transition: all 0.2s;
-}
-
-.modal-close:hover {
-    background: #f7f6fc;
-    color: #0b044d;
-}
-
-.modal-body {
-    padding: 24px;
-    max-height: calc(90vh - 140px);
-    overflow-y: auto;
-}
-
-.form-row {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 16px;
-}
-
-.form-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #0b044d;
-    margin-bottom: 6px;
-}
-
-.form-input {
-    padding: 10px 12px;
-    border: 1px solid #e5e3f8;
-    border-radius: 6px;
-    font-size: 13px;
-    color: #0b044d;
-    font-family: 'Poppins', sans-serif;
-    transition: all 0.2s;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: #0b044d;
-    box-shadow: 0 0 0 3px rgba(11, 4, 77, 0.1);
-}
-
-.form-input::placeholder {
-    color: #b3b1c8;
-}
-
-textarea.form-input {
-    resize: vertical;
-    min-height: 60px;
-}
-
-.form-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid #f2f1fb;
-}
-
-.btn-cancel {
-    padding: 10px 20px;
-    border: 1px solid #e5e3f8;
-    background: #fff;
-    color: #56547a;
-    font-size: 13px;
-    font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: 'Poppins', sans-serif;
-}
-
-.btn-cancel:hover {
-    background: #f7f6fc;
-    border-color: #0b044d;
-    color: #0b044d;
-}
-
-.btn-submit {
-    padding: 10px 20px;
-    border: none;
-    background: #0b044d;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: 'Poppins', sans-serif;
-}
-
-.btn-submit:hover {
-    background: #150c63;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(11, 4, 77, 0.3);
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@media (max-width: 768px) {
-    .form-row {
-        flex-direction: column;
-    }
-}
-</style>
-
-<script>
-function openAddLoanModal() {
-    document.getElementById('addLoanModal').classList.add('active');
-}
-
-function closeAddLoanModal(event) {
-    if (event && event.target !== event.currentTarget) return;
-    document.getElementById('addLoanModal').classList.remove('active');
-    document.getElementById('addLoanForm').reset();
-    document.getElementById('providerName').value = '';
-    document.getElementById('otherProviderFields').style.display = 'none';
-    document.getElementById('otherProviderName').removeAttribute('required');
-    document.getElementById('otherLoanType').removeAttribute('required');
-}
-
-function handleLoanTypeChange() {
-    const loanSelect = document.getElementById('loanProvider');
-    const selectedOption = loanSelect.options[loanSelect.selectedIndex];
-    const providerId = loanSelect.value;
-    const providerType = selectedOption.getAttribute('data-provider');
-    const providerNameInput = document.getElementById('providerName');
-    const otherProviderFields = document.getElementById('otherProviderFields');
-    const otherProviderName = document.getElementById('otherProviderName');
-    const otherLoanType = document.getElementById('otherLoanType');
-    const maxAmountHint = document.getElementById('maxAmountHint');
-    const totalAmountInput = document.getElementById('loanTotalAmount');
-
-    // Reset other provider fields
-    otherProviderFields.style.display = 'none';
-    otherProviderName.removeAttribute('required');
-    otherLoanType.removeAttribute('required');
-    maxAmountHint.style.display = 'none';
-    totalAmountInput.removeAttribute('max');
-
-    if (!providerId) {
-        providerNameInput.value = '';
-        return;
-    }
-
-    // Handle "Other" (external provider)
-    if (providerId === 'OTHER') {
-        providerNameInput.value = 'External Provider';
-        otherProviderFields.style.display = 'flex';
-        otherProviderName.setAttribute('required', 'required');
-        otherLoanType.setAttribute('required', 'required');
-        return;
-    }
-
-    // Set provider name based on data attribute
-    if (providerType) {
-        providerNameInput.value = providerType;
-    }
-
-    // Show loan constraints
-    const maxAmount = selectedOption.getAttribute('data-max-amount');
-    const interestRate = selectedOption.getAttribute('data-interest-rate');
-    const maxTerms = selectedOption.getAttribute('data-max-terms');
-
-    if (maxAmount && parseFloat(maxAmount) > 0) {
-        maxAmountHint.textContent = `Max loanable: ₱${parseFloat(maxAmount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-        maxAmountHint.style.display = 'block';
-        totalAmountInput.setAttribute('max', maxAmount);
-    }
-
-    if (interestRate && parseFloat(interestRate) > 0) {
-        maxAmountHint.textContent += ` | Interest: ${interestRate}%`;
-    }
-
-    if (maxTerms && parseInt(maxTerms) > 0) {
-        maxAmountHint.textContent += ` | Max terms: ${maxTerms} months`;
-    }
-}
-
-function calculateLoanInstallment() {
-    const totalAmount = parseFloat(document.getElementById('loanTotalAmount').value) || 0;
-    const startDate = document.getElementById('loanStartDate').value;
-    const endDate = document.getElementById('loanEndDate').value;
-
-    if (totalAmount > 0 && startDate && endDate) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const months = Math.round((end - start) / (1000 * 60 * 60 * 24 * 30));
-
-        if (months > 0) {
-            const installment = (totalAmount / months).toFixed(2);
-            document.getElementById('loanInstallment').value = installment;
-        }
-    }
-}
-</script>
+@push('scripts')
+    @vite('resources/js/admin/deductions/addLoanModal.js')
+@endpush

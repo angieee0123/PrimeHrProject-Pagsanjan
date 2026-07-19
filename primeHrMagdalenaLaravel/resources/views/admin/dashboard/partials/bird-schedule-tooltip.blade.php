@@ -25,5 +25,5 @@
 </div>
 
 @push('scripts')
-    @vite('resources/js/dashboard/bird-schedule-tooltip.js')
+    @vite('resources/js/admin/dashboard/bird-schedule-tooltip.js')
 @endpush

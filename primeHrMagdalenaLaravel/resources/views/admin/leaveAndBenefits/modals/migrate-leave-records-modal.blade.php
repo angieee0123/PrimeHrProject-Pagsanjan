@@ -113,5 +113,5 @@
 </x-modal>
 
 @push('scripts')
-    @vite('resources/js/leaveAndBenefits/migrate-leave-records-modal.js')
+    @vite('resources/js/admin/leaveAndBenefits/migrate-leave-records-modal.js')
 @endpush

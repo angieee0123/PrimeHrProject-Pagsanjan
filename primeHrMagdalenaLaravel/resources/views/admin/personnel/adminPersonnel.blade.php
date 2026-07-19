@@ -5,7 +5,7 @@
 @endpush
 
 @push('scripts')
-    @vite('resources/js/personnel/adminPersonnel.js')
+    @vite('resources/js/admin/personnel/adminPersonnel.js')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 @endpush
 

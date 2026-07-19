@@ -49,7 +49,7 @@
     window.dashboardChartData = @json($chartData);
     window.perfPeriods = { month: @json($perfPeriodMonth), week: @json($perfPeriodWeek) };
 </script>
-    @vite('resources/js/dashboard/adminDashboard.js')
+    @vite('resources/js/admin/dashboard/adminDashboard.js')
 @endpush
 
 

@@ -22,5 +22,5 @@
 
 {{-- Also drives the attendance trend chart card (#attendanceChart) — the two share initCharts(). --}}
 @push('scripts')
-    @vite('resources/js/dashboard/charts.js')
+    @vite('resources/js/admin/dashboard/charts.js')
 @endpush

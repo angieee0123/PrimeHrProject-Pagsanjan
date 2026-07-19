@@ -362,5 +362,5 @@
 </style>
 
 @push('scripts')
-    @vite('resources/js/personnel/bulkAssignSchedule.js')
+    @vite('resources/js/admin/personnel/bulkAssignSchedule.js')
 @endpush

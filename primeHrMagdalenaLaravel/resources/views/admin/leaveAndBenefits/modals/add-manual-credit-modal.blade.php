@@ -87,5 +87,5 @@
 </x-modal-container>
 
 @push('scripts')
-    @vite('resources/js/leaveAndBenefits/add-manual-credit-modal.js')
+    @vite('resources/js/admin/leaveAndBenefits/add-manual-credit-modal.js')
 @endpush

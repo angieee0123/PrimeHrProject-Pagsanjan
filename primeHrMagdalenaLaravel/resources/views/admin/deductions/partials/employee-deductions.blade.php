@@ -1,4 +1,4 @@
-<div id="employee-deductions-tab" style="display: none;">
+<div id="employee-deductions-tab" class="ded-hidden">
 <section class="table-section">
     <div class="table-header">
         <div>
@@ -6,7 +6,7 @@
             <p class="table-sub">Municipal Government of Pagsanjan · Assign and manage deductions for employees</p>
         </div>
         <div class="table-actions">
-            <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAssignDeductionModal()">
+            <button class="modal-btn-primary ded-btn-sm" onclick="openAssignDeductionModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="12" y1="5" x2="12" y2="19"/>
                     <line x1="5" y1="12" x2="19" y2="12"/>
@@ -38,31 +38,31 @@
                     data-type="{{ $deduction->deductionType->category }}" 
                     data-status="{{ $deduction->status }}">
                     <td>
-                        <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="ded-row-flex">
                             @if($deduction->employee->photo)
-                                <img src="{{ $deduction->employee->photo }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
+                                <img src="{{ $deduction->employee->photo }}" class="ded-avatar-img">
                             @else
-                                <div class="avatar" style="background: {{ $avatarColors[($deduction->employee_id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #ecebf6;">
+                                <div class="avatar ded-avatar-img" style="background: {{ $avatarColors[($deduction->employee_id ?? 0) % count($avatarColors)] }}; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px;">
                                     {{ getInitials($deduction->employee->first_name . ' ' . $deduction->employee->last_name) }}
                                 </div>
                             @endif
                             <div>
-                                <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">
+                                <p class="ded-cell-title">
                                     {{ $deduction->employee->first_name }} {{ $deduction->employee->last_name }}
                                 </p>
-                                <p style="color: #8f8daf; margin: 0; font-size: 11px;">ID: {{ $deduction->employee->employee_id }}</p>
+                                <p class="ded-cell-sub">ID: {{ $deduction->employee->employee_id }}</p>
                             </div>
                         </div>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #56547a;">
+                        <span class="ded-text-muted-sm">
                             {{ $deduction->employee->employmentDetail->departmentRelation->name ?? 'N/A' }}
                         </span>
                     </td>
                     <td>
                         <div>
-                            <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">{{ $deduction->deductionType->name }}</p>
-                            <p style="color: #8f8daf; margin: 0; font-size: 11px;">{{ $deduction->deductionType->code }}</p>
+                            <p class="ded-cell-title">{{ $deduction->deductionType->name }}</p>
+                            <p class="ded-cell-sub">{{ $deduction->deductionType->code }}</p>
                         </div>
                     </td>
                     <td>
@@ -81,24 +81,24 @@
                     <td>
                         @if($deduction->deductionType->category === 'LOAN')
                             <div>
-                                <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">
+                                <p class="ded-cell-title">
                                     ₱{{ number_format($deduction->remaining_balance ?? 0, 2) }}
                                 </p>
-                                <p style="color: #8f8daf; margin: 0; font-size: 11px;">
+                                <p class="ded-cell-sub">
                                     of ₱{{ number_format($deduction->total_amount ?? 0, 2) }}
                                 </p>
                             </div>
                         @elseif($deduction->deductionType->computation_type === 'PERCENTAGE')
-                            <span style="font-size: 13px; color: #56547a;">
+                            <span class="ded-text-sm">
                                 {{ $deduction->deductionType->percentage_rate }}% 
                                 @if($deduction->deductionType->max_amount)
                                     (max ₱{{ number_format($deduction->deductionType->max_amount, 2) }})
                                 @endif
                             </span>
                         @elseif($deduction->amount)
-                            <span style="font-size: 13px; color: #56547a;">₱{{ number_format($deduction->amount, 2) }}</span>
+                            <span class="ded-text-sm">₱{{ number_format($deduction->amount, 2) }}</span>
                         @else
-                            <span style="font-size: 13px; color: #8f8daf;">Auto-computed</span>
+                            <span class="ded-text-faint-sm">Auto-computed</span>
                         @endif
                     </td>
                     <td>
@@ -123,19 +123,19 @@
                             }
                         @endphp
                         <div>
-                            <p style="font-weight: 600; color: {{ $scheduleColor }}; margin: 0; font-size: 13px;">
+                            <p style="color: {{ $scheduleColor }};" class="ded-cell-title">
                                 {{ $scheduleDisplay }}
                             </p>
-                            <p style="color: #8f8daf; margin: 0; font-size: 11px;">{{ $cutoffSchedule }}</p>
+                            <p class="ded-cell-sub">{{ $cutoffSchedule }}</p>
                         </div>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #56547a;">
+                        <span class="ded-text-muted-sm">
                             {{ \Carbon\Carbon::parse($deduction->start_date)->format('M d, Y') }}
                         </span>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #56547a;">
+                        <span class="ded-text-muted-sm">
                             {{ $deduction->end_date ? \Carbon\Carbon::parse($deduction->end_date)->format('M d, Y') : 'Ongoing' }}
                         </span>
                     </td>
@@ -153,14 +153,14 @@
                         </span>
                     </td>
                     <td>
-                        <div style="display: flex; gap: 6px;">
+                        <div class="ded-actions">
                             <button class="action-btn" onclick="editEmployeeDeduction({{ $deduction->id }})" title="Edit">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                                 </svg>
                             </button>
-                            <button class="action-btn" onclick="deleteEmployeeDeduction({{ $deduction->id }}, '{{ $deduction->employee->first_name }} {{ $deduction->employee->last_name }}', '{{ $deduction->deductionType->name }}')" title="Delete" style="color: #8e1e18;">
+                            <button class="action-btn ded-danger-btn" onclick="deleteEmployeeDeduction({{ $deduction->id }}, '{{ $deduction->employee->first_name }} {{ $deduction->employee->last_name }}', '{{ $deduction->deductionType->name }}')" title="Delete">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <polyline points="3 6 5 6 21 6"/>
                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -171,7 +171,7 @@
                 </tr>
             @empty
                 <tr id="noDataRow">
-                    <td colspan="10" style="text-align: center; padding: 40px; color: #8f8daf;">
+                    <td colspan="10" class="ded-empty-cell">
                         No employee deductions found. Click "Assign Deduction" to add.
                     </td>
                 </tr>
@@ -181,9 +181,9 @@
 </div>
 
     <div class="table-footer">
-        <div style="display:flex;align-items:center;gap:12px;">
+        <div class="ded-footer-flex">
             <p id="employeeDeductionsFooter">Showing <strong id="deductionRowStart">1</strong>-<strong id="deductionRowEnd">{{ min(10, $employeeDeductions->count()) }}</strong> of <strong id="deductionRowTotal">{{ $employeeDeductions->count() }}</strong> records</p>
-            <select id="deductionRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changeDeductionRowsPerPage()">
+            <select id="deductionRowsPerPage" class="filter-select ded-rows-select" onchange="changeDeductionRowsPerPage()">
                 <option value="10">10 rows</option>
                 <option value="25">25 rows</option>
                 <option value="50">50 rows</option>
@@ -194,180 +194,8 @@
     </div>
 </section>
 
-<script>
-window._deductionCurrentPage = 1;
-window._deductionRowsPerPage = 10;
-
-function filterEmployeeDeductions() {
-    const searchTerm = document.getElementById('searchEmployee').value.toLowerCase();
-    const typeFilter = document.getElementById('filterType').value;
-    const statusFilter = document.getElementById('filterStatus').value;
-    const rows = document.querySelectorAll('#employeeDeductionsTableBody tr:not(#noDataRow)');
-    
-    const filtered = [];
-    
-    rows.forEach(row => {
-        const employeeName = row.dataset.employee || '';
-        const type = row.dataset.type || '';
-        const status = row.dataset.status || '';
-        
-        const matchesSearch = employeeName.includes(searchTerm);
-        const matchesType = !typeFilter || type === typeFilter;
-        const matchesStatus = !statusFilter || status === statusFilter;
-        
-        if (matchesSearch && matchesType && matchesStatus) {
-            filtered.push(row);
-        }
-    });
-    
-    window._deductionFilteredRows = filtered;
-    window._deductionCurrentPage = 1;
-    updateDeductionPagination();
-}
-
-window.updateDeductionPagination = function () {
-    const rows = window._deductionFilteredRows || [];
-    const total = rows.length;
-    const perPage = window._deductionRowsPerPage;
-    const totalPages = Math.ceil(total / perPage) || 1;
-    const page = Math.min(window._deductionCurrentPage, totalPages);
-    window._deductionCurrentPage = page;
-    
-    const start = (page - 1) * perPage;
-    const end = Math.min(start + perPage, total);
-    
-    document.querySelectorAll('#employeeDeductionsTableBody tr:not(#noDataRow)').forEach(row => row.style.display = 'none');
-    rows.forEach((row, i) => { if (i >= start && i < end) row.style.display = ''; });
-    
-    document.getElementById('deductionRowStart').textContent = total ? start + 1 : 0;
-    document.getElementById('deductionRowEnd').textContent = end;
-    document.getElementById('deductionRowTotal').textContent = total;
-    
-    // Show/hide no data row
-    const noDataRow = document.getElementById('noDataRow');
-    if (noDataRow) {
-        noDataRow.style.display = total === 0 ? '' : 'none';
-    }
-    
-    const controls = document.getElementById('deductionPaginationControls');
-    if (totalPages <= 1) { controls.innerHTML = ''; return; }
-    
-    let html = '';
-    const maxVisible = 5;
-    let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-    if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
-    
-    if (page > 1) html += '<button class="page-btn" onclick="goToDeductionPage(' + (page - 1) + ')">‹</button>';
-    if (startPage > 1) {
-        html += '<button class="page-btn" onclick="goToDeductionPage(1)">1</button>';
-        if (startPage > 2) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
-    }
-    for (let i = startPage; i <= endPage; i++) {
-        html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToDeductionPage(' + i + ')">' + i + '</button>';
-    }
-    if (endPage < totalPages) {
-        if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
-        html += '<button class="page-btn" onclick="goToDeductionPage(' + totalPages + ')">' + totalPages + '</button>';
-    }
-    if (page < totalPages) html += '<button class="page-btn" onclick="goToDeductionPage(' + (page + 1) + ')">›</button>';
-    
-    controls.innerHTML = html;
-};
-
-window.goToDeductionPage = function (page) {
-    window._deductionCurrentPage = page;
-    updateDeductionPagination();
-};
-
-window.changeDeductionRowsPerPage = function () {
-    window._deductionRowsPerPage = parseInt(document.getElementById('deductionRowsPerPage').value) || 10;
-    window._deductionCurrentPage = 1;
-    updateDeductionPagination();
-};
-
-// Initialize pagination on page load
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('employeeDeductionsTableBody')) {
-        filterEmployeeDeductions();
-    }
-});
-
-function editEmployeeDeduction(id) {
-    // Fetch deduction data
-    fetch(`/admin/deductions/employee/${id}`)
-        .then(response => response.json())
-        .then(data => {
-            // Set form action
-            document.getElementById('editEmployeeDeductionForm').action = `/admin/deductions/employee/${id}`;
-            
-            // Populate basic fields
-            document.getElementById('editDeductionId').value = data.id;
-            document.getElementById('editStartDate').value = data.start_date;
-            document.getElementById('editEndDate').value = data.end_date || '';
-            document.getElementById('editStatus').value = data.status;
-            document.getElementById('editRemarks').value = data.remarks || '';
-            
-            // Show employee and deduction type info
-            document.getElementById('editEmployeeName').textContent = `${data.employee.first_name} ${data.employee.last_name}`;
-            document.getElementById('editDeductionType').textContent = data.deduction_type.name;
-            
-            // Hide all conditional fields first
-            document.getElementById('editLoanFields').style.display = 'none';
-            document.getElementById('editInstallmentField').style.display = 'none';
-            document.getElementById('editFixedAmountField').style.display = 'none';
-            
-            // Show relevant fields based on deduction type
-            if (data.deduction_type.category === 'LOAN') {
-                // Show loan fields
-                document.getElementById('editLoanFields').style.display = 'flex';
-                document.getElementById('editInstallmentField').style.display = 'block';
-                document.getElementById('editTotalAmount').value = data.total_amount || '';
-                document.getElementById('editRemainingBalance').value = data.remaining_balance || '';
-                document.getElementById('editInstallmentAmount').value = data.installment_amount || '';
-            } else if (data.deduction_type.computation_type === 'FIXED' && data.amount) {
-                // Show fixed amount field for non-loan fixed deductions
-                document.getElementById('editFixedAmountField').style.display = 'block';
-                document.getElementById('editAmount').value = data.amount || '';
-            }
-            
-            // Open modal
-            openEditEmployeeDeductionModal();
-        })
-        .catch(error => {
-            console.error('Error fetching deduction:', error);
-            alert('Failed to load deduction data.');
-        });
-}
-
-function deleteEmployeeDeduction(id, employeeName, deductionType) {
-    if (confirm(`Are you sure you want to delete ${deductionType} for ${employeeName}?\n\nThis action cannot be undone.`)) {
-        // Create a form and submit
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/deductions/employee/${id}/delete`;
-        
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = '_token';
-        csrfInput.value = csrfToken;
-        
-        const methodInput = document.createElement('input');
-        methodInput.type = 'hidden';
-        methodInput.name = '_method';
-        methodInput.value = 'DELETE';
-        
-        form.appendChild(csrfInput);
-        form.appendChild(methodInput);
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
-function exportEmployeeDeductions() {
-    window.location.href = '/admin/deductions/employee/export';
-}
-</script>
+@push('scripts')
+    @vite('resources/js/admin/deductions/employee-deductions.js')
+@endpush
 
 </div>

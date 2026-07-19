@@ -1,4 +1,4 @@
-<div id="loans-tab" style="display: none;">
+<div id="loans-tab" class="ded-hidden">
 <section class="table-section">
     <div class="table-header">
         <div>
@@ -6,7 +6,7 @@
             <p class="table-sub">Municipal Government of Pagsanjan · Manage GSIS and Pag-IBIG loans with automatic balance tracking</p>
         </div>
         <div class="table-actions">
-            <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAddLoanModal()">
+            <button class="modal-btn-primary ded-btn-sm" onclick="openAddLoanModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="12" y1="5" x2="12" y2="19"/>
                     <line x1="5" y1="12" x2="19" y2="12"/>
@@ -90,31 +90,31 @@
                     data-loan-type="{{ $loan->deduction_type_id }}" 
                     data-status="{{ $loan->status }}">
                     <td>
-                        <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="ded-row-flex">
                             @if($loan->employee->photo)
-                                <img src="{{ $loan->employee->photo }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
+                                <img src="{{ $loan->employee->photo }}" class="ded-avatar-img">
                             @else
-                                <div class="avatar" style="background: {{ $avatarColors[($loan->employee_id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #ecebf6;">
+                                <div class="avatar ded-avatar-img" style="background: {{ $avatarColors[($loan->employee_id ?? 0) % count($avatarColors)] }}; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px;">
                                     {{ getInitials($loan->employee->first_name . ' ' . $loan->employee->last_name) }}
                                 </div>
                             @endif
                             <div>
-                                <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">
+                                <p class="ded-cell-title">
                                     {{ $loan->employee->first_name }} {{ $loan->employee->last_name }}
                                 </p>
-                                <p style="color: #8f8daf; margin: 0; font-size: 11px;">ID: {{ $loan->employee->employee_id }}</p>
+                                <p class="ded-cell-sub">ID: {{ $loan->employee->employee_id }}</p>
                             </div>
                         </div>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #56547a;">
+                        <span class="ded-text-muted-sm">
                             {{ $loan->employee->employmentDetail->departmentRelation->name ?? 'N/A' }}
                         </span>
                     </td>
                     <td>
                         <div>
-                            <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">{{ $loan->deductionType->name }}</p>
-                            <p style="color: #8f8daf; margin: 0; font-size: 11px;">{{ $loan->deductionType->code }}</p>
+                            <p class="ded-cell-title">{{ $loan->deductionType->name }}</p>
+                            <p class="ded-cell-sub">{{ $loan->deductionType->code }}</p>
                         </div>
                     </td>
                     <td>
@@ -131,52 +131,52 @@
                         </span>
                     </td>
                     <td>
-                        <span style="font-weight: 600; color: #0b044d; font-size: 13px;">
+                        <span class="ded-cell-title" style="font-size:13px;">
                             ₱{{ number_format($loan->total_amount ?? 0, 2) }}
                         </span>
                     </td>
                     <td>
                         <div>
-                            <p style="font-weight: 600; color: {{ $loan->remaining_balance > 0 ? '#c9a227' : '#15803d' }}; margin: 0; font-size: 13px;">
+                            <p class="ded-cell-title" style="color: {{ $loan->remaining_balance > 0 ? '#c9a227' : '#15803d' }};">
                                 ₱{{ number_format($loan->remaining_balance ?? 0, 2) }}
                             </p>
                             @if($loan->remaining_balance > 0)
-                                <p style="color: #8f8daf; margin: 0; font-size: 11px;">
+                                <p class="ded-cell-sub">
                                     {{ number_format($progress, 1) }}% paid
                                 </p>
                             @else
-                                <p style="color: #15803d; margin: 0; font-size: 11px;">Fully paid</p>
+                                <p class="ded-cell-sub" style="color:#15803d;">Fully paid</p>
                             @endif
                         </div>
                     </td>
                     <td>
-                        <span style="font-size: 13px; color: #56547a;">
+                        <span class="ded-text-sm">
                             ₱{{ number_format($loan->installment_amount ?? 0, 2) }}
                         </span>
                     </td>
                     <td>
                         <div>
-                            <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">
+                            <p class="ded-cell-title">
                                 {!! $perCutoffDisplay !!}
                             </p>
-                            <p style="color: #8f8daf; margin: 0; font-size: 11px;">{{ $scheduleLabel }}</p>
+                            <p class="ded-cell-sub">{{ $scheduleLabel }}</p>
                         </div>
                     </td>
-                    <td style="min-width: 120px;">
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <div style="width: 100%; height: 6px; background: #f2f1fb; border-radius: 3px; overflow: hidden;">
-                                <div style="width: {{ $progress }}%; height: 100%; background: {{ $progress >= 100 ? '#15803d' : '#0b044d' }}; transition: width 0.3s;"></div>
+                    <td class="ded-min-w-120">
+                        <div class="ded-progress-track">
+                            <div class="ded-progress-bar">
+                                <div class="ded-progress-fill" style="width: {{ $progress }}%; background: {{ $progress >= 100 ? '#15803d' : '#0b044d' }};"></div>
                             </div>
-                            <span style="font-size: 11px; color: #56547a;">{{ number_format($progress, 1) }}%</span>
+                            <span class="ded-progress-pct">{{ number_format($progress, 1) }}%</span>
                         </div>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #56547a;">
+                        <span class="ded-text-muted-sm">
                             {{ \Carbon\Carbon::parse($loan->start_date)->format('M d, Y') }}
                         </span>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #56547a;">
+                        <span class="ded-text-muted-sm">
                             {{ $loan->end_date ? \Carbon\Carbon::parse($loan->end_date)->format('M d, Y') : 'Ongoing' }}
                         </span>
                     </td>
@@ -194,7 +194,7 @@
                         </span>
                     </td>
                     <td>
-                        <div style="display: flex; gap: 6px;">
+                        <div class="ded-actions">
                             <button class="action-btn" onclick="viewLoanDetails({{ $loan->id }})" title="View Details">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -207,7 +207,7 @@
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                                 </svg>
                             </button>
-                            <button class="action-btn" onclick="deleteEmployeeDeduction({{ $loan->id }}, '{{ $loan->employee->first_name }} {{ $loan->employee->last_name }}', '{{ $loan->deductionType->name }}')" title="Delete" style="color: #8e1e18;">
+                            <button class="action-btn ded-danger-btn" onclick="deleteEmployeeDeduction({{ $loan->id }}, '{{ $loan->employee->first_name }} {{ $loan->employee->last_name }}', '{{ $loan->deductionType->name }}')" title="Delete">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <polyline points="3 6 5 6 21 6"/>
                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -218,7 +218,7 @@
                 </tr>
             @empty
                 <tr id="noLoansRow">
-                    <td colspan="13" style="text-align: center; padding: 40px; color: #8f8daf;">
+                    <td colspan="13" class="ded-empty-cell">
                         No loans found. Click "Add Loan" to create a new loan.
                     </td>
                 </tr>
@@ -228,9 +228,9 @@
 </div>
 
     <div class="table-footer">
-        <div style="display:flex;align-items:center;gap:12px;">
+        <div class="ded-footer-flex">
             <p id="loansFooter">Showing <strong id="loanRowStart">1</strong>-<strong id="loanRowEnd">{{ min(10, $loans->count()) }}</strong> of <strong id="loanRowTotal">{{ $loans->count() }}</strong> loans</p>
-            <select id="loanRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changeLoanRowsPerPage()">
+            <select id="loanRowsPerPage" class="filter-select ded-rows-select" onchange="changeLoanRowsPerPage()">
                 <option value="10">10 rows</option>
                 <option value="25">25 rows</option>
                 <option value="50">50 rows</option>
@@ -241,205 +241,8 @@
     </div>
 </section>
 
-<script>
-window._loanCurrentPage = 1;
-window._loanRowsPerPage = 10;
+@push('scripts')
+    @vite('resources/js/admin/deductions/loans.js')
+@endpush
 
-function filterLoans() {
-    const searchTerm = document.getElementById('searchLoan').value.toLowerCase();
-    const loanTypeFilter = document.getElementById('filterLoanType').value;
-    const statusFilter = document.getElementById('filterLoanStatus').value;
-    const rows = document.querySelectorAll('#loansTableBody tr:not(#noLoansRow)');
-    
-    const filtered = [];
-    
-    rows.forEach(row => {
-        const employeeName = row.dataset.employee || '';
-        const loanType = row.dataset.loanType || '';
-        const status = row.dataset.status || '';
-        
-        const matchesSearch = employeeName.includes(searchTerm);
-        const matchesType = !loanTypeFilter || loanType === loanTypeFilter;
-        const matchesStatus = !statusFilter || status === statusFilter;
-        
-        if (matchesSearch && matchesType && matchesStatus) {
-            filtered.push(row);
-        }
-    });
-    
-    window._loanFilteredRows = filtered;
-    window._loanCurrentPage = 1;
-    updateLoanPagination();
-}
-
-window.updateLoanPagination = function () {
-    const rows = window._loanFilteredRows || [];
-    const total = rows.length;
-    const perPage = window._loanRowsPerPage;
-    const totalPages = Math.ceil(total / perPage) || 1;
-    const page = Math.min(window._loanCurrentPage, totalPages);
-    window._loanCurrentPage = page;
-    
-    const start = (page - 1) * perPage;
-    const end = Math.min(start + perPage, total);
-    
-    document.querySelectorAll('#loansTableBody tr:not(#noLoansRow)').forEach(row => row.style.display = 'none');
-    rows.forEach((row, i) => { if (i >= start && i < end) row.style.display = ''; });
-    
-    document.getElementById('loanRowStart').textContent = total ? start + 1 : 0;
-    document.getElementById('loanRowEnd').textContent = end;
-    document.getElementById('loanRowTotal').textContent = total;
-    
-    // Show/hide no data row
-    const noLoansRow = document.getElementById('noLoansRow');
-    if (noLoansRow) {
-        noLoansRow.style.display = total === 0 ? '' : 'none';
-    }
-    
-    const controls = document.getElementById('loanPaginationControls');
-    if (totalPages <= 1) { controls.innerHTML = ''; return; }
-    
-    let html = '';
-    const maxVisible = 5;
-    let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-    if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
-    
-    if (page > 1) html += '<button class="page-btn" onclick="goToLoanPage(' + (page - 1) + ')">‹</button>';
-    if (startPage > 1) {
-        html += '<button class="page-btn" onclick="goToLoanPage(1)">1</button>';
-        if (startPage > 2) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
-    }
-    for (let i = startPage; i <= endPage; i++) {
-        html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToLoanPage(' + i + ')">' + i + '</button>';
-    }
-    if (endPage < totalPages) {
-        if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
-        html += '<button class="page-btn" onclick="goToLoanPage(' + totalPages + ')">' + totalPages + '</button>';
-    }
-    if (page < totalPages) html += '<button class="page-btn" onclick="goToLoanPage(' + (page + 1) + ')">›</button>';
-    
-    controls.innerHTML = html;
-};
-
-window.goToLoanPage = function (page) {
-    window._loanCurrentPage = page;
-    updateLoanPagination();
-};
-
-window.changeLoanRowsPerPage = function () {
-    window._loanRowsPerPage = parseInt(document.getElementById('loanRowsPerPage').value) || 10;
-    window._loanCurrentPage = 1;
-    updateLoanPagination();
-};
-
-// Initialize pagination on page load
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('loansTableBody')) {
-        filterLoans();
-    }
-});
-
-function viewLoanDetails(id) {
-    // Fetch loan data
-    fetch(`/admin/deductions/employee/${id}`)
-        .then(response => response.json())
-        .then(data => {
-            const employeeName = `${data.employee.first_name} ${data.employee.last_name}`;
-            const loanType = data.deduction_type.name;
-            const totalAmount = parseFloat(data.total_amount || 0);
-            const remainingBalance = parseFloat(data.remaining_balance || 0);
-            const installment = parseFloat(data.installment_amount || 0);
-            const amountPaid = totalAmount - remainingBalance;
-            const progress = totalAmount > 0 ? (amountPaid / totalAmount) * 100 : 0;
-            const monthsRemaining = installment > 0 ? Math.ceil(remainingBalance / installment) : 0;
-            
-            // Get schedule - prioritize custom schedule over default
-            let schedule = 'BOTH_SPLIT'; // Default
-            let scheduleSource = 'Default';
-            
-            if (data.custom_cutoff_schedule) {
-                schedule = data.custom_cutoff_schedule;
-                scheduleSource = 'Custom';
-            } else if (data.deduction_type.schedules && data.deduction_type.schedules.length > 0) {
-                schedule = data.deduction_type.schedules[0].cutoff_schedule;
-                scheduleSource = 'Type Default';
-            }
-            
-            // Calculate per-cutoff based on schedule
-            let perCutoff1st, perCutoff2nd, scheduleText;
-            if (schedule === '1ST_ONLY') {
-                perCutoff1st = installment;
-                perCutoff2nd = 0;
-                scheduleText = '1st Cutoff Only';
-            } else if (schedule === '2ND_ONLY') {
-                perCutoff1st = 0;
-                perCutoff2nd = installment;
-                scheduleText = '2nd Cutoff Only';
-            } else if (schedule === 'BOTH_FULL') {
-                perCutoff1st = installment;
-                perCutoff2nd = installment;
-                scheduleText = 'Both Cutoffs (Full Amount Each)';
-            } else { // BOTH_SPLIT
-                perCutoff1st = installment / 2;
-                perCutoff2nd = installment / 2;
-                scheduleText = 'Both Cutoffs (Split 50-50)';
-            }
-            
-            const message = `
-╔════════════════════════════════════════════╗
-║          LOAN DETAILS                      ║
-╠════════════════════════════════════════════╣
-║ Employee: ${employeeName.padEnd(32)} ║
-║ Loan Type: ${loanType.padEnd(31)} ║
-╠════════════════════════════════════════════╣
-║ Total Amount: ₱${totalAmount.toFixed(2).padStart(26)} ║
-║ Amount Paid: ₱${amountPaid.toFixed(2).padStart(27)} ║
-║ Remaining Balance: ₱${remainingBalance.toFixed(2).padStart(21)} ║
-║ Progress: ${progress.toFixed(1)}%${' '.repeat(32 - progress.toFixed(1).length)} ║
-╠════════════════════════════════════════════╣
-║ Monthly Installment: ₱${installment.toFixed(2).padStart(19)} ║
-║ Schedule: ${scheduleText.padEnd(31)} ║
-║ Schedule Source: ${scheduleSource.padEnd(26)} ║
-║ 1st Cutoff: ₱${perCutoff1st.toFixed(2).padStart(26)} ║
-║ 2nd Cutoff: ₱${perCutoff2nd.toFixed(2).padStart(26)} ║
-║ Months Remaining: ${monthsRemaining} months${' '.repeat(22 - monthsRemaining.toString().length)} ║
-╠════════════════════════════════════════════╣
-║ Start Date: ${new Date(data.start_date).toLocaleDateString().padEnd(28)} ║
-║ End Date: ${(data.end_date ? new Date(data.end_date).toLocaleDateString() : 'Ongoing').padEnd(30)} ║
-║ Status: ${data.status.padEnd(32)} ║
-╠════════════════════════════════════════════╣
-║ Remarks: ${(data.remarks || 'None').padEnd(31)} ║
-╚════════════════════════════════════════════╝
-            `.trim();
-            
-            alert(message);
-        })
-        .catch(error => {
-            console.error('Error fetching loan details:', error);
-            alert('Failed to load loan details.');
-        });
-}
-
-function exportLoans() {
-    window.location.href = '/admin/deductions/loans/export';
-}
-</script>
-
-<script>
-// Ensure modal functions are in global scope
-window.openAddLoanModal = function() {
-    document.getElementById('addLoanModal').classList.add('active');
-};
-
-window.closeAddLoanModal = function(event) {
-    if (event && event.target !== event.currentTarget) return;
-    document.getElementById('addLoanModal').classList.remove('active');
-    document.getElementById('addLoanForm').reset();
-    document.getElementById('providerName').value = '';
-    document.getElementById('otherProviderFields').style.display = 'none';
-    document.getElementById('otherProviderName').removeAttribute('required');
-    document.getElementById('otherLoanType').removeAttribute('required');
-};
-</script>
 </div>

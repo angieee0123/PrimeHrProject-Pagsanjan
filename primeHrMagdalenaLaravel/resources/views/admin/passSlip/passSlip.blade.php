@@ -374,6 +374,6 @@
 </div>
 
 @push('scripts')
-    @vite('resources/js/passSlip/passSlip.js')
+    @vite('resources/js/admin/passSlip/passSlip.js')
 @endpush
 @endsection

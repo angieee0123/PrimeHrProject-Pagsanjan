@@ -1,4 +1,4 @@
-<div id="deduction-types-tab" style="display: block;">
+<div id="deduction-types-tab">
 <section class="table-section">
     <div class="table-header">
         <div>
@@ -6,7 +6,7 @@
             <p class="table-sub">Municipal Government of Pagsanjan · Manage mandatory contributions, loans, and other deduction types</p>
         </div>
         <div class="table-actions">
-            <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAddDeductionTypeModal()">
+            <button class="modal-btn-primary ded-btn-sm" onclick="openAddDeductionTypeModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="12" y1="5" x2="12" y2="19"/>
                     <line x1="5" y1="12" x2="19" y2="12"/>
@@ -38,7 +38,7 @@
             @endphp
             @forelse($deductionTypes as $type)
             <tr>
-                <td><strong style="color: #0b044d; font-size: 13px;">{{ $type->code }}</strong></td>
+                <td><strong class="ded-cell-title">{{ $type->code }}</strong></td>
                 <td>{{ $type->name }}</td>
                 <td>
                     @if($type->category === 'MANDATORY')
@@ -51,9 +51,9 @@
                 </td>
                 <td>
                     @if($type->deducted_from_employee)
-                        <span class="badge-status pending" style="background: #fff3e0; color: #e65100;">Employee Share</span>
+                        <span class="badge-status pending ded-badge-employee-share">Employee Share</span>
                     @else
-                        <span class="badge-status processed" style="background: #e8f5e9; color: #2e7d32;">Employer Share</span>
+                        <span class="badge-status processed ded-badge-employer-share">Employer Share</span>
                     @endif
                 </td>
                 <td>{{ $type->computation_type }}</td>
@@ -89,7 +89,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="10" style="text-align: center; padding: 40px; color: #8f8daf;">
+                <td colspan="10" class="ded-empty-cell">
                     No deduction types found. Click "Add Deduction Type" to create one.
                 </td>
             </tr>

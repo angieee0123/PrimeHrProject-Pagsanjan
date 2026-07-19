@@ -82,5 +82,5 @@
 </div>
 
 @push('scripts')
-    @vite('resources/js/dashboard/pending-requests-card.js')
+    @vite('resources/js/admin/dashboard/pending-requests-card.js')
 @endpush

@@ -34,5 +34,5 @@
 </x-modal>
 
 @push('scripts')
-    @vite('resources/js/leaveAndBenefits/view-leave-type-modal.js')
+    @vite('resources/js/admin/leaveAndBenefits/view-leave-type-modal.js')
 @endpush

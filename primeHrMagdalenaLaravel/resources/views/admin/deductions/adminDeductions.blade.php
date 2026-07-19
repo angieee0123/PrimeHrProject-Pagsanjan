@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('styles')
+    @vite('resources/css/adminDeductions.css')
+@endpush
+
 @section('content')
 @include('admin.topbar.deductionsTopbar')
 @include('admin.notification.adminNotification')
@@ -20,11 +24,11 @@ function getInitials($name) {
 
 <div class="glass-shell">
 
-<div class="stats-grid" style="margin-bottom: 20px;">
+<div class="stats-grid ded-mb-20">
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Deduction Types</p>
-            <div class="stat-icon-wrap" style="background: #0b044d18; color: #0b044d;">
+            <div class="stat-icon-wrap ded-icon-wrap-blue">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="2" y="5" width="20" height="14" rx="2"/>
                     <line x1="2" y1="10" x2="22" y2="10"/>
@@ -33,14 +37,14 @@ function getInitials($name) {
         </div>
         <h2 class="stat-value">{{ $stats['total_types'] }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #0b044d;"></span>
+            <span class="stat-dot ded-dot-blue"></span>
             <p class="stat-sub">{{ $stats['mandatory_count'] }} mandatory, {{ $stats['loan_count'] }} loans</p>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Active Loans</p>
-            <div class="stat-icon-wrap" style="background: #c9a22718; color: #c9a227;">
+            <div class="stat-icon-wrap ded-icon-wrap-gold">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
                     <path d="M12 6v6l4 2"/>
@@ -49,29 +53,29 @@ function getInitials($name) {
         </div>
         <h2 class="stat-value">{{ $stats['active_loans'] }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #c9a227;"></span>
+            <span class="stat-dot ded-dot-gold"></span>
             <p class="stat-sub">{{ $stats['active_loans'] > 0 ? 'Ongoing loans' : 'No active loans' }}</p>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Outstanding</p>
-            <div class="stat-icon-wrap" style="background: #8e1e1818; color: #8e1e18;">
+            <div class="stat-icon-wrap ded-icon-wrap-red">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
                     <text x="3" y="19" font-size="17" font-weight="bold" font-family="Arial, sans-serif">₱</text>
                 </svg>
             </div>
         </div>
-        <h2 class="stat-value" style="font-size: 18px;">₱{{ number_format($stats['total_outstanding'], 2) }}</h2>
+        <h2 class="stat-value ded-stat-value-sm">₱{{ number_format($stats['total_outstanding'], 2) }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #8e1e18;"></span>
+            <span class="stat-dot ded-dot-red"></span>
             <p class="stat-sub">Loan balances</p>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Transactions</p>
-            <div class="stat-icon-wrap" style="background: #15803d18; color: #15803d;">
+            <div class="stat-icon-wrap ded-icon-wrap-green">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>
@@ -80,7 +84,7 @@ function getInitials($name) {
         </div>
         <h2 class="stat-value">{{ $stats['transactions_this_month'] }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #15803d;"></span>
+            <span class="stat-dot ded-dot-green"></span>
             <p class="stat-sub">This month</p>
         </div>
     </div>
@@ -88,7 +92,7 @@ function getInitials($name) {
 
 {{-- Filter Toolbar (contents swap per active tab) --}}
 <div class="filter-card">
-    <div class="filter-group" id="deduction-types-filter-group" style="display: contents;">
+    <div class="filter-group ded-filter-contents" id="deduction-types-filter-group">
         <div class="filter-card-fields">
             <div class="fld">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
@@ -116,7 +120,7 @@ function getInitials($name) {
         </div>
     </div>
 
-    <div class="filter-group" id="employee-deductions-filter-group" style="display: none;">
+    <div class="filter-group ded-hidden" id="employee-deductions-filter-group">
         <div class="filter-card-fields">
             <div class="fld">
                 <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -149,7 +153,7 @@ function getInitials($name) {
         </div>
     </div>
 
-    <div class="filter-group" id="loans-filter-group" style="display: none;">
+    <div class="filter-group ded-hidden" id="loans-filter-group">
         <div class="filter-card-fields">
             <div class="fld">
                 <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -182,7 +186,7 @@ function getInitials($name) {
         </div>
     </div>
 
-    <div class="filter-group" id="schedules-filter-group" style="display: none;">
+    <div class="filter-group ded-hidden" id="schedules-filter-group">
         <div class="filter-card-fields">
             <div class="fld">
                 <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -206,7 +210,7 @@ function getInitials($name) {
         </div>
     </div>
 
-    <div class="filter-group" id="loan-types-filter-group" style="display: none;">
+    <div class="filter-group ded-hidden" id="loan-types-filter-group">
         <div class="filter-card-fields">
             <div class="fld">
                 <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -233,7 +237,7 @@ function getInitials($name) {
         <div class="filter-card-actions"></div>
     </div>
 
-    <div class="filter-group" id="transactions-filter-group" style="display: none;">
+    <div class="filter-group ded-hidden" id="transactions-filter-group">
         <div class="filter-card-fields">
             <div class="fld">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -310,22 +314,7 @@ function getInitials($name) {
 @include('admin.deductions.modals.assignDeductionModal')
 @include('admin.deductions.modals.editEmployeeDeductionModal')
 
-<style>
-.modal-overlay.active { display: flex !important; align-items: center; justify-content: center; }
-</style>
-
 @push('scripts')
-<script>
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('[id$="-tab"]').forEach(tab => tab.style.display = 'none');
-        document.querySelectorAll('.filter-group').forEach(g => g.style.display = 'none');
-
-        event.target.classList.add('active');
-        document.getElementById(tabName + '-tab').style.display = 'block';
-        const group = document.getElementById(tabName + '-filter-group');
-        if (group) group.style.display = 'contents';
-    }
-</script>
+    @vite('resources/js/admin/deductions/adminDeductions.js')
 @endpush
 @endsection

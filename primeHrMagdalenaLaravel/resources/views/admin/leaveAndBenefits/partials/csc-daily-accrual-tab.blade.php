@@ -137,5 +137,5 @@
 </section>
 
 @push('scripts')
-    @vite('resources/js/leaveAndBenefits/csc-daily-accrual-tab.js')
+    @vite('resources/js/admin/leaveAndBenefits/csc-daily-accrual-tab.js')
 @endpush

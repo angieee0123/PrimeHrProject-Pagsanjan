@@ -126,6 +126,6 @@
 @include('admin.travelOrder.modals.viewTravelOrderModal')
 
 @push('scripts')
-    @vite('resources/js/travelOrder/travelOrder.js')
+    @vite('resources/js/admin/travelOrder/travelOrder.js')
 @endpush
 @endsection

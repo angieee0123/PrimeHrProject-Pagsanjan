@@ -1,4 +1,4 @@
-<div id="schedules-tab" style="display: none;">
+<div id="schedules-tab" class="ded-hidden">
 <section class="table-section">
     <div class="table-header">
         <div>
@@ -7,13 +7,13 @@
         </div>
     </div>
 
-<div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: #1e40af;">
+<div class="ded-notice-banner-teal">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10"/>
         <line x1="12" y1="16" x2="12" y2="12"/>
         <line x1="12" y1="8" x2="12.01" y2="8"/>
     </svg>
-    <div style="font-size: 13px;">
+    <div class="ded-text-sm">
         <strong>Deduction Scheduling:</strong> This table shows all employees with active deductions. Click "Manage Schedule" to configure which cutoff period (1st, 2nd, or Both) each deduction will be applied.
     </div>
 </div>
@@ -34,25 +34,25 @@
             @forelse($employeesWithDeductions as $emp)
                 <tr data-employee="{{ strtolower($emp['name']) }}" data-department="{{ $emp['department'] }}">
                     <td>
-                        <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="ded-row-flex">
                             @if($emp['photo'] ?? null)
-                                <img src="{{ $emp['photo'] }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
+                                <img src="{{ $emp['photo'] }}" class="ded-avatar-img">
                             @else
-                                <div class="avatar" style="background: {{ $avatarColors[($emp['id'] ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #ecebf6;">
+                                <div class="avatar ded-avatar-img" style="background: {{ $avatarColors[($emp['id'] ?? 0) % count($avatarColors)] }}; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px;">
                                     {{ getInitials($emp['name']) }}
                                 </div>
                             @endif
                             <div>
-                                <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">{{ $emp['name'] }}</p>
-                                <p style="color: #8f8daf; margin: 0; font-size: 11px;">ID: {{ $emp['employee_id'] }}</p>
+                                <p class="ded-cell-title">{{ $emp['name'] }}</p>
+                                <p class="ded-cell-sub">ID: {{ $emp['employee_id'] }}</p>
                             </div>
                         </div>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #56547a;">{{ $emp['department'] }}</span>
+                        <span class="ded-text-muted-sm">{{ $emp['department'] }}</span>
                     </td>
                     <td>
-                        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #f2f1fb; border-radius: 6px; font-size: 12px; font-weight: 600; color: #0b044d;">
+                        <span class="ded-badge-count is-blue">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="2" y="5" width="20" height="14" rx="2"/>
                                 <line x1="2" y1="10" x2="22" y2="10"/>
@@ -62,7 +62,7 @@
                     </td>
                     <td>
                         @if($emp['loans_count'] > 0)
-                            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #fbf6e3; border-radius: 6px; font-size: 12px; font-weight: 600; color: #c9a227;">
+                            <span class="ded-badge-count is-gold">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="10"/>
                                     <path d="M12 6v6l4 2"/>
@@ -70,10 +70,10 @@
                                 {{ $emp['loans_count'] }} {{ $emp['loans_count'] == 1 ? 'Loan' : 'Loans' }}
                             </span>
                         @else
-                            <span style="color: #8f8daf; font-size: 12px;">No loans</span>
+                            <span class="ded-text-muted-sm">No loans</span>
                         @endif
                     </td>
-                    <td style="color: #56547a; font-size: 12px;">
+                    <td class="ded-text-muted-sm">
                         {{ $emp['updated_at'] ? \Carbon\Carbon::parse($emp['updated_at'])->format('M d, Y') : 'N/A' }}
                     </td>
                     <td>
@@ -84,7 +84,7 @@
                 </tr>
             @empty
                 <tr id="noSchedulesRow">
-                    <td colspan="6" style="text-align: center; padding: 40px; color: #8f8daf;">
+                    <td colspan="6" class="ded-empty-cell">
                         No employees with active deductions found. Assign deductions to employees first.
                     </td>
                 </tr>
@@ -98,42 +98,8 @@
     </div>
 </section>
 
-<script>
-function filterSchedules() {
-    const searchTerm = document.getElementById('searchSchedule').value.toLowerCase();
-    const departmentFilter = document.getElementById('filterDepartment').value;
-    const rows = document.querySelectorAll('#schedulesTableBody tr:not(#noSchedulesRow)');
-    
-    let visibleCount = 0;
-    
-    rows.forEach(row => {
-        const employeeName = row.dataset.employee || '';
-        const department = row.dataset.department || '';
-        
-        const matchesSearch = employeeName.includes(searchTerm);
-        const matchesDepartment = !departmentFilter || department === departmentFilter;
-        
-        if (matchesSearch && matchesDepartment) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-    
-    // Update showing count
-    document.getElementById('showingSchedulesCount').textContent = visibleCount;
-    
-    // Show/hide no data row
-    const noSchedulesRow = document.getElementById('noSchedulesRow');
-    if (noSchedulesRow) {
-        noSchedulesRow.style.display = visibleCount === 0 ? '' : 'none';
-    }
-}
-
-function exportSchedules() {
-    window.location.href = '/admin/deductions/schedules/export';
-}
-</script>
+@push('scripts')
+    @vite('resources/js/admin/deductions/schedules.js')
+@endpush
 
 </div>

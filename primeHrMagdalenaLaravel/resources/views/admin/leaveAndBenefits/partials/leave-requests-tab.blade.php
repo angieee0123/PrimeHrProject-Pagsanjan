@@ -234,5 +234,5 @@
 </div>
 
 @push('scripts')
-    @vite('resources/js/leaveAndBenefits/leave-requests-tab.js')
+    @vite('resources/js/admin/leaveAndBenefits/leave-requests-tab.js')
 @endpush

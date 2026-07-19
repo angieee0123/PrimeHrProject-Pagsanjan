@@ -1,4 +1,4 @@
-<div id="loan-types-tab" style="display: none;">
+<div id="loan-types-tab" class="ded-hidden">
 <section class="table-section">
     <div class="table-header">
         <div>
@@ -6,7 +6,7 @@
             <p class="table-sub">Municipal Government of Pagsanjan · Register and manage reusable loan types that can be assigned to multiple employees</p>
         </div>
         <div class="table-actions">
-            <button class="modal-btn-primary" style="padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" onclick="openAddLoanTypeModal()">
+            <button class="modal-btn-primary ded-btn-sm" onclick="openAddLoanTypeModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="12" y1="5" x2="12" y2="19"/>
                     <line x1="5" y1="12" x2="19" y2="12"/>
@@ -16,13 +16,13 @@
         </div>
     </div>
 
-<div style="background: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: #1565c0;">
+<div class="ded-notice-banner">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10"/>
         <line x1="12" y1="16" x2="12" y2="12"/>
         <line x1="12" y1="8" x2="12.01" y2="8"/>
     </svg>
-    <div style="font-size: 13px;">
+    <div class="ded-notice-text">
         <strong>Loan Type Registry:</strong> Register loan types once, then assign them to multiple employees with different amounts and payment terms. Registered loan types automatically appear in the "Add Employee Loan" dropdown.
     </div>
 </div>
@@ -73,14 +73,14 @@
                     data-provider="{{ $provider }}" 
                     data-status="{{ $loanType->is_active ? '1' : '0' }}">
                     <td>
-                        <span style="font-family: 'Courier New', monospace; font-size: 12px; color: #56547a; background: #f7f6fc; padding: 4px 8px; border-radius: 4px;">
+                        <span class="ded-mono-code">
                             {{ $loanType->code }}
                         </span>
                     </td>
                     <td>
                         <div>
-                            <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">{{ $loanType->name }}</p>
-                            <p style="color: #8f8daf; margin: 0; font-size: 11px;">{{ $loanType->category }}</p>
+                            <p class="ded-cell-title">{{ $loanType->name }}</p>
+                            <p class="ded-cell-sub">{{ $loanType->category }}</p>
                         </div>
                     </td>
                     <td>
@@ -97,33 +97,33 @@
                         </span>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #56547a;">
+                        <span class="ded-text-muted-sm">
                             {{ $loanType->max_amount ? '₱' . number_format($loanType->max_amount, 2) : 'No limit' }}
                         </span>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #56547a;">
+                        <span class="ded-text-muted-sm">
                             {{ $loanType->percentage_rate ? $loanType->percentage_rate . '%' : 'N/A' }}
                         </span>
                     </td>
                     <td>
-                        <span style="font-size: 12px; color: #56547a;">N/A</span>
+                        <span class="ded-text-muted-sm">N/A</span>
                     </td>
                     <td>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-weight: 600; color: #0b044d; font-size: 14px;">{{ $employeesCount }}</span>
-                            <span style="font-size: 11px; color: #8f8daf;">{{ $employeesCount == 1 ? 'employee' : 'employees' }}</span>
+                        <div class="ded-row-flex">
+                            <span style="font-size:14px;" class="ded-cell-title">{{ $employeesCount }}</span>
+                            <span class="ded-cell-sub" style="font-size:11px;">{{ $employeesCount == 1 ? 'employee' : 'employees' }}</span>
                         </div>
                     </td>
                     <td>
                         @if($loanType->is_active)
-                            <span class="badge" style="background: #15803d18; color: #15803d;">Active</span>
+                            <span class="badge ded-badge-active">Active</span>
                         @else
-                            <span class="badge" style="background: #56547a18; color: #56547a;">Inactive</span>
+                            <span class="badge ded-badge-inactive">Inactive</span>
                         @endif
                     </td>
                     <td>
-                        <div style="display: flex; gap: 6px;">
+                        <div class="ded-actions">
                             <button class="action-btn" onclick="viewLoanTypeDetails({{ $loanType->id }})" title="View Details">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -137,14 +137,14 @@
                                 </svg>
                             </button>
                             @if($employeesCount == 0)
-                                <button class="action-btn" onclick="deleteLoanType({{ $loanType->id }}, '{{ $loanType->name }}')" title="Delete" style="color: #8e1e18;">
+                                <button class="action-btn ded-danger-btn" onclick="deleteLoanType({{ $loanType->id }}, '{{ $loanType->name }}')" title="Delete">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <polyline points="3 6 5 6 21 6"/>
                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                                     </svg>
                                 </button>
                             @else
-                                <button class="action-btn" disabled title="Cannot delete - in use by {{ $employeesCount }} employee(s)" style="opacity: 0.3; cursor: not-allowed;">
+                                <button class="action-btn ded-disabled-btn" disabled title="Cannot delete - in use by {{ $employeesCount }} employee(s)">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <polyline points="3 6 5 6 21 6"/>
                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -156,7 +156,7 @@
                 </tr>
             @empty
                 <tr id="noLoanTypesRow">
-                    <td colspan="9" style="text-align: center; padding: 40px; color: #8f8daf;">
+                    <td colspan="9" class="ded-empty-cell">
                         No loan types registered. Click "Register Loan Type" to add a new loan type.
                     </td>
                 </tr>
@@ -170,178 +170,8 @@
     </div>
 </section>
 
-<script>
-function filterLoanTypes() {
-    const searchTerm = document.getElementById('searchLoanType').value.toLowerCase();
-    const providerFilter = document.getElementById('filterLoanTypeProvider').value;
-    const statusFilter = document.getElementById('filterLoanTypeStatus').value;
-    const rows = document.querySelectorAll('#loanTypesTableBody tr:not(#noLoanTypesRow)');
-    
-    let visibleCount = 0;
-    
-    rows.forEach(row => {
-        const loanTypeName = row.dataset.loanType || '';
-        const provider = row.dataset.provider || '';
-        const status = row.dataset.status || '';
-        
-        const matchesSearch = loanTypeName.includes(searchTerm);
-        const matchesProvider = !providerFilter || provider === providerFilter;
-        const matchesStatus = !statusFilter || status === statusFilter;
-        
-        if (matchesSearch && matchesProvider && matchesStatus) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-    
-    document.getElementById('showingLoanTypesCount').textContent = visibleCount;
-    
-    const noLoanTypesRow = document.getElementById('noLoanTypesRow');
-    if (noLoanTypesRow) {
-        noLoanTypesRow.style.display = visibleCount === 0 ? '' : 'none';
-    }
-}
+@push('scripts')
+    @vite('resources/js/admin/deductions/loan-types.js')
+@endpush
 
-function viewLoanTypeDetails(id) {
-    fetch(`/admin/deductions/types/${id}`)
-        .then(response => response.json())
-        .then(data => {
-            const provider = data.code.includes('GSIS') ? 'GSIS' : (data.code.includes('PAGIBIG') ? 'Pag-IBIG' : 'Other');
-            const maxLoanable = data.max_amount ? '₱' + parseFloat(data.max_amount).toFixed(2) : 'No limit';
-            const interestRate = data.percentage_rate ? data.percentage_rate + '%' : 'N/A';
-            
-            alert(`
-╔════════════════════════════════════════════╗
-║          LOAN TYPE DETAILS                 ║
-╠════════════════════════════════════════════╣
-║ Code: ${data.code.padEnd(37)} ║
-║ Name: ${data.name.padEnd(37)} ║
-║ Provider: ${provider.padEnd(33)} ║
-╠════════════════════════════════════════════╣
-║ Max Loanable: ${maxLoanable.padEnd(29)} ║
-║ Interest Rate: ${interestRate.padEnd(28)} ║
-║ Category: ${data.category.padEnd(33)} ║
-║ Computation: ${data.computation_type.padEnd(30)} ║
-╠════════════════════════════════════════════╣
-║ Status: ${(data.is_active ? 'Active' : 'Inactive').padEnd(35)} ║
-╚════════════════════════════════════════════╝
-            `.trim());
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to load loan type details.');
-        });
-}
-
-function editLoanType(id) {
-    // Fetch loan type data
-    fetch(`/admin/deductions/types/${id}`)
-        .then(response => response.json())
-        .then(data => {
-            // Determine provider from code
-            let provider = 'OTHER';
-            if (data.code.includes('GSIS')) provider = 'GSIS';
-            else if (data.code.includes('PAGIBIG')) provider = 'PAGIBIG';
-            else if (data.code.includes('SSS')) provider = 'SSS';
-            else if (data.code.includes('BANK')) provider = 'BANK';
-            else if (data.code.includes('COOP')) provider = 'COOP';
-            
-            // Populate form
-            document.getElementById('editLoanTypeId').value = data.id;
-            document.getElementById('editLoanProvider').value = provider;
-            document.getElementById('editLoanTypeCode').value = data.code;
-            document.getElementById('editLoanTypeName').value = data.name;
-            document.getElementById('editMaxLoanable').value = data.max_amount || '';
-            document.getElementById('editInterestRate').value = data.percentage_rate || '';
-            document.getElementById('editMaxTerms').value = '';
-            document.getElementById('editIsActive').value = data.is_active ? '1' : '0';
-            document.getElementById('editDescription').value = '';
-            
-            // Show warning if employees are using this loan type
-            if (data.employees_count > 0) {
-                document.getElementById('editEmployeesUsingWarning').style.display = 'block';
-                document.getElementById('editEmployeesCount').textContent = data.employees_count;
-            } else {
-                document.getElementById('editEmployeesUsingWarning').style.display = 'none';
-            }
-            
-            // Set form action
-            document.getElementById('editLoanTypeForm').action = `/admin/deductions/loan-types/${data.id}`;
-            
-            // Open modal
-            document.getElementById('editLoanTypeModal').classList.add('active');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to load loan type details.');
-        });
-}
-
-function deleteLoanType(id, name) {
-    if (!confirm(`Are you sure you want to delete the loan type "${name}"?\n\nThis action cannot be undone.`)) {
-        return;
-    }
-    
-    // Create a form and submit it
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = `/admin/deductions/loan-types/${id}`;
-    
-    // Add CSRF token
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = '_token';
-    csrfInput.value = document.querySelector('meta[name="csrf-token"]').content;
-    form.appendChild(csrfInput);
-    
-    // Add DELETE method
-    const methodInput = document.createElement('input');
-    methodInput.type = 'hidden';
-    methodInput.name = '_method';
-    methodInput.value = 'DELETE';
-    form.appendChild(methodInput);
-    
-    document.body.appendChild(form);
-    form.submit();
-}
-</script>
-
-<script>
-// Ensure modal functions are in global scope
-window.openAddLoanTypeModal = function() {
-    document.getElementById('addLoanTypeModal').classList.add('active');
-};
-
-window.closeAddLoanTypeModal = function(event) {
-    if (event && event.target !== event.currentTarget) return;
-    document.getElementById('addLoanTypeModal').classList.remove('active');
-    document.getElementById('addLoanTypeForm').reset();
-};
-
-window.closeEditLoanTypeModal = function(event) {
-    if (event && event.target !== event.currentTarget) return;
-    document.getElementById('editLoanTypeModal').classList.remove('active');
-    document.getElementById('editLoanTypeForm').reset();
-};
-
-window.updateLoanCode = function() {
-    const provider = document.getElementById('loanProvider').value;
-    const name = document.getElementById('loanTypeName').value;
-    const codeInput = document.getElementById('loanTypeCode');
-    
-    if (provider && name) {
-        const namePart = name.toUpperCase()
-            .replace(/[^A-Z0-9\s]/g, '')
-            .split(' ')
-            .map(word => word.substring(0, 4))
-            .join('_')
-            .substring(0, 20);
-        
-        const code = `${provider}_${namePart}`;
-        codeInput.value = code;
-    }
-};
-</script>
 </div>

@@ -143,5 +143,5 @@
 </section>
 
 @push('scripts')
-    @vite('resources/js/leaveAndBenefits/leave-credits-tab.js')
+    @vite('resources/js/admin/leaveAndBenefits/leave-credits-tab.js')
 @endpush

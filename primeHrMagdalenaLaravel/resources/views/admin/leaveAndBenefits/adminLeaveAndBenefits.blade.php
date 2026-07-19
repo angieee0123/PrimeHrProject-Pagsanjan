@@ -360,6 +360,6 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 @include('admin.leaveAndBenefits.modals.migrate-leave-records-modal')
 
 @push('scripts')
-    @vite('resources/js/leaveAndBenefits/adminLeaveAndBenefits.js')
+    @vite('resources/js/admin/leaveAndBenefits/adminLeaveAndBenefits.js')
 @endpush
 @endsection

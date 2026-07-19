@@ -32,5 +32,5 @@
 </x-schedule-modal>
 
 @push('scripts')
-    @vite('resources/js/personnel/viewSchedules.js')
+    @vite('resources/js/admin/personnel/viewSchedules.js')
 @endpush

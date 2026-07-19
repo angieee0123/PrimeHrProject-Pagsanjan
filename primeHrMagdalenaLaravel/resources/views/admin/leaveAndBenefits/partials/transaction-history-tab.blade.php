@@ -285,5 +285,5 @@
 </div>
 
 @push('scripts')
-    @vite('resources/js/leaveAndBenefits/transaction-history-tab.js')
+    @vite('resources/js/admin/leaveAndBenefits/transaction-history-tab.js')
 @endpush

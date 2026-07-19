@@ -275,5 +275,5 @@
 </div>
 
 @push('scripts')
-    @vite('resources/js/attendance/attendance-settings-tab.js')
+    @vite('resources/js/admin/attendance/attendance-settings-tab.js')
 @endpush

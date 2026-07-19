@@ -108,5 +108,5 @@
 </x-schedule-modal>
 
 @push('scripts')
-    @vite('resources/js/personnel/assignSchedule.js')
+    @vite('resources/js/admin/personnel/assignSchedule.js')
 @endpush

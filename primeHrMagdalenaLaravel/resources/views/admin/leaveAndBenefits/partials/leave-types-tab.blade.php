@@ -106,6 +106,6 @@
 </section>
 
 @push('scripts')
-    @vite('resources/js/leaveAndBenefits/leave-types-tab.js')
+    @vite('resources/js/admin/leaveAndBenefits/leave-types-tab.js')
 @endpush
 </section>

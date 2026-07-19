@@ -414,6 +414,6 @@
 </div>
 
 @push('scripts')
-    @vite(['resources/js/personnel/employeeWizard.js', 'resources/js/personnel/employeeWizardComplete.js'])
+    @vite(['resources/js/admin/personnel/employeeWizard.js', 'resources/js/admin/personnel/employeeWizardComplete.js'])
 @endpush
 

@@ -5,51 +5,51 @@
         @method('PUT')
         <input type="hidden" id="editDeductionId" name="deduction_id">
 
-        <div class="info-box" style="background: #f7f6fc; padding: 12px; border-radius: 6px; margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                <span style="font-size: 11px; color: #56547a; font-weight: 600;">EMPLOYEE</span>
-                <span id="editEmployeeName" style="font-size: 13px; color: #0b044d; font-weight: 600;"></span>
+        <div class="info-box ded-info-box">
+            <div class="ded-info-row">
+                <span class="ded-info-label">EMPLOYEE</span>
+                <span id="editEmployeeName" class="ded-info-value"></span>
             </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span style="font-size: 11px; color: #56547a; font-weight: 600;">DEDUCTION TYPE</span>
-                <span id="editDeductionType" style="font-size: 13px; color: #0b044d; font-weight: 600;"></span>
+            <div class="ded-info-row">
+                <span class="ded-info-label">DEDUCTION TYPE</span>
+                <span id="editDeductionType" class="ded-info-value"></span>
             </div>
         </div>
 
-        <div class="form-row" id="editLoanFields" style="display: none;">
-            <div class="form-group" style="flex: 1;">
+        <div class="form-row ded-hidden" id="editLoanFields">
+            <div class="form-group ded-col">
                 <label class="form-label">Total Amount</label>
-                <input type="number" id="editTotalAmount" class="form-input" step="0.01" min="0" readonly style="background: #f7f6fc; cursor: not-allowed;">
+                <input type="number" id="editTotalAmount" class="form-input ded-readonly-input" step="0.01" min="0" readonly>
             </div>
-            <div class="form-group" style="flex: 1;">
+            <div class="form-group ded-col">
                 <label class="form-label">Remaining Balance</label>
                 <input type="number" name="remaining_balance" id="editRemainingBalance" class="form-input" step="0.01" min="0">
             </div>
         </div>
 
-        <div class="form-group" id="editInstallmentField" style="display: none;">
-            <label class="form-label">Monthly Installment <span style="color: #8e1e18;">*</span></label>
+        <div class="form-group ded-hidden" id="editInstallmentField">
+            <label class="form-label">Monthly Installment <span class="ded-required">*</span></label>
             <input type="number" name="installment_amount" id="editInstallmentAmount" class="form-input" step="0.01" min="0">
         </div>
 
-        <div class="form-group" id="editFixedAmountField" style="display: none;">
-            <label class="form-label">Deduction Amount <span style="color: #8e1e18;">*</span></label>
+        <div class="form-group ded-hidden" id="editFixedAmountField">
+            <label class="form-label">Deduction Amount <span class="ded-required">*</span></label>
             <input type="number" name="amount" id="editAmount" class="form-input" step="0.01" min="0">
         </div>
 
         <div class="form-row">
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">Start Date <span style="color: #8e1e18;">*</span></label>
+            <div class="form-group ded-col">
+                <label class="form-label">Start Date <span class="ded-required">*</span></label>
                 <input type="date" name="start_date" id="editStartDate" class="form-input" required>
             </div>
-            <div class="form-group" style="flex: 1;">
+            <div class="form-group ded-col">
                 <label class="form-label">End Date</label>
                 <input type="date" name="end_date" id="editEndDate" class="form-input">
             </div>
         </div>
 
         <div class="form-group">
-            <label class="form-label">Status <span style="color: #8e1e18;">*</span></label>
+            <label class="form-label">Status <span class="ded-required">*</span></label>
             <select name="status" id="editStatus" class="form-input" required>
                 <option value="ACTIVE">Active</option>
                 <option value="SUSPENDED">Suspended</option>
@@ -69,23 +69,6 @@
     </form>
 </x-modal-container>
 
-<style>
-.info-box {
-    background: #f7f6fc;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 16px;
-}
-</style>
-
-<script>
-function openEditEmployeeDeductionModal() {
-    document.getElementById('editEmployeeDeductionModal').classList.add('active');
-}
-
-function closeEditEmployeeDeductionModal(event) {
-    if (event && event.target !== event.currentTarget) return;
-    document.getElementById('editEmployeeDeductionModal').classList.remove('active');
-    document.getElementById('editEmployeeDeductionForm').reset();
-}
-</script>
+@push('scripts')
+    @vite('resources/js/admin/deductions/editEmployeeDeductionModal.js')
+@endpush

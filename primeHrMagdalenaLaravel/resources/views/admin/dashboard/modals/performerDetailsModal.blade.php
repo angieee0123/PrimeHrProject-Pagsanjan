@@ -86,5 +86,5 @@
 </div>
 
 @push('scripts')
-    @vite('resources/js/dashboard/performerDetailsModal.js')
+    @vite('resources/js/admin/dashboard/performerDetailsModal.js')
 @endpush

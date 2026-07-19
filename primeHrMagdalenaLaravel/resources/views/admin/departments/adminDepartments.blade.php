@@ -53,6 +53,6 @@ $largestDept    = $departments->sortByDesc('personnel_count')->first();
         importType: @json(session('import_type', 'record'))
     };
 </script>
-    @vite('resources/js/departments/adminDepartments.js')
+    @vite('resources/js/admin/departments/adminDepartments.js')
 @endpush
 @endsection

@@ -112,5 +112,5 @@
 </div>
 
 @push('scripts')
-    @vite('resources/js/dashboard/employee-directory.js')
+    @vite('resources/js/admin/dashboard/employee-directory.js')
 @endpush

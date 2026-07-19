@@ -168,5 +168,5 @@
 </x-modal-container>
 
 @push('scripts')
-    @vite('resources/js/leaveAndBenefits/add-accrual-rate-modal.js')
+    @vite('resources/js/admin/leaveAndBenefits/add-accrual-rate-modal.js')
 @endpush

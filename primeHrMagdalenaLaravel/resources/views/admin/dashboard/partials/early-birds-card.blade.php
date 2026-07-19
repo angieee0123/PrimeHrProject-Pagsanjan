@@ -96,5 +96,5 @@
 </div>
 
 @push('scripts')
-    @vite('resources/js/dashboard/early-birds-card.js')
+    @vite('resources/js/admin/dashboard/early-birds-card.js')
 @endpush

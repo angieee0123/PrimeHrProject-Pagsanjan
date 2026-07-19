@@ -62,5 +62,5 @@
 </x-adm-modal>
 
 @push('scripts')
-    @vite('resources/js/departments/bulkImportDepartment.js')
+    @vite('resources/js/admin/departments/bulkImportDepartment.js')
 @endpush

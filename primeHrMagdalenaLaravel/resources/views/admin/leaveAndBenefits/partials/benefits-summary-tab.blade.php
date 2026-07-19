@@ -76,5 +76,5 @@
 </section>
 
 @push('scripts')
-    @vite('resources/js/leaveAndBenefits/benefits-summary-tab.js')
+    @vite('resources/js/admin/leaveAndBenefits/benefits-summary-tab.js')
 @endpush

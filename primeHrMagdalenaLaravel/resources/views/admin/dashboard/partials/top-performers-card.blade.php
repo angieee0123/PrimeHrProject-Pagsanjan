@@ -78,5 +78,5 @@
 </div>
 
 @push('scripts')
-    @vite('resources/js/dashboard/top-performers-card.js')
+    @vite('resources/js/admin/dashboard/top-performers-card.js')
 @endpush

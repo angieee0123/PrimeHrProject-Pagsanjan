@@ -241,12 +241,12 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 @vite([
-    'resources/js/attendance/adminAttendance.js',
-    'resources/js/attendance/dtrDetailModal.js',
-    'resources/js/attendance/editDtrModal.js',
-    'resources/js/attendance/correctAttendanceModal.js',
-    'resources/js/attendance/detailedDtrModal.js',
-    'resources/js/attendance/successModal.js',
+    'resources/js/admin/attendance/adminAttendance.js',
+    'resources/js/admin/attendance/dtrDetailModal.js',
+    'resources/js/admin/attendance/editDtrModal.js',
+    'resources/js/admin/attendance/correctAttendanceModal.js',
+    'resources/js/admin/attendance/detailedDtrModal.js',
+    'resources/js/admin/attendance/successModal.js',
 ])
 @endpush
 @endsection
