@@ -90,7 +90,8 @@ export default defineConfig({
                 'resources/js/admin/payroll/generate-payroll.js',
                 'resources/js/admin/payroll/payroll-result-modal.js',
                 'resources/js/admin/payroll/payroll-status-modals.js',
-                'resources/js/admin/payroll/payslip-detail-modal.js'
+                'resources/js/admin/payroll/payslip-detail-modal.js',
+                'resources/js/admin/chatbot/adminChatbot.js'
             ],
             refresh: true,
         }),

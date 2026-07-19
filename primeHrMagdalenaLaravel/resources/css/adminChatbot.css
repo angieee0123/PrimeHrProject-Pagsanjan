@@ -338,3 +338,6 @@
         padding: 7px 10px;
     }
 }
+
+/* ══════════ Utility (adminChatbot.blade.php + partials) ══════════ */
+.cb-hidden { display: none; }
