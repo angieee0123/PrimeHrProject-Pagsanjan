@@ -145,9 +145,3 @@
 @push('scripts')
     @vite('resources/js/leaveAndBenefits/leave-credits-tab.js')
 @endpush
-
-<style>
-.hidden-by-pagination {
-    display: none !important;
-}
-</style>

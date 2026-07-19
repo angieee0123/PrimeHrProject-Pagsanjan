@@ -105,61 +105,6 @@
     </div>
 </section>
 
-<style>
-.lt-ellipsis-btn {
-    background: none;
-    border: none;
-    color: #8f8daf;
-    cursor: pointer;
-    padding: 6px 10px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-.lt-ellipsis-btn:hover {
-    background: #f1f5f9;
-    color: #0b044d;
-}
-.lt-action-menu {
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15);
-    z-index: 100;
-    min-width: 140px;
-    margin-top: 6px;
-    overflow: hidden;
-    animation: ltSlideDown 0.2s ease-out;
-}
-.lt-action-menu button {
-    width: 100%;
-    padding: 11px 14px;
-    border: none;
-    background: none;
-    text-align: left;
-    font-size: 12px;
-    color: #0b044d;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.lt-action-menu button:hover {
-    background: #f2f1fb;
-}
-@keyframes ltSlideDown {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-</style>
-
 @push('scripts')
     @vite('resources/js/leaveAndBenefits/leave-types-tab.js')
 @endpush
