@@ -40,10 +40,6 @@ window.disapproveOrder = function(id) {
     form.submit();
 }
 
-window.viewOrder = function(id) {
-    window.location.href = `/admin/travelorder/${id}`;
-}
-
 document.addEventListener('click', () => {
     document.querySelectorAll('.travel-action-menu').forEach(m => m.style.display = 'none');
 });
