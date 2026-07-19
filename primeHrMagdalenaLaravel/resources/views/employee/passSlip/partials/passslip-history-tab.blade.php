@@ -12,7 +12,7 @@
                 <option value="rejected">Rejected</option>
                 <option value="cancelled">Cancelled</option>
             </select>
-            <button class="btn-export" style="background: #0b044d; color: #fff; border-color: #0b044d;" onclick="openPassSlipModal()">
+            <button class="btn-export ps-btn-primary-solid" onclick="openPassSlipModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 File Pass Slip
             </button>
@@ -21,51 +21,51 @@
 
     {{-- Success/Error Messages --}}
     @if(session('success'))
-    <div style="padding: 12px 16px; background: #d1fae5; border-left: 3px solid #10b981; border-radius: 6px; margin-bottom: 16px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
+    <div class="ps-session-alert-success">
+        <div class="ps-flex-gap-8">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                 <polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
-            <p style="margin: 0; color: #065f46; font-size: 13px; font-weight: 500;">{{ session('success') }}</p>
+            <p class="ps-flash-text-success">{{ session('success') }}</p>
         </div>
     </div>
     @endif
 
     @if(session('error'))
-    <div style="padding: 12px 16px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 6px; margin-bottom: 16px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
+    <div class="ps-session-alert-error">
+        <div class="ps-flex-gap-8">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="15" y1="9" x2="9" y2="15"/>
                 <line x1="9" y1="9" x2="15" y2="15"/>
             </svg>
-            <p style="margin: 0; color: #991b1b; font-size: 13px; font-weight: 500;">{{ session('error') }}</p>
+            <p class="ps-flash-text-error">{{ session('error') }}</p>
         </div>
     </div>
     @endif
 
     @php
-        $sortIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;"><polyline points="18 15 12 9 6 15"></polyline></svg>';
+        $sortIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ps-sort-icon"><polyline points="18 15 12 9 6 15"></polyline></svg>';
     @endphp
 
     <div class="table-wrapper">
         <table class="payroll-table">
             <thead>
                 <tr>
-                    <th onclick="sortPassSlips('reason')" style="cursor: pointer;">Reason {!! $sortIcon !!}</th>
-                    <th onclick="sortPassSlips('date')" style="cursor: pointer;">Date {!! $sortIcon !!}</th>
-                    <th style="text-align: center;">Time Out</th>
-                    <th style="text-align: center;">Time In</th>
-                    <th onclick="sortPassSlips('status')" style="cursor: pointer; text-align: center;">Status {!! $sortIcon !!}</th>
-                    <th style="text-align: center;">Actions</th>
+                    <th onclick="sortPassSlips('reason')" class="ps-th-sort">Reason {!! $sortIcon !!}</th>
+                    <th onclick="sortPassSlips('date')" class="ps-th-sort">Date {!! $sortIcon !!}</th>
+                    <th class="ps-ta-center">Time Out</th>
+                    <th class="ps-ta-center">Time In</th>
+                    <th onclick="sortPassSlips('status')" class="ps-th-sort ps-ta-center">Status {!! $sortIcon !!}</th>
+                    <th class="ps-ta-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($passSlips ?? [] as $slip)
                 <tr class="passslip-row" data-status="{{ $slip->status }}">
-                    <td data-label="Reason" style="font-size: 13px; color: #0b044d; font-weight: 600;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
+                    <td data-label="Reason" class="ps-td-semibold">
+                        <div class="ps-flex-gap-8">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0b044d" stroke-width="2">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                                 <polyline points="14 2 14 8 20 8"/>
@@ -73,10 +73,10 @@
                             {{ Str::limit($slip->reason, 40) }}
                         </div>
                     </td>
-                    <td data-label="Date" style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $slip->date->format('M d, Y') }}</td>
-                    <td data-label="Time Out" style="text-align: center; font-size: 13px; color: #6b6a8a;">{{ \Carbon\Carbon::parse($slip->time_out)->format('g:i A') }}</td>
-                    <td data-label="Time In" style="text-align: center; font-size: 13px; color: #6b6a8a;">{{ $slip->time_in ? \Carbon\Carbon::parse($slip->time_in)->format('g:i A') : '—' }}</td>
-                    <td data-label="Status" style="text-align: center;">
+                    <td data-label="Date" class="ps-td-semibold">{{ $slip->date->format('M d, Y') }}</td>
+                    <td data-label="Time Out" class="ps-td-muted-center">{{ \Carbon\Carbon::parse($slip->time_out)->format('g:i A') }}</td>
+                    <td data-label="Time In" class="ps-td-muted-center">{{ $slip->time_in ? \Carbon\Carbon::parse($slip->time_in)->format('g:i A') : '—' }}</td>
+                    <td data-label="Status" class="ps-ta-center">
                         @if($slip->status === 'pending')
                             <span class="badge-status pending">Pending</span>
                         @elseif($slip->status === 'approved')
@@ -84,17 +84,17 @@
                         @elseif($slip->status === 'rejected')
                             <span class="badge-status on-hold">Rejected</span>
                         @else
-                            <span class="badge-status" style="background: #f3f4f6; color: #6b7280;">Cancelled</span>
+                            <span class="badge-status ps-badge-cancelled">Cancelled</span>
                         @endif
                     </td>
                     <td data-label="Actions">
                         <div class="row-actions">
                             <button class="btn-view" onclick="viewPassSlip({{ $slip->id }})">View</button>
                             @if($slip->status === 'pending')
-                                <form method="POST" action="{{ route('passslip.delete', $slip->id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to cancel this pass slip?');">
+                                <form method="POST" action="{{ route('passslip.delete', $slip->id) }}" class="ps-inline" onsubmit="return confirm('Are you sure you want to cancel this pass slip?');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn-edit" style="background: #dc2626; border-color: #dc2626;">Cancel</button>
+                                    <button type="submit" class="btn-edit ps-btn-reject">Cancel</button>
                                 </form>
                             @endif
                         </div>
@@ -102,13 +102,13 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 40px; color: #6b6a8a;">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" style="margin: 0 auto 12px;">
+                    <td colspan="6" class="ps-empty-cell">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" class="ps-icon-center">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                             <polyline points="14 2 14 8 20 8"/>
                         </svg>
-                        <p style="margin: 0; font-size: 14px;">No pass slips yet</p>
-                        <button onclick="openPassSlipModal()" style="margin-top: 12px; padding: 8px 16px; background: #0b044d; color: white; border: none; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                        <p class="ps-empty-title">No pass slips yet</p>
+                        <button onclick="openPassSlipModal()" class="ps-btn-empty-cta">
                             File Your First Pass Slip
                         </button>
                     </td>
@@ -119,9 +119,9 @@
     </div>
 
     <div class="table-footer">
-        <div style="display:flex;align-items:center;gap:12px;">
+        <div class="ps-flex-gap-12">
             <p id="passSlipFooter">Showing <strong id="passSlipRowStart">{{ $passSlips->firstItem() ?? 0 }}</strong>-<strong id="passSlipRowEnd">{{ $passSlips->lastItem() ?? 0 }}</strong> of <strong id="passSlipRowTotal">{{ $passSlips->total() ?? 0 }}</strong> records</p>
-            <select id="passSlipRowsPerPage" class="filter-select" style="width:auto;padding:6px 10px;font-size:13px;" onchange="changePassSlipRowsPerPage()">
+            <select id="passSlipRowsPerPage" class="filter-select ps-select-inline" onchange="changePassSlipRowsPerPage()">
                 <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 rows</option>
                 <option value="25" {{ request('per_page', 10) == 25 ? 'selected' : '' }}>25 rows</option>
                 <option value="50" {{ request('per_page', 10) == 50 ? 'selected' : '' }}>50 rows</option>
@@ -134,32 +134,3 @@
         </div>
     </div>
 </section>
-
-<script>
-function changePassSlipRowsPerPage() {
-    const perPage = document.getElementById('passSlipRowsPerPage').value;
-    const url = new URL(window.location.href);
-    url.searchParams.set('per_page', perPage);
-    url.searchParams.delete('page');
-    window.location.href = url.toString();
-}
-
-// Applies the status dropdown and the topbar search together, so neither one
-// re-shows rows the other has filtered out.
-function filterPassSlips() {
-    const statusFilter = document.getElementById('filterPassSlipStatus').value;
-    const searchInput = document.getElementById('passSlipSearchInput');
-    const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-    const rows = document.querySelectorAll('.passslip-row');
-
-    rows.forEach(row => {
-        const matchesStatus = statusFilter === 'all' || row.dataset.status === statusFilter;
-        const matchesQuery = query === '' || row.textContent.toLowerCase().includes(query);
-        row.style.display = (matchesStatus && matchesQuery) ? '' : 'none';
-    });
-}
-
-function sortPassSlips(column) {
-    console.log('Sort by:', column);
-}
-</script>

@@ -2,6 +2,10 @@
 
 @section('title', 'Pass Slip · PRIME HRIS')
 
+@push('styles')
+    @vite('resources/css/employee/employeePassSlip.css')
+@endpush
+
 @section('content')
 <div class="app-layout">
 
@@ -105,49 +109,8 @@
 
 @include('employee.chatbot.employeeChatbot')
 
-<script>
-    const sidebar   = document.getElementById('sidebar');
-    const toggleBtn = document.getElementById('toggle-btn');
-    const logoText  = document.getElementById('logo-text');
-    const navLabel  = document.getElementById('nav-label');
-    const userInfo  = document.getElementById('user-info');
-    const sidebarFooter = document.getElementById('sidebar-footer');
-    const mobileBtn = document.getElementById('mobile-menu-btn');
-    const overlay   = document.getElementById('mobile-overlay');
-
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            const collapsed = sidebar.classList.toggle('collapsed');
-            toggleBtn.textContent = collapsed ? '›' : '‹';
-            if (logoText) logoText.style.display = collapsed ? 'none' : '';
-            if (navLabel) navLabel.style.display = collapsed ? 'none' : '';
-            if (userInfo) userInfo.style.display = collapsed ? 'none' : '';
-            if (sidebarFooter) sidebarFooter.classList.toggle('collapsed-footer', collapsed);
-            document.querySelectorAll('.nav-label, .nav-active-bar').forEach(el => {
-                el.style.display = collapsed ? 'none' : '';
-            });
-        });
-    }
-
-    if (mobileBtn) {
-        mobileBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('mobile-open');
-            overlay.classList.toggle('active');
-        });
-    }
-
-    if (overlay) {
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('mobile-open');
-            overlay.classList.remove('active');
-        });
-    }
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closePassSlipModal();
-        }
-    });
-</script>
+@push('scripts')
+    @vite('resources/js/employee/employeePassSlip.js')
+@endpush
 
 @endsection
