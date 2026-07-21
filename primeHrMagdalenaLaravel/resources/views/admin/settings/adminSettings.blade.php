@@ -21,7 +21,13 @@
 <div class="settings-container">
     <div class="settings-sidebar">
         <div class="settings-profile-card">
-            <div class="settings-profile-avatar">{{ $initials }}</div>
+            <div class="settings-profile-avatar" id="sidebarAvatar">
+                @if($employee?->photo)
+                    <img src="{{ $employee->photo }}" alt="" class="settings-avatar-img">
+                @else
+                    <span id="sidebarAvatarInitials">{{ $initials }}</span>
+                @endif
+            </div>
             <h3 class="settings-profile-name">{{ $fullName }}</h3>
             <p class="settings-profile-role">{{ $employee->employee_id ?? $user->username ?? $roleLabel }}</p>
             <div class="settings-profile-info">
@@ -80,12 +86,30 @@
                 <div class="settings-section-content">
                     <div class="settings-form-wrapper">
                         <div class="settings-avatar-row">
-                            <div class="settings-avatar">{{ $initials }}</div>
+                            <div class="settings-avatar-upload-wrap">
+                                <div class="settings-avatar" id="mainAvatar">
+                                    @if($employee?->photo)
+                                        <img src="{{ $employee->photo }}" alt="" class="settings-avatar-img">
+                                    @else
+                                        <span id="mainAvatarInitials">{{ $initials }}</span>
+                                    @endif
+                                </div>
+                                @if($employee)
+                                <button type="button" class="settings-avatar-edit-btn" onclick="document.getElementById('avatarPhotoInput').click()" title="Change photo">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                </button>
+                                <input type="file" id="avatarPhotoInput" accept="image/png,image/jpeg,image/webp" class="hidden" onchange="uploadAvatarPhoto(this)">
+                                @endif
+                            </div>
                             <div class="settings-avatar-info">
                                 <p class="settings-avatar-name">{{ $fullName }}</p>
                                 <p class="settings-avatar-role">{{ $position ? $position . ' · ' . $department : $roleLabel }}</p>
+                                @if(!$employee)
+                                <p class="settings-row-desc" style="margin-top:4px">No employee record linked — photo upload unavailable.</p>
+                                @endif
                             </div>
                         </div>
+                        <p class="settings-message error hidden" id="avatarMsg"></p>
 
                         <div class="settings-form-grid">
                             <div class="settings-form-field">
@@ -228,21 +252,25 @@
 
         {{-- AI / Chatbot --}}
         <div id="tab-ai" class="hidden">
+            @php
+                $providerLabels = ['groq' => 'Groq (Llama)', 'openai' => 'OpenAI', 'anthropic' => 'Anthropic (Claude)'];
+                $systemDefaultLabel = $systemAiProvider ? ($providerLabels[$systemAiProvider] ?? $systemAiProvider) : 'not configured';
+            @endphp
             <div class="settings-section">
                 <h3 class="settings-section-title">Chatbot AI Provider</h3>
                 <div class="settings-section-content">
                     <div class="settings-form-wrapper">
                         <p class="settings-row-desc" style="margin-bottom:16px">
-                            By default, the PRIME HRIS chatbot uses the system's shared Groq (Llama) key. Bring your own
-                            API key to use a different provider or model for your own chatbot conversations only —
-                            other admins and HR staff are unaffected.
+                            By default, the PRIME HRIS chatbot uses the system default below (currently {{ $systemDefaultLabel }}).
+                            Bring your own API key here to use a different provider or model for your own chatbot
+                            conversations only — other admins and HR staff are unaffected.
                         </p>
 
                         <div class="settings-form-grid">
                             <div class="settings-form-field">
                                 <label>Provider</label>
                                 <select id="aiProvider" onchange="onAiProviderChange()">
-                                    <option value="" {{ !$aiProvider ? 'selected' : '' }}>Use System Default (Groq · Llama)</option>
+                                    <option value="" {{ !$aiProvider ? 'selected' : '' }}>Use System Default ({{ $systemDefaultLabel }})</option>
                                     <option value="groq" {{ $aiProvider === 'groq' ? 'selected' : '' }}>Groq (Llama)</option>
                                     <option value="openai" {{ $aiProvider === 'openai' ? 'selected' : '' }}>OpenAI</option>
                                     <option value="anthropic" {{ $aiProvider === 'anthropic' ? 'selected' : '' }}>Anthropic (Claude)</option>
@@ -267,6 +295,47 @@
                     </div>
                 </div>
             </div>
+
+            @if($isSystemAdmin)
+            <div class="settings-section">
+                <h3 class="settings-section-title">System Default (applies org-wide)</h3>
+                <div class="settings-section-content">
+                    <div class="settings-form-wrapper">
+                        <p class="settings-row-desc" style="margin-bottom:16px">
+                            This is the provider/key used for every admin, HR staff, and employee who hasn't set up
+                            their own key above. Only administrators can change this. Managed here in Settings —
+                            no server or .env access needed.
+                        </p>
+
+                        <div class="settings-form-grid">
+                            <div class="settings-form-field">
+                                <label>Provider</label>
+                                <select id="systemAiProvider" onchange="onSystemAiProviderChange()">
+                                    <option value="" {{ !$systemAiProvider ? 'selected' : '' }}>Not configured (falls back to .env)</option>
+                                    <option value="groq" {{ $systemAiProvider === 'groq' ? 'selected' : '' }}>Groq (Llama)</option>
+                                    <option value="openai" {{ $systemAiProvider === 'openai' ? 'selected' : '' }}>OpenAI</option>
+                                    <option value="anthropic" {{ $systemAiProvider === 'anthropic' ? 'selected' : '' }}>Anthropic (Claude)</option>
+                                </select>
+                            </div>
+                            <div class="settings-form-field">
+                                <label>Model <span style="text-transform:none;font-weight:500">(optional)</span></label>
+                                <input type="text" id="systemAiModel" value="{{ $systemAiModel }}" placeholder="{{ $aiDefaultModels[$systemAiProvider ?? 'groq'] }}">
+                            </div>
+                        </div>
+
+                        <div class="settings-form-field settings-field-spacing-md">
+                            <label>API Key</label>
+                            <input type="password" id="systemAiApiKey" placeholder="{{ $systemAiMaskedKey ? $systemAiMaskedKey . ' — leave blank to keep' : 'sk-...' }}" autocomplete="off">
+                        </div>
+
+                        <p class="settings-message error hidden" id="systemAiMsg"></p>
+                        <div class="settings-save-bar">
+                            <button class="settings-btn-save" id="systemAiSaveBtn" onclick="saveSystemAiSettings()">Save System Default</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 </div>

@@ -2,14 +2,17 @@
 
 namespace App\Services;
 
+use App\Models\SystemAiSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Single entry point for calling out to an LLM for chatbot responses.
- * Resolves the calling user's own provider/API key (Settings → AI/Chatbot)
- * when configured, otherwise falls back to the system-wide GROQ_API_KEY.
+ * Resolution order: the calling user's own provider/key (Settings →
+ * AI/Chatbot), then the org-wide default (also Settings → AI/Chatbot, admin-
+ * managed, stored in system_ai_settings), then .env's GROQ_API_KEY as a
+ * last-resort fallback if that row was never configured.
  */
 class AiChatService
 {
@@ -46,6 +49,15 @@ class AiChatService
                 'provider' => $setting->provider,
                 'api_key' => $setting->api_key,
                 'model' => $setting->model ?: self::defaultModel($setting->provider),
+            ];
+        }
+
+        $system = SystemAiSetting::current();
+        if ($system->provider && $system->api_key) {
+            return [
+                'provider' => $system->provider,
+                'api_key' => $system->api_key,
+                'model' => $system->model ?: self::defaultModel($system->provider),
             ];
         }
 

@@ -75,9 +75,8 @@ Route::get('/employee/training/{id}/certificate', [\App\Http\Controllers\Employe
 Route::get('/employee/profile', [\App\Http\Controllers\EmployeeProfileController::class, 'index'])->middleware('auth')->name('employee.profile');
 Route::post('/employee/profile/update', [\App\Http\Controllers\EmployeeProfileController::class, 'update'])->middleware('auth')->name('employee.profile.update');
 
-Route::get('/employee/settings', function () {
-    return view('employee.settings.employeeSettings');
-})->middleware('auth')->name('employee.settings');
+Route::get('/employee/settings', [\App\Http\Controllers\EmployeeSettingsController::class, 'index'])->middleware('auth')->name('employee.settings');
+Route::post('/employee/settings/photo', [\App\Http\Controllers\EmployeeSettingsController::class, 'updatePhoto'])->middleware('auth')->name('employee.settings.photo');
 
 Route::get('/employee/notification', function () {
     return view('employee.notification.employeeNotification');
@@ -389,6 +388,8 @@ Route::post('/admin/settings/profile', [\App\Http\Controllers\AdminSettingsContr
 Route::post('/admin/settings/password', [\App\Http\Controllers\AdminSettingsController::class, 'updatePassword'])->middleware('auth')->name('admin.settings.password');
 Route::post('/admin/settings/notifications', [\App\Http\Controllers\AdminSettingsController::class, 'updateNotifications'])->middleware('auth')->name('admin.settings.notifications');
 Route::post('/admin/settings/ai', [\App\Http\Controllers\AdminSettingsController::class, 'updateAiSettings'])->middleware('auth')->name('admin.settings.ai');
+Route::post('/admin/settings/photo', [\App\Http\Controllers\AdminSettingsController::class, 'updatePhoto'])->middleware('auth')->name('admin.settings.photo');
+Route::post('/admin/settings/system-ai', [\App\Http\Controllers\AdminSettingsController::class, 'updateSystemAiSettings'])->middleware('auth')->name('admin.settings.systemAi');
 
 // Chatbot API
 Route::post('/chatbot/chat', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware('auth')->name('chatbot.chat');

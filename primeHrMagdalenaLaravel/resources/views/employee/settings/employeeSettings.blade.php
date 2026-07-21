@@ -20,24 +20,37 @@
 
         @include('employee.notification.employeeNotification')
 
+        @php
+            $position = $employee->employmentDetail?->designationRelation?->title ?? $employee->employmentDetail?->position ?? 'N/A';
+            $department = $employee->employmentDetail?->departmentRelation?->name ?? 'N/A';
+            $employmentType = $employee->employmentDetail?->employment_status ?? 'N/A';
+            $dateHired = $employee->employmentDetail?->appointment_date ? \Carbon\Carbon::parse($employee->employmentDetail->appointment_date)->format('M d, Y') : 'N/A';
+        @endphp
+
         <div class="settings-container">
             <div class="settings-sidebar">
                 <div class="settings-profile-card">
-                    <div class="settings-profile-avatar">AR</div>
-                    <h3 class="settings-profile-name">Ana R. Reyes</h3>
-                    <p class="settings-profile-role">PGS-0115</p>
+                    <div class="settings-profile-avatar" id="sidebarAvatar">
+                        @if($employee->photo)
+                            <img src="{{ $employee->photo }}" alt="" class="settings-avatar-img">
+                        @else
+                            <span id="sidebarAvatarInitials">{{ $initials }}</span>
+                        @endif
+                    </div>
+                    <h3 class="settings-profile-name">{{ $fullName }}</h3>
+                    <p class="settings-profile-role">{{ $employee->employee_id }}</p>
                     <div class="settings-profile-info">
                         <div class="settings-profile-info-item">
                             <p>POSITION</p>
-                            <p>Nurse II</p>
+                            <p>{{ $position }}</p>
                         </div>
                         <div class="settings-profile-info-item">
                             <p>DEPARTMENT</p>
-                            <p>Municipal Health Office</p>
+                            <p>{{ $department }}</p>
                         </div>
                         <div class="settings-profile-info-item">
                             <p>TYPE</p>
-                            <p>Permanent</p>
+                            <p>{{ $employmentType }}</p>
                         </div>
                     </div>
                 </div>
@@ -73,29 +86,42 @@
                         <div class="settings-section-content">
                             <div class="settings-form-wrapper">
                                 <div class="settings-avatar-row">
-                                    <div class="settings-avatar">AR</div>
+                                    <div class="settings-avatar-upload-wrap">
+                                        <div class="settings-avatar" id="mainAvatar">
+                                            @if($employee->photo)
+                                                <img src="{{ $employee->photo }}" alt="" class="settings-avatar-img">
+                                            @else
+                                                <span id="mainAvatarInitials">{{ $initials }}</span>
+                                            @endif
+                                        </div>
+                                        <button type="button" class="settings-avatar-edit-btn" onclick="document.getElementById('avatarPhotoInput').click()" title="Change photo">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                        </button>
+                                        <input type="file" id="avatarPhotoInput" accept="image/png,image/jpeg,image/webp" class="hidden" onchange="uploadAvatarPhoto(this)">
+                                    </div>
                                     <div class="settings-avatar-info">
-                                        <p class="settings-avatar-name">Ana R. Reyes</p>
-                                        <p class="settings-avatar-role">Nurse II · Municipal Health Office</p>
+                                        <p class="settings-avatar-name">{{ $fullName }}</p>
+                                        <p class="settings-avatar-role">{{ $position }} · {{ $department }}</p>
                                     </div>
                                 </div>
-                                
+                                <p class="settings-message error hidden" id="avatarMsg"></p>
+
                                 <div class="settings-form-grid">
                                     <div class="settings-form-field">
                                         <label>First Name</label>
-                                        <input type="text" id="firstName" value="Ana">
+                                        <input type="text" id="firstName" value="{{ $employee->first_name }}">
                                     </div>
                                     <div class="settings-form-field">
                                         <label>Last Name</label>
-                                        <input type="text" id="lastName" value="R. Reyes">
+                                        <input type="text" id="lastName" value="{{ $employee->last_name }}">
                                     </div>
                                     <div class="settings-form-field">
                                         <label>Email Address</label>
-                                        <input type="email" id="emailAddr" value="ana.reyes@pagsanjan.gov.ph">
+                                        <input type="email" id="emailAddr" value="{{ auth()->user()->email }}">
                                     </div>
                                     <div class="settings-form-field">
                                         <label>Contact No.</label>
-                                        <input type="text" id="contactNo" value="09201122334">
+                                        <input type="text" id="contactNo" value="{{ $contactNumber }}">
                                     </div>
                                 </div>
                                 <div class="settings-save-bar">
@@ -114,35 +140,35 @@
                                     <p class="settings-row-title">Employee ID</p>
                                     <p class="settings-row-desc">Assigned by HR — not editable</p>
                                 </div>
-                                <span class="notif-readonly">PGS-0115</span>
+                                <span class="notif-readonly">{{ $employee->employee_id }}</span>
                             </div>
                             <div class="settings-row">
                                 <div class="settings-row-label">
                                     <p class="settings-row-title">Position</p>
                                     <p class="settings-row-desc">Assigned by HR — not editable</p>
                                 </div>
-                                <span class="notif-readonly">Nurse II</span>
+                                <span class="notif-readonly">{{ $position }}</span>
                             </div>
                             <div class="settings-row">
                                 <div class="settings-row-label">
                                     <p class="settings-row-title">Department</p>
                                     <p class="settings-row-desc">Assigned by HR — not editable</p>
                                 </div>
-                                <span class="notif-readonly">Municipal Health Office</span>
+                                <span class="notif-readonly">{{ $department }}</span>
                             </div>
                             <div class="settings-row">
                                 <div class="settings-row-label">
                                     <p class="settings-row-title">Employment Type</p>
                                     <p class="settings-row-desc">Assigned by HR — not editable</p>
                                 </div>
-                                <span class="notif-readonly">Permanent</span>
+                                <span class="notif-readonly">{{ $employmentType }}</span>
                             </div>
                             <div class="settings-row">
                                 <div class="settings-row-label">
                                     <p class="settings-row-title">Date Hired</p>
                                     <p class="settings-row-desc">Assigned by HR — not editable</p>
                                 </div>
-                                <span class="notif-readonly">Jan 15, 2018</span>
+                                <span class="notif-readonly">{{ $dateHired }}</span>
                             </div>
                         </div>
                     </div>
@@ -321,10 +347,70 @@
         btn.classList.toggle('active');
     }
 
-    const profileDefaults = { firstName: 'Ana', lastName: 'R. Reyes', emailAddr: 'ana.reyes@pagsanjan.gov.ph', contactNo: '09201122334' };
+    function setAvatarDisplay(containerId, initialsId, photoUrl) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = photoUrl
+            ? `<img src="${photoUrl}" alt="" class="settings-avatar-img">`
+            : (document.getElementById(initialsId)?.outerHTML || container.innerHTML);
+    }
+
+    function uploadAvatarPhoto(input) {
+        const msg = document.getElementById('avatarMsg');
+        msg.classList.add('hidden');
+
+        const file = input.files ? input.files[0] : null;
+        if (!file) return;
+
+        const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!allowed.includes(file.type)) {
+            msg.textContent = 'Please upload a JPEG, PNG, or WebP image.';
+            msg.className = 'settings-message error';
+            input.value = '';
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            msg.textContent = 'Image must be 5 MB or smaller.';
+            msg.className = 'settings-message error';
+            input.value = '';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('photo', file);
+        const token = document.querySelector('meta[name="csrf-token"]')?.content;
+
+        fetch('{{ route('employee.settings.photo') }}', {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': token },
+            body: formData,
+        })
+            .then(async (response) => {
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(data.message || 'Failed to upload photo.');
+                return data;
+            })
+            .then(data => {
+                setAvatarDisplay('sidebarAvatar', 'sidebarAvatarInitials', data.photo);
+                setAvatarDisplay('mainAvatar', 'mainAvatarInitials', data.photo);
+                saveSettings('photo');
+            })
+            .catch(err => {
+                msg.textContent = err.message;
+                msg.className = 'settings-message error';
+            })
+            .finally(() => { input.value = ''; });
+    }
+
+    const profileDefaults = {
+        firstName: @json($employee->first_name),
+        lastName: @json($employee->last_name),
+        emailAddr: @json(auth()->user()->email),
+        contactNo: @json($contactNumber),
+    };
 
     function saveSettings(section) {
-        const labels = { profile: 'Personal Information', notifications: 'Notification Preferences', password: 'Password' };
+        const labels = { profile: 'Personal Information', notifications: 'Notification Preferences', password: 'Password', photo: 'Profile Photo' };
         const now = new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', hour12: true }) +
                     ', ' + new Date().toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
         document.getElementById('savedSection').textContent = labels[section] || section;

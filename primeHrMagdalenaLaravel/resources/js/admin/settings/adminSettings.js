@@ -57,6 +57,54 @@ function hideFieldError(elId) {
     document.getElementById(elId).classList.add('hidden');
 }
 
+// ── Avatar photo ──
+function setAvatarDisplay(containerId, initialsId, photoUrl) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = photoUrl
+        ? `<img src="${photoUrl}" alt="" class="settings-avatar-img">`
+        : (document.getElementById(initialsId)?.outerHTML || container.innerHTML);
+}
+
+window.uploadAvatarPhoto = function (input) {
+    hideFieldError('avatarMsg');
+    const file = input.files ? input.files[0] : null;
+    if (!file) return;
+
+    const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowed.includes(file.type)) {
+        showFieldError('avatarMsg', 'Please upload a JPEG, PNG, or WebP image.');
+        input.value = '';
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        showFieldError('avatarMsg', 'Image must be 5 MB or smaller.');
+        input.value = '';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    fetch('/admin/settings/photo', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+        body: formData,
+    })
+        .then(async (response) => {
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.message || 'Failed to upload photo.');
+            return data;
+        })
+        .then(data => {
+            setAvatarDisplay('sidebarAvatar', 'sidebarAvatarInitials', data.photo);
+            setAvatarDisplay('mainAvatar', 'mainAvatarInitials', data.photo);
+            showSavedModal('Your profile photo has been updated.');
+        })
+        .catch(err => showFieldError('avatarMsg', err.message))
+        .finally(() => { input.value = ''; });
+};
+
 // ── Profile ──
 window.resetProfile = function () {
     const data = window.adminSettingsData || {};
@@ -174,6 +222,33 @@ window.revertAiSettings = function () {
     document.getElementById('aiApiKey').value = '';
     onAiProviderChange();
     saveAiSettings();
+};
+
+// ── AI / Chatbot — System Default (admin-only) ──
+window.onSystemAiProviderChange = function () {
+    const el = document.getElementById('systemAiProvider');
+    if (!el) return;
+    const provider = el.value || 'groq';
+    const defaults = (window.adminSettingsData || {}).aiDefaultModels || {};
+    document.getElementById('systemAiModel').placeholder = defaults[provider] || '';
+};
+
+window.saveSystemAiSettings = function () {
+    hideFieldError('systemAiMsg');
+    const provider = document.getElementById('systemAiProvider').value;
+    const model = document.getElementById('systemAiModel').value.trim();
+    const apiKey = document.getElementById('systemAiApiKey').value.trim();
+
+    const btn = document.getElementById('systemAiSaveBtn');
+    btn.disabled = true;
+
+    settingsPost('/admin/settings/system-ai', { provider, model, api_key: apiKey || null })
+        .then(() => {
+            document.getElementById('systemAiApiKey').value = '';
+            showSavedModal(provider ? 'The system default AI settings have been saved.' : 'System default cleared.');
+        })
+        .catch(err => showFieldError('systemAiMsg', err.message))
+        .finally(() => { btn.disabled = false; });
 };
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSavedModal(); });
