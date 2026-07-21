@@ -34,7 +34,6 @@ export default defineConfig({
                 'resources/css/admin/adminDeductions.css',
                 'resources/css/mayor/mayor.css',
                 'resources/css/mayor/mayorDashboard.css',
-                'resources/css/mayor/mayorTravelOrder.css',
                 'resources/js/app.js',
                 'resources/js/employee/employeeDashboard.js',
                 'resources/js/employee/employeePayslip.js',

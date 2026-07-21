@@ -2,24 +2,34 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\TravelOrder;
+use App\Models\Department;
 
 class MayorTravelOrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $travelOrders = TravelOrder::with(['employee.employmentDetail.departmentRelation'])
+        $perPage = $request->input('per_page', 10);
+
+        $pendingOrders = TravelOrder::with(['employee.employmentDetail.departmentRelation', 'companions.employee'])
+            ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate($perPage, ['*'], 'pending_page');
 
-        $stats = [
-            'total'    => $travelOrders->count(),
-            'approved' => $travelOrders->where('status', 'approved')->count(),
-            'pending'  => $travelOrders->where('status', 'pending')->count(),
-            'rejected' => $travelOrders->whereIn('status', ['rejected', 'disapproved'])->count(),
-        ];
+        $approvedOrders = TravelOrder::with(['employee.employmentDetail.departmentRelation', 'approver', 'companions.employee'])
+            ->where('status', 'approved')
+            ->orderBy('approved_at', 'desc')
+            ->paginate($perPage, ['*'], 'approved_page');
 
-        return view('mayor.travelOrder.mayorTravelOrder', compact('travelOrders', 'stats'));
+        $disapprovedOrders = TravelOrder::with(['employee.employmentDetail.departmentRelation', 'disapprover', 'companions.employee'])
+            ->where('status', 'rejected')
+            ->orderBy('updated_at', 'desc')
+            ->paginate($perPage, ['*'], 'disapproved_page');
+
+        $departments = Department::where('status', 'Active')->orderBy('name')->get();
+
+        return view('mayor.travelOrder.mayorTravelOrder', compact('pendingOrders', 'approvedOrders', 'disapprovedOrders', 'departments'));
     }
 
     public function show($id)
