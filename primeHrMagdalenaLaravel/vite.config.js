@@ -31,6 +31,7 @@ export default defineConfig({
                 'resources/css/passSlip.css',
                 'resources/css/travelOrder.css',
                 'resources/css/admin/adminDeductions.css',
+                'resources/css/mayor/mayorDashboard.css',
                 'resources/js/app.js',
                 'resources/js/employee/employeeDashboard.js',
                 'resources/js/employee/employeePayslip.js',
@@ -101,7 +102,9 @@ export default defineConfig({
                 'resources/js/admin/payroll/payroll-result-modal.js',
                 'resources/js/admin/payroll/payroll-status-modals.js',
                 'resources/js/admin/payroll/payslip-detail-modal.js',
-                'resources/js/admin/chatbot/adminChatbot.js'
+                'resources/js/admin/chatbot/adminChatbot.js',
+                'resources/js/mayor/dashboard/mayorDashboard.js',
+                'resources/js/mayor/personnel/mayorPersonnel.js'
             ],
             refresh: true,
         }),

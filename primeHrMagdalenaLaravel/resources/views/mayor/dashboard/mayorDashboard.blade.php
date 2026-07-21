@@ -2,78 +2,15 @@
 
 @section('title', "Mayor's View · PRIME HRIS")
 
+@push('styles')
+    @vite('resources/css/mayor/mayorDashboard.css')
+@endpush
+
 @section('content')
 
 <main class="enterprise-hr-dashboard">
 
 @include('mayor.topbar.dashboardTopbar')
-
-<style>
-.mayor-stat-clickable { cursor: pointer; transition: transform 0.25s ease, box-shadow 0.25s ease; }
-.mayor-stat-clickable:hover { transform: translateY(-4px); }
-
-.mayor-section-icon {
-    width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center;
-    background: #f2f1fb; flex-shrink: 0;
-}
-.mayor-table-title-row { display: flex; align-items: center; gap: 9px; }
-
-/* Compact charts grid — 2x2, distinct from admin's full-width trend charts */
-.mayor-charts-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
-@media (max-width: 1100px) { .mayor-charts-grid { grid-template-columns: 1fr; } }
-
-.mayor-chart-card { padding: 16px 18px 18px; }
-.mayor-chart-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.mayor-chart-card-title { font-size: 13.5px; font-weight: 700; color: #0b044d; margin: 0 0 2px; }
-.mayor-chart-card-sub { font-size: 11px; color: #8f8daf; margin: 0; }
-
-.mayor-donut-row { display: flex; align-items: center; gap: 16px; }
-.mayor-donut-wrap { position: relative; width: 116px; height: 116px; flex-shrink: 0; }
-.mayor-donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
-.mayor-donut-center-value { font-size: 18px; font-weight: 800; color: #0b044d; line-height: 1.1; }
-.mayor-donut-center-label { font-size: 9px; font-weight: 600; color: #8f8daf; text-transform: uppercase; letter-spacing: .3px; }
-
-.mayor-legend-list { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
-.mayor-legend-row { display: flex; align-items: center; gap: 8px; }
-.mayor-legend-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
-.mayor-legend-label { flex: 1; min-width: 0; font-size: 11.5px; font-weight: 600; color: #56547a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mayor-legend-value { font-size: 12px; font-weight: 700; color: #0b044d; }
-
-/* Highlights: single tabbed panel replaces admin's several separate list panels */
-.mayor-highlights-tabs { display: flex; gap: 6px; }
-.mayor-highlight-row { display: flex; align-items: center; gap: 11px; padding: 9px 0; }
-
-/* Dark pill tabs — matches the active-tab treatment used on the admin dashboard */
-.mayor-highlights-tabs .chart-tab {
-    border-radius: 999px;
-    font-weight: 700;
-    transition: all .22s cubic-bezier(.4, 0, .2, 1);
-}
-.mayor-highlights-tabs .chart-tab.active {
-    border-color: transparent;
-    background: linear-gradient(135deg, #1b1464, #0b044d);
-    color: #fff;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 20px rgba(11,4,77,.35);
-}
-.mayor-highlights-tabs .chart-tab.active:hover {
-    transform: translateY(-1px);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 10px 26px rgba(11,4,77,.42);
-}
-.mayor-highlights-tabs .chart-tab:not(.active):hover {
-    background: rgba(11,4,77,.06);
-}
-
-/* Top Attendance Performers — real data table with column headers, not card rows */
-.mayor-perf-table { width: 100%; border-collapse: collapse; }
-.mayor-perf-table thead th { text-align: left; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #8f8daf; padding: 0 10px 9px; border-bottom: 1.5px solid #ecebf6; }
-.mayor-perf-table tbody td { padding: 8px 10px; font-size: 12.5px; color: #0b044d; border-bottom: 1px solid #f7f6fc; vertical-align: middle; }
-.mayor-perf-table tbody tr:last-child td { border-bottom: none; }
-.mayor-perf-table tbody tr { transition: background 0.15s ease; }
-.mayor-perf-table tbody tr:hover { background: #f7f6fc; }
-.mayor-perf-rank-td { display: inline-flex; align-items: center; justify-content: center; min-width: 21px; height: 21px; border-radius: 7px; font-size: 10.5px; font-weight: 700; }
-.mayor-perf-bar-track { width: 64px; height: 4px; background: #ecebf6; border-radius: 3px; overflow: hidden; flex-shrink: 0; }
-.mayor-perf-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #150c63, #0b044d); }
-</style>
 
 {{-- Stats Grid --}}
 <div class="stats-grid stats-grid-4">
@@ -405,100 +342,15 @@
 
 @push('scripts')
 <script>
-function switchHighlights(tab) {
-    const panels = { performers: 'panelHlPerformers', earners: 'panelHlEarners', leave: 'panelHlLeave' };
-    const titles = { performers: 'Top Attendance Performers', earners: 'Top 5 Highest Earners', leave: 'Recent Leave Activity' };
-    Object.keys(panels).forEach(key => {
-        document.getElementById(panels[key]).style.display = key === tab ? 'block' : 'none';
-    });
-    document.getElementById('tabHlPerformers').classList.toggle('active', tab === 'performers');
-    document.getElementById('tabHlEarners').classList.toggle('active', tab === 'earners');
-    document.getElementById('tabHlLeave').classList.toggle('active', tab === 'leave');
-    document.getElementById('highlightsTitle').textContent = titles[tab];
-    document.getElementById('highlightsSub').textContent = tab === 'performers' ? @json($perfPeriodMonth) : (tab === 'earners' ? @json($payrollAnchor->format('F Y')) : 'Latest 5 applications');
-}
-
-const deptData = @json($departments->take(5)->values());
-const attendanceToday = @json($attendanceToday);
-const payrollTrend = @json($payrollTrend);
-const leaveBreakdown = @json($leaveBreakdown);
-
-function donutOptions() {
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '72%',
-        plugins: { legend: { display: false }, tooltip: { backgroundColor: '#fff', titleColor: '#0b044d', bodyColor: '#56547a', borderColor: '#ecebf6', borderWidth: 1.5, padding: 10 } }
+    window.mayorDashboardData = {
+        perfPeriodMonth: @json($perfPeriodMonth),
+        payrollAnchorLabel: @json($payrollAnchor->format('F Y')),
+        departments: @json($departments->take(5)->values()),
+        attendanceToday: @json($attendanceToday),
+        payrollTrend: @json($payrollTrend),
+        leaveBreakdown: @json($leaveBreakdown),
     };
-}
-
-window.addEventListener('load', () => {
-    if (deptData.length) {
-        new Chart(document.getElementById('deptDonut').getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: deptData.map(d => d.name),
-                datasets: [{ data: deptData.map(d => d.count), backgroundColor: deptData.map(d => d.color), borderWidth: 2, borderColor: '#fff' }]
-            },
-            options: donutOptions()
-        });
-    }
-
-    new Chart(document.getElementById('attendanceDonut').getContext('2d'), {
-        type: 'doughnut',
-        data: {
-            labels: ['On Time', 'Late', 'Absent'],
-            datasets: [{ data: [attendanceToday.on_time, attendanceToday.late, attendanceToday.absent], backgroundColor: ['#15803d', '#c9a227', '#8e1e18'], borderWidth: 2, borderColor: '#fff' }]
-        },
-        options: donutOptions()
-    });
-
-    new Chart(document.getElementById('payrollBar').getContext('2d'), {
-        type: 'bar',
-        data: {
-            labels: payrollTrend.labels,
-            datasets: [{ data: payrollTrend.data, backgroundColor: '#0b044d', borderRadius: 6, maxBarThickness: 28 }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: '#fff', titleColor: '#0b044d', bodyColor: '#56547a', borderColor: '#ecebf6', borderWidth: 1.5, padding: 10,
-                    callbacks: { label: (ctx) => '₱' + Number(ctx.raw).toLocaleString() }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: '#f7f6fc', drawBorder: false },
-                    ticks: {
-                        color: '#8f8daf', font: { size: 10, family: 'Poppins' },
-                        callback: function(value) {
-                            if (value >= 1000000) return '₱' + (value / 1000000).toFixed(1) + 'M';
-                            if (value >= 1000) return '₱' + (value / 1000).toFixed(0) + 'K';
-                            return '₱' + value;
-                        }
-                    }
-                },
-                x: { grid: { display: false, drawBorder: false }, ticks: { color: '#8f8daf', font: { size: 10, family: 'Poppins' } } }
-            }
-        }
-    });
-
-    const leaveTotal = leaveBreakdown.approved + leaveBreakdown.pending + leaveBreakdown.rejected;
-    if (leaveTotal > 0) {
-        new Chart(document.getElementById('leaveDonut').getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Approved', 'Pending', 'Rejected'],
-                datasets: [{ data: [leaveBreakdown.approved, leaveBreakdown.pending, leaveBreakdown.rejected], backgroundColor: ['#15803d', '#c9a227', '#8e1e18'], borderWidth: 2, borderColor: '#fff' }]
-            },
-            options: donutOptions()
-        });
-    }
-});
 </script>
+    @vite('resources/js/mayor/dashboard/mayorDashboard.js')
 @endpush
 @endsection
