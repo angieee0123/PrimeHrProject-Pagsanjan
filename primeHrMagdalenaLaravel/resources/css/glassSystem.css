@@ -1,0 +1,436 @@
+/* ══════════════════════════════════════════════════════════════════════
+   GLASS SYSTEM — shared Apple macOS "frosted glass" design module.
+
+   Extracted from admin/dashboard/adminDashboard.blade.php and
+   admin/attendance/adminAttendance.blade.php (the two pages this look
+   originated on) so every other page can opt in with one class instead
+   of re-pasting the same ~150 lines of scoped CSS per page.
+
+   Usage: add `glass-shell` to a page's top-level content wrapper.
+   Keep modals as SIBLINGS of `.glass-shell`, not children — this wrapper
+   sets `isolation: isolate` for its own decorative background, which
+   would otherwise trap position:fixed modals below the sidebar's z-index.
+   ══════════════════════════════════════════════════════════════════════ */
+
+:root {
+    /* Core brand palette — previously scoped to .glass-shell, so only pages
+       using that class could reference them. Promoted here so any stylesheet
+       or component can consume var(--gp-*) regardless of page wrapper. */
+    --gp-pri: #0b044d;
+    --gp-pri-2: #150c63;
+    --gp-bg: #F7F8FC;
+    --gp-ink: #1E2247;
+    --gp-muted: #7C839D;
+    --gp-glass: rgba(255, 255, 255, .58);
+    --gp-glass-strong: rgba(255, 255, 255, .8);
+    --gp-glass-border: rgba(255, 255, 255, .65);
+    --gp-radius-card: 18px;
+    --gp-radius-table: 20px;
+
+    /* Secondary text/background/status tones — named from the values already
+       hardcoded across the per-page stylesheets (see adminAttendance.css etc.),
+       not new colors. --gp-muted above and --gp-text-soft below are distinct
+       existing greys (#7C839D vs #8f8daf), kept separate rather than merged. */
+    --gp-text-soft: #8f8daf;
+    --gp-text-mid: #56547a;
+    --gp-bg-tint: #f7f6fc;
+    --gp-bg-tint-2: #f2f1fb;
+    --gp-border: #ecebf6;
+    --gp-accent-gold: #c9a227;
+    --gp-good: #15803d;
+    --gp-bad: #8e1e18;
+}
+
+.glass-shell {
+    color: var(--gp-ink);
+    min-height: 100vh;
+    padding: 0 0 48px;
+    position: relative;
+    isolation: isolate;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Poppins', sans-serif;
+}
+.glass-shell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--gp-bg);
+}
+
+/* ---------- Stat cards ---------- */
+.glass-shell .stats-grid,
+.glass-shell .stats-grid-4 { gap: 16px; margin-bottom: 18px; }
+
+.glass-shell .stat-card {
+    border: 1px solid var(--gp-glass-border) !important;
+    border-radius: var(--gp-radius-card) !important;
+    background: linear-gradient(180deg, var(--gp-glass-strong), var(--gp-glass)) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .8),
+        0 1px 3px rgba(15, 23, 42, .04),
+        0 10px 30px rgba(15, 23, 42, .07) !important;
+    transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+.glass-shell .stat-card:hover {
+    border-color: rgba(255, 255, 255, .9) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .9),
+        0 2px 4px rgba(15, 23, 42, .05),
+        0 16px 40px rgba(11, 4, 77, .12) !important;
+    transform: translateY(-2px);
+}
+.glass-shell .stat-icon-wrap {
+    border: 1px solid rgba(255, 255, 255, .7) !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, .55) !important;
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+.glass-shell .stat-label,
+.glass-shell .stat-sub,
+.glass-shell .table-sub,
+.glass-shell .chart-sub { color: var(--gp-muted) !important; }
+.glass-shell .stat-value,
+.glass-shell .table-title,
+.glass-shell .chart-title { color: var(--gp-ink) !important; }
+
+/* ---------- Segmented tabs ---------- */
+.glass-shell .seg-tabs,
+.glass-shell .tab-nav,
+.glass-shell .payroll-tabs {
+    display: inline-flex;
+    gap: 4px;
+    padding: 5px;
+    background: rgba(255, 255, 255, .5);
+    border: 1px solid rgba(255, 255, 255, .6);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 4px 14px rgba(15, 23, 42, .04);
+    border-radius: 16px;
+    margin-bottom: 18px;
+}
+.glass-shell .tab-btn,
+.glass-shell .tab-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px !important;
+    border: none !important;
+    border-bottom: none !important;
+    background: transparent !important;
+    color: var(--gp-muted) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    border-radius: 12px !important;
+    margin-bottom: 0 !important;
+    transition: all .2s ease;
+    text-decoration: none;
+}
+.glass-shell .tab-btn:hover:not(.active),
+.glass-shell .tab-link:hover:not(.active) { color: var(--gp-pri) !important; }
+.glass-shell .tab-btn.active,
+.glass-shell .tab-link.active {
+    color: #fff !important;
+    background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri)) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 6px 16px rgba(11, 4, 77, .28) !important;
+}
+
+/* ---------- Table / list containers ---------- */
+.glass-shell .table-section,
+.glass-shell .chart-card {
+    border: 1px solid var(--gp-glass-border) !important;
+    border-radius: var(--gp-radius-table) !important;
+    background: linear-gradient(180deg, var(--gp-glass-strong), var(--gp-glass)) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), 0 10px 30px rgba(15, 23, 42, .07) !important;
+    margin-bottom: 18px;
+    overflow: hidden;
+}
+.glass-shell .table-header,
+.glass-shell .chart-header {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(15, 23, 42, .06) !important;
+}
+.glass-shell .payroll-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f2f1fb !important;
+    color: #0b044d !important;
+    border-bottom: 2px solid #c9a227 !important;
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+}
+.glass-shell .payroll-table td { border-bottom: 1px solid #ecebf6 !important; }
+.glass-shell .payroll-table tbody tr:nth-child(even) { background: #f7f6fc !important; }
+.glass-shell .payroll-table tbody tr:hover { background: #f2f1fb !important; }
+.glass-shell .table-footer {
+    background: transparent !important;
+    border-top: 1px solid rgba(15, 23, 42, .06) !important;
+}
+
+/* ---------- Toolbar controls: search / filters / buttons ---------- */
+.glass-shell .filter-select,
+.glass-shell .search-input,
+.glass-shell input[type="text"],
+.glass-shell input[type="date"] {
+    border-radius: 999px !important;
+    border-color: rgba(15, 23, 42, .08) !important;
+    background: rgba(255, 255, 255, .55) !important;
+    backdrop-filter: blur(12px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+    color: #56547a !important;
+}
+.glass-shell .btn-export {
+    border-radius: 999px !important;
+    border-color: rgba(15, 23, 42, .08);
+    background: rgba(255, 255, 255, .55);
+    backdrop-filter: blur(12px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+    font-weight: 700 !important;
+    transition: all .22s cubic-bezier(.4, 0, .2, 1) !important;
+}
+.glass-shell .btn-export:hover {
+    background: rgba(255, 255, 255, .85);
+    transform: translateY(-1px);
+}
+.glass-shell .btn-solid,
+.glass-shell .btn-primary,
+.glass-shell .btn-filter-main {
+    border-radius: 999px !important;
+    border-color: transparent !important;
+    background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri)) !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 8px 20px rgba(11, 4, 77, .3) !important;
+    transition: all .22s cubic-bezier(.4, 0, .2, 1) !important;
+}
+.glass-shell .btn-solid:hover,
+.glass-shell .btn-primary:hover,
+.glass-shell .btn-filter-main:hover {
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 10px 26px rgba(11, 4, 77, .38) !important;
+}
+
+/* ---------- Modal footer action buttons ----------
+   Canonical definition for every page — replaces ~10 divergent per-page
+   redefinitions (see resources/views/components/modal-btn.blade.php). This
+   is intentionally NOT scoped to .glass-shell: modals are documented to live
+   as DOM siblings of .glass-shell, not children, so a .glass-shell-scoped
+   rule would never reach them on compliant pages. glassSystem.css is
+   @import-ed at the top of app.css, and app.css is loaded by every layout,
+   so this reaches admin, employee, mayor, and joborder pages alike. */
+.modal-btn-primary,
+.modal-btn-ghost,
+.modal-btn-danger,
+.modal-btn-danger-outline,
+.modal-btn-success {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease, color .2s ease;
+}
+.modal-btn-primary,
+.modal-btn-danger,
+.modal-btn-success { border: none; color: #fff; }
+.modal-btn-ghost,
+.modal-btn-danger-outline { border: 1px solid var(--gp-border); background: #fff; }
+
+.modal-btn-primary { background: linear-gradient(135deg, var(--gp-pri), var(--gp-pri-2)); box-shadow: 0 2px 8px rgba(11, 4, 77, .25); }
+.modal-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(11, 4, 77, .35); }
+
+.modal-btn-ghost { color: var(--gp-text-mid); font-weight: 600; }
+.modal-btn-ghost:hover { background: var(--gp-bg-tint); border-color: var(--gp-pri); color: var(--gp-pri); }
+
+.modal-btn-danger { background: var(--gp-bad); }
+.modal-btn-danger:hover { background: #6b1510; }
+
+.modal-btn-danger-outline { border-color: #fecaca; color: var(--gp-bad); }
+.modal-btn-danger-outline:hover { background: #fdf0ef; border-color: var(--gp-bad); }
+
+.modal-btn-success { background: linear-gradient(135deg, var(--gp-good) 0%, #22c55e 100%); box-shadow: 0 2px 8px rgba(21, 128, 61, .3); }
+.modal-btn-success:hover { box-shadow: 0 4px 12px rgba(21, 128, 61, .4); }
+
+.modal-btn-primary:active,
+.modal-btn-ghost:active { transform: scale(.97); }
+
+/* ---------- Filter card (top-level glass filter toolbar) ---------- */
+.glass-shell .filter-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: linear-gradient(180deg, var(--gp-glass-strong), var(--gp-glass));
+    border: 1px solid var(--gp-glass-border);
+    border-radius: 18px;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), 0 10px 30px rgba(15, 23, 42, .06);
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+.glass-shell .filter-card-fields {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    flex-wrap: wrap;
+}
+.glass-shell .filter-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.glass-shell .fld {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 140px;
+}
+.glass-shell .fld > svg {
+    position: absolute;
+    left: 10px;
+    color: #9aa1b5;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+.glass-shell .fc-input,
+.glass-shell .fc-select {
+    height: 38px;
+    width: 100%;
+    border: 1px solid rgba(15, 23, 42, .08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .55);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    color: var(--gp-ink);
+    font-size: 12.5px;
+    font-family: inherit;
+    outline: none;
+    padding: 0 12px 0 32px;
+    transition: border-color .2s ease, background .2s ease;
+}
+.glass-shell .fc-select {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    padding-right: 30px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%237C839D' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+.glass-shell .fc-input:hover,
+.glass-shell .fc-select:hover { background: rgba(255, 255, 255, .8); }
+.glass-shell .fc-input:focus,
+.glass-shell .fc-select:focus {
+    border-color: var(--gp-pri);
+    background: rgba(255, 255, 255, .95);
+    box-shadow: 0 0 0 3px rgba(11, 4, 77, .07);
+}
+.glass-shell .fc-sep {
+    color: var(--gp-muted);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 0 6px;
+    flex-shrink: 0;
+}
+.glass-shell .fc-divider {
+    width: 1px;
+    height: 24px;
+    background: rgba(15, 23, 42, .1);
+    flex-shrink: 0;
+    margin: 0 6px;
+}
+.glass-shell .btn-solid,
+.glass-shell .btn-ghost {
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 20px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.glass-shell .btn-ghost {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .55);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    color: var(--gp-ink);
+    border: 1px solid rgba(15, 23, 42, .08);
+    box-shadow: none;
+    transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.glass-shell .btn-ghost:hover { background: rgba(255, 255, 255, .85); transform: translateY(-1px); }
+
+/* ---------- Badges & pills ---------- */
+.glass-shell .dept-tag,
+.glass-shell .badge-status,
+.glass-shell .badge-emptype { border-radius: 999px !important; font-weight: 700 !important; }
+
+/* ---------- Pagination ---------- */
+.glass-shell .page-btn {
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, .6) !important;
+    border-color: rgba(15, 23, 42, .08) !important;
+    backdrop-filter: blur(8px) saturate(160%);
+    -webkit-backdrop-filter: blur(8px) saturate(160%);
+}
+.glass-shell .page-btn.active {
+    background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri)) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+    box-shadow: 0 6px 16px rgba(11, 10, 77, .20) !important;
+}
+
+/* ---------- Small icon action buttons (view/edit/delete/QR/etc.) ---------- */
+.glass-shell .btn-view,
+.glass-shell .btn-edit,
+.glass-shell .btn-delete,
+.glass-shell .btn-qr,
+.glass-shell .btn-deactivate,
+.glass-shell .btn-activate,
+.glass-shell .act-btn {
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, .65);
+    backdrop-filter: blur(8px) saturate(160%);
+    -webkit-backdrop-filter: blur(8px) saturate(160%);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-shell .stat-card,
+    .glass-shell .table-section,
+    .glass-shell .chart-card {
+        background: rgba(255, 255, 255, .96) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .glass-shell .seg-tabs,
+    .glass-shell .tab-nav { display: flex; width: 100%; overflow-x: auto; }
+    .glass-shell .filter-card { flex-direction: column; align-items: stretch; }
+    .glass-shell .filter-card-fields { flex-direction: column; }
+    .glass-shell .filter-card-actions { width: 100%; justify-content: stretch; }
+    .glass-shell .filter-card-actions .btn-solid,
+    .glass-shell .filter-card-actions .btn-ghost { flex: 1; justify-content: center; }
+    .glass-shell .fld { width: 100%; }
+    .glass-shell .fc-divider { width: 100%; height: 1px; margin: 4px 0; }
+}

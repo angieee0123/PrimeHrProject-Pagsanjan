@@ -1,0 +1,133 @@
+/* ══ Shared topbar (welcome banner) theme ══
+   The admin topbar design — solid navy panel, frosted-glass icon tile and
+   badges — used by every topbar partial under admin/, employee/ and mayor/.
+
+   This started life as a <style> block copied into a handful of individual
+   topbars (admin attendance, admin dashboard, mayor dashboard), which left the
+   other partials falling back to the older gold-tinted icon and 14px banner.
+   Keeping it in one file means the three areas cannot drift apart again.
+
+   Loaded from layouts/app.blade.php (admin), layouts/employee.blade.php and
+   layouts/mayor.blade.php.
+
+   !important is required: the page stylesheets set .welcome-banner /
+   .banner-icon backgrounds at equal or higher specificity (e.g. employee.css
+   `.permanent-dashboard .welcome-banner`), so plain declarations lose. */
+
+.welcome-banner {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, .18) !important;
+    background: var(--gp-pri) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .16),
+        0 16px 40px rgba(11, 4, 77, .28) !important;
+}
+
+.welcome-banner .banner-icon {
+    border: 1px solid rgba(255, 255, 255, .22) !important;
+    background: rgba(255, 255, 255, .12) !important;
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+}
+
+.welcome-banner .banner-badge {
+    border: 1px solid rgba(255, 255, 255, .16);
+    background: rgba(255, 255, 255, .12) !important;
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+}
+
+.welcome-banner .banner-badge.outline {
+    background: transparent !important;
+}
+
+/* Used by the live/status dots in the admin and mayor dashboard banners. */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .7; }
+}
+
+/* ══ Topbar search box ══
+   Rounded rectangle that sits on the navy banner, matching the frosted icon and
+   badge tiles rather than punching a solid white hole in the panel.
+
+   Resting: translucent frosted glass, white text — it recedes into the banner.
+   In use: opaque white with dark text, so the field the user is typing in is
+   unmistakably the active one.
+
+   "In use" is focus OR :not(:placeholder-shown) — the latter keeps the box
+   solid while it still holds a query after the user clicks away, which is what
+   makes it read as "active" rather than merely "focused". Every topbar search
+   input sets a placeholder, so :placeholder-shown is a reliable "is empty" test.
+
+   Single source of truth: the topbar partials no longer carry their own copies. */
+
+.topbar-search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.topbar-search-icon {
+    position: absolute;
+    left: 12px;
+    color: rgba(255, 255, 255, .55);
+    pointer-events: none;
+    transition: color .2s ease;
+}
+
+.topbar-search-input {
+    width: 260px;
+    padding: 9px 12px 9px 34px;
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, .12);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    font-family: inherit;
+    font-size: 12.5px;
+    color: #fff;
+    outline: none;
+    transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, color .2s ease;
+}
+
+.topbar-search-input::placeholder {
+    color: rgba(255, 255, 255, .55);
+    transition: color .2s ease;
+}
+
+.topbar-search-input:hover {
+    background: rgba(255, 255, 255, .18);
+    border-color: rgba(255, 255, 255, .32);
+}
+
+/* In use — focused, or still holding a query after blur. */
+.topbar-search-input:focus,
+.topbar-search-input:not(:placeholder-shown) {
+    background: #fff;
+    border-color: #fff;
+    color: var(--gp-pri);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, .18);
+}
+
+.topbar-search-input:focus::placeholder,
+.topbar-search-input:not(:placeholder-shown)::placeholder {
+    color: #aaa8cc;
+}
+
+/* The magnifier sits inside the box, so it has to invert along with it. The icon
+   markup precedes the input, so this needs :has() — there is no previous-sibling
+   combinator. Browsers without :has() simply keep the resting icon colour, which
+   stays legible either way. */
+.topbar-search-wrap:focus-within .topbar-search-icon,
+.topbar-search-wrap:has(.topbar-search-input:not(:placeholder-shown)) .topbar-search-icon {
+    color: var(--gp-text-soft);
+}
+
+@media (max-width: 768px) {
+    .banner-right { flex-wrap: wrap; }
+    .topbar-search-wrap { width: 100%; }
+    .topbar-search-input { width: 100%; }
+}

@@ -1,0 +1,200 @@
+/* Employee Travel Order — extracted from inline styles.
+   Scoped to :is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal).
+   .permanent-leavebenefits is this page's <main> wrapper (stats grid, companion
+   invitations, travel history table). The two modal IDs are needed separately
+   because @include renders both modals as siblings of <main> (children of
+   <body>, appended after </div> that closes .app-layout) — a plain
+   ".permanent-leavebenefits .to-x" descendant selector never reaches them, so
+   every rule meant for modal content is scoped to both instead of just the one
+   ancestor class. "to-" = travel order. */
+
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-mb-12 { margin-bottom: 12px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-mb-20 { margin-bottom: 20px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-mb-24 { margin-bottom: 24px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-mt-8 { margin-top: 8px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-mt-16 { margin-top: 16px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-relative { position: relative; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-hidden { display: none; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-cursor-pointer { cursor: pointer; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-inline { display: inline; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-line-tall { line-height: 1.6; }
+
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-flex-between { display: flex; align-items: center; justify-content: space-between; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-flex-between-mt4 { display: flex; justify-content: space-between; margin-top: 4px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-flex-start-8 { display: flex; align-items: flex-start; gap: 8px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-flex-gap-8 { display: flex; align-items: center; gap: 8px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-flex-gap-10 { display: flex; align-items: center; gap: 10px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-flex-gap-12 { display: flex; align-items: center; gap: 12px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-flex-1-minw0 { flex: 1; min-width: 0; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-gap-12 { gap: 12px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-justify-center { justify-content: center; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-ta-center { text-align: center; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-icon-inline { display: inline-block; vertical-align: middle; margin-right: 4px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-icon-top { flex-shrink: 0; margin-top: 2px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-icon-center { margin: 0 auto 12px; display: block; }
+
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-required { color: #8e1e18; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-field-label { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #0b044d; margin-bottom: 8px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-panel-label { display: flex; align-items: center; font-weight: 600; color: #0b044d; margin-bottom: 12px; font-size: 13px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-sublabel { font-size: 12px; color: #6b7280; margin-bottom: 6px; display: block; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-text-muted-11 { color: #9ca3af; font-size: 11px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-text-muted-12 { color: #9ca3af; font-size: 12px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-hint { margin: 8px 0 0 0; font-size: 11px; color: #9ca3af; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-hint-tight { margin: 0; font-size: 11px; color: #9ca3af; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-days-label { font-size: 13px; color: #6b7280; font-weight: 500; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-upload-title { margin: 0 0 4px 0; font-size: 13px; color: #374151; font-weight: 500; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-error-text { margin: 0; color: #991b1b; font-size: 13px; line-height: 1.5; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-remarks-text { color: #991b1b; font-style: italic; line-height: 1.6; }
+
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-panel { background: #fbfbfe; padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--gp-border, #e5e7eb); box-shadow: 0 1px 2px rgba(11,4,77,0.03); }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-days-box { margin-top: 12px; padding: 12px; background: #fff; border-radius: 6px; border: 2px dashed #d1d5db; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-days-input { width: 70px; padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 14px; font-weight: 700; color: #0b044d; text-align: center; background: #f9fafb; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-dropzone { border: 2px dashed #d1d5db; border-radius: 8px; padding: 20px; text-align: center; background: #fafafa; transition: all 0.2s; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-dropzone:hover { border-color: #b7b5d8; background: #f7f6fc; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-dropzone.to-dropzone-active { border-color: var(--gp-pri, #0b044d); background: #f0f0fb; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-file-name-box { margin-top: 12px; padding: 8px 12px; background: #f0f9ff; border-radius: 4px; font-size: 12px; color: #0369a1; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-error-box { padding: 12px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 6px; margin-bottom: 16px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-session-alert-success { padding: 12px 16px; background: #d1fae5; border-left: 3px solid #10b981; border-radius: 6px; margin-bottom: 16px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-session-alert-error { padding: 12px 16px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 6px; margin-bottom: 16px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-flash-text-success { margin: 0; color: #065f46; font-size: 13px; font-weight: 500; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-flash-text-error { margin: 0; color: #991b1b; font-size: 13px; font-weight: 500; }
+
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-input-lg { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-family: inherit; transition: border-color 0.15s, box-shadow 0.15s; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-input-md { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px; font-family: inherit; transition: border-color 0.15s, box-shadow 0.15s; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-select-md { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px; font-family: inherit; background: #fff; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical; line-height: 1.6; transition: border-color 0.15s, box-shadow 0.15s; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-input-currency { width: 100%; padding: 10px 10px 10px 28px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px; font-family: inherit; transition: border-color 0.15s, box-shadow 0.15s; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-currency-symbol { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 13px; font-weight: 600; }
+
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-input-lg:focus,
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-input-md:focus,
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-select-md:focus,
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-textarea:focus,
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-input-currency:focus {
+    outline: none;
+    border-color: var(--gp-pri, #0b044d);
+    box-shadow: 0 0 0 3px rgba(11,4,77,0.10);
+}
+
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-select-box { min-height: 48px; width: 100%; border: 2px solid #e5e7eb; border-radius: 8px; padding: 6px 36px 6px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; cursor: pointer; background: #fff; position: relative; transition: border-color 0.15s, box-shadow 0.15s; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-select-box:focus-within { border-color: var(--gp-pri, #0b044d); box-shadow: 0 0 0 3px rgba(11,4,77,0.10); }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-placeholder { color: #9ca3af; font-size: 13px; padding: 4px 6px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-select-arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-dropdown { position: absolute; top: 100%; left: 0; right: 0; z-index: 50; background: #fff; border: 2px solid #e5e7eb; border-radius: 8px; margin-top: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); overflow: hidden; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-dropdown-search-wrap { padding: 8px; border-bottom: 1px solid #f3f4f6; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-options-list { max-height: 210px; overflow-y: auto; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-option-name { margin: 0; font-size: 13px; font-weight: 600; color: #0b044d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-option-id { margin: 0; font-size: 11px; color: #9ca3af; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-avatar-sm { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid #e5e7eb; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-avatar-initials-sm { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #0b044d, #4338ca); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .companion-option { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; transition: background 0.15s; background: #fff; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .companion-option:hover { background: #f7f6ff; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .companion-option.selected { background: #f0f9ff; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .companion-check { display: none; color: #0369a1; flex-shrink: 0; }
+
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-companion-chip { display: inline-flex; align-items: center; gap: 6px; background: #eef2ff; border: 1px solid #d9d9ee; border-radius: 999px; padding: 3px 8px 3px 4px; font-size: 12px; font-weight: 600; color: #0b044d; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-chip-avatar-img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-chip-avatar-initials { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, #0b044d, #4338ca); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-chip-remove { border: none; background: none; cursor: pointer; color: #6b7280; display: inline-flex; padding: 0; }
+
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-modal-footer { border-top: 1px solid #e5e7eb; padding: 16px 24px; background: #f9fafb; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-btn-pad-sm { padding: 10px 20px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-btn-submit { padding: 10px 24px; display: flex; align-items: center; gap: 8px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-btn-danger { background: #dc2626; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-btn-primary-solid { background: #0b044d; color: #fff; border-color: #0b044d; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-btn-accept { background: #15803d; border-color: #15803d; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-btn-reject { background: #dc2626; border-color: #dc2626; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-btn-empty-cta { margin-top: 12px; padding: 8px 16px; background: #0b044d; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-select-inline { width: auto; padding: 6px 10px; font-size: 13px; }
+
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-pill-amber { background: #fef3c7; color: #a16207; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 999px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-badge-awaiting { background: #ede9fe; color: #6d28d9; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-badge-cancelled { background: #f3f4f6; color: #6b7280; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-sort-icon { display: inline-block; vertical-align: middle; margin-left: 4px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-th-sort { cursor: pointer; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-td-bold { font-size: 13px; color: #0b044d; font-weight: 700; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-td-semibold { font-size: 13px; color: #0b044d; font-weight: 600; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-td-muted { font-size: 13px; color: #6b6a8a; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-td-duration { text-align: center; font-weight: 600; color: #0b044d; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-empty-cell { text-align: center; padding: 40px; color: #6b6a8a; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-empty-title { margin: 0; font-size: 14px; }
+:is(.permanent-leavebenefits, #fileTravelOrderModal, #viewTravelDetailModal) .to-companions-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+
+/* ---------------------------------------------------------------------------
+   Modal scroll containment — #fileTravelOrderModal's form is long (destination,
+   purpose, travel period, travel details, companions, attachment, errors) and
+   #viewTravelDetailModal can grow just as tall once companions/history/approval/
+   remarks sections all show at once. Neither .modal-box nor .modal-body capped
+   height before this, so on shorter viewports the footer buttons (Submit,
+   Cancel Travel Order) could be pushed below the fold with no way to reach them.
+   Turns each modal box into a flex column with a fixed header/footer and a
+   scrolling middle so the footer stays reachable no matter the content length.
+   --------------------------------------------------------------------------- */
+#fileTravelOrderModal .modal-box,
+#viewTravelDetailModal .modal-box {
+    display: flex;
+    flex-direction: column;
+    max-height: 88vh;
+}
+#fileTravelOrderModal .modal-box #travelOrderForm {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+#fileTravelOrderModal .to-modal-body-scroll,
+#viewTravelDetailModal .modal-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+#fileTravelOrderModal .to-modal-body-scroll::-webkit-scrollbar,
+#viewTravelDetailModal .modal-body::-webkit-scrollbar { width: 8px; }
+#fileTravelOrderModal .to-modal-body-scroll::-webkit-scrollbar-thumb,
+#viewTravelDetailModal .modal-body::-webkit-scrollbar-thumb { background: #e0dff0; border-radius: 99px; }
+#fileTravelOrderModal .to-modal-body-scroll::-webkit-scrollbar-track,
+#viewTravelDetailModal .modal-body::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------------------------------------------------------------------------
+   Detail modal: companion cards + document history timeline.
+   Markup for these two blocks is generated in employeeTravelOrder.js
+   (renderTravelCompanions / renderTravelHistory) — kept here as real classes
+   instead of the inline `style="..."` strings that used to build each row.
+   --------------------------------------------------------------------------- */
+#viewTravelDetailModal .to-companion-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #f9fafb; border: 1px solid var(--gp-border, #f0f0f7); border-radius: 10px; }
+#viewTravelDetailModal .to-companion-note { margin: 2px 0 0; font-size: 11px; color: #9ca3af; font-style: italic; }
+#viewTravelDetailModal .to-companion-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gp-border, #e5e7eb); flex-shrink: 0; }
+#viewTravelDetailModal .to-companion-avatar-initials { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--gp-pri, #0b044d), #4338ca); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+
+#viewTravelDetailModal .to-history-item { display: flex; gap: 10px; padding: 6px 0; }
+#viewTravelDetailModal .to-history-rail { display: flex; flex-direction: column; align-items: center; }
+#viewTravelDetailModal .to-history-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+#viewTravelDetailModal .to-history-line { flex: 1; width: 2px; background: var(--gp-border, #e5e7eb); margin-top: 2px; }
+#viewTravelDetailModal .to-history-item:last-child .to-history-line { display: none; }
+#viewTravelDetailModal .to-history-content { flex: 1; padding-bottom: 6px; }
+#viewTravelDetailModal .to-history-label { margin: 0; font-size: 12px; font-weight: 700; color: var(--gp-pri, #0b044d); }
+#viewTravelDetailModal .to-history-time { font-weight: 400; color: #9ca3af; font-size: 11px; }
+#viewTravelDetailModal .to-history-remarks { margin: 2px 0 0; font-size: 12px; color: #6b7280; line-height: 1.5; }
+
+/* Filer avatar in the detail header: .modal-emp-avatar defaults to --gp-bad
+   (dark red) for the payslip modal's deduction theme; that reads as an alarm
+   color here since it's just showing the filer's initials. */
+#viewTravelDetailModal .modal-emp-avatar { background: linear-gradient(135deg, var(--gp-pri, #0b044d), #4338ca); }
+
+@media (max-width: 640px) {
+    #fileTravelOrderModal .modal-box,
+    #viewTravelDetailModal .modal-box {
+        max-height: 94vh;
+    }
+    #fileTravelOrderModal .to-modal-footer,
+    #viewTravelDetailModal .modal-footer {
+        flex-wrap: wrap;
+    }
+    #fileTravelOrderModal .to-modal-footer .modal-btn-ghost,
+    #fileTravelOrderModal .to-modal-footer .modal-btn-primary,
+    #viewTravelDetailModal .modal-footer .modal-btn-ghost,
+    #viewTravelDetailModal .modal-footer .modal-btn-primary {
+        flex: 1;
+        justify-content: center;
+    }
+}

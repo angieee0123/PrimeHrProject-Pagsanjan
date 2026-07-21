@@ -1,0 +1,66 @@
+/* Employee Pass Slip — extracted from inline styles.
+   Scoped under .permanent-leavebenefits (this page's <main> wrapper class,
+   reused from the leave & benefits page's layout). "ps-" = pass slip. */
+
+.permanent-leavebenefits .ps-mb-12 { margin-bottom: 12px; }
+.permanent-leavebenefits .ps-mb-20 { margin-bottom: 20px; }
+.permanent-leavebenefits .ps-mt-8 { margin-top: 8px; }
+.permanent-leavebenefits .ps-mt-16 { margin-top: 16px; }
+.permanent-leavebenefits .ps-hidden { display: none; }
+.permanent-leavebenefits .ps-inline { display: inline; }
+.permanent-leavebenefits .ps-cursor-pointer { cursor: pointer; }
+
+.permanent-leavebenefits .ps-flex-start-8 { display: flex; align-items: flex-start; gap: 8px; }
+.permanent-leavebenefits .ps-flex-gap-8 { display: flex; align-items: center; gap: 8px; }
+.permanent-leavebenefits .ps-flex-gap-12 { display: flex; align-items: center; gap: 12px; }
+.permanent-leavebenefits .ps-flex-between-mt4 { display: flex; justify-content: space-between; margin-top: 4px; }
+.permanent-leavebenefits .ps-radio-row { display: flex; gap: 20px; padding: 10px 4px; }
+.permanent-leavebenefits .ps-radio-label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.permanent-leavebenefits .ps-gap-12 { gap: 12px; }
+.permanent-leavebenefits .ps-ta-center { text-align: center; }
+.permanent-leavebenefits .ps-icon-inline { display: inline-block; vertical-align: middle; margin-right: 4px; }
+.permanent-leavebenefits .ps-icon-top { flex-shrink: 0; margin-top: 2px; }
+.permanent-leavebenefits .ps-icon-center { margin: 0 auto 12px; display: block; }
+
+.permanent-leavebenefits .ps-required { color: #8e1e18; }
+.permanent-leavebenefits .ps-field-label { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #0b044d; margin-bottom: 8px; }
+.permanent-leavebenefits .ps-panel-label { display: block; font-weight: 600; color: #0b044d; margin-bottom: 12px; font-size: 13px; }
+.permanent-leavebenefits .ps-sublabel { font-size: 12px; color: #6b7280; margin-bottom: 6px; display: block; }
+.permanent-leavebenefits .ps-text-muted-11 { color: #9ca3af; font-size: 11px; }
+.permanent-leavebenefits .ps-hint { margin: 8px 0 0 0; font-size: 11px; color: #9ca3af; }
+.permanent-leavebenefits .ps-hint-tight { margin: 0; font-size: 11px; color: #9ca3af; }
+.permanent-leavebenefits .ps-modal-body-scroll { max-height: 70vh; overflow-y: auto; }
+.permanent-leavebenefits .ps-upload-title { margin: 0 0 4px 0; font-size: 13px; color: #374151; font-weight: 500; }
+.permanent-leavebenefits .ps-error-text { margin: 0; color: #991b1b; font-size: 13px; line-height: 1.5; }
+.permanent-leavebenefits .ps-remarks-text { color: #991b1b; font-style: italic; line-height: 1.6; }
+.permanent-leavebenefits .ps-empty-title { margin: 0; font-size: 14px; }
+
+.permanent-leavebenefits .ps-panel { background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px; }
+.permanent-leavebenefits .ps-dropzone { border: 2px dashed #d1d5db; border-radius: 8px; padding: 20px; text-align: center; background: #fafafa; transition: all 0.2s; }
+.permanent-leavebenefits .ps-file-name-box { margin-top: 12px; padding: 8px 12px; background: #f0f9ff; border-radius: 4px; font-size: 12px; color: #0369a1; }
+.permanent-leavebenefits .ps-error-box { padding: 12px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 6px; margin-bottom: 16px; }
+.permanent-leavebenefits .ps-session-alert-success { padding: 12px 16px; background: #d1fae5; border-left: 3px solid #10b981; border-radius: 6px; margin-bottom: 16px; }
+.permanent-leavebenefits .ps-session-alert-error { padding: 12px 16px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 6px; margin-bottom: 16px; }
+.permanent-leavebenefits .ps-flash-text-success { margin: 0; color: #065f46; font-size: 13px; font-weight: 500; }
+.permanent-leavebenefits .ps-flash-text-error { margin: 0; color: #991b1b; font-size: 13px; font-weight: 500; }
+.permanent-leavebenefits .ps-empty-cell { text-align: center; padding: 40px; color: #6b6a8a; }
+
+.permanent-leavebenefits .ps-input-lg { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-family: inherit; }
+.permanent-leavebenefits .ps-select-lg { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff; }
+.permanent-leavebenefits .ps-input-md { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px; font-family: inherit; }
+.permanent-leavebenefits .ps-textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical; line-height: 1.6; }
+
+.permanent-leavebenefits .ps-modal-footer { border-top: 1px solid #e5e7eb; padding: 16px 24px; background: #f9fafb; }
+.permanent-leavebenefits .ps-btn-pad-sm { padding: 10px 20px; }
+.permanent-leavebenefits .ps-btn-submit { padding: 10px 24px; display: flex; align-items: center; gap: 8px; }
+.permanent-leavebenefits .ps-btn-danger { background: #dc2626; }
+.permanent-leavebenefits .ps-btn-primary-solid { background: #0b044d; color: #fff; border-color: #0b044d; }
+.permanent-leavebenefits .ps-btn-reject { background: #dc2626; border-color: #dc2626; }
+.permanent-leavebenefits .ps-btn-empty-cta { margin-top: 12px; padding: 8px 16px; background: #0b044d; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
+.permanent-leavebenefits .ps-select-inline { width: auto; padding: 6px 10px; font-size: 13px; }
+
+.permanent-leavebenefits .ps-badge-cancelled { background: #f3f4f6; color: #6b7280; }
+.permanent-leavebenefits .ps-sort-icon { display: inline-block; vertical-align: middle; margin-left: 4px; }
+.permanent-leavebenefits .ps-th-sort { cursor: pointer; }
+.permanent-leavebenefits .ps-td-semibold { font-size: 13px; color: #0b044d; font-weight: 600; }
+.permanent-leavebenefits .ps-td-muted-center { text-align: center; font-size: 13px; color: #6b6a8a; }

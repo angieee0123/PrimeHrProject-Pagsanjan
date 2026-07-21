@@ -1,0 +1,580 @@
+/* ══════════ EMPLOYEE DASHBOARD ══════════
+   Glass card system mirroring the admin dashboard (adminDashboard.blade.php). */
+.perm-dash {
+    --eh-blue: var(--gp-pri);
+    --eh-blue-2: #1b1464;
+    --eh-card: #ffffff;
+    --eh-ink: #111827;
+    --eh-muted: #667085;
+    --eh-line: #e5e7eb;
+    --eh-glass: rgba(255, 255, 255, .58);
+    --eh-glass-strong: rgba(255, 255, 255, .78);
+    --eh-glass-border: rgba(255, 255, 255, .65);
+    --eh-radius: 18px;
+    padding-bottom: 28px;
+    color: var(--eh-ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Poppins', sans-serif;
+    position: relative;
+    isolation: isolate;
+}
+
+.perm-dash * { letter-spacing: 0; }
+
+/* ── Greeting ──
+   Intentionally not a card: it's the page's focal point, so it sits on the
+   background as plain text rather than competing with the surfaces below. */
+.perm-greeting { margin: 0 0 22px; }
+
+.perm-greeting-title {
+    margin: 0 0 6px;
+    color: var(--eh-ink);
+    font-size: clamp(21px, 2.4vw, 27px);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.perm-greeting-sub {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--eh-muted);
+}
+
+.perm-greeting-fact { display: inline-flex; align-items: center; gap: 7px; }
+
+.perm-greeting-fact::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.perm-greeting-fact strong { color: var(--eh-ink); font-weight: 700; }
+
+.perm-greeting-warn::before { background: #b7791f; }
+.perm-greeting-calm::before { background: #cbd5e1; }
+
+/* ── Glass surfaces ── */
+.perm-dash .stat-card,
+.perm-dash .table-section,
+.perm-dash .chart-card,
+.perm-action-bar {
+    border: 1px solid var(--eh-glass-border) !important;
+    border-radius: var(--eh-radius) !important;
+    background: linear-gradient(180deg, var(--eh-glass-strong), var(--eh-glass)) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .8),
+        0 1px 3px rgba(15, 23, 42, .04),
+        0 10px 30px rgba(15, 23, 42, .07) !important;
+    position: relative;
+    isolation: isolate;
+}
+
+.perm-dash .stat-card:hover,
+.perm-dash .table-section:hover,
+.perm-dash .chart-card:hover {
+    border-color: rgba(255, 255, 255, .9) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .9),
+        0 2px 4px rgba(15, 23, 42, .05),
+        0 16px 40px rgba(11, 4, 77, .12) !important;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .perm-dash .stat-card,
+    .perm-dash .table-section,
+    .perm-dash .chart-card,
+    .perm-action-bar {
+        background: rgba(255, 255, 255, .96) !important;
+    }
+}
+
+/* ── Stats ── */
+.perm-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.perm-stat-hover {
+    cursor: pointer;
+    min-height: 132px;
+    padding: 20px !important;
+    overflow: hidden;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+.perm-stat-hover:hover { transform: translateY(-4px); }
+
+.perm-dash .stat-top { margin-bottom: 16px; }
+
+.perm-dash .stat-label {
+    color: var(--eh-muted) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+}
+
+.perm-dash .stat-value {
+    color: var(--eh-ink) !important;
+    font-size: 26px !important;
+    line-height: 1.05;
+}
+
+.perm-dash .stat-value span { color: var(--eh-muted) !important; }
+
+.perm-dash .stat-icon-wrap {
+    width: 40px !important;
+    height: 40px !important;
+    border: 1px solid rgba(255, 255, 255, .7);
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, .55) !important;
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+
+.perm-dash .stat-sub,
+.perm-dash .table-sub,
+.perm-dash .chart-sub { color: var(--eh-muted) !important; font-size: 12px !important; }
+
+.stat-pill-alert {
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--gp-bad);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+/* ── Action bar ── */
+.perm-action-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+}
+
+.perm-action-spacer { margin-right: auto; }
+
+.perm-quick-btn {
+    font-size: 11px !important;
+    padding: 0 14px !important;
+    height: 34px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-weight: 700 !important;
+}
+
+/* ── Dashboard tabs ──
+   A segmented control on the glass surface, sized larger than the in-card
+   .chart-tab pills so the page hierarchy stays readable: these switch the
+   whole view, those only re-scope a single card. */
+.perm-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    padding: 6px;
+    border: 1px solid var(--eh-glass-border);
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--eh-glass-strong), var(--eh-glass));
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .8),
+        0 1px 3px rgba(15, 23, 42, .04),
+        0 10px 30px rgba(15, 23, 42, .07);
+}
+
+.perm-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--eh-muted);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all .22s cubic-bezier(.4, 0, .2, 1);
+}
+
+.perm-tab:not(.active):hover {
+    background: rgba(11, 4, 77, .06);
+    color: var(--eh-ink);
+}
+
+.perm-tab.active {
+    background: linear-gradient(135deg, var(--eh-blue-2), var(--eh-blue));
+    color: #fff;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .25),
+        0 8px 20px rgba(11, 4, 77, .35);
+}
+
+.perm-tab svg { flex-shrink: 0; }
+
+.perm-tab:focus-visible {
+    outline: 2px solid var(--eh-blue);
+    outline-offset: 2px;
+}
+
+/* Neutral counter — distinct from .stat-pill-alert, which means "needs action". */
+.perm-tab-count {
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(11, 4, 77, .1);
+    color: var(--eh-blue);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.perm-tab.active .perm-tab-count {
+    background: rgba(255, 255, 255, .22);
+    color: #fff;
+}
+
+/* Panels stay in the DOM while hidden — the deduction switcher and CSV export
+   query their elements globally and would break if this were detached. */
+.perm-tab-panel { display: none; }
+.perm-tab-panel.active { display: block; }
+
+/* ── Controls: pills, gradient primary ── */
+.perm-dash .chart-tab,
+.perm-dash .btn-export,
+.perm-dash .modal-btn-primary,
+.perm-dash .filter-select {
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+    transition: all .22s cubic-bezier(.4, 0, .2, 1) !important;
+}
+
+.perm-dash .chart-tab.active,
+.perm-dash .modal-btn-primary {
+    border-color: transparent !important;
+    background: linear-gradient(135deg, var(--eh-blue-2), var(--eh-blue)) !important;
+    color: #fff !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .25),
+        0 8px 20px rgba(11, 4, 77, .35) !important;
+}
+
+.perm-dash .chart-tab.active:hover,
+.perm-dash .modal-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .3),
+        0 10px 26px rgba(11, 4, 77, .42) !important;
+}
+
+.perm-dash .btn-export,
+.perm-dash .filter-select {
+    border-color: rgba(15, 23, 42, .08) !important;
+    background: rgba(255, 255, 255, .55) !important;
+    backdrop-filter: blur(12px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+    color: var(--gp-text-mid) !important;
+}
+
+.perm-dash .btn-export:hover {
+    background: rgba(255, 255, 255, .85) !important;
+    border-color: rgba(15, 23, 42, .12) !important;
+    transform: translateY(-1px);
+}
+
+.perm-dash .chart-tab:not(.active):hover { background: rgba(11, 4, 77, .06) !important; }
+
+/* ── Grids ──
+   Every panel in both rows shares one height, so the two charts and the two
+   side panels all line up. Each child is a flex column, so its body (chart
+   canvas / list) absorbs the height rather than leaving a gap beneath. */
+.perm-dash { --perm-panel-h: 400px; }
+
+.perm-overview-grid,
+.perm-secondary-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 18px;
+    align-items: stretch;
+    margin-bottom: 18px;
+}
+
+.perm-overview-grid > *,
+.perm-secondary-grid > * {
+    min-width: 0;
+    height: var(--perm-panel-h);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Chart.js sizes the canvas to this box (maintainAspectRatio:false), so it
+   needs a definite height — min-height:0 lets it shrink inside the flex column. */
+.perm-chart-canvas-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    padding: 12px 16px 16px;
+}
+
+/* Long lists scroll inside the fixed panel instead of stretching it. */
+.perm-overview-grid .perm-card-body,
+.perm-secondary-grid .perm-card-body {
+    overflow-y: auto;
+    min-height: 0;
+}
+
+/* ── Section chrome ── */
+.perm-dash .table-section { margin-bottom: 18px; }
+
+.perm-dash .table-header,
+.perm-dash .chart-header {
+    align-items: center;
+    padding: 18px 20px !important;
+    border-bottom: 1px solid rgba(15, 23, 42, .06) !important;
+    background: transparent !important;
+    border-radius: var(--eh-radius) var(--eh-radius) 0 0 !important;
+}
+
+.perm-dash .table-title,
+.perm-dash .chart-title {
+    color: var(--eh-ink) !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+}
+
+.perm-dash .chart-card { padding: 0 !important; }
+
+.perm-dash .payroll-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.perm-dash .table-wrapper {
+    max-width: 100%;
+    overflow: auto;
+}
+
+.perm-dash .payroll-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgba(248, 250, 252, .75);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    color: #667085;
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.perm-dash .payroll-table td { border-bottom: 1px solid rgba(15, 23, 42, .05); }
+.perm-dash .payroll-table tbody tr:hover { background: rgba(11, 4, 77, .035); }
+
+.perm-dash .dept-tag,
+.perm-dash .badge-status {
+    border-radius: 999px !important;
+    font-weight: 800 !important;
+}
+
+.perm-card-body { padding: 8px 20px 16px; flex: 1; }
+
+.perm-overview-grid .perm-empty,
+.perm-secondary-grid .perm-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── My Requests rows ── */
+.perm-req-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(15, 23, 42, .05);
+}
+
+.perm-req-row:last-child { border-bottom: 0; }
+
+.perm-req-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.perm-req-info { flex: 1; min-width: 0; }
+
+.perm-req-title {
+    margin: 0 0 3px;
+    color: var(--eh-ink);
+    font-size: 12.5px;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.perm-req-sub {
+    margin: 0;
+    color: var(--eh-muted);
+    font-size: 11px;
+}
+
+/* ── Leave balance bars ── */
+.perm-balance-row { margin-bottom: 16px; }
+.perm-balance-row:last-child { margin-bottom: 4px; }
+
+.perm-balance-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.perm-balance-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.perm-balance-val {
+    font-size: 12.5px;
+    font-weight: 800;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.perm-balance-val em {
+    font-style: normal;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.perm-balance-track {
+    height: 6px;
+    border-radius: 999px;
+    background: #eef2f6;
+    overflow: hidden;
+}
+
+.perm-balance-fill {
+    height: 100%;
+    border-radius: inherit;
+    transition: width .3s ease;
+}
+
+/* ── Empty states ── */
+.perm-empty { text-align: center; padding: 32px 24px; }
+
+.perm-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: #f1f5f9;
+}
+
+.perm-empty-title { margin: 0 0 4px; font-size: 13px; font-weight: 700; color: #475569; }
+.perm-empty-sub { margin: 0; font-size: 12px; color: #94a3b8; }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+    .perm-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .perm-overview-grid,
+    .perm-secondary-grid { grid-template-columns: 1fr; }
+
+    /* Stacked: nothing to align against, so panels take their natural height
+       and only the charts keep a floor so the canvas stays legible. */
+    .perm-overview-grid > *,
+    .perm-secondary-grid > * { height: auto; }
+
+    .perm-overview-grid .chart-card,
+    .perm-secondary-grid .chart-card { height: 340px; }
+}
+
+@media (max-width: 760px) {
+    .perm-action-bar { flex-direction: column; align-items: stretch; }
+    .perm-action-spacer { margin-right: 0; margin-bottom: 4px; }
+    .perm-quick-btn { width: 100% !important; justify-content: center; }
+    .perm-stats { grid-template-columns: 1fr !important; }
+
+    .perm-dash .table-header,
+    .perm-dash .table-actions,
+    .perm-dash .chart-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .perm-dash .table-actions > * { width: 100% !important; }
+
+    /* Header wraps to two rows here, so give the chart body room back. */
+    .perm-overview-grid .chart-card,
+    .perm-secondary-grid .chart-card { height: 380px; }
+}
+
+@media (max-width: 540px) {
+    .perm-dash .stat-value { font-size: 24px !important; }
+    .perm-stat-hover { min-height: auto; }
+
+    /* Keep the tabs side by side — they're the page's primary navigation, and
+       stacking them costs a full row. Drop the icons instead. */
+    .perm-tab {
+        gap: 5px;
+        padding: 10px 10px;
+        font-size: 11.5px;
+    }
+
+    .perm-tab svg { display: none; }
+}
+
+/* ══════════ Utility classes (replacing inline style="") ══════════ */
+.eh-dot-blue { background: #0b044d; }
+.eh-dot-green { background: #22c55e; }
+.eh-dot-gold { background: #d9bb00; }
+.eh-flex-row-6 { display: flex; align-items: center; gap: 6px; }
+.eh-flex-row-8 { display: flex; align-items: center; gap: 8px; }
+.eh-flex-row-8-mw0 { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.eh-flex-row-10 { display: flex; align-items: center; gap: 10px; }
+.eh-unit-label { font-size: 14px; font-weight: 500; }
+.eh-quick-icon { width: 34px; height: 34px; border-radius: 10px; background: #eef2ff; display: flex; align-items: center; justify-content: center; color: #0b044d; flex-shrink: 0; }
+.eh-quick-title { font-size: 13px; font-weight: 800; color: #111827; margin: 0; }
+.eh-quick-sub { font-size: 11px; color: #667085; margin: 0; }
+.eh-m0 { margin: 0; }
+.eh-btn-export-sm { font-size: 11px; padding: 6px 12px; }
+.eh-secondary-grid-single { grid-template-columns: 1fr; }
+.eh-cursor-pointer { cursor: pointer; }
+.eh-subtext { font-size: 11px; color: #9999bb; }
+.eh-pending-note { color: #a16207; font-size: 12px; }
+.eh-tbd-note { color: #9999bb; font-size: 12px; }
+.eh-na-note { color: #9999bb; }
+.eh-hidden { display: none; }
+.eh-remark-text { font-size: 12px; color: #6b6a8a; }
+.eh-net-pay-cell { font-weight: 700; color: #15803d; }
+.eh-no-transform { text-transform: none; }

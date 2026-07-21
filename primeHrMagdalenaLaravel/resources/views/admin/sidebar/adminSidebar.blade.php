@@ -1,0 +1,115 @@
+@php
+$navItems = [
+    ['id' => 'admin.dashboard',   'label' => 'Dashboard',              'route' => route('admin.dashboard')],
+    ['id' => 'admin.recruitment', 'label' => 'Recruitment',            'route' => route('admin.recruitment')],
+    ['id' => 'admin.personnel',   'label' => 'Personnel',              'route' => route('admin.personnel')],
+    ['id' => 'admin.training',    'label' => 'Training & Development', 'route' => route('admin.training')],
+    ['id' => 'admin.performance', 'label' => 'Performance Management', 'route' => route('admin.performance')],
+    ['id' => 'admin.attendance',  'label' => 'Attendance',             'route' => route('admin.attendance')],
+    ['id' => 'admin.leave',       'label' => 'Leave & Benefits',       'route' => route('admin.leave')],
+    ['id' => 'admin.travelorder', 'label' => 'Travel Orders',          'route' => route('admin.travelorder')],
+    ['id' => 'admin.passslip',    'label' => 'Pass Slip',              'route' => route('admin.passslip')],
+    ['id' => 'admin.payroll',     'label' => 'Payroll',                'route' => route('admin.payroll')],
+    ['id' => 'admin.deductions',  'label' => 'Deductions',             'route' => route('admin.deductions')],
+    ['id' => 'admin.departments', 'label' => 'Departments',            'route' => route('admin.departments')],
+    ['id' => 'admin.reports',     'label' => 'Reports',                'route' => route('admin.reports')],
+    ['id' => 'admin.settings',    'label' => 'Settings',               'route' => route('admin.settings')],
+];
+$currentRoute = Route::currentRouteName();
+@endphp
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-header">
+        <div class="logo">
+            <div class="logo-mark">
+                <img src="/municipal-of-pagsanjan-logo.jpg" alt="Pagsanjan Logo"
+                     style="width:32px;height:32px;border-radius:50%;object-fit:cover"
+                     onerror="this.style.display='none'">
+            </div>
+            <div class="logo-text-wrap" id="logo-text">
+                <span class="logo-text">PRIME HRIS</span>
+                <span class="logo-sub">Pagsanjan, Laguna</span>
+            </div>
+        </div>
+        <button class="toggle-btn" id="toggle-btn" aria-label="Toggle sidebar">‹</button>
+    </div>
+
+    <p class="nav-section-label" id="nav-label">NAVIGATION</p>
+
+    <nav class="sidebar-nav" id="sidebar-nav">
+        @foreach($navItems as $item)
+        <a href="{{ $item['route'] }}"
+           class="nav-item {{ $currentRoute === $item['id'] ? 'active' : '' }}"
+           title="{{ $item['label'] }}">
+            <span class="nav-icon">
+                @if($item['id'] === 'admin.dashboard')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                @elseif($item['id'] === 'admin.recruitment')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                @elseif($item['id'] === 'admin.personnel')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                @elseif($item['id'] === 'admin.training')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                @elseif($item['id'] === 'admin.performance')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                @elseif($item['id'] === 'admin.attendance')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
+                @elseif($item['id'] === 'admin.leave')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                @elseif($item['id'] === 'admin.travelorder')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                @elseif($item['id'] === 'admin.passslip')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                @elseif($item['id'] === 'admin.payroll')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" stroke="none"><text x="3" y="19" font-size="17" font-weight="bold" font-family="Arial, sans-serif">₱</text></svg>
+                @elseif($item['id'] === 'admin.deductions')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                @elseif($item['id'] === 'admin.departments')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                @elseif($item['id'] === 'admin.reports')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                @elseif($item['id'] === 'admin.settings')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                @endif
+            </span>
+            <span class="nav-label">{{ $item['label'] }}</span>
+            @if($currentRoute === $item['id'])
+            <span class="nav-active-bar"></span>
+            @endif
+        </a>
+        @endforeach
+    </nav>
+
+    <div class="sidebar-footer" id="sidebar-footer">
+        <div class="user-avatar-wrap">
+            @if(Auth::check() && Auth::user()->employee && Auth::user()->employee->photo)
+                <img src="{{ Auth::user()->employee->photo }}" class="user-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
+            @else
+                <div class="user-avatar" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#0b044d; color:white; font-weight:600; font-size:13px; border:2px solid #ecebf6;">
+                    @if(Auth::check())
+                        {{ strtoupper(substr(Auth::user()->employee->first_name ?? 'A', 0, 1) . substr(Auth::user()->employee->last_name ?? 'D', 0, 1)) }}
+                    @else
+                        AD
+                    @endif
+                </div>
+            @endif
+            <span class="user-status-dot"></span>
+        </div>
+        <div class="user-info" id="user-info">
+            <p class="user-name">{{ Auth::check() ? (Auth::user()->employee->first_name ?? 'Admin') . ' ' . (Auth::user()->employee->last_name ?? 'User') : 'Admin User' }}</p>
+            <p class="user-role">{{ ($authRole ?? null) === 'Admin' ? 'Administrator' : (($authRole ?? null) === 'Hr' ? 'HR Staff' : ($authRole ?? 'HR Staff')) }}</p>
+        </div>
+        @if(Auth::check() && count(Auth::user()->dashboardRoutes()) > 1)
+            <a href="{{ route('select-role') }}" class="switch-role-btn" title="Switch Role">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            </a>
+        @endif
+        <form action="{{ route('logout') }}" method="POST" style="margin:0;">
+            @csrf
+            <button type="submit" class="logout-btn" title="Logout">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+        </form>
+    </div>
+</aside>

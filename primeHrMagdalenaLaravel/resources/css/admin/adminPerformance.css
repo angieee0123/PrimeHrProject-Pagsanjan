@@ -1,0 +1,78 @@
+/* ── adminPerformance.css ── */
+
+/* Stat icon wrap colours */
+.pf-icon-primary { background: rgba(11,4,77,0.1); }
+.pf-icon-success { background: rgba(21,128,61,0.1); }
+.pf-icon-warning { background: rgba(217,187,0,0.1); }
+.pf-icon-purple  { background: rgba(107,63,160,0.1); }
+
+/* Stat dot colours */
+.pf-dot-primary { background: var(--gp-pri); }
+.pf-dot-success { background: var(--gp-good); }
+.pf-dot-warning { background: var(--gp-accent-gold); }
+.pf-dot-purple  { background: var(--gp-text-mid); }
+
+/* Table cell helpers */
+.pf-period-cell    { font-size: 12.5px; color: var(--gp-text-mid); white-space: nowrap; }
+.pf-evaluator-cell { font-size: 12.5px; color: var(--gp-text-mid); }
+
+/* Star rating */
+.pf-rating-wrap  { display: flex; align-items: center; gap: 6px; }
+.pf-stars        { display: flex; gap: 2px; }
+.pf-rating-value { font-size: 13px; color: var(--gp-pri); font-weight: 600; }
+.pf-not-rated    { font-size: 12.5px; color: var(--gp-text-soft); }
+
+/* Evaluate button */
+.btn-evaluate {
+    padding: 5px 14px;
+    border: 1.5px solid var(--gp-pri);
+    border-radius: 7px;
+    background: var(--gp-pri);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-evaluate:hover { background: var(--gp-pri-2); border-color: var(--gp-pri-2); }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 40px 20px; }
+.empty-sub   { font-size: 13px; color: var(--gp-text-soft); margin: 0; }
+
+/* View modal — employee row */
+.pf-modal-emp-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--gp-bg-tint);
+    border-radius: 12px;
+}
+.pf-modal-emp-id { font-size: 11px; color: var(--gp-text-soft); margin: 0 0 4px; }
+
+/* Avatar size variant */
+.emp-avatar-lg {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+}
+
+/* Evaluate form — textarea */
+.form-field textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid var(--gp-border);
+    border-radius: 9px;
+    font-size: 13px;
+    font-family: 'Poppins', sans-serif;
+    color: var(--gp-pri);
+    outline: none;
+    box-sizing: border-box;
+    background: #fff;
+    resize: vertical;
+}
+.form-field textarea:focus { border-color: var(--gp-pri); }

@@ -1,0 +1,254 @@
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+function settingsPost(url, body) {
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+        },
+        body: JSON.stringify(body),
+    }).then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(data.message || 'Something went wrong. Please try again.');
+        }
+        return data;
+    });
+}
+
+window.switchSettingsTab = function (tabId, btn) {
+    document.querySelectorAll('.settings-nav-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#tab-profile, #tab-security, #tab-notifications, #tab-ai').forEach(t => t.classList.add('hidden'));
+    document.getElementById('tab-' + tabId).classList.remove('hidden');
+};
+
+window.toggleSetting = function (btn) {
+    btn.classList.toggle('active');
+};
+
+function showSavedModal(message) {
+    const now = new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', hour12: true }) +
+                ', ' + new Date().toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+    document.getElementById('savedTime').textContent = now;
+    document.getElementById('savedMsg').textContent = message;
+    const modal = document.getElementById('settingsSavedModal');
+    modal.style.opacity = '1';
+    modal.style.visibility = 'visible';
+    document.getElementById('settingsSavedBox').style.transform = 'translateY(0)';
+}
+
+window.closeSavedModal = function () {
+    const modal = document.getElementById('settingsSavedModal');
+    modal.style.opacity = '0';
+    modal.style.visibility = 'hidden';
+    document.getElementById('settingsSavedBox').style.transform = 'translateY(16px)';
+};
+
+function showFieldError(elId, message) {
+    const el = document.getElementById(elId);
+    el.textContent = message;
+    el.classList.remove('hidden');
+}
+
+function hideFieldError(elId) {
+    document.getElementById(elId).classList.add('hidden');
+}
+
+// ── Avatar photo ──
+function setAvatarDisplay(containerId, initialsId, photoUrl) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = photoUrl
+        ? `<img src="${photoUrl}" alt="" class="settings-avatar-img">`
+        : (document.getElementById(initialsId)?.outerHTML || container.innerHTML);
+}
+
+window.uploadAvatarPhoto = function (input) {
+    hideFieldError('avatarMsg');
+    const file = input.files ? input.files[0] : null;
+    if (!file) return;
+
+    const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowed.includes(file.type)) {
+        showFieldError('avatarMsg', 'Please upload a JPEG, PNG, or WebP image.');
+        input.value = '';
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        showFieldError('avatarMsg', 'Image must be 5 MB or smaller.');
+        input.value = '';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    fetch('/admin/settings/photo', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+        body: formData,
+    })
+        .then(async (response) => {
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.message || 'Failed to upload photo.');
+            return data;
+        })
+        .then(data => {
+            setAvatarDisplay('sidebarAvatar', 'sidebarAvatarInitials', data.photo);
+            setAvatarDisplay('mainAvatar', 'mainAvatarInitials', data.photo);
+            showSavedModal('Your profile photo has been updated.');
+        })
+        .catch(err => showFieldError('avatarMsg', err.message))
+        .finally(() => { input.value = ''; });
+};
+
+// ── Profile ──
+window.resetProfile = function () {
+    const data = window.adminSettingsData || {};
+    document.getElementById('settingsEmail').value = data.email || '';
+    document.getElementById('settingsContactNo').value = data.contactNumber || '';
+    hideFieldError('profileMsg');
+};
+
+window.saveProfile = function () {
+    hideFieldError('profileMsg');
+    const email = document.getElementById('settingsEmail').value.trim();
+    const contactNumber = document.getElementById('settingsContactNo').value.trim();
+
+    if (!email) {
+        showFieldError('profileMsg', 'Email address is required.');
+        return;
+    }
+
+    const btn = document.getElementById('profileSaveBtn');
+    btn.disabled = true;
+
+    settingsPost('/admin/settings/profile', { email, contact_number: contactNumber })
+        .then(() => {
+            window.adminSettingsData.email = email;
+            window.adminSettingsData.contactNumber = contactNumber;
+            showSavedModal('Your personal information has been saved successfully.');
+        })
+        .catch(err => showFieldError('profileMsg', err.message))
+        .finally(() => { btn.disabled = false; });
+};
+
+// ── Security ──
+window.changePassword = function () {
+    hideFieldError('pwMsg');
+    const current = document.getElementById('currentPw').value;
+    const newPw = document.getElementById('newPw').value;
+    const confirm = document.getElementById('confirmPw').value;
+
+    if (!current || !newPw || !confirm) {
+        showFieldError('pwMsg', 'Please fill in all password fields.');
+        return;
+    }
+    if (newPw.length < 8) {
+        showFieldError('pwMsg', 'New password must be at least 8 characters.');
+        return;
+    }
+    if (newPw !== confirm) {
+        showFieldError('pwMsg', 'New password and confirmation do not match.');
+        return;
+    }
+
+    const btn = document.getElementById('pwSaveBtn');
+    btn.disabled = true;
+
+    settingsPost('/admin/settings/password', {
+        current_password: current,
+        new_password: newPw,
+        new_password_confirmation: confirm,
+    })
+        .then(() => {
+            document.getElementById('currentPw').value = '';
+            document.getElementById('newPw').value = '';
+            document.getElementById('confirmPw').value = '';
+            showSavedModal('Your password has been changed successfully.');
+        })
+        .catch(err => showFieldError('pwMsg', err.message))
+        .finally(() => { btn.disabled = false; });
+};
+
+// ── Notifications ──
+window.saveNotificationPrefs = function () {
+    hideFieldError('notifMsg');
+    const prefs = {};
+    document.querySelectorAll('#tab-notifications .settings-toggle[data-pref]').forEach(toggle => {
+        prefs[toggle.dataset.pref] = toggle.classList.contains('active');
+    });
+
+    const btn = document.getElementById('notifSaveBtn');
+    btn.disabled = true;
+
+    settingsPost('/admin/settings/notifications', prefs)
+        .then(() => showSavedModal('Your notification preferences have been saved.'))
+        .catch(err => showFieldError('notifMsg', err.message))
+        .finally(() => { btn.disabled = false; });
+};
+
+// ── AI / Chatbot ──
+window.onAiProviderChange = function () {
+    const provider = document.getElementById('aiProvider').value || 'groq';
+    const defaults = (window.adminSettingsData || {}).aiDefaultModels || {};
+    document.getElementById('aiModel').placeholder = defaults[provider] || '';
+};
+
+window.saveAiSettings = function () {
+    hideFieldError('aiMsg');
+    const provider = document.getElementById('aiProvider').value;
+    const model = document.getElementById('aiModel').value.trim();
+    const apiKey = document.getElementById('aiApiKey').value.trim();
+
+    const btn = document.getElementById('aiSaveBtn');
+    btn.disabled = true;
+
+    settingsPost('/admin/settings/ai', { provider, model, api_key: apiKey || null })
+        .then(() => {
+            document.getElementById('aiApiKey').value = '';
+            showSavedModal(provider ? 'Your AI provider settings have been saved.' : 'Reverted to the system default AI provider.');
+        })
+        .catch(err => showFieldError('aiMsg', err.message))
+        .finally(() => { btn.disabled = false; });
+};
+
+window.revertAiSettings = function () {
+    document.getElementById('aiProvider').value = '';
+    document.getElementById('aiModel').value = '';
+    document.getElementById('aiApiKey').value = '';
+    onAiProviderChange();
+    saveAiSettings();
+};
+
+// ── AI / Chatbot — System Default (admin-only) ──
+window.onSystemAiProviderChange = function () {
+    const el = document.getElementById('systemAiProvider');
+    if (!el) return;
+    const provider = el.value || 'groq';
+    const defaults = (window.adminSettingsData || {}).aiDefaultModels || {};
+    document.getElementById('systemAiModel').placeholder = defaults[provider] || '';
+};
+
+window.saveSystemAiSettings = function () {
+    hideFieldError('systemAiMsg');
+    const provider = document.getElementById('systemAiProvider').value;
+    const model = document.getElementById('systemAiModel').value.trim();
+    const apiKey = document.getElementById('systemAiApiKey').value.trim();
+
+    const btn = document.getElementById('systemAiSaveBtn');
+    btn.disabled = true;
+
+    settingsPost('/admin/settings/system-ai', { provider, model, api_key: apiKey || null })
+        .then(() => {
+            document.getElementById('systemAiApiKey').value = '';
+            showSavedModal(provider ? 'The system default AI settings have been saved.' : 'System default cleared.');
+        })
+        .catch(err => showFieldError('systemAiMsg', err.message))
+        .finally(() => { btn.disabled = false; });
+};
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSavedModal(); });

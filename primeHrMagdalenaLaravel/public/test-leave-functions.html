@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leave Request Functions Test</title>
+    <meta name="csrf-token" content="test-token">
+</head>
+<body>
+    <h1>Leave Request Functions Test</h1>
+    
+    <button onclick="testApproveFunction()">Test Approve Function</button>
+    <button onclick="testRejectFunction()">Test Reject Function</button>
+    <button onclick="testViewFunction()">Test View Function</button>
+    
+    <div id="results"></div>
+    
+    <script>
+        // Mock functions for testing
+        function testApproveFunction() {
+            if (typeof approveLeaveRequest === 'function') {
+                document.getElementById('results').innerHTML += '<p>✅ approveLeaveRequest function exists</p>';
+            } else {
+                document.getElementById('results').innerHTML += '<p>❌ approveLeaveRequest function NOT found</p>';
+            }
+        }
+        
+        function testRejectFunction() {
+            if (typeof openRejectModal === 'function') {
+                document.getElementById('results').innerHTML += '<p>✅ openRejectModal function exists</p>';
+            } else {
+                document.getElementById('results').innerHTML += '<p>❌ openRejectModal function NOT found</p>';
+            }
+        }
+        
+        function testViewFunction() {
+            if (typeof openAdminLeaveDetailModal === 'function') {
+                document.getElementById('results').innerHTML += '<p>✅ openAdminLeaveDetailModal function exists</p>';
+            } else {
+                document.getElementById('results').innerHTML += '<p>❌ openAdminLeaveDetailModal function NOT found</p>';
+            }
+        }
+        
+        // Test on page load
+        window.addEventListener('load', function() {
+            testApproveFunction();
+            testRejectFunction();
+            testViewFunction();
+        });
+    </script>
+</body>
+</html>
