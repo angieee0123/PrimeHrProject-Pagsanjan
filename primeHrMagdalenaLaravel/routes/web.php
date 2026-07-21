@@ -383,16 +383,6 @@ Route::get('/admin/reports', function () {
     return view('admin.reports.adminReports');
 })->middleware('auth')->name('admin.reports');
 
-// Chatbot Test Page
-Route::get('/admin/test-chatbot', function () {
-    return view('admin.test-chatbot');
-})->middleware('auth')->name('admin.test-chatbot');
-
-// ✅ NEW: Chatbot with Laravel Session Integration
-Route::get('/admin/chatbot', function () {
-    return view('admin.chatbot');
-})->middleware('auth')->name('admin.chatbot');
-
 // Chatbot API
 Route::post('/chatbot/chat', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware('auth')->name('chatbot.chat');
 Route::get('/chatbot/history', [\App\Http\Controllers\ChatbotController::class, 'history'])->middleware('auth')->name('chatbot.history');
