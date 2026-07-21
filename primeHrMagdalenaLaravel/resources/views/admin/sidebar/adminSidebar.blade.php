@@ -13,7 +13,7 @@ $navItems = [
     ['id' => 'admin.deductions',  'label' => 'Deductions',             'route' => route('admin.deductions')],
     ['id' => 'admin.departments', 'label' => 'Departments',            'route' => route('admin.departments')],
     ['id' => 'admin.reports',     'label' => 'Reports',                'route' => route('admin.reports')],
-    ['id' => 'admin.settings',    'label' => 'Settings',               'route' => '#'],
+    ['id' => 'admin.settings',    'label' => 'Settings',               'route' => route('admin.settings')],
 ];
 $currentRoute = Route::currentRouteName();
 @endphp

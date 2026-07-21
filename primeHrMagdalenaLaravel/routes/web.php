@@ -384,6 +384,12 @@ Route::get('/admin/reports', function () {
     return view('admin.reports.adminReports');
 })->middleware('auth')->name('admin.reports');
 
+Route::get('/admin/settings', [\App\Http\Controllers\AdminSettingsController::class, 'index'])->middleware('auth')->name('admin.settings');
+Route::post('/admin/settings/profile', [\App\Http\Controllers\AdminSettingsController::class, 'updateProfile'])->middleware('auth')->name('admin.settings.profile');
+Route::post('/admin/settings/password', [\App\Http\Controllers\AdminSettingsController::class, 'updatePassword'])->middleware('auth')->name('admin.settings.password');
+Route::post('/admin/settings/notifications', [\App\Http\Controllers\AdminSettingsController::class, 'updateNotifications'])->middleware('auth')->name('admin.settings.notifications');
+Route::post('/admin/settings/ai', [\App\Http\Controllers\AdminSettingsController::class, 'updateAiSettings'])->middleware('auth')->name('admin.settings.ai');
+
 // Chatbot API
 Route::post('/chatbot/chat', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware('auth')->name('chatbot.chat');
 Route::get('/chatbot/history', [\App\Http\Controllers\ChatbotController::class, 'history'])->middleware('auth')->name('chatbot.history');

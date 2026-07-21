@@ -10,7 +10,6 @@ use App\Models\SalaryComputation;
 use App\Models\Training;
 use App\Models\TravelOrder;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class EmployeeChatbotService
@@ -475,12 +474,6 @@ TEXT;
 
     private function generateResponse(string $message, string $context, Employee $employee): string
     {
-        $apiKey = config('services.groq.api_key') ?: env('GROQ_API_KEY');
-
-        if (!$apiKey) {
-            return $this->fallbackResponse($message, $context);
-        }
-
         $prompt = <<<PROMPT
 You are the PRIME HRIS assistant for a single municipal employee using the mobile app.
 
@@ -498,30 +491,9 @@ STRICT RULES:
 Employee's question: "{$message}"
 PROMPT;
 
-        try {
-            $response = Http::timeout(20)->withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type' => 'application/json',
-            ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                'model' => config('services.groq.model', 'llama-3.3-70b-versatile'),
-                'messages' => [
-                    ['role' => 'user', 'content' => $prompt],
-                ],
-                'temperature' => 0.5,
-                'max_tokens' => 450,
-            ]);
+        $content = AiChatService::complete($employee->user, $prompt, 0.5, 450);
 
-            if ($response->successful()) {
-                $content = $response->json('choices.0.message.content');
-                if ($content) {
-                    return trim($content);
-                }
-            }
-        } catch (\Throwable $e) {
-            \Log::warning('Employee chatbot Groq error: ' . $e->getMessage());
-        }
-
-        return $this->fallbackResponse($message, $context);
+        return $content !== null ? trim($content) : $this->fallbackResponse($message, $context);
     }
 
     private function fallbackResponse(string $message, string $context): string

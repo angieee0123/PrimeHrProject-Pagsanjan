@@ -51,6 +51,28 @@ class User extends Authenticatable
         return $this->belongsTo(Employee::class, 'employee_id');
     }
 
+    public function notificationPreference()
+    {
+        return $this->hasOne(UserNotificationPreference::class);
+    }
+
+    public function aiSetting()
+    {
+        return $this->hasOne(UserAiSetting::class);
+    }
+
+    /**
+     * Whether this user wants to receive the given notification category.
+     * Opt-out model: a user with no preference row yet (the common case,
+     * since this predates the preferences feature) wants everything.
+     */
+    public function wantsNotification(string $key): bool
+    {
+        $pref = $this->notificationPreference;
+
+        return $pref === null || (bool) $pref->{$key};
+    }
+
     /**
      * Whether this user has been granted the given role.
      */

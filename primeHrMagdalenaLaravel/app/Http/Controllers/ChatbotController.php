@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Services\AiChatService;
 
 class ChatbotController extends Controller
 {
@@ -361,7 +362,7 @@ User Question: {$question}
 SQL Query:
 PROMPT;
 
-        $content = $this->callGroq($prompt, 0.1, 400);
+        $content = $this->callAi($prompt, 0.1, 400);
 
         if (!$content || str_contains(strtoupper($content), 'CANNOT_ANSWER')) {
             return null;
@@ -415,7 +416,7 @@ Instructions:
 - If the result shows leave balances, mention remaining VL and SL credits after deduction
 PROMPT;
 
-        return $this->callGroq($prompt, 0.7, 400) ?? $this->buildFallbackNarration($results);
+        return $this->callAi($prompt, 0.7, 400) ?? $this->buildFallbackNarration($results);
     }
 
     private function askGroqDirectly(string $question, array $history = []): string
@@ -436,7 +437,7 @@ Latest User Question: {$question}
 Provide a clear, friendly answer in 2-4 sentences. Match the user's language (Tagalog or English) and don't repeat introductions already made earlier in the conversation.
 PROMPT;
 
-        return $this->callGroq($prompt, 0.7, 500)
+        return $this->callAi($prompt, 0.7, 500)
             ?? "I'm not sure how to answer that. Could you rephrase or ask about employees, attendance, leave balances, or HR policies?";
     }
 
@@ -553,34 +554,9 @@ PROMPT;
         return null;
     }
 
-    private function callGroq(string $prompt, float $temperature, int $maxTokens): ?string
+    private function callAi(string $prompt, float $temperature, int $maxTokens): ?string
     {
-        $apiKey = config('services.groq.api_key') ?: env('GROQ_API_KEY');
-        if (!$apiKey) {
-            return null;
-        }
-
-        try {
-            $response = Http::timeout(20)->withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type'  => 'application/json',
-            ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                'model'       => config('services.groq.model', 'llama-3.3-70b-versatile'),
-                'messages'    => [['role' => 'user', 'content' => $prompt]],
-                'temperature' => $temperature,
-                'max_tokens'  => $maxTokens,
-            ]);
-
-            if ($response->successful()) {
-                return $response->json('choices.0.message.content');
-            }
-
-            Log::error('Groq API error: ' . $response->status() . ' ' . $response->body());
-        } catch (\Throwable $e) {
-            Log::error('Groq exception: ' . $e->getMessage());
-        }
-
-        return null;
+        return AiChatService::complete(Auth::user(), $prompt, $temperature, $maxTokens);
     }
 
     private function buildFallbackNarration(array $results): string

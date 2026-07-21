@@ -21,6 +21,8 @@ class NotificationService
         })->get();
         
         foreach ($admins as $admin) {
+            if (!$admin->wantsNotification('leave_requests')) continue;
+
             Notification::create([
                 'user_id' => $admin->id,
                 'type' => 'leave_request',
@@ -80,6 +82,8 @@ class NotificationService
         })->get();
         
         foreach ($admins as $admin) {
+            if (!$admin->wantsNotification('training_submissions')) continue;
+
             Notification::create([
                 'user_id' => $admin->id,
                 'type' => 'training',
@@ -212,6 +216,8 @@ class NotificationService
         })->get();
         
         foreach ($admins as $admin) {
+            if (!$admin->wantsNotification('employee_requests')) continue;
+
             Notification::create([
                 'user_id' => $admin->id,
                 'type' => 'request',
@@ -237,6 +243,8 @@ class NotificationService
         })->get();
         
         foreach ($admins as $admin) {
+            if (!$admin->wantsNotification('employee_requests')) continue;
+
             Notification::create([
                 'user_id' => $admin->id,
                 'type' => 'request',
@@ -262,6 +270,8 @@ class NotificationService
         })->get();
         
         foreach ($admins as $admin) {
+            if (!$admin->wantsNotification('employee_requests')) continue;
+
             Notification::create([
                 'user_id' => $admin->id,
                 'type' => 'request',
@@ -341,6 +351,8 @@ class NotificationService
         })->get();
 
         foreach ($admins as $admin) {
+            if (!$admin->wantsNotification('travel_orders')) continue;
+
             Notification::create([
                 'user_id' => $admin->id,
                 'type' => 'travel_order',
