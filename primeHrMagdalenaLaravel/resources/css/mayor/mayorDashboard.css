@@ -41,29 +41,9 @@
 .mayor-legend-label { flex: 1; min-width: 0; font-size: 11.5px; font-weight: 600; color: #56547a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mayor-legend-value { font-size: 12px; font-weight: 700; color: #0b044d; }
 
-/* Highlights: single tabbed panel replaces admin's several separate list panels */
-.mayor-highlights-tabs { display: flex; gap: 6px; }
+/* Highlights: single tabbed panel replaces admin's several separate list panels.
+   .mayor-highlights-tabs itself lives in mayor.css (shared with personnel). */
 .mayor-highlight-row { display: flex; align-items: center; gap: 11px; padding: 9px 0; }
-
-/* Dark pill tabs — matches the active-tab treatment used on the admin dashboard */
-.mayor-highlights-tabs .chart-tab {
-    border-radius: 999px;
-    font-weight: 700;
-    transition: all .22s cubic-bezier(.4, 0, .2, 1);
-}
-.mayor-highlights-tabs .chart-tab.active {
-    border-color: transparent;
-    background: linear-gradient(135deg, #1b1464, #0b044d);
-    color: #fff;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 20px rgba(11,4,77,.35);
-}
-.mayor-highlights-tabs .chart-tab.active:hover {
-    transform: translateY(-1px);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 10px 26px rgba(11,4,77,.42);
-}
-.mayor-highlights-tabs .chart-tab:not(.active):hover {
-    background: rgba(11,4,77,.06);
-}
 
 /* Top Attendance Performers — real data table with column headers, not card rows */
 .mayor-perf-table { width: 100%; border-collapse: collapse; }

@@ -1,0 +1,104 @@
+/* ── Step indicator ── */
+.cert-steps {
+    display: flex;
+    align-items: center;
+    padding: 12px 24px 0;
+    gap: 0;
+}
+.cert-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #b3b1c8;
+}
+.cert-step.active .cert-step-num {
+    background: #0b044d;
+    color: #fff;
+}
+.cert-step.active .cert-step-label { color: #0b044d; }
+.cert-step.done .cert-step-num {
+    background: #15803d;
+    color: #fff;
+}
+.cert-step.done .cert-step-label { color: #15803d; }
+.cert-step-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e5e3f8;
+    color: #9999bb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+}
+.cert-step-line {
+    flex: 1;
+    height: 2px;
+    background: #e5e3f8;
+    margin: 0 10px;
+}
+/* ── Scan spinner ── */
+.cert-scan-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e5e3f8;
+    border-top-color: #0b044d;
+    border-radius: 50%;
+    animation: certSpin 0.8s linear infinite;
+    margin: 0 auto 12px;
+}
+@keyframes certSpin { to { transform: rotate(360deg); } }
+.cert-scan-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0b044d;
+    margin: 0;
+}
+/* ── Auto-fill banner ── */
+.cert-autofill-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+.cert-autofill-success {
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    color: #1b5e20;
+}
+.cert-autofill-warn {
+    background: #fff9e6;
+    border: 1px solid #ffe9a3;
+    color: #8b7500;
+}
+/* ── Auto-filled field highlight ── */
+.cert-autofilled {
+    border-color: #15803d !important;
+    background: #f0fdf4 !important;
+    box-shadow: 0 0 0 2px rgba(21,128,61,0.12) !important;
+}
+.cert-autofilled:focus {
+    border-color: #0b044d !important;
+    background: #fff !important;
+    box-shadow: 0 0 0 3px rgba(11,4,77,0.1) !important;
+}
+/* ── File preview in step 2 ── */
+.cert-file-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #f7f6ff;
+    border: 1.5px solid #e5e3f8;
+    border-radius: 8px;
+}

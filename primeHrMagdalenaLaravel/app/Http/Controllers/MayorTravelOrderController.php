@@ -21,4 +21,12 @@ class MayorTravelOrderController extends Controller
 
         return view('mayor.travelOrder.mayorTravelOrder', compact('travelOrders', 'stats'));
     }
+
+    public function show($id)
+    {
+        $travelOrder = TravelOrder::with(['employee.employmentDetail.departmentRelation', 'approver', 'companions.employee', 'histories.performer.employee'])
+            ->findOrFail($id);
+
+        return response()->json($travelOrder);
+    }
 }

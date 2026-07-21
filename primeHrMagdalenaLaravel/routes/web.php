@@ -34,6 +34,7 @@ Route::get('/mayor/dashboard', [\App\Http\Controllers\MayorDashboardController::
 Route::get('/mayor/personnel', [\App\Http\Controllers\MayorPersonnelController::class, 'index'])->middleware('auth')->name('mayor.personnel');
 Route::get('/mayor/leave', [\App\Http\Controllers\MayorLeaveController::class, 'index'])->middleware('auth')->name('mayor.leave');
 Route::get('/mayor/travelorder', [\App\Http\Controllers\MayorTravelOrderController::class, 'index'])->middleware('auth')->name('mayor.travelorder');
+Route::get('/mayor/travelorder/{id}', [\App\Http\Controllers\MayorTravelOrderController::class, 'show'])->middleware('auth')->name('mayor.travelorder.view');
 Route::get('/mayor/passslip', [\App\Http\Controllers\MayorPassSlipController::class, 'index'])->middleware('auth')->name('mayor.passslip');
 
 // ── Permanent Employee Dashboard ──

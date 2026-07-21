@@ -1,0 +1,11 @@
+/* Table cell styling ported from employee/employeeTravelOrder.css's .to-* classes
+   (values kept identical) — that file scopes everything under .permanent-leavebenefits,
+   which doesn't exist on this page's .enterprise-hr-dashboard shell, so the same
+   selectors are redeclared here unscoped, page-loaded only. */
+
+.to-flex-gap-8 { display: flex; align-items: center; gap: 8px; }
+.to-ta-center { text-align: center; }
+.to-td-semibold { font-size: 13px; color: #0b044d; font-weight: 600; }
+.to-td-muted { font-size: 13px; color: #6b6a8a; }
+.to-td-duration { text-align: center; font-weight: 600; color: #0b044d; }
+.to-badge-cancelled { background: #f3f4f6; color: #6b7280; }

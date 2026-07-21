@@ -7,7 +7,7 @@
     <title>@yield('title', 'PRIME HRIS - Mayor\'s View')</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    @vite(['resources/css/app.css', 'resources/css/admin/admin.css', 'resources/css/admin/adminDashboard.css', 'resources/css/topbarTheme.css'])
+    @vite(['resources/css/app.css', 'resources/css/admin/admin.css', 'resources/css/admin/adminDashboard.css', 'resources/css/topbarTheme.css', 'resources/css/mayor/mayor.css'])
     @stack('styles')
 </head>
 <body>

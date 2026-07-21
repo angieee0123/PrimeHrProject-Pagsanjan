@@ -2,6 +2,10 @@
 
 @section('title', "Travel Orders · PRIME HRIS")
 
+@push('styles')
+    @vite(['resources/css/travelOrder.css', 'resources/css/mayor/mayorTravelOrder.css'])
+@endpush
+
 @section('content')
 
 <main class="enterprise-hr-dashboard">
@@ -98,8 +102,9 @@
                     <th>Destination</th>
                     <th>Purpose</th>
                     <th>Travel Dates</th>
-                    <th>Duration</th>
-                    <th>Status</th>
+                    <th class="to-ta-center">Duration</th>
+                    <th class="to-ta-center">Status</th>
+                    <th class="to-ta-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -110,7 +115,12 @@
                         if (!$emp) continue;
                         $fullName = trim($emp->first_name . ' ' . $emp->last_name);
                         $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
-                        $statusClass = $order->status === 'approved' ? 'processed' : ($order->status === 'pending' ? 'pending' : 'on-hold');
+                        $statusClass = match($order->status) {
+                            'approved' => 'processed',
+                            'pending' => 'pending',
+                            'rejected', 'disapproved' => 'on-hold',
+                            default => 'to-badge-cancelled',
+                        };
                     @endphp
                     <tr data-status="{{ $order->status }}" data-search="{{ strtolower($fullName) }}">
                         <td>
@@ -126,14 +136,22 @@
                                 </div>
                             </div>
                         </td>
-                        <td>{{ $order->destination }}</td>
-                        <td style="max-width:220px;font-size:12px;color:#56547a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $order->purpose }}</td>
-                        <td style="font-size:12px;color:#56547a;white-space:nowrap">{{ $order->travel_date->format('M d') }} – {{ $order->return_date->format('M d, Y') }}</td>
-                        <td style="text-align:center">{{ $order->duration }} day{{ $order->duration > 1 ? 's' : '' }}</td>
-                        <td><span class="badge-status {{ $statusClass }}">{{ ucfirst($order->status) }}</span></td>
+                        <td class="to-td-semibold">
+                            <div class="to-flex-gap-8">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0b044d" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                {{ $order->destination }}
+                            </div>
+                        </td>
+                        <td class="to-td-muted">{{ Str::limit($order->purpose, 50) }}</td>
+                        <td class="to-td-semibold">{{ $order->travel_date->format('M d') }} – {{ $order->return_date->format('M d, Y') }}</td>
+                        <td class="to-td-duration">{{ $order->duration }} day{{ $order->duration > 1 ? 's' : '' }}</td>
+                        <td class="to-ta-center"><span class="badge-status {{ $statusClass }}">{{ ucfirst($order->status) }}</span></td>
+                        <td class="to-ta-center">
+                            <button class="btn-view" onclick="viewMayorTravelOrder({{ $order->id }})">View</button>
+                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" style="text-align:center;padding:32px 0;color:#94a3b8;font-size:12.5px">No travel orders yet</td></tr>
+                    <tr><td colspan="7" style="text-align:center;padding:32px 0;color:#94a3b8;font-size:12.5px">No travel orders yet</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -143,24 +161,9 @@
 
 </main>
 
+@include('mayor.travelOrder.modals.viewTravelOrderModal')
+
 @push('scripts')
-<script>
-function mayorFilterTravel() {
-    const search = document.getElementById('mayorTravelSearch').value.toLowerCase().trim();
-    const status = document.getElementById('mayorTravelStatus').value;
-    const rows = document.querySelectorAll('#mayorTravelTable tbody tr[data-search]');
-    let visibleCount = 0;
-
-    rows.forEach(row => {
-        const matchesSearch = !search || row.dataset.search.includes(search);
-        const matchesStatus = !status || row.dataset.status === status;
-        const visible = matchesSearch && matchesStatus;
-        row.style.display = visible ? '' : 'none';
-        if (visible) visibleCount++;
-    });
-
-    document.getElementById('mayorTravelNoResults').style.display = (rows.length && visibleCount === 0) ? 'block' : 'none';
-}
-</script>
+    @vite('resources/js/mayor/travelOrder/mayorTravelOrder.js')
 @endpush
 @endsection
