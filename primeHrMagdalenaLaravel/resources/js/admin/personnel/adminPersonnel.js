@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.getElementById('employeeWizardModal')) {
             document.getElementById('employeeWizardModal').style.display = 'none';
         }
+        // A successful add/update means there's no draft left to resume.
+        if (window.clearWizardDraft) window.clearWizardDraft();
     }
 
     if (flash.error) {

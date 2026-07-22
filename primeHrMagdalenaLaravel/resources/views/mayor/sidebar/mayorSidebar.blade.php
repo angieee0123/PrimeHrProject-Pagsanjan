@@ -52,6 +52,17 @@ $currentRoute = Route::currentRouteName();
             @endif
         </a>
         @endforeach
+
+        {{-- Divider separating the nav items from the logout --}}
+        <div class="nav-divider"></div>
+
+        {{-- Logout — last item in the nav, styled like the others --}}
+        <button type="button" class="nav-item nav-logout" onclick="openLogoutModal()" title="Logout">
+            <span class="nav-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </span>
+            <span class="nav-label">Log Out</span>
+        </button>
     </nav>
 
     @php
@@ -79,11 +90,7 @@ $currentRoute = Route::currentRouteName();
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
             </a>
         @endif
-        <form action="{{ route('logout') }}" method="POST" style="margin:0;">
-            @csrf
-            <button type="submit" class="logout-btn" title="Logout">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            </button>
-        </form>
     </div>
 </aside>
+
+@include('partials.logoutConfirmModal', ['firstName' => $mayorEmployee->first_name ?? 'Mayor'])

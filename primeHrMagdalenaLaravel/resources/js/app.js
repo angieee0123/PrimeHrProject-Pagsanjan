@@ -1,5 +1,35 @@
 import './bootstrap';
 
+// ── Logout confirmation modal ──
+// Exposed on window because the sidebar buttons wire up via inline onclick.
+window.openLogoutModal = function () {
+    const modal = document.getElementById('logoutModal');
+    if (!modal) return;
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeLogoutModal = function () {
+    const modal = document.getElementById('logoutModal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+};
+
+window.confirmLogout = function () {
+    const form = document.getElementById('logout-form');
+    if (form) form.submit();
+};
+
+// Esc closes the logout confirmation (only when it's actually open).
+document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const modal = document.getElementById('logoutModal');
+    if (modal && modal.classList.contains('open')) window.closeLogoutModal();
+});
+
 // ── Sidebar toggle (desktop collapse + mobile open/close) ──
 document.addEventListener('DOMContentLoaded', () => {
     const sidebar       = document.getElementById('sidebar');

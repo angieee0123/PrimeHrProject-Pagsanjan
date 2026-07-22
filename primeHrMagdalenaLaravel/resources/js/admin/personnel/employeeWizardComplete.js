@@ -16,6 +16,8 @@ function editEmployee(id) {
     // Reset to step 1 and open
     if (typeof goToWizardStep === 'function') goToWizardStep(1);
     document.getElementById('employeeWizardModal').style.display = 'flex';
+    if (window.resetWizardFieldValidation) window.resetWizardFieldValidation();
+    if (window.resetWizardPasswordVisibility) window.resetWizardPasswordVisibility();
 
     fetch(`/admin/personnel/${id}/edit`)
         .then(r => r.json())
@@ -118,7 +120,7 @@ function submitWizardUpdate() {
     document.getElementById('employeeWizardForm').submit();
 }
 
-function loadDesignations(deptId) {
+function loadDesignations(deptId, onLoaded) {
     const posSelect  = document.getElementById('wizard-position');
     const statusInput = document.getElementById('wizard-employment-status');
     const gradeInput  = document.getElementById('wizard-salary-grade');
@@ -132,6 +134,7 @@ function loadDesignations(deptId) {
     if (!deptId) {
         posSelect.innerHTML = '<option value="">— Select a department first —</option>';
         hint.textContent    = 'Select a department to load available designations.';
+        if (typeof onLoaded === 'function') onLoaded();
         return;
     }
 
@@ -141,6 +144,7 @@ function loadDesignations(deptId) {
             if (!data.length) {
                 posSelect.innerHTML = '<option value="">No designations found for this department</option>';
                 hint.textContent    = 'No designations are set up for this department yet.';
+                if (typeof onLoaded === 'function') onLoaded();
                 return;
             }
             posSelect.innerHTML = '<option value="">Select Position</option>';
@@ -154,10 +158,12 @@ function loadDesignations(deptId) {
             });
             posSelect.disabled   = false;
             hint.textContent     = `${data.length} designation(s) available. Select one to auto-fill employment details.`;
+            if (typeof onLoaded === 'function') onLoaded();
         })
         .catch(() => {
             posSelect.innerHTML = '<option value="">Error loading designations</option>';
             hint.textContent    = 'Could not load designations. Please try again.';
+            if (typeof onLoaded === 'function') onLoaded();
         });
 }
 

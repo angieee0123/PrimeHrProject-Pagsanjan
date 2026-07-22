@@ -1399,3 +1399,82 @@ body.dark-mode .tab-btn.active { color: var(--gp-border); border-bottom-color: v
         padding: 5px 9px;
     }
 }
+
+/* ══════════════════════════════════════════════════════
+   SIDEBAR LOGOUT  (shared across admin, mayor & employee sidebars)
+   New class names only — no collision with the sidebar rules in
+   admin.css / employee.css, so this loads-first stylesheet is safe.
+══════════════════════════════════════════════════════ */
+/* Logout is the last item in the nav list, styled identically to the other
+   nav items. It's a <button> (to trigger the confirm modal) so only the
+   default button chrome is reset here — color, size, padding, weight and the
+   hover state all come from the shared .nav-item / .nav-item:hover rules in
+   admin.css / employee.css. */
+/* Divider separating the real navigation items from the logout below. */
+.nav-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 8px 10px 6px;
+}
+
+.nav-item.nav-logout {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  text-align: left;
+}
+/* Red hover, so the sign-out action reads as destructive on rollover.
+   The compound selector outranks the shared .nav-item:hover rule. */
+.nav-item.nav-logout:hover { background: rgba(142, 30, 24, 0.28); color: #ff8787; }
+
+/* ══════════════════════════════════════════════════════
+   LOGOUT CONFIRMATION MODAL  (personalized)
+══════════════════════════════════════════════════════ */
+.logout-hidden-form { display: none; }
+
+.logout-modal {
+  position: fixed; inset: 0; z-index: 1200;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.logout-modal.open { display: flex; }
+.logout-modal-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(11, 4, 77, 0.55);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+.logout-modal-card {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 380px;
+  background: #ffffff; border-radius: 18px;
+  padding: 28px 26px 22px; text-align: center;
+  box-shadow: 0 25px 60px -12px rgba(11, 4, 77, 0.4);
+  animation: logoutModalIn 0.22s ease;
+}
+@keyframes logoutModalIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.logout-modal-icon {
+  width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 16px;
+  display: flex; align-items: center; justify-content: center;
+  background: #fdf0ef; color: var(--gp-bad);
+}
+.logout-modal-title { font-size: 18px; font-weight: 800; color: var(--gp-pri); margin: 0 0 8px; }
+.logout-modal-text { font-size: 13px; line-height: 1.6; color: var(--gp-text-mid); margin: 0 0 22px; }
+.logout-modal-actions { display: flex; gap: 10px; }
+.logout-modal-btn {
+  flex: 1; padding: 11px 16px; border-radius: 10px; cursor: pointer;
+  font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 700;
+  transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.15s;
+}
+.logout-modal-btn:active { transform: scale(0.97); }
+.logout-modal-cancel { background: #ffffff; border: 1.5px solid var(--gp-border); color: var(--gp-text-mid); }
+.logout-modal-cancel:hover { background: var(--gp-bg-tint); border-color: var(--gp-pri); color: var(--gp-pri); }
+.logout-modal-confirm { background: var(--gp-bad); border: 1.5px solid var(--gp-bad); color: #ffffff; }
+.logout-modal-confirm:hover { background: #6b1510; border-color: #6b1510; }
+
+@media (max-width: 480px) {
+  .logout-modal-actions { flex-direction: column-reverse; }
+}
