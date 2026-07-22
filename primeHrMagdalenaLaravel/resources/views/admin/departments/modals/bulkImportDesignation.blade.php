@@ -47,7 +47,7 @@
                     <div class="bim-column-chip">{{ $col }}</div>
                     @endforeach
                 </div>
-                <p class="bim-columns-note"><strong>department_code</strong> must match an existing department · employment_type: Permanent, Casual, Contractual, Job Order · monthly_rate and description are optional</p>
+                <p class="bim-columns-note"><strong>department_code</strong> must match an existing department · employment_type: Permanent, Temporary, Coterminous, Casual, Contractual, Job Order · monthly_rate and description are optional</p>
             </div>
 
             <div class="adm-footer bim-footer">

@@ -15,7 +15,7 @@ class DesignationController extends Controller
             'department_id'   => ['required', 'exists:departments,id'],
             'salary_grade'    => ['nullable', 'string', 'max:50'],
             'monthly_rate'    => ['nullable', 'numeric', 'min:0'],
-            'employment_type' => ['nullable', 'in:Permanent,Casual,Contractual,Job Order'],
+            'employment_type' => ['nullable', 'in:Permanent,Temporary,Coterminous,Casual,Contractual,Job Order'],
             'description'     => ['nullable', 'string'],
         ]);
 

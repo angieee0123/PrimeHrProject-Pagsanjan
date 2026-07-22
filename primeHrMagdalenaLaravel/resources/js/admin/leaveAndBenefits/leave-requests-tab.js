@@ -258,4 +258,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     renderLeaveRequestPagination();
     paginateLeaveRequestTable();
+
+    // Open the detail modal directly when arriving from a notification link
+    const highlightId = new URLSearchParams(window.location.search).get('highlight');
+    if (highlightId) {
+        const targetRow = document.querySelector(`[data-leave-app-id="${highlightId}"]`)?.closest('tr');
+        if (targetRow) {
+            targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetRow.style.background = '#f2f1fb';
+        }
+        document.querySelector(`[data-leave-app-id="${highlightId}"]`)?.click();
+    }
 });

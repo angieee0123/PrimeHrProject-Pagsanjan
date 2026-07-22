@@ -47,6 +47,10 @@
                         <select class="form-input" name="emp_type" required>
                             <option value="">Select type</option>
                             <option value="Permanent">Permanent</option>
+                            <option value="Temporary">Temporary</option>
+                            <option value="Coterminous">Coterminous</option>
+                            <option value="Casual">Casual</option>
+                            <option value="Contractual">Contractual</option>
                             <option value="Job Order">Job Order</option>
                         </select>
                     </div>

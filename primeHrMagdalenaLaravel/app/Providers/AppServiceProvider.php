@@ -51,7 +51,9 @@ class AppServiceProvider extends ServiceProvider
                     'authEmployeeId' => $employee->employee_id ?? 'N/A',
                     'authRole' => ucfirst($activeRole),
                     'authRoles' => $user->roles ?? [],
-                    'isPermanent' => $employmentStatus === 'Permanent',
+                    // Permanent, Temporary, Coterminous, Casual, and Contractual all get the
+                    // full leave-and-benefits experience; only Job Order does not.
+                    'isPermanent' => $employmentStatus !== null && $employmentStatus !== 'Job Order',
                 ];
 
                 $view->with($userData);

@@ -26,9 +26,10 @@ class NotificationService
             Notification::create([
                 'user_id' => $admin->id,
                 'type' => 'leave_request',
+                'audience' => 'admin',
                 'title' => 'New Leave Request',
                 'message' => "{$employeeName} submitted a {$leaveApplication->leaveType->leave_name} request for {$leaveApplication->number_of_days} day(s).",
-                'link' => route('admin.leave', ['tab' => 'requests']),
+                'link' => route('admin.leave', ['highlight' => $leaveApplication->id]),
                 'related_id' => $leaveApplication->id,
                 'related_type' => 'App\Models\LeaveApplication',
             ]);
@@ -56,9 +57,10 @@ class NotificationService
             Notification::create([
                 'user_id' => $employee->user->id,
                 'type' => 'leave_request',
+                'audience' => 'employee',
                 'title' => "Leave Request {$statusText}",
                 'message' => $message,
-                'link' => route('employee.leave'),
+                'link' => route('employee.leave', ['highlight' => $leaveApplication->id]),
                 'related_id' => $leaveApplication->id,
                 'related_type' => 'App\Models\LeaveApplication',
             ]);
@@ -87,6 +89,7 @@ class NotificationService
             Notification::create([
                 'user_id' => $admin->id,
                 'type' => 'training',
+                'audience' => 'admin',
                 'title' => 'New Training Submission',
                 'message' => "{$employeeName} submitted a training record: {$training->title}",
                 'link' => route('admin.training'),
@@ -111,6 +114,7 @@ class NotificationService
         Notification::create([
             'user_id' => $employee->user->id,
             'type' => 'training',
+            'audience' => 'employee',
             'title' => "Training {$statusText}",
             'message' => $message,
             'link' => route('employee.training'),
@@ -140,6 +144,7 @@ class NotificationService
             Notification::create([
                 'user_id' => $user->id,
                 'type' => 'payroll',
+                'audience' => 'employee',
                 'title' => 'Payroll Available',
                 'message' => "Your payslip for {$period} is now available.",
                 'link' => route('employee.payslip'),
@@ -159,6 +164,7 @@ class NotificationService
         Notification::create([
             'user_id' => $employee->user->id,
             'type' => 'attendance',
+            'audience' => 'employee',
             'title' => 'Attendance Corrected',
             'message' => "Your attendance record for " . date('M d, Y', strtotime($attendance->date)) . " has been corrected by HR.",
             'link' => route('employee.attendance'),
@@ -179,11 +185,13 @@ class NotificationService
         }
         
         $users = $query->get();
-        
+        $audience = in_array($role, ['admin', 'hr'], true) ? 'admin' : 'system';
+
         foreach ($users as $user) {
             Notification::create([
                 'user_id' => $user->id,
                 'type' => 'system',
+                'audience' => $audience,
                 'title' => $title,
                 'message' => $message,
             ]);
@@ -221,6 +229,7 @@ class NotificationService
             Notification::create([
                 'user_id' => $admin->id,
                 'type' => 'request',
+                'audience' => 'admin',
                 'title' => 'Payslip Request',
                 'message' => "{$employeeName} requested a payslip: {$request->description}",
                 'link' => route('admin.requests'),
@@ -248,6 +257,7 @@ class NotificationService
             Notification::create([
                 'user_id' => $admin->id,
                 'type' => 'request',
+                'audience' => 'admin',
                 'title' => 'Deduction Inquiry',
                 'message' => "{$employeeName} has a question about deductions: {$request->description}",
                 'link' => route('admin.requests'),
@@ -275,6 +285,7 @@ class NotificationService
             Notification::create([
                 'user_id' => $admin->id,
                 'type' => 'request',
+                'audience' => 'admin',
                 'title' => $request->request_type_name,
                 'message' => "{$employeeName} submitted a request: {$request->title}",
                 'link' => route('admin.requests'),
@@ -300,9 +311,10 @@ class NotificationService
         Notification::create([
             'user_id' => $companionEmployee->user->id,
             'type' => 'travel_order',
+            'audience' => 'employee',
             'title' => 'Travel Order Companion Request',
             'message' => "{$filerName} included you as a companion on travel order {$travelOrder->order_number} to {$travelOrder->destination} ({$dates}). Please accept or reject the request.",
-            'link' => route('employee.travelorder'),
+            'link' => route('employee.travelorder', ['highlight' => $travelOrder->id]),
             'related_id' => $travelOrder->id,
             'related_type' => 'App\\Models\\TravelOrder',
         ]);
@@ -328,9 +340,10 @@ class NotificationService
         Notification::create([
             'user_id' => $filer->user->id,
             'type' => 'travel_order',
+            'audience' => 'employee',
             'title' => "Companion Request {$statusText}",
             'message' => $message,
-            'link' => route('employee.travelorder'),
+            'link' => route('employee.travelorder', ['highlight' => $travelOrder->id]),
             'related_id' => $travelOrder->id,
             'related_type' => 'App\\Models\\TravelOrder',
         ]);
@@ -356,9 +369,10 @@ class NotificationService
             Notification::create([
                 'user_id' => $admin->id,
                 'type' => 'travel_order',
+                'audience' => 'admin',
                 'title' => 'New Travel Order Request',
                 'message' => "{$filerName} submitted travel order {$travelOrder->order_number} to {$travelOrder->destination}{$companionText}.",
-                'link' => route('admin.travelorder'),
+                'link' => route('admin.travelorder', ['highlight' => $travelOrder->id]),
                 'related_id' => $travelOrder->id,
                 'related_type' => 'App\\Models\\TravelOrder',
             ]);
@@ -397,9 +411,10 @@ class NotificationService
             Notification::create([
                 'user_id' => $recipient['user_id'],
                 'type' => 'travel_order',
+                'audience' => 'employee',
                 'title' => "Travel Order {$statusText}",
                 'message' => $recipient['message'],
-                'link' => route('employee.travelorder'),
+                'link' => route('employee.travelorder', ['highlight' => $travelOrder->id]),
                 'related_id' => $travelOrder->id,
                 'related_type' => 'App\\Models\\TravelOrder',
             ]);
@@ -425,6 +440,7 @@ class NotificationService
         Notification::create([
             'user_id' => $employee->user->id,
             'type' => 'request',
+            'audience' => 'employee',
             'title' => "Request {$statusText}",
             'message' => $message,
             'link' => route('employee.requests'),

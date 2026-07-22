@@ -348,6 +348,13 @@ document.addEventListener('DOMContentLoaded', function() {
 // ── View Travel Order Detail modal ──
 let currentTravelOrderId = null;
 
+document.addEventListener('DOMContentLoaded', function() {
+    const highlightId = new URLSearchParams(window.location.search).get('highlight');
+    if (highlightId) {
+        viewTravelOrder(highlightId);
+    }
+});
+
 function closeTravelDetailModal() {
     document.getElementById('viewTravelDetailModal').style.display = 'none';
     document.body.style.overflow = '';

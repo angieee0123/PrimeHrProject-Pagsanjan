@@ -39,6 +39,8 @@
                 <select class="fc-select" id="desig-filter-type" onchange="applyDesigFilters()">
                     <option value="">All Employment Types</option>
                     <option value="Permanent">Permanent</option>
+                    <option value="Temporary">Temporary</option>
+                    <option value="Coterminous">Coterminous</option>
                     <option value="Casual">Casual</option>
                     <option value="Contractual">Contractual</option>
                     <option value="Job Order">Job Order</option>

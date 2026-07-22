@@ -246,6 +246,7 @@ class EmployeeTravelOrderController extends Controller
                 Notification::create([
                     'user_id' => $companion->employee->user->id,
                     'type' => 'travel_order',
+                    'audience' => 'employee',
                     'title' => 'Travel Order Cancelled',
                     'message' => "Travel order {$travelOrder->order_number} to {$travelOrder->destination}, where you were invited as a companion, has been cancelled by the filer.",
                     'link' => route('employee.travelorder'),

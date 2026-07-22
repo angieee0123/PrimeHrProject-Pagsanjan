@@ -55,7 +55,7 @@
                         @endif
                     </td>
                     <td>
-                        <button class="btn-view" onclick="openDetailModal(
+                        <button class="btn-view" data-leave-app-id="{{ $application->id }}" onclick="openDetailModal(
                             '{{ addslashes($application->leaveType->leave_name ?? 'N/A') }}',
                             '{{ $application->start_date->format('M d, Y') }}',
                             '{{ $application->end_date->format('M d, Y') }}',

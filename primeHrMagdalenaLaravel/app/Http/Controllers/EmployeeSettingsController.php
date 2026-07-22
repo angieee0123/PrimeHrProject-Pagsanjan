@@ -21,7 +21,9 @@ class EmployeeSettingsController extends Controller
         $fullName = trim($employee->first_name . ' ' . $employee->last_name);
         $initials = strtoupper(substr($employee->first_name, 0, 1) . substr($employee->last_name, 0, 1));
         $contactNumber = optional($employee->contacts->firstWhere('type', 'mobile'))->number;
-        $isPermanent = $employee->employmentDetail?->employment_status === 'Permanent';
+        // All employment types except Job Order get the leave-and-benefits experience
+        $employmentStatus = $employee->employmentDetail?->employment_status;
+        $isPermanent = $employmentStatus !== null && $employmentStatus !== 'Job Order';
 
         return view('employee.settings.employeeSettings', [
             'employee' => $employee,

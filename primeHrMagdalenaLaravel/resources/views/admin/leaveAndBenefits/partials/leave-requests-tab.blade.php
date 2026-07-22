@@ -95,7 +95,7 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                             </button>
                             <div class="leave-action-menu" style="display: none; position: absolute; right: 0; top: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15); z-index: 100; min-width: 160px; margin-top: 6px; overflow: hidden;">
-                                <button onclick="openAdminLeaveDetailModal(
+                                <button data-leave-app-id="{{ $application->id }}" onclick="openAdminLeaveDetailModal(
                                     {{ $application->id }},
                                     '{{ addslashes($application->employee->first_name ?? 'N/A') }} {{ addslashes($application->employee->last_name ?? '') }}',
                                     '{{ $application->employee->employee_id ?? 'N/A' }}',

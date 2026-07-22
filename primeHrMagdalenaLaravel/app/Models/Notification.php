@@ -9,6 +9,7 @@ class Notification extends Model
     protected $fillable = [
         'user_id',
         'type',
+        'audience',
         'title',
         'message',
         'link',
@@ -50,6 +51,11 @@ class Notification extends Model
     public function scopeRecent($query, $limit = 10)
     {
         return $query->orderBy('created_at', 'desc')->limit($limit);
+    }
+
+    public function scopeForAdmin($query)
+    {
+        return $query->whereIn('audience', ['admin', 'system']);
     }
 
     public function getTimeAgoAttribute()

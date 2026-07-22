@@ -13,7 +13,7 @@
         <div class="confirm-input-wrap">
             <label class="confirm-input-label">Type "Yes I confirm" to proceed:</label>
             <input type="text" id="confirmInput" placeholder="Yes I confirm" class="confirm-input" />
-            <p class="confirm-error" id="confirmError">Please type exactly "Yes I confirm"</p>
+            <p class="confirm-error" id="confirmError">Please type "Yes I confirm" (capitalization doesn't matter)</p>
         </div>
         <div class="confirm-modal-footer">
             <button onclick="closeConfirmModal()" class="confirm-btn-cancel">Cancel</button>

@@ -23,4 +23,9 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         document.getElementById('pending-tab').style.display = 'block';
     }
+
+    const highlightId = urlParams.get('highlight');
+    if (highlightId && typeof window.viewOrder === 'function') {
+        window.viewOrder(highlightId);
+    }
 });

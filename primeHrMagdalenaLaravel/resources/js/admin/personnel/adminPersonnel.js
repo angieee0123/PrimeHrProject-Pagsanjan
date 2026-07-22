@@ -430,7 +430,8 @@ function submitConfirmation() {
     const input = document.getElementById('confirmInput');
     const error = document.getElementById('confirmError');
     
-    if (input.value.trim() !== 'Yes I confirm') {
+    const typed = input.value.trim().replace(/\s+/g, ' ').toLowerCase();
+    if (typed !== 'yes i confirm') {
         error.style.display = 'block';
         input.style.borderColor = '#8e1e18';
         return;

@@ -2,7 +2,7 @@
     <button class="notif-btn" id="notifBtn" onclick="toggleNotif()">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         @php
-            $unreadCount = \App\Models\Notification::where('user_id', Auth::id())->unread()->count();
+            $unreadCount = \App\Models\Notification::where('user_id', Auth::id())->forAdmin()->unread()->count();
         @endphp
         <span class="notif-dot {{ $unreadCount > 0 ? 'active' : '' }}" id="notifDot"></span>
     </button>
@@ -19,6 +19,7 @@
         <div class="notif-body" id="notifBody">
             @php
                 $notifications = \App\Models\Notification::where('user_id', Auth::id())
+                    ->forAdmin()
                     ->orderBy('created_at', 'desc')
                     ->limit(10)
                     ->get();

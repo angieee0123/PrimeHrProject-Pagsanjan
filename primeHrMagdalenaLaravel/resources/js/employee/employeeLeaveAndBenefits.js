@@ -281,6 +281,16 @@ document.addEventListener('DOMContentLoaded', function() {
             buttons[tabIndex].classList.add('active');
         }
     }
+
+    // Open the detail modal directly when arriving from a notification link
+    const highlightId = urlParams.get('highlight');
+    if (highlightId) {
+        const targetBtn = document.querySelector(`[data-leave-app-id="${highlightId}"]`);
+        if (targetBtn) {
+            targetBtn.closest('tr')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetBtn.click();
+        }
+    }
 });
 
 function switchTab(tabId, btn) {
