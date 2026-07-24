@@ -869,7 +869,9 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
 .permanent-leavebenefits .lb-leave-type { font-weight: 600; }
 .permanent-leavebenefits .lb-leave-days { font-weight: 700; }
 .permanent-leavebenefits .lb-leave-reason { font-size: 12.5px; color: #5a5888; }
-.permanent-leavebenefits .lb-hidden { display: none !important; }
+/* No !important here: lb-hidden is only the *initial* state — the leave modal's
+   JS reveals these elements with inline style.display, which must win. */
+.permanent-leavebenefits .lb-hidden { display: none; }
 
 /* ---------------------------------------------------------------------------
    Settings — permanentSettings.blade.php (.settings-*, saved confirmation UI)

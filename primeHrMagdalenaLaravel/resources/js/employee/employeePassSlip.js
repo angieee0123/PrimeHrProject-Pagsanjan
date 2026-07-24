@@ -1,3 +1,5 @@
+import { initBusySingleDate } from '../shared/busyDatesCalendar.js';
+
 // ── Sidebar / mobile menu toggle ──
 const sidebar = document.getElementById('sidebar');
 const toggleBtn = document.getElementById('toggle-btn');
@@ -7,6 +9,13 @@ const userInfo = document.getElementById('user-info');
 const sidebarFooter = document.getElementById('sidebar-footer');
 const mobileBtn = document.getElementById('mobile-menu-btn');
 const overlay = document.getElementById('mobile-overlay');
+
+// Busy-aware calendar for the File Pass Slip modal. Marks the employee's leave
+// and travel dates as a heads-up only — nothing is blocked, since the system
+// allows several pass slips a day and has no pass-slip/leave overlap rule.
+document.addEventListener('DOMContentLoaded', function () {
+    initBusySingleDate({ inputId: 'passSlipDate' });
+});
 
 if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
@@ -46,6 +55,8 @@ document.addEventListener('keydown', function(e) {
 function closePassSlipModal() {
     document.getElementById('filePassSlipModal').style.display = 'none';
     document.getElementById('passSlipForm').reset();
+    // form.reset() clears the input but not flatpickr's internal selection
+    document.getElementById('passSlipDate')?._flatpickr?.clear();
     const fileDisplay = document.getElementById('passSlipFileNameDisplay');
     fileDisplay.style.display = 'none';
     fileDisplay.innerHTML = '';

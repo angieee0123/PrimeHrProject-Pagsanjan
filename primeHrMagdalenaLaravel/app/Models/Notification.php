@@ -58,19 +58,30 @@ class Notification extends Model
         return $query->whereIn('audience', ['admin', 'system']);
     }
 
+    /**
+     * Employee-facing notifications only. 'system' is included on both sides:
+     * it marks broadcast announcements, not admin-specific traffic.
+     */
+    public function scopeForEmployee($query)
+    {
+        return $query->whereIn('audience', ['employee', 'system']);
+    }
+
     public function getTimeAgoAttribute()
     {
-        $diff = $this->created_at->diffInMinutes(now());
-        
+        // (int) cast: Carbon 3 returns fractional minutes, which otherwise
+        // render as "43.078455566667 minutes ago".
+        $diff = (int) $this->created_at->diffInMinutes(now());
+
         if ($diff < 1) return 'Just now';
         if ($diff < 60) return $diff . ' minute' . ($diff > 1 ? 's' : '') . ' ago';
-        
-        $hours = floor($diff / 60);
+
+        $hours = (int) floor($diff / 60);
         if ($hours < 24) return $hours . ' hour' . ($hours > 1 ? 's' : '') . ' ago';
-        
-        $days = floor($hours / 24);
+
+        $days = (int) floor($hours / 24);
         if ($days < 7) return $days . ' day' . ($days > 1 ? 's' : '') . ' ago';
-        
+
         return $this->created_at->format('M d, Y');
     }
 }

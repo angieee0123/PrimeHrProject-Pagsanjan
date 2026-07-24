@@ -1,3 +1,25 @@
+import { initBusyDateRange } from '../../shared/busyDatesCalendar.js';
+
+// Busy-date calendar on the deduction effectivity period. INFORMATIONAL only:
+// the period legitimately spans the employee's leave and travel days, so
+// nothing is blocked. minDate null because assignments can be backdated.
+let deductionBusyCal = null;
+document.addEventListener('DOMContentLoaded', function () {
+    deductionBusyCal = initBusyDateRange({
+        fromId: 'start_date',
+        toId: 'end_date',
+        scope: 'admin',
+        minDate: null,
+    });
+
+    // Repaint the marks whenever a different employee is picked. The select
+    // already has an inline onchange (checkExistingDeductions), which this
+    // listener runs alongside rather than replacing.
+    document.getElementById('assignEmployee')?.addEventListener('change', function () {
+        if (deductionBusyCal) deductionBusyCal.setEmployee(this.value);
+    });
+});
+
 function openAssignDeductionModal() {
     document.getElementById('assignDeductionModal').classList.add('active');
     setTimeout(() => handleCheckboxChange(), 100);

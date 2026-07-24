@@ -1,8 +1,26 @@
 // Add/Deduct Manual Leave Credits Modal
+import { initBusySingleDate } from '../../shared/busyDatesCalendar.js';
+
 let employeeLeaveBalances = {};
 let currentTransactionType = 'add';
 
+// Busy-date calendar on the transaction date. INFORMATIONAL only: this is the
+// ledger date the adjustment posts on, which is valid whether or not the
+// employee is on leave that day — so nothing is blocked, and backdating stays
+// allowed (minDate null) since corrections are routinely posted retroactively.
+let manualCreditCal = null;
+document.addEventListener('DOMContentLoaded', function () {
+    manualCreditCal = initBusySingleDate({
+        inputId: 'manualCreditDate',
+        scope: 'admin',
+        minDate: null,
+    });
+});
+
 window.loadEmployeeLeaveTypes = function(employeeId) {
+    // Repaint the date calendar for whoever was just picked.
+    if (manualCreditCal) manualCreditCal.setEmployee(employeeId);
+
     if (!employeeId) {
         document.getElementById('leaveTypeSelect').innerHTML = '<option value="">Select Leave Type</option>';
         document.getElementById('currentBalanceDisplay').style.display = 'none';

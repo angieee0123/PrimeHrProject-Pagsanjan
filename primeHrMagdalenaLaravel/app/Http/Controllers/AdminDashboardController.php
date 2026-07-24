@@ -22,10 +22,14 @@ class AdminDashboardController extends Controller
             ->count();
         
         // Present today
+        // count('employee_id') on a distinct query, not distinct('employee_id')
+        // ->count(): the latter compiles to SELECT DISTINCT *, i.e. distinct
+        // ROWS. It happens to agree today only because of the unique
+        // (employee_id, date) index — this counts distinct people regardless.
         $presentToday = Attendance::whereDate('date', $today)
             ->whereNotNull('am_in')
-            ->distinct('employee_id')
-            ->count();
+            ->distinct()
+            ->count('employee_id');
         $attendanceRate = $totalEmployees > 0 ? round(($presentToday / $totalEmployees) * 100, 1) : 0;
         
         // On leave
@@ -34,6 +38,51 @@ class AdminDashboardController extends Controller
             ->whereDate('end_date', '>=', $today)
             ->count();
         $pendingLeave = LeaveApplication::where('status', 'pending')->count();
+
+        // Who exactly is on leave today (same filter as the $onLeaveToday stat)
+        $onLeaveTodayList = LeaveApplication::with(['employee.employmentDetail.departmentRelation', 'employee.employmentDetail.designationRelation', 'leaveType', 'filedBy'])
+            ->where('status', 'approved')
+            ->whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today)
+            ->orderBy('end_date')
+            ->get()
+            ->map(function ($leave) use ($today) {
+                $emp = $leave->employee;
+                if (!$emp) return null;
+
+                $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
+                $colors = ['#0b044d', '#8e1e18', '#15803d', '#a16207', '#7c3aed'];
+                $end = Carbon::parse($leave->end_date);
+
+                return [
+                    'id' => $emp->id,
+                    'initials' => $initials,
+                    'color' => $colors[array_rand($colors)],
+                    'photo' => $emp->photo,
+                    'name' => $emp->first_name . ' ' . $emp->last_name,
+                    'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
+                    'dept' => $emp->employmentDetail->departmentRelation->name ?? 'N/A',
+                    'leave_type' => $leave->leaveType->leave_name ?? 'Leave',
+                    'start_date' => Carbon::parse($leave->start_date)->format('M d'),
+                    'end_date' => $end->format('M d, Y'),
+                    'is_last_day' => $end->isSameDay($today),
+                    'back_on' => $end->copy()->addDay()->format('M d'),
+                    // Everything below feeds openAdminLeaveDetailModal(), the same
+                    // CS Form No. 6 preview the Leave & Benefits page opens.
+                    'leave_id' => $leave->id,
+                    'employee_code' => $emp->employee_id ?? 'N/A',
+                    'detail_start' => Carbon::parse($leave->start_date)->format('M d, Y'),
+                    'detail_end' => $end->format('M d, Y'),
+                    'days' => $leave->number_of_days,
+                    'reason' => $leave->reason ?? '',
+                    'status_label' => ucfirst($leave->status),
+                    'application_number' => $leave->application_number,
+                    'attachment_url' => $leave->attachment_path ? asset('storage/' . $leave->attachment_path) : '',
+                    'approver_remarks' => $leave->approver_remarks ?? '',
+                ];
+            })
+            ->filter()
+            ->values();
         
         // Monthly payroll (from salary computations)
         $monthlyPayroll = DB::table('daily_salary_computations')
@@ -387,8 +436,12 @@ class AdminDashboardController extends Controller
             'pending_leave' => $pendingLeave,
             'monthly_payroll' => $monthlyPayroll,
         ];
-        
-        return view('admin.dashboard.adminDashboard', compact('stats', 'employees', 'leaveRequests', 'departments', 'chartData', 'earlyBirds', 'lateBirds', 'attendancePerformanceMonth', 'attendancePerformanceWeek', 'topEarners', 'recentLeaveFilers', 'attendanceDate', 'perfPeriodMonth', 'perfPeriodWeek', 'passSlipRequests', 'pendingPassSlips'));
+
+        // Department models for the Add Employee wizard — $departments above is
+        // chart-shaped (name/count/color) and unusable for the wizard's select.
+        $wizardDepartments = Department::where('status', 'Active')->orderBy('name')->get();
+
+        return view('admin.dashboard.adminDashboard', compact('stats', 'employees', 'leaveRequests', 'departments', 'chartData', 'earlyBirds', 'lateBirds', 'attendancePerformanceMonth', 'attendancePerformanceWeek', 'topEarners', 'recentLeaveFilers', 'attendanceDate', 'perfPeriodMonth', 'perfPeriodWeek', 'passSlipRequests', 'pendingPassSlips', 'wizardDepartments', 'onLeaveTodayList'));
     }
     
     private function getChartData()

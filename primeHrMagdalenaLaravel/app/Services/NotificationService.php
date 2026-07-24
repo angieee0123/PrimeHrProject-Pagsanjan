@@ -199,16 +199,25 @@ class NotificationService
     }
 
     /**
-     * Mark all notifications as read for a user
+     * Mark all notifications as read for a user. Pass the panel's audience
+     * ('admin' or 'employee') so clearing one dashboard's bell does not also
+     * clear the other's; null keeps the old clear-everything behavior.
      */
-    public static function markAllAsRead($userId)
+    public static function markAllAsRead($userId, $audience = null)
     {
-        Notification::where('user_id', $userId)
-            ->where('is_read', false)
-            ->update([
-                'is_read' => true,
-                'read_at' => now(),
-            ]);
+        $query = Notification::where('user_id', $userId)
+            ->where('is_read', false);
+
+        if ($audience === 'admin') {
+            $query->forAdmin();
+        } elseif ($audience === 'employee') {
+            $query->forEmployee();
+        }
+
+        $query->update([
+            'is_read' => true,
+            'read_at' => now(),
+        ]);
     }
 
     /**

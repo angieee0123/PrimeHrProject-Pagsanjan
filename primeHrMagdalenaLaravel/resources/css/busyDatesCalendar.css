@@ -1,0 +1,213 @@
+/* Busy-date calendars for the File Leave / Travel Order / Pass Slip modals.
+   Imported by busyDatesCalendar.js; flatpickr renders at body level, so these
+   selectors are intentionally unscoped. */
+
+/* ── Calendar shell ─────────────────────────────────────────────────────── */
+/* Modals sit at z-index 2000; the calendar must float above them. */
+.flatpickr-calendar {
+    z-index: 3000 !important;
+    font-family: inherit;
+    font-size: 12.5px;
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(11, 4, 77, .18), 0 2px 8px rgba(11, 4, 77, .08);
+}
+
+/* static:true (see busyDatesCalendar.js) wraps each input in .flatpickr-wrapper
+   and anchors the calendar to it, so the calendar can never drift away from its
+   field on scroll. Stock flatpickr styles that wrapper inline-block, which would
+   collapse our full-width date inputs — force it back to a block. */
+.flatpickr-wrapper {
+    display: block;
+    position: relative;
+    width: 100%;
+}
+
+/* Anchored below the field by default; .arrowUp is flatpickr's own flag for the
+   flipped case, where it should sit above instead. */
+.flatpickr-calendar.static {
+    top: calc(100% + 4px);
+}
+.flatpickr-calendar.static.arrowUp {
+    top: auto;
+    bottom: calc(100% + 4px);
+}
+
+/* Stock flatpickr type runs larger than the app (14px base, ~19px month
+   header, 39px day cells); scale everything to the modals' 11–13px rhythm. */
+.flatpickr-current-month {
+    font-size: 14px;
+    padding-top: 9px;
+}
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+    color: #0b044d;
+    font-weight: 700;
+    font-size: 14px;
+}
+/* Font only — day cells stay at flatpickr's stock 39×39px: the 7-column grid
+   wraps on cell width, and the highlight circles need width = height. */
+.flatpickr-day {
+    font-size: 12.5px;
+}
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+    fill: #0b044d;
+}
+.flatpickr-months .flatpickr-prev-month:hover svg,
+.flatpickr-months .flatpickr-next-month:hover svg {
+    fill: #8e1e18;
+}
+span.flatpickr-weekday {
+    color: #8f8daf;
+    font-weight: 600;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+/* Today: quiet brand outline instead of flatpickr's grey */
+.flatpickr-day.today {
+    border-color: #0b044d;
+}
+.flatpickr-day.today:hover,
+.flatpickr-day.today:focus {
+    background: #eef2ff;
+    color: #0b044d;
+    border-color: #0b044d;
+}
+
+/* ── Range selection in brand colors ────────────────────────────────────── */
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover {
+    background: #0b044d;
+    border-color: #0b044d;
+    color: #fff;
+}
+.flatpickr-day.inRange {
+    background: #eef2ff;
+    border-color: #eef2ff;
+    color: #0b044d;
+    box-shadow: -5px 0 0 #eef2ff, 5px 0 0 #eef2ff;
+}
+.flatpickr-day.selected.startRange + .endRange:not(:nth-child(7n+1)),
+.flatpickr-day.startRange.startRange + .endRange:not(:nth-child(7n+1)),
+.flatpickr-day.endRange.startRange + .endRange:not(:nth-child(7n+1)) {
+    box-shadow: -10px 0 0 #0b044d;
+}
+
+/* Weekends in the leave calendar: excluded from business-day counts, so they
+   read as quiet filler rather than pickable working days. */
+.flatpickr-day.busy-weekend:not(.busy-day):not(.selected):not(.startRange):not(.endRange):not(.inRange) {
+    color: #c3c1dd;
+}
+
+/* ── Busy day marks ─────────────────────────────────────────────────────── */
+.flatpickr-day.busy-day {
+    position: relative;
+    font-weight: 600;
+}
+.flatpickr-day.busy-day::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+}
+
+.flatpickr-day.busy-leave-pending { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+.flatpickr-day.busy-leave-pending::after { background: #f59e0b; }
+
+.flatpickr-day.busy-leave-approved { background: #dcfce7; border-color: #bbf7d0; color: #166534; }
+.flatpickr-day.busy-leave-approved::after { background: #16a34a; }
+
+.flatpickr-day.busy-travel { background: #dbeafe; border-color: #bfdbfe; color: #1e40af; }
+.flatpickr-day.busy-travel::after { background: #3b82f6; }
+
+/* Blocked busy days (flatpickr adds .flatpickr-disabled) keep their color so
+   the user can tell WHY the day is unavailable, but read clearly as off-limits. */
+.flatpickr-day.busy-day.flatpickr-disabled,
+.flatpickr-day.busy-day.flatpickr-disabled:hover {
+    opacity: .55;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+/* Stock flatpickr clips .flatpickr-days (for month-change animation, which we
+   don't use); busy-day tooltips must be able to overhang the day grid. */
+.flatpickr-calendar .flatpickr-innerContainer,
+.flatpickr-calendar .flatpickr-days,
+.flatpickr-calendar .dayContainer {
+    overflow: visible;
+}
+
+/* Instant tooltip naming the conflicting request (data-busy-label is set by
+   onDayCreate). Native title tooltips take ~1s to appear and are easy to miss. */
+.flatpickr-day.busy-day::before {
+    content: attr(data-busy-label);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) scale(.96);
+    background: #0b044d;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 6px 9px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .12s ease, transform .12s ease;
+    z-index: 10;
+}
+.flatpickr-day.busy-day:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+/* ── "Unavailable" notice (blocked-day click feedback) ──────────────────── */
+.busy-cal-notice {
+    display: none;
+    padding: 8px 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #8e1e18;
+    background: #fef2f2;
+    border-top: 1px solid #fecaca;
+    border-radius: 0 0 14px 14px;
+    text-align: center;
+}
+.busy-cal-notice.show { display: block; }
+
+/* ── Legend under the date fields ───────────────────────────────────────── */
+.busy-cal-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: #6b7280;
+}
+.busy-cal-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.busy-cal-legend i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.busy-cal-legend .dot-pending { background: #f59e0b; }
+.busy-cal-legend .dot-approved { background: #16a34a; }
+.busy-cal-legend .dot-travel { background: #3b82f6; }

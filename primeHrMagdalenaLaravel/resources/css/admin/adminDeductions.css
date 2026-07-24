@@ -22,7 +22,12 @@
     animation: fadeIn 0.2s ease;
 }
 
-.modal-overlay.active {
+/* `:not(#addEmployeeModal)` is here purely to raise specificity to (1,1,0)+1
+   class so this beats adminDashboard.css's `.modal-overlay:not(#addEmployeeModal)
+   { display:none }` — that file is loaded globally by layouts/app.blade.php, and
+   its id-in-:not() outranked a plain two-class rule, leaving every modal on this
+   page permanently invisible even with .active applied. */
+.modal-overlay.active:not(#addEmployeeModal) {
     display: flex;
     align-items: center;
     justify-content: center;

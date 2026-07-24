@@ -16,10 +16,11 @@
 
 @include('admin.dashboard.partials.quick-actions-bar')
 
-{{-- Main reference layout: wide chart + right requests --}}
+{{-- Main reference layout: chart + right rail (requests, who's out today) --}}
 <div class="enterprise-overview-grid">
     @include('admin.dashboard.partials.main-chart-card')
     @include('admin.dashboard.partials.pending-requests-card')
+    @include('admin.dashboard.partials.on-leave-today-card')
 </div>
 
 <div class="enterprise-secondary-grid">
@@ -39,8 +40,10 @@
 </main>
 
 @include('admin.dashboard.modals.performerDetailsModal')
-@include('admin.dashboard.modals.viewEmployeeDashboardModal')
-@include('admin.dashboard.modals.addEmployeeModal')
+{{-- Opened by the On Leave Today card — same modal the Leave & Benefits page uses. --}}
+@include('admin.leaveAndBenefits.modals.leave-detail-modal')
+@include('admin.personnel.modals.viewEmployeeModal')
+@include('admin.personnel.modals.employeeWizardComplete', ['departments' => $wizardDepartments])
 
 @include('admin.dashboard.partials.bird-schedule-tooltip')
 

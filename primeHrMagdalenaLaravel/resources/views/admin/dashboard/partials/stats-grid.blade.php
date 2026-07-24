@@ -28,14 +28,11 @@
         </div>
     </div>
 
-    <div class="stat-card" style="cursor:pointer;transition:all 0.3s" onclick="document.querySelector('.table-header .table-title').scrollIntoView({behavior:'smooth'})" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+    {{-- Jumps to the On Leave Today card in the overview grid (the list behind
+         this number), not just the first table heading on the page. --}}
+    <div class="stat-card" style="cursor:pointer;transition:all 0.3s" onclick="document.getElementById('on-leave-today')?.scrollIntoView({behavior:'smooth',block:'center'})" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
         <div class="stat-top">
-            <p class="stat-label" style="display:flex;align-items:center;gap:6px">
-                On Leave Today
-                @if($stats['pending_leave'] > 0)
-                <span style="font-size:10px;font-weight:700;color:#fff;background:#8e1e18;padding:2px 7px;border-radius:4px;line-height:1.5">{{ $stats['pending_leave'] }}</span>
-                @endif
-            </p>
+            <p class="stat-label">On Leave Today</p>
             <div class="stat-icon-wrap" style="background:#f2f1fb">
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
@@ -54,7 +51,17 @@
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="#0b044d" stroke="none"><text x="3" y="19" font-size="17" font-weight="bold" font-family="Arial, sans-serif">₱</text></svg>
             </div>
         </div>
-        <p class="stat-value" style="font-size:20px">₱{{ number_format($stats['monthly_payroll'] / 1000000, 2) }}M</p>
+        {{-- Scale the unit to the amount: a five-figure payroll rendered as
+             "₱0.11M" hides its real size. Full value stays in the tooltip. --}}
+        @php
+            $payroll = (float) $stats['monthly_payroll'];
+            $payrollDisplay = $payroll >= 1000000
+                ? '₱' . number_format($payroll / 1000000, 2) . 'M'
+                : ($payroll >= 1000
+                    ? '₱' . number_format($payroll / 1000, 1) . 'K'
+                    : '₱' . number_format($payroll, 2));
+        @endphp
+        <p class="stat-value" style="font-size:20px" title="₱{{ number_format($payroll, 2) }}">{{ $payrollDisplay }}</p>
         <div class="stat-footer">
             <span class="stat-dot" style="background:#0b044d"></span>
             <p class="stat-sub">{{ now()->format('M Y') }} total</p>

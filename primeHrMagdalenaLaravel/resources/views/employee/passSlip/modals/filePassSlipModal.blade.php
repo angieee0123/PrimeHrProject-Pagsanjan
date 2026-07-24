@@ -89,9 +89,16 @@
                     </svg>
                     Date &amp; Time
                 </label>
+                {{-- type=text: flatpickr calendar (busyDatesCalendar.js) that marks
+                     dates already used by leaves or travel orders --}}
                 <div class="form-field ps-mb-12">
                     <label class="ps-sublabel">Date <span class="ps-required">*</span></label>
-                    <input type="date" name="date" id="passSlipDate" required class="ps-input-md">
+                    <input type="text" name="date" id="passSlipDate" required placeholder="Select date..." autocomplete="off" class="ps-input-md">
+                    <div class="busy-cal-legend">
+                        <span><i class="dot-pending"></i> Pending leave</span>
+                        <span><i class="dot-approved"></i> Approved leave</span>
+                        <span><i class="dot-travel"></i> Travel order</span>
+                    </div>
                 </div>
                 <div class="form-grid ps-gap-12">
                     <div class="form-field">

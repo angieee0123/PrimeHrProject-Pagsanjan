@@ -1,5 +1,7 @@
-{{-- File Leave Modal --}}
-<x-modal id="fileModal" close="closeFileModal" max-width="700px"
+{{-- File Leave Modal. The permanent-leavebenefits class scopes the lb-* styles:
+     this modal renders as a sibling of .glass-shell (see glassSystem.css), so it
+     sits outside the <main> that normally carries that class. --}}
+<x-modal id="fileModal" close="closeFileModal" max-width="700px" class="permanent-leavebenefits"
           eyebrow="NEW LEAVE REQUEST" title="File a Leave Application">
     <x-slot:subtitle>{{ auth()->user()->employee->first_name ?? 'Employee' }} {{ auth()->user()->employee->last_name ?? '' }} · {{ auth()->user()->employee->employee_id ?? '' }}</x-slot:subtitle>
     <form id="leaveApplicationForm" method="POST" action="{{ route('leave.store') }}" enctype="multipart/form-data">
@@ -56,15 +58,22 @@
                     </svg>
                     Leave Period
                 </label>
+                {{-- type=text: these are flatpickr calendars (busyDatesCalendar.js)
+                     that mark/block dates already used by leaves or travel orders --}}
                 <div class="form-grid lb-gap-12">
                     <div class="form-field">
                         <label class="lb-sublabel">Date From <span class="lb-required">*</span></label>
-                        <input type="date" name="start_date" id="leaveFrom" required onchange="calculateDays()" class="lb-input-md">
+                        <input type="text" name="start_date" id="leaveFrom" required placeholder="Select date..." autocomplete="off" class="lb-input-md">
                     </div>
                     <div class="form-field">
                         <label class="lb-sublabel">Date To <span class="lb-required">*</span></label>
-                        <input type="date" name="end_date" id="leaveTo" required onchange="calculateDays()" class="lb-input-md">
+                        <input type="text" name="end_date" id="leaveTo" required placeholder="Select date..." autocomplete="off" class="lb-input-md">
                     </div>
+                </div>
+                <div class="busy-cal-legend">
+                    <span><i class="dot-pending"></i> Pending leave</span>
+                    <span><i class="dot-approved"></i> Approved leave</span>
+                    <span><i class="dot-travel"></i> Travel order</span>
                 </div>
 
                 {{-- Days Display --}}

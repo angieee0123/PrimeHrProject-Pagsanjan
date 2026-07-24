@@ -1,4 +1,21 @@
 // Assign Schedule Modal
+import { initBusyDateRange } from '../../shared/busyDatesCalendar.js';
+
+// Busy-date calendar for the schedule effectivity range. Marks are
+// INFORMATIONAL only (no blockKind): a schedule period routinely spans an
+// employee's leave and travel days — blocking them would make most realistic
+// ranges unselectable, since flatpickr's range mode refuses to span a disabled
+// day. minDate null because schedules can be backdated.
+// openAssignScheduleModal() (adminPersonnel.js) drives this via setEmployee().
+document.addEventListener('DOMContentLoaded', function () {
+    window.scheduleBusyCal = initBusyDateRange({
+        fromId: 'scheduleStartDate',
+        toId: 'scheduleEndDate',
+        scope: 'admin',
+        minDate: null,
+        onChange: () => validateScheduleDates(),
+    });
+});
 
 function closeAssignScheduleModal() {
     document.getElementById('assignScheduleModal').style.display = 'none';

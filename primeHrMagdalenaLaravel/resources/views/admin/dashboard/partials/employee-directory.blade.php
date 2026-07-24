@@ -14,22 +14,24 @@
             </div>
             <select class="filter-select" id="filterDept" onchange="applyFilters()" style="font-size:11px">
                 <option value="">All Departments</option>
-                <option>Administration</option>
-                <option>Engineering</option>
-                <option>Health</option>
-                <option>Finance</option>
-                <option>HRMO</option>
+                @foreach($wizardDepartments as $dept)
+                    <option>{{ $dept->name }}</option>
+                @endforeach
             </select>
             <select class="filter-select" id="filterType" onchange="applyFilters()" style="font-size:11px">
                 <option value="">All Types</option>
                 <option>Permanent</option>
+                <option>Temporary</option>
+                <option>Coterminous</option>
+                <option>Casual</option>
+                <option>Contractual</option>
                 <option>Job Order</option>
             </select>
             <button class="btn-export">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
-            <x-modal-btn onclick="openAddEmployee()">
+            <x-modal-btn onclick="openEmployeeWizard()">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Employee
             </x-modal-btn>
@@ -74,7 +76,7 @@
                             <span class="badge-status pending">Inactive</span>
                         @endif
                     </td>
-                    <td><button class="btn-view" onclick='viewEmployeeDashboard({{ $emp["id"] ?? 0 }})'>View</button></td>
+                    <td><button class="btn-view" onclick='viewEmployee({{ $emp["id"] ?? 0 }})'>View</button></td>
                 </tr>
                 @empty
                 <tr>

@@ -28,21 +28,22 @@
                     <strong>{{ $l['name'] }}</strong>
                     <span>{{ $l['type'] }} · {{ $l['days'] }}</span>
                 </div>
-                <button onclick="toggleLeaveMenu(event)" style="background:none;border:none;color:#8f8daf;cursor:pointer;padding:4px 8px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0" onmouseover="this.style.background='#f1f5f9';this.style.color='#0b044d'" onmouseout="this.style.background='none';this.style.color='#8f8daf'">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                <button type="button" class="pr-action-btn" onclick="toggleLeaveMenu(event)" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for {{ $l['name'] }}">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                 </button>
-                <div class="leave-action-menu" style="display:none;position:absolute;right:0;top:100%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(15,23,42,0.12);z-index:100;min-width:140px;margin-top:4px">
-                    <button onclick="approveLeave(event)" style="width:100%;padding:10px 12px;border:none;background:#0b044d;color:#fff;text-align:left;font-size:12px;font-weight:600;cursor:pointer;border-bottom:1px solid #e5e7eb;transition:all 0.2s;border-radius:6px 6px 0 0" onmouseover="this.style.background='#1b1464'" onmouseout="this.style.background='#0b044d'">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display:inline;margin-right:6px;vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg>
+                <div class="leave-action-menu pr-menu" role="menu" style="display:none">
+                    <button type="button" role="menuitem" class="pr-menu-item is-approve" onclick="approveLeave(event)">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
                         Approve
                     </button>
-                    <button onclick="disapproveLeave(event)" style="width:100%;padding:10px 12px;border:none;background:none;text-align:left;font-size:12px;color:#8e1e18;font-weight:600;cursor:pointer;border-bottom:1px solid #e5e7eb;transition:all 0.2s" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display:inline;margin-right:6px;vertical-align:middle"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    <button type="button" role="menuitem" class="pr-menu-item is-disapprove" onclick="disapproveLeave(event)">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         Disapprove
                     </button>
-                    <button onclick="viewLeaveDetails(event)" style="width:100%;padding:10px 12px;border:none;background:none;text-align:left;font-size:12px;color:#0b044d;font-weight:600;cursor:pointer;transition:all 0.2s;border-radius:0 0 6px 6px" onmouseover="this.style.background='#f2f1fb'" onmouseout="this.style.background='none'">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display:inline;margin-right:6px;vertical-align:middle"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        View
+                    <div class="pr-menu-sep"></div>
+                    <button type="button" role="menuitem" class="pr-menu-item" onclick="viewLeaveDetails(event)">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        View details
                     </button>
                 </div>
             </div>
@@ -64,12 +65,12 @@
                     <strong>{{ $p['name'] }}</strong>
                     <span>{{ $p['type_label'] }}{{ $p['destination'] ? ' · ' . $p['destination'] : '' }}</span>
                 </div>
-                <button onclick="togglePassSlipMenuDash(event)" style="background:none;border:none;color:#8f8daf;cursor:pointer;padding:4px 8px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0" onmouseover="this.style.background='#f1f5f9';this.style.color='#0b044d'" onmouseout="this.style.background='none';this.style.color='#8f8daf'">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                <button type="button" class="pr-action-btn" onclick="togglePassSlipMenuDash(event)" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for {{ $p['name'] }}">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                 </button>
-                <div class="leave-action-menu" style="display:none;position:absolute;right:0;top:100%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(15,23,42,0.12);z-index:100;min-width:160px;margin-top:4px">
-                    <button onclick="window.location.href='/admin/passslip'" style="width:100%;padding:10px 12px;border:none;background:#0b044d;color:#fff;text-align:left;font-size:12px;font-weight:600;cursor:pointer;border-radius:6px 6px 0 0" onmouseover="this.style.background='#1b1464'" onmouseout="this.style.background='#0b044d'">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display:inline;margin-right:6px;vertical-align:middle"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <div class="leave-action-menu pr-menu" role="menu" style="display:none">
+                    <button type="button" role="menuitem" class="pr-menu-item" onclick="window.location.href='/admin/passslip'">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         Review in Pass Slip
                     </button>
                 </div>

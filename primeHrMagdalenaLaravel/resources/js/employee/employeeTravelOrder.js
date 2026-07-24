@@ -1,3 +1,5 @@
+import { initBusyDateRange } from '../shared/busyDatesCalendar.js';
+
 // ── Sidebar / mobile menu toggle ──
 const sidebar = document.getElementById('sidebar');
 const toggleBtn = document.getElementById('toggle-btn');
@@ -7,6 +9,17 @@ const userInfo = document.getElementById('user-info');
 const sidebarFooter = document.getElementById('sidebar-footer');
 const mobileBtn = document.getElementById('mobile-menu-btn');
 const overlay = document.getElementById('mobile-overlay');
+
+// Busy-aware calendars for the File Travel Order modal: travel-busy dates are
+// blocked (no double-booked trips), leave dates are marked as a heads-up.
+document.addEventListener('DOMContentLoaded', function () {
+    initBusyDateRange({
+        fromId: 'travelDateFrom',
+        toId: 'travelDateTo',
+        blockKind: 'travel',
+        onChange: () => calculateTravelDuration(),
+    });
+});
 
 if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
@@ -121,6 +134,9 @@ function editTravelOrder(id) {
 function closeTravelOrderModal() {
     document.getElementById('fileTravelOrderModal').style.display = 'none';
     document.getElementById('travelOrderForm').reset();
+    // form.reset() clears the inputs but not flatpickr's internal selection
+    document.getElementById('travelDateFrom')?._flatpickr?.clear();
+    document.getElementById('travelDateTo')?._flatpickr?.clear();
     document.getElementById('travelFileNameDisplay').style.display = 'none';
     document.getElementById('travelErrorMessage').style.display = 'none';
     document.body.style.overflow = '';

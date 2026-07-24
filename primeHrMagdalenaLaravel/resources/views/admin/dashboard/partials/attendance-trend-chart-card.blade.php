@@ -11,7 +11,12 @@
             <button class="chart-tab" onclick="switchAttendanceChart('year')">Year</button>
         </div>
     </div>
-    <div style="flex:1;padding:0 16px 16px 16px;display:flex;align-items:stretch">
-        <canvas id="attendanceChart" style="width:100%;height:100%"></canvas>
+    {{-- The canvas is absolutely positioned inside this wrapper (see
+         .attendance-canvas-wrap): Chart.js writes a pixel height onto the
+         canvas, and while the card stretches to the grid row, that height would
+         feed back into the row and grow it on every resize pass. Taking the
+         canvas out of flow lets it fill the card without affecting its height. --}}
+    <div class="attendance-canvas-wrap">
+        <canvas id="attendanceChart"></canvas>
     </div>
 </div>

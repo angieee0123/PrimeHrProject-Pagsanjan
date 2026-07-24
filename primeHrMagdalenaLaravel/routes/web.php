@@ -52,6 +52,30 @@ Route::get('/employee/leave', [EmployeeLeaveBalanceController::class, 'show'])->
 Route::post('/leave/store', [LeaveController::class, 'store'])->middleware('auth')->name('leave.store');
 Route::post('/leave/{id}/cancel', [LeaveController::class, 'cancel'])->middleware('auth')->name('leave.cancel');
 
+// Busy dates for the File Leave / File Travel Order calendars: the logged-in
+// employee's own leave and travel date ranges, so the pickers can mark them.
+Route::get('/employee/busy-dates', function () {
+    $user = Auth::user();
+    $employee = $user instanceof User ? $user->employee : null;
+
+    return response()->json(\App\Services\BusyDatesService::forEmployee($employee));
+})->middleware('auth')->name('employee.busy-dates');
+
+// Same payload for ANY employee, for the admin modals' busy-date calendars.
+// Admin/HR only — this exposes one employee's schedule to another user, which
+// the self-scoped route above deliberately never does.
+Route::get('/admin/employee-busy-dates', function (\Illuminate\Http\Request $request) {
+    $user = Auth::user();
+    if (!$user instanceof User || !$user->hasAnyRole(['admin', 'hr'])) {
+        abort(403);
+    }
+
+    $employeeId = $request->query('employee_id');
+    $employee = $employeeId ? \App\Models\Employee::find($employeeId) : null;
+
+    return response()->json(\App\Services\BusyDatesService::forEmployee($employee));
+})->middleware('auth')->name('admin.employee-busy-dates');
+
 Route::get('/employee/performance', function () {
     $user = Auth::user();
     $employee = $user instanceof User ? $user->employee : null;
@@ -251,7 +275,7 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
 })->middleware('auth')->name('admin.personnel.update');
 
 Route::get('/admin/personnel/{id}', function ($id) {
-    $employee = \App\Models\Employee::with(['employmentDetail', 'addresses', 'contacts', 'governmentIds'])
+    $employee = \App\Models\Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'addresses', 'contacts', 'governmentIds'])
         ->findOrFail($id);
 
     return response()->json($employee);
@@ -396,8 +420,8 @@ Route::post('/chatbot/chat', [\App\Http\Controllers\ChatbotController::class, 'c
 Route::get('/chatbot/history', [\App\Http\Controllers\ChatbotController::class, 'history'])->middleware('auth')->name('chatbot.history');
 
 // Notification API Routes
-Route::post('/api/notifications/mark-all-read', function () {
-    \App\Services\NotificationService::markAllAsRead(Auth::id());
+Route::post('/api/notifications/mark-all-read', function (\Illuminate\Http\Request $request) {
+    \App\Services\NotificationService::markAllAsRead(Auth::id(), $request->input('audience'));
     return response()->json(['success' => true]);
 })->middleware('auth');
 
