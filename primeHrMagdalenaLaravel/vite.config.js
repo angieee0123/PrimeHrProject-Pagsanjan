@@ -36,6 +36,7 @@ export default defineConfig({
                 'resources/css/travelOrder.css',
                 'resources/css/admin/adminDeductions.css',
                 'resources/css/admin/adminSettings.css',
+                'resources/css/admin/adminReports.css',
                 'resources/css/mayor/mayor.css',
                 'resources/css/mayor/mayorDashboard.css',
                 'resources/js/app.js',
@@ -125,6 +126,13 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
+        // `php artisan serve` listens on 127.0.0.1 (IPv4). Left to itself Vite
+        // binds to [::1] (IPv6) and writes that into public/hot, so every asset
+        // on the page becomes a cross-origin request to a different loopback
+        // stack — which is why edited CSS kept appearing not to take effect:
+        // the browser served its cached copy and a normal reload never
+        // revalidated. Pinning the host keeps both servers on one origin.
+        host: '127.0.0.1',
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },

@@ -47,6 +47,23 @@ window.closeSavedModal = function () {
     document.getElementById('settingsSavedBox').style.transform = 'translateY(16px)';
 };
 
+// Brief confirmation on the button itself, so the save reads as successful
+// even after the modal is dismissed. The `.saved` style already existed in
+// adminSettings.css but nothing ever applied it.
+function flashSaved(btn, label = 'Saved') {
+    if (!btn) return;
+    if (btn.dataset.idleLabel === undefined) {
+        btn.dataset.idleLabel = btn.textContent.trim();
+    }
+    clearTimeout(btn.savedTimer);
+    btn.classList.add('saved');
+    btn.textContent = label;
+    btn.savedTimer = setTimeout(() => {
+        btn.classList.remove('saved');
+        btn.textContent = btn.dataset.idleLabel;
+    }, 2200);
+}
+
 function showFieldError(elId, message) {
     const el = document.getElementById(elId);
     el.textContent = message;
@@ -130,6 +147,7 @@ window.saveProfile = function () {
         .then(() => {
             window.adminSettingsData.email = email;
             window.adminSettingsData.contactNumber = contactNumber;
+            flashSaved(btn);
             showSavedModal('Your personal information has been saved successfully.');
         })
         .catch(err => showFieldError('profileMsg', err.message))
@@ -168,6 +186,7 @@ window.changePassword = function () {
             document.getElementById('currentPw').value = '';
             document.getElementById('newPw').value = '';
             document.getElementById('confirmPw').value = '';
+            flashSaved(btn, 'Password Changed');
             showSavedModal('Your password has been changed successfully.');
         })
         .catch(err => showFieldError('pwMsg', err.message))
@@ -186,7 +205,10 @@ window.saveNotificationPrefs = function () {
     btn.disabled = true;
 
     settingsPost('/admin/settings/notifications', prefs)
-        .then(() => showSavedModal('Your notification preferences have been saved.'))
+        .then(() => {
+            flashSaved(btn);
+            showSavedModal('Your notification preferences have been saved.');
+        })
         .catch(err => showFieldError('notifMsg', err.message))
         .finally(() => { btn.disabled = false; });
 };
@@ -210,6 +232,7 @@ window.saveAiSettings = function () {
     settingsPost('/admin/settings/ai', { provider, model, api_key: apiKey || null })
         .then(() => {
             document.getElementById('aiApiKey').value = '';
+            flashSaved(btn);
             showSavedModal(provider ? 'Your AI provider settings have been saved.' : 'Reverted to the system default AI provider.');
         })
         .catch(err => showFieldError('aiMsg', err.message))
@@ -245,6 +268,7 @@ window.saveSystemAiSettings = function () {
     settingsPost('/admin/settings/system-ai', { provider, model, api_key: apiKey || null })
         .then(() => {
             document.getElementById('systemAiApiKey').value = '';
+            flashSaved(btn);
             showSavedModal(provider ? 'The system default AI settings have been saved.' : 'System default cleared.');
         })
         .catch(err => showFieldError('systemAiMsg', err.message))

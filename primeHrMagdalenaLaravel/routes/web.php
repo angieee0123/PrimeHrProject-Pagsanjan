@@ -105,6 +105,9 @@ Route::post('/employee/profile/update', [\App\Http\Controllers\EmployeeProfileCo
 
 Route::get('/employee/settings', [\App\Http\Controllers\EmployeeSettingsController::class, 'index'])->middleware('auth')->name('employee.settings');
 Route::post('/employee/settings/photo', [\App\Http\Controllers\EmployeeSettingsController::class, 'updatePhoto'])->middleware('auth')->name('employee.settings.photo');
+Route::post('/employee/settings/profile', [\App\Http\Controllers\EmployeeSettingsController::class, 'updateProfile'])->middleware('auth')->name('employee.settings.profile');
+Route::post('/employee/settings/password', [\App\Http\Controllers\EmployeeSettingsController::class, 'updatePassword'])->middleware('auth')->name('employee.settings.password');
+Route::post('/employee/settings/notifications', [\App\Http\Controllers\EmployeeSettingsController::class, 'updateNotifications'])->middleware('auth')->name('employee.settings.notifications');
 
 Route::get('/employee/notification', function () {
     return view('employee.notification.employeeNotification');
@@ -410,9 +413,7 @@ Route::get('/admin/departments/template', [\App\Http\Controllers\DepartmentContr
 Route::post('/admin/departments/import', [\App\Http\Controllers\DepartmentController::class, 'import'])->middleware('auth')->name('admin.departments.import');
 Route::post('/admin/departments', [\App\Http\Controllers\DepartmentController::class, 'store'])->middleware('auth')->name('admin.departments.store');
 
-Route::get('/admin/reports', function () {
-    return view('admin.reports.adminReports');
-})->middleware('auth')->name('admin.reports');
+Route::get('/admin/reports', [\App\Http\Controllers\AdminReportsController::class, 'index'])->middleware('auth')->name('admin.reports');
 
 Route::get('/admin/settings', [\App\Http\Controllers\AdminSettingsController::class, 'index'])->middleware('auth')->name('admin.settings');
 Route::post('/admin/settings/profile', [\App\Http\Controllers\AdminSettingsController::class, 'updateProfile'])->middleware('auth')->name('admin.settings.profile');

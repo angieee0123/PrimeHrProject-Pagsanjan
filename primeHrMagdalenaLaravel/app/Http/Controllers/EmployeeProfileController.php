@@ -31,7 +31,25 @@ class EmployeeProfileController extends Controller
             ->where('status', 'verified')
             ->count();
 
-        return view('employee.profile.employeeProfile', compact('employee', 'yearsOfService', 'leaveBalance', 'trainingsCompleted'));
+        // Attendance rate for the current year. Replaces a hardcoded "4.9"
+        // performance rating — this schema has no performance/evaluation table,
+        // so there was nothing behind that figure.
+        $year = Carbon::now()->year;
+        $byType = \App\Models\Attendance::where('employee_id', $employee->id)
+            ->whereYear('date', $year)
+            ->selectRaw('attendance_type, COUNT(*) AS total')
+            ->groupBy('attendance_type')
+            ->pluck('total', 'attendance_type');
+
+        $daysPresent = (int) ($byType['REGULAR'] ?? 0);
+        $daysAbsent  = (int) ($byType['ABSENT'] ?? 0);
+        $daysLogged  = $daysPresent + $daysAbsent;
+        $attendanceRate = $daysLogged > 0 ? round($daysPresent / $daysLogged * 100, 1) : null;
+
+        return view('employee.profile.employeeProfile', compact(
+            'employee', 'yearsOfService', 'leaveBalance', 'trainingsCompleted',
+            'attendanceRate', 'daysPresent', 'daysAbsent', 'year'
+        ));
     }
 
     public function update(Request $request)
@@ -45,7 +63,9 @@ class EmployeeProfileController extends Controller
 
         $data = $request->validate([
             'contact_number' => 'required|string|max:20',
-            'email' => 'required|email|max:255',
+            // Without the unique rule an employee could save an address already
+            // held by another account and hit the users.email constraint as a 500.
+            'email' => ['required', 'email', 'max:255', \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user->id)],
             'house_no' => 'nullable|string|max:50',
             'street' => 'nullable|string|max:255',
             'barangay' => 'nullable|string|max:255',
@@ -67,8 +87,11 @@ class EmployeeProfileController extends Controller
             ]);
         }
 
-        // Update email
+        // Update email on both records — employees.email is what HR reports read,
+        // users.email is what the account signs in with. Settings keeps these in
+        // step too; leaving one behind makes them silently diverge.
         $user->update(['email' => $data['email']]);
+        $employee->update(['email' => $data['email']]);
 
         // Update address
         $address = $employee->addresses->first();
@@ -108,10 +131,17 @@ class EmployeeProfileController extends Controller
             ]);
         }
 
-        // Build full address for response
-        $fullAddress = trim(($data['house_no'] ?? '') . ' ' . ($data['street'] ?? '') . ', ' . 
-                            ($data['barangay'] ?? '') . ', ' . ($data['city'] ?? '') . ', ' . 
-                            ($data['province'] ?? ''));
+        // Build the display address. Joining only the parts that were filled in
+        // avoids the ", , ," that a blank barangay/city used to leave behind.
+        $line = trim(($data['house_no'] ?? '') . ' ' . ($data['street'] ?? ''));
+        $fullAddress = collect([$line, $data['barangay'] ?? null, $data['city'] ?? null, $data['province'] ?? null])
+            ->filter(fn ($part) => filled(trim((string) $part)))
+            ->implode(', ');
+
+        if (filled($data['zip_code'] ?? null)) {
+            $fullAddress = trim($fullAddress . ' ' . $data['zip_code']);
+        }
+        $fullAddress = $fullAddress !== '' ? $fullAddress : 'N/A';
 
         return response()->json([
             'success' => true, 

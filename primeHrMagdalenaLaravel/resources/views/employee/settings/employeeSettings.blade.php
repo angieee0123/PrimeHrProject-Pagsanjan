@@ -72,7 +72,7 @@
                 
                 <div class="settings-tip">
                     <div class="settings-tip-header">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d9bb00" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                         <p class="settings-tip-title">QUICK TIP</p>
                     </div>
                     <p class="settings-tip-text">Keep your profile updated for accurate payroll processing.</p>
@@ -124,9 +124,10 @@
                                         <input type="text" id="contactNo" value="{{ $contactNumber }}">
                                     </div>
                                 </div>
+                                <p class="settings-message error hidden" id="profileMsg"></p>
                                 <div class="settings-save-bar">
                                     <button class="settings-btn-reset" onclick="resetProfile()">Reset</button>
-                                    <button class="settings-btn-save" onclick="saveSettings('profile')">Save Changes</button>
+                                    <button class="settings-btn-save" id="profileSaveBtn" onclick="saveProfile()">Save Changes</button>
                                 </div>
                             </div>
                         </div>
@@ -192,36 +193,40 @@
                                     <input type="password" id="confirmPw" placeholder="••••••••">
                                 </div>
                                 <p class="settings-message error hidden" id="pwMsg"></p>
-                                <button class="settings-btn-primary" onclick="changePassword()">
+                                <button class="settings-btn-primary" id="pwSaveBtn" onclick="changePassword()">
                                     Change Password
                                 </button>
                             </div>
                         </div>
                     </div>
                     
+                    {{-- Read-only account facts, straight from the users table. The
+                         previous Two-Factor Authentication toggle and Session
+                         Timeout picker had no backing column and no enforcement —
+                         a 2FA switch that protects nothing is worse than none. --}}
                     <div class="settings-section">
-                        <h3 class="settings-section-title">Login Security</h3>
+                        <h3 class="settings-section-title">Account</h3>
                         <div class="settings-section-content">
                             <div class="settings-row">
                                 <div class="settings-row-label">
-                                    <p class="settings-row-title">Two-Factor Authentication</p>
-                                    <p class="settings-row-desc">Require OTP on every login</p>
+                                    <p class="settings-row-title">Username</p>
+                                    <p class="settings-row-desc">Used to sign in — assigned by HR</p>
                                 </div>
-                                <button class="settings-toggle" id="twoFA" onclick="toggleSetting(this)">
-                                    <span class="settings-toggle-thumb"></span>
-                                </button>
+                                <span class="notif-readonly">{{ auth()->user()->username ?? '—' }}</span>
                             </div>
                             <div class="settings-row">
                                 <div class="settings-row-label">
-                                    <p class="settings-row-title">Session Timeout</p>
-                                    <p class="settings-row-desc">Auto-logout after inactivity</p>
+                                    <p class="settings-row-title">Account Status</p>
+                                    <p class="settings-row-desc">Deactivated accounts cannot sign in</p>
                                 </div>
-                                <select class="settings-select">
-                                    <option value="15">15 minutes</option>
-                                    <option value="30" selected>30 minutes</option>
-                                    <option value="60">1 hour</option>
-                                    <option value="120">2 hours</option>
-                                </select>
+                                <span class="notif-readonly">{{ ucfirst(auth()->user()->status ?? 'active') }}</span>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-row-label">
+                                    <p class="settings-row-title">Session Length</p>
+                                    <p class="settings-row-desc">You are signed out automatically after this much inactivity</p>
+                                </div>
+                                <span class="notif-readonly">{{ config('session.lifetime') }} minutes</span>
                             </div>
                         </div>
                     </div>
@@ -236,7 +241,7 @@
                                     <p class="settings-row-title">Payslip Available</p>
                                     <p class="settings-row-desc">Notify when your monthly payslip is ready</p>
                                 </div>
-                                <button class="settings-toggle active" onclick="toggleSetting(this)">
+                                <button class="settings-toggle {{ $prefs['payslip_available'] ? 'active' : '' }}" data-pref="payslip_available" onclick="toggleSetting(this)">
                                     <span class="settings-toggle-thumb"></span>
                                 </button>
                             </div>
@@ -246,7 +251,7 @@
                                     <p class="settings-row-title">Leave Status Update</p>
                                     <p class="settings-row-desc">Notify when your leave request is approved or rejected</p>
                                 </div>
-                                <button class="settings-toggle active" onclick="toggleSetting(this)">
+                                <button class="settings-toggle {{ $prefs['leave_status'] ? 'active' : '' }}" data-pref="leave_status" onclick="toggleSetting(this)">
                                     <span class="settings-toggle-thumb"></span>
                                 </button>
                             </div>
@@ -256,7 +261,7 @@
                                     <p class="settings-row-title">DTR Deadline Reminder</p>
                                     <p class="settings-row-desc">Remind before DTR submission deadline</p>
                                 </div>
-                                <button class="settings-toggle active" onclick="toggleSetting(this)">
+                                <button class="settings-toggle {{ $prefs['dtr_reminder'] ? 'active' : '' }}" data-pref="dtr_reminder" onclick="toggleSetting(this)">
                                     <span class="settings-toggle-thumb"></span>
                                 </button>
                             </div>
@@ -265,7 +270,7 @@
                                     <p class="settings-row-title">Attendance Alert</p>
                                     <p class="settings-row-desc">Notify when a late or absent entry is recorded</p>
                                 </div>
-                                <button class="settings-toggle" onclick="toggleSetting(this)">
+                                <button class="settings-toggle {{ $prefs['attendance_alert'] ? 'active' : '' }}" data-pref="attendance_alert" onclick="toggleSetting(this)">
                                     <span class="settings-toggle-thumb"></span>
                                 </button>
                             </div>
@@ -280,14 +285,15 @@
                                     <p class="settings-row-title">Email Digest</p>
                                     <p class="settings-row-desc">Receive a daily summary of updates via email</p>
                                 </div>
-                                <button class="settings-toggle active" onclick="toggleSetting(this)">
+                                <button class="settings-toggle {{ $prefs['email_digest'] ? 'active' : '' }}" data-pref="email_digest" onclick="toggleSetting(this)">
                                     <span class="settings-toggle-thumb"></span>
                                 </button>
                             </div>
+                            <p class="settings-message error hidden" id="notifMsg"></p>
                             <div class="settings-form-wrapper">
                                 <div class="settings-save-bar">
                                     <button class="settings-btn-reset" onclick="resetNotifications()">Reset</button>
-                                    <button class="settings-btn-save" onclick="saveSettings('notifications')">Save Changes</button>
+                                    <button class="settings-btn-save" id="notifSaveBtn" onclick="saveNotifications()">Save Changes</button>
                                 </div>
                             </div>
                         </div>
@@ -408,6 +414,111 @@
         emailAddr: @json(auth()->user()->email),
         contactNo: @json($contactNumber),
     };
+    const notificationDefaults = @json($prefs);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+    /** POST JSON and surface the server's message on failure. */
+    function settingsPost(url, body) {
+        return fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: JSON.stringify(body),
+        }).then(async (response) => {
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.message || 'Something went wrong. Please try again.');
+            return data;
+        });
+    }
+
+    function showFieldError(id, message) {
+        const el = document.getElementById(id);
+        el.textContent = message;
+        el.className = 'settings-message error';
+    }
+
+    function hideFieldError(id) {
+        document.getElementById(id).classList.add('hidden');
+    }
+
+    /** Brief green confirmation on the button itself, alongside the modal. */
+    function flashSaved(btn, label = 'Saved') {
+        if (!btn) return;
+        if (btn.dataset.idleLabel === undefined) btn.dataset.idleLabel = btn.textContent.trim();
+        clearTimeout(btn.savedTimer);
+        btn.classList.add('saved');
+        btn.textContent = label;
+        btn.savedTimer = setTimeout(() => {
+            btn.classList.remove('saved');
+            btn.textContent = btn.dataset.idleLabel;
+        }, 2200);
+    }
+
+    function saveProfile() {
+        hideFieldError('profileMsg');
+        const payload = {
+            first_name: document.getElementById('firstName').value.trim(),
+            last_name: document.getElementById('lastName').value.trim(),
+            email: document.getElementById('emailAddr').value.trim(),
+            contact_number: document.getElementById('contactNo').value.trim(),
+        };
+
+        if (!payload.first_name || !payload.last_name) {
+            showFieldError('profileMsg', 'First and last name are required.');
+            return;
+        }
+        if (!payload.email) {
+            showFieldError('profileMsg', 'Email address is required.');
+            return;
+        }
+
+        const btn = document.getElementById('profileSaveBtn');
+        btn.disabled = true;
+
+        settingsPost('{{ route('employee.settings.profile') }}', payload)
+            .then(data => {
+                // Keep Reset and the on-page name/initials in step with what was saved.
+                profileDefaults.firstName = payload.first_name;
+                profileDefaults.lastName = payload.last_name;
+                profileDefaults.emailAddr = payload.email;
+                profileDefaults.contactNo = payload.contact_number;
+                document.querySelectorAll('.settings-profile-name, .settings-avatar-name')
+                    .forEach(el => { el.textContent = data.fullName; });
+                ['sidebarAvatarInitials', 'mainAvatarInitials'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = data.initials;
+                });
+                flashSaved(btn);
+                saveSettings('profile');
+            })
+            .catch(err => showFieldError('profileMsg', err.message))
+            .finally(() => { btn.disabled = false; });
+    }
+
+    function saveNotifications() {
+        hideFieldError('notifMsg');
+        const payload = {};
+        Object.keys(notificationDefaults).forEach(key => {
+            const toggle = document.querySelector(`#tab-notifications .settings-toggle[data-pref="${key}"]`);
+            // A category hidden for this employment type keeps its stored value.
+            payload[key] = toggle ? toggle.classList.contains('active') : notificationDefaults[key];
+        });
+
+        const btn = document.getElementById('notifSaveBtn');
+        btn.disabled = true;
+
+        settingsPost('{{ route('employee.settings.notifications') }}', payload)
+            .then(() => {
+                Object.assign(notificationDefaults, payload);
+                flashSaved(btn);
+                saveSettings('notifications');
+            })
+            .catch(err => showFieldError('notifMsg', err.message))
+            .finally(() => { btn.disabled = false; });
+    }
 
     function saveSettings(section) {
         const labels = { profile: 'Personal Information', notifications: 'Notification Preferences', password: 'Password', photo: 'Profile Photo' };
@@ -437,38 +548,51 @@
         });
     }
 
+    /** Restore the toggles to what is currently stored, not to a fixed pattern. */
     function resetNotifications() {
-        document.querySelectorAll('#tab-notifications .settings-toggle').forEach((t, i) => {
-            if (i < 3) t.classList.add('active'); else t.classList.remove('active');
+        hideFieldError('notifMsg');
+        Object.entries(notificationDefaults).forEach(([key, on]) => {
+            const toggle = document.querySelector(`#tab-notifications .settings-toggle[data-pref="${key}"]`);
+            if (toggle) toggle.classList.toggle('active', !!on);
         });
     }
 
     function changePassword() {
+        hideFieldError('pwMsg');
         const current = document.getElementById('currentPw').value;
         const newPw   = document.getElementById('newPw').value;
         const confirm = document.getElementById('confirmPw').value;
-        const msg     = document.getElementById('pwMsg');
 
         if (!current || !newPw || !confirm) {
-            msg.textContent = 'Please fill in all password fields.';
-            msg.className = 'settings-message error';
+            showFieldError('pwMsg', 'Please fill in all password fields.');
             return;
         }
         if (newPw.length < 8) {
-            msg.textContent = 'New password must be at least 8 characters.';
-            msg.className = 'settings-message error';
+            showFieldError('pwMsg', 'New password must be at least 8 characters.');
             return;
         }
         if (newPw !== confirm) {
-            msg.textContent = 'New password and confirmation do not match.';
-            msg.className = 'settings-message error';
+            showFieldError('pwMsg', 'New password and confirmation do not match.');
             return;
         }
-        msg.classList.add('hidden');
-        document.getElementById('currentPw').value = '';
-        document.getElementById('newPw').value = '';
-        document.getElementById('confirmPw').value = '';
-        saveSettings('password');
+
+        const btn = document.getElementById('pwSaveBtn');
+        btn.disabled = true;
+
+        settingsPost('{{ route('employee.settings.password') }}', {
+            current_password: current,
+            new_password: newPw,
+            new_password_confirmation: confirm,
+        })
+            .then(() => {
+                document.getElementById('currentPw').value = '';
+                document.getElementById('newPw').value = '';
+                document.getElementById('confirmPw').value = '';
+                flashSaved(btn, 'Password Changed');
+                saveSettings('password');
+            })
+            .catch(err => showFieldError('pwMsg', err.message))
+            .finally(() => { btn.disabled = false; });
     }
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSavedModal(); });

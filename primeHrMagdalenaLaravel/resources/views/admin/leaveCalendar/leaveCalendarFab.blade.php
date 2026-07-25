@@ -37,20 +37,46 @@
                 <p>Loading calendar…</p>
             </div>
             <iframe id="leaveCalFrame" title="Leave & Travel Calendar" src="about:blank" loading="lazy"
-                    onload="if(this.src.indexOf('about:blank')===-1){document.getElementById('leaveCalLoader').style.display='none';}"></iframe>
+                    onload="leaveCalFrameLoaded(this)"></iframe>
         </div>
     </div>
 </div>
 
 <script>
+    // Root-relative on purpose: an absolute URL built from APP_URL (127.0.0.1)
+    // is a different host than a browser sitting on localhost, so the session
+    // cookie would not be sent and every open would land on /login.
+    var LEAVE_CAL_PATH = "{{ route('admin.leaveCalendar', [], false) }}";
+    var LEAVE_CAL_SRC  = "{{ route('admin.leaveCalendar', ['embed' => 1], false) }}";
+
     function openLeaveCalModal() {
         var modal = document.getElementById('leaveCalModal');
         var frame = document.getElementById('leaveCalFrame');
-        if (frame.getAttribute('src') === 'about:blank') {
-            frame.src = "{{ route('admin.leaveCalendar', ['embed' => 1]) }}";
-        }
+        // Reload every time so the month is current and an expired session is
+        // caught on open rather than showing a stale calendar.
+        document.getElementById('leaveCalLoader').style.display = '';
+        frame.src = LEAVE_CAL_SRC;
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+    }
+
+    // The iframe renders whatever the server returns. If `auth` redirected the
+    // request (expired session), that response is the full portal/login page —
+    // send the whole window there instead of framing the portal inside the modal.
+    function leaveCalFrameLoaded(frame) {
+        var loc;
+        try {
+            loc = frame.contentWindow.location;
+        } catch (e) {
+            return;   // cross-origin: nothing we can inspect
+        }
+        if (loc.href === 'about:blank') return;
+
+        if (loc.pathname !== LEAVE_CAL_PATH) {
+            window.location.href = loc.href;
+            return;
+        }
+        document.getElementById('leaveCalLoader').style.display = 'none';
     }
     function closeLeaveCalModal(event) {
         if (event && event.target !== event.currentTarget) return;

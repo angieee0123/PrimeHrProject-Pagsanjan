@@ -35,20 +35,46 @@
                 <p>Loading calendar…</p>
             </div>
             <iframe id="ecalFrame" title="My Leave & Travel Calendar" src="about:blank" loading="lazy"
-                    onload="if(this.src.indexOf('about:blank')===-1){document.getElementById('ecalLoader').style.display='none';}"></iframe>
+                    onload="ecalFrameLoaded(this)"></iframe>
         </div>
     </div>
 </div>
 
 <script>
+    // Root-relative on purpose: an absolute URL built from APP_URL (127.0.0.1)
+    // is a different host than a browser sitting on localhost, so the session
+    // cookie would not be sent and every open would land on /login.
+    var ECAL_PATH = "{{ route('employee.leaveCalendar', [], false) }}";
+    var ECAL_SRC  = "{{ route('employee.leaveCalendar', ['embed' => 1], false) }}";
+
     function openEcalModal() {
         var modal = document.getElementById('ecalModal');
         var frame = document.getElementById('ecalFrame');
-        if (frame.getAttribute('src') === 'about:blank') {
-            frame.src = "{{ route('employee.leaveCalendar', ['embed' => 1]) }}";
-        }
+        // Reload every time so the month is current and an expired session is
+        // caught on open rather than showing a stale calendar.
+        document.getElementById('ecalLoader').style.display = '';
+        frame.src = ECAL_SRC;
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+    }
+
+    // The iframe renders whatever the server returns. If `auth` redirected the
+    // request (expired session), that response is the full portal/login page —
+    // send the whole window there instead of framing the portal inside the modal.
+    function ecalFrameLoaded(frame) {
+        var loc;
+        try {
+            loc = frame.contentWindow.location;
+        } catch (e) {
+            return;   // cross-origin: nothing we can inspect
+        }
+        if (loc.href === 'about:blank') return;
+
+        if (loc.pathname !== ECAL_PATH) {
+            window.location.href = loc.href;
+            return;
+        }
+        document.getElementById('ecalLoader').style.display = 'none';
     }
     function closeEcalModal(event) {
         if (event && event.target !== event.currentTarget) return;

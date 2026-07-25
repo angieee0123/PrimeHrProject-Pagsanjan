@@ -6,22 +6,32 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserNotificationPreference extends Model
 {
-    protected $fillable = [
-        'user_id',
+    /** Categories shown on the admin Settings page. */
+    public const ADMIN_KEYS = [
         'leave_requests',
         'training_submissions',
         'travel_orders',
         'employee_requests',
     ];
 
+    /** Categories shown on the employee Settings page. */
+    public const EMPLOYEE_KEYS = [
+        'payslip_available',
+        'leave_status',
+        'dtr_reminder',
+        'attendance_alert',
+        'email_digest',
+    ];
+
+    protected $fillable = [
+        'user_id',
+        ...self::ADMIN_KEYS,
+        ...self::EMPLOYEE_KEYS,
+    ];
+
     protected function casts(): array
     {
-        return [
-            'leave_requests' => 'boolean',
-            'training_submissions' => 'boolean',
-            'travel_orders' => 'boolean',
-            'employee_requests' => 'boolean',
-        ];
+        return array_fill_keys([...self::ADMIN_KEYS, ...self::EMPLOYEE_KEYS], 'boolean');
     }
 
     public function user()

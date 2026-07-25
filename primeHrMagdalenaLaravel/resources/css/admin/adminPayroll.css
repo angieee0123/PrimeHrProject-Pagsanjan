@@ -370,8 +370,15 @@
 .signature-date { font-size: 11px; color: #56547a; margin: 0; }
 
 @media print {
-    body * { visibility: hidden; }
-    #payslipDetailModal, #payslipDetailModal * { visibility: visible; }
+    /* Scoped with :has() on purpose. This file is loaded by layouts/app on EVERY
+       admin page, so an unscoped `body *{ visibility:hidden }` blanked the
+       printout of every page that has no payslip modal (Reports, Attendance,
+       …). Now the isolation only engages where #payslipDetailModal exists.
+       If a browser lacks :has(), the selector is dropped and that page simply
+       prints in full — a safe degradation rather than a blank sheet. */
+    body:has(#payslipDetailModal) * { visibility: hidden; }
+    body:has(#payslipDetailModal) #payslipDetailModal,
+    body:has(#payslipDetailModal) #payslipDetailModal * { visibility: visible; }
     #payslipDetailModal { position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: white; z-index: 9999; }
     .modal-overlay { position: static; background: none; padding: 0; }
     .modal-container { box-shadow: none; max-width: 100%; max-height: none; border-radius: 0; }

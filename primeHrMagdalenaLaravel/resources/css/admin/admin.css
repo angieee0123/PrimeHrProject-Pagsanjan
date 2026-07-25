@@ -96,23 +96,108 @@ body {
 .logo-mark { flex-shrink: 0; }
 .logo-text-wrap { overflow: hidden; white-space: nowrap; }
 .logo-text { display: block; font-size: 13.5px; font-weight: 800; color: #ffffff; line-height: 1.2; }
-.logo-sub  { display: block; font-size: 10px; color: rgba(255,255,255,0.4); }
+/* 0.4 white measured 3.6:1 at 10px — under the AA floor for text this size. */
+.logo-sub  { display: block; font-size: 10px; color: rgba(255,255,255,0.6); letter-spacing: 0.2px; }
 
 .toggle-btn {
-  background: rgba(255,255,255,0.08); border: none; color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.08); border: none; color: rgba(255,255,255,0.75);
   width: 24px; height: 24px; border-radius: 6px; cursor: pointer;
   font-size: 16px; display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; transition: background 0.2s;
 }
 .toggle-btn:hover { background: rgba(255,255,255,0.15); }
 
+/* Was rgba(255,255,255,0.3) at 9.5px with 1.5px tracking — 2.49:1 against the
+   navy rail, well under the 4.5:1 WCAG AA minimum, and dimmer than the links
+   underneath it, which inverted the hierarchy. Now 0.62 (7.3:1), a size up, and
+   tighter tracking, because wide letter-spacing on tiny type hurts legibility
+   rather than helping it. */
 .nav-section-label {
-  font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px;
-  color: rgba(255,255,255,0.3); padding: 16px 18px 6px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.9px;
+  color: rgba(255,255,255,0.62); padding: 16px 18px 6px;
   text-transform: uppercase; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+/* ---- Collapsible nav sections ---- */
+.nav-group { display: flex; flex-direction: column; }
+
+/* Headers are proper rows, matched to .nav-item metrics. As loose labels they
+   looked unfinished once several groups were shut at the same time. */
+.nav-section-toggle {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 9px 10px;
+  background: none; border: none; cursor: pointer;
+  font-family: inherit; text-align: left;
+  border-radius: 9px;
+  transition: background 0.18s, color 0.18s;
+}
+.nav-section-toggle .nav-section-label { padding: 0; flex: 1; min-width: 0; }
+.nav-section-toggle:hover { background: rgba(255,255,255,0.07); }
+.nav-section-toggle:hover .nav-section-label { color: #ffffff; }
+.nav-section-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.55);
+}
+/* An open section reads as the heading of live content, so it carries full
+   weight; shut sections stay one step back. */
+.nav-group:not(.is-collapsed) > .nav-section-toggle .nav-section-label { color: rgba(255,255,255,0.82); }
+
+.nav-section-chevron {
+  color: rgba(255,255,255,0.55); flex-shrink: 0;
+  transition: transform 0.22s cubic-bezier(0.32,0.72,0,1), color 0.18s;
+}
+.nav-section-toggle:hover .nav-section-chevron { color: #ffffff; }
+.nav-group.is-collapsed .nav-section-chevron { transform: rotate(-90deg); }
+
+/* Count sits in for the hidden links while a section is shut. */
+.nav-section-count {
+  display: none;
+  min-width: 19px; padding: 0 6px; height: 18px;
+  align-items: center; justify-content: center;
+  border-radius: 999px; flex-shrink: 0;
+  background: rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.75);
+  font-size: 10px; font-weight: 700; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.nav-group.is-collapsed .nav-section-count { display: inline-flex; }
+.nav-section-toggle:hover .nav-section-count { background: rgba(255,255,255,0.22); color: #ffffff; }
+
+/* Breathing room between shut sections without the sparse look of the old
+   asymmetric padding. */
+.nav-group + .nav-group { margin-top: 2px; }
+.nav-group.is-collapsed + .nav-group.is-collapsed { margin-top: 0; }
+
+.nav-group-items { display: flex; flex-direction: column; gap: 2px; }
+.nav-group.is-collapsed .nav-group-items { display: none; }
+
+/* Icons-only rail: the accordion is meaningless without labels, so headers go
+   away and every group is forced open — otherwise a collapsed section would
+   hide its pages with no visible way to get them back. A hairline keeps the
+   groups readable as clusters. */
+.sidebar.collapsed .nav-section-toggle { display: none; }
+.sidebar.collapsed .nav-group-items { display: flex !important; }
+.sidebar.collapsed .nav-group {
+  border-top: 1px solid rgba(255,255,255,0.10);
+  margin-top: 6px;
+  padding-top: 6px;
 }
 
-.sidebar-nav { flex: 1; padding: 4px 10px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; overflow-x: hidden; }
+/* Referenced by the sidebar markup (before Log Out) but never styled, so the
+   separation it was meant to provide did not render at all. */
+.nav-divider {
+  height: 1px;
+  margin: 10px 8px 6px;
+  background: rgba(255,255,255,0.12);
+  flex-shrink: 0;
+}
+
+/* The accordion keeps at most three sections open and closes the oldest as soon
+   as the list would outgrow this box (see initNavGroups in app.js), so in normal
+   use no scrollbar appears. `auto` stays as a last-resort guard — clipping with
+   `hidden` would make links unreachable instead of merely scrollable. */
+.sidebar-nav { flex: 1; min-height: 0; padding: 4px 10px 8px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; }
 .sidebar-nav::-webkit-scrollbar { width: 4px; }
 .sidebar-nav::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
 .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
@@ -121,18 +206,35 @@ body {
 .nav-item {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 10px; border-radius: 9px; text-decoration: none;
-  color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 500;
+  /* 0.55 was only just over the AA floor; 0.72 gives 9.1:1 and lets the active
+     row stand out by weight and fill rather than by everything else being dim. */
+  color: rgba(255,255,255,0.72); font-size: 13px; font-weight: 500;
   transition: background 0.18s, color 0.18s; position: relative; white-space: nowrap;
 }
-.nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
-.nav-item.active { background: rgba(255,255,255,0.12); color: #ffffff; font-weight: 600; }
+.nav-item:hover { background: rgba(255,255,255,0.08); color: #ffffff; }
+.nav-item:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(255,255,255,0.55); }
+.nav-item.active {
+  background: linear-gradient(90deg, rgba(255,255,255,0.16), rgba(255,255,255,0.09));
+  color: #ffffff; font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+}
+.nav-item .nav-icon { opacity: 0.85; transition: opacity 0.18s; }
+.nav-item:hover .nav-icon, .nav-item.active .nav-icon { opacity: 1; }
 
 .nav-icon { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 20px; }
 .nav-label { overflow: hidden; text-overflow: ellipsis; }
+/* Indicator moved to the leading edge — on a left-hand rail a marker pinned to
+   the far right reads as detached from the row it belongs to. */
 .nav-active-bar {
-  position: absolute; right: 0; top: 50%; transform: translateY(-50%);
-  width: 3px; height: 18px; background: var(--gp-accent-gold); border-radius: 3px 0 0 3px;
+  position: absolute; left: 2px; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 17px; background: var(--gp-accent-gold); border-radius: 999px;
 }
+
+/* Log Out shared the plain nav styling, so a destructive action looked exactly
+   like navigating to another page. */
+.nav-logout { width: 100%; background: none; border: none; cursor: pointer; font-family: inherit; text-align: left; }
+.nav-logout:hover { background: rgba(220,38,38,0.16); color: #fecaca; }
+.nav-logout:hover .nav-icon { opacity: 1; }
 
 /* Sidebar Footer */
 .sidebar-footer {
@@ -142,20 +244,31 @@ body {
 .sidebar-footer.collapsed-footer { justify-content: center; padding: 14px 0; }
 
 .user-avatar-wrap { position: relative; flex-shrink: 0; }
+/* Circular, and defined here rather than inline in the blade. The markup used to
+   carry width/height/border-radius/background as inline styles that overrode
+   this class completely, so the stylesheet said one thing and the page rendered
+   another. */
 .user-avatar {
-  width: 34px; height: 34px; border-radius: 9px;
-  background: rgba(217,187,0,0.2); border: 1.5px solid rgba(217,187,0,0.35);
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, #2b3f9e, #0b044d);
+  border: 2px solid #ecebf6;
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; color: var(--gp-accent-gold);
+  font-size: 13px; font-weight: 600; color: #ffffff;
+  flex-shrink: 0; overflow: hidden;
 }
+/* Photo variant — fills the same circle so the footer never reflows. */
+.user-avatar-img { object-fit: cover; display: block; padding: 0; }
+/* Sits on the circle's lower-right arc; the old -2px offsets were tuned for a
+   rounded square and float off the edge of a circle. */
 .user-status-dot {
-  position: absolute; bottom: -2px; right: -2px;
+  position: absolute; bottom: 0; right: 0;
   width: 9px; height: 9px; border-radius: 50%;
   background: #22c55e; border: 2px solid var(--gp-pri);
 }
 .user-info { flex: 1; overflow: hidden; }
 .user-name { font-size: 12.5px; font-weight: 700; color: #ffffff; margin: 0 0 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.user-role { font-size: 10.5px; color: rgba(255,255,255,0.4); margin: 0; }
+/* Same 3.6:1 problem as .logo-sub — raised to clear AA. */
+.user-role { font-size: 10.5px; color: rgba(255,255,255,0.6); margin: 0; }
 
 .logout-btn {
   background: rgba(255,255,255,0.07); border: none; color: rgba(255,255,255,0.5);
@@ -236,6 +349,12 @@ body {
   .toggle-btn { display: none; }
   .nav-section-label { display: block !important; }
   .nav-label { display: block !important; }
+  /* Mobile keeps full width even when .collapsed is set, so the section headers
+     must come back — and a collapsed group must stay collapsed, not be forced
+     open by the icons-only rule above. */
+  .nav-section-toggle { display: flex !important; }
+  .nav-group { border-top: none; margin-top: 0; padding-top: 0; }
+  .nav-group.is-collapsed .nav-group-items { display: none !important; }
   .user-info { display: flex !important; flex-direction: column; }
   .sidebar-footer { padding: 14px !important; }
   .mobile-overlay { z-index: 250; }
