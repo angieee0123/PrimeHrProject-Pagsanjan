@@ -76,6 +76,10 @@ Route::get('/admin/employee-busy-dates', function (\Illuminate\Http\Request $req
     return response()->json(\App\Services\BusyDatesService::forEmployee($employee));
 })->middleware('auth')->name('admin.employee-busy-dates');
 
+// Employee's own Leave & Travel calendar (self-scoped, read-only). Opened from
+// the floating button on every employee page; ?embed=1 loads the bare modal view.
+Route::get('/employee/leave-calendar', [\App\Http\Controllers\EmployeeLeaveCalendarController::class, 'index'])->middleware('auth')->name('employee.leaveCalendar');
+
 Route::get('/employee/performance', function () {
     $user = Auth::user();
     $employee = $user instanceof User ? $user->employee : null;
@@ -308,6 +312,9 @@ Route::put('/admin/attendance/exemptions/{id}', [AttendanceController::class, 'u
 Route::delete('/admin/attendance/exemptions/{id}', [AttendanceController::class, 'destroyExemption'])->middleware('auth')->name('admin.attendance.exemptions.destroy');
 
 Route::get('/admin/leave', [LeaveController::class, 'index'])->middleware('auth')->name('admin.leave');
+
+// Leave & Travel Calendar — read-only availability monitor for the admin.
+Route::get('/admin/leave-calendar', [\App\Http\Controllers\AdminLeaveCalendarController::class, 'index'])->middleware('auth')->name('admin.leaveCalendar');
 
 Route::get('/admin/travelorder', [\App\Http\Controllers\TravelOrderController::class, 'index'])->middleware('auth')->name('admin.travelorder');
 Route::post('/admin/travelorder/{id}/approve', [\App\Http\Controllers\TravelOrderController::class, 'approve'])->middleware('auth')->name('admin.travelorder.approve');

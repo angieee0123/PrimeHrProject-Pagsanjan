@@ -212,11 +212,12 @@ class AdminDashboardController extends Controller
             })
             ->filter();
 
-        // Department breakdown - ordered by member count (most to least)
+        // Department breakdown - all active departments, ordered by member count
+        // (most to least). The order is recomputed on every load, so a department
+        // that gains employees moves up the list automatically.
         $departments = Department::where('status', 'Active')
             ->withCount(['employmentDetails as employee_count'])
             ->orderByDesc('employee_count')
-            ->limit(5)
             ->get()
             ->map(function($dept, $index) {
                 $colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#6366f1', '#14b8a6'];

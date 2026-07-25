@@ -1,0 +1,363 @@
+/* ============================================================
+   Admin Leave & Travel Calendar
+   View:  resources/views/admin/leaveCalendar/leaveCalendar.blade.php
+   Design language mirrors the Attendance page (glass-shell +
+   filter-card + btn-solid/btn-ghost, navy #0b044d accents).
+   Renders inside the floating-button modal via an iframe embed.
+   ============================================================ */
+
+.lc-calendar { display: flex; flex-direction: column; gap: 16px; }
+/* Inside the modal iframe the calendar sits on the modal panel's own glass +
+   colour wash, so cancel .glass-shell's full-height opaque page background. */
+.lc-calendar.glass-shell { min-height: 0; padding: 0; }
+.lc-calendar.glass-shell::before { display: none; }
+
+/* ---------- Modal (embed) mode: fit the whole month, no scrolling ----------
+   Only inside the popup iframe (.lc-embed-wrap). The full-page view keeps its
+   natural fixed-height cells and normal document flow. Here the calendar fills
+   the modal and the week rows divide the leftover height so every week shows. */
+.lc-embed-wrap .lc-calendar { flex: 1; min-height: 0; }
+.lc-embed-wrap .lc-card {
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
+}
+.lc-embed-wrap .lc-days {
+    flex: 1; min-height: 0;
+    grid-auto-rows: 1fr;     /* every week row shares the height equally */
+}
+.lc-embed-wrap .lc-day { min-height: 0; }
+
+/* 6-week months split the height into six short rows. Compact the cells and
+   avatars so the grid stays balanced and legible instead of cramped, and give
+   the calendar a little more room by tightening the strip above it. */
+.lc-embed-wrap .lc-weeks-6 { gap: 11px; }
+.lc-embed-wrap .lc-weeks-6 .lc-stat { padding: 12px 15px; }
+.lc-embed-wrap .lc-weeks-6 .lc-card { padding: 13px; }
+.lc-embed-wrap .lc-weeks-6 .lc-grid { gap: 6px; }
+.lc-embed-wrap .lc-weeks-6 .lc-weekdays { margin-bottom: 7px; padding-bottom: 7px; }
+.lc-embed-wrap .lc-weeks-6 .lc-day { padding: 5px 7px 6px; gap: 3px; border-radius: 10px; }
+.lc-embed-wrap .lc-weeks-6 .lc-day-num { font-size: 12px; }
+.lc-embed-wrap .lc-weeks-6 .lc-day.is-today .lc-day-num { width: 21px; height: 21px; font-size: 11px; }
+.lc-embed-wrap .lc-weeks-6 .lc-day-count { font-size: 9.5px; padding: 1px 6px; }
+.lc-embed-wrap .lc-weeks-6 .cal-marker { width: 33px; height: 33px; margin-left: -11px; }
+.lc-embed-wrap .lc-weeks-6 .cal-marker-initials { font-size: 11.5px; }
+.lc-embed-wrap .lc-weeks-6 .cal-more { height: 29px; font-size: 11px; padding: 0 9px; }
+
+/* ---------- Toolbar (uses .filter-card from the glass system) ---------- */
+.lc-toolbar { flex-wrap: wrap; row-gap: 10px; }
+.lc-nav { align-items: center; gap: 10px !important; flex: 0 1 auto !important; }
+.lc-toolbar-label {
+    font-size: 10.5px; font-weight: 600; color: #9aa1b5;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding-right: 2px; white-space: nowrap;
+}
+.lc-nav-btn {
+    width: 38px; height: 38px;
+    padding: 0 !important;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+}
+.lc-month-title {
+    font-size: 17px; font-weight: 800; color: #0b044d;
+    margin: 0; min-width: 148px; text-align: center;
+}
+/* Month/year jump-to picker styled to read like the title, editable on click */
+.lc-month-input {
+    font-family: inherit;
+    font-size: 15.5px; font-weight: 800; color: #0b044d;
+    text-align: center;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.lc-month-input:hover { background: rgba(11, 4, 77, 0.05); border-color: rgba(11, 4, 77, 0.12); }
+.lc-month-input:focus {
+    outline: none;
+    background: #fff;
+    border-color: #0b044d;
+    box-shadow: 0 0 0 4px rgba(11, 4, 77, 0.08);
+}
+.lc-month-input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 0.16s ease;
+}
+.lc-month-input:hover::-webkit-calendar-picker-indicator { opacity: 0.9; }
+.lc-today-btn {
+    height: 38px;
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12.5px;
+    padding: 0 16px !important;
+}
+
+/* ---------- Legend ---------- */
+.lc-legend { flex-wrap: wrap; gap: 14px !important; }
+.lc-legend-item {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 600; color: #64748b;
+}
+.lc-legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid transparent; }
+.lc-legend-dot.is-leave-approved { background: #16a34a; }
+.lc-legend-dot.is-leave-pending  { background: #f59e0b; }
+.lc-legend-dot.is-travel         { background: #3b82f6; }
+.lc-legend-dot.is-pending-swatch { background: #fff; border: 2px dashed #94a3b8; }
+.lc-legend-count {
+    font-size: 11.5px; font-weight: 700; color: #0b044d;
+    background: #eef0fb; padding: 5px 12px; border-radius: 999px;
+}
+
+/* ---------- Summary stat strip (glassy KPI cards, DTR-modal style) ---------- */
+.lc-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: -14px;   /* tighten the gap to the month-selection toolbar above */
+}
+.lc-stat {
+    display: flex; align-items: center; gap: 12px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.55));
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(15, 23, 42, 0.04);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease;
+}
+.lc-stat:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.9);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 28px rgba(11, 4, 77, 0.1);
+}
+.lc-stat-ico {
+    width: 38px; height: 38px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+.lc-stat-ico.is-people  { background: #eef0fb; color: #0b044d; }
+.lc-stat-ico.is-leave   { background: #e9f9ef; color: #2fa860; }  /* green — matches leave marks */
+.lc-stat-ico.is-travel  { background: #eaf1ff; color: #4F7CFF; }  /* blue  — matches travel marks */
+.lc-stat-ico.is-pending { background: #fbf6e3; color: #eba417; }  /* amber — pending */
+.lc-stat-body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.lc-stat-num { margin: 0; font-size: 20px; font-weight: 700; color: #1a1f36; line-height: 1.1; letter-spacing: -0.4px; }
+.lc-stat-lbl { margin: 0; font-size: 11px; font-weight: 500; color: #697086; }
+
+/* ---------- Calendar card (glassy, DTR-modal style) ---------- */
+.lc-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.6));
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+.lc-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+
+.lc-weekdays {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eef0f5;
+}
+.lc-weekday {
+    text-align: center;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    color: #94a3b8; text-transform: uppercase;
+    padding: 2px 0;
+}
+.lc-weekday.is-weekend { color: #b4b9c6; }
+
+/* ---------- Day cell ---------- */
+.lc-day {
+    min-height: 130px;
+    border: 1px solid #eef0f5;
+    border-radius: 12px;
+    padding: 8px 9px 9px;
+    background: #fff;
+    display: flex; flex-direction: column; gap: 7px;
+    overflow: hidden;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.lc-day:hover { border-color: #d7d9ec; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06); }
+.lc-day.is-muted { background: #fafbfd; }
+.lc-day.is-muted .lc-day-num { color: #c3c0d6; }
+/* Weekend tint wins over the muted (adjacent-month) tint so every weekend
+   column reads the same, but the today highlight below still wins over both. */
+.lc-day.is-weekend { background: #e6e8f1; }
+.lc-day.is-muted.is-weekend { background: #dfe1ee; }
+.lc-day.is-today {
+    border-color: #0b044d;
+    box-shadow: inset 0 0 0 1.5px #0b044d;
+    background: #fbfaff;
+}
+.lc-day-head { display: flex; align-items: center; justify-content: space-between; }
+.lc-day-num { font-size: 12.5px; font-weight: 700; color: #334155; }
+.lc-day.is-today .lc-day-num {
+    background: #0b044d; color: #fff;
+    width: 23px; height: 23px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11.5px;
+}
+.lc-day-count {
+    font-size: 10px; font-weight: 700; color: #8a6d1f;
+    background: #fbf3d7; padding: 1px 8px; border-radius: 999px;
+}
+
+/* ---------- Markers (overlapping avatar stack) ---------- */
+.cal-stack { display: flex; align-items: center; margin-top: auto; padding-left: 2px; }
+.cal-markers { display: flex; align-items: center; }
+/* Show only the first 4 avatars; the rest live in the DOM for the "+X more" popover. */
+.cal-markers .cal-marker:nth-child(n+5) { display: none; }
+
+.cal-marker {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    padding: 0;
+    border: 2px solid #0b044d;
+    background: #fff;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    margin-left: -14px;                /* overlap into a stack */
+    box-shadow: 0 0 0 2px #fff;        /* white separation ring between avatars */
+    transition: transform 0.14s ease, box-shadow 0.14s ease, margin 0.14s ease;
+}
+.cal-markers .cal-marker:first-child { margin-left: 0; }
+.cal-marker:hover {
+    transform: translateY(-3px);
+    z-index: 3;
+    box-shadow: 0 0 0 2px #fff, 0 6px 14px rgba(11, 4, 77, 0.28);
+}
+.cal-marker img,
+.cal-marker-initials {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px; font-weight: 700;
+}
+/* Ring color follows the shared busy-dates convention (busyDatesCalendar.js):
+   amber = pending leave · green = approved leave · blue = travel order.
+   Dashed ring additionally marks any pending item. */
+.cal-marker.type-leave.status-approved  { border-color: #16a34a; }  /* approved leave — green */
+.cal-marker.type-leave.status-pending   { border-color: #f59e0b; }  /* pending leave  — amber */
+.cal-marker.type-travel                 { border-color: #3b82f6; }  /* travel order   — blue  */
+.cal-marker.status-pending { border-style: dashed; opacity: 0.62; }
+.cal-marker.status-pending:hover { opacity: 1; }
+
+/* ---------- "+X more" chip (sits at the end of the stack) ---------- */
+.cal-more {
+    margin-left: -6px;
+    font-size: 12px; font-weight: 800; letter-spacing: 0.01em;
+    color: #475569;
+    background: #eef0f6;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    height: 36px;
+    padding: 0 12px;
+    display: inline-flex; align-items: center;
+    cursor: pointer;
+    box-shadow: 0 0 0 1px #e2e5ee;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.cal-more:hover { background: #0b044d; color: #fff; }
+
+/* ---------- Hover tooltip ---------- */
+.cal-tooltip {
+    position: fixed;
+    z-index: 4000;
+    max-width: 244px;
+    background: #0b044d;
+    color: #fff;
+    border-radius: 11px;
+    padding: 11px 13px;
+    box-shadow: 0 10px 28px rgba(11, 4, 77, 0.34);
+    pointer-events: none;
+}
+.cal-tip-name { font-size: 12.5px; font-weight: 700; margin: 0 0 5px; }
+.cal-tip-line { font-size: 11px; margin: 0 0 3px; color: #d8d5f0; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.cal-tip-dates { color: #b9b5e0; }
+.cal-tip-tag {
+    font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+    padding: 1px 6px; border-radius: 5px; color: #fff;
+}
+.cal-tip-tag.type-leave  { background: #16a34a; }
+.cal-tip-tag.type-travel { background: #3b82f6; }
+.cal-tip-status {
+    display: inline-block; margin-top: 6px;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 9px; border-radius: 999px;
+}
+.cal-tip-status.is-approved { background: #dcfce7; color: #15803d; }
+.cal-tip-status.is-pending  { background: #fef3c7; color: #92400e; }
+
+/* ---------- Day-detail popover ---------- */
+.cal-day-modal {
+    position: fixed; inset: 0;
+    z-index: 3500;
+    background: rgba(11, 4, 77, 0.3);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+}
+.cal-day-modal-panel {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%; max-width: 440px;
+    max-height: 80vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(11, 4, 77, 0.3);
+    overflow: hidden;
+}
+.cal-day-modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eef0f5;
+}
+.cal-day-modal-head h3 { font-size: 14.5px; font-weight: 800; color: #0b044d; margin: 0; }
+.cal-day-modal-close {
+    background: none; border: none; cursor: pointer;
+    font-size: 15px; color: #94a3b8; padding: 4px;
+}
+.cal-day-modal-close:hover { color: #0b044d; }
+.cal-day-modal-list { padding: 8px; overflow-y: auto; }
+
+.cal-day-row {
+    width: 100%;
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    background: none; border: none; border-radius: 10px;
+    cursor: pointer; text-align: left;
+    transition: background 0.14s ease;
+}
+.cal-day-row:hover { background: #f5f5fc; }
+.cal-day-row-avatar { flex-shrink: 0; }
+.cal-day-row-avatar .cal-marker { width: 36px; height: 36px; pointer-events: none; }
+.cal-day-row-avatar .cal-marker-initials { font-size: 12px; }
+.cal-day-row-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cal-day-row-name { font-size: 13px; font-weight: 700; color: #1e293b; }
+.cal-day-row-sub {
+    font-size: 11px; color: #64748b;
+    display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+}
+.cal-day-row-sub .cal-tip-tag.type-leave  { background: #16a34a; }
+.cal-day-row-status {
+    flex-shrink: 0;
+    font-size: 10px; font-weight: 700;
+    padding: 3px 9px; border-radius: 999px;
+}
+.cal-day-row-status.is-approved { background: #dcfce7; color: #15803d; }
+.cal-day-row-status.is-pending  { background: #fef3c7; color: #92400e; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 720px) {
+    .lc-day { min-height: 88px; }
+    .cal-marker { width: 36px; height: 36px; margin-left: -11px; }
+    .cal-marker-initials { font-size: 12px; }
+    .lc-weekday { font-size: 9.5px; }
+    .lc-month-title { font-size: 15px; min-width: 116px; }
+    .lc-grid { gap: 5px; }
+}

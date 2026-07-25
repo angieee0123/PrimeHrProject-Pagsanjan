@@ -1,5 +1,5 @@
 {{-- Department Distribution card — expects: $departments (collection with name, count, percentage, color), $stats. --}}
-<div class="table-section" style="margin:0">
+<div class="table-section" style="margin:0;display:flex;flex-direction:column">
     <div class="table-header">
         <div>
             <p class="table-title">Department Distribution</p>
@@ -7,7 +7,10 @@
         </div>
     </div>
     @php $maxCount = $departments->max('count') ?? 1; @endphp
-    <div class="enterprise-card-body" style="padding:12px 20px 20px;max-height:100%;overflow-y:auto" id="deptDistContainer">
+    {{-- Cap the visible list at 10 department rows (~43px each + top padding),
+         then scroll vertically for the rest. flex:1 + min-height:0 still lets it
+         shrink to match shorter neighbours in the compact grid row. --}}
+    <div class="enterprise-card-body" style="padding:12px 20px 20px;flex:1;min-height:0;max-height:448px;overflow-y:auto" id="deptDistContainer">
         @foreach($departments as $d)
         <div class="dept-dist-row">
             <span class="dept-dist-swatch" style="background:{{ $d['color'] }}"></span>
