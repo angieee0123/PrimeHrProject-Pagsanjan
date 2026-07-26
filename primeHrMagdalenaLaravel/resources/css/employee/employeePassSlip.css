@@ -132,9 +132,32 @@
 }
 @keyframes psSpin { to { transform: rotate(360deg); } }
 .ps-btn-danger { background: #dc2626; }
-.ps-btn-primary-solid { background: #0b044d; color: #fff; border-color: #0b044d; }
-.ps-btn-primary-solid.btn-export:hover,
-.ps-btn-primary-solid:hover { background: #0b044d !important; color: #fff; border-color: #0b044d; transform: none; }
+
+/* Primary action in the table header — the navy pill "File Travel Order" uses.
+   It keeps .btn-export's shape (the glass system rounds it to a 999px pill) and
+   only takes over the colours.
+
+   Both selectors name .btn-export as well, which is what makes them stick:
+   `.glass-shell .btn-export` paints export buttons a translucent white and is
+   (0,2,0), so a lone `.ps-btn-primary-solid` at (0,1,0) lost the background and
+   left a white label on a white pill. Matching .btn-export puts these at (0,3,0)
+   and (0,4,0), so they win on specificity rather than on stylesheet order.
+
+   The hover rule is deliberately not a copy of travel order's, which has none —
+   `.glass-shell .btn-export:hover` is (0,3,0) and hands that button back to the
+   glass tint mid-hover, so its label vanishes exactly like this one did. */
+.permanent-leavebenefits .ps-btn-primary-solid.btn-export {
+    background: #0b044d;
+    color: #fff;
+    border-color: #0b044d;
+}
+.permanent-leavebenefits .ps-btn-primary-solid.btn-export:hover {
+    background: #1a1080;
+    color: #fff;
+    border-color: #1a1080;
+    transform: translateY(-1px);
+}
+
 .ps-btn-reject { background: #dc2626; border-color: #dc2626; }
 .ps-btn-empty-cta { margin-top: 12px; padding: 8px 16px; background: #0b044d; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
 .ps-select-inline { width: auto; padding: 6px 10px; font-size: 13px; }

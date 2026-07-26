@@ -244,6 +244,9 @@ class MayorDashboardController extends Controller
                     'photo'    => $emp->photo,
                     'position' => $emp->employmentDetail->designationRelation->title ?? 'N/A',
                     'rate'     => min(round(($presentDays / $workingDaysMonth) * 100), 100),
+                    // The rate's denominator, so a row states what it is a
+                    // percentage of rather than leaving it to be inferred.
+                    'days_note' => min($presentDays, $workingDaysMonth) . ' of ' . $workingDaysMonth . ' days',
                 ];
             })
             ->sortByDesc('rate')
@@ -276,6 +279,18 @@ class MayorDashboardController extends Controller
                 ];
             });
 
+        /* Pay has no natural ceiling the way an attendance rate does, so the
+           earnings meter is scaled to the leader instead of to some invented
+           maximum. Each row states its own share in words next to the bar, so
+           the relative scale is labelled rather than assumed. */
+        $earnerTop = (float) ($topEarners->max('avg_earnings') ?: 0);
+        $topEarners = $topEarners->map(function ($earner) use ($earnerTop) {
+            $earner['share'] = $earnerTop > 0
+                ? (int) round($earner['avg_earnings'] / $earnerTop * 100)
+                : 0;
+            return $earner;
+        });
+
         // Highlights panel: recent leave activity (status display only)
         $recentLeaveFilers = LeaveApplication::with(['employee.employmentDetail.designationRelation', 'leaveType'])
             ->whereIn('status', ['pending', 'approved', 'rejected'])
@@ -286,21 +301,55 @@ class MayorDashboardController extends Controller
                 $emp = $leave->employee;
                 if (!$emp) return null;
 
-                $days = Carbon::parse($leave->start_date)->diffInDays(Carbon::parse($leave->end_date)) + 1;
-                $statusColor = $leave->status === 'approved' ? '#22c55e' : ($leave->status === 'pending' ? '#f59e0b' : '#ef4444');
-                $statusBg = $leave->status === 'approved' ? '#f0fdf4' : ($leave->status === 'pending' ? '#fffbeb' : '#fef2f2');
+                $start = Carbon::parse($leave->start_date);
+                $end   = Carbon::parse($leave->end_date);
+
+                /* The filed figure, not a calendar diff. A Friday-to-Monday
+                   application is 2 days on the form and 4 by subtraction, and
+                   the panel should agree with the form. Falls back to the span
+                   only for rows saved before the column was populated. */
+                $days = $leave->number_of_days !== null
+                    ? (float) $leave->number_of_days
+                    : (int) $start->diffInDays($end) + 1;
+
+                /* "Mar 3 – 7" inside one month, "Mar 30 – Apr 2" across two,
+                   and a bare "Mar 3" for a single day. The year is only spelled
+                   out when the leave is not in the current one, which keeps the
+                   common case short. */
+                if ($start->isSameDay($end)) {
+                    $range = $start->format('M j');
+                } elseif ($start->isSameMonth($end)) {
+                    $range = $start->format('M j') . ' – ' . $end->format('j');
+                } else {
+                    $range = $start->format('M j') . ' – ' . $end->format('M j');
+                }
+                // Either end being off-year earns the suffix: a range that opens
+                // in December and closes in January is in the current year by
+                // its end date alone, and "Dec 28 – Jan 4" on its own does not
+                // say which December.
+                if (!$start->isCurrentYear() || !$end->isCurrentYear()) {
+                    $range .= ', ' . $end->format('Y');
+                }
+
+                $filed = $leave->created_at ? Carbon::parse($leave->created_at) : null;
 
                 return [
-                    'initials'     => strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1)),
-                    'color'        => $colors[$emp->id % count($colors)],
-                    'photo'        => $emp->photo,
-                    'name'         => $emp->first_name . ' ' . $emp->last_name,
-                    'position'     => $emp->employmentDetail->designationRelation->title ?? 'N/A',
-                    'leave_type'   => $leave->leaveType->leave_name ?? 'Leave',
-                    'days'         => $days,
-                    'status'       => ucfirst($leave->status),
-                    'status_color' => $statusColor,
-                    'status_bg'    => $statusBg,
+                    'initials'    => strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1)),
+                    'color'       => $colors[$emp->id % count($colors)],
+                    'photo'       => $emp->photo,
+                    'name'        => $emp->first_name . ' ' . $emp->last_name,
+                    'position'    => $emp->employmentDetail->designationRelation->title ?? 'N/A',
+                    'leave_type'  => $leave->leaveType->leave_name ?? 'Leave',
+                    'days'        => $days,
+                    'days_label'  => rtrim(rtrim(number_format($days, 1), '0'), '.')
+                                     . ' ' . ($days == 1 ? 'day' : 'days'),
+                    'date_range'  => $range,
+                    'status'      => ucfirst($leave->status),
+                    // Drives the CSS tone class; the hex pairs this used to ship
+                    // are now .is-approved / .is-pending / .is-rejected rules.
+                    'status_key'  => strtolower($leave->status),
+                    'filed_short' => $filed?->diffForHumans(['short' => true, 'parts' => 1]),
+                    'filed_full'  => $filed?->format('M j, Y · g:i A'),
                 ];
             })
             ->filter()

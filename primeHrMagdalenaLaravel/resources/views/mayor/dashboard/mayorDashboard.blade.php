@@ -331,102 +331,163 @@
             </div>
         </div>
 
+        {{-- Top Performers and Top Earners share one leaderboard component.
+
+             They were a bordered table and a ranked list respectively, which
+             made the tab switch look like a move to a different kind of report
+             when both answer the same shape of question: who are the top five
+             by one measure. Now only the measure changes. Recent Leave keeps
+             its own form because it is a stream, not a ranking — the shapes
+             carry the distinction rather than spending it arbitrarily.
+
+             Each row is name, role, a value, and a meter with the meter's own
+             denominator stated beside it, so no bar is left to be interpreted
+             on trust. --}}
+
         {{-- Top Performers panel --}}
-        <div id="panelHlPerformers" class="mayor-panel mayor-panel-scroll">
-            <table class="mayor-perf-table">
-                <thead>
-                    <tr>
-                        <th class="mayor-perf-col-rank">#</th>
-                        <th>Employee</th>
-                        <th>Position</th>
-                        <th class="mayor-perf-col-rate">Attendance</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($topPerformers as $i => $emp)
-                    <tr>
-                        <td>
-                            <span class="mayor-perf-rank-td {{ $i < 3 ? 'is-top' : '' }}">{{ $i + 1 }}</span>
-                        </td>
-                        <td>
-                            <div class="mayor-perf-employee">
-                                @if($emp['photo'])
-                                    <img src="{{ $emp['photo'] }}" alt="" class="mayor-avatar mayor-avatar-sm mayor-avatar-img">
-                                @else
-                                    <div class="mayor-avatar mayor-avatar-sm" style="background:{{ $emp['color'] }}">{{ $emp['initials'] }}</div>
-                                @endif
-                                <span class="mayor-perf-name">{{ $emp['name'] }}</span>
+        <div id="panelHlPerformers" class="mayor-panel-list">
+            @if($topPerformers->isEmpty())
+            <div class="mayor-empty">
+                <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <p>No attendance data yet</p>
+            </div>
+            @else
+            <ol class="mlead-list">
+                @foreach($topPerformers as $emp)
+                <li class="mlead-row mlead-rank-{{ min($loop->iteration, 4) }}">
+                    <span class="mlead-rank">{{ $loop->iteration }}</span>
+                    @if($emp['photo'])
+                        <img src="{{ $emp['photo'] }}" alt="" class="mayor-avatar mayor-avatar-img">
+                    @else
+                        <div class="mayor-avatar" style="background:{{ $emp['color'] }}">{{ $emp['initials'] }}</div>
+                    @endif
+                    <div class="mlead-body">
+                        <div class="mlead-line">
+                            <p class="mlead-name">{{ $emp['name'] }}</p>
+                            <p class="mlead-role">{{ $emp['position'] }}</p>
+                            <span class="mlead-value">{{ $emp['rate'] }}<em>%</em></span>
+                        </div>
+                        <div class="mlead-scale">
+                            {{-- Anchored at zero: an attendance rate is already a
+                                 share of a known whole, so rescaling it to the
+                                 leader would overstate small gaps. The track runs
+                                 the full width instead, which is what makes a
+                                 94-vs-99 difference legible — at the 64px it used
+                                 to be, five points was three pixels. --}}
+                            <div class="mlead-meter" role="img" aria-label="{{ $emp['rate'] }}% attendance">
+                                <span class="mlead-meter-fill" style="width:{{ $emp['rate'] }}%"></span>
                             </div>
-                        </td>
-                        <td class="mayor-perf-position">{{ $emp['position'] }}</td>
-                        <td>
-                            <div class="mayor-perf-rate-cell">
-                                <div class="mayor-perf-bar-track">
-                                    <div class="mayor-perf-bar-fill" style="width:{{ $emp['rate'] }}%"></div>
-                                </div>
-                                <span class="mayor-perf-rate">{{ $emp['rate'] }}%</span>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="4" class="mayor-perf-empty">No attendance data yet</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+                            <span class="mlead-note">{{ $emp['days_note'] }}</span>
+                        </div>
+                    </div>
+                </li>
+                @endforeach
+            </ol>
+            @endif
         </div>
 
         {{-- Top Earners panel --}}
         <div id="panelHlEarners" class="mayor-panel-list" style="display:none">
-            <div class="mayor-highlight-list">
-                @forelse($topEarners as $earner)
-                <div class="mayor-highlight-row">
-                    <div class="mayor-rank {{ $earner['rank'] <= 3 ? 'is-top' : '' }}">{{ $earner['rank'] }}</div>
+            @if($topEarners->isEmpty())
+            <div class="mayor-empty">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <p>No salary data available</p>
+            </div>
+            @else
+            <ol class="mlead-list">
+                @foreach($topEarners as $earner)
+                <li class="mlead-row mlead-rank-{{ min($earner['rank'], 4) }}">
+                    <span class="mlead-rank">{{ $earner['rank'] }}</span>
                     @if($earner['photo'])
                         <img src="{{ $earner['photo'] }}" alt="" class="mayor-avatar mayor-avatar-img">
                     @else
                         <div class="mayor-avatar" style="background:{{ $earner['color'] }}">{{ $earner['initials'] }}</div>
                     @endif
-                    <div class="mayor-highlight-body">
-                        <p class="mayor-highlight-name">{{ $earner['name'] }}</p>
-                        <p class="mayor-highlight-meta">{{ $earner['designation'] }}</p>
+                    <div class="mlead-body">
+                        <div class="mlead-line">
+                            <p class="mlead-name">{{ $earner['name'] }}</p>
+                            <p class="mlead-role">{{ $earner['designation'] }}</p>
+                            <span class="mlead-value">₱{{ number_format($earner['avg_earnings'], 2) }}<em>/day</em></span>
+                        </div>
+                        <div class="mlead-scale">
+                            {{-- Scaled to the leader, not to zero-to-anything: pay
+                                 has no natural ceiling to divide by. The share is
+                                 spelled out beside the bar so the relative basis
+                                 is read, not guessed. --}}
+                            <div class="mlead-meter" role="img" aria-label="{{ $earner['share'] }}% of the top earner">
+                                <span class="mlead-meter-fill" style="width:{{ $earner['share'] }}%"></span>
+                            </div>
+                            <span class="mlead-note">{{ $earner['share'] }}% of top</span>
+                        </div>
                     </div>
-                    <div class="mayor-highlight-amount">
-                        <p class="mayor-highlight-amount-value">₱{{ number_format($earner['avg_earnings'], 2) }}</p>
-                        <p class="mayor-highlight-amount-label">avg/day</p>
-                    </div>
-                </div>
-                @empty
-                <div class="mayor-empty">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                    <p>No salary data available</p>
-                </div>
-                @endforelse
-            </div>
+                </li>
+                @endforeach
+            </ol>
+            @endif
         </div>
 
-        {{-- Recent Leave panel --}}
+        {{-- Recent Leave panel — an activity timeline, not another ranked list.
+             This used to borrow the Top Earners row, so switching tabs changed
+             the numbers without changing the shape and the two panels read as
+             the same answer twice. Leave is a stream of events, not a ranking,
+             so it gets a stream's form: a rail, newest at the top. It is the
+             one tab that does not use .mlead-row above, and deliberately.
+
+             The panel also called itself "Recent Leave Activity" while showing
+             nothing time-bound — no filing time, and no dates for the leave
+             itself, which is the thing an oversight view is actually watching.
+             Both are on the row now, and the employee's position (already
+             loaded by the controller, previously dropped) with them. --}}
         <div id="panelHlLeave" class="mayor-panel-list" style="display:none">
-            <div class="mayor-highlight-list">
-                @forelse($recentLeaveFilers as $filer)
-                <div class="mayor-highlight-row">
+            @if($recentLeaveFilers->isEmpty())
+            <div class="mayor-empty">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <p>No recent leave applications</p>
+            </div>
+            @else
+            {{-- An ordered list because the order is the content: newest first. --}}
+            <ol class="mleave-feed">
+            @foreach($recentLeaveFilers as $filer)
+            <li class="mleave-item is-{{ $filer['status_key'] }}">
+                {{-- The avatar doubles as the timeline node; the status rides on
+                     it as a corner dot, so scanning the rail gives the mix
+                     before any label is read. --}}
+                <div class="mleave-node">
                     @if($filer['photo'])
                         <img src="{{ $filer['photo'] }}" alt="" class="mayor-avatar mayor-avatar-img">
                     @else
                         <div class="mayor-avatar" style="background:{{ $filer['color'] }}">{{ $filer['initials'] }}</div>
                     @endif
-                    <div class="mayor-highlight-body">
-                        <p class="mayor-highlight-name">{{ $filer['name'] }}</p>
-                        <p class="mayor-highlight-meta">{{ $filer['leave_type'] }} · {{ $filer['days'] }} day{{ $filer['days'] > 1 ? 's' : '' }}</p>
+                    <span class="mleave-node-dot" aria-hidden="true"></span>
+                </div>
+
+                <div class="mleave-body">
+                    <div class="mleave-line">
+                        <p class="mleave-name">{{ $filer['name'] }}</p>
+                        <p class="mleave-pos">{{ $filer['position'] }}</p>
+                        @if($filer['filed_short'])
+                        {{-- Relative for the glance, exact on hover — "2h ago"
+                             answers "is this fresh?" without a date to parse. --}}
+                        <span class="mleave-ago" title="Filed {{ $filer['filed_full'] }}">{{ $filer['filed_short'] }}</span>
+                        @endif
                     </div>
-                    <div class="mayor-status-pill" style="background:{{ $filer['status_bg'] }};color:{{ $filer['status_color'] }}">{{ $filer['status'] }}</div>
+
+                    <div class="mleave-meta">
+                        <span class="mleave-chip mleave-chip-type">{{ $filer['leave_type'] }}</span>
+                        <span class="mleave-chip mleave-dates">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            {{ $filer['date_range'] }}
+                        </span>
+                        <span class="mleave-chip">{{ $filer['days_label'] }}</span>
+                        {{-- Status is stated in words as well as tone, so it
+                             never rides on hue alone. --}}
+                        <span class="mleave-status">{{ $filer['status'] }}</span>
+                    </div>
                 </div>
-                @empty
-                <div class="mayor-empty">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                    <p>No recent leave applications</p>
-                </div>
-                @endforelse
-            </div>
+            </li>
+            @endforeach
+            </ol>
+            @endif
         </div>
     </div>
 </div>

@@ -6,7 +6,10 @@
             <p class="table-sub">Municipal Government of Pagsanjan · Manage mandatory contributions, loans, and other deduction types</p>
         </div>
         <div class="table-actions">
-            <button class="modal-btn-primary ded-btn-sm" onclick="openAddDeductionTypeModal()">
+            {{-- Same navy pill as "File Travel Order". The three sibling tabs put
+                 their own primary action in this exact slot, so they move
+                 together — otherwise switching tabs would reshape the button. --}}
+            <button class="btn-export adm-btn-primary-solid" onclick="openAddDeductionTypeModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="12" y1="5" x2="12" y2="19"/>
                     <line x1="5" y1="12" x2="19" y2="12"/>

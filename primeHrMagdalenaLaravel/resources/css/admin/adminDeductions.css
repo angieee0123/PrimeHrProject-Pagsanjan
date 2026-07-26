@@ -543,7 +543,6 @@ textarea.form-input {
 .ded-required { color: #8e1e18; }
 .ded-col { flex: 1; }
 .ded-col-2 { flex: 2; }
-.ded-btn-sm { padding: 7px 16px; font-size: 12.5px; display: flex; align-items: center; gap: 6px; }
 .ded-readonly-input { background: #f7f6fc; cursor: not-allowed; }
 .ded-field-note { font-size: 11px; color: #56547a; margin: 4px 0 0 0; }
 .ded-field-hint-hidden { font-size: 11px; color: #56547a; margin: 4px 0 0 0; display: none; }

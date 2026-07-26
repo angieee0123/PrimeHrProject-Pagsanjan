@@ -491,6 +491,28 @@ p { color: var(--c-muted); font-size: var(--fs-md); }
   transform: translateY(-1px);
 }
 
+/* Primary action paired with a .btn-export in a .table-header — the navy pill
+   the employee "File Travel Order" button uses. .btn-export above supplies the
+   shape (full-round, 34px, 12.5px bold); this only takes over the colours, so
+   the two buttons in a header differ by weight rather than by silhouette.
+
+   Both selectors name .btn-export, which puts them at (0,3,0) and (0,4,0).
+   glassSystem.css also styles `.glass-shell .btn-export` (0,2,0) and its :hover
+   (0,3,0) back to a translucent white; matching on specificity rather than on
+   stylesheet order means this holds wherever the two files end up in the build.
+   Skipping the :hover pair is what leaves a white label on a white pill. */
+.glass-shell .btn-export.adm-btn-primary-solid {
+  background: #0b044d;
+  color: #fff;
+  border-color: #0b044d;
+}
+.glass-shell .btn-export.adm-btn-primary-solid:hover {
+  background: #1a1080;
+  color: #fff;
+  border-color: #1a1080;
+  transform: translateY(-1px);
+}
+
 .btn-view {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 5px 14px;

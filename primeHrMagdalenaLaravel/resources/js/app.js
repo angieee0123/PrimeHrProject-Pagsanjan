@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // closing the oldest until the nav actually fits. On a tall monitor you get the
 // full three; on a short window it quietly settles for what there is room for.
 const NAV_GROUP_STORE = 'primehris.openNavGroups';
+const NAV_GROUP_COOKIE = 'openNavGroups';
 const NAV_MAX_OPEN = 3;
 
 function readOpenNavGroups() {
@@ -96,11 +97,19 @@ function readOpenNavGroups() {
 }
 
 function writeOpenNavGroups(names) {
+    const value = JSON.stringify(names);
     try {
-        localStorage.setItem(NAV_GROUP_STORE, JSON.stringify(names));
+        localStorage.setItem(NAV_GROUP_STORE, value);
     } catch (e) {
         /* storage unavailable — the accordion still works for this page view */
     }
+    // Mirrored into a cookie because localStorage is invisible to PHP, and the
+    // Blade sidebar needs this state at render time. Without it the server
+    // ships every section expanded and the paint() below snaps them shut after
+    // the browser has already drawn the open rail — a flicker on every page.
+    // Exempted from encryption in bootstrap/app.php so PHP reads plain JSON.
+    document.cookie = NAV_GROUP_COOKIE + '=' + encodeURIComponent(value) +
+        ';path=/;max-age=31536000;samesite=lax';
 }
 
 function setNavGroup(group, collapsed) {
@@ -144,6 +153,11 @@ function initNavGroups(sidebar) {
         while (open.length > 1 && nav.scrollHeight > nav.clientHeight && evictOldest()) {
             paint();
         }
+        // Persisted on every run, not only on click. The cap and the height
+        // eviction above also happen on load and on resize, and the next page
+        // render has to reproduce whatever they settled on or it renders a
+        // state this function will immediately undo.
+        writeOpenNavGroups(open.map(g => g.dataset.navGroup));
     };
 
     fit();
@@ -155,8 +169,7 @@ function initNavGroups(sidebar) {
             } else {
                 open.push(group);                       // newest at the end
             }
-            fit();
-            writeOpenNavGroups(open.map(g => g.dataset.navGroup));
+            fit();   // fit() persists the result
         });
     });
 

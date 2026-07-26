@@ -26,6 +26,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 Request::HEADER_X_FORWARDED_PROTO,
         );
 
+        // Written by app.js, read by the admin sidebar to render its collapsed
+        // sections server-side. Encrypted cookies are opaque to JavaScript, so
+        // this one stays plain — it holds nothing but a list of open nav
+        // section slugs, and a forged value can only mis-collapse a menu.
+        $middleware->encryptCookies(except: [
+            'openNavGroups',
+        ]);
+
         // Account activation gate: ends access for a user who is deactivated
         // while holding a live session or API token. Runs before the role check
         // so an inactive admin is turned away rather than let into admin/.

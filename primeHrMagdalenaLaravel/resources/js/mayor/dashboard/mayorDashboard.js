@@ -28,7 +28,9 @@ window.switchHighlights = function (tab) {
     document.getElementById('tabHlEarners').classList.toggle('active', tab === 'earners');
     document.getElementById('tabHlLeave').classList.toggle('active', tab === 'leave');
     document.getElementById('highlightsTitle').textContent = titles[tab];
-    document.getElementById('highlightsSub').textContent = tab === 'performers' ? perfPeriodMonth : (tab === 'earners' ? payrollAnchorLabel : 'Latest 5 applications');
+    // The leave panel is a timeline, so its sub-line states the ordering the
+    // rail implies rather than just the count.
+    document.getElementById('highlightsSub').textContent = tab === 'performers' ? perfPeriodMonth : (tab === 'earners' ? payrollAnchorLabel : 'Last 5 filed · newest first');
 };
 
 function peso(value) {

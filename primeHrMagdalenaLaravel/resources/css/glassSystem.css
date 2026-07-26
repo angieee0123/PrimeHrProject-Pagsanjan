@@ -199,6 +199,33 @@
     background: rgba(255, 255, 255, .85);
     transform: translateY(-1px);
 }
+
+/* Solid variant of the pill above — the primary action when a .table-header
+   holds two buttons, so the pair differs by weight rather than by silhouette.
+   Lives here, next to the rule it overrides, because it is needed on pages that
+   ship no stylesheet of their own (the payslip page is one) and glassSystem is
+   @import-ed into app.css, which every layout loads.
+
+   Naming follows .btn-export-green, the other .btn-export variant in the
+   codebase. This is the canonical version; employeePassSlip.css,
+   employeeLeaveAndBenefits.css, employeeTravelOrder.css and admin.css each
+   carry a private copy under their own prefix that could collapse into it.
+
+   Both selectors name .btn-export, putting them at (0,3,0) and (0,4,0) so they
+   beat the rules above on specificity rather than on stylesheet order. The
+   :hover pair is not optional: without it the button reverts to the translucent
+   white above while its label stays white, and disappears mid-hover. */
+.glass-shell .btn-export.btn-export-solid {
+    background: #0b044d;
+    color: #fff;
+    border-color: #0b044d;
+}
+.glass-shell .btn-export.btn-export-solid:hover {
+    background: #1a1080;
+    color: #fff;
+    border-color: #1a1080;
+    transform: translateY(-1px);
+}
 .glass-shell .btn-solid,
 .glass-shell .btn-primary,
 .glass-shell .btn-filter-main {

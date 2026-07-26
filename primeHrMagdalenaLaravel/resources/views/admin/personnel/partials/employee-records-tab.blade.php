@@ -14,7 +14,10 @@
                 </svg>
                 Bulk Import
             </button>
-            <button class="modal-btn-primary" onclick="openEmployeeWizard()" style="padding: 8px 18px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;">
+            {{-- Same navy pill as "File Travel Order". The inline padding/size
+                 that used to sit here was reproducing .btn-export's metrics by
+                 hand; the class supplies them. --}}
+            <button class="btn-export adm-btn-primary-solid" onclick="openEmployeeWizard()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="12" y1="5" x2="12" y2="19"/>
                     <line x1="5" y1="12" x2="19" y2="12"/>

@@ -8,8 +8,9 @@
  *  - Personnel leads ORGANIZATION because it is the daily driver; Departments
  *    sits beside it (employees belong to departments) instead of being stranded
  *    between Deductions and Reports as it was.
- *  - Leave & Travel Calendar is listed here for the first time — it was only
- *    reachable from the floating button, which is easy to miss.
+ *  - Leave & Travel Calendar is deliberately absent: the floating button on
+ *    every admin page already opens it, so a nav row would be a second door
+ *    to the same screen.
  */
 // Dashboard sits above the groups on its own — a collapsible header wrapping a
 // single link is just an extra click.
@@ -28,7 +29,6 @@ $navGroups = [
         ['id' => 'admin.leave',        'label' => 'Leave & Benefits',      'icon' => 'leave',         'route' => route('admin.leave')],
         ['id' => 'admin.travelorder',  'label' => 'Travel Orders',         'icon' => 'travelorder',   'route' => route('admin.travelorder')],
         ['id' => 'admin.passslip',     'label' => 'Pass Slips',            'icon' => 'passslip',      'route' => route('admin.passslip')],
-        ['id' => 'admin.leaveCalendar','label' => 'Leave & Travel Calendar','icon' => 'leaveCalendar','route' => route('admin.leaveCalendar')],
     ],
     'Compensation' => [
         ['id' => 'admin.payroll',    'label' => 'Payroll',    'icon' => 'payroll',    'route' => route('admin.payroll')],
@@ -40,6 +40,51 @@ $navGroups = [
     ],
 ];
 $currentRoute = Route::currentRouteName();
+
+/*
+ * Which sections start open is resolved here, not left to app.js alone.
+ *
+ * app.js kept the open list in localStorage, which PHP cannot see, so every
+ * response went out with all four sections expanded and the script snapped
+ * them shut on DOMContentLoaded — one painted frame of a fully open rail on
+ * every navigation. It now mirrors the list into a plain `openNavGroups`
+ * cookie so the collapsed state ships in the initial HTML and nothing has to
+ * be corrected after paint.
+ *
+ * The rules below deliberately mirror initNavGroups(): the group holding the
+ * current page is always open, the first group is the fallback, and the cap is
+ * NAV_MAX_OPEN. Height-based eviction stays client-side — it needs measurement.
+ */
+$groupSlugs = collect($navGroups)->keys()->map(fn ($l) => Str::slug($l))->all();
+
+$currentGroup = null;
+foreach ($navGroups as $groupLabel => $groupItems) {
+    if (collect($groupItems)->contains(fn ($i) => $i['id'] === $currentRoute)) {
+        $currentGroup = Str::slug($groupLabel);
+        break;
+    }
+}
+
+// Oldest first — the same order app.js writes, so eviction stays FIFO.
+$storedGroups = json_decode(request()->cookie('openNavGroups') ?? '', true);
+$openGroups = array_values(array_intersect(
+    is_array($storedGroups) ? $storedGroups : [],
+    $groupSlugs
+));
+
+if ($currentGroup && !in_array($currentGroup, $openGroups, true)) {
+    $openGroups[] = $currentGroup;
+}
+if (!$openGroups) {
+    $openGroups = [$groupSlugs[0]];
+}
+
+// Drop the oldest, but never the section holding the page being viewed.
+while (count($openGroups) > 3) {
+    $oldest = collect($openGroups)->search(fn ($s) => $s !== $currentGroup);
+    if ($oldest === false) break;
+    array_splice($openGroups, $oldest, 1);
+}
 @endphp
 
 <aside class="sidebar" id="sidebar">
@@ -76,11 +121,12 @@ $currentRoute = Route::currentRouteName();
             $slug = Str::slug($groupLabel);
             // The group holding the current page starts open regardless of the
             // stored preference, so you can always see where you are.
-            $holdsCurrent = collect($items)->contains(fn ($i) => $i['id'] === $currentRoute);
+            $holdsCurrent = $slug === $currentGroup;
+            $isOpen = in_array($slug, $openGroups, true);
         @endphp
-        <div class="nav-group" data-nav-group="{{ $slug }}" @if($holdsCurrent) data-holds-current @endif>
+        <div class="nav-group @if(!$isOpen) is-collapsed @endif" data-nav-group="{{ $slug }}" @if($holdsCurrent) data-holds-current @endif>
             <button type="button" class="nav-section-toggle"
-                    aria-expanded="true" aria-controls="nav-group-{{ $slug }}">
+                    aria-expanded="{{ $isOpen ? 'true' : 'false' }}" aria-controls="nav-group-{{ $slug }}">
                 <span class="nav-section-label">{{ strtoupper($groupLabel) }}</span>
                 {{-- Only shown while the group is shut, so a row of closed
                      sections still tells you what is behind each one. --}}
