@@ -30,7 +30,14 @@ Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])-
 // ── Admin Dashboard ──
 Route::get('/admin/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->middleware('auth')->name('admin.dashboard');
 
+Route::get('/admin/ai-assistant', function () {
+    return view('admin.chatbot.adminAiAssistant');
+})->middleware('auth')->name('admin.aiAssistant');
+
 Route::get('/mayor/dashboard', [\App\Http\Controllers\MayorDashboardController::class, 'index'])->middleware('auth')->name('mayor.dashboard');
+Route::get('/mayor/ai-assistant', function () {
+    return view('mayor.chatbot.mayorAiAssistant');
+})->middleware('auth')->name('mayor.aiAssistant');
 Route::get('/mayor/personnel', [\App\Http\Controllers\MayorPersonnelController::class, 'index'])->middleware('auth')->name('mayor.personnel');
 Route::get('/mayor/leave', [\App\Http\Controllers\MayorLeaveController::class, 'index'])->middleware('auth')->name('mayor.leave');
 Route::get('/mayor/travelorder', [\App\Http\Controllers\MayorTravelOrderController::class, 'index'])->middleware('auth')->name('mayor.travelorder');
@@ -39,6 +46,10 @@ Route::get('/mayor/passslip', [\App\Http\Controllers\MayorPassSlipController::cl
 
 // ── Permanent Employee Dashboard ──
 Route::get('/employee/dashboard', [\App\Http\Controllers\EmployeeDashboardController::class, 'index'])->middleware('auth')->name('employee.dashboard');
+
+Route::get('/employee/ai-assistant', function () {
+    return view('employee.chatbot.employeeAiAssistant');
+})->middleware('auth')->name('employee.aiAssistant');
 
 Route::get('/employee/attendance', [EmployeeAttendanceController::class, 'index'])->middleware('auth')->name('employee.attendance');
 Route::get('/employee/attendance/detailed', [EmployeeAttendanceController::class, 'detailedDTR'])->middleware('auth')->name('employee.attendance.detailed');
