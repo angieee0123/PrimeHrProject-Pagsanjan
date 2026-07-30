@@ -63,9 +63,11 @@
                     <select name="employment_status" class="form-input">
                         <option value="">All Status</option>
                         <option value="Permanent">Permanent</option>
-                        <option value="Job Order">Job Order</option>
+                        <option value="Temporary">Temporary</option>
+                        <option value="Coterminous">Coterminous</option>
                         <option value="Casual">Casual</option>
                         <option value="Contractual">Contractual</option>
+                        <option value="Job Order">Job Order</option>
                     </select>
                 </div>
             </div>

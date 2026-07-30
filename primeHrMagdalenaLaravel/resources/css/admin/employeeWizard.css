@@ -1,3 +1,91 @@
+/* Draft Continue/Start Over Prompt */
+.wizard-draft-prompt-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 4, 77, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.wizard-draft-prompt-card {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    border-radius: 18px;
+    padding: 28px 26px 22px;
+    text-align: center;
+    box-shadow: 0 25px 60px -12px rgba(11, 4, 77, 0.4);
+    animation: wizardDraftPromptIn 0.22s ease;
+}
+@keyframes wizardDraftPromptIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.wizard-draft-prompt-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f2f1fb;
+    color: var(--gp-pri);
+}
+.wizard-draft-prompt-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--gp-pri);
+    margin: 0 0 8px;
+}
+.wizard-draft-prompt-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #56547a;
+    margin: 0 0 22px;
+}
+.wizard-draft-prompt-actions {
+    display: flex;
+    gap: 10px;
+}
+.wizard-draft-prompt-btn {
+    flex: 1;
+    padding: 11px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.15s;
+}
+.wizard-draft-prompt-btn:active { transform: scale(0.97); }
+.wizard-draft-prompt-startover {
+    background: #fff;
+    border: 1.5px solid #d8d6ec;
+    color: #56547a;
+}
+.wizard-draft-prompt-startover:hover {
+    background: #f7f6fc;
+    border-color: var(--gp-pri);
+    color: var(--gp-pri);
+}
+.wizard-draft-prompt-continue {
+    background: var(--gp-pri);
+    border: 1.5px solid var(--gp-pri);
+    color: #fff;
+}
+.wizard-draft-prompt-continue:hover {
+    background: var(--gp-pri-2);
+    border-color: var(--gp-pri-2);
+}
+@media (max-width: 480px) {
+    .wizard-draft-prompt-actions { flex-direction: column-reverse; }
+}
+
 /* Employee Wizard Modal */
 #employeeWizardModal {
     display: none;
@@ -86,6 +174,19 @@
     position: relative;
     flex-shrink: 0;
     min-width: 60px;
+    cursor: pointer;
+}
+.wizard-step:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+    border-radius: 8px;
+}
+.wizard-step:hover .wizard-circle {
+    background: rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.7);
+}
+.wizard-step:hover .wizard-label {
+    color: #fff;
 }
 
 .wizard-circle {
@@ -235,6 +336,60 @@
     color: var(--gp-text-mid);
 }
 
+/* Password / Confirm Password — show/hide toggle */
+.wizard-pw-wrap {
+    position: relative;
+}
+.wizard-pw-wrap .wizard-input {
+    padding-right: 40px;
+}
+.wizard-pw-toggle {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gp-text-mid);
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+}
+.wizard-pw-toggle:hover {
+    color: var(--gp-pri);
+    background: #f2f1fb;
+}
+
+/* Real-time validation state — the error message swaps into the .wizard-hint
+   line itself (see employeeWizardValidation.js), this just colors it. */
+.wizard-hint-error {
+    color: #dc2626;
+    font-weight: 600;
+}
+.wizard-input-invalid,
+.wizard-select-invalid {
+    border-color: #dc2626 !important;
+}
+.wizard-input-invalid:focus,
+.wizard-select-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
+}
+.wizard-hint-valid {
+    color: #15803d;
+}
+.wizard-input-valid,
+.wizard-select-valid {
+    border-color: #15803d !important;
+}
+.wizard-input-valid:focus,
+.wizard-select-valid:focus {
+    box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.15) !important;
+}
+
 .wizard-role-checkboxes {
     border: 1px solid #e5e5e8;
     border-radius: 8px;
@@ -263,27 +418,6 @@
     cursor: pointer;
     accent-color: var(--gp-pri);
     flex-shrink: 0;
-}
-
-.wizard-requirements-box {
-    background: #f8f8fb;
-    padding: 12px;
-    border-radius: 8px;
-    border-left: 4px solid var(--gp-pri);
-}
-
-.wizard-requirements-title {
-    margin: 0 0 8px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--gp-pri);
-}
-
-.wizard-requirements-list {
-    margin: 0;
-    padding-left: 20px;
-    font-size: 11px;
-    color: var(--gp-text-mid);
 }
 
 .wizard-address-header {

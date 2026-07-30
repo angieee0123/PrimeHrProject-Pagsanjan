@@ -1,21 +1,90 @@
 @php
-$navItems = [
-    ['id' => 'admin.dashboard',   'label' => 'Dashboard',              'route' => route('admin.dashboard')],
-    ['id' => 'admin.recruitment', 'label' => 'Recruitment',            'route' => route('admin.recruitment')],
-    ['id' => 'admin.personnel',   'label' => 'Personnel',              'route' => route('admin.personnel')],
-    ['id' => 'admin.training',    'label' => 'Training & Development', 'route' => route('admin.training')],
-    ['id' => 'admin.performance', 'label' => 'Performance Management', 'route' => route('admin.performance')],
-    ['id' => 'admin.attendance',  'label' => 'Attendance',             'route' => route('admin.attendance')],
-    ['id' => 'admin.leave',       'label' => 'Leave & Benefits',       'route' => route('admin.leave')],
-    ['id' => 'admin.travelorder', 'label' => 'Travel Orders',          'route' => route('admin.travelorder')],
-    ['id' => 'admin.passslip',    'label' => 'Pass Slip',              'route' => route('admin.passslip')],
-    ['id' => 'admin.payroll',     'label' => 'Payroll',                'route' => route('admin.payroll')],
-    ['id' => 'admin.deductions',  'label' => 'Deductions',             'route' => route('admin.deductions')],
-    ['id' => 'admin.departments', 'label' => 'Departments',            'route' => route('admin.departments')],
-    ['id' => 'admin.reports',     'label' => 'Reports',                'route' => route('admin.reports')],
-    ['id' => 'admin.settings',    'label' => 'Settings',               'route' => route('admin.settings')],
+/*
+ * Grouped rather than one flat list of 14. Past roughly seven items the eye
+ * stops scanning and starts hunting, and the four natural clusters were
+ * invisible without headers.
+ *
+ * Ordering notes:
+ *  - Personnel leads ORGANIZATION because it is the daily driver; Departments
+ *    sits beside it (employees belong to departments) instead of being stranded
+ *    between Deductions and Reports as it was.
+ *  - Leave & Travel Calendar is deliberately absent: the floating button on
+ *    every admin page already opens it, so a nav row would be a second door
+ *    to the same screen.
+ */
+// Dashboard sits above the groups on its own — a collapsible header wrapping a
+// single link is just an extra click.
+$dashboardItem = ['id' => 'admin.dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard', 'route' => route('admin.dashboard')];
+
+$navGroups = [
+    'Organization' => [
+        ['id' => 'admin.personnel',   'label' => 'Personnel',              'icon' => 'personnel',   'route' => route('admin.personnel')],
+        ['id' => 'admin.departments', 'label' => 'Departments',            'icon' => 'departments', 'route' => route('admin.departments')],
+        ['id' => 'admin.recruitment', 'label' => 'Recruitment',            'icon' => 'recruitment', 'route' => route('admin.recruitment')],
+        ['id' => 'admin.training',    'label' => 'Training & Development', 'icon' => 'training',    'route' => route('admin.training')],
+        ['id' => 'admin.performance', 'label' => 'Performance Management', 'icon' => 'performance', 'route' => route('admin.performance')],
+    ],
+    'Time & Absence' => [
+        ['id' => 'admin.attendance',   'label' => 'Attendance',            'icon' => 'attendance',    'route' => route('admin.attendance')],
+        ['id' => 'admin.leave',        'label' => 'Leave & Benefits',      'icon' => 'leave',         'route' => route('admin.leave')],
+        ['id' => 'admin.travelorder',  'label' => 'Travel Orders',         'icon' => 'travelorder',   'route' => route('admin.travelorder')],
+        ['id' => 'admin.passslip',     'label' => 'Pass Slips',            'icon' => 'passslip',      'route' => route('admin.passslip')],
+    ],
+    'Compensation' => [
+        ['id' => 'admin.payroll',    'label' => 'Payroll',    'icon' => 'payroll',    'route' => route('admin.payroll')],
+        ['id' => 'admin.deductions', 'label' => 'Deductions', 'icon' => 'deductions', 'route' => route('admin.deductions')],
+    ],
+    'System' => [
+        ['id' => 'admin.reports',  'label' => 'Reports',  'icon' => 'reports',  'route' => route('admin.reports')],
+        ['id' => 'admin.settings', 'label' => 'Settings', 'icon' => 'settings', 'route' => route('admin.settings')],
+    ],
 ];
 $currentRoute = Route::currentRouteName();
+
+/*
+ * Which sections start open is resolved here, not left to app.js alone.
+ *
+ * app.js kept the open list in localStorage, which PHP cannot see, so every
+ * response went out with all four sections expanded and the script snapped
+ * them shut on DOMContentLoaded — one painted frame of a fully open rail on
+ * every navigation. It now mirrors the list into a plain `openNavGroups`
+ * cookie so the collapsed state ships in the initial HTML and nothing has to
+ * be corrected after paint.
+ *
+ * The rules below deliberately mirror initNavGroups(): the group holding the
+ * current page is always open, the first group is the fallback, and the cap is
+ * NAV_MAX_OPEN. Height-based eviction stays client-side — it needs measurement.
+ */
+$groupSlugs = collect($navGroups)->keys()->map(fn ($l) => Str::slug($l))->all();
+
+$currentGroup = null;
+foreach ($navGroups as $groupLabel => $groupItems) {
+    if (collect($groupItems)->contains(fn ($i) => $i['id'] === $currentRoute)) {
+        $currentGroup = Str::slug($groupLabel);
+        break;
+    }
+}
+
+// Oldest first — the same order app.js writes, so eviction stays FIFO.
+$storedGroups = json_decode(request()->cookie('openNavGroups') ?? '', true);
+$openGroups = array_values(array_intersect(
+    is_array($storedGroups) ? $storedGroups : [],
+    $groupSlugs
+));
+
+if ($currentGroup && !in_array($currentGroup, $openGroups, true)) {
+    $openGroups[] = $currentGroup;
+}
+if (!$openGroups) {
+    $openGroups = [$groupSlugs[0]];
+}
+
+// Drop the oldest, but never the section holding the page being viewed.
+while (count($openGroups) > 3) {
+    $oldest = collect($openGroups)->search(fn ($s) => $s !== $currentGroup);
+    if ($oldest === false) break;
+    array_splice($openGroups, $oldest, 1);
+}
 @endphp
 
 <aside class="sidebar" id="sidebar">
@@ -35,64 +104,83 @@ $currentRoute = Route::currentRouteName();
         <button class="toggle-btn" id="toggle-btn" aria-label="Toggle sidebar">‹</button>
     </div>
 
-    <p class="nav-section-label" id="nav-label">NAVIGATION</p>
-
     <nav class="sidebar-nav" id="sidebar-nav">
-        @foreach($navItems as $item)
-        <a href="{{ $item['route'] }}"
-           class="nav-item {{ $currentRoute === $item['id'] ? 'active' : '' }}"
-           title="{{ $item['label'] }}">
-            <span class="nav-icon">
-                @if($item['id'] === 'admin.dashboard')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                @elseif($item['id'] === 'admin.recruitment')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-                @elseif($item['id'] === 'admin.personnel')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                @elseif($item['id'] === 'admin.training')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                @elseif($item['id'] === 'admin.performance')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                @elseif($item['id'] === 'admin.attendance')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
-                @elseif($item['id'] === 'admin.leave')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                @elseif($item['id'] === 'admin.travelorder')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                @elseif($item['id'] === 'admin.passslip')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                @elseif($item['id'] === 'admin.payroll')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" stroke="none"><text x="3" y="19" font-size="17" font-weight="bold" font-family="Arial, sans-serif">₱</text></svg>
-                @elseif($item['id'] === 'admin.deductions')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                @elseif($item['id'] === 'admin.departments')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                @elseif($item['id'] === 'admin.reports')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                @elseif($item['id'] === 'admin.settings')
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                @endif
-            </span>
-            <span class="nav-label">{{ $item['label'] }}</span>
-            @if($currentRoute === $item['id'])
+        {{-- Ungrouped: always visible, never collapses. --}}
+        <a href="{{ $dashboardItem['route'] }}"
+           class="nav-item {{ $currentRoute === $dashboardItem['id'] ? 'active' : '' }}"
+           title="{{ $dashboardItem['label'] }}">
+            <span class="nav-icon"><x-nav-icon :name="$dashboardItem['icon']" /></span>
+            <span class="nav-label">{{ $dashboardItem['label'] }}</span>
+            @if($currentRoute === $dashboardItem['id'])
             <span class="nav-active-bar"></span>
             @endif
         </a>
+
+        @foreach($navGroups as $groupLabel => $items)
+        @php
+            $slug = Str::slug($groupLabel);
+            // The group holding the current page starts open regardless of the
+            // stored preference, so you can always see where you are.
+            $holdsCurrent = $slug === $currentGroup;
+            $isOpen = in_array($slug, $openGroups, true);
+        @endphp
+        <div class="nav-group @if(!$isOpen) is-collapsed @endif" data-nav-group="{{ $slug }}" @if($holdsCurrent) data-holds-current @endif>
+            <button type="button" class="nav-section-toggle"
+                    aria-expanded="{{ $isOpen ? 'true' : 'false' }}" aria-controls="nav-group-{{ $slug }}">
+                <span class="nav-section-label">{{ strtoupper($groupLabel) }}</span>
+                {{-- Only shown while the group is shut, so a row of closed
+                     sections still tells you what is behind each one. --}}
+                <span class="nav-section-count">{{ count($items) }}</span>
+                <svg class="nav-section-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div class="nav-group-items" id="nav-group-{{ $slug }}">
+                @foreach($items as $item)
+                <a href="{{ $item['route'] }}"
+                   class="nav-item {{ $currentRoute === $item['id'] ? 'active' : '' }}"
+                   title="{{ $item['label'] }}">
+                    <span class="nav-icon"><x-nav-icon :name="$item['icon']" /></span>
+                    <span class="nav-label">{{ $item['label'] }}</span>
+                    @if($currentRoute === $item['id'])
+                    <span class="nav-active-bar"></span>
+                    @endif
+                </a>
+                @endforeach
+            </div>
+        </div>
         @endforeach
+
+        {{-- Divider separating the nav items from the logout --}}
+        <div class="nav-divider"></div>
+
+        {{-- Logout — last item in the nav, styled like the others --}}
+        <button type="button" class="nav-item nav-logout" onclick="openLogoutModal()" title="Logout">
+            <span class="nav-icon"><x-nav-icon name="logout" /></span>
+            <span class="nav-label">Log Out</span>
+        </button>
     </nav>
 
     <div class="sidebar-footer" id="sidebar-footer">
+        {{-- Sizing/shape now live in .user-avatar rather than inline styles, so
+             this rail and the employee one stay in step. --}}
         <div class="user-avatar-wrap">
-            @if(Auth::check() && Auth::user()->employee && Auth::user()->employee->photo)
-                <img src="{{ Auth::user()->employee->photo }}" class="user-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
+            @php
+                $avatarEmployee = $authEmployee ?? (Auth::check() ? Auth::user()->employee : null);
+                $avatarInitials = $avatarEmployee
+                    ? strtoupper(substr($avatarEmployee->first_name ?? 'A', 0, 1) . substr($avatarEmployee->last_name ?? 'D', 0, 1))
+                    : 'AD';
+            @endphp
+            @if($avatarEmployee?->photo)
+                {{-- If the stored file has gone missing, hand off to the initials
+                     instead of leaving a broken-image icon. --}}
+                <img src="{{ $avatarEmployee->photo }}" alt=""
+                     class="user-avatar user-avatar-img"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="user-avatar" style="display:none">{{ $avatarInitials }}</div>
             @else
-                <div class="user-avatar" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#0b044d; color:white; font-weight:600; font-size:13px; border:2px solid #ecebf6;">
-                    @if(Auth::check())
-                        {{ strtoupper(substr(Auth::user()->employee->first_name ?? 'A', 0, 1) . substr(Auth::user()->employee->last_name ?? 'D', 0, 1)) }}
-                    @else
-                        AD
-                    @endif
-                </div>
+                <div class="user-avatar">{{ $avatarInitials }}</div>
             @endif
             <span class="user-status-dot"></span>
         </div>
@@ -105,11 +193,7 @@ $currentRoute = Route::currentRouteName();
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
             </a>
         @endif
-        <form action="{{ route('logout') }}" method="POST" style="margin:0;">
-            @csrf
-            <button type="submit" class="logout-btn" title="Logout">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            </button>
-        </form>
     </div>
 </aside>
+
+@include('partials.logoutConfirmModal', ['firstName' => Auth::check() && Auth::user()->employee ? (Auth::user()->employee->first_name ?? 'Admin') : 'Admin'])

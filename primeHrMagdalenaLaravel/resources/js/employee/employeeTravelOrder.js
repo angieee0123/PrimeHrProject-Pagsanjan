@@ -1,3 +1,5 @@
+import { initBusyDateRange } from '../shared/busyDatesCalendar.js';
+
 // ── Sidebar / mobile menu toggle ──
 const sidebar = document.getElementById('sidebar');
 const toggleBtn = document.getElementById('toggle-btn');
@@ -7,6 +9,17 @@ const userInfo = document.getElementById('user-info');
 const sidebarFooter = document.getElementById('sidebar-footer');
 const mobileBtn = document.getElementById('mobile-menu-btn');
 const overlay = document.getElementById('mobile-overlay');
+
+// Busy-aware calendars for the File Travel Order modal: travel-busy dates are
+// blocked (no double-booked trips), leave dates are marked as a heads-up.
+document.addEventListener('DOMContentLoaded', function () {
+    initBusyDateRange({
+        fromId: 'travelDateFrom',
+        toId: 'travelDateTo',
+        blockKind: 'travel',
+        onChange: () => calculateTravelDuration(),
+    });
+});
 
 if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
@@ -121,6 +134,9 @@ function editTravelOrder(id) {
 function closeTravelOrderModal() {
     document.getElementById('fileTravelOrderModal').style.display = 'none';
     document.getElementById('travelOrderForm').reset();
+    // form.reset() clears the inputs but not flatpickr's internal selection
+    document.getElementById('travelDateFrom')?._flatpickr?.clear();
+    document.getElementById('travelDateTo')?._flatpickr?.clear();
     document.getElementById('travelFileNameDisplay').style.display = 'none';
     document.getElementById('travelErrorMessage').style.display = 'none';
     document.body.style.overflow = '';
@@ -288,6 +304,35 @@ function handleTravelFileSelect(input) {
     }
 }
 
+// Dropzone label reads "drag and drop" — wire up the actual drop behavior.
+const travelDropZone = document.getElementById('travelAttachmentDropZone');
+if (travelDropZone) {
+    const travelFileInput = document.getElementById('travelAttachment');
+
+    ['dragover', 'dragenter'].forEach(evt => {
+        travelDropZone.addEventListener(evt, function(e) {
+            e.preventDefault();
+            travelDropZone.classList.add('to-dropzone-active');
+        });
+    });
+
+    ['dragleave', 'dragend'].forEach(evt => {
+        travelDropZone.addEventListener(evt, function(e) {
+            e.preventDefault();
+            travelDropZone.classList.remove('to-dropzone-active');
+        });
+    });
+
+    travelDropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        travelDropZone.classList.remove('to-dropzone-active');
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+        travelFileInput.files = e.dataTransfer.files;
+        handleTravelFileSelect(travelFileInput);
+    });
+}
+
 function showTravelError(message) {
     const errorDiv = document.getElementById('travelErrorMessage');
     const errorText = document.getElementById('travelErrorMessageText');
@@ -318,6 +363,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ── View Travel Order Detail modal ──
 let currentTravelOrderId = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const highlightId = new URLSearchParams(window.location.search).get('highlight');
+    if (highlightId) {
+        viewTravelOrder(highlightId);
+    }
+});
 
 function closeTravelDetailModal() {
     document.getElementById('viewTravelDetailModal').style.display = 'none';
@@ -430,13 +482,13 @@ function viewTravelOrder(id) {
         });
 }
 
-function travelCompanionAvatar(employee, size) {
+function travelCompanionAvatar(employee) {
     if (employee && employee.photo) {
         const src = /^(\/|https?:)/.test(employee.photo) ? employee.photo : `/storage/${employee.photo}`;
-        return `<img src="${src}" alt="" style="width: ${size}px; height: ${size}px; border-radius: 50%; object-fit: cover; border: 1px solid #e5e7eb; flex-shrink: 0;">`;
+        return `<img src="${src}" alt="" class="to-companion-avatar">`;
     }
     const initials = (((employee?.first_name || 'E')[0]) + ((employee?.last_name || 'E')[0])).toUpperCase();
-    return `<span style="width: ${size}px; height: ${size}px; border-radius: 50%; background: linear-gradient(135deg, #0b044d, #4338ca); color: white; display: inline-flex; align-items: center; justify-content: center; font-size: ${Math.round(size * 0.38)}px; font-weight: 700; flex-shrink: 0;">${initials}</span>`;
+    return `<span class="to-companion-avatar-initials">${initials}</span>`;
 }
 
 function renderTravelCompanions(companions) {
@@ -458,12 +510,12 @@ function renderTravelCompanions(companions) {
     list.innerHTML = companions.map(companion => {
         const emp = companion.employee || {};
         const name = `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || 'Unknown employee';
-        const note = companion.response_note ? `<p style="margin: 2px 0 0; font-size: 11px; color: #9ca3af; font-style: italic;">“${companion.response_note}”</p>` : '';
-        return `<div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #f9fafb; border-radius: 8px;">
-            ${travelCompanionAvatar(emp, 32)}
-            <div style="flex: 1; min-width: 0;">
-                <p style="margin: 0; font-size: 13px; font-weight: 600; color: #0b044d;">${name}</p>
-                <p style="margin: 0; font-size: 11px; color: #9ca3af;">${emp.employee_id || ''}</p>
+        const note = companion.response_note ? `<p class="to-companion-note">“${companion.response_note}”</p>` : '';
+        return `<div class="to-companion-card">
+            ${travelCompanionAvatar(emp)}
+            <div class="to-flex-1-minw0">
+                <p class="to-option-name">${name}</p>
+                <p class="to-option-id">${emp.employee_id || ''}</p>
                 ${note}
             </div>
             ${badges[companion.status] || ''}
@@ -506,14 +558,14 @@ function renderTravelHistory(histories) {
     list.innerHTML = histories.map(entry => {
         const when = new Date(entry.created_at).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
         const label = travelHistoryLabels[entry.action] || entry.action;
-        const remarks = entry.remarks ? `<p style="margin: 2px 0 0; font-size: 12px; color: #6b7280; line-height: 1.5;">${entry.remarks}</p>` : '';
-        return `<div style="display: flex; gap: 10px; padding: 6px 0;">
-            <div style="display: flex; flex-direction: column; align-items: center;">
-                <span style="width: 10px; height: 10px; border-radius: 50%; background: ${dotColors[entry.action] || '#9ca3af'}; margin-top: 4px; flex-shrink: 0;"></span>
-                <span style="flex: 1; width: 2px; background: #e5e7eb;"></span>
+        const remarks = entry.remarks ? `<p class="to-history-remarks">${entry.remarks}</p>` : '';
+        return `<div class="to-history-item">
+            <div class="to-history-rail">
+                <span class="to-history-dot" style="background: ${dotColors[entry.action] || '#9ca3af'};"></span>
+                <span class="to-history-line"></span>
             </div>
-            <div style="flex: 1; padding-bottom: 6px;">
-                <p style="margin: 0; font-size: 12px; font-weight: 700; color: #0b044d;">${label} <span style="font-weight: 400; color: #9ca3af; font-size: 11px;">· ${when}</span></p>
+            <div class="to-history-content">
+                <p class="to-history-label">${label} <span class="to-history-time">· ${when}</span></p>
                 ${remarks}
             </div>
         </div>`;

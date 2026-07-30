@@ -70,11 +70,19 @@
         <div class="form-row">
             <div class="form-group ded-col">
                 <label class="form-label">Start Date <span class="ded-required">*</span></label>
-                <input type="date" name="start_date" id="start_date" class="form-input" required value="{{ date('Y-m-d') }}">
+                {{-- type=text: flatpickr calendar (busyDatesCalendar.js) marking the
+                     selected employee's leave / travel days for context. Nothing is
+                     blocked — a deduction schedule legitimately spans them. --}}
+                <input type="text" name="start_date" id="start_date" class="form-input" required value="{{ date('Y-m-d') }}" autocomplete="off">
             </div>
             <div class="form-group ded-col">
                 <label class="form-label">End Date</label>
-                <input type="date" name="end_date" id="end_date" class="form-input">
+                <input type="text" name="end_date" id="end_date" class="form-input" autocomplete="off">
+            </div>
+            <div class="busy-cal-legend" style="width:100%">
+                <span><i class="dot-pending"></i> Pending leave</span>
+                <span><i class="dot-approved"></i> Approved leave</span>
+                <span><i class="dot-travel"></i> Travel order</span>
             </div>
         </div>
 

@@ -16,6 +16,7 @@ export default defineConfig({
                 'resources/css/admin/adminDepartment.css',
                 'resources/css/admin/employeeWizard.css',
                 'resources/css/admin/adminPersonnel.css',
+                'resources/css/admin/viewEmployeeModal.css',
                 'resources/css/joborder.css',
                 'resources/css/employee/employee.css',
                 'resources/css/employee/employeeDashboard.css',
@@ -25,14 +26,17 @@ export default defineConfig({
                 'resources/css/employee/employeeTravelOrder.css',
                 'resources/css/employee/employeePassSlip.css',
                 'resources/css/employee/employeeTraining.css',
+                'resources/css/employee/employeeLeaveCalendar.css',
                 'resources/css/admin/adminChatbot.css',
                 'resources/css/admin/adminPayroll.css',
                 'resources/css/admin/adminLeaveAndBenefits.css',
+                'resources/css/admin/adminLeaveCalendar.css',
                 'resources/css/topbarTheme.css',
                 'resources/css/passSlip.css',
                 'resources/css/travelOrder.css',
                 'resources/css/admin/adminDeductions.css',
                 'resources/css/admin/adminSettings.css',
+                'resources/css/admin/adminReports.css',
                 'resources/css/mayor/mayor.css',
                 'resources/css/mayor/mayorDashboard.css',
                 'resources/js/app.js',
@@ -43,9 +47,12 @@ export default defineConfig({
                 'resources/js/employee/employeeTravelOrder.js',
                 'resources/js/employee/employeePassSlip.js',
                 'resources/js/employee/employeeTraining.js',
+                'resources/js/employee/leaveCalendar/leaveCalendar.js',
                 'resources/js/admin/personnel/employeeWizard.js',
                 'resources/js/admin/personnel/employeeWizardComplete.js',
+                'resources/js/admin/personnel/employeeWizardValidation.js',
                 'resources/js/admin/personnel/adminPersonnel.js',
+                'resources/js/admin/personnel/viewEmployeeModal.js',
                 'resources/js/admin/personnel/assignSchedule.js',
                 'resources/js/admin/personnel/bulkAssignSchedule.js',
                 'resources/js/admin/personnel/viewSchedules.js',
@@ -61,6 +68,7 @@ export default defineConfig({
                 'resources/js/admin/leaveAndBenefits/view-leave-type-modal.js',
                 'resources/js/admin/leaveAndBenefits/leave-types-tab.js',
                 'resources/js/admin/leaveAndBenefits/leave-requests-tab.js',
+                'resources/js/admin/leaveAndBenefits/leaveDetailModal.js',
                 'resources/js/admin/leaveAndBenefits/leave-credits-tab.js',
                 'resources/js/admin/leaveAndBenefits/benefits-summary-tab.js',
                 'resources/js/admin/leaveAndBenefits/transaction-history-tab.js',
@@ -74,6 +82,7 @@ export default defineConfig({
                 'resources/js/admin/travelOrder/approved-orders-tab.js',
                 'resources/js/admin/travelOrder/disapproved-orders-tab.js',
                 'resources/js/admin/travelOrder/viewTravelOrderModal.js',
+                'resources/js/admin/leaveCalendar/leaveCalendar.js',
                 'resources/js/admin/departments/adminDepartments.js',
                 'resources/js/admin/departments/bulkImportDepartment.js',
                 'resources/js/admin/departments/bulkImportDesignation.js',
@@ -84,9 +93,7 @@ export default defineConfig({
                 'resources/js/admin/dashboard/charts.js',
                 'resources/js/admin/dashboard/department-distribution-card.js',
                 'resources/js/admin/dashboard/early-birds-card.js',
-                'resources/js/admin/dashboard/viewEmployeeDashboardModal.js',
                 'resources/js/admin/dashboard/employee-directory.js',
-                'resources/js/admin/dashboard/addEmployeeModal.js',
                 'resources/js/admin/dashboard/bird-schedule-tooltip.js',
                 'resources/js/admin/deductions/adminDeductions.js',
                 'resources/js/admin/deductions/addDeductionTypeModal.js',
@@ -119,6 +126,13 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
+        // `php artisan serve` listens on 127.0.0.1 (IPv4). Left to itself Vite
+        // binds to [::1] (IPv6) and writes that into public/hot, so every asset
+        // on the page becomes a cross-origin request to a different loopback
+        // stack — which is why edited CSS kept appearing not to take effect:
+        // the browser served its cached copy and a normal reload never
+        // revalidated. Pinning the host keeps both servers on one origin.
+        host: '127.0.0.1',
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },

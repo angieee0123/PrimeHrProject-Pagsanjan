@@ -33,7 +33,7 @@ class EmployeeRegistrationController extends Controller
                 'roles.*' => ['in:' . implode(',', User::ROLES)],
                 'department' => ['required', 'exists:departments,id'],
                 'designation_id' => ['required', 'exists:designations,id'],
-                'employment_status' => ['required', 'in:Permanent,Casual,Contractual,Job Order'],
+                'employment_status' => ['required', 'in:Permanent,Temporary,Coterminous,Casual,Contractual,Job Order'],
                 'appointment_date' => ['required', 'date'],
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {

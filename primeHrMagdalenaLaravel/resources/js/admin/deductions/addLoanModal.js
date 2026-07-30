@@ -1,3 +1,24 @@
+import { initBusyDateRange } from '../../shared/busyDatesCalendar.js';
+
+// Busy-date calendar on the loan period. INFORMATIONAL only: a repayment
+// period legitimately spans the employee's leave and travel days, so nothing
+// is blocked. minDate null because loans can start retroactively.
+let loanBusyCal = null;
+document.addEventListener('DOMContentLoaded', function () {
+    loanBusyCal = initBusyDateRange({
+        fromId: 'loanStartDate',
+        toId: 'loanEndDate',
+        scope: 'admin',
+        minDate: null,
+        onChange: () => calculateLoanInstallment(),
+    });
+
+    // Repaint the marks whenever a different employee is picked.
+    document.getElementById('loanEmployee')?.addEventListener('change', function () {
+        if (loanBusyCal) loanBusyCal.setEmployee(this.value);
+    });
+});
+
 function openAddLoanModal() {
     document.getElementById('addLoanModal').classList.add('active');
 }

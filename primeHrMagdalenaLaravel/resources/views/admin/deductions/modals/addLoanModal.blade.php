@@ -4,7 +4,7 @@
         @csrf
         <div class="form-group">
             <label class="form-label">Employee <span class="ded-required">*</span></label>
-            <select name="employee_id" class="form-input" required>
+            <select name="employee_id" id="loanEmployee" class="form-input" required>
                 <option value="">Select Employee</option>
                 @foreach(\App\Models\Employee::with('employmentDetail.departmentRelation')->orderBy('last_name')->get() as $emp)
                     <option value="{{ $emp->id }}">
@@ -107,11 +107,19 @@
         <div class="form-row">
             <div class="form-group ded-col">
                 <label class="form-label">Start Date <span class="ded-required">*</span></label>
-                <input type="date" name="start_date" id="loanStartDate" class="form-input" required value="{{ date('Y-m-d') }}" onchange="calculateLoanInstallment()">
+                {{-- type=text: flatpickr calendar (busyDatesCalendar.js) marking the
+                     selected employee's leave / travel days for context. Nothing is
+                     blocked — a loan period legitimately spans them. --}}
+                <input type="text" name="start_date" id="loanStartDate" class="form-input" required value="{{ date('Y-m-d') }}" autocomplete="off">
             </div>
             <div class="form-group ded-col">
                 <label class="form-label">End Date <span class="ded-required">*</span></label>
-                <input type="date" name="end_date" id="loanEndDate" class="form-input" required onchange="calculateLoanInstallment()">
+                <input type="text" name="end_date" id="loanEndDate" class="form-input" required autocomplete="off">
+            </div>
+            <div class="busy-cal-legend" style="width:100%">
+                <span><i class="dot-pending"></i> Pending leave</span>
+                <span><i class="dot-approved"></i> Approved leave</span>
+                <span><i class="dot-travel"></i> Travel order</span>
             </div>
         </div>
 

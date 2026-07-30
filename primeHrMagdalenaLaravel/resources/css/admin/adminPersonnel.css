@@ -348,76 +348,8 @@
 }
 .confirm-btn-cancel:active, .confirm-btn-submit:active { transform: scale(.97); }
 
-/* View Employee Modal */
-#viewEmployeeModal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15,12,40,0.42);
-    -webkit-backdrop-filter: blur(8px) saturate(150%);
-    backdrop-filter: blur(8px) saturate(150%);
-    z-index: 2000;
-    align-items: center;
-    justify-content: center;
-    overflow-y: auto;
-}
-
-.view-employee-box {
-    background: #fff;
-    border-radius: 18px;
-    width: 100%;
-    max-width: 900px;
-    margin: 20px;
-    box-shadow: 0 20px 50px rgba(15,23,42,.16), 0 2px 10px rgba(15,23,42,.05);
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-}
-
-.view-employee-header {
-    background: linear-gradient(135deg, var(--gp-pri) 0%, var(--gp-pri-2) 100%);
-    padding: 24px;
-    border-radius: 18px 18px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.view-employee-header h3 {
-    margin: 0 0 4px;
-    font-size: 20px;
-    font-weight: 700;
-    color: #fff;
-}
-
-.view-employee-header p {
-    margin: 0;
-    font-size: 13px;
-    color: rgba(255,255,255,0.7);
-}
-
-.view-employee-close {
-    background: rgba(255,255,255,0.1);
-    border: none;
-    color: #fff;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    transition: background .2s cubic-bezier(.4,0,.2,1), transform .15s ease;
-}
-.view-employee-close:hover { background: rgba(255,255,255,0.2); }
-.view-employee-close:active { transform: scale(.9); }
-
-.view-employee-body {
-    padding: 24px;
-    overflow-y: auto;
-    flex: 1;
-}
+/* View Employee Modal styles live in viewEmployeeModal.css, loaded by the
+   viewEmployeeModal blade partial (shared with the admin dashboard). */
 
 /* Table section shadow override for personnel */
 .personnel-table-section {

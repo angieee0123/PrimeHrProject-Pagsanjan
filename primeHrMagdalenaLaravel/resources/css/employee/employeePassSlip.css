@@ -1,66 +1,169 @@
-/* Employee Pass Slip — extracted from inline styles.
-   Scoped under .permanent-leavebenefits (this page's <main> wrapper class,
-   reused from the leave & benefits page's layout). "ps-" = pass slip. */
+/* Employee Pass Slip — extracted from inline styles. "ps-" = pass slip.
+   Unscoped (no ancestor class prefix): this stylesheet is only ever
+   loaded on employeePassSlip.blade.php, and its modals render as DOM
+   siblings of <body>, not descendants of the page's <main> wrapper —
+   scoping under a wrapper class here would silently never match. */
 
-.permanent-leavebenefits .ps-mb-12 { margin-bottom: 12px; }
-.permanent-leavebenefits .ps-mb-20 { margin-bottom: 20px; }
-.permanent-leavebenefits .ps-mt-8 { margin-top: 8px; }
-.permanent-leavebenefits .ps-mt-16 { margin-top: 16px; }
-.permanent-leavebenefits .ps-hidden { display: none; }
-.permanent-leavebenefits .ps-inline { display: inline; }
-.permanent-leavebenefits .ps-cursor-pointer { cursor: pointer; }
+.ps-mb-12 { margin-bottom: 12px; }
+.ps-mb-20 { margin-bottom: 20px; }
+.ps-mt-8 { margin-top: 8px; }
+.ps-mt-16 { margin-top: 16px; }
+.ps-hidden { display: none; }
+.ps-inline { display: inline; }
+.ps-cursor-pointer { cursor: pointer; }
 
-.permanent-leavebenefits .ps-flex-start-8 { display: flex; align-items: flex-start; gap: 8px; }
-.permanent-leavebenefits .ps-flex-gap-8 { display: flex; align-items: center; gap: 8px; }
-.permanent-leavebenefits .ps-flex-gap-12 { display: flex; align-items: center; gap: 12px; }
-.permanent-leavebenefits .ps-flex-between-mt4 { display: flex; justify-content: space-between; margin-top: 4px; }
-.permanent-leavebenefits .ps-radio-row { display: flex; gap: 20px; padding: 10px 4px; }
-.permanent-leavebenefits .ps-radio-label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; cursor: pointer; }
-.permanent-leavebenefits .ps-gap-12 { gap: 12px; }
-.permanent-leavebenefits .ps-ta-center { text-align: center; }
-.permanent-leavebenefits .ps-icon-inline { display: inline-block; vertical-align: middle; margin-right: 4px; }
-.permanent-leavebenefits .ps-icon-top { flex-shrink: 0; margin-top: 2px; }
-.permanent-leavebenefits .ps-icon-center { margin: 0 auto 12px; display: block; }
+.ps-flex-start-8 { display: flex; align-items: flex-start; gap: 8px; }
+.ps-flex-gap-8 { display: flex; align-items: center; gap: 8px; }
+.ps-flex-gap-12 { display: flex; align-items: center; gap: 12px; }
+.ps-flex-between-mt4 { display: flex; justify-content: space-between; margin-top: 4px; }
+.ps-radio-row { display: flex; gap: 12px; }
+.ps-radio-label {
+    flex: 1;
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 13px; font-weight: 500; color: #4b5563;
+    cursor: pointer;
+    transition: border-color .18s ease, background .18s ease, color .18s ease, box-shadow .18s ease;
+}
+.ps-radio-label:hover { border-color: #c7c5e0; background: #faf9ff; }
+.ps-radio-label input[type="radio"] { width: 15px; height: 15px; margin: 0; accent-color: #0b044d; flex-shrink: 0; }
+.ps-radio-label.is-selected {
+    border-color: #0b044d;
+    background: #f4f3ff;
+    color: #0b044d;
+    font-weight: 600;
+    box-shadow: 0 0 0 3px rgba(11, 4, 77, .08);
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; }
+.ps-gap-12 { gap: 12px; }
+.ps-ta-center { text-align: center; }
+.ps-icon-inline { display: inline-block; vertical-align: middle; margin-right: 4px; }
+.ps-icon-top { flex-shrink: 0; margin-top: 2px; }
+.ps-icon-center { margin: 0 auto 12px; display: block; }
 
-.permanent-leavebenefits .ps-required { color: #8e1e18; }
-.permanent-leavebenefits .ps-field-label { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #0b044d; margin-bottom: 8px; }
-.permanent-leavebenefits .ps-panel-label { display: block; font-weight: 600; color: #0b044d; margin-bottom: 12px; font-size: 13px; }
-.permanent-leavebenefits .ps-sublabel { font-size: 12px; color: #6b7280; margin-bottom: 6px; display: block; }
-.permanent-leavebenefits .ps-text-muted-11 { color: #9ca3af; font-size: 11px; }
-.permanent-leavebenefits .ps-hint { margin: 8px 0 0 0; font-size: 11px; color: #9ca3af; }
-.permanent-leavebenefits .ps-hint-tight { margin: 0; font-size: 11px; color: #9ca3af; }
-.permanent-leavebenefits .ps-modal-body-scroll { max-height: 70vh; overflow-y: auto; }
-.permanent-leavebenefits .ps-upload-title { margin: 0 0 4px 0; font-size: 13px; color: #374151; font-weight: 500; }
-.permanent-leavebenefits .ps-error-text { margin: 0; color: #991b1b; font-size: 13px; line-height: 1.5; }
-.permanent-leavebenefits .ps-remarks-text { color: #991b1b; font-style: italic; line-height: 1.6; }
-.permanent-leavebenefits .ps-empty-title { margin: 0; font-size: 14px; }
+.ps-required { color: #8e1e18; }
+.ps-field-label { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #0b044d; margin-bottom: 8px; }
+.ps-panel-label { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #0b044d; margin-bottom: 12px; font-size: 13px; }
+.ps-sublabel { font-size: 12px; color: #6b7280; margin-bottom: 6px; display: block; }
+.ps-text-muted-11 { color: #9ca3af; font-size: 11px; }
+.ps-hint { margin: 8px 0 0 0; font-size: 11px; color: #9ca3af; }
+.ps-hint-tight { margin: 0; font-size: 11px; color: #9ca3af; }
+.ps-modal-body-scroll { max-height: 70vh; overflow-y: auto; }
+.ps-modal-body-scroll::-webkit-scrollbar { width: 8px; }
+.ps-modal-body-scroll::-webkit-scrollbar-track { background: transparent; }
+.ps-modal-body-scroll::-webkit-scrollbar-thumb { background: #d7d5ea; border-radius: 8px; }
+.ps-modal-body-scroll::-webkit-scrollbar-thumb:hover { background: #b9b6d9; }
+.ps-upload-title { margin: 0 0 4px 0; font-size: 13px; color: #374151; font-weight: 500; }
+.ps-error-text { margin: 0; color: #991b1b; font-size: 13px; line-height: 1.5; }
+.ps-remarks-text { color: #991b1b; font-style: italic; line-height: 1.6; }
+.ps-empty-title { margin: 0; font-size: 14px; }
 
-.permanent-leavebenefits .ps-panel { background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px; }
-.permanent-leavebenefits .ps-dropzone { border: 2px dashed #d1d5db; border-radius: 8px; padding: 20px; text-align: center; background: #fafafa; transition: all 0.2s; }
-.permanent-leavebenefits .ps-file-name-box { margin-top: 12px; padding: 8px 12px; background: #f0f9ff; border-radius: 4px; font-size: 12px; color: #0369a1; }
-.permanent-leavebenefits .ps-error-box { padding: 12px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 6px; margin-bottom: 16px; }
-.permanent-leavebenefits .ps-session-alert-success { padding: 12px 16px; background: #d1fae5; border-left: 3px solid #10b981; border-radius: 6px; margin-bottom: 16px; }
-.permanent-leavebenefits .ps-session-alert-error { padding: 12px 16px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 6px; margin-bottom: 16px; }
-.permanent-leavebenefits .ps-flash-text-success { margin: 0; color: #065f46; font-size: 13px; font-weight: 500; }
-.permanent-leavebenefits .ps-flash-text-error { margin: 0; color: #991b1b; font-size: 13px; font-weight: 500; }
-.permanent-leavebenefits .ps-empty-cell { text-align: center; padding: 40px; color: #6b6a8a; }
+.ps-panel { background: linear-gradient(180deg, #f9f9fd, #f4f3fa); border: 1px solid #ece9f7; padding: 18px; border-radius: 12px; margin-bottom: 20px; }
+.ps-dropzone { border: 2px dashed #d7d5ea; border-radius: 12px; padding: 26px 20px; text-align: center; background: #fafafe; transition: all 0.2s; }
+.ps-dropzone:hover,
+.ps-dropzone.ps-dropzone-active { border-color: #0b044d; background: #f4f3ff; }
+.ps-upload-icon-wrap {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: #eeecfb; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px;
+}
+.ps-file-name-box {
+    margin-top: 12px; padding: 10px 14px;
+    background: #eef6ff; border: 1px solid #bfe0fb; border-radius: 8px;
+    font-size: 12.5px; color: #0369a1;
+    align-items: center; justify-content: space-between; gap: 10px; text-align: left;
+}
+.ps-file-info { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ps-file-info span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ps-file-size { color: #6b98b3; }
+.ps-file-remove-btn {
+    border: none; background: none; cursor: pointer; color: #0369a1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 3px; border-radius: 5px; flex-shrink: 0;
+    transition: background .15s ease, color .15s ease;
+}
+.ps-file-remove-btn:hover { background: rgba(3, 105, 161, .12); color: #024a75; }
+.ps-error-box { padding: 12px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 6px; margin-bottom: 16px; animation: psErrorIn .2s ease; }
+@keyframes psErrorIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.ps-session-alert-success { padding: 12px 16px; background: #d1fae5; border-left: 3px solid #10b981; border-radius: 6px; margin-bottom: 16px; }
+.ps-session-alert-error { padding: 12px 16px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 6px; margin-bottom: 16px; }
+.ps-flash-text-success { margin: 0; color: #065f46; font-size: 13px; font-weight: 500; }
+.ps-flash-text-error { margin: 0; color: #991b1b; font-size: 13px; font-weight: 500; }
+.ps-empty-cell { text-align: center; padding: 40px; color: #6b6a8a; }
 
-.permanent-leavebenefits .ps-input-lg { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-family: inherit; }
-.permanent-leavebenefits .ps-select-lg { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff; }
-.permanent-leavebenefits .ps-input-md { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px; font-family: inherit; }
-.permanent-leavebenefits .ps-textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical; line-height: 1.6; }
+.ps-input-lg,
+.ps-select-lg,
+.ps-input-md,
+.ps-textarea {
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+.ps-input-lg:focus,
+.ps-select-lg:focus,
+.ps-input-md:focus,
+.ps-textarea:focus {
+    outline: none;
+    border-color: #0b044d;
+    box-shadow: 0 0 0 3px rgba(11, 4, 77, .1);
+}
+.ps-input-lg { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+.ps-select-lg {
+    width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
+    appearance: none; -webkit-appearance: none; cursor: pointer; box-sizing: border-box;
+    padding-right: 38px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230b044d' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+}
+.ps-input-md { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px; font-family: inherit; box-sizing: border-box; }
+.ps-textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical; line-height: 1.6; box-sizing: border-box; }
 
-.permanent-leavebenefits .ps-modal-footer { border-top: 1px solid #e5e7eb; padding: 16px 24px; background: #f9fafb; }
-.permanent-leavebenefits .ps-btn-pad-sm { padding: 10px 20px; }
-.permanent-leavebenefits .ps-btn-submit { padding: 10px 24px; display: flex; align-items: center; gap: 8px; }
-.permanent-leavebenefits .ps-btn-danger { background: #dc2626; }
-.permanent-leavebenefits .ps-btn-primary-solid { background: #0b044d; color: #fff; border-color: #0b044d; }
-.permanent-leavebenefits .ps-btn-reject { background: #dc2626; border-color: #dc2626; }
-.permanent-leavebenefits .ps-btn-empty-cta { margin-top: 12px; padding: 8px 16px; background: #0b044d; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
-.permanent-leavebenefits .ps-select-inline { width: auto; padding: 6px 10px; font-size: 13px; }
+.ps-modal-footer { border-top: 1px solid #e5e7eb; padding: 16px 24px; background: #f9fafb; }
+.ps-btn-pad-sm { padding: 10px 20px; }
+.ps-btn-submit { padding: 10px 24px; display: flex; align-items: center; gap: 8px; }
+.modal-btn-primary:disabled { opacity: .7; cursor: not-allowed; transform: none !important; }
+.ps-spinner {
+    width: 13px; height: 13px; flex-shrink: 0;
+    border: 2px solid rgba(255, 255, 255, .4); border-top-color: #fff;
+    border-radius: 50%; display: inline-block;
+    animation: psSpin .6s linear infinite;
+}
+@keyframes psSpin { to { transform: rotate(360deg); } }
+.ps-btn-danger { background: #dc2626; }
 
-.permanent-leavebenefits .ps-badge-cancelled { background: #f3f4f6; color: #6b7280; }
-.permanent-leavebenefits .ps-sort-icon { display: inline-block; vertical-align: middle; margin-left: 4px; }
-.permanent-leavebenefits .ps-th-sort { cursor: pointer; }
-.permanent-leavebenefits .ps-td-semibold { font-size: 13px; color: #0b044d; font-weight: 600; }
-.permanent-leavebenefits .ps-td-muted-center { text-align: center; font-size: 13px; color: #6b6a8a; }
+/* Primary action in the table header — the navy pill "File Travel Order" uses.
+   It keeps .btn-export's shape (the glass system rounds it to a 999px pill) and
+   only takes over the colours.
+
+   Both selectors name .btn-export as well, which is what makes them stick:
+   `.glass-shell .btn-export` paints export buttons a translucent white and is
+   (0,2,0), so a lone `.ps-btn-primary-solid` at (0,1,0) lost the background and
+   left a white label on a white pill. Matching .btn-export puts these at (0,3,0)
+   and (0,4,0), so they win on specificity rather than on stylesheet order.
+
+   The hover rule is deliberately not a copy of travel order's, which has none —
+   `.glass-shell .btn-export:hover` is (0,3,0) and hands that button back to the
+   glass tint mid-hover, so its label vanishes exactly like this one did. */
+.permanent-leavebenefits .ps-btn-primary-solid.btn-export {
+    background: #0b044d;
+    color: #fff;
+    border-color: #0b044d;
+}
+.permanent-leavebenefits .ps-btn-primary-solid.btn-export:hover {
+    background: #1a1080;
+    color: #fff;
+    border-color: #1a1080;
+    transform: translateY(-1px);
+}
+
+.ps-btn-reject { background: #dc2626; border-color: #dc2626; }
+.ps-btn-empty-cta { margin-top: 12px; padding: 8px 16px; background: #0b044d; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
+.ps-select-inline { width: auto; padding: 6px 10px; font-size: 13px; }
+
+.ps-badge-cancelled { background: #f3f4f6; color: #6b7280; }
+.ps-sort-icon { display: inline-block; vertical-align: middle; margin-left: 4px; }
+.ps-th-sort { cursor: pointer; }
+.ps-td-semibold { font-size: 13px; color: #0b044d; font-weight: 600; }
+.ps-td-muted-center { text-align: center; font-size: 13px; color: #6b6a8a; }

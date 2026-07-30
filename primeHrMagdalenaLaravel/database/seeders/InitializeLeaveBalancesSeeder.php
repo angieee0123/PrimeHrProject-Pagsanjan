@@ -37,7 +37,9 @@ class InitializeLeaveBalancesSeeder extends Seeder
                 );
 
                 if ($credits !== null) {
-                    LeaveBalance::updateOrCreate(
+                    // firstOrCreate, not updateOrCreate: initializing must never
+                    // reset used/pending credits on balances that already exist.
+                    LeaveBalance::firstOrCreate(
                         [
                             'employee_id' => $employee->id,
                             'leave_code' => $leaveType->leave_code,

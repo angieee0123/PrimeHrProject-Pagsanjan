@@ -1,57 +1,411 @@
-.mayor-stat-clickable { cursor: pointer; transition: transform 0.25s ease, box-shadow 0.25s ease; }
+/* ══════════════════════════════════════════════════════════════════════
+   Mayor · Oversight Dashboard
+
+   Built on the admin dashboard's design language, not a parallel one. The page
+   uses the same shell (.enterprise-hr-dashboard.glass-shell), the same cards
+   (.stat-card / .chart-card / .table-section), the same headers (.chart-header,
+   .table-header) and the same ranked rows (.dept-dist-*) — all already defined
+   in adminDashboard.css, which the mayor layout loads.
+
+   What lives here is only what the admin dashboard has no equivalent for:
+   the status breakdown cards, the tabbed highlights panel and its table, plus
+   the one grid shape this page needs.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ---------- Stat cards ----------
+   Admin declares the click affordance inline per card (cursor + transform via
+   onmouseover/onmouseout). Same result, done as a class so it also gets focus. */
+.mayor-stat-clickable {
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.25s ease;
+}
 .mayor-stat-clickable:hover { transform: translateY(-4px); }
+.mayor-stat-clickable:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11, 4, 77, 0.16); }
+/* Deliberately NOT tabular-nums: equal-width digits on a large standalone
+   figure read as loosely spaced. They stay on the small aligned numbers in the
+   lists and tables below, where column alignment is the point. */
+.mayor-stat-value-sm { font-size: 20px; }
+.mayor-stat-of { font-size: 14px; color: #8f8daf; font-weight: 500; }
 
-.mayor-section-icon {
-    width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center;
-    background: #f2f1fb; flex-shrink: 0;
+/* ---------- Layout ----------
+   Mirrors the admin's fixed-rail + flexible-main pattern and its 18px gutter. */
+.mayor-split-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+    gap: 18px;
+    align-items: stretch;
+    margin-bottom: 18px;
 }
-.mayor-table-title-row { display: flex; align-items: center; gap: 9px; }
+.mayor-split-grid > * { min-width: 0; }
 
-/* Compact charts grid — 2x2, distinct from admin's full-width trend charts */
-.mayor-charts-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
-@media (max-width: 1100px) { .mayor-charts-grid { grid-template-columns: 1fr; } }
-
-.mayor-chart-card { padding: 16px 18px 18px; }
-
-/* adminDashboard.css's `.enterprise-hr-dashboard .chart-card` rules were written for the
-   admin dashboard's own canvas-fills-the-whole-card layout (padding: 0 !important on the
-   card, plus inset padding on the canvas itself). This page's `.chart-card`s share that
-   base class for the glass-card theming but have their own header + fixed-size donut
-   wrapper, so that canvas padding squeezes the donut canvases into a non-square box and
-   renders the charts as ellipses. Neutralize both at matching specificity. */
-.chart-card.mayor-chart-card {
-    padding: 16px 18px 18px !important;
+/* The rail cards in the overview row are lists, not canvases — let them fill
+   the row height the way the admin's rail cards do. */
+.enterprise-overview-grid > .table-section {
+    display: flex;
+    flex-direction: column;
 }
-.chart-card.mayor-chart-card canvas {
-    padding: 0;
+
+/* ---------- Payroll trend headline ----------
+   The chart is a trend; the header states where it landed and which way it
+   moved, so the panel reads at a glance. No tabular-nums on the headline —
+   equal-width digits make a large standalone figure look loosely spaced. */
+/* Headline and period switch share the header's right side; they stack before
+   the chart-header's own wrap breakpoint bites. */
+.payroll-header-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: flex-end; }
+#payrollPeriodTabs { display: flex; gap: 6px; }
+.payroll-headline { text-align: right; flex-shrink: 0; }
+.payroll-headline-value {
+    font-size: 22px; font-weight: 800; color: var(--gp-pri);
+    margin: 0; line-height: 1.1; letter-spacing: -0.5px;
 }
-.mayor-chart-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.mayor-chart-card-title { font-size: 13.5px; font-weight: 700; color: #0b044d; margin: 0 0 2px; }
-.mayor-chart-card-sub { font-size: 11px; color: #8f8daf; margin: 0; }
+.payroll-headline-meta { display: flex; align-items: center; justify-content: flex-end; gap: 7px; margin-top: 4px; }
+.payroll-headline-label { font-size: 10.5px; color: #94a3b8; font-weight: 600; }
+.payroll-delta {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10.5px; font-weight: 700;
+    padding: 2px 7px; border-radius: 999px;
+    white-space: nowrap;
+}
+.payroll-delta.is-up { background: #eaf6ee; color: #15803d; }
+.payroll-delta.is-down { background: #fdf0ef; color: #8e1e18; }
 
-.mayor-donut-row { display: flex; align-items: center; gap: 16px; }
-.mayor-donut-wrap { position: relative; width: 116px; height: 116px; flex-shrink: 0; }
-.mayor-donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
-.mayor-donut-center-value { font-size: 18px; font-weight: 800; color: #0b044d; line-height: 1.1; }
-.mayor-donut-center-label { font-size: 9px; font-weight: 600; color: #8f8daf; text-transform: uppercase; letter-spacing: .3px; }
+/* Sizing the canvas — same pattern adminDashboard.css uses for its own
+   .attendance-canvas-wrap, because three of its rules otherwise fight here:
+     · .enterprise-hr-dashboard .chart-card  → padding: 0 !important
+     · .enterprise-hr-dashboard .chart-card canvas → padding: 0 16px 16px
+       (the card's inset lives on the canvas, which Chart.js then subtracts
+        from its own drawing box — the chart came out smaller than its slot)
+     · .enterprise-overview-grid > .chart-card canvas → margin: auto
+   A fixed wrapper height fought all three, and the card itself is a stretched
+   flex column whose height is set by the taller rail cards beside it.
 
-.mayor-legend-list { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
-.mayor-legend-row { display: flex; align-items: center; gap: 8px; }
-.mayor-legend-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
-.mayor-legend-label { flex: 1; min-width: 0; font-size: 11.5px; font-weight: 600; color: #56547a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mayor-legend-value { font-size: 12px; font-weight: 700; color: #0b044d; }
+   So: the wrapper flexes to whatever the card has left, the canvas is pinned
+   to it absolutely, and the 16px inset moves from canvas padding to the
+   positioning offsets. min-height:0 lets the item shrink below the canvas's
+   intrinsic size instead of feeding the row and growing the grid each pass. */
+.payroll-chart-wrap {
+    flex: 1;
+    min-height: 220px;
+    /* The card sets padding:0 !important, so the inset lives here — on the
+       wrapper, not on the canvas. */
+    padding: 0 16px 16px;
+    box-sizing: border-box;
+}
 
-/* Highlights: single tabbed panel replaces admin's several separate list panels.
-   .mayor-highlights-tabs itself lives in mayor.css (shared with personnel). */
-.mayor-highlight-row { display: flex; align-items: center; gap: 11px; padding: 9px 0; }
+/* Chart.js (responsive) measures the canvas's PARENT and then writes an explicit
+   style.width/height onto the canvas. Insetting the canvas itself with
+   left+right made that a three-way over-constraint — width wins, `right` is
+   dropped, and the plot ran past the card and got clipped on that side.
+   This inner box IS the canvas's box, so measured size and painted size agree. */
+.payroll-chart-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.payroll-chart-inner canvas {
+    position: absolute;
+    inset: 0;
+    padding: 0 !important;   /* cancels .chart-card canvas { padding: 0 16px 16px } */
+    margin: 0 !important;    /* cancels the overview grid's centring margins */
+}
 
-/* Top Attendance Performers — real data table with column headers, not card rows */
-.mayor-perf-table { width: 100%; border-collapse: collapse; }
-.mayor-perf-table thead th { text-align: left; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #8f8daf; padding: 0 10px 9px; border-bottom: 1.5px solid #ecebf6; }
-.mayor-perf-table tbody td { padding: 8px 10px; font-size: 12.5px; color: #0b044d; border-bottom: 1px solid #f7f6fc; vertical-align: middle; }
-.mayor-perf-table tbody tr:last-child td { border-bottom: none; }
-.mayor-perf-table tbody tr { transition: background 0.15s ease; }
-.mayor-perf-table tbody tr:hover { background: #f7f6fc; }
-.mayor-perf-rank-td { display: inline-flex; align-items: center; justify-content: center; min-width: 21px; height: 21px; border-radius: 7px; font-size: 10.5px; font-weight: 700; }
-.mayor-perf-bar-track { width: 64px; height: 4px; background: #ecebf6; border-radius: 3px; overflow: hidden; flex-shrink: 0; }
-.mayor-perf-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #150c63, #0b044d); }
+/* ---------- Status breakdown ----------
+   A headline figure, then one track per status.
+
+   The previous single stacked meter looked tidy but failed at this width: a
+   1-of-16 segment came out around 3px, so the very values that matter (a late
+   arrival, a rejected request) were the hardest to see. Giving each status its
+   own full-width track keeps small proportions legible, and reuses the admin
+   dashboard's ranked-row component rather than inventing a second bar style. */
+.mayor-breakdown-body { padding-top: 4px; }
+
+.mayor-figure {
+    padding: 4px 0 14px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid #eef2f7;
+}
+/* No tabular-nums here — equal-width digits make a large standalone figure read
+   as loosely spaced. */
+.mayor-figure-value {
+    font-size: 30px; font-weight: 800; color: var(--gp-pri);
+    line-height: 1; letter-spacing: -1px; margin: 0;
+}
+.mayor-figure-unit { font-size: 15px; font-weight: 600; color: #94a3b8; letter-spacing: 0; margin-left: 3px; }
+.mayor-figure-label { font-size: 11.5px; color: #64748b; font-weight: 500; margin: 6px 0 0; }
+
+/* Status tones for the shared ranked-row component. Colour never carries the
+   meaning alone — every row is labelled and shows its count. */
+.dept-dist-swatch.is-good, .dept-dist-fill.is-good { background: #15803d; }
+.dept-dist-swatch.is-warn, .dept-dist-fill.is-warn { background: #c9a227; }
+.dept-dist-swatch.is-bad,  .dept-dist-fill.is-bad  { background: #8e1e18; }
+
+/* A zero-width fill would leave the row looking broken; show a hairline stub so
+   "0%" still reads as a bar at zero rather than a missing element. */
+.mayor-breakdown-body .dept-dist-fill { min-width: 2px; }
+.mayor-breakdown-body .dept-dist-row { padding: 7px 0; }
+
+/* ---------- Department distribution ----------
+   Six rows visible (~43px each: 8+8 padding, ~17 name line, 5 gap, 5 track),
+   then scroll. Capping the height rather than the query means every staffed
+   department is still on the page. */
+.mayor-dept-scroll {
+    padding: 12px 20px 20px;
+    flex: 1;
+    min-height: 0;
+    max-height: 272px;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+}
+/* A slim rail — the default is heavy next to 5px bars. */
+.mayor-dept-scroll::-webkit-scrollbar { width: 6px; }
+.mayor-dept-scroll::-webkit-scrollbar-track { background: transparent; }
+.mayor-dept-scroll::-webkit-scrollbar-thumb { background: #dfe3ec; border-radius: 3px; }
+.mayor-dept-scroll::-webkit-scrollbar-thumb:hover { background: #c6ccdb; }
+.mayor-dept-scroll { scrollbar-width: thin; scrollbar-color: #dfe3ec transparent; }
+
+/* ---------- Highlights panel ---------- */
+.mayor-highlights-tabs { display: flex; gap: 6px; }
+.mayor-panel-list { padding: 6px 20px 18px; }
+
+.mayor-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 12px;
+    border: 2px solid #e2e1f0; flex-shrink: 0; overflow: hidden;
+}
+.mayor-avatar-img { object-fit: cover; display: block; }
+
+/* ---------- Leaderboard · Top Performers + Top Earners ----------
+   One component for both tabs. They were a bordered table and a ranked list,
+   which spent a shape difference on two questions that have the same shape:
+   the top five by one measure. Only the measure differs now, so switching tabs
+   moves the eye down the same columns instead of re-teaching it a layout.
+
+   Every row carries its meter's basis in words next to the bar — the two tabs
+   scale differently (see .mlead-meter) and a bar whose basis is unstated is a
+   bar the reader has to trust. */
+.mlead-list { list-style: none; margin: 0; padding: 2px 0 0; }
+
+.mlead-row {
+    display: flex; align-items: center; gap: 11px;
+    padding: 9px 10px; margin: 0 -10px;
+    border-radius: 11px;
+    border-bottom: 1px solid #eef2f7;
+    transition: background 0.15s ease;
+}
+.mlead-row:last-child { border-bottom: none; }
+.mlead-row:hover { background: #f8fafc; }
+
+/* Rank medals. The old rule painted 1, 2 and 3 the same gold, which threw away
+   the ordering the column exists to show. Gold, silver and bronze read as a
+   sequence at a glance; 4th down falls back to plain grey so the podium stays
+   the only thing that draws the eye. */
+.mlead-rank {
+    min-width: 24px; height: 24px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800;
+    background: #eef2f7; color: #94a3b8;
+    flex-shrink: 0; font-variant-numeric: tabular-nums;
+}
+.mlead-rank-1 .mlead-rank { background: #fbf3d8; color: #a67c0a; box-shadow: inset 0 0 0 1px #f0e2b0; }
+.mlead-rank-2 .mlead-rank { background: #eef1f6; color: #71809a; box-shadow: inset 0 0 0 1px #dfe4ee; }
+.mlead-rank-3 .mlead-rank { background: #f8ece2; color: #a06a42; box-shadow: inset 0 0 0 1px #ecd9c8; }
+
+/* The leader gets a little more presence than the rest, stopping short of a
+   highlighted row — it is first, not urgent. */
+.mlead-rank-1 .mayor-avatar { border-color: #ecd9a4; }
+
+.mlead-body { flex: 1; min-width: 0; }
+
+/* Name, role and value on one baseline. The value is pushed to the edge so the
+   figures form a readable column down the panel. */
+.mlead-line { display: flex; align-items: baseline; gap: 7px; }
+.mlead-name {
+    font-size: 12.5px; font-weight: 650; color: #1e293b; margin: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    flex-shrink: 0; max-width: 52%;
+}
+.mlead-role {
+    font-size: 11px; font-weight: 500; color: #94a3b8; margin: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mlead-value {
+    margin-left: auto; flex-shrink: 0;
+    font-size: 13px; font-weight: 700; color: var(--gp-pri);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+/* The unit rides small and muted so the digits stay the thing being compared. */
+.mlead-value em { font-style: normal; font-size: 10px; font-weight: 600; color: #a3adc2; margin-left: 1px; }
+
+.mlead-scale { display: flex; align-items: center; gap: 9px; margin-top: 6px; }
+
+/* Full-width track, which is the point: at the 64px the performers table used,
+   the gap between a 94% and a 99% month was three pixels and the column read as
+   five identical bars. Same track for both tabs, different basis — attendance
+   is anchored at zero, earnings at the leader. */
+.mlead-meter {
+    flex: 1; min-width: 0;
+    height: 6px; border-radius: 3px;
+    background: #eef1f7;
+    overflow: hidden;
+}
+.mlead-meter-fill {
+    display: block; height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, #2a1f8f, var(--gp-pri));
+    transition: width 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.mlead-rank-1 .mlead-meter-fill { background: linear-gradient(90deg, #b8912b, #c9a227); }
+
+.mlead-note {
+    flex-shrink: 0; min-width: 74px; text-align: right;
+    font-size: 10px; font-weight: 600; color: #a3adc2;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* ---------- Recent Leave · activity timeline ----------
+   The other two highlight tabs are ranked lists — a position and a figure. Leave
+   is not ranked, it is a sequence, and reusing the ranked row made the tab
+   switch read as a data refresh rather than a different question. The rail puts
+   the ordering on screen: newest at the top, status on each node. */
+.mleave-feed { list-style: none; margin: 0; padding: 2px 0 0; }
+
+.mleave-item {
+    position: relative;
+    display: flex;
+    gap: 12px;
+    padding: 10px;
+    margin: 0 -10px;
+    border-radius: 12px;
+    transition: background 0.15s ease;
+}
+.mleave-item:hover { background: #f8fafc; }
+
+/* Drawn per item from below its node down to the next, not as one full-height
+   rule, so the line stops at the last entry instead of trailing into padding.
+   left = 10px item padding + half the 32px avatar - half the 2px line. */
+.mleave-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 25px;
+    top: 48px;
+    bottom: -2px;
+    width: 2px;
+    background: linear-gradient(#e6eaf3, #f1f5f9);
+    border-radius: 1px;
+}
+
+/* Pending is the only state with a decision still outstanding, which is what an
+   oversight view is scanning for — so it gets a wash the settled rows do not.
+   The tint fades out early to keep it a hint rather than a highlighted row. */
+.mleave-item.is-pending { background: linear-gradient(90deg, #fffdf4, transparent 60%); }
+.mleave-item.is-pending:hover { background: linear-gradient(90deg, #fffaea, #f8fafc 60%); }
+
+.mleave-node { position: relative; flex-shrink: 0; }
+.mleave-node-dot {
+    position: absolute; right: -2px; bottom: -2px;
+    width: 12px; height: 12px; border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+.mleave-item.is-approved .mleave-node-dot { background: #22c55e; }
+.mleave-item.is-pending  .mleave-node-dot { background: #f59e0b; }
+.mleave-item.is-rejected .mleave-node-dot { background: #ef4444; }
+
+.mleave-body { flex: 1; min-width: 0; }
+
+/* Name and position share a baseline; the filed time is pushed to the far edge
+   so the timestamps form a column down the panel. */
+.mleave-line { display: flex; align-items: baseline; gap: 7px; }
+.mleave-name {
+    font-size: 12.5px; font-weight: 650; color: #1e293b; margin: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    flex-shrink: 0; max-width: 60%;
+}
+.mleave-pos {
+    font-size: 11px; font-weight: 500; color: #94a3b8; margin: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mleave-ago {
+    margin-left: auto; flex-shrink: 0;
+    font-size: 10.5px; font-weight: 600; color: #a3adc2;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+    cursor: default;
+}
+
+.mleave-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+
+/* One chip family for the three facts — type, dates, duration — so none of them
+   outranks the others. Type alone is tinted, being the label you scan for. */
+.mleave-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    height: 21px; padding: 0 8px;
+    border-radius: 6px;
+    font-size: 10.5px; font-weight: 600; white-space: nowrap;
+    background: #f5f7fb; color: #55607a;
+    border: 1px solid #e9edf5;
+}
+.mleave-chip svg { color: #a3adc2; flex-shrink: 0; }
+.mleave-chip-type { background: #f2f1fb; color: var(--gp-pri); border-color: #e4e2f4; }
+.mleave-dates { font-variant-numeric: tabular-nums; }
+
+.mleave-status {
+    margin-left: auto; flex-shrink: 0;
+    display: inline-flex; align-items: center; gap: 5px;
+    height: 21px; padding: 0 9px;
+    border-radius: 999px;
+    font-size: 10.5px; font-weight: 700; white-space: nowrap;
+}
+.mleave-status::before {
+    content: ''; width: 5px; height: 5px; border-radius: 50%;
+    background: currentColor; flex-shrink: 0;
+}
+.mleave-item.is-approved .mleave-status { background: #f0fdf4; color: #15803d; }
+.mleave-item.is-pending  .mleave-status { background: #fffbeb; color: #b45309; }
+.mleave-item.is-rejected .mleave-status { background: #fef2f2; color: #b91c1c; }
+
+/* ---------- Empty states ---------- */
+.mayor-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; padding: 26px 16px; text-align: center;
+}
+.mayor-empty svg { color: #cbd5e1; }
+.mayor-empty p { font-size: 12px; color: #94a3b8; margin: 0; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1180px) {
+    .mayor-split-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+    .mayor-panel-list { padding-left: 14px; padding-right: 14px; }
+    .mayor-highlights-tabs { flex-wrap: wrap; }
+    /* Name and filed time are the pair worth keeping on the top line here; the
+       position is the first thing to go rather than let all three ellipsise.
+       Same trade in the leaderboard: the role yields to the name and figure. */
+    .mleave-pos, .mlead-role { display: none; }
+    .mleave-name { max-width: none; }
+    .mlead-name { max-width: none; }
+    /* The note is the meter's basis, so it stays; it only gives up the reserved
+       column width that keeps the figures aligned on wider screens. */
+    .mlead-note { min-width: 0; }
+    /* Once the chips wrap, an auto margin would strand the status alone on a
+       trailing line — let it sit with the run instead. */
+    .mleave-status { margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mayor-stat-clickable, .mleave-item, .mlead-row, .mlead-meter-fill { transition: none; }
+    .mayor-stat-clickable:hover { transform: none; }
+}
+
+/* ---------- Print ---------- */
+@media print {
+    .mayor-highlights-tabs { display: none !important; }
+    .mayor-stat-clickable { cursor: default; }
+    .stat-card, .chart-card, .table-section, .mleave-item, .mlead-row { break-inside: avoid; }
+    /* Meters, node dots and status tints all carry values that exist nowhere
+       else in the row, so they have to survive the print pipeline. */
+    .mlead-meter-fill, .mlead-rank, .dept-dist-fill, .mleave-node-dot, .mleave-status {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+}

@@ -44,6 +44,8 @@
                 <select name="employment_type">
                     <option value="">— Select —</option>
                     <option value="Permanent"   {{ old('employment_type') == 'Permanent'   ? 'selected' : '' }}>Permanent</option>
+                    <option value="Temporary"   {{ old('employment_type') == 'Temporary'   ? 'selected' : '' }}>Temporary</option>
+                    <option value="Coterminous" {{ old('employment_type') == 'Coterminous' ? 'selected' : '' }}>Coterminous</option>
                     <option value="Casual"      {{ old('employment_type') == 'Casual'      ? 'selected' : '' }}>Casual</option>
                     <option value="Contractual" {{ old('employment_type') == 'Contractual' ? 'selected' : '' }}>Contractual</option>
                     <option value="Job Order"   {{ old('employment_type') == 'Job Order'   ? 'selected' : '' }}>Job Order</option>

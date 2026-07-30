@@ -35,17 +35,26 @@
                     <p class="stat-sub">Since {{ $employee->employmentDetail && $employee->employmentDetail->appointment_date ? \Carbon\Carbon::parse($employee->employmentDetail->appointment_date)->format('M Y') : 'N/A' }}</p>
                 </div>
             </div>
+            {{-- Attendance rate, computed from this year's DTR. This card used to
+                 show a hardcoded "4.9" performance rating; the schema has no
+                 performance or evaluation table to draw one from. --}}
             <div class="stat-card">
                 <div class="stat-top">
-                    <p class="stat-label">Performance Rating</p>
+                    <p class="stat-label">Attendance Rate</p>
                     <div class="stat-icon-wrap stat-icon-wrap-success">
-                        <svg width="17" height="17" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg width="17" height="17" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     </div>
                 </div>
-                <p class="stat-value">4.9</p>
+                <p class="stat-value">{{ $attendanceRate !== null ? $attendanceRate . '%' : '—' }}</p>
                 <div class="stat-footer">
                     <span class="stat-dot stat-dot-success"></span>
-                    <p class="stat-sub">Latest evaluation</p>
+                    <p class="stat-sub">
+                        @if($attendanceRate !== null)
+                            {{ $daysPresent }} present · {{ $daysAbsent }} absent in {{ $year }}
+                        @else
+                            No DTR records for {{ $year }}
+                        @endif
+                    </p>
                 </div>
             </div>
             @if($isPermanent ?? false)
@@ -99,13 +108,28 @@
 
                 {{-- Personal Info --}}
                 <div id="tab-personal" class="tab-pane active">
+                    @php
+                        // addresses has no `full_address` column, so the old template
+                        // always fell through to a concatenation that left ", , ,"
+                        // behind whenever a part was blank. Join only what exists.
+                        $addr = $employee->addresses->first();
+                        $addrLine = $addr
+                            ? collect([
+                                trim(($addr->house_no ?? '') . ' ' . ($addr->street ?? '')),
+                                $addr->barangay, $addr->city, $addr->province,
+                              ])->filter(fn ($p) => filled(trim((string) $p)))->implode(', ')
+                            : '';
+                        if ($addr && filled($addr->zip_code)) {
+                            $addrLine = trim($addrLine . ' ' . $addr->zip_code);
+                        }
+                    @endphp
                     <div class="profile-grid">
                         <div class="profile-field"><span>Full Name</span><strong>{{ $employee->first_name }} {{ $employee->middle_name ? substr($employee->middle_name, 0, 1) . '.' : '' }} {{ $employee->last_name }}{{ $employee->suffix ? ' ' . $employee->suffix : '' }}</strong></div>
                         <div class="profile-field"><span>Gender</span><strong>{{ $employee->sex ?? 'N/A' }}</strong></div>
                         <div class="profile-field"><span>Date of Birth</span><strong>{{ $employee->birth_date ? \Carbon\Carbon::parse($employee->birth_date)->format('M d, Y') : 'N/A' }}</strong></div>
                         <div class="profile-field"><span>Contact No.</span><strong id="display-contact">{{ $employee->contacts->firstWhere('type', 'mobile')->number ?? 'N/A' }}</strong></div>
                         <div class="profile-field profile-field-full"><span>Email Address</span><strong id="display-email">{{ Auth::user()->email }}</strong></div>
-                        <div class="profile-field profile-field-full"><span>Address</span><strong id="display-address">{{ $employee->addresses->first()->full_address ?? ($employee->addresses->first() ? trim(($employee->addresses->first()->house_no ?? '') . ' ' . ($employee->addresses->first()->street ?? '') . ', ' . ($employee->addresses->first()->barangay ?? '') . ', ' . ($employee->addresses->first()->city ?? '') . ', ' . ($employee->addresses->first()->province ?? '')) : 'N/A') }}</strong></div>
+                        <div class="profile-field profile-field-full"><span>Address</span><strong id="display-address">{{ $addrLine ?: 'N/A' }}</strong></div>
                     </div>
                 </div>
 
@@ -123,12 +147,16 @@
 
                 {{-- Government IDs --}}
                 <div id="tab-government" class="tab-pane">
+                    @php $ids = $employee->governmentIds->first(); @endphp
                     <div class="profile-grid">
-                        <div class="profile-field"><span>GSIS No.</span><strong>{{ $employee->governmentIds->first()->gsis_no ?? 'N/A' }}</strong></div>
-                        <div class="profile-field"><span>PhilHealth No.</span><strong>{{ $employee->governmentIds->first()->philhealth_no ?? 'N/A' }}</strong></div>
-                        <div class="profile-field"><span>Pag-IBIG No.</span><strong>{{ $employee->governmentIds->first()->pagibig_no ?? 'N/A' }}</strong></div>
-                        <div class="profile-field"><span>TIN</span><strong>{{ $employee->governmentIds->first()->tin_no ?? 'N/A' }}</strong></div>
+                        <div class="profile-field"><span>GSIS No.</span><strong>{{ $ids?->gsis_no ?: 'N/A' }}</strong></div>
+                        <div class="profile-field"><span>PhilHealth No.</span><strong>{{ $ids?->philhealth_no ?: 'N/A' }}</strong></div>
+                        <div class="profile-field"><span>Pag-IBIG No.</span><strong>{{ $ids?->pagibig_no ?: 'N/A' }}</strong></div>
+                        <div class="profile-field"><span>TIN</span><strong>{{ $ids?->tin_no ?: 'N/A' }}</strong></div>
+                        {{-- license_no is stored but was never surfaced. --}}
+                        <div class="profile-field profile-field-full"><span>PRC / Professional License No.</span><strong>{{ $ids?->license_no ?: 'N/A' }}</strong></div>
                     </div>
+                    <p class="profile-note">These identifiers are maintained by HR. Contact the HR office if any is incorrect.</p>
                 </div>
 
                 {{-- Emergency Contact --}}
@@ -158,6 +186,7 @@
             </button>
         </div>
         <div class="p-modal-body">
+            <p class="p-form-error hidden" id="editModalMsg"></p>
             <span class="p-form-label">CONTACT INFORMATION</span>
             <div class="p-form-grid">
                 <div class="p-form-field">
@@ -210,7 +239,7 @@
         </div>
         <div class="p-modal-footer">
             <button class="p-btn-ghost" onclick="closeEditModal()">Cancel</button>
-            <button class="p-btn-primary" onclick="saveProfile()">
+            <button class="p-btn-primary" id="editSaveBtn" onclick="saveProfile()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 Save Changes
             </button>
@@ -293,40 +322,65 @@ function openEditModal()  { document.getElementById('editModal').classList.add('
 function closeEditModal() { document.getElementById('editModal').classList.remove('show'); }
 function closeSaveSuccess() { document.getElementById('saveSuccessModal').classList.remove('show'); }
 
+function showEditError(message) {
+    const box = document.getElementById('editModalMsg');
+    box.textContent = message;
+    box.classList.remove('hidden');
+    document.querySelector('#editModal .p-modal-body').scrollTop = 0;
+}
+
 function saveProfile() {
+    const box = document.getElementById('editModalMsg');
+    box.classList.add('hidden');
+
     const data = {
-        contact_number: document.getElementById('edit-contact').value,
-        email: document.getElementById('edit-email').value,
-        house_no: document.getElementById('edit-house-no').value,
-        street: document.getElementById('edit-street').value,
-        barangay: document.getElementById('edit-barangay').value,
-        city: document.getElementById('edit-city').value,
-        province: document.getElementById('edit-province').value,
-        zip_code: document.getElementById('edit-zip').value,
-        emergency_contact_person: document.getElementById('edit-emergencyContact').value,
-        emergency_phone: document.getElementById('edit-emergencyPhone').value,
-        _token: '{{ csrf_token() }}'
+        contact_number: document.getElementById('edit-contact').value.trim(),
+        email: document.getElementById('edit-email').value.trim(),
+        house_no: document.getElementById('edit-house-no').value.trim(),
+        street: document.getElementById('edit-street').value.trim(),
+        barangay: document.getElementById('edit-barangay').value.trim(),
+        city: document.getElementById('edit-city').value.trim(),
+        province: document.getElementById('edit-province').value.trim(),
+        zip_code: document.getElementById('edit-zip').value.trim(),
+        emergency_contact_person: document.getElementById('edit-emergencyContact').value.trim(),
+        emergency_phone: document.getElementById('edit-emergencyPhone').value.trim(),
     };
+
+    const btn = document.getElementById('editSaveBtn');
+    btn.disabled = true;
 
     fetch('{{ route("employee.profile.update") }}', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
         body: JSON.stringify(data)
     })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-            document.getElementById('display-contact').textContent = result.data.contact_number;
-            document.getElementById('display-email').textContent = result.data.email;
-            document.getElementById('display-address').textContent = result.data.address;
-            document.getElementById('display-emergency-contact').textContent = result.data.emergency_contact_person;
-            document.getElementById('display-emergency-phone').textContent = result.data.emergency_phone;
-            document.getElementById('saveTimestamp').textContent = new Date().toLocaleString('en-PH', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
-            closeEditModal();
-            document.getElementById('saveSuccessModal').classList.add('show');
+    .then(async response => {
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            // Laravel returns 422 with {message, errors:{field:[...]}} — surface the
+            // first one. Previously any failure was swallowed and the modal just
+            // sat there looking like nothing had happened.
+            const first = result.errors ? Object.values(result.errors)[0]?.[0] : null;
+            throw new Error(first || result.message || 'Could not save your changes. Please try again.');
         }
+        return result;
     })
-    .catch(error => console.error('Error:', error));
+    .then(result => {
+        document.getElementById('display-contact').textContent = result.data.contact_number;
+        document.getElementById('display-email').textContent = result.data.email;
+        document.getElementById('display-address').textContent = result.data.address;
+        document.getElementById('display-emergency-contact').textContent = result.data.emergency_contact_person;
+        document.getElementById('display-emergency-phone').textContent = result.data.emergency_phone;
+        document.getElementById('saveTimestamp').textContent = new Date().toLocaleString('en-PH', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
+        closeEditModal();
+        document.getElementById('saveSuccessModal').classList.add('show');
+    })
+    .catch(error => showEditError(error.message))
+    .finally(() => { btn.disabled = false; });
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeEditModal(); closeSaveSuccess(); } });

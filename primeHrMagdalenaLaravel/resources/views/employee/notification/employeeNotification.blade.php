@@ -2,9 +2,9 @@
     <button class="notif-btn" id="notifBtn" onclick="toggleNotif()">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         @php
-            $unreadCount = \App\Models\Notification::where('user_id', Auth::id())->unread()->count();
+            $unreadCount = \App\Models\Notification::where('user_id', Auth::id())->forEmployee()->unread()->count();
         @endphp
-        <span class="notif-dot {{ $unreadCount > 0 ? 'active' : '' }}" id="notifDot"></span>
+        <span class="notif-badge {{ $unreadCount > 0 ? 'active' : '' }}" id="notifDot">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
     </button>
     <div class="notif-panel" id="notifPanel">
         <div class="notif-head">
@@ -19,6 +19,7 @@
         <div class="notif-body" id="notifBody">
             @php
                 $notifications = \App\Models\Notification::where('user_id', Auth::id())
+                    ->forEmployee()
                     ->orderBy('created_at', 'desc')
                     ->limit(10)
                     ->get();
@@ -33,13 +34,13 @@
                         ($notif->type === 'training' ? 'linear-gradient(135deg,#7c3aed,#a78bfa)' : 
                         'linear-gradient(135deg,#ea580c,#fb923c)'))) }}">
                         @if($notif->type === 'leave_request')
-                            <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                         @elseif($notif->type === 'payroll')
-                            <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                            <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                         @elseif($notif->type === 'attendance')
                             <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                         @elseif($notif->type === 'training')
-                            <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         @else
                             <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         @endif
@@ -66,12 +67,12 @@
 
 <style>
 .notif-wrap { position: fixed; top: 20px; right: 20px; z-index: 1000; }
-.notif-btn { width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid #e5e5f0; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.2s; position: relative; }
+.notif-btn { width: 46px; height: 46px; border-radius: 11px; background: #fff; border: 1px solid #e5e5f0; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.2s; position: relative; }
 .notif-btn:hover { border-color: #0b044d; box-shadow: 0 4px 12px rgba(11,4,77,0.15); transform: translateY(-1px); }
-.notif-btn svg { color: #0b044d; }
-.notif-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; border: 2px solid #fff; display: none; }
-.notif-dot.active { display: block; animation: pulse 2s infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.notif-btn svg { color: #0b044d; width: 22px; height: 22px; }
+.notif-badge { position: absolute; top: -6px; right: -6px; min-width: 19px; height: 19px; padding: 0 5px; background: #ef4444; color: #fff; font-size: 10px; font-weight: 700; line-height: 1; border-radius: 999px; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(239,68,68,.4); display: none; align-items: center; justify-content: center; }
+.notif-badge.active { display: inline-flex; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
 .notif-panel { position: absolute; top: 56px; right: 0; width: 420px; background: #fff; border-radius: 16px; box-shadow: 0 12px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05); display: none; flex-direction: column; overflow: hidden; }
 .notif-panel.open { display: flex; animation: fadeIn 0.25s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
@@ -88,6 +89,7 @@
 .notif-card.new { background: linear-gradient(135deg, #f7f6ff 0%, #fafafe 100%); border-color: #d9d9ee; }
 .notif-left { flex-shrink: 0; }
 .notif-avatar { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+.notif-avatar svg { width: 16px; height: 16px; }
 .notif-right { flex: 1; min-width: 0; }
 .notif-right h4 { font-size: 12px; font-weight: 700; color: #0b044d; margin: 0 0 3px; }
 .notif-msg { font-size: 11px; color: #5a5888; line-height: 1.4; margin: 0 0 6px; }
@@ -98,7 +100,6 @@
 .notif-empty p { font-size: 12px; color: #9999bb; margin: 0; }
 @media (max-width: 768px) {
     .notif-wrap { top: 12px; right: 12px; }
-    .notif-btn { width: 44px; height: 44px; border-radius: 10px; }
     .notif-panel {
         position: fixed;
         top: 64px;
@@ -134,7 +135,8 @@ function markAllAsRead() {
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        }
+        },
+        body: JSON.stringify({ audience: 'employee' })
     })
     .then(response => response.json())
     .then(data => {

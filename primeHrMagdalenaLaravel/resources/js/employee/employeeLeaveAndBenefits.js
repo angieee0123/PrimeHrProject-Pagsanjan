@@ -1,3 +1,5 @@
+import { initBusyDateRange } from '../shared/busyDatesCalendar.js';
+
 // ── Sidebar / mobile menu toggle ──
 const sidebar = document.getElementById('sidebar');
 const toggleBtn = document.getElementById('toggle-btn');
@@ -7,6 +9,18 @@ const userInfo = document.getElementById('user-info');
 const sidebarFooter = document.getElementById('sidebar-footer');
 const mobileBtn = document.getElementById('mobile-menu-btn');
 const overlay = document.getElementById('mobile-overlay');
+
+// Busy-aware calendars for the File Leave modal: leave-busy dates are blocked
+// (the server rejects overlaps), travel dates are marked as a heads-up.
+document.addEventListener('DOMContentLoaded', function () {
+    initBusyDateRange({
+        fromId: 'leaveFrom',
+        toId: 'leaveTo',
+        blockKind: 'leave',
+        muteWeekends: true,
+        onChange: () => calculateDays(),
+    });
+});
 
 if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
@@ -281,6 +295,16 @@ document.addEventListener('DOMContentLoaded', function() {
             buttons[tabIndex].classList.add('active');
         }
     }
+
+    // Open the detail modal directly when arriving from a notification link
+    const highlightId = urlParams.get('highlight');
+    if (highlightId) {
+        const targetBtn = document.querySelector(`[data-leave-app-id="${highlightId}"]`);
+        if (targetBtn) {
+            targetBtn.closest('tr')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetBtn.click();
+        }
+    }
 });
 
 function switchTab(tabId, btn) {
@@ -363,6 +387,9 @@ function openFileModal() {
 function closeFileModal() {
     document.getElementById('fileModal').style.display = 'none';
     document.getElementById('leaveApplicationForm').reset();
+    // form.reset() clears the inputs but not flatpickr's internal selection
+    document.getElementById('leaveFrom')?._flatpickr?.clear();
+    document.getElementById('leaveTo')?._flatpickr?.clear();
     document.getElementById('errorMessage').style.display = 'none';
     document.getElementById('attachmentField').style.display = 'none';
     document.getElementById('leaveDetailsSection').style.display = 'none';
@@ -469,15 +496,17 @@ function updateLeaveInfo() {
     const attachmentInput = document.getElementById('leaveAttachment');
     const attachmentInfoText = document.getElementById('attachmentInfoText');
 
+    // Never set .required on the file input: it is display:none behind the
+    // styled dropzone, and a required hidden control makes the browser abort
+    // submission silently ("not focusable"). Presence is checked in the
+    // submit handler instead (and again server-side).
     if (requiresAttachment) {
         attachmentField.style.display = 'block';
-        attachmentInput.required = true;
         if (attachmentInfo) {
             attachmentInfoText.textContent = attachmentInfo;
         }
     } else {
         attachmentField.style.display = 'none';
-        attachmentInput.required = false;
     }
 
     updateLeaveDetailsFields(select.value);
@@ -582,6 +611,15 @@ document.getElementById('leaveApplicationForm')?.addEventListener('submit', func
 
     if (requestedDays <= 0) {
         document.getElementById('errorMessageText').textContent = 'Please select valid leave dates.';
+        document.getElementById('errorMessage').style.display = 'block';
+        document.getElementById('errorMessage').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+
+    // The file input is hidden behind the dropzone, so its presence is checked
+    // here rather than with the native `required` attribute (see updateLeaveInfo).
+    if (option.dataset.requiresAttachment === '1' && !document.getElementById('leaveAttachment').files.length) {
+        document.getElementById('errorMessageText').textContent = 'A supporting document is required for this leave type. Please attach a file.';
         document.getElementById('errorMessage').style.display = 'block';
         document.getElementById('errorMessage').scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;

@@ -1,5 +1,5 @@
 {{-- Leave Detail Modal --}}
-<x-modal id="detailModal" close="closeModal" eyebrow="LEAVE REQUEST · LV-2025-002" title="Sick Leave" title-id="detailType" subtitle="Jun 15, 2025 — Jun 16, 2025" subtitle-id="detailDates">
+<x-modal id="detailModal" close="closeModal" class="permanent-leavebenefits" eyebrow="LEAVE REQUEST · LV-2025-002" title="Sick Leave" title-id="detailType" subtitle="Jun 15, 2025 — Jun 16, 2025" subtitle-id="detailDates">
     <div class="modal-body">
         <div class="modal-emp-row">
             <div class="emp-avatar modal-emp-avatar">{{ strtoupper(substr(auth()->user()->employee->first_name ?? 'E', 0, 1) . substr(auth()->user()->employee->last_name ?? 'E', 0, 1)) }}</div>

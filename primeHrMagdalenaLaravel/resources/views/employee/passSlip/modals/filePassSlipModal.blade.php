@@ -28,6 +28,10 @@
             {{-- Purpose --}}
             <div class="form-field ps-mb-20">
                 <label class="ps-field-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                        <line x1="7" y1="7" x2="7.01" y2="7"/>
+                    </svg>
                     Purpose <span class="ps-required">*</span>
                 </label>
                 <select name="purpose_category" id="purposeCategory" required class="ps-select-lg">
@@ -85,9 +89,16 @@
                     </svg>
                     Date &amp; Time
                 </label>
+                {{-- type=text: flatpickr calendar (busyDatesCalendar.js) that marks
+                     dates already used by leaves or travel orders --}}
                 <div class="form-field ps-mb-12">
                     <label class="ps-sublabel">Date <span class="ps-required">*</span></label>
-                    <input type="date" name="date" id="passSlipDate" required class="ps-input-md">
+                    <input type="text" name="date" id="passSlipDate" required placeholder="Select date..." autocomplete="off" class="ps-input-md">
+                    <div class="busy-cal-legend">
+                        <span><i class="dot-pending"></i> Pending leave</span>
+                        <span><i class="dot-approved"></i> Approved leave</span>
+                        <span><i class="dot-travel"></i> Travel order</span>
+                    </div>
                 </div>
                 <div class="form-grid ps-gap-12">
                     <div class="form-field">
@@ -110,11 +121,13 @@
                     Supporting Document (Optional)
                 </label>
                 <div class="ps-dropzone" id="passSlipAttachmentDropZone">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" class="ps-icon-center">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="17 8 12 3 7 8"/>
-                        <line x1="12" y1="3" x2="12" y2="15"/>
-                    </svg>
+                    <div class="ps-upload-icon-wrap">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0b044d" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
                     <input type="file" name="attachment" id="passSlipAttachment" accept=".pdf,.jpg,.jpeg,.png" class="ps-hidden" onchange="handlePassSlipFileSelect(this)">
                     <label for="passSlipAttachment" class="ps-cursor-pointer">
                         <p class="ps-upload-title">Click to upload or drag and drop</p>

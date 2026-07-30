@@ -9,7 +9,7 @@
             <!-- Employee Selection -->
             <div class="form-group" style="flex: 1;">
                 <label class="form-label">Employee <span style="color: #8e1e18;">*</span></label>
-                <select name="employee_id" class="form-input" required onchange="loadEmployeeLeaveTypes(this.value)">
+                <select name="employee_id" id="manualCreditEmployee" class="form-input" required onchange="loadEmployeeLeaveTypes(this.value)">
                     <option value="">Select Employee</option>
                     @foreach($employees ?? [] as $employee)
                         <option value="{{ $employee->id }}">
@@ -49,9 +49,21 @@
             <!-- Transaction Date -->
             <div class="form-group" style="flex: 1;">
                 <label class="form-label">Transaction Date <span style="color: #8e1e18;">*</span></label>
-                <input type="date" name="transaction_date" class="form-input" value="{{ date('Y-m-d') }}" required>
+                {{-- type=text: flatpickr calendar (busyDatesCalendar.js). Marks the
+                     selected employee's leave / travel days for context; nothing is
+                     blocked — this is the ledger date the adjustment posts on, which
+                     is valid regardless of where the employee happens to be. --}}
+                <input type="text" name="transaction_date" id="manualCreditDate" class="form-input" value="{{ date('Y-m-d') }}" autocomplete="off" required>
                 <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">Date of adjustment</p>
             </div>
+        </div>
+
+        {{-- Full-width so the three keys stay on one line; inside the narrow date
+             column they wrapped onto three cramped rows. --}}
+        <div class="busy-cal-legend" style="margin: -8px 0 16px">
+            <span><i class="dot-pending"></i> Pending leave</span>
+            <span><i class="dot-approved"></i> Approved leave</span>
+            <span><i class="dot-travel"></i> Travel order</span>
         </div>
 
         <div class="form-group">

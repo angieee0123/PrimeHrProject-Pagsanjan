@@ -1,3 +1,5 @@
+import { initBusySingleDate } from '../shared/busyDatesCalendar.js';
+
 // ── Sidebar / mobile menu toggle ──
 const sidebar = document.getElementById('sidebar');
 const toggleBtn = document.getElementById('toggle-btn');
@@ -7,6 +9,13 @@ const userInfo = document.getElementById('user-info');
 const sidebarFooter = document.getElementById('sidebar-footer');
 const mobileBtn = document.getElementById('mobile-menu-btn');
 const overlay = document.getElementById('mobile-overlay');
+
+// Busy-aware calendar for the File Pass Slip modal. Marks the employee's leave
+// and travel dates as a heads-up only — nothing is blocked, since the system
+// allows several pass slips a day and has no pass-slip/leave overlap rule.
+document.addEventListener('DOMContentLoaded', function () {
+    initBusySingleDate({ inputId: 'passSlipDate' });
+});
 
 if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
@@ -46,9 +55,25 @@ document.addEventListener('keydown', function(e) {
 function closePassSlipModal() {
     document.getElementById('filePassSlipModal').style.display = 'none';
     document.getElementById('passSlipForm').reset();
-    document.getElementById('passSlipFileNameDisplay').style.display = 'none';
+    // form.reset() clears the input but not flatpickr's internal selection
+    document.getElementById('passSlipDate')?._flatpickr?.clear();
+    const fileDisplay = document.getElementById('passSlipFileNameDisplay');
+    fileDisplay.style.display = 'none';
+    fileDisplay.innerHTML = '';
     document.getElementById('passSlipErrorMessage').style.display = 'none';
     document.body.style.overflow = '';
+
+    const submitBtn = document.getElementById('passSlipSubmitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Submit Pass Slip
+        `;
+    }
 }
 
 function openPassSlipModal() {
@@ -60,6 +85,12 @@ function openPassSlipModal() {
     document.getElementById('passSlipDate').value = today;
 }
 
+function escapePassSlipHtml(value) {
+    const div = document.createElement('div');
+    div.textContent = value;
+    return div.innerHTML;
+}
+
 function handlePassSlipFileSelect(input) {
     const file = input.files[0];
     const display = document.getElementById('passSlipFileNameDisplay');
@@ -69,14 +100,58 @@ function handlePassSlipFileSelect(input) {
             showPassSlipError('File size must not exceed 5MB');
             input.value = '';
             display.style.display = 'none';
+            display.innerHTML = '';
             return;
         }
 
-        display.textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-        display.style.display = 'block';
+        display.innerHTML = `
+            <div class="ps-file-info">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span>${escapePassSlipHtml(file.name)} <span class="ps-file-size">(${(file.size / 1024).toFixed(1)} KB)</span></span>
+            </div>
+            <button type="button" class="ps-file-remove-btn" onclick="removePassSlipFile()" aria-label="Remove attachment">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        `;
+        display.style.display = 'flex';
     } else {
         display.style.display = 'none';
+        display.innerHTML = '';
     }
+}
+
+function removePassSlipFile() {
+    const input = document.getElementById('passSlipAttachment');
+    const display = document.getElementById('passSlipFileNameDisplay');
+    input.value = '';
+    display.style.display = 'none';
+    display.innerHTML = '';
+}
+
+// ── Drag-and-drop for the attachment dropzone ──
+const passSlipDropZone = document.getElementById('passSlipAttachmentDropZone');
+if (passSlipDropZone) {
+    ['dragenter', 'dragover'].forEach(evt => {
+        passSlipDropZone.addEventListener(evt, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            passSlipDropZone.classList.add('ps-dropzone-active');
+        });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+        passSlipDropZone.addEventListener(evt, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            passSlipDropZone.classList.remove('ps-dropzone-active');
+        });
+    });
+    passSlipDropZone.addEventListener('drop', function(e) {
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+        const input = document.getElementById('passSlipAttachment');
+        input.files = e.dataTransfer.files;
+        handlePassSlipFileSelect(input);
+    });
 }
 
 function togglePassSlipPurposeOptions() {
@@ -94,6 +169,24 @@ function togglePassSlipPurposeOptions() {
         personalGroup.style.display = 'none';
         select.value = 'coordinate_with';
     }
+
+    document.querySelectorAll('.ps-radio-label').forEach(label => {
+        const radio = label.querySelector('input[type="radio"]');
+        label.classList.toggle('is-selected', !!radio && radio.checked);
+    });
+}
+
+// Disable + spin the submit button once the form actually passes native
+// validation and starts posting, so a slow connection can't be double-submitted.
+const passSlipForm = document.getElementById('passSlipForm');
+if (passSlipForm) {
+    passSlipForm.addEventListener('submit', function() {
+        const btn = document.getElementById('passSlipSubmitBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="ps-spinner"></span> Submitting...';
+        }
+    });
 }
 
 function showPassSlipError(message) {
@@ -117,6 +210,8 @@ document.addEventListener('DOMContentLoaded', function() {
             reasonCounter.textContent = `${length} / 300`;
             if (length > 300) {
                 reasonCounter.style.color = '#dc2626';
+            } else if (length > 270) {
+                reasonCounter.style.color = '#d97706';
             } else {
                 reasonCounter.style.color = '#9ca3af';
             }
@@ -277,6 +372,7 @@ function sortPassSlips(column) {
 window.closePassSlipModal = closePassSlipModal;
 window.openPassSlipModal = openPassSlipModal;
 window.handlePassSlipFileSelect = handlePassSlipFileSelect;
+window.removePassSlipFile = removePassSlipFile;
 window.togglePassSlipPurposeOptions = togglePassSlipPurposeOptions;
 window.closePassSlipDetailModal = closePassSlipDetailModal;
 window.viewPassSlip = viewPassSlip;

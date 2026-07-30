@@ -9,7 +9,7 @@
             <p style="font-size:11px;color:#667085;margin:0">Frequently used HR workflows</p>
         </div>
     </div>
-    <x-modal-btn onclick="openAddEmployee()" style="font-size:11px;padding:0 14px;height:34px;display:flex;align-items:center;gap:6px">
+    <x-modal-btn onclick="openEmployeeWizard()" style="font-size:11px;padding:0 14px;height:34px;display:flex;align-items:center;gap:6px">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
         Add Employee
     </x-modal-btn>

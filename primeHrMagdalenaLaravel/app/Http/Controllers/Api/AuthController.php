@@ -62,7 +62,8 @@ class AuthController extends Controller
         } elseif ($user->employee && $user->employee->employmentDetail) {
             $employmentStatus = $user->employee->employmentDetail->employment_status;
 
-            if ($employmentStatus === 'Permanent') {
+            // All employment types except Job Order get the leave-and-benefits experience
+            if ($employmentStatus !== null && $employmentStatus !== 'Job Order') {
                 $userType = 'permanent';
                 $isPermanent = true;
             }
@@ -204,7 +205,10 @@ class AuthController extends Controller
         } elseif ($user->hasRole('hr')) {
             $userType = 'hr';
         } elseif ($user->employee && $user->employee->employmentDetail) {
-            if ($user->employee->employmentDetail->employment_status === 'Permanent') {
+            $employmentStatus = $user->employee->employmentDetail->employment_status;
+
+            // All employment types except Job Order get the leave-and-benefits experience
+            if ($employmentStatus !== null && $employmentStatus !== 'Job Order') {
                 $userType = 'permanent';
                 $isPermanent = true;
             }

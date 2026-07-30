@@ -1,4 +1,5 @@
-<!-- View Employee Modal -->
+<!-- View Employee (Employee Details) Modal — shared by the personnel page and
+     the admin dashboard; brings its own styles and script. -->
 <div id="viewEmployeeModal">
     <div class="view-employee-box">
         <div class="view-employee-header">
@@ -13,3 +14,11 @@
         </div>
     </div>
 </div>
+
+@push('styles')
+    @vite('resources/css/admin/viewEmployeeModal.css')
+@endpush
+
+@push('scripts')
+    @vite('resources/js/admin/personnel/viewEmployeeModal.js')
+@endpush

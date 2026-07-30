@@ -1,3 +1,22 @@
+<!-- Draft Continue/Start Over Prompt (shown before the wizard when a previous,
+     unsubmitted "Add Employee" session was interrupted) -->
+<div id="wizardDraftPrompt" class="wizard-draft-prompt-overlay" style="display:none;">
+    <div class="wizard-draft-prompt-card" role="dialog" aria-modal="true" aria-labelledby="wizardDraftPromptTitle">
+        <div class="wizard-draft-prompt-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"/>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+            </svg>
+        </div>
+        <h3 class="wizard-draft-prompt-title" id="wizardDraftPromptTitle">Unfinished Registration Found</h3>
+        <p class="wizard-draft-prompt-text">You have an unsaved employee registration in progress. Would you like to continue where you left off, or start a new one?</p>
+        <div class="wizard-draft-prompt-actions">
+            <button type="button" class="wizard-draft-prompt-btn wizard-draft-prompt-startover" onclick="startOverEmployeeWizard()">Start Over</button>
+            <button type="button" class="wizard-draft-prompt-btn wizard-draft-prompt-continue" onclick="continueEmployeeWizardDraft()">Continue Draft</button>
+        </div>
+    </div>
+</div>
+
 <!-- Employee Registration Wizard - 6 Steps -->
 <div id="employeeWizardModal">
     <div class="wizard-modal-container">
@@ -11,34 +30,34 @@
                 <button onclick="closeEmployeeWizard()" class="wizard-close-btn">&times;</button>
             </div>
 
-            <!-- Progress Indicator -->
+            <!-- Progress Indicator (steps are clickable to jump between pages) -->
             <div id="progressBar">
-                <div class="wizard-step active" data-step="1">
+                <div class="wizard-step active" data-step="1" role="button" tabindex="0" title="Go to Personal" onclick="goToWizardStep(1)">
                     <div class="wizard-circle">1</div>
                     <span class="wizard-label">Personal</span>
                 </div>
                 <div class="wizard-connector"></div>
-                <div class="wizard-step" data-step="2">
+                <div class="wizard-step" data-step="2" role="button" tabindex="0" title="Go to Account" onclick="goToWizardStep(2)">
                     <div class="wizard-circle">2</div>
                     <span class="wizard-label">Account</span>
                 </div>
                 <div class="wizard-connector"></div>
-                <div class="wizard-step" data-step="3">
+                <div class="wizard-step" data-step="3" role="button" tabindex="0" title="Go to Employment" onclick="goToWizardStep(3)">
                     <div class="wizard-circle">3</div>
                     <span class="wizard-label">Employment</span>
                 </div>
                 <div class="wizard-connector"></div>
-                <div class="wizard-step" data-step="4">
+                <div class="wizard-step" data-step="4" role="button" tabindex="0" title="Go to Contact" onclick="goToWizardStep(4)">
                     <div class="wizard-circle">4</div>
                     <span class="wizard-label">Contact</span>
                 </div>
                 <div class="wizard-connector"></div>
-                <div class="wizard-step" data-step="5">
+                <div class="wizard-step" data-step="5" role="button" tabindex="0" title="Go to Gov IDs" onclick="goToWizardStep(5)">
                     <div class="wizard-circle">5</div>
                     <span class="wizard-label">Gov IDs</span>
                 </div>
                 <div class="wizard-connector"></div>
-                <div class="wizard-step" data-step="6">
+                <div class="wizard-step" data-step="6" role="button" tabindex="0" title="Go to Review" onclick="goToWizardStep(6)">
                     <div class="wizard-circle">6</div>
                     <span class="wizard-label">Review</span>
                 </div>
@@ -163,8 +182,8 @@
                     </div>
                     <div class="wizard-field">
                         <label class="wizard-label-text">Username * <span style="color:#0b044d; font-size:11px;">(UNIQUE)</span></label>
-                        <input type="text" name="username" placeholder="e.g. maria.santos" maxlength="255" class="wizard-input">
-                        <p class="wizard-hint">No spaces. Use lowercase letters, numbers, dots, and underscores.</p>
+                        <input type="text" name="username" placeholder="e.g. santosjuan" maxlength="255" class="wizard-input">
+                        <p class="wizard-hint">Auto-filled from Last Name + First Name — edit if you'd like a different one.</p>
                     </div>
                     <div class="wizard-field">
                         <label class="wizard-label-text">Email * <span style="color:#0b044d; font-size:11px;">(UNIQUE)</span></label>
@@ -173,12 +192,24 @@
                     </div>
                     <div class="wizard-field">
                         <label class="wizard-label-text">Password * <span style="color:#0b044d; font-size:11px;">(Min 8 characters)</span></label>
-                        <input type="password" name="password" placeholder="••••••••" maxlength="255" class="wizard-input">
+                        <div class="wizard-pw-wrap">
+                            <input type="password" name="password" placeholder="••••••••" maxlength="255" class="wizard-input">
+                            <button type="button" class="wizard-pw-toggle" onclick="toggleWizardPassword(this)" aria-label="Show password">
+                                <svg class="wizard-eye-show" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><circle cx="12" cy="12" r="2.75"/></svg>
+                                <svg class="wizard-eye-hide" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                            </button>
+                        </div>
                         <p class="wizard-hint">Use uppercase, lowercase, numbers, and symbols for security.</p>
                     </div>
                     <div class="wizard-field">
                         <label class="wizard-label-text">Confirm Password *</label>
-                        <input type="password" name="password_confirm" placeholder="••••••••" maxlength="255" class="wizard-input">
+                        <div class="wizard-pw-wrap">
+                            <input type="password" name="password_confirm" placeholder="••••••••" maxlength="255" class="wizard-input">
+                            <button type="button" class="wizard-pw-toggle" onclick="toggleWizardPassword(this)" aria-label="Show password">
+                                <svg class="wizard-eye-show" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><circle cx="12" cy="12" r="2.75"/></svg>
+                                <svg class="wizard-eye-hide" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                            </button>
+                        </div>
                     </div>
                     <div class="wizard-field">
                         <label class="wizard-label-text">Role / Access Level * <span style="font-weight:400;color:#56547a;">(select one or more)</span></label>
@@ -201,16 +232,6 @@
                             </label>
                         </div>
                         <p class="wizard-hint">An employee can hold multiple roles at once, e.g. HR + Mayor.</p>
-                    </div>
-                    <div class="wizard-requirements-box">
-                        <p class="wizard-requirements-title">✓ Password Requirements:</p>
-                        <ul class="wizard-requirements-list">
-                            <li>At least 8 characters long</li>
-                            <li>Contains uppercase letter (A-Z)</li>
-                            <li>Contains lowercase letter (a-z)</li>
-                            <li>Contains number (0-9)</li>
-                            <li>Contains special character (!@#$%^&*)</li>
-                        </ul>
                     </div>
                 </div>
                 <div id="step2-edit" style="display:none;">
@@ -414,6 +435,6 @@
 </div>
 
 @push('scripts')
-    @vite(['resources/js/admin/personnel/employeeWizard.js', 'resources/js/admin/personnel/employeeWizardComplete.js'])
+    @vite(['resources/js/admin/personnel/employeeWizard.js', 'resources/js/admin/personnel/employeeWizardComplete.js', 'resources/js/admin/personnel/employeeWizardValidation.js'])
 @endpush
 

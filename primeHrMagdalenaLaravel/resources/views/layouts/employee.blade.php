@@ -12,6 +12,9 @@
 </head>
 <body>
     @yield('content')
+    @auth
+        @include('employee.leaveCalendar.leaveCalendarFab')
+    @endauth
     @vite('resources/js/app.js')
     @stack('scripts')
 </body>

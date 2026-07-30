@@ -2,16 +2,204 @@
 let currentStep = 1;
 const totalSteps = 6;
 
-window.openEmployeeWizard = function() {
+// Password / Confirm Password show-hide toggle (step 2).
+window.toggleWizardPassword = function(btn) {
+    const input = btn.parentElement.querySelector('input');
+    if (!input) return;
+    const showIcon = btn.querySelector('.wizard-eye-show');
+    const hideIcon = btn.querySelector('.wizard-eye-hide');
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    showIcon.style.display = isHidden ? 'none' : '';
+    hideIcon.style.display = isHidden ? '' : 'none';
+    btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+}
+
+// Re-masks both password fields and resets their toggle icons — called
+// whenever the wizard opens or closes so a revealed password never carries
+// over into the next session.
+function resetWizardPasswordVisibility() {
+    document.querySelectorAll('#employeeWizardModal .wizard-pw-wrap').forEach(function(wrap) {
+        const input = wrap.querySelector('input');
+        const showIcon = wrap.querySelector('.wizard-eye-show');
+        const hideIcon = wrap.querySelector('.wizard-eye-hide');
+        const btn = wrap.querySelector('.wizard-pw-toggle');
+        if (input) input.type = 'password';
+        if (showIcon) showIcon.style.display = '';
+        if (hideIcon) hideIcon.style.display = 'none';
+        if (btn) btn.setAttribute('aria-label', 'Show password');
+    });
+}
+window.resetWizardPasswordVisibility = resetWizardPasswordVisibility;
+
+// ── Draft autosave (Add Employee flow only — never for editEmployee) ──
+// Lets an admin who accidentally closes the wizard mid-entry pick up where
+// they left off next time they click "Add Employee", instead of losing
+// everything they typed.
+const WIZARD_DRAFT_KEY = 'employeeWizardDraft';
+// Never persisted: passwords (plaintext in localStorage is unsafe), the
+// photo file (can't be serialized), and request/edit bookkeeping fields.
+const WIZARD_DRAFT_SKIP_FIELDS = ['password', 'password_confirm', 'photo', '_token', '_edit_id'];
+
+function collectWizardDraftData() {
+    const form = document.getElementById('employeeWizardForm');
+    const data = {};
+    form.querySelectorAll('input, select').forEach(function(field) {
+        if (!field.name || WIZARD_DRAFT_SKIP_FIELDS.includes(field.name) || field.type === 'file') return;
+        if (field.type === 'checkbox') {
+            if (field.name === 'roles[]' && field.closest('#register-roles')) {
+                data.roles = data.roles || [];
+                if (field.checked) data.roles.push(field.value);
+            }
+            return;
+        }
+        data[field.name] = field.value;
+    });
+    return data;
+}
+
+function isWizardDraftEmpty(data) {
+    return Object.keys(data).every(function(key) {
+        // "Employee" is checked by default on a brand-new form, so roles
+        // alone don't mean the admin has actually started entering anything —
+        // counting it would make a genuinely untouched form look "non-empty"
+        // and overwrite a real saved draft the moment it's closed.
+        if (key === 'roles') return true;
+        const val = data[key];
+        return Array.isArray(val) ? val.length === 0 : !val || !String(val).trim();
+    });
+}
+
+function saveWizardDraft() {
+    if (window.wizardIsEditMode) return;
+    const data = collectWizardDraftData();
+    // Nothing typed in the current session — leave any existing saved draft
+    // alone rather than wiping it (e.g. right after "Start Over", before the
+    // admin has typed anything new, the earlier draft must stay recoverable).
+    if (isWizardDraftEmpty(data)) return;
+    try {
+        localStorage.setItem(WIZARD_DRAFT_KEY, JSON.stringify({ step: currentStep, data: data }));
+    } catch (e) { /* storage unavailable/full — draft just won't persist */ }
+}
+
+function getWizardDraft() {
+    try {
+        const raw = localStorage.getItem(WIZARD_DRAFT_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function clearWizardDraft() {
+    try { localStorage.removeItem(WIZARD_DRAFT_KEY); } catch (e) {}
+}
+window.clearWizardDraft = clearWizardDraft;
+
+function applyWizardDraft(draft) {
+    const data = draft.data || {};
+    Object.keys(data).forEach(function(name) {
+        if (name === 'roles') return;
+        const field = document.querySelector('#employeeWizardForm [name="' + name + '"]');
+        if (field && field.type !== 'checkbox') field.value = data[name] || '';
+    });
+
+    const roles = Array.isArray(data.roles) ? data.roles : [];
+    document.querySelectorAll('#register-roles input[type="checkbox"]').forEach(function(cb) {
+        cb.checked = roles.includes(cb.value);
+    });
+
+    if (data.department && window.loadDesignations) {
+        window.loadDesignations(data.department, function() {
+            const pos = document.getElementById('wizard-position');
+            pos.value = data.designation_id || '';
+            if (pos.value && window.fillFromDesignation) window.fillFromDesignation(pos);
+        });
+    }
+
+    // A restored username (typed or previously auto-filled) shouldn't be
+    // silently clobbered if the admin tweaks the name fields afterward.
+    const restoredUsernameField = document.querySelector('#employeeWizardForm [name="username"]');
+    if (restoredUsernameField && data.username) restoredUsernameField.dataset.userEdited = 'true';
+
+    currentStep = (draft.step >= 1 && draft.step <= totalSteps) ? draft.step : 1;
+    updateWizardUI();
+    if (currentStep === totalSteps) generateReview();
+    if (window.resetWizardFieldValidation) window.resetWizardFieldValidation();
+}
+
+// ── Username auto-fill (Step 2) — derived from Last Name + First Name ──
+// e.g. Last "Santos" + First "Juan" -> "santosjuan". Stops auto-updating the
+// moment the admin types into the username field directly, so a deliberate
+// choice never gets overwritten by a later name edit.
+let wizardUsernameAutoFilling = false;
+// Unicode combining diacritical marks (U+0300–U+036F), built from char codes
+// rather than a literal range so accented source files can't mangle it.
+const DIACRITIC_MARKS_RE = new RegExp('[' + String.fromCharCode(0x0300) + '-' + String.fromCharCode(0x036f) + ']', 'g');
+
+function usernameSlug(value) {
+    return String(value || '')
+        .toLowerCase()
+        .normalize('NFD').replace(DIACRITIC_MARKS_RE, '')
+        .replace(/[^a-z0-9]/g, '');
+}
+
+function autoFillWizardUsername() {
+    const usernameField = document.querySelector('#employeeWizardForm [name="username"]');
+    if (!usernameField || usernameField.dataset.userEdited === 'true') return;
+    const firstName = document.querySelector('#employeeWizardForm [name="first_name"]');
+    const lastName  = document.querySelector('#employeeWizardForm [name="last_name"]');
+    const generated = usernameSlug(lastName && lastName.value) + usernameSlug(firstName && firstName.value);
+    if (usernameField.value === generated) return;
+    wizardUsernameAutoFilling = true;
+    usernameField.value = generated;
+    usernameField.dispatchEvent(new Event('input', { bubbles: true }));
+    wizardUsernameAutoFilling = false;
+}
+
+function openFreshEmployeeWizard() {
     document.getElementById('employeeWizardModal').style.display = 'flex';
     currentStep = 1;
     updateWizardUI();
+    const usernameField = document.querySelector('#employeeWizardForm [name="username"]');
+    if (usernameField) delete usernameField.dataset.userEdited;
+    if (window.resetWizardFieldValidation) window.resetWizardFieldValidation();
+    resetWizardPasswordVisibility();
+}
+
+// Opens a blank wizard for this attempt WITHOUT deleting the saved draft —
+// the admin may still want it back via "Continue Draft" on a later visit,
+// so only a successful submission (see adminPersonnel.js) clears it.
+window.startOverEmployeeWizard = function() {
+    document.getElementById('employeeWizardForm').reset();
+    document.getElementById('wizardDraftPrompt').style.display = 'none';
+    openFreshEmployeeWizard();
+}
+
+window.continueEmployeeWizardDraft = function() {
+    const draft = getWizardDraft();
+    document.getElementById('wizardDraftPrompt').style.display = 'none';
+    document.getElementById('employeeWizardModal').style.display = 'flex';
+    resetWizardPasswordVisibility();
+    if (draft) applyWizardDraft(draft);
+}
+
+window.openEmployeeWizard = function() {
+    const draft = getWizardDraft();
+    if (draft && !isWizardDraftEmpty(draft.data || {})) {
+        document.getElementById('wizardDraftPrompt').style.display = 'flex';
+        return;
+    }
+    openFreshEmployeeWizard();
 }
 
 window.closeEmployeeWizard = function() {
+    saveWizardDraft();
     document.getElementById('employeeWizardModal').style.display = 'none';
     currentStep = 1;
     document.getElementById('employeeWizardForm').reset();
+    if (window.resetWizardFieldValidation) window.resetWizardFieldValidation();
+    resetWizardPasswordVisibility();
     // delegate to blade-defined closeEmployeeWizard for edit-mode reset if present
     if (window.wizardIsEditMode) {
         window.wizardIsEditMode = false;
@@ -30,8 +218,14 @@ window.closeEmployeeWizard = function() {
 }
 
 window.goToWizardStep = function(step) {
+    if (step < 1 || step > totalSteps) return;
     currentStep = step;
     updateWizardUI();
+    // Landing on the Review step directly (via a header click) still needs
+    // its summary populated, just like reaching it through Next.
+    if (currentStep === totalSteps) {
+        generateReview();
+    }
 }
 
 window.nextStep = function() {
@@ -79,21 +273,115 @@ function validateCurrentStep() {
     return true;
 }
 
-function generateReview() {
-    const formData = new FormData(document.getElementById('employeeWizardForm'));
-    let html = '<div class="review-section"><div class="review-section-title">👤 Personal Info</div>';
-    html += `<div class="review-row"><div class="review-item"><div class="review-label">Employee ID</div><div class="review-value">${formData.get('employee_id') || 'N/A'}</div></div>`;
-    html += `<div class="review-item"><div class="review-label">Full Name</div><div class="review-value">${formData.get('first_name') || ''} ${formData.get('last_name') || ''}</div></div></div></div>`;
+function escapeWizardHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+}
 
-    html += '<div class="review-section"><div class="review-section-title">💼 Employment</div>';
-    html += `<div class="review-row"><div class="review-item"><div class="review-label">Position</div><div class="review-value">${formData.get('position') || 'N/A'}</div></div>`;
-    html += `<div class="review-item"><div class="review-label">Department</div><div class="review-value">${formData.get('department') || 'N/A'}</div></div></div></div>`;
+function formatWizardDate(value) {
+    if (!value) return '';
+    const d = new Date(value + 'T00:00:00');
+    if (isNaN(d.getTime())) return value;
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+// Selects (department, designation) store an id as their value — the review
+// should show what the admin actually picked, not the raw id.
+function selectedOptionText(form, name) {
+    const el = form.querySelector('select[name="' + name + '"]');
+    if (!el || el.selectedIndex < 0) return '';
+    const opt = el.options[el.selectedIndex];
+    return opt ? opt.textContent.trim() : '';
+}
+
+const WIZARD_ROLE_LABELS = { employee: 'Employee', hr: 'HR', admin: 'Admin', mayor: 'Mayor' };
+
+function selectedWizardRoles() {
+    const container = document.querySelector('#step2-register:not([style*="display: none"]) .wizard-role-checkboxes, #step2-edit:not([style*="display: none"]) .wizard-role-checkboxes');
+    if (!container) return [];
+    return Array.from(container.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(function(cb) { return WIZARD_ROLE_LABELS[cb.value] || cb.value; });
+}
+
+function reviewRow(items) {
+    const spanFull = items.length === 1;
+    const cells = items.map(function(item) {
+        const style = spanFull ? ' style="grid-column:1 / -1;"' : '';
+        const value = item[1] ? escapeWizardHtml(item[1]) : '<span style="color:var(--gp-text-mid);font-weight:500;">N/A</span>';
+        return '<div class="review-item"' + style + '><div class="review-label">' + escapeWizardHtml(item[0]) + '</div><div class="review-value">' + value + '</div></div>';
+    }).join('');
+    return '<div class="review-row">' + cells + '</div>';
+}
+
+function reviewSection(title, rows) {
+    return '<div class="review-section"><div class="review-section-title">' + title + '</div>' + rows.join('') + '</div>';
+}
+
+function generateReview() {
+    const form = document.getElementById('employeeWizardForm');
+    const formData = new FormData(form);
+    const isEdit = !!window.wizardIsEditMode;
+    const get = function(name) { return (formData.get(name) || '').toString().trim(); };
+
+    const fullName = [get('first_name'), get('middle_name'), get('last_name'), get('suffix')].filter(Boolean).join(' ');
+    const photoFile = formData.get('photo');
+    const roles = selectedWizardRoles().join(', ');
+
+    let html = '';
+
+    html += reviewSection('👤 Personal Information', [
+        reviewRow([['Employee ID', get('employee_id')], ['Full Name', fullName]]),
+        reviewRow([['Date of Birth', formatWizardDate(get('birth_date'))], ['Place of Birth', get('place_of_birth')]]),
+        reviewRow([['Sex', get('sex')], ['Civil Status', get('civil_status')]]),
+        reviewRow([['Height', get('height') ? get('height') + ' cm' : ''], ['Weight', get('weight') ? get('weight') + ' kg' : '']]),
+        reviewRow([['Blood Type', get('blood_type')], ['Citizenship', get('citizenship')]]),
+        reviewRow([['Photo', (photoFile && photoFile.name) ? photoFile.name : '']]),
+    ]);
+
+    html += isEdit
+        ? reviewSection('🔐 Role / Access Level', [reviewRow([['Roles', roles]])])
+        : reviewSection('🔐 Account Setup', [
+            reviewRow([['Username', get('username')], ['Email', get('user_email')]]),
+            reviewRow([['Password', get('password') ? 'Set ✓' : ''], ['Roles', roles]]),
+        ]);
+
+    html += reviewSection('💼 Employment Details', [
+        reviewRow([['Department', selectedOptionText(form, 'department')], ['Position', selectedOptionText(form, 'designation_id')]]),
+        reviewRow([['Employment Type/Status', get('employment_status')], ['Appointment Date', formatWizardDate(get('appointment_date'))]]),
+        reviewRow([['Salary Grade', get('salary_grade')], ['Step Increment', get('step_increment')]]),
+    ]);
+
+    const addressLine = [get('house_no'), get('street'), get('barangay'), get('city'), get('province')].filter(Boolean).join(', ');
+    const address = [addressLine, get('zip_code')].filter(Boolean).join(' ');
+    html += reviewSection('📞 Contact Information', [
+        reviewRow([['Mobile Number', get('mobile_number')], ['Landline Number', get('landline_number')]]),
+        reviewRow([['Emergency Contact Person', get('emergency_contact_person')], ['Emergency Contact Number', get('emergency_contact_number')]]),
+        reviewRow([['Residential Address', address]]),
+    ]);
+
+    html += reviewSection('🪪 Government IDs', [
+        reviewRow([['GSIS Number', get('gsis_no')], ['PhilHealth Number', get('philhealth_no')]]),
+        reviewRow([['PAG-IBIG Number', get('pagibig_no')], ['TIN Number', get('tin_no')]]),
+        reviewRow([['License Number', get('license_no')]]),
+    ]);
 
     document.getElementById('wizardReviewContent').innerHTML = html;
 }
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    // Keyboard access for the clickable header steps (Enter / Space).
+    document.querySelectorAll('#progressBar .wizard-step').forEach(function(stepEl) {
+        stepEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                const step = parseInt(stepEl.getAttribute('data-step'), 10);
+                if (step) goToWizardStep(step);
+            }
+        });
+    });
+
     const form = document.getElementById('employeeWizardForm');
     if (form) {
         form.addEventListener('submit', function(e) {
@@ -114,6 +402,32 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 alert('Please complete all steps before submitting.');
             }
+        });
+    }
+
+    // Autosave the draft as the admin types, so the wizard can be restored
+    // even if the tab is closed outright (not just via the Cancel/X button).
+    if (form) {
+        let draftSaveTimer = null;
+        ['input', 'change'].forEach(function(evt) {
+            form.addEventListener(evt, function() {
+                clearTimeout(draftSaveTimer);
+                draftSaveTimer = setTimeout(saveWizardDraft, 400);
+            });
+        });
+    }
+
+    // Username auto-fill: keep it in sync with Last Name + First Name until
+    // the admin edits it directly, at which point their choice takes over.
+    const firstNameField = document.querySelector('#employeeWizardForm [name="first_name"]');
+    const lastNameField  = document.querySelector('#employeeWizardForm [name="last_name"]');
+    const usernameField  = document.querySelector('#employeeWizardForm [name="username"]');
+    [firstNameField, lastNameField].forEach(function(field) {
+        if (field) field.addEventListener('input', autoFillWizardUsername);
+    });
+    if (usernameField) {
+        usernameField.addEventListener('input', function() {
+            if (!wizardUsernameAutoFilling) usernameField.dataset.userEdited = 'true';
         });
     }
 });

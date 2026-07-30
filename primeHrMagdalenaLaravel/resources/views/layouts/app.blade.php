@@ -30,6 +30,7 @@
             @yield('content')
         </main>
         @include('admin.chatbot.adminChatbot')
+        @include('admin.leaveCalendar.leaveCalendarFab')
         @include('admin.themeSettings.adminThemeSettings')
     </div>
     

@@ -18,7 +18,9 @@
                 <option value="rejected">Rejected</option>
                 <option value="cancelled">Cancelled</option>
             </select>
-            <button class="btn-export" onclick="openFileModal()">+ File Leave</button>
+            {{-- Same navy pill as "File Travel Order" — see the .lb-btn-primary-solid
+                 rules in employeeLeaveAndBenefits.css for why both classes are needed. --}}
+            <button class="btn-export lb-btn-primary-solid" onclick="openFileModal()">+ File Leave</button>
         </div>
     </div>
 
@@ -55,7 +57,7 @@
                         @endif
                     </td>
                     <td>
-                        <button class="btn-view" onclick="openDetailModal(
+                        <button class="btn-view" data-leave-app-id="{{ $application->id }}" onclick="openDetailModal(
                             '{{ addslashes($application->leaveType->leave_name ?? 'N/A') }}',
                             '{{ $application->start_date->format('M d, Y') }}',
                             '{{ $application->end_date->format('M d, Y') }}',

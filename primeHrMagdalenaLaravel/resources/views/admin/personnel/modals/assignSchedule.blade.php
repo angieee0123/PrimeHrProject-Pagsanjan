@@ -21,13 +21,20 @@
                     <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
                         Start Date <span style="color:#8e1e18;">*</span>
                     </label>
-                    <input type="date" name="start_date" id="scheduleStartDate" required onchange="validateScheduleDates()" style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                    {{-- type=text: flatpickr calendar (busyDatesCalendar.js) marking
+                         this employee's leave / travel days --}}
+                    <input type="text" name="start_date" id="scheduleStartDate" required placeholder="Select date..." autocomplete="off" style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
                 </div>
                 <div>
                     <label style="display:block; font-size:12px; font-weight:600; color:#0b044d; margin-bottom:6px;">
                         End Date <span style="color:#8e1e18;">*</span>
                     </label>
-                    <input type="date" name="end_date" id="scheduleEndDate" required onchange="validateScheduleDates()" style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                    <input type="text" name="end_date" id="scheduleEndDate" required placeholder="Select date..." autocomplete="off" style="width:100%; padding:10px 12px; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#0b044d; background:#fff; box-sizing:border-box;">
+                </div>
+                <div class="busy-cal-legend" style="grid-column:1/-1">
+                    <span><i class="dot-pending"></i> Pending leave</span>
+                    <span><i class="dot-approved"></i> Approved leave</span>
+                    <span><i class="dot-travel"></i> Travel order</span>
                 </div>
             </div>
 

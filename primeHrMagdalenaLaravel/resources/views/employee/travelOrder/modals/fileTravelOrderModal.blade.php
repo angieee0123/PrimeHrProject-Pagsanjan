@@ -45,15 +45,22 @@
                     </svg>
                     Travel Period
                 </label>
+                {{-- type=text: these are flatpickr calendars (busyDatesCalendar.js)
+                     that mark/block dates already used by leaves or travel orders --}}
                 <div class="form-grid to-gap-12">
                     <div class="form-field">
                         <label class="to-sublabel">Departure Date <span class="to-required">*</span></label>
-                        <input type="date" name="travel_date" id="travelDateFrom" required onchange="calculateTravelDuration()" class="to-input-md">
+                        <input type="text" name="travel_date" id="travelDateFrom" required placeholder="Select date..." autocomplete="off" class="to-input-md">
                     </div>
                     <div class="form-field">
                         <label class="to-sublabel">Return Date <span class="to-required">*</span></label>
-                        <input type="date" name="return_date" id="travelDateTo" required onchange="calculateTravelDuration()" class="to-input-md">
+                        <input type="text" name="return_date" id="travelDateTo" required placeholder="Select date..." autocomplete="off" class="to-input-md">
                     </div>
+                </div>
+                <div class="busy-cal-legend">
+                    <span><i class="dot-pending"></i> Pending leave</span>
+                    <span><i class="dot-approved"></i> Approved leave</span>
+                    <span><i class="dot-travel"></i> Travel order</span>
                 </div>
 
                 {{-- Duration Display --}}

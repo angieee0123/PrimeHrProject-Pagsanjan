@@ -1,25 +1,49 @@
 @php
+/*
+ * Grouped to match the admin rail. No accordion here — ten items across three
+ * short sections stay scannable without one, and collapsing would only add a
+ * click on a nav this size.
+ */
 $isPermanent = $isPermanent ?? false;
 
-$navItems = [
-    ['id' => 'dashboard',   'label' => 'Dashboard',              'route' => route('employee.dashboard')],
-    ['id' => 'payslip',     'label' => 'Payslip',                'route' => route('employee.payslip')],
-    ['id' => 'attendance',  'label' => 'Attendance',             'route' => route('employee.attendance')],
-];
+// Dashboard sits above the sections on its own.
+$dashboardItem = ['id' => 'employee.dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard', 'route' => route('employee.dashboard')];
 
+$timeItems = [
+    ['id' => 'employee.attendance', 'label' => 'Attendance', 'icon' => 'attendance', 'route' => route('employee.attendance')],
+];
 if ($isPermanent) {
-    $navItems[] = ['id' => 'leave', 'label' => 'Leave & Benefits', 'route' => route('employee.leave')];
+    $timeItems[] = ['id' => 'employee.leave', 'label' => 'Leave & Benefits', 'icon' => 'leave', 'route' => route('employee.leave')];
 }
-
-$navItems = [...$navItems,
-    ['id' => 'travelorder', 'label' => 'Travel Order',           'route' => route('employee.travelorder')],
-    ['id' => 'passslip',    'label' => 'Pass Slip',              'route' => route('employee.passslip')],
-    ['id' => 'training',    'label' => 'Training',               'route' => route('employee.training')],
-    ['id' => 'performance', 'label' => 'Performance',            'route' => route('employee.performance')],
-    ['id' => 'profile',     'label' => 'Profile',                'route' => route('employee.profile')],
-    ['id' => 'settings',    'label' => 'Settings',               'route' => route('employee.settings')],
+$timeItems = [...$timeItems,
+    ['id' => 'employee.travelorder', 'label' => 'Travel Orders', 'icon' => 'travelorder', 'route' => route('employee.travelorder')],
+    ['id' => 'employee.passslip',    'label' => 'Pass Slips',    'icon' => 'passslip',    'route' => route('employee.passslip')],
 ];
-$currentRoute = Route::currentRouteName();
+
+$navGroups = [
+    'Time & Absence' => $timeItems,
+    'Pay & Records'  => [
+        ['id' => 'employee.payslip',     'label' => 'Payslip',     'icon' => 'payslip',     'route' => route('employee.payslip')],
+        ['id' => 'employee.training',    'label' => 'Training',    'icon' => 'training',    'route' => route('employee.training')],
+        ['id' => 'employee.performance', 'label' => 'Performance', 'icon' => 'performance', 'route' => route('employee.performance')],
+    ],
+    'Account' => [
+        ['id' => 'employee.profile',  'label' => 'Profile',  'icon' => 'profile',  'route' => route('employee.profile')],
+        ['id' => 'employee.settings', 'label' => 'Settings', 'icon' => 'settings', 'route' => route('employee.settings')],
+    ],
+];
+
+$currentRoute = Route::currentRouteName() ?? '';
+
+/*
+ * Exact route name, or a child of it — so employee.attendance.detailed and
+ * employee.payslip.details still light up their parent.
+ *
+ * The old test was str_contains($currentRoute, 'leave'), which also matched
+ * employee.leaveCalendar and lit "Leave & Benefits" on the calendar page.
+ * Requiring the trailing dot for children keeps sibling names apart.
+ */
+$isActive = fn (string $id) => $currentRoute === $id || Str::startsWith($currentRoute, $id . '.');
 @endphp
 
 <aside class="sidebar" id="sidebar">
@@ -39,47 +63,58 @@ $currentRoute = Route::currentRouteName();
         <button class="toggle-btn" id="toggle-btn" aria-label="Toggle sidebar">‹</button>
     </div>
 
-    <p class="nav-section-label" id="nav-label">NAVIGATION</p>
-
     <nav class="sidebar-nav" id="sidebar-nav">
-        @foreach($navItems as $item)
+        {{-- Ungrouped: the landing page, always first. --}}
+        <a href="{{ $dashboardItem['route'] }}"
+           class="nav-item {{ $isActive($dashboardItem['id']) ? 'active' : '' }}"
+           title="{{ $dashboardItem['label'] }}">
+            <span class="nav-icon"><x-nav-icon :name="$dashboardItem['icon']" /></span>
+            <span class="nav-label">{{ $dashboardItem['label'] }}</span>
+            @if($isActive($dashboardItem['id']))
+            <span class="nav-active-bar"></span>
+            @endif
+        </a>
+
+        @foreach($navGroups as $groupLabel => $items)
+        <p class="nav-section-label">{{ strtoupper($groupLabel) }}</p>
+        @foreach($items as $item)
         <a href="{{ $item['route'] }}"
-           class="nav-item {{ str_contains($currentRoute, $item['id']) ? 'active' : '' }}"
+           class="nav-item {{ $isActive($item['id']) ? 'active' : '' }}"
            title="{{ $item['label'] }}">
-            <span class="nav-icon">
-                @if($item['id'] === 'dashboard')
-                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                @elseif($item['id'] === 'payslip')
-                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                @elseif($item['id'] === 'attendance')
-                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                @elseif($item['id'] === 'leave')
-                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                @elseif($item['id'] === 'travelorder')
-                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                @elseif($item['id'] === 'passslip')
-                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                @elseif($item['id'] === 'training')
-                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                @elseif($item['id'] === 'performance')
-                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                @elseif($item['id'] === 'profile')
-                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                @elseif($item['id'] === 'settings')
-                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                @endif
-            </span>
+            <span class="nav-icon"><x-nav-icon :name="$item['icon']" /></span>
             <span class="nav-label">{{ $item['label'] }}</span>
-            @if(str_contains($currentRoute, $item['id']))
-                <span class="nav-active-bar"></span>
+            @if($isActive($item['id']))
+            <span class="nav-active-bar"></span>
             @endif
         </a>
         @endforeach
+        @endforeach
+
+        {{-- Divider separating the nav items from the logout --}}
+        <div class="nav-divider"></div>
+
+        {{-- Logout — last item in the nav, styled like the others --}}
+        <button type="button" class="nav-item nav-logout" onclick="openLogoutModal()" title="Logout">
+            <span class="nav-icon"><x-nav-icon name="logout" /></span>
+            <span class="nav-label">Log Out</span>
+        </button>
     </nav>
 
     <div class="sidebar-footer" id="sidebar-footer">
+        {{-- This only ever rendered initials, even though the employee's photo is
+             on the record and the admin rail already showed it. If the file is
+             missing the img hands off to the initials rather than leaving a
+             broken-image icon. --}}
         <div class="user-avatar-wrap">
-            <div class="user-avatar">{{ $authInitials ?? 'PE' }}</div>
+            @php $avatarPhoto = ($authEmployee ?? null)?->photo; @endphp
+            @if($avatarPhoto)
+                <img src="{{ $avatarPhoto }}" alt=""
+                     class="user-avatar user-avatar-img"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="user-avatar" style="display:none">{{ $authInitials ?? 'PE' }}</div>
+            @else
+                <div class="user-avatar">{{ $authInitials ?? 'PE' }}</div>
+            @endif
             <span class="user-status-dot"></span>
         </div>
         <div class="user-info" id="user-info">
@@ -91,16 +126,8 @@ $currentRoute = Route::currentRouteName();
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
             </a>
         @endif
-        <form method="POST" action="{{ route('logout') }}" id="logout-form" style="margin: 0;">
-            @csrf
-            <button type="submit" class="logout-btn" title="Logout">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
-            </button>
-        </form>
     </div>
 
 </aside>
+
+@include('partials.logoutConfirmModal', ['firstName' => isset($authFullName) ? explode(' ', trim($authFullName))[0] : 'there'])

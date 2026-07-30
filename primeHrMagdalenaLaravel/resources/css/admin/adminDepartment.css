@@ -160,7 +160,6 @@
 
 /* ── Tab table headers/footers ── */
 .btn-export-green { color: #15803d; border-color: #15803d; }
-.modal-btn-primary-sm { padding: 7px 16px; font-size: 12.5px; }
 .dep-footer-inner { display: flex; align-items: center; gap: 8px; }
 .dep-rows-select {
     font-size: 13px;

@@ -1,8 +1,14 @@
 {{-- Permanent Profile Topbar --}}
 <div class="welcome-banner profile-banner">
     <div class="banner-left profile-banner-left">
+        {{-- The uploaded photo is already stored on the employee record; the
+             banner previously showed initials even when one existed. --}}
         <div class="profile-avatar-lg">
-            {{ strtoupper(substr($employee->first_name, 0, 1)) }}{{ strtoupper(substr($employee->last_name, 0, 1)) }}
+            @if($employee->photo)
+                <img src="{{ $employee->photo }}" alt="" class="profile-avatar-lg-img">
+            @else
+                {{ strtoupper(substr($employee->first_name, 0, 1)) }}{{ strtoupper(substr($employee->last_name, 0, 1)) }}
+            @endif
         </div>
         <div class="profile-banner-info">
             <div class="profile-banner-row profile-banner-name-row">
