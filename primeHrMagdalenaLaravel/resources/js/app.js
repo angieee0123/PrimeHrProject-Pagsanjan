@@ -57,6 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.querySelectorAll('.nav-label, .nav-active-bar').forEach(el => {
             el.style.display = collapsed ? 'none' : '';
         });
+        // Every nav click is a full page load, not an SPA transition, so
+        // without this the rail silently re-expanded on the very next page —
+        // the click that just collapsed it was undone by navigating anywhere.
+        // Mirrors the openNavGroups cookie below: plain (unencrypted, see
+        // bootstrap/app.php) so the Blade sidebar can read it at render time.
+        document.cookie = 'sidebarCollapsed=' + (collapsed ? '1' : '0') +
+            ';path=/;max-age=31536000;samesite=lax';
     });
 
     // Mobile open

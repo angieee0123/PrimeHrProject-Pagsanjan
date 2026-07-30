@@ -66,6 +66,11 @@ foreach ($navGroups as $groupLabel => $groupItems) {
     }
 }
 
+// Mirrors openNavGroups below: written by app.js on toggle, read here so a
+// collapsed rail ships correctly in the initial HTML instead of flashing
+// expanded for a frame on every full-page navigation.
+$sidebarCollapsed = request()->cookie('sidebarCollapsed') === '1';
+
 // Oldest first — the same order app.js writes, so eviction stays FIFO.
 $storedGroups = json_decode(request()->cookie('openNavGroups') ?? '', true);
 $openGroups = array_values(array_intersect(
@@ -88,7 +93,7 @@ while (count($openGroups) > 3) {
 }
 @endphp
 
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar @if($sidebarCollapsed) collapsed @endif" id="sidebar">
 
     <div class="sidebar-header">
         <div class="logo">
@@ -102,7 +107,7 @@ while (count($openGroups) > 3) {
                 <span class="logo-sub">Pagsanjan, Laguna</span>
             </div>
         </div>
-        <button class="toggle-btn" id="toggle-btn" aria-label="Toggle sidebar">‹</button>
+        <button class="toggle-btn" id="toggle-btn" aria-label="Toggle sidebar">{{ $sidebarCollapsed ? '›' : '‹' }}</button>
     </div>
 
     <nav class="sidebar-nav" id="sidebar-nav">
@@ -173,7 +178,7 @@ while (count($openGroups) > 3) {
         </button>
     </nav>
 
-    <div class="sidebar-footer" id="sidebar-footer">
+    <div class="sidebar-footer @if($sidebarCollapsed) collapsed-footer @endif" id="sidebar-footer">
         {{-- Sizing/shape now live in .user-avatar rather than inline styles, so
              this rail and the employee one stay in step. --}}
         <div class="user-avatar-wrap">

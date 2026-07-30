@@ -87,6 +87,14 @@ body {
   overflow: hidden;
 }
 .sidebar.collapsed { width: 64px; }
+/* app.js also sets these inline on click, but the collapsed class can now
+   arrive server-rendered (see adminSidebar.blade.php's sidebarCollapsed
+   cookie), so the CSS has to hide them too or a fresh page load would flash
+   the labels for a frame before JS caught up. */
+.sidebar.collapsed .logo-text-wrap,
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .nav-active-bar,
+.sidebar.collapsed #user-info { display: none; }
 
 .sidebar-header {
   display: flex; align-items: center; justify-content: space-between;

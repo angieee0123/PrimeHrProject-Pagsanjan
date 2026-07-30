@@ -28,10 +28,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Written by app.js, read by the admin sidebar to render its collapsed
         // sections server-side. Encrypted cookies are opaque to JavaScript, so
-        // this one stays plain — it holds nothing but a list of open nav
-        // section slugs, and a forged value can only mis-collapse a menu.
+        // these stay plain — they hold nothing but a list of open nav section
+        // slugs and a boolean rail state, and a forged value can only
+        // mis-collapse a menu.
         $middleware->encryptCookies(except: [
             'openNavGroups',
+            'sidebarCollapsed',
         ]);
 
         // Account activation gate: ends access for a user who is deactivated
