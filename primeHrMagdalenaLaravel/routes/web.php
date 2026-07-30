@@ -427,6 +427,16 @@ Route::post('/admin/settings/system-ai', [\App\Http\Controllers\AdminSettingsCon
 Route::post('/chatbot/chat', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware('auth')->name('chatbot.chat');
 Route::get('/chatbot/history', [\App\Http\Controllers\ChatbotController::class, 'history'])->middleware('auth')->name('chatbot.history');
 
+// AI Assistant — full-page, persisted & searchable chat history. Same controller
+// for all three areas; EnsureRoleForArea already guards each URL prefix.
+foreach (['admin', 'employee', 'mayor'] as $aiArea) {
+    Route::get("/{$aiArea}/ai-assistant", [\App\Http\Controllers\AiAssistantController::class, 'index'])->middleware('auth')->name("{$aiArea}.ai-assistant");
+    Route::get("/{$aiArea}/ai-assistant/conversations/{conversation}", [\App\Http\Controllers\AiAssistantController::class, 'messages'])->middleware('auth')->name("{$aiArea}.ai-assistant.messages");
+    Route::get("/{$aiArea}/ai-assistant/search", [\App\Http\Controllers\AiAssistantController::class, 'search'])->middleware('auth')->name("{$aiArea}.ai-assistant.search");
+    Route::post("/{$aiArea}/ai-assistant/message", [\App\Http\Controllers\AiAssistantController::class, 'send'])->middleware('auth')->name("{$aiArea}.ai-assistant.send");
+    Route::delete("/{$aiArea}/ai-assistant/conversations/{conversation}", [\App\Http\Controllers\AiAssistantController::class, 'destroy'])->middleware('auth')->name("{$aiArea}.ai-assistant.destroy");
+}
+
 // Notification API Routes
 Route::post('/api/notifications/mark-all-read', function (\Illuminate\Http\Request $request) {
     \App\Services\NotificationService::markAllAsRead(Auth::id(), $request->input('audience'));

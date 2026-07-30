@@ -15,6 +15,7 @@
 // Dashboard sits above the groups on its own — a collapsible header wrapping a
 // single link is just an extra click.
 $dashboardItem = ['id' => 'admin.dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard', 'route' => route('admin.dashboard')];
+$aiAssistantItem = ['id' => 'admin.ai-assistant', 'label' => 'AI Assistant', 'icon' => 'ai-assistant', 'route' => route('admin.ai-assistant')];
 
 $navGroups = [
     'Organization' => [
@@ -112,6 +113,16 @@ while (count($openGroups) > 3) {
             <span class="nav-icon"><x-nav-icon :name="$dashboardItem['icon']" /></span>
             <span class="nav-label">{{ $dashboardItem['label'] }}</span>
             @if($currentRoute === $dashboardItem['id'])
+            <span class="nav-active-bar"></span>
+            @endif
+        </a>
+
+        <a href="{{ $aiAssistantItem['route'] }}"
+           class="nav-item {{ $currentRoute === $aiAssistantItem['id'] ? 'active' : '' }}"
+           title="{{ $aiAssistantItem['label'] }}">
+            <span class="nav-icon"><x-nav-icon :name="$aiAssistantItem['icon']" /></span>
+            <span class="nav-label">{{ $aiAssistantItem['label'] }}</span>
+            @if($currentRoute === $aiAssistantItem['id'])
             <span class="nav-active-bar"></span>
             @endif
         </a>

@@ -8,6 +8,7 @@ $isPermanent = $isPermanent ?? false;
 
 // Dashboard sits above the sections on its own.
 $dashboardItem = ['id' => 'employee.dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard', 'route' => route('employee.dashboard')];
+$aiAssistantItem = ['id' => 'employee.ai-assistant', 'label' => 'AI Assistant', 'icon' => 'ai-assistant', 'route' => route('employee.ai-assistant')];
 
 $timeItems = [
     ['id' => 'employee.attendance', 'label' => 'Attendance', 'icon' => 'attendance', 'route' => route('employee.attendance')],
@@ -71,6 +72,16 @@ $isActive = fn (string $id) => $currentRoute === $id || Str::startsWith($current
             <span class="nav-icon"><x-nav-icon :name="$dashboardItem['icon']" /></span>
             <span class="nav-label">{{ $dashboardItem['label'] }}</span>
             @if($isActive($dashboardItem['id']))
+            <span class="nav-active-bar"></span>
+            @endif
+        </a>
+
+        <a href="{{ $aiAssistantItem['route'] }}"
+           class="nav-item {{ $isActive($aiAssistantItem['id']) ? 'active' : '' }}"
+           title="{{ $aiAssistantItem['label'] }}">
+            <span class="nav-icon"><x-nav-icon :name="$aiAssistantItem['icon']" /></span>
+            <span class="nav-label">{{ $aiAssistantItem['label'] }}</span>
+            @if($isActive($aiAssistantItem['id']))
             <span class="nav-active-bar"></span>
             @endif
         </a>

@@ -1,6 +1,7 @@
 @php
 $navItems = [
-    ['id' => 'mayor.dashboard',    'label' => 'Dashboard',           'route' => route('mayor.dashboard')],
+    ['id' => 'mayor.dashboard',     'label' => 'Dashboard',           'route' => route('mayor.dashboard')],
+    ['id' => 'mayor.ai-assistant',  'label' => 'AI Assistant',        'route' => route('mayor.ai-assistant')],
     ['id' => 'mayor.personnel',    'label' => 'Personnel Directory', 'route' => route('mayor.personnel')],
     ['id' => 'mayor.leave',        'label' => 'Leave Applications',  'route' => route('mayor.leave')],
     ['id' => 'mayor.travelorder',  'label' => 'Travel Orders',       'route' => route('mayor.travelorder')],
@@ -36,6 +37,8 @@ $currentRoute = Route::currentRouteName();
             <span class="nav-icon">
                 @if($item['id'] === 'mayor.dashboard')
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                @elseif($item['id'] === 'mayor.ai-assistant')
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.6 4.6L18 9l-4.4 1.4L12 15l-1.6-4.6L6 9l4.4-1.4z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>
                 @elseif($item['id'] === 'mayor.personnel')
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 @elseif($item['id'] === 'mayor.leave')

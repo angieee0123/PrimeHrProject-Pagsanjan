@@ -29,7 +29,12 @@
 
             @yield('content')
         </main>
+        {{-- The floating widget's FAB sits fixed bottom-right, on top of the
+             full-page assistant's own send button — and showing both on the
+             same page is redundant anyway, so it's skipped here. --}}
+        @unless(Route::currentRouteName() === 'admin.ai-assistant')
         @include('admin.chatbot.adminChatbot')
+        @endunless
         @include('admin.leaveCalendar.leaveCalendarFab')
         @include('admin.themeSettings.adminThemeSettings')
     </div>
