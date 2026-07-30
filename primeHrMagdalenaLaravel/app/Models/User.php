@@ -61,6 +61,11 @@ class User extends Authenticatable
         return $this->hasOne(UserAiSetting::class);
     }
 
+    public function aiConversations()
+    {
+        return $this->hasMany(AiConversation::class);
+    }
+
     /**
      * Whether this user wants to receive the given notification category.
      * Opt-out model: a user with no preference row yet (the common case,

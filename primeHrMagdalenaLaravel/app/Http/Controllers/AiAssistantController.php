@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\AiConversation;
-use App\Services\HrChatbotAnswerer;
+use App\Services\AiQueryService;
+use App\Services\ChartRenderer;
+use App\Services\ReportPdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -19,8 +21,11 @@ class AiAssistantController extends Controller
         'mayor' => 'mayor.aiAssistant.mayorAiAssistant',
     ];
 
-    public function __construct(private HrChatbotAnswerer $answerer)
-    {
+    public function __construct(
+        private AiQueryService $assistant,
+        private ChartRenderer $chartRenderer,
+        private ReportPdfService $pdf,
+    ) {
     }
 
     public function index(Request $request)
@@ -73,8 +78,13 @@ class AiAssistantController extends Controller
             'content' => $message,
         ]);
 
-        $response = $this->answerer->answer(Auth::user(), $message, $history);
+        $user = Auth::user();
+        $result = $this->assistant->ask($user, $message, $history);
+        $response = $result['answer'];
 
+        // Only the prose is persisted as the turn — replaying a stored table
+        // months later would show stale figures. The structured payload is
+        // for this response only.
         $conversation->messages()->create([
             'role' => 'assistant',
             'content' => $response,
@@ -82,12 +92,74 @@ class AiAssistantController extends Controller
 
         $conversation->touch();
 
-        return response()->json([
+        $charts = $result['charts'] ?? null;
+
+        $payload = [
             'conversation_id' => $conversation->id,
             'title' => $conversation->title,
             'response' => $response,
+            'intent' => $result['intent'] ?? null,
             'status' => 'success',
-        ]);
+        ];
+
+        if (!empty($result['data'])) {
+            $payload['data'] = $result['data'];
+        }
+
+        if (!empty($charts)) {
+            $payload['charts'] = $charts;
+            $payload['chart_svg'] = collect($charts)
+                ->map(fn (array $chart) => $this->chartRenderer->render($chart))
+                ->all();
+        }
+
+        // A report or chart can be exported; stash it so the download button
+        // has something to exchange.
+        if (!empty($result['report']) || !empty($charts)) {
+            $report = $result['report'] ?? [
+                'title' => $charts[0]['title'] ?? 'Chart',
+                'columns' => $this->inferColumns($result['data'] ?? []),
+                'totals' => [],
+            ];
+
+            $payload['report'] = $report;
+            $payload['export_token'] = $this->pdf->stash($user, $report, $result['data'] ?? [], $charts);
+        }
+
+        return response()->json($payload);
+    }
+
+    /**
+     * Export a previously generated report as a PDF.
+     */
+    public function export(Request $request, string $token)
+    {
+        $result = $this->pdf->download(Auth::user(), $token);
+
+        if (!$result) {
+            abort(404, 'That report has expired. Ask the assistant to generate it again.');
+        }
+
+        return $result['pdf']->download($result['filename']);
+    }
+
+    /**
+     * Build column definitions for a payload that came back without them
+     * (chart tables, ad-hoc SQL results).
+     *
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array{key: string, label: string}>
+     */
+    private function inferColumns(array $rows): array
+    {
+        if (empty($rows) || !is_array($rows[0] ?? null)) {
+            return [];
+        }
+
+        return array_map(
+            fn (string $key) => ['key' => $key, 'label' => Str::headline($key)],
+            array_keys($rows[0])
+        );
     }
 
     public function messages(AiConversation $conversation)

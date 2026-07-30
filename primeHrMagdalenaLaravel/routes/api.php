@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\MobileTravelOrderController;
 use App\Http\Controllers\Api\MobileTrainingController;
 use App\Http\Controllers\Api\MobileChatbotController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AiAssistantController;
 
 /*
 |--------------------------------------------------------------------------
@@ -99,5 +100,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // HR chatbot (employee-scoped)
         Route::post('/chatbot', [MobileChatbotController::class, 'chat']);
+    });
+
+    // AI Assistant — same AiQueryService the web UI uses, so permissions and
+    // audit logging are identical across both surfaces.
+    Route::prefix('ai')->group(function () {
+        Route::post('/query', [AiAssistantController::class, 'query']);
+        Route::get('/export/{token}', [AiAssistantController::class, 'export']);
+        Route::get('/conversations', [AiAssistantController::class, 'index']);
+        Route::get('/conversations/{conversation}', [AiAssistantController::class, 'show']);
+        Route::delete('/conversations/{conversation}', [AiAssistantController::class, 'destroy']);
     });
 });
