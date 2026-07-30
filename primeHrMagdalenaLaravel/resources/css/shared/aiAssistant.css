@@ -1,16 +1,24 @@
 /* ══ Full-page AI Assistant ══
    Shared by admin, employee and mayor (resources/views/shared/aiAssistant/page.blade.php).
-   Two-pane layout: conversation list (left) + message thread (right). Fills the
-   `.main-content` viewport area exactly (height: 100%, overflow: hidden) so only
-   the conversation list and message thread scroll internally — never the page
-   itself, which would otherwise double-scroll against `.main-content`'s own
-   overflow-y: auto. Uses the shared --gp-* tokens from glassSystem.css so it
-   matches whichever role's page it's dropped into. */
+   Two-pane layout: conversation list (left) + message thread (right). The outer
+   wrapper stacks the role's <x-topbar> banner above the chat panel and fills the
+   `.main-content` viewport area exactly (height: 100%); the chat panel takes the
+   remaining space via flex: 1 (overflow: hidden) so only the conversation list
+   and message thread scroll internally — never the page itself, which would
+   otherwise double-scroll against `.main-content`'s own overflow-y: auto. Uses
+   the shared --gp-* tokens from glassSystem.css so it matches whichever role's
+   page it's dropped into. */
+
+.ai-page-outer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
 
 .ai-page {
     display: flex;
-    height: 100%;
-    min-height: 560px;
+    flex: 1;
+    min-height: 420px;
     overflow: hidden;
     background: var(--gp-glass, #fff);
     border: 1px solid var(--gp-border, #ecebf6);

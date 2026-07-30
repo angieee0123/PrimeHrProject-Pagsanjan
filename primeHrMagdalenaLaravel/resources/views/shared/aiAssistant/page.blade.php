@@ -5,6 +5,9 @@
     $area = $area ?? 'admin';
 @endphp
 
+<div class="ai-page-outer">
+@include($area . '.topbar.aiAssistantTopbar')
+
 <div class="ai-page" id="ai-page"
      data-send-url="{{ route($area . '.ai-assistant.send') }}"
      data-search-url="{{ route($area . '.ai-assistant.search') }}"
@@ -47,4 +50,5 @@
             </button>
         </form>
     </section>
+</div>
 </div>
