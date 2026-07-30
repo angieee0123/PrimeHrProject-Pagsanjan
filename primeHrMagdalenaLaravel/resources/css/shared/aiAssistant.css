@@ -351,3 +351,156 @@
     .ai-page-sidebar.open { transform: translateX(0); }
     .ai-msg { max-width: 88%; }
 }
+
+/* ══ Generated UI inside assistant replies ══
+   The assistant can answer with a rendered table and/or chart, not just prose
+   ("generate a table of employees with 2+ absences"). These live inside the
+   message bubble, so two things matter: the bubble sets `white-space: pre-wrap`
+   for chat text and that has to be reset here, and wide content must scroll
+   inside its own box rather than pushing the thread sideways. */
+
+/* A reply carrying generated UI needs more room than a sentence does. */
+.ai-msg.assistant:has(.ai-table-wrap),
+.ai-msg.assistant:has(.ai-chart) {
+    max-width: 94%;
+}
+
+.ai-table-wrap,
+.ai-chart {
+    white-space: normal;
+    margin: 10px 0 2px;
+}
+
+.ai-table-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--gp-text-soft, #8f8daf);
+    margin-bottom: 6px;
+}
+
+/* The table's own scroll container: wide result sets stay inside the bubble. */
+.ai-table-scroll {
+    overflow-x: auto;
+    max-height: 420px;
+    overflow-y: auto;
+    border: 1px solid var(--gp-line, #e3e1f0);
+    border-radius: 10px;
+    background: var(--gp-surface, #fff);
+}
+
+.ai-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.ai-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--gp-pri, #0b044d);
+    color: #fff;
+    text-align: left;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 7px 10px;
+    white-space: nowrap;
+}
+
+/* Cells do not wrap: a name broken across two lines ("Juan Dela / Cruz") is
+   harder to scan than a column you scroll to. The scroll container above
+   handles the overflow. */
+.ai-table tbody td {
+    padding: 6px 10px;
+    border-top: 1px solid var(--gp-line, #e3e1f0);
+    color: var(--gp-ink, #1E2247);
+    vertical-align: middle;
+    white-space: nowrap;
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ai-table tbody tr:nth-child(even) td {
+    background: var(--gp-bg-tint, #f8f7fd);
+}
+
+/* Numbers align right and share a common digit width so columns scan cleanly. */
+.ai-table .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.ai-row-hidden { display: none; }
+.ai-table-wrap.expanded .ai-row-hidden { display: table-row; }
+
+.ai-table-toggle {
+    margin-top: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gp-pri, #0b044d);
+    background: transparent;
+    border: 1px solid var(--gp-line, #e3e1f0);
+    border-radius: 999px;
+    cursor: pointer;
+}
+.ai-table-toggle:hover {
+    background: var(--gp-bg-tint, #f8f7fd);
+}
+
+.ai-table-totals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+.ai-table-totals span {
+    padding: 3px 9px;
+    font-size: 11px;
+    border-radius: 999px;
+    background: var(--gp-surface, #fff);
+    border: 1px solid var(--gp-line, #e3e1f0);
+    color: var(--gp-ink, #1E2247);
+}
+.ai-table-totals em {
+    font-style: normal;
+    color: var(--gp-text-soft, #8f8daf);
+}
+
+.ai-chart {
+    padding: 10px;
+    border: 1px solid var(--gp-line, #e3e1f0);
+    border-radius: 10px;
+    background: var(--gp-surface, #fff);
+    overflow-x: auto;
+}
+.ai-chart svg { display: block; }
+
+.ai-export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 6px 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-decoration: none;
+    color: #fff;
+    background: var(--gp-pri, #0b044d);
+    border-radius: 999px;
+}
+.ai-export-btn:hover { opacity: .9; }
+
+@media (max-width: 860px) {
+    .ai-msg.assistant:has(.ai-table-wrap),
+    .ai-msg.assistant:has(.ai-chart) {
+        max-width: 100%;
+    }
+    .ai-table { font-size: 11px; }
+}

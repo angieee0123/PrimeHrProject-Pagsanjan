@@ -8,6 +8,7 @@
     const sendUrl = page.dataset.sendUrl;
     const searchUrl = page.dataset.searchUrl;
     const conversationsUrl = page.dataset.conversationsUrl;
+    const exportUrl = page.dataset.exportUrl;
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
     const listEl = document.getElementById('ai-conversations-list');
@@ -120,7 +121,7 @@
         messagesEl.appendChild(welcomeEl);
     }
 
-    function appendMessage(role, content, timestamp) {
+    function appendMessage(role, content, timestamp, attachments) {
         if (welcomeEl.parentNode === messagesEl) messagesEl.removeChild(welcomeEl);
 
         const wrap = document.createElement('div');
@@ -137,6 +138,24 @@
         bubble.className = 'ai-msg-bubble';
         bubble.innerHTML = escapeHtml(content).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
 
+        // Charts, then the table, then the export button — the assistant's
+        // prose summarises, and these carry the detail.
+        if (attachments) {
+            if (attachments.chart_svg) {
+                attachments.chart_svg.forEach(function (svg) {
+                    bubble.appendChild(buildChart(svg));
+                });
+            }
+
+            if (attachments.table && attachments.data && attachments.data.length) {
+                bubble.appendChild(buildTable(attachments.table, attachments.data));
+            }
+
+            if (attachments.export_token && exportUrl) {
+                bubble.appendChild(buildExportButton(attachments.export_token));
+            }
+        }
+
         const ts = document.createElement('span');
         ts.className = 'ai-msg-ts';
         ts.textContent = timestamp || new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -145,6 +164,117 @@
         wrap.appendChild(bubble);
         messagesEl.appendChild(wrap);
         messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    /** Chart SVG is generated server-side, so it renders identically in a PDF. */
+    function buildChart(svg) {
+        const holder = document.createElement('div');
+        holder.className = 'ai-chart';
+        holder.innerHTML = svg;
+        return holder;
+    }
+
+    function buildExportButton(token) {
+        const link = document.createElement('a');
+        link.className = 'ai-export-btn';
+        link.href = exportUrl.replace('__TOKEN__', encodeURIComponent(token));
+        link.setAttribute('download', '');
+        link.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Download PDF</span>';
+        return link;
+    }
+
+    /**
+     * Renders rows as a real table. Long result sets collapse to the first
+     * 25 rows behind a "show all" toggle so one query cannot flood the thread.
+     */
+    function buildTable(spec, rows) {
+        const COLLAPSE_AT = 25;
+
+        const holder = document.createElement('div');
+        holder.className = 'ai-table-wrap';
+
+        if (spec.title) {
+            const cap = document.createElement('div');
+            cap.className = 'ai-table-title';
+            cap.textContent = spec.title;
+            holder.appendChild(cap);
+        }
+
+        const scroller = document.createElement('div');
+        scroller.className = 'ai-table-scroll';
+
+        const table = document.createElement('table');
+        table.className = 'ai-table';
+
+        const columns = (spec.columns && spec.columns.length)
+            ? spec.columns
+            : Object.keys(rows[0]).map(function (k) { return { key: k, label: k }; });
+
+        const thead = document.createElement('thead');
+        const headRow = document.createElement('tr');
+        columns.forEach(function (col) {
+            const th = document.createElement('th');
+            th.textContent = col.label || col.key;
+            if (col.align === 'right') th.className = 'num';
+            headRow.appendChild(th);
+        });
+        thead.appendChild(headRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        rows.forEach(function (row, index) {
+            const tr = document.createElement('tr');
+            if (index >= COLLAPSE_AT) tr.className = 'ai-row-hidden';
+
+            columns.forEach(function (col) {
+                const td = document.createElement('td');
+                const value = row[col.key];
+                td.textContent = formatCell(value, col.format);
+                if (col.align === 'right') td.className = 'num';
+                tr.appendChild(td);
+            });
+
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        scroller.appendChild(table);
+        holder.appendChild(scroller);
+
+        if (rows.length > COLLAPSE_AT) {
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'ai-table-toggle';
+            toggle.textContent = 'Show all ' + rows.length + ' rows';
+            toggle.addEventListener('click', function () {
+                const expanded = holder.classList.toggle('expanded');
+                toggle.textContent = expanded
+                    ? 'Show fewer rows'
+                    : 'Show all ' + rows.length + ' rows';
+            });
+            holder.appendChild(toggle);
+        }
+
+        if (spec.totals && Object.keys(spec.totals).length) {
+            const foot = document.createElement('div');
+            foot.className = 'ai-table-totals';
+            Object.keys(spec.totals).forEach(function (label) {
+                const chip = document.createElement('span');
+                chip.innerHTML = '<em>' + escapeHtml(label) + '</em> ' + escapeHtml(String(spec.totals[label]));
+                foot.appendChild(chip);
+            });
+            holder.appendChild(foot);
+        }
+
+        return holder;
+    }
+
+    function formatCell(value, format) {
+        if (value === null || value === undefined || value === '') return '—';
+        if (format === 'money' && !isNaN(value)) {
+            return Number(value).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+        return String(value);
     }
 
     function showTyping() {
@@ -225,7 +355,12 @@
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 removeTyping();
-                appendMessage('assistant', data.response || "Sorry, I couldn't process that.");
+                appendMessage('assistant', data.response || "Sorry, I couldn't process that.", null, {
+                    table: data.table,
+                    data: data.data,
+                    chart_svg: data.chart_svg,
+                    export_token: data.export_token,
+                });
 
                 const isNewConversation = activeConversationId === null;
                 activeConversationId = data.conversation_id;

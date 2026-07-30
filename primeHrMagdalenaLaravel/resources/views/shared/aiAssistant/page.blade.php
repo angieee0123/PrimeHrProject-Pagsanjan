@@ -12,6 +12,7 @@
      data-send-url="{{ route($area . '.ai-assistant.send') }}"
      data-search-url="{{ route($area . '.ai-assistant.search') }}"
      data-conversations-url="{{ url($area . '/ai-assistant/conversations') }}"
+    data-export-url="{{ route($area . '.ai-assistant.export', ['token' => '__TOKEN__']) }}"
      data-initial-conversations='@json($conversations->map(fn ($c) => ["id" => $c->id, "title" => $c->title, "updated_at" => optional($c->updated_at)->toIso8601String()])->values())'>
 
     <button type="button" class="ai-page-mobile-list-toggle" id="ai-mobile-list-toggle" aria-label="Toggle conversation list">

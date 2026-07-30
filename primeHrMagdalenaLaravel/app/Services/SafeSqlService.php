@@ -28,6 +28,9 @@ class SafeSqlService
 {
     private const MAX_ROWS = 200;
 
+    /** Generation attempts before giving up, including the first try. */
+    private const MAX_ATTEMPTS = 3;
+
     /**
      * Tables the assistant may read. Anything not listed is rejected even if
      * the model invents a plausible join.
@@ -102,49 +105,68 @@ class SafeSqlService
             ];
         }
 
-        $sql = $this->generateSql($user, $question, $history);
+        // Text-to-SQL is not reliable in one shot: the model regularly emits a
+        // statement that violates ONLY_FULL_GROUP_BY, references a column that
+        // does not exist, or returns nothing at all. Feeding the failure back
+        // and asking for a correction turns most of those into a good answer,
+        // so the query is attempted up to MAX_ATTEMPTS times.
+        $sql = null;
+        $lastError = null;
+        $rows = null;
 
-        if (!$sql) {
-            return [
-                'answer' => 'I could not turn that into a database query. Try naming the records you want '
-                    . '— for example "employees appointed after 2023" or "approved leave in June".',
-                'data' => [],
-            ];
+        for ($attempt = 1; $attempt <= self::MAX_ATTEMPTS; $attempt++) {
+            $sql = $this->generateSql($user, $question, $history, $sql, $lastError);
+
+            if (!$sql) {
+                $lastError = 'No statement was produced.';
+                continue;
+            }
+
+            $verdict = $this->validate($sql);
+
+            if (!$verdict['safe']) {
+                Log::channel('ai_audit')->warning('AI SQL rejected', [
+                    'user_id' => $user->id,
+                    'reason' => $verdict['reason'],
+                    'sql' => $sql,
+                ]);
+
+                // A rejected statement is a safety decision, not a bug to
+                // iterate on — stop rather than coaching around the guard.
+                return [
+                    'answer' => "I generated a query for that, but blocked it before it ran: {$verdict['reason']}. "
+                        . 'The assistant is read-only by design.',
+                    'data' => [],
+                    'blocked' => true,
+                ];
+            }
+
+            try {
+                $rows = array_map(
+                    fn ($row) => (array) $row,
+                    DB::select($this->enforceRowCap($sql))
+                );
+                $lastError = null;
+                break;
+            } catch (\Throwable $e) {
+                $lastError = $this->summariseDbError($e->getMessage());
+                $rows = null;
+
+                Log::channel('ai_audit')->warning('AI SQL attempt failed', [
+                    'user_id' => $user->id,
+                    'attempt' => $attempt,
+                    'sql' => $sql,
+                    'error' => $lastError,
+                ]);
+            }
         }
 
-        $verdict = $this->validate($sql);
-
-        if (!$verdict['safe']) {
-            Log::channel('ai_audit')->warning('AI SQL rejected', [
-                'user_id' => $user->id,
-                'reason' => $verdict['reason'],
-                'sql' => $sql,
-            ]);
-
+        if ($rows === null) {
             return [
-                'answer' => "I generated a query for that, but blocked it before it ran: {$verdict['reason']}. "
-                    . 'The assistant is read-only by design.',
+                'answer' => 'I could not build a working query for that. Try naming the records more directly '
+                    . '— for example "employees with 2 or more absences this year".',
                 'data' => [],
-                'blocked' => true,
-            ];
-        }
-
-        try {
-            $rows = array_map(
-                fn ($row) => (array) $row,
-                DB::select($this->enforceRowCap($sql))
-            );
-        } catch (\Throwable $e) {
-            Log::channel('ai_audit')->error('AI SQL execution failed', [
-                'user_id' => $user->id,
-                'sql' => $sql,
-                'error' => $e->getMessage(),
-            ]);
-
-            return [
-                'answer' => 'That query failed against the database. Try rephrasing the question.',
-                'data' => [],
-                'error' => $e->getMessage(),
+                'error' => $lastError ?? 'no statement produced',
             ];
         }
 
@@ -159,9 +181,14 @@ class SafeSqlService
     /**
      * @param array<int, array{role: string, content: string}> $history
      */
-    private function generateSql(User $user, string $question, array $history): ?string
-    {
-        $schema = $this->describeSchema();
+    private function generateSql(
+        User $user,
+        string $question,
+        array $history,
+        ?string $previousSql = null,
+        ?string $previousError = null,
+    ): ?string {
+        $schema = $this->describeSchema($question);
         $today = now()->toDateString();
 
         $system = <<<PROMPT
@@ -178,27 +205,67 @@ RULES — a violation means the query is discarded:
    personal_access_tokens, sessions, or information_schema.
 4. Always include a LIMIT of at most 200.
 5. Prefer explicit JOINs and select named columns rather than SELECT *.
-6. Employees link to departments through employment_details.department_id, and
+6. This server runs with ONLY_FULL_GROUP_BY. Every selected column must either
+   appear in GROUP BY or be wrapped in an aggregate (COUNT, SUM, MAX…). When
+   aggregating, do NOT also select per-row columns such as a date.
+7. Give every aggregate a readable alias, e.g. COUNT(*) AS total_absences.
+
+DOMAIN RULES — these matter more than they look:
+8. Employees link to departments through employment_details.department_id, and
    to job titles through employment_details.designation_id.
-7. leave_applications.status is one of: pending, approved, rejected, cancelled.
-8. attendance uses the column `date`, not `attendance_date`.
+9. An ABSENCE is `attendance.attendance_type = 'ABSENT'` and nothing else.
+   Never infer absence from accredited_hours or total_hours — those are NULL
+   until payroll computes the day, and counting NULL as absent reports almost
+   every employee as absent.
+10. attendance uses the column `date`, not `attendance_date`.
+11. leave_applications.status is one of: pending, approved, rejected, cancelled
+    (lowercase). Its dates are start_date and end_date.
 
 Example:
-Question: employees hired in 2024
-SELECT e.employee_id, e.first_name, e.last_name, d.name AS department, ed.appointment_date
+Question: employees with 2 or more absences
+SELECT e.employee_id, e.first_name, e.last_name, COUNT(*) AS total_absences
 FROM employees e
-JOIN employment_details ed ON ed.employee_id = e.id
-LEFT JOIN departments d ON d.id = ed.department_id
-WHERE YEAR(ed.appointment_date) = 2024
+JOIN attendance a ON a.employee_id = e.id
+WHERE a.attendance_type = 'ABSENT'
+GROUP BY e.id, e.employee_id, e.first_name, e.last_name
+HAVING COUNT(*) >= 2
+ORDER BY total_absences DESC
 LIMIT 200
 PROMPT;
 
         $messages = $history;
-        $messages[] = ['role' => 'user', 'content' => $question];
 
-        $raw = AiChatService::chat($user, $system, $messages, 0.1, 600);
+        if ($previousSql !== null && $previousError !== null) {
+            // Hand back the exact statement and the database's complaint; the
+            // model corrects far more reliably from the real error than from a
+            // restated instruction.
+            $messages[] = ['role' => 'user', 'content' => $question];
+            $messages[] = ['role' => 'assistant', 'content' => $previousSql];
+            $messages[] = [
+                'role' => 'user',
+                'content' => "That statement failed with:\n{$previousError}\n\n"
+                    . 'Return a corrected single SELECT statement. Output only the SQL.',
+            ];
+        } else {
+            $messages[] = ['role' => 'user', 'content' => $question];
+        }
+
+        $raw = AiChatService::chat($user, $system, $messages, 0.0, 600);
 
         return $raw ? $this->extractSql($raw) : null;
+    }
+
+    /**
+     * MySQL errors arrive wrapped in the full PDO message plus the entire
+     * statement. Keep the part that tells the model what to fix.
+     */
+    private function summariseDbError(string $message): string
+    {
+        if (preg_match('/SQLSTATE\[\w+\]:?\s*(.+?)\s*\(Connection:/s', $message, $m)) {
+            return trim($m[1]);
+        }
+
+        return mb_substr($message, 0, 400);
     }
 
     /**
@@ -318,25 +385,140 @@ PROMPT;
     }
 
     /**
-     * Column listing for the allowed tables only, read from the live schema so
-     * it cannot drift from the database.
+     * Which tables a question is likely to need. Sending all 32 allowed tables
+     * with full column types costs ~2,900 tokens per attempt — enough to burn a
+     * daily LLM quota in about ten questions — so the schema is narrowed to the
+     * subject of the question plus the core employee tables everything joins to.
+     *
+     * @var array<string, array<int, string>>
      */
-    private function describeSchema(): string
+    private const TABLE_TOPICS = [
+        // Stems, not whole words: "absen" covers absent/absence/absences.
+        'attend' => ['attendance', 'attendance_corrections', 'attendance_exemptions', 'accredited_hours_log', 'schedules'],
+        'absen' => ['attendance'],
+        'present' => ['attendance'],
+        'late' => ['attendance', 'accredited_hours_log'],
+        'tardi' => ['attendance', 'accredited_hours_log'],
+        'undertime' => ['attendance', 'accredited_hours_log'],
+        'overtime' => ['attendance'],
+        'dtr' => ['attendance'],
+        'schedul' => ['schedules', 'attendance'],
+        'leave' => ['leave_applications', 'leave_balances', 'leave_transactions', 'leave_types_config', 'leave_accrual_rates'],
+        'vacation' => ['leave_applications', 'leave_balances', 'leave_types_config'],
+        'sick' => ['leave_applications', 'leave_balances', 'leave_types_config'],
+        'maternity' => ['leave_applications', 'leave_types_config'],
+        'credit' => ['leave_balances', 'leave_types_config'],
+        'payroll' => ['salary_computations', 'daily_salary_computations', 'employee_deductions', 'deduction_types', 'deduction_schedules'],
+        'salar' => ['salary_computations', 'daily_salary_computations', 'designations'],
+        'payslip' => ['salary_computations'],
+        'net pay' => ['salary_computations'],
+        'gross' => ['salary_computations'],
+        'compensat' => ['salary_computations', 'designations'],
+        'deduct' => ['employee_deductions', 'deduction_types', 'deduction_schedules'],
+        'loan' => ['employee_deductions', 'deduction_types'],
+        'train' => ['trainings'],
+        'seminar' => ['trainings'],
+        'certificat' => ['trainings', 'documents'],
+        'travel' => ['travel_orders'],
+        'document' => ['documents'],
+        'file' => ['documents'],
+        'upload' => ['documents'],
+        'government' => ['government_ids'],
+        'gsis' => ['government_ids'],
+        'philhealth' => ['government_ids'],
+        'pag-ibig' => ['government_ids'],
+        'pagibig' => ['government_ids'],
+        'tin' => ['government_ids'],
+        'educat' => ['educations', 'eligibilities'],
+        'school' => ['educations'],
+        'degree' => ['educations'],
+        'eligib' => ['eligibilities'],
+        'experience' => ['work_experiences'],
+        'famil' => ['family_members'],
+        'address' => ['addresses'],
+        'contact' => ['contacts'],
+        'pass slip' => ['pass_slips'],
+        'passslip' => ['pass_slips'],
+        'request' => ['employee_requests'],
+        'requirement' => ['legal_requirements', 'government_ids'],
+        // People-only questions need nothing beyond the core tables. Listing
+        // them here means such a question counts as "matched" and so does not
+        // trigger the send-everything fallback.
+        'employee' => [],
+        'personnel' => [],
+        'staff' => [],
+        'department' => [],
+        'office' => [],
+        'position' => [],
+        'designation' => [],
+        'hired' => [],
+        'appoint' => [],
+        'headcount' => [],
+        'gender' => [],
+        'male' => [],
+        'female' => [],
+    ];
+
+    /** Always present — nearly every question joins through these. */
+    private const CORE_TABLES = ['employees', 'employment_details', 'departments', 'designations'];
+
+    /**
+     * Condensed column listing, read from the live schema so it cannot drift
+     * from the database. Types are omitted except for enums, whose allowed
+     * values the model genuinely needs in order to write a correct WHERE.
+     */
+    private function describeSchema(string $question = ''): string
     {
         $lines = [];
 
-        foreach (self::ALLOWED_TABLES as $table) {
+        foreach ($this->relevantTables($question) as $table) {
             try {
                 $columns = DB::select("SHOW COLUMNS FROM `{$table}`");
             } catch (\Throwable) {
                 continue; // Table not present in this deployment.
             }
 
-            $cols = implode(', ', array_map(fn ($c) => "{$c->Field} {$c->Type}", $columns));
-            $lines[] = "{$table}: {$cols}";
+            $cols = array_map(function ($column) {
+                return str_starts_with(strtolower($column->Type), 'enum')
+                    ? $column->Field . ' ' . $column->Type
+                    : $column->Field;
+            }, $columns);
+
+            $lines[] = "{$table}(" . implode(', ', $cols) . ')';
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function relevantTables(string $question): array
+    {
+        if ($question === '') {
+            return self::ALLOWED_TABLES;
+        }
+
+        $q = strtolower($question);
+        $tables = self::CORE_TABLES;
+        $matched = false;
+
+        foreach (self::TABLE_TOPICS as $keyword => $topicTables) {
+            if (str_contains($q, $keyword)) {
+                $matched = true;
+                $tables = array_merge($tables, $topicTables);
+            }
+        }
+
+        // Nothing recognisable: the question could be about anything, so send
+        // the full list rather than guessing wrong and omitting the one table
+        // it needed. A narrow-but-incomplete schema produces a broken query;
+        // a wide one only costs tokens.
+        if (!$matched) {
+            return self::ALLOWED_TABLES;
+        }
+
+        return array_values(array_intersect(self::ALLOWED_TABLES, array_unique($tables)));
     }
 
     /**
@@ -353,11 +535,14 @@ PROMPT;
 You are the PRIME HRIS Assistant explaining the result of a database query to
 an HR administrator.
 
-- State what the data shows, in plain language, leading with the headline number.
-- Call out the notable rows and any pattern worth acting on.
+The rows are ALREADY shown to the user as a table directly beneath your reply.
+So summarise them — do not transcribe them.
+
+- Lead with the headline number ("4 employees have 2 or more absences").
+- Add the insight the table does not show: the pattern, the outlier, what to do.
+- Do NOT list each row's field values; that is what the table is for.
 - Every figure you cite must come from the rows given. Never estimate or invent.
-- If the rows were truncated, say the count shown may be partial.
-- Under 180 words. No SQL, no raw JSON.
+- Under 120 words. No SQL, no JSON, no markdown table.
 PROMPT;
 
         $sample = json_encode(array_slice($rows, 0, 25), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);

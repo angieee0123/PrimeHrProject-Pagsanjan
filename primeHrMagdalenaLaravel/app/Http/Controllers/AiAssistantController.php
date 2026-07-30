@@ -106,6 +106,11 @@ class AiAssistantController extends Controller
             $payload['data'] = $result['data'];
         }
 
+        // Column definitions for the table the UI renders under the reply.
+        if (!empty($result['table'])) {
+            $payload['table'] = $result['table'];
+        }
+
         if (!empty($charts)) {
             $payload['charts'] = $charts;
             $payload['chart_svg'] = collect($charts)
@@ -113,10 +118,10 @@ class AiAssistantController extends Controller
                 ->all();
         }
 
-        // A report or chart can be exported; stash it so the download button
-        // has something to exchange.
-        if (!empty($result['report']) || !empty($charts)) {
-            $report = $result['report'] ?? [
+        // Anything with rows or a chart can be exported; stash it so the
+        // download button has something to exchange.
+        if (!empty($result['table']) || !empty($charts)) {
+            $report = $result['report'] ?? $result['table'] ?? [
                 'title' => $charts[0]['title'] ?? 'Chart',
                 'columns' => $this->inferColumns($result['data'] ?? []),
                 'totals' => [],

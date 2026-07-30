@@ -80,6 +80,10 @@ class AiAssistantController extends Controller
             $payload['data'] = $result['data'];
         }
 
+        if (!empty($result['table'])) {
+            $payload['table'] = $result['table'];
+        }
+
         if (!empty($result['charts'])) {
             $payload['charts'] = $result['charts'];
             $payload['chart_svg'] = collect($result['charts'])
@@ -87,11 +91,13 @@ class AiAssistantController extends Controller
                 ->all();
         }
 
-        if (!empty($result['report'])) {
-            $payload['report'] = $result['report'];
+        if (!empty($result['table']) || !empty($result['charts'])) {
+            $report = $result['report'] ?? $result['table'] ?? ['title' => 'Chart', 'columns' => [], 'totals' => []];
+
+            $payload['report'] = $report;
             $payload['export_token'] = $this->pdf->stash(
                 $user,
-                $result['report'],
+                $report,
                 $result['data'] ?? [],
                 $result['charts'] ?? null
             );

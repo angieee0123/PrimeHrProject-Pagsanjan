@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
  * The AI Assistant orchestrator.
@@ -75,9 +76,64 @@ class AiQueryService
             ];
         }
 
+        $result = $this->attachTableSpec($result, $resolved);
+
         $this->audit($user, $intent, $message, 'ok', null, (int) ((microtime(true) - $started) * 1000), $result);
 
         return $result + ['intent' => $intent];
+    }
+
+    /**
+     * Give the UI something to render as a table whenever an answer carries
+     * rows. Report and workflow handlers already describe their own columns;
+     * ad-hoc results (generated SQL, searches) get theirs inferred from the
+     * first row, so "generate a table of…" produces an actual table rather
+     * than a paragraph listing the values.
+     *
+     * @param array<string, mixed> $result
+     * @return array<string, mixed>
+     */
+    private function attachTableSpec(array $result, string $question): array
+    {
+        $rows = $result['data'] ?? null;
+
+        if (!is_array($rows) || empty($rows) || !is_array($rows[0] ?? null)) {
+            return $result;
+        }
+
+        if (!empty($result['report']['columns'])) {
+            $result['table'] = $result['report'];
+
+            return $result;
+        }
+
+        $result['table'] = [
+            'key' => 'result',
+            'title' => $this->titleFor($question),
+            'columns' => array_map(
+                fn (string $key) => [
+                    'key' => $key,
+                    'label' => Str::headline($key),
+                    'align' => is_numeric($rows[0][$key] ?? null) ? 'right' : 'left',
+                ],
+                array_keys($rows[0])
+            ),
+            'totals' => ['Rows' => count($rows)],
+            'row_count' => count($rows),
+        ];
+
+        return $result;
+    }
+
+    /**
+     * A short heading for an ad-hoc result, derived from the question itself.
+     */
+    private function titleFor(string $question): string
+    {
+        $title = trim(preg_replace('/^\s*(please\s+)?(can\s+you\s+)?(generate|create|show|give|list|make|build|produce)\s+(me\s+)?(a\s+|an\s+|the\s+)?(table|list|report)?\s*(of|for|with)?\s*/i', '', $question) ?? $question);
+        $title = rtrim($title, " ?.");
+
+        return $title === '' ? 'Results' : Str::ucfirst($title);
     }
 
     /**
@@ -132,6 +188,10 @@ class AiQueryService
             (bool) preg_match('/\b(graph|chart|plot|visuali[sz]e|pie|bar\s+chart|line\s+chart|trend\s+(?:graph|chart))\b/', $q) => 'chart',
             (bool) preg_match('/\b(generate|create|prepare|produce|export|download|draft)\b.*\b(report|summary|payslip|letter|certificate|checklist|preview)\b/', $q) => $this->reportOrWorkflow($q),
             (bool) preg_match('/\b(report)\b/', $q) => 'report',
+            // "table"/"list of" asks for tabular output over arbitrary criteria,
+            // which is the generated-SQL path — the table itself is attached to
+            // every row-bearing answer downstream.
+            (bool) preg_match('/\b(table|tabulate|spreadsheet|list\s+(?:of|all|the)|breakdown\s+of)\b/', $q) => 'data_query',
             (bool) preg_match('/\b(draft|write|compose)\b.*\b(letter|memo|notice|email)\b|\bonboarding\b|\bapproval\s+summary\b/', $q) => 'workflow',
             (bool) preg_match('/\b(file|files|document|documents|upload(?:ed)?|attachment|scan(?:ned)?|pdf|docx?|contract|certificate|photo|picture|image|id\s*card|passport|licen[sc]e)\b/', $q) => 'document_search',
             (bool) preg_match('/\b(how many|how much|count|total|number of|who has|which department|pending|missing|expir\w+|overview|dashboard)\b/', $q) => 'dashboard',

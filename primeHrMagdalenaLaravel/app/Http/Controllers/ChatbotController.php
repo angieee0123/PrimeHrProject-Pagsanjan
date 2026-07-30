@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Services\HrChatbotAnswerer;
+use App\Services\AiQueryService;
 
 class ChatbotController extends Controller
 {
@@ -14,7 +14,13 @@ class ChatbotController extends Controller
     /** Messages to keep (user + assistant combined) — bounds session size and prompt length. */
     private const MAX_HISTORY_MESSAGES = 12;
 
-    public function __construct(private HrChatbotAnswerer $answerer)
+    /**
+     * The floating widget goes through the same assistant as the full page.
+     * It previously called HrChatbotAnswerer directly, which generates SQL
+     * without the domain rules — that is what produced answers like counting
+     * an employee with one absence as having ten.
+     */
+    public function __construct(private AiQueryService $assistant)
     {
     }
 
@@ -35,10 +41,20 @@ class ChatbotController extends Controller
 
         $history = $request->session()->get(self::HISTORY_KEY, []);
 
-        $response = $this->answerer->answer(Auth::user(), $message, $history);
+        $result = $this->assistant->ask(Auth::user(), $message, $history);
+        $response = $result['answer'];
+
         $this->rememberTurn($request, $history, $message, $response);
 
-        return response()->json(['response' => $response, 'status' => 'success']);
+        // The widget renders prose only, but it still ships the rows so a
+        // caller that can draw a table has them without a second round-trip.
+        return response()->json(array_filter([
+            'response' => $response,
+            'intent' => $result['intent'] ?? null,
+            'table' => $result['table'] ?? null,
+            'data' => $result['data'] ?? null,
+            'status' => 'success',
+        ], fn ($value) => $value !== null));
     }
 
     /**
