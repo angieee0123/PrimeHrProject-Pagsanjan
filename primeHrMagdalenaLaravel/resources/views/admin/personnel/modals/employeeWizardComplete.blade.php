@@ -367,30 +367,31 @@
             <!-- STEP 5: Government IDs -->
             <div class="wizard-content" data-step="5" style="display:none;">
                 <h4 class="wizard-section-title">🪪 Government IDs</h4>
-                <div class="wizard-grid-2">
-                    <div>
-                        <label class="wizard-label-text">GSIS Number</label>
-                        <input type="text" name="gsis_no" placeholder="GSIS ID" maxlength="255" class="wizard-input">
+                <p class="wizard-hint" style="margin-bottom:20px;">Upload a scanned copy or photo of each ID (PDF, JPG, or PNG, max 5MB). The number is read automatically from the scan — please verify it, or type it in by hand if the auto-read doesn't find it.</p>
+
+                @foreach ([
+                    ['key' => 'gsis', 'label' => 'GSIS', 'placeholder' => 'GSIS ID'],
+                    ['key' => 'philhealth', 'label' => 'PhilHealth', 'placeholder' => 'PhilHealth ID'],
+                    ['key' => 'pagibig', 'label' => 'PAG-IBIG', 'placeholder' => 'PAG-IBIG ID'],
+                    ['key' => 'tin', 'label' => 'TIN', 'placeholder' => 'Tax ID'],
+                    ['key' => 'license', 'label' => 'Professional License', 'placeholder' => 'License No.'],
+                ] as $gov)
+                    <div class="wizard-govid-group" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f0effe;">
+                        <div class="wizard-grid-2">
+                            <div>
+                                <label class="wizard-label-text">{{ $gov['label'] }} — Scanned ID (Upload)</label>
+                                <input type="file" name="{{ $gov['key'] }}_file" accept="application/pdf,image/png,image/jpeg" class="wizard-input govid-file-input" data-id-type="{{ $gov['key'] }}" data-target="{{ $gov['key'] }}_no">
+                                <p class="wizard-hint">PDF, JPG, or PNG (Max 5MB)</p>
+                            </div>
+                            <div>
+                                <label class="wizard-label-text">{{ $gov['label'] }} Number</label>
+                                <input type="text" name="{{ $gov['key'] }}_no" placeholder="{{ $gov['placeholder'] }}" maxlength="255" class="wizard-input">
+                                <p class="wizard-hint govid-ocr-status" data-status-for="{{ $gov['key'] }}"></p>
+                            </div>
+                        </div>
+                        <div class="wizard-govid-current" data-current-for="{{ $gov['key'] }}" style="display:none;"></div>
                     </div>
-                    <div>
-                        <label class="wizard-label-text">PhilHealth Number</label>
-                        <input type="text" name="philhealth_no" placeholder="PhilHealth ID" maxlength="255" class="wizard-input">
-                    </div>
-                </div>
-                <div class="wizard-grid-2">
-                    <div>
-                        <label class="wizard-label-text">PAG-IBIG Number</label>
-                        <input type="text" name="pagibig_no" placeholder="PAG-IBIG ID" maxlength="255" class="wizard-input">
-                    </div>
-                    <div>
-                        <label class="wizard-label-text">TIN Number</label>
-                        <input type="text" name="tin_no" placeholder="Tax ID" maxlength="255" class="wizard-input">
-                    </div>
-                </div>
-                <div>
-                    <label class="wizard-label-text">License Number</label>
-                    <input type="text" name="license_no" placeholder="Professional License" maxlength="255" class="wizard-input">
-                </div>
+                @endforeach
             </div>
 
             <!-- STEP 6: Review -->

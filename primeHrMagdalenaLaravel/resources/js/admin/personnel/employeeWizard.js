@@ -164,6 +164,8 @@ function openFreshEmployeeWizard() {
     const usernameField = document.querySelector('#employeeWizardForm [name="username"]');
     if (usernameField) delete usernameField.dataset.userEdited;
     if (window.resetWizardFieldValidation) window.resetWizardFieldValidation();
+    if (window.clearGovIdCurrentFiles) window.clearGovIdCurrentFiles();
+    clearGovIdOcrStatuses();
     resetWizardPasswordVisibility();
 }
 
@@ -360,17 +362,83 @@ function generateReview() {
         reviewRow([['Residential Address', address]]),
     ]);
 
+    const govIdFileName = function(name) {
+        const f = formData.get(name);
+        return (f && f.name) ? f.name : '';
+    };
+
     html += reviewSection('🪪 Government IDs', [
-        reviewRow([['GSIS Number', get('gsis_no')], ['PhilHealth Number', get('philhealth_no')]]),
-        reviewRow([['PAG-IBIG Number', get('pagibig_no')], ['TIN Number', get('tin_no')]]),
-        reviewRow([['License Number', get('license_no')]]),
+        reviewRow([['GSIS Number', get('gsis_no')], ['GSIS Scan', govIdFileName('gsis_file')]]),
+        reviewRow([['PhilHealth Number', get('philhealth_no')], ['PhilHealth Scan', govIdFileName('philhealth_file')]]),
+        reviewRow([['PAG-IBIG Number', get('pagibig_no')], ['PAG-IBIG Scan', govIdFileName('pagibig_file')]]),
+        reviewRow([['TIN Number', get('tin_no')], ['TIN Scan', govIdFileName('tin_file')]]),
+        reviewRow([['License Number', get('license_no')], ['License Scan', govIdFileName('license_file')]]),
     ]);
 
     document.getElementById('wizardReviewContent').innerHTML = html;
 }
 
+// ── Government ID scan upload -> OCR auto-fill (Step 5) ──
+// Best-effort only: a misread or an unsupported scan just leaves the number
+// field for the admin to type by hand, which is why the request never blocks
+// the wizard and every failure path still leaves the field editable.
+function govIdStatusEl(idType) {
+    return document.querySelector('.govid-ocr-status[data-status-for="' + idType + '"]');
+}
+
+function setGovIdStatus(idType, message, tone) {
+    const el = govIdStatusEl(idType);
+    if (!el) return;
+    el.textContent = message;
+    el.style.color = tone === 'error' ? '#8e1e18' : (tone === 'success' ? '#15803d' : '#56547a');
+}
+
+function clearGovIdOcrStatuses() {
+    document.querySelectorAll('.govid-ocr-status').forEach(function(el) {
+        el.textContent = '';
+        el.style.color = '';
+    });
+}
+
+function wireGovIdOcrUploads() {
+    document.querySelectorAll('.govid-file-input').forEach(function(input) {
+        input.addEventListener('change', function() {
+            const idType = input.dataset.idType;
+            const targetField = document.querySelector('#employeeWizardForm [name="' + input.dataset.target + '"]');
+            const file = input.files[0];
+            if (!file || !idType) return;
+
+            setGovIdStatus(idType, 'Reading ID scan…');
+
+            const ocrData = new FormData();
+            ocrData.append('file', file);
+            ocrData.append('id_type', idType);
+            const tokenField = document.querySelector('#employeeWizardForm [name="_token"]');
+
+            fetch('/admin/personnel/government-ids/extract', {
+                method: 'POST',
+                headers: tokenField ? { 'X-CSRF-TOKEN': tokenField.value } : {},
+                body: ocrData,
+            })
+                .then(function(r) { return r.json(); })
+                .then(function(result) {
+                    if (result.number && targetField) {
+                        targetField.value = result.number;
+                        setGovIdStatus(idType, result.message || 'Auto-filled from scan — please verify.', 'success');
+                    } else {
+                        setGovIdStatus(idType, result.message || 'Could not read the number automatically — please type it in.', 'error');
+                    }
+                })
+                .catch(function() {
+                    setGovIdStatus(idType, 'Could not read the scan automatically — please type the number in.', 'error');
+                });
+        });
+    });
+}
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    wireGovIdOcrUploads();
     // Keyboard access for the clickable header steps (Enter / Space).
     document.querySelectorAll('#progressBar .wizard-step').forEach(function(stepEl) {
         stepEl.addEventListener('keydown', function(e) {

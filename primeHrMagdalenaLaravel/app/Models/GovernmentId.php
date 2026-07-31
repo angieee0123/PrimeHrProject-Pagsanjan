@@ -9,8 +9,11 @@ class GovernmentId extends Model
     public $timestamps = false;
     
     protected $fillable = [
-        'employee_id', 'gsis_no', 'philhealth_no',
-        'pagibig_no', 'tin_no', 'license_no'
+        'employee_id', 'gsis_no', 'gsis_file_path',
+        'philhealth_no', 'philhealth_file_path',
+        'pagibig_no', 'pagibig_file_path',
+        'tin_no', 'tin_file_path',
+        'license_no', 'license_file_path',
     ];
 
     public function employee()

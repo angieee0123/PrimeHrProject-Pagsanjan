@@ -108,6 +108,9 @@ function editEmployee(id) {
             setVal('pagibig_no',    gov.pagibig_no);
             setVal('tin_no',        gov.tin_no);
             setVal('license_no',    gov.license_no);
+            ['gsis', 'philhealth', 'pagibig', 'tin', 'license'].forEach(function(key) {
+                showGovIdCurrentFile(key, gov[key + '_file_path']);
+            });
         });
 }
 
@@ -115,6 +118,40 @@ function setVal(name, value) {
     const el = document.querySelector(`[name="${name}"]`);
     if (el) el.value = value || '';
 }
+
+// A file input can't be pre-populated with an existing upload (browsers block
+// it), so edit mode shows a "current file" link next to it instead — built
+// with DOM methods rather than innerHTML since the path embeds the admin's
+// original filename verbatim.
+function showGovIdCurrentFile(idType, path) {
+    const el = document.querySelector('.wizard-govid-current[data-current-for="' + idType + '"]');
+    if (!el) return;
+    el.innerHTML = '';
+    if (!path) {
+        el.style.display = 'none';
+        return;
+    }
+    el.style.display = 'block';
+    const p = document.createElement('p');
+    p.className = 'wizard-hint';
+    p.appendChild(document.createTextNode('Current file: '));
+    const a = document.createElement('a');
+    a.href = path;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = 'View uploaded scan';
+    p.appendChild(a);
+    p.appendChild(document.createTextNode(' — choose a new file above to replace it.'));
+    el.appendChild(p);
+}
+
+function clearGovIdCurrentFiles() {
+    document.querySelectorAll('.wizard-govid-current').forEach(function(el) {
+        el.innerHTML = '';
+        el.style.display = 'none';
+    });
+}
+window.clearGovIdCurrentFiles = clearGovIdCurrentFiles;
 
 function submitWizardUpdate() {
     document.getElementById('employeeWizardForm').submit();

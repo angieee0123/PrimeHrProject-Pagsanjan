@@ -35,6 +35,11 @@ class EmployeeRegistrationController extends Controller
                 'designation_id' => ['required', 'exists:designations,id'],
                 'employment_status' => ['required', 'in:Permanent,Temporary,Coterminous,Casual,Contractual,Job Order'],
                 'appointment_date' => ['required', 'date'],
+                'gsis_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+                'philhealth_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+                'pagibig_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+                'tin_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+                'license_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->with('error', collect($e->errors())->flatten()->first())->withInput();
@@ -124,10 +129,15 @@ class EmployeeRegistrationController extends Controller
             GovernmentId::create([
                 'employee_id' => $employee->id,
                 'gsis_no' => $request->gsis_no,
+                'gsis_file_path' => $this->handleFileUpload($request->file('gsis_file'), 'employees/government_ids'),
                 'philhealth_no' => $request->philhealth_no,
+                'philhealth_file_path' => $this->handleFileUpload($request->file('philhealth_file'), 'employees/government_ids'),
                 'pagibig_no' => $request->pagibig_no,
+                'pagibig_file_path' => $this->handleFileUpload($request->file('pagibig_file'), 'employees/government_ids'),
                 'tin_no' => $request->tin_no,
+                'tin_file_path' => $this->handleFileUpload($request->file('tin_file'), 'employees/government_ids'),
                 'license_no' => $request->license_no,
+                'license_file_path' => $this->handleFileUpload($request->file('license_file'), 'employees/government_ids'),
             ]);
 
             DB::commit();
@@ -142,7 +152,7 @@ class EmployeeRegistrationController extends Controller
         }
     }
 
-    private function handleFileUpload($file)
+    private function handleFileUpload($file, string $folder = 'employees/photos')
     {
         if (!$file) {
             return null;
@@ -150,7 +160,7 @@ class EmployeeRegistrationController extends Controller
 
         try {
             $filename = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('employees/photos', $filename, 'public');
+            $path = $file->storeAs($folder, $filename, 'public');
             return '/storage/' . $path;
         } catch (\Exception $e) {
             return null;

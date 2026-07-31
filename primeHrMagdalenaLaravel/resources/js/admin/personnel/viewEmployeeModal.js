@@ -38,6 +38,19 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function escapeViewAttr(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+}
+
+// Government ID paths embed the admin's original uploaded filename, so the
+// href is escaped before going into the template literal below.
+function govIdScanLink(path) {
+    if (!path) return '';
+    return ` <a href="${escapeViewAttr(path)}" target="_blank" rel="noopener" style="font-size:11px;color:#150c63;font-weight:600;margin-left:8px;">View Scan</a>`;
+}
+
 function generateEmployeeView(data) {
     return `
         <div style="margin-bottom:24px;">
@@ -82,11 +95,11 @@ function generateEmployeeView(data) {
             <div>
                 <h4 style="font-size:14px; font-weight:700; color:#0b044d; margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid #f0effe;">🪪 Government IDs</h4>
                 <div style="display:flex; flex-direction:column; gap:12px;">
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">GSIS Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.gsis_no || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">PhilHealth Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.philhealth_no || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">PAG-IBIG Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.pagibig_no || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">TIN Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.tin_no || 'N/A'}</span></div>
-                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">License Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.license_no || 'N/A'}</span></div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">GSIS Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.gsis_no || 'N/A'}</span>${govIdScanLink(data.government_ids?.[0]?.gsis_file_path)}</div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">PhilHealth Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.philhealth_no || 'N/A'}</span>${govIdScanLink(data.government_ids?.[0]?.philhealth_file_path)}</div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">PAG-IBIG Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.pagibig_no || 'N/A'}</span>${govIdScanLink(data.government_ids?.[0]?.pagibig_file_path)}</div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">TIN Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.tin_no || 'N/A'}</span>${govIdScanLink(data.government_ids?.[0]?.tin_file_path)}</div>
+                    <div><span style="font-size:11px; color:#9999bb; display:block; margin-bottom:4px;">License Number</span><span style="font-size:13px; font-weight:600; color:#0b044d;">${data.government_ids?.[0]?.license_no || 'N/A'}</span>${govIdScanLink(data.government_ids?.[0]?.license_file_path)}</div>
                 </div>
             </div>
         </div>

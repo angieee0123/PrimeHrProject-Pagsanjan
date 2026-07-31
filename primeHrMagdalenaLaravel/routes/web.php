@@ -151,6 +151,7 @@ Route::get('/admin/personnel', function () {
 
 Route::post('/admin/personnel', [EmployeeRegistrationController::class, 'store'])->middleware('auth')->name('admin.personnel.store');
 Route::post('/admin/personnel/bulk-import', [EmployeeRegistrationController::class, 'bulkImport'])->middleware('auth')->name('admin.personnel.bulk-import');
+Route::post('/admin/personnel/government-ids/extract', [\App\Http\Controllers\GovernmentIdOcrController::class, 'extract'])->middleware('auth')->name('admin.personnel.government-ids.extract');
 
 // Schedule Routes
 Route::post('/admin/schedules/assign', [\App\Http\Controllers\ScheduleController::class, 'assign'])->middleware('auth')->name('admin.schedules.assign');
@@ -259,16 +260,24 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
         ]);
     }
 
-    $govId = $employee->governmentIds->first();
-    if ($govId) {
-        $govId->update([
-            'gsis_no'       => $request->gsis_no,
-            'philhealth_no' => $request->philhealth_no,
-            'pagibig_no'    => $request->pagibig_no,
-            'tin_no'        => $request->tin_no,
-            'license_no'    => $request->license_no,
-        ]);
+    $govIdUpdateData = [
+        'gsis_no'       => $request->gsis_no,
+        'philhealth_no' => $request->philhealth_no,
+        'pagibig_no'    => $request->pagibig_no,
+        'tin_no'        => $request->tin_no,
+        'license_no'    => $request->license_no,
+    ];
+
+    foreach (['gsis', 'philhealth', 'pagibig', 'tin', 'license'] as $govIdKey) {
+        if ($request->hasFile($govIdKey . '_file')) {
+            $govFile = $request->file($govIdKey . '_file');
+            $filename = time() . '_' . $govFile->getClientOriginalName();
+            $path = $govFile->storeAs('employees/government_ids', $filename, 'public');
+            $govIdUpdateData[$govIdKey . '_file_path'] = '/storage/' . $path;
+        }
     }
+
+    $employee->governmentIds()->updateOrCreate([], $govIdUpdateData);
 
     if ($request->has('roles') && $employee->user) {
         $validated = $request->validate([
