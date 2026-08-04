@@ -8,7 +8,7 @@ PASSWORD = "admin"
 DATABASE = "primehrismagdalena"
 
 SQL_FOLDER = os.path.join(os.path.dirname(__file__), "database")
-MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" if sys.platform == "win32" else "mysql"
+MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe" if sys.platform == "win32" else "mysql"
 
 ORDER = [
     "primehrismagdalena_migrations.sql",
@@ -63,7 +63,7 @@ ORDER = [
 ]
 
 def mysql_cmd(sql, db=None):
-    cmd = [MYSQL_BIN, f"-h{HOST}", f"-u{USER}", f"-p{PASSWORD}", "--force"]
+    cmd = [MYSQL_BIN, f"-h{HOST}", f"-u{USER}", f"-p{PASSWORD}", "--force", "--default-auth=mysql_native_password"]
     if db:
         cmd.append(db)
     return subprocess.run(cmd, input=sql.encode("utf-8"), capture_output=True)
