@@ -161,7 +161,7 @@
     top: 0;
     z-index: 2;
     background: #f2f1fb !important;
-    color: #0b044d !important;
+    color: var(--gp-pri) !important;
     border-bottom: 2px solid #c9a227 !important;
     backdrop-filter: blur(10px) saturate(160%);
     -webkit-backdrop-filter: blur(10px) saturate(160%);
@@ -216,14 +216,14 @@
    :hover pair is not optional: without it the button reverts to the translucent
    white above while its label stays white, and disappears mid-hover. */
 .glass-shell .btn-export.btn-export-solid {
-    background: #0b044d;
+    background: var(--gp-pri);
     color: #fff;
-    border-color: #0b044d;
+    border-color: var(--gp-pri);
 }
 .glass-shell .btn-export.btn-export-solid:hover {
-    background: #1a1080;
+    background: var(--gp-pri-2);
     color: #fff;
-    border-color: #1a1080;
+    border-color: var(--gp-pri-2);
     transform: translateY(-1px);
 }
 .glass-shell .btn-solid,

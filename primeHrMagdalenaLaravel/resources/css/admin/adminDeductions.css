@@ -55,7 +55,7 @@
 .modal-title {
     font-size: 18px;
     font-weight: 600;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin: 0 0 4px 0;
 }
 
@@ -80,7 +80,7 @@
 
 .modal-close:hover {
     background: #f7f6fc;
-    color: #0b044d;
+    color: var(--gp-pri);
 }
 
 .modal-body {
@@ -104,7 +104,7 @@
 .form-label {
     font-size: 12px;
     font-weight: 600;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin-bottom: 6px;
 }
 
@@ -113,14 +113,14 @@
     border: 1px solid #e5e3f8;
     border-radius: 6px;
     font-size: 13px;
-    color: #0b044d;
+    color: var(--gp-pri);
     font-family: 'Poppins', sans-serif;
     transition: all 0.2s;
 }
 
 .form-input:focus {
     outline: none;
-    border-color: #0b044d;
+    border-color: var(--gp-pri);
     box-shadow: 0 0 0 3px rgba(11, 4, 77, 0.1);
 }
 
@@ -164,14 +164,14 @@ textarea.form-input {
 
 .btn-cancel:hover {
     background: #f7f6fc;
-    border-color: #0b044d;
-    color: #0b044d;
+    border-color: var(--gp-pri);
+    color: var(--gp-pri);
 }
 
 .btn-submit {
     padding: 10px 20px;
     border: none;
-    background: #0b044d;
+    background: var(--gp-pri);
     color: #fff;
     font-size: 13px;
     font-weight: 600;
@@ -182,7 +182,7 @@ textarea.form-input {
 }
 
 .btn-submit:hover {
-    background: #150c63;
+    background: var(--gp-pri-2);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(11, 4, 77, 0.3);
 }
@@ -229,7 +229,7 @@ textarea.form-input {
 .category-label {
     font-size: 11px;
     font-weight: 700;
-    color: #0b044d;
+    color: var(--gp-pri);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 0 0 8px 0;
@@ -256,12 +256,12 @@ textarea.form-input {
     width: 16px;
     height: 16px;
     cursor: pointer;
-    accent-color: #0b044d;
+    accent-color: var(--gp-pri);
 }
 
 .checkbox-text {
     font-size: 13px;
-    color: #0b044d;
+    color: var(--gp-pri);
     user-select: none;
 }
 
@@ -290,7 +290,7 @@ textarea.form-input {
 .btn-link {
     background: none;
     border: none;
-    color: #0b044d;
+    color: var(--gp-pri);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -329,7 +329,7 @@ textarea.form-input {
 
 .ded-info-value {
     font-size: 13px;
-    color: #0b044d;
+    color: var(--gp-pri);
     font-weight: 600;
 }
 
@@ -346,7 +346,7 @@ textarea.form-input {
 }
 
 .deduction-schedule-item:hover {
-    border-color: #0b044d;
+    border-color: var(--gp-pri);
     box-shadow: 0 2px 8px rgba(11, 4, 77, 0.1);
 }
 
@@ -357,7 +357,7 @@ textarea.form-input {
 .deduction-name {
     font-size: 13px;
     font-weight: 600;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin: 0 0 4px 0;
 }
 
@@ -387,7 +387,7 @@ textarea.form-input {
 }
 
 .cutoff-radio:hover {
-    border-color: #0b044d;
+    border-color: var(--gp-pri);
     background: #f7f6fc;
 }
 
@@ -395,17 +395,17 @@ textarea.form-input {
     width: 16px;
     height: 16px;
     cursor: pointer;
-    accent-color: #0b044d;
+    accent-color: var(--gp-pri);
 }
 
 .cutoff-radio input[type="radio"]:checked + span {
-    color: #0b044d;
+    color: var(--gp-pri);
 }
 
 .cutoff-radio:has(input[type="radio"]:checked) {
-    border-color: #0b044d;
+    border-color: var(--gp-pri);
     background: #f7f6fc;
-    color: #0b044d;
+    color: var(--gp-pri);
 }
 
 .schedule-history-item {
@@ -423,7 +423,7 @@ textarea.form-input {
 
 .schedule-period {
     font-weight: 600;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin-bottom: 4px;
 }
 
@@ -476,7 +476,7 @@ textarea.form-input {
 
 #deductionsList::-webkit-scrollbar-thumb:hover,
 #scheduleHistoryList::-webkit-scrollbar-thumb:hover {
-    background: #0b044d;
+    background: var(--gp-pri);
 }
 
 #deductionsList {
@@ -502,14 +502,14 @@ textarea.form-input {
 
 .ded-sched-panel { padding: 24px; overflow-y: auto; flex: 1; max-height: calc(90vh - 200px); }
 .ded-sched-block { margin-bottom: 20px; }
-.ded-sched-label { display: block; font-size: 12px; font-weight: 600; color: #0b044d; margin-bottom: 8px; }
+.ded-sched-label { display: block; font-size: 12px; font-weight: 600; color: var(--gp-pri); margin-bottom: 8px; }
 .ded-sched-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .ded-sched-sublabel { display: block; font-size: 11px; font-weight: 600; color: #56547a; margin-bottom: 6px; }
-.ded-sched-input { width: 100%; padding: 10px 12px; border: 1.5px solid #ecebf6; border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; color: #0b044d; background: #fff; box-sizing: border-box; }
+.ded-sched-input { width: 100%; padding: 10px 12px; border: 1.5px solid #ecebf6; border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; color: var(--gp-pri); background: #fff; box-sizing: border-box; }
 .ded-sched-history-section { display: none; margin-bottom: 20px; }
 .ded-sched-history-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.ded-sched-history-label { font-size: 12px; font-weight: 600; color: #0b044d; }
-.ded-sched-toggle-btn { background: transparent; border: none; color: #0b044d; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.ded-sched-history-label { font-size: 12px; font-weight: 600; color: var(--gp-pri); }
+.ded-sched-toggle-btn { background: transparent; border: none; color: var(--gp-pri); font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
 .ded-sched-history-list { display: none; background: #f7f6fc; border: 1.5px solid #ecebf6; border-radius: 8px; padding: 12px; max-height: 200px; overflow-y: auto; }
 .ded-sched-deductions-box { background: #f7f6fc; border: 1.5px solid #ecebf6; border-radius: 10px; padding: 16px; margin-bottom: 20px; }
 .ded-sched-deductions-label { margin: 0 0 12px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #8f8daf; }
@@ -524,16 +524,16 @@ textarea.form-input {
 .ded-sched-note-text.is-gold { color: #c9a227; }
 .ded-sched-footer { padding: 16px 24px; border-top: 1px solid #f2f1fb; display: flex; justify-content: flex-end; gap: 10px; }
 .ded-sched-btn-cancel { padding: 10px 24px; background: #fff; border: 1.5px solid #ecebf6; border-radius: 8px; font-size: 13px; font-weight: 600; color: #56547a; cursor: pointer; font-family: 'Poppins', sans-serif; }
-.ded-sched-btn-submit { padding: 10px 24px; background: #0b044d; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 8px; }
-.ded-deduction-badge-inline { display: inline-block; padding: 2px 8px; background: #f2f1fb; border-radius: 4px; font-size: 10px; font-weight: 600; color: #0b044d; margin-right: 6px; }
+.ded-sched-btn-submit { padding: 10px 24px; background: var(--gp-pri); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 8px; }
+.ded-deduction-badge-inline { display: inline-block; padding: 2px 8px; background: #f2f1fb; border-radius: 4px; font-size: 10px; font-weight: 600; color: var(--gp-pri); margin-right: 6px; }
 
 /* ══════════ Page-wide utility classes (replacing inline style="") ══════════ */
 .ded-mb-20 { margin-bottom: 20px; }
-.ded-icon-wrap-blue { background: #0b044d18; color: #0b044d; }
+.ded-icon-wrap-blue { background: var(--gp-pri)18; color: var(--gp-pri); }
 .ded-icon-wrap-gold { background: #c9a22718; color: #c9a227; }
 .ded-icon-wrap-red { background: #8e1e1818; color: #8e1e18; }
 .ded-icon-wrap-green { background: #15803d18; color: #15803d; }
-.ded-dot-blue { background: #0b044d; }
+.ded-dot-blue { background: var(--gp-pri); }
 .ded-dot-gold { background: #c9a227; }
 .ded-dot-red { background: #8e1e18; }
 .ded-dot-green { background: #15803d; }
@@ -558,7 +558,7 @@ textarea.form-input {
 .ded-warn-text { margin: 0; font-size: 12px; color: #856404; line-height: 1.5; }
 .ded-avatar-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #ecebf6; }
 .ded-row-flex { display: flex; align-items: center; gap: 10px; }
-.ded-cell-title { font-weight: 600; color: #0b044d; margin: 0; font-size: 13px; }
+.ded-cell-title { font-weight: 600; color: var(--gp-pri); margin: 0; font-size: 13px; }
 .ded-cell-sub { color: #8f8daf; margin: 0; font-size: 11px; }
 .ded-text-sm { font-size: 13px; color: #56547a; }
 .ded-text-muted-sm { font-size: 12px; color: #56547a; }
@@ -576,7 +576,7 @@ textarea.form-input {
 .ded-progress-fill { height: 100%; transition: width 0.3s; }
 .ded-progress-pct { font-size: 11px; color: #56547a; }
 .ded-badge-count { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-.ded-badge-count.is-blue { background: #f2f1fb; color: #0b044d; }
+.ded-badge-count.is-blue { background: #f2f1fb; color: var(--gp-pri); }
 .ded-badge-count.is-gold { background: #fbf6e3; color: #c9a227; }
 .ded-footer-flex { display: flex; align-items: center; gap: 12px; }
 .ded-rows-select { width: auto; padding: 6px 10px; font-size: 13px; }

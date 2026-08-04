@@ -16,6 +16,11 @@ class SystemAiSetting extends Model
         'provider',
         'api_key',
         'model',
+        'theme',
+        'custom_theme_primary',
+        'theme_secondary',
+        'theme_accent',
+        'theme_muted',
     ];
 
     protected function casts(): array

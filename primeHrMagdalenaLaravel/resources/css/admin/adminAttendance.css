@@ -673,7 +673,7 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
     text-align: left;
     transition: background .15s ease;
 }
-.action-dropdown-item:hover { background: #f4f6ff; color: #0b044d; }
+.action-dropdown-item:hover { background: #f4f6ff; color: var(--gp-pri); }
 
 /* ============ RESPONSIVE ============ */
 @media (max-width: 1280px) {
@@ -824,7 +824,7 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
     box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
 }
 #summary-tab .act-btn:hover {
-    background: linear-gradient(135deg, #1b1464, #0b044d) !important;
+    background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri)) !important;
     color: #fff !important;
     border-color: transparent !important;
     box-shadow: 0 6px 16px rgba(11,4,77,.35);
@@ -875,7 +875,7 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
 #detailedFilterForm { display: contents; }
 #detailed-tab .employee-filter-select { min-width: 200px; }
 #detailed-tab .dtr-filter-sep { font-size: 12px; color: #8f8daf; }
-#detailed-tab .btn-filter-main.ghost { background: #f7f6fc; color: #0b044d; border: 1px solid #ecebf6; }
+#detailed-tab .btn-filter-main.ghost { background: #f7f6fc; color: var(--gp-pri); border: 1px solid #ecebf6; }
 #detailed-tab .table-footer-form { display: inline; margin: 0; }
 #detailed-tab .per-page-select { width: auto; padding: 6px 10px; font-size: 13px; }
 #detailed-tab .pagination { gap: 8px; align-items: center; }
@@ -922,7 +922,7 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
 }
 #detailed-tab .btn-filter-main {
     border-radius: 999px !important;
-    background: linear-gradient(135deg, #1b1464, #0b044d) !important;
+    background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri)) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 20px rgba(11,4,77,.3);
     border: none !important;
 }
@@ -1176,7 +1176,7 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
 #exemptionModal .modal-box { max-width: 640px; max-height: 90vh; overflow-y: auto; }
 .modal-row-block { display: block; }
 .modal-row-block.mt { margin-top: 16px; }
-.modal-field-label { display: block; margin-bottom: 8px; font-weight: 600; color: #0b044d; }
+.modal-field-label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--gp-pri); }
 .modal-field-label-sm { display: block; margin-bottom: 4px; font-size: 12px; color: #6b7280; }
 .modal-field-hint { margin: 0 0 8px; font-size: 12px; color: #6b7280; }
 .modal-select-full { width: 100%; }
@@ -1186,7 +1186,7 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
 .checkbox-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .checkbox-col { display: flex; flex-direction: column; gap: 8px; }
 .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.checkbox-input { width: 16px; height: 16px; accent-color: #0b044d; }
+.checkbox-input { width: 16px; height: 16px; accent-color: var(--gp-pri); }
 
 /* ══════════════════════════════════════════════════════
    DTR Detail Modal (relocated from modals/dtrDetailModal.blade.php's
@@ -1198,12 +1198,12 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
 .text-success { color: #15803d; }
 .text-danger { color: #8e1e18; }
 .text-warning { color: #c9a227; }
-.text-primary-ink { color: #0b044d; }
+.text-primary-ink { color: var(--gp-pri); }
 
 #dtrModal .dtr-date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
 #dtrModal .dtr-field-label { font-size: 12px; color: #56547a; font-weight: 600; display: block; margin-bottom: 6px; }
 #dtrModal .dtr-date-input { width: 100%; padding: 8px; border: 1px solid #ecebf6; border-radius: 6px; font-size: 13px; }
-#dtrModal .dtr-load-btn { width: 100%; padding: 8px; background: #0b044d; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 20px; font-size: 13px; }
+#dtrModal .dtr-load-btn { width: 100%; padding: 8px; background: var(--gp-pri); color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 20px; font-size: 13px; }
 
 /* Standalone modal — give it the same explicit base z-index as the
    other top-level attendance modals instead of leaving it to whichever
@@ -1318,7 +1318,7 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
    Every class emitted by adminAttendance.js is styled below. */
 #detailedDTRModal.ddtr-overlay {
     --pri: #0B0A4D;
-    --pri-2: #1b1464;
+    --pri-2: var(--gp-pri-2);
     --pri-soft: #eef0fb;
     --card: #FFFFFF;
     --line: #e9eaf2;
@@ -1796,7 +1796,7 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
 ══════════════════════════════════════════════════════ */
 
 .success-icon-circle { width: 64px; height: 64px; background: #e8f9ef; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
-.success-title { margin: 0 0 12px; font-size: 20px; font-weight: 700; color: #0b044d; }
+.success-title { margin: 0 0 12px; font-size: 20px; font-weight: 700; color: var(--gp-pri); }
 .success-message { margin: 0 0 24px; font-size: 14px; color: #56547a; line-height: 1.6; }
 .success-done-btn { padding: 12px 32px; background: #15803d; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
 

@@ -14,10 +14,10 @@
     color: #b3b1c8;
 }
 .cert-step.active .cert-step-num {
-    background: #0b044d;
+    background: var(--gp-pri);
     color: #fff;
 }
-.cert-step.active .cert-step-label { color: #0b044d; }
+.cert-step.active .cert-step-label { color: var(--gp-pri); }
 .cert-step.done .cert-step-num {
     background: #15803d;
     color: #fff;
@@ -48,7 +48,7 @@
     width: 40px;
     height: 40px;
     border: 3px solid #e5e3f8;
-    border-top-color: #0b044d;
+    border-top-color: var(--gp-pri);
     border-radius: 50%;
     animation: certSpin 0.8s linear infinite;
     margin: 0 auto 12px;
@@ -57,7 +57,7 @@
 .cert-scan-label {
     font-size: 13px;
     font-weight: 600;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin: 0;
 }
 /* ── Auto-fill banner ── */
@@ -88,7 +88,7 @@
     box-shadow: 0 0 0 2px rgba(21,128,61,0.12) !important;
 }
 .cert-autofilled:focus {
-    border-color: #0b044d !important;
+    border-color: var(--gp-pri) !important;
     background: #fff !important;
     box-shadow: 0 0 0 3px rgba(11,4,77,0.1) !important;
 }

@@ -422,6 +422,11 @@ Route::post('/admin/settings/notifications', [\App\Http\Controllers\AdminSetting
 Route::post('/admin/settings/ai', [\App\Http\Controllers\AdminSettingsController::class, 'updateAiSettings'])->middleware('auth')->name('admin.settings.ai');
 Route::post('/admin/settings/photo', [\App\Http\Controllers\AdminSettingsController::class, 'updatePhoto'])->middleware('auth')->name('admin.settings.photo');
 Route::post('/admin/settings/system-ai', [\App\Http\Controllers\AdminSettingsController::class, 'updateSystemAiSettings'])->middleware('auth')->name('admin.settings.systemAi');
+Route::post('/admin/settings/theme', [\App\Http\Controllers\AdminSettingsController::class, 'updateTheme'])->middleware('auth')->name('admin.settings.theme');
+Route::get('/admin/settings/theme-css', function (\Illuminate\Http\Request $request) {
+    $theme = $request->query('theme', 'default');
+    return response(\App\Services\SystemTheme::toCss($theme), 200)->header('Content-Type', 'text/css');
+})->middleware('auth')->name('admin.settings.theme-css');
 
 // Chatbot API
 Route::post('/chatbot/chat', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware('auth')->name('chatbot.chat');

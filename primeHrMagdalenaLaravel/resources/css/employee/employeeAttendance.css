@@ -2,7 +2,7 @@
    Same design system as the admin Detailed DTR modal, laid out as a page. */
 .ddtr-page {
     --pri: #0B0A4D;
-    --pri-2: #1b1464;
+    --pri-2: var(--gp-pri-2);
     --pri-soft: #eef0fb;
     --card: #FFFFFF;
     --line: #e9eaf2;

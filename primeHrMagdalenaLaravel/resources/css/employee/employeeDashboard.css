@@ -2,7 +2,7 @@
    Glass card system mirroring the admin dashboard (adminDashboard.blade.php). */
 .perm-dash {
     --eh-blue: var(--gp-pri);
-    --eh-blue-2: #1b1464;
+    --eh-blue-2: var(--gp-pri-2);
     --eh-card: #ffffff;
     --eh-ink: #111827;
     --eh-muted: #667085;
@@ -555,7 +555,7 @@
 }
 
 /* ══════════ Utility classes (replacing inline style="") ══════════ */
-.eh-dot-blue { background: #0b044d; }
+.eh-dot-blue { background: var(--gp-pri); }
 .eh-dot-green { background: #22c55e; }
 .eh-dot-gold { background: #d9bb00; }
 .eh-flex-row-6 { display: flex; align-items: center; gap: 6px; }
@@ -563,7 +563,7 @@
 .eh-flex-row-8-mw0 { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .eh-flex-row-10 { display: flex; align-items: center; gap: 10px; }
 .eh-unit-label { font-size: 14px; font-weight: 500; }
-.eh-quick-icon { width: 34px; height: 34px; border-radius: 10px; background: #eef2ff; display: flex; align-items: center; justify-content: center; color: #0b044d; flex-shrink: 0; }
+.eh-quick-icon { width: 34px; height: 34px; border-radius: 10px; background: #eef2ff; display: flex; align-items: center; justify-content: center; color: var(--gp-pri); flex-shrink: 0; }
 .eh-quick-title { font-size: 13px; font-weight: 800; color: #111827; margin: 0; }
 .eh-quick-sub { font-size: 11px; color: #667085; margin: 0; }
 .eh-m0 { margin: 0; }

@@ -5,7 +5,7 @@
             <p class="table-sub" style="color: #667085; font-size: 12px; margin: 0;">Municipal Government of Pagsanjan · <span id="leaveRequestCount">{{ $leaveApplications->count() }}</span> records</p>
         </div>
         <div class="table-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="btn-export" style="background: #0b044d; color: #fff; border: 1px solid #0b044d; border-radius: 8px; font-size: 11px; padding: 0 14px; height: 34px; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(11, 4, 77, 0.1);" onclick="openManualCreditModal('add')" onmouseover="this.style.background='#1b1464'; this.style.boxShadow='0 4px 8px rgba(11, 4, 77, 0.2)'" onmouseout="this.style.background='#0b044d'; this.style.boxShadow='0 2px 4px rgba(11, 4, 77, 0.1)'">
+            <button class="btn-export" style="background: var(--gp-pri); color: #fff; border: 1px solid var(--gp-pri); border-radius: 8px; font-size: 11px; padding: 0 14px; height: 34px; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(11, 4, 77, 0.1);" onclick="openManualCreditModal('add')" onmouseover="this.style.background='var(--gp-pri-2)'; this.style.boxShadow='0 4px 8px rgba(11, 4, 77, 0.2)'" onmouseout="this.style.background='var(--gp-pri)'; this.style.boxShadow='0 2px 4px rgba(11, 4, 77, 0.1)'">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Manual Credits
             </button>
@@ -57,7 +57,7 @@
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
                         <span style="display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #f1f5f9; color: #475569;">{{ $application->employee->employmentDetail->departmentRelation->name ?? 'N/A' }}</span>
                     </td>
-                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: #0b044d; font-weight: 600;">{{ $application->leaveType->leave_name ?? 'N/A' }}</td>
+                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 13px; color: var(--gp-pri); font-weight: 600;">{{ $application->leaveType->leave_name ?? 'N/A' }}</td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; font-size: 12px; color: #64748b;">
                         @php
                             $startMonth = $application->start_date->format('M');
@@ -77,7 +77,7 @@
                         @endphp
                         <span style="font-weight: 600; color: #111827;">{{ $period }}</span>
                     </td>
-                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; text-align: center; font-weight: 700; color: #0b044d; font-size: 14px;">{{ number_format($application->number_of_days, 1) }}</td>
+                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; text-align: center; font-weight: 700; color: var(--gp-pri); font-size: 14px;">{{ number_format($application->number_of_days, 1) }}</td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6; text-align: center;">
                         @if($application->status === 'approved')
                             <span style="display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #f0fdf4; color: #15803d;">Approved</span>
@@ -91,7 +91,7 @@
                     </td>
                     <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
                         <div style="position: relative; display: flex; justify-content: center;">
-                            <button class="action-ellipsis-btn" onclick="toggleLeaveActionMenu(event, this)" title="Actions" style="background: none; border: none; color: #8f8daf; cursor: pointer; padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='#0b044d'" onmouseout="this.style.background='none'; this.style.color='#8f8daf'">
+                            <button class="action-ellipsis-btn" onclick="toggleLeaveActionMenu(event, this)" title="Actions" style="background: none; border: none; color: #8f8daf; cursor: pointer; padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='var(--gp-pri)'" onmouseout="this.style.background='none'; this.style.color='#8f8daf'">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                             </button>
                             <div class="leave-action-menu" style="display: none; position: absolute; right: 0; top: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15); z-index: 100; min-width: 160px; margin-top: 6px; overflow: hidden;">
@@ -108,7 +108,7 @@
                                     '{{ $application->application_number }}',
                                     '{{ $application->attachment_path ? asset('storage/' . $application->attachment_path) : '' }}',
                                     '{{ addslashes($application->approver_remarks ?? '') }}'
-                                )" style="width: 100%; padding: 11px 14px; border: none; background: none; text-align: left; font-size: 12px; color: #0b044d; font-weight: 600; cursor: pointer; transition: all 0.2s; border-radius: 0;" onmouseover="this.style.background='#f2f1fb'" onmouseout="this.style.background='none'">
+                                )" style="width: 100%; padding: 11px 14px; border: none; background: none; text-align: left; font-size: 12px; color: var(--gp-pri); font-weight: 600; cursor: pointer; transition: all 0.2s; border-radius: 0;" onmouseover="this.style.background='#f2f1fb'" onmouseout="this.style.background='none'">
                                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display: inline; margin-right: 8px; vertical-align: middle;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                     View Details
                                 </button>
@@ -145,7 +145,7 @@
 
     <div class="table-footer" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-top: 1px solid #eef2f6; background: #f8fafc;">
         <div style="display: flex; align-items: center; gap: 12px;">
-            <p id="leaveRequestFooter" style="margin: 0; font-size: 12px; color: #64748b; font-weight: 500;">Showing <strong style="color: #0b044d; font-weight: 700;" id="leaveRequestRowStart">1</strong>-<strong style="color: #0b044d; font-weight: 700;" id="leaveRequestRowEnd">{{ min(10, $leaveApplications->count()) }}</strong> of <strong style="color: #0b044d; font-weight: 700;" id="leaveRequestRowTotal">{{ $leaveApplications->count() }}</strong> records</p>
+            <p id="leaveRequestFooter" style="margin: 0; font-size: 12px; color: #64748b; font-weight: 500;">Showing <strong style="color: var(--gp-pri); font-weight: 700;" id="leaveRequestRowStart">1</strong>-<strong style="color: var(--gp-pri); font-weight: 700;" id="leaveRequestRowEnd">{{ min(10, $leaveApplications->count()) }}</strong> of <strong style="color: var(--gp-pri); font-weight: 700;" id="leaveRequestRowTotal">{{ $leaveApplications->count() }}</strong> records</p>
             <select id="leaveRequestRowsPerPage" onchange="changeLeaveRequestRowsPerPage()" style="width: auto; padding: 6px 10px; font-size: 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; color: #56547a; font-weight: 600; cursor: pointer;">
                 <option value="10">10 rows</option>
                 <option value="25">25 rows</option>
@@ -174,7 +174,7 @@
         </div>
         <div class="modal-body">
             <div class="form-field">
-                <label style="display: block; font-weight: 600; color: #0b044d; margin-bottom: 8px;">Disapproval Reason <span style="color: #8e1e18;">*</span></label>
+                <label style="display: block; font-weight: 600; color: var(--gp-pri); margin-bottom: 8px;">Disapproval Reason <span style="color: #8e1e18;">*</span></label>
                 <textarea id="rejectionReason" rows="4" placeholder="Explain why this leave request is being disapproved..." required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical;"></textarea>
             </div>
         </div>

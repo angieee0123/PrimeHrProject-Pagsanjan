@@ -258,7 +258,7 @@ body {
    another. */
 .user-avatar {
   width: 40px; height: 40px; border-radius: 50%;
-  background: linear-gradient(135deg, #2b3f9e, #0b044d);
+  background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri));
   border: 2px solid #ecebf6;
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 600; color: #ffffff;
@@ -510,14 +510,14 @@ p { color: var(--c-muted); font-size: var(--fs-md); }
    stylesheet order means this holds wherever the two files end up in the build.
    Skipping the :hover pair is what leaves a white label on a white pill. */
 .glass-shell .btn-export.adm-btn-primary-solid {
-  background: #0b044d;
+  background: var(--gp-pri);
   color: #fff;
-  border-color: #0b044d;
+  border-color: var(--gp-pri);
 }
 .glass-shell .btn-export.adm-btn-primary-solid:hover {
-  background: #1a1080;
+  background: var(--gp-pri-2);
   color: #fff;
-  border-color: #1a1080;
+  border-color: var(--gp-pri-2);
   transform: translateY(-1px);
 }
 

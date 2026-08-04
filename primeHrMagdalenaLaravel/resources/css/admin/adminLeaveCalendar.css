@@ -2,7 +2,7 @@
    Admin Leave & Travel Calendar
    View:  resources/views/admin/leaveCalendar/leaveCalendar.blade.php
    Design language mirrors the Attendance page (glass-shell +
-   filter-card + btn-solid/btn-ghost, navy #0b044d accents).
+   filter-card + btn-solid/btn-ghost, navy var(--gp-pri) accents).
    Renders inside the floating-button modal via an iframe embed.
    ============================================================ */
 
@@ -58,13 +58,13 @@
     flex: 0 0 auto;
 }
 .lc-month-title {
-    font-size: 17px; font-weight: 800; color: #0b044d;
+    font-size: 17px; font-weight: 800; color: var(--gp-pri);
     margin: 0; min-width: 148px; text-align: center;
 }
 /* Month/year jump-to picker styled to read like the title, editable on click */
 .lc-month-input {
     font-family: inherit;
-    font-size: 15.5px; font-weight: 800; color: #0b044d;
+    font-size: 15.5px; font-weight: 800; color: var(--gp-pri);
     text-align: center;
     border: 1px solid transparent;
     border-radius: 10px;
@@ -77,7 +77,7 @@
 .lc-month-input:focus {
     outline: none;
     background: #fff;
-    border-color: #0b044d;
+    border-color: var(--gp-pri);
     box-shadow: 0 0 0 4px rgba(11, 4, 77, 0.08);
 }
 .lc-month-input::-webkit-calendar-picker-indicator {
@@ -105,7 +105,7 @@
 .lc-legend-dot.is-travel         { background: #3b82f6; }
 .lc-legend-dot.is-pending-swatch { background: #fff; border: 2px dashed #94a3b8; }
 .lc-legend-count {
-    font-size: 11.5px; font-weight: 700; color: #0b044d;
+    font-size: 11.5px; font-weight: 700; color: var(--gp-pri);
     background: #eef0fb; padding: 5px 12px; border-radius: 999px;
 }
 
@@ -138,7 +138,7 @@
     flex-shrink: 0;
     border: 1px solid rgba(255, 255, 255, 0.6);
 }
-.lc-stat-ico.is-people  { background: #eef0fb; color: #0b044d; }
+.lc-stat-ico.is-people  { background: #eef0fb; color: var(--gp-pri); }
 .lc-stat-ico.is-leave   { background: #e9f9ef; color: #2fa860; }  /* green — matches leave marks */
 .lc-stat-ico.is-travel  { background: #eaf1ff; color: #4F7CFF; }  /* blue  — matches travel marks */
 .lc-stat-ico.is-pending { background: #fbf6e3; color: #eba417; }  /* amber — pending */
@@ -190,14 +190,14 @@
 .lc-day.is-weekend { background: #e6e8f1; }
 .lc-day.is-muted.is-weekend { background: #dfe1ee; }
 .lc-day.is-today {
-    border-color: #0b044d;
-    box-shadow: inset 0 0 0 1.5px #0b044d;
+    border-color: var(--gp-pri);
+    box-shadow: inset 0 0 0 1.5px var(--gp-pri);
     background: #fbfaff;
 }
 .lc-day-head { display: flex; align-items: center; justify-content: space-between; }
 .lc-day-num { font-size: 12.5px; font-weight: 700; color: #334155; }
 .lc-day.is-today .lc-day-num {
-    background: #0b044d; color: #fff;
+    background: var(--gp-pri); color: #fff;
     width: 23px; height: 23px; border-radius: 50%;
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 11.5px;
@@ -217,7 +217,7 @@
     width: 44px; height: 44px;
     border-radius: 50%;
     padding: 0;
-    border: 2px solid #0b044d;
+    border: 2px solid var(--gp-pri);
     background: #fff;
     cursor: pointer;
     position: relative;
@@ -264,14 +264,14 @@
     box-shadow: 0 0 0 1px #e2e5ee;
     transition: background 0.15s ease, color 0.15s ease;
 }
-.cal-more:hover { background: #0b044d; color: #fff; }
+.cal-more:hover { background: var(--gp-pri); color: #fff; }
 
 /* ---------- Hover tooltip ---------- */
 .cal-tooltip {
     position: fixed;
     z-index: 4000;
     max-width: 244px;
-    background: #0b044d;
+    background: var(--gp-pri);
     color: #fff;
     border-radius: 11px;
     padding: 11px 13px;
@@ -317,12 +317,12 @@
     padding: 15px 20px;
     border-bottom: 1px solid #eef0f5;
 }
-.cal-day-modal-head h3 { font-size: 14.5px; font-weight: 800; color: #0b044d; margin: 0; }
+.cal-day-modal-head h3 { font-size: 14.5px; font-weight: 800; color: var(--gp-pri); margin: 0; }
 .cal-day-modal-close {
     background: none; border: none; cursor: pointer;
     font-size: 15px; color: #94a3b8; padding: 4px;
 }
-.cal-day-modal-close:hover { color: #0b044d; }
+.cal-day-modal-close:hover { color: var(--gp-pri); }
 .cal-day-modal-list { padding: 8px; overflow-y: auto; }
 
 .cal-day-row {

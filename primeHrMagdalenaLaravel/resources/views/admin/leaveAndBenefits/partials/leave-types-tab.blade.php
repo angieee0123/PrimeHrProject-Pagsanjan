@@ -5,7 +5,7 @@
             <p class="table-sub">Manage all leave types for LGU Pagsanjan · {{ $leaveTypes->total() }} records</p>
         </div>
         <div class="table-actions">
-            <button class="btn-export" style="background: #0b044d; color: #fff; border-color: #0b044d;" onclick="openAddLeaveTypeModal()">
+            <button class="btn-export" style="background: var(--gp-pri); color: #fff; border-color: var(--gp-pri);" onclick="openAddLeaveTypeModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Leave Type
             </button>
@@ -14,7 +14,7 @@
 
     @php
         $sortIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px;"><polyline points="18 15 12 9 6 15"></polyline></svg>';
-        $colors = ['#0b044d', '#8e1e18', '#150c63', '#a52820', '#150c63', '#56547a'];
+        $colors = ['var(--gp-pri)', '#8e1e18', 'var(--gp-pri-2)', '#a52820', 'var(--gp-pri-2)', '#56547a'];
     @endphp
 
     <div class="table-wrapper">
@@ -34,14 +34,14 @@
                     <td data-label="Leave Type" style="text-align: left;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <div class="emp-avatar" style="background: {{ $colors[$loop->index % 6] }}; margin-left: 0; flex-shrink: 0;">{{ $type->leave_code }}</div>
-                            <span style="font-size: 13px; color: #0b044d; font-weight: 500;">{{ $type->leave_name }}</span>
+                            <span style="font-size: 13px; color: var(--gp-pri); font-weight: 500;">{{ $type->leave_name }}</span>
                         </div>
                     </td>
-                    <td data-label="Annual Limit" style="font-weight: 600; color: #0b044d; font-size: 13px;">
+                    <td data-label="Annual Limit" style="font-weight: 600; color: var(--gp-pri); font-size: 13px;">
                         {!! $type->annual_limit > 0 ? number_format($type->annual_limit, 0) . ' days' : '<span style="color: #9ca3af;">—</span>' !!}
                     </td>
                     <td data-label="Attachment" style="font-size: 13px; padding-left: 24px; padding-right: 24px;">
-                        <span style="color: {{ $type->attachment_info ? '#0b044d' : '#9ca3af' }}; font-weight: {{ $type->attachment_info ? '500' : 'normal' }}; font-style: {{ $type->attachment_info ? 'normal' : 'italic' }};">
+                        <span style="color: {{ $type->attachment_info ? 'var(--gp-pri)' : '#9ca3af' }}; font-weight: {{ $type->attachment_info ? '500' : 'normal' }}; font-style: {{ $type->attachment_info ? 'normal' : 'italic' }};">
                             {{ $type->attachment_info ?: 'Not required' }}
                         </span>
                     </td>

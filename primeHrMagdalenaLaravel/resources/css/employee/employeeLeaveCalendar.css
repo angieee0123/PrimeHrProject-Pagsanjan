@@ -34,13 +34,13 @@
 .ec-nav-btn { width: 38px; height: 38px; padding: 0 !important; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
 .ec-today-btn { height: 38px; display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; padding: 0 16px !important; }
 .ec-month-input {
-    font-family: inherit; font-size: 15.5px; font-weight: 800; color: #0b044d;
+    font-family: inherit; font-size: 15.5px; font-weight: 800; color: var(--gp-pri);
     text-align: center; border: 1px solid transparent; border-radius: 10px;
     background: transparent; padding: 6px 10px; cursor: pointer;
     transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 .ec-month-input:hover { background: rgba(11, 4, 77, 0.05); border-color: rgba(11, 4, 77, 0.12); }
-.ec-month-input:focus { outline: none; background: #fff; border-color: #0b044d; box-shadow: 0 0 0 4px rgba(11, 4, 77, 0.08); }
+.ec-month-input:focus { outline: none; background: #fff; border-color: var(--gp-pri); box-shadow: 0 0 0 4px rgba(11, 4, 77, 0.08); }
 .ec-month-input::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.55; }
 .ec-month-input:hover::-webkit-calendar-picker-indicator { opacity: 0.9; }
 
@@ -64,7 +64,7 @@
 }
 .ec-stat:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.9); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 28px rgba(11, 4, 77, 0.1); }
 .ec-stat-ico { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(255, 255, 255, 0.6); }
-.ec-stat-ico.is-days    { background: #eef0fb; color: #0b044d; }
+.ec-stat-ico.is-days    { background: #eef0fb; color: var(--gp-pri); }
 .ec-stat-ico.is-leave   { background: #e9f9ef; color: #2fa860; }
 .ec-stat-ico.is-travel  { background: #eaf1ff; color: #4F7CFF; }
 .ec-stat-ico.is-pending { background: #fbf6e3; color: #eba417; }
@@ -96,11 +96,11 @@
 .ec-day.is-muted .ec-day-num { color: #c3c0d6; }
 .ec-day.is-weekend { background: #e6e8f1; }
 .ec-day.is-muted.is-weekend { background: #dfe1ee; }
-.ec-day.is-today { border-color: #0b044d; box-shadow: inset 0 0 0 1.5px #0b044d; background: #fbfaff; }
+.ec-day.is-today { border-color: var(--gp-pri); box-shadow: inset 0 0 0 1.5px var(--gp-pri); background: #fbfaff; }
 .ec-day-head { display: flex; align-items: center; justify-content: space-between; }
 .ec-day-num { font-size: 12.5px; font-weight: 700; color: #334155; }
 .ec-day.is-today .ec-day-num {
-    background: #0b044d; color: #fff; width: 23px; height: 23px; border-radius: 50%;
+    background: var(--gp-pri); color: #fff; width: 23px; height: 23px; border-radius: 50%;
     display: inline-flex; align-items: center; justify-content: center; font-size: 11.5px;
 }
 /* Subtle left accent tint by the day's primary item */
@@ -135,7 +135,7 @@
 /* ---------- Hover tooltip ---------- */
 .ec-tooltip {
     position: fixed; z-index: 4000; max-width: 240px;
-    background: #0b044d; color: #fff; border-radius: 11px; padding: 11px 13px;
+    background: var(--gp-pri); color: #fff; border-radius: 11px; padding: 11px 13px;
     box-shadow: 0 10px 28px rgba(11, 4, 77, 0.34); pointer-events: none;
 }
 .ec-tip-name { font-size: 12.5px; font-weight: 700; margin: 0 0 5px; }
@@ -154,9 +154,9 @@
 .ec-day-modal { position: fixed; inset: 0; z-index: 3500; background: rgba(11, 4, 77, 0.3); display: flex; align-items: center; justify-content: center; padding: 20px; }
 .ec-day-modal-panel { background: #fff; border-radius: 16px; width: 100%; max-width: 420px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(11, 4, 77, 0.3); overflow: hidden; }
 .ec-day-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #eef0f5; }
-.ec-day-modal-head h3 { font-size: 14.5px; font-weight: 800; color: #0b044d; margin: 0; }
+.ec-day-modal-head h3 { font-size: 14.5px; font-weight: 800; color: var(--gp-pri); margin: 0; }
 .ec-day-modal-close { background: none; border: none; cursor: pointer; font-size: 15px; color: #94a3b8; padding: 4px; }
-.ec-day-modal-close:hover { color: #0b044d; }
+.ec-day-modal-close:hover { color: var(--gp-pri); }
 .ec-day-modal-list { padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
 .ec-day-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; background: #f8f9fc; }
 .ec-day-row-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }

@@ -465,7 +465,7 @@ body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
 .pub-cta-feat { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,0.82); }
 
 /* Footer */
-.pub-footer { background: #08033a; border-top: 1px solid rgba(255,255,255,0.08); padding: 30px 64px; }
+.pub-footer { background: var(--gp-pri); border-top: 1px solid rgba(255,255,255,0.08); padding: 30px 64px; }
 .pub-footer-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
 .pub-footer-brand { display: flex; align-items: center; gap: 12px; }
 .pub-footer-name { display: block; font-size: 14px; font-weight: 700; color: #ffffff; }

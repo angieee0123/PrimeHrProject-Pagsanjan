@@ -92,16 +92,14 @@
     @keyframes ecalSpin { to { transform: rotate(360deg); } }
 
     .ecal-fab {
-        /* Stacked just above the employee chatbot FAB (bottom:28px, z-index:999)
-           so the two don't overlap — the calendar sits on top of the chatbot. */
         position: fixed; right: 28px; bottom: 96px; z-index: 997;
         width: 56px; height: 56px; border: none; border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
-        background: #0b044d; color: #fff; cursor: pointer;
-        box-shadow: 0 8px 30px rgba(11, 4, 77, 0.32);
+        background: var(--theme-primary); color: #fff; cursor: pointer;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
         transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
     }
-    .ecal-fab:hover { background: #150c63; transform: translateY(-2px) scale(1.03); box-shadow: 0 12px 30px rgba(11, 4, 77, 0.35); }
+    .ecal-fab:hover { background: var(--theme-primary-2); transform: translateY(-2px) scale(1.03); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28); }
 
     .ecal-modal-overlay {
         position: fixed; inset: 0; z-index: 3000;
@@ -136,8 +134,8 @@
     .ecal-modal-head-icon {
         width: 36px; height: 36px; border-radius: 12px; flex-shrink: 0;
         display: flex; align-items: center; justify-content: center;
-        background: linear-gradient(135deg, #1b1464, #0b044d); border: 1px solid rgba(255, 255, 255, 0.18);
-        color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 12px rgba(11, 10, 77, 0.3);
+        background: linear-gradient(135deg, var(--theme-primary-2), var(--theme-primary)); border: 1px solid rgba(255, 255, 255, 0.18);
+        color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 12px rgba(0, 0, 0, 0.2);
     }
     .ecal-modal-head-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
     .ecal-modal-head-h3 { font-size: 14px; font-weight: 700; color: #1a1f36; letter-spacing: -0.1px; line-height: 1.2; white-space: nowrap; }
@@ -155,7 +153,7 @@
 
     .ecal-modal-loader { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: transparent; }
     .ecal-modal-loader p { margin: 0; font-size: 12.5px; font-weight: 600; color: #7c839d; }
-    .ecal-spinner { width: 36px; height: 36px; border-radius: 50%; border: 3px solid rgba(15, 23, 42, 0.1); border-top-color: #0b044d; animation: ecalSpin 0.7s linear infinite; }
+    .ecal-spinner { width: 36px; height: 36px; border-radius: 50%; border: 3px solid rgba(15, 23, 42, 0.1); border-top-color: var(--theme-primary); animation: ecalSpin 0.7s linear infinite; }
 
     @media (prefers-reduced-motion: reduce) { .ecal-modal-overlay, .ecal-modal-panel { animation: none; } }
     @media (max-width: 640px) {

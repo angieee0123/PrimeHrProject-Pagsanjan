@@ -21,7 +21,7 @@ function settingsPost(url, body) {
 window.switchSettingsTab = function (tabId, btn) {
     document.querySelectorAll('.settings-nav-item').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    document.querySelectorAll('#tab-profile, #tab-security, #tab-notifications, #tab-ai').forEach(t => t.classList.add('hidden'));
+    document.querySelectorAll('#tab-profile, #tab-security, #tab-notifications, #tab-ai, #tab-theme').forEach(t => t.classList.add('hidden'));
     document.getElementById('tab-' + tabId).classList.remove('hidden');
 };
 
@@ -29,11 +29,12 @@ window.toggleSetting = function (btn) {
     btn.classList.toggle('active');
 };
 
-function showSavedModal(message) {
+function showSavedModal(message, title = 'Settings Saved!') {
     const now = new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', hour12: true }) +
                 ', ' + new Date().toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
     document.getElementById('savedTime').textContent = now;
     document.getElementById('savedMsg').textContent = message;
+    document.getElementById('savedTitle').textContent = title;
     const modal = document.getElementById('settingsSavedModal');
     modal.style.opacity = '1';
     modal.style.visibility = 'visible';
@@ -276,3 +277,126 @@ window.saveSystemAiSettings = function () {
 };
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSavedModal(); });
+
+// ── Theme ──
+let _selectedTheme = (window.adminSettingsData || {}).activeTheme || 'default';
+let _customColor   = (window.adminSettingsData || {}).customThemeColor || '#6366f1';
+
+// Palette default vars keyed by palette key for populating the override pickers
+const _paletteDefaults = {
+    default:  { secondary: '#1b1464', accent: '#0b044d', muted: '#9999bb' },
+    emerald:  { secondary: '#065f46', accent: '#059669', muted: '#6ee7b7' },
+    crimson:  { secondary: '#991b1b', accent: '#dc2626', muted: '#f87171' },
+    violet:   { secondary: '#5b21b6', accent: '#7c3aed', muted: '#a78bfa' },
+    slate:    { secondary: '#334155', accent: '#475569', muted: '#94a3b8' },
+    amber:    { secondary: '#92400e', accent: '#d97706', muted: '#fbbf24' },
+    custom:   { secondary: '#6366f1', accent: '#6366f1', muted: '#a5b4fc' },
+};
+
+function _getOverrides() {
+    return {
+        secondary: document.getElementById('override-secondary')?.value || null,
+        accent:    document.getElementById('override-accent')?.value    || null,
+        muted:     document.getElementById('override-muted')?.value     || null,
+    };
+}
+
+function _populateOverridePickers(key, savedSecondary, savedAccent, savedMuted) {
+    const defaults = _paletteDefaults[key] || _paletteDefaults.default;
+    const s = document.getElementById('override-secondary');
+    const a = document.getElementById('override-accent');
+    const m = document.getElementById('override-muted');
+    if (s) s.value = savedSecondary || defaults.secondary;
+    if (a) a.value = savedAccent    || defaults.accent;
+    if (m) m.value = savedMuted     || defaults.muted;
+}
+
+window.resetThemeOverrides = function () {
+    const defaults = _paletteDefaults[_selectedTheme] || _paletteDefaults.default;
+    const s = document.getElementById('override-secondary');
+    const a = document.getElementById('override-accent');
+    const m = document.getElementById('override-muted');
+    if (s) s.value = defaults.secondary;
+    if (a) a.value = defaults.accent;
+    if (m) m.value = defaults.muted;
+};
+
+window.onCustomColorChange = function (hex) {
+    _customColor = hex;
+    const preview = document.getElementById('custom-color-preview');
+    if (preview) preview.style.background = hex;
+    selectTheme('custom');
+};
+
+window.selectTheme = function (key) {
+    _selectedTheme = key;
+    const data = window.adminSettingsData || {};
+    // Only restore saved overrides when re-selecting the already-active theme
+    const isActive = key === data.activeTheme;
+    _populateOverridePickers(
+        key,
+        isActive ? data.themeSecondary : null,
+        isActive ? data.themeAccent    : null,
+        isActive ? data.themeMuted     : null
+    );
+    document.querySelectorAll('[id^="theme-card-"]').forEach(card => {
+        const cardActive = card.id === 'theme-card-' + key;
+        const preview    = card.querySelector('div');
+        const color      = card.id === 'theme-card-custom'
+            ? (_customColor || '#6366f1')
+            : (preview ? preview.style.background : '#0b044d');
+        card.style.borderColor = cardActive ? color : '#e5e7eb';
+        card.style.background  = cardActive ? '#fafafe' : '#fff';
+        let check = card.querySelector('.theme-check');
+        if (cardActive && !check) {
+            check = document.createElement('span');
+            check.className = 'theme-check';
+            check.style.cssText = 'position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;background:' + color + ';display:flex;align-items:center;justify-content:center';
+            check.innerHTML = '<svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+            card.appendChild(check);
+        } else if (!cardActive && check) {
+            check.remove();
+        }
+    });
+};
+
+window.saveTheme = function () {
+    const btn = document.getElementById('themeSaveBtn');
+    const msg = document.getElementById('themeMsg');
+    msg.classList.add('hidden');
+    btn.disabled = true;
+    btn.textContent = 'Applying...';
+    const data = window.adminSettingsData || {};
+    const overrides = _getOverrides();
+    const body = {
+        theme:     _selectedTheme,
+        secondary: overrides.secondary,
+        accent:    overrides.accent,
+        muted:     overrides.muted,
+    };
+    if (_selectedTheme === 'custom') body.custom_color = _customColor;
+    fetch(data.themeRoute, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': data.csrfToken },
+        body: JSON.stringify(body),
+    })
+    .then(async r => {
+        const json = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(json.message || 'Failed to save theme.');
+        return json;
+    })
+    .then(() => { location.reload(); })
+    .catch(err => { msg.textContent = err.message || 'Failed to save theme.'; msg.classList.remove('hidden'); })
+    .finally(() => { btn.disabled = false; btn.textContent = 'Apply Theme'; });
+};
+
+// Populate pickers on page load with saved overrides
+document.addEventListener('DOMContentLoaded', () => {
+    const data = window.adminSettingsData || {};
+    _populateOverridePickers(
+        data.activeTheme || 'default',
+        data.themeSecondary,
+        data.themeAccent,
+        data.themeMuted
+    );
+});

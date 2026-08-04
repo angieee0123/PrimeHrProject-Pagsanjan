@@ -635,7 +635,7 @@
 
 .action-ellipsis-btn:hover {
     background: #f1f5f9;
-    color: #0b044d;
+    color: var(--gp-pri);
 }
 
 .leave-action-menu {
@@ -673,7 +673,7 @@
 }
 .th-ellipsis-btn:hover {
     background: #f1f5f9;
-    color: #0b044d;
+    color: var(--gp-pri);
 }
 .th-action-menu {
     position: absolute;
@@ -696,7 +696,7 @@
     background: none;
     text-align: left;
     font-size: 12px;
-    color: #0b044d;
+    color: var(--gp-pri);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
@@ -738,7 +738,7 @@
 }
 .lt-ellipsis-btn:hover {
     background: #f1f5f9;
-    color: #0b044d;
+    color: var(--gp-pri);
 }
 .lt-action-menu {
     position: absolute;
@@ -761,7 +761,7 @@
     background: none;
     text-align: left;
     font-size: 12px;
-    color: #0b044d;
+    color: var(--gp-pri);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;

@@ -5,7 +5,7 @@
             <p class="table-sub">Configure leave credit earning rates for all accrual-based leave types · {{ $accrualRates->total() }} records</p>
         </div>
         <div class="table-actions">
-            <button class="btn-export" style="background: #0b044d; color: #fff; border-color: #0b044d;" onclick="openAddAccrualRateModal()">
+            <button class="btn-export" style="background: var(--gp-pri); color: #fff; border-color: var(--gp-pri);" onclick="openAddAccrualRateModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Accrual Rate
             </button>
@@ -31,11 +31,11 @@
                 <tr class="accrual-rate-row" data-status="{{ $rate->is_active ? 'active' : 'inactive' }}" data-frequency="{{ $rate->accrual_frequency }}">
                     <td data-label="Leave Type" style="text-align: left;">
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <div class="emp-avatar" style="background: {{ ['#0b044d', '#8e1e18', '#150c63', '#a52820'][$loop->index % 4] }}; margin-left: 0;">
+                            <div class="emp-avatar" style="background: {{ ['var(--gp-pri)', '#8e1e18', 'var(--gp-pri-2)', '#a52820'][$loop->index % 4] }}; margin-left: 0;">
                                 {{ $rate->leave_code }}
                             </div>
                             <div>
-                                <p style="font-weight: 600; color: #0b044d; margin: 0; font-size: 13px;">{{ $rate->leaveType->leave_name ?? $rate->leave_code }}</p>
+                                <p style="font-weight: 600; color: var(--gp-pri); margin: 0; font-size: 13px;">{{ $rate->leaveType->leave_name ?? $rate->leave_code }}</p>
                                 <p style="color: #56547a; margin: 0; font-size: 12px;">{{ $rate->leaveType->is_accrued ? 'Accrued Leave Type' : 'Fixed Leave Type' }}</p>
                             </div>
                         </div>
@@ -45,7 +45,7 @@
                             {{ ucfirst($rate->accrual_frequency) }}
                         </span>
                     </td>
-                    <td data-label="Days of Service" style="text-align: center; font-weight: 600; color: #0b044d;">
+                    <td data-label="Days of Service" style="text-align: center; font-weight: 600; color: var(--gp-pri);">
                         {{ number_format($rate->days_of_service_required, 2) }} {{ $rate->days_of_service_required == 1 ? 'day' : 'days' }}
                     </td>
                     <td data-label="Credits Earned" style="text-align: center; font-weight: 600; color: #15803d;">

@@ -32,12 +32,12 @@
 }
 
 .btn-view {
-    color: #0b044d;
+    color: var(--gp-pri);
 }
 
 .btn-view:hover {
     background: #f7f6ff;
-    border-color: #0b044d;
+    border-color: var(--gp-pri);
 }
 
 .btn-print {
@@ -85,7 +85,7 @@
 .modal-title {
     font-size: 18px;
     font-weight: 700;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin: 0;
 }
 
@@ -94,7 +94,7 @@
     height: 32px;
     border: none;
     background: #f7f6ff;
-    color: #0b044d;
+    color: var(--gp-pri);
     font-size: 24px;
     border-radius: 6px;
     cursor: pointer;
@@ -126,7 +126,7 @@
 .btn-secondary {
     padding: 10px 20px;
     background: #f7f6ff;
-    color: #0b044d;
+    color: var(--gp-pri);
     border: 1px solid #e8e7f5;
     border-radius: 6px;
     font-size: 13px;
@@ -141,7 +141,7 @@
 
 .btn-primary {
     padding: 10px 20px;
-    background: #0b044d;
+    background: var(--gp-pri);
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -155,14 +155,14 @@
 }
 
 .btn-primary:hover {
-    background: #1a0f6e;
+    background: var(--gp-pri-2);
 }
 
 .payslip-header {
     text-align: center;
     margin-bottom: 24px;
     padding-bottom: 16px;
-    border-bottom: 2px solid #0b044d;
+    border-bottom: 2px solid var(--gp-pri);
 }
 
 .payslip-logo {
@@ -182,7 +182,7 @@
 .payslip-logo h2 {
     font-size: 18px;
     font-weight: 700;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin: 0;
     text-transform: uppercase;
 }
@@ -196,7 +196,7 @@
 .payslip-title {
     font-size: 16px;
     font-weight: 700;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin: 8px 0 0 0;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -229,7 +229,7 @@
 
 .info-group strong {
     font-size: 14px;
-    color: #0b044d;
+    color: var(--gp-pri);
     font-weight: 600;
 }
 
@@ -246,7 +246,7 @@
 .section-title {
     font-size: 14px;
     font-weight: 700;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin: 0 0 12px 0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -274,7 +274,7 @@
 
 .table-row strong {
     font-size: 13px;
-    color: #0b044d;
+    color: var(--gp-pri);
     font-weight: 600;
 }
 
@@ -284,7 +284,7 @@
 }
 
 .table-row.total {
-    background: #0b044d;
+    background: var(--gp-pri);
     color: #fff;
     margin-top: 8px;
 }
@@ -304,7 +304,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px 24px;
-    background: linear-gradient(135deg, #0b044d 0%, #1a0f6e 100%);
+    background: linear-gradient(135deg, var(--gp-pri) 0%, var(--gp-pri-2) 100%);
     border-radius: 8px;
     color: #fff;
 }
@@ -353,7 +353,7 @@
 
 .notes-info p {
     font-size: 13px;
-    color: #0b044d;
+    color: var(--gp-pri);
     background: #f7f6ff;
     padding: 12px;
     border-radius: 6px;
@@ -379,14 +379,14 @@
 .signature-line {
     width: 100%;
     height: 60px;
-    border-bottom: 2px solid #0b044d;
+    border-bottom: 2px solid var(--gp-pri);
     margin-bottom: 8px;
 }
 
 .signature-label {
     font-size: 12px;
     font-weight: 600;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin: 0 0 4px 0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -395,7 +395,7 @@
 .signature-name {
     font-size: 13px;
     font-weight: 600;
-    color: #0b044d;
+    color: var(--gp-pri);
     margin: 0 0 4px 0;
 }
 
