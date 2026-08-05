@@ -1,3 +1,9 @@
+/* Admin HRIS Assistant widget — adminChatbot.blade.php + partials.
+   Kept visually in step with the employee panel (employee.css, "Chatbot FAB +
+   panel"), which is the same component with fewer controls. Everything is
+   scoped to .admin-chatbot-ui because these class names are generic enough to
+   collide with the copies in app.css and joborder.css. */
+
 .admin-chatbot-ui .chat-fab {
     position: fixed;
     right: 28px;
@@ -6,59 +12,89 @@
     height: 56px;
     border: none;
     border-radius: 50%;
-    background: var(--gp-pri);
+    background: linear-gradient(140deg, var(--gp-pri-2), var(--gp-pri));
     color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    /* grid, so both icons share one centred cell and keep their transforms
+       free for the swap animation below */
+    display: grid;
+    place-items: center;
     cursor: pointer;
     z-index: 999;
-    box-shadow: 0 8px 30px rgba(11, 4, 77, 0.32);
-    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 10px 28px rgba(11, 4, 77, .34), 0 2px 6px rgba(11, 4, 77, .18);
+    transition: transform .22s ease, background .22s ease, box-shadow .22s ease;
 }
 
 .admin-chatbot-ui .chat-fab:hover {
-    background: var(--gp-bad);
-    transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 12px 30px rgba(11, 4, 77, 0.35);
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 14px 34px rgba(11, 4, 77, .4);
+}
+
+.admin-chatbot-ui .chat-fab:focus-visible {
+    outline: 3px solid rgba(11, 4, 77, .35);
+    outline-offset: 3px;
 }
 
 .admin-chatbot-ui .chat-fab.open {
-    background: var(--gp-bad);
+    background: linear-gradient(140deg, #a8332b, var(--gp-bad));
 }
+
+/* Both icons are stacked; .open cross-fades the ✕ in so the button reads as a
+   toggle rather than changing only colour. */
+.admin-chatbot-ui .chat-fab-ico {
+    grid-area: 1 / 1;
+    transition: opacity .2s ease, transform .25s ease;
+}
+.admin-chatbot-ui .chat-fab-ico.is-close { opacity: 0; transform: rotate(-90deg) scale(.6); }
+.admin-chatbot-ui .chat-fab.open .chat-fab-ico.is-chat { opacity: 0; transform: rotate(90deg) scale(.6); }
+.admin-chatbot-ui .chat-fab.open .chat-fab-ico.is-close { opacity: 1; transform: none; }
 
 .admin-chatbot-ui .chat-fab-badge {
     position: absolute;
-    top: -4px;
-    right: -4px;
+    top: -3px;
+    right: -3px;
     padding: 2px 6px;
     border-radius: 999px;
+    border: 2px solid #fff;
     background: var(--gp-accent-gold);
     color: var(--gp-pri);
     font-size: 9px;
     font-weight: 800;
     letter-spacing: 0.3px;
 }
+.admin-chatbot-ui .chat-fab.open .chat-fab-badge { display: none; }
 
+/* height is capped against the viewport: at a flat 680px the panel ran off the
+   top of the screen on any laptop shorter than ~780px. */
 .admin-chatbot-ui .chatbot-window {
     position: fixed;
     right: 28px;
     bottom: 96px;
-    width: 420px;
-    height: 680px;
-    border-radius: 18px;
-    border: 1.5px solid #eceaf8;
+    width: 400px;
+    height: min(660px, calc(100vh - 128px));
+    border-radius: 20px;
+    border: 1px solid #eceaf8;
     background: #fff;
-    box-shadow: 0 16px 46px rgba(11, 4, 77, 0.22);
+    box-shadow: 0 24px 60px rgba(11, 4, 77, .22), 0 4px 14px rgba(11, 4, 77, .08);
     z-index: 998;
     overflow: hidden;
+    display: none;
     flex-direction: column;
+}
+
+.admin-chatbot-ui .chatbot-window.open {
+    display: flex;
+    animation: adminChatPanelIn .22s cubic-bezier(.22, 1, .36, 1);
+}
+
+@keyframes adminChatPanelIn {
+    from { opacity: 0; transform: translateY(14px) scale(.98); }
+    to   { opacity: 1; transform: none; }
 }
 
 .admin-chatbot-ui .chatbot-window.fullscreen-mode {
     right: 0;
     bottom: 0;
-    width: min(520px, 100vw);
+    width: min(560px, 100vw);
     height: 100vh;
     border-radius: 0;
     border-right: none;
@@ -70,16 +106,18 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: 12px 14px;
+    padding: 13px 14px;
     background: linear-gradient(135deg, var(--gp-pri) 0%, var(--gp-pri-2) 100%);
     color: #fff;
-    border-bottom: 1px solid #1f1675;
+    /* Light catch along the top edge, instead of a hard 1px seam at the bottom. */
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16);
 }
 
 .admin-chatbot-ui .chatbot-header-left {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
 }
 
 .admin-chatbot-ui .chatbot-header-right {
@@ -91,27 +129,49 @@
 .admin-chatbot-ui .chatbot-avatar {
     width: 34px;
     height: 34px;
+    flex-shrink: 0;
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: var(--gp-pri);
     background: #fff;
-    border: 1px solid #eceaf8;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, .16);
 }
 
+/* colour stated rather than inherited from .chatbot-header, for the same
+   reason as the bubble rule below — admin.css's bare `p` rule outranks it. */
 .admin-chatbot-ui .chatbot-name {
     margin: 0;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
+    letter-spacing: .1px;
     line-height: 1.2;
+    color: #fff;
 }
 
 .admin-chatbot-ui .chatbot-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
     margin: 2px 0 0;
     font-size: 11px;
-    color: #98f6bb;
+    color: #a7f3c6;
     line-height: 1.2;
+}
+
+.admin-chatbot-ui .chatbot-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: adminChatPulse 2.4s ease-out infinite;
+}
+
+@keyframes adminChatPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(74, 222, 128, .55); }
+    70%  { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
 }
 
 .admin-chatbot-ui .chatbot-close,
@@ -119,51 +179,67 @@
 .admin-chatbot-ui .chatbot-clear {
     width: 28px;
     height: 28px;
-    border: none;
-    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: #fff;
-    background: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, .1);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color .2s ease, border-color .2s ease;
 }
 
 .admin-chatbot-ui .chatbot-close:hover,
 .admin-chatbot-ui .chatbot-fullscreen:hover,
 .admin-chatbot-ui .chatbot-clear:hover {
-    background: rgba(255, 255, 255, 0.24);
+    background: rgba(255, 255, 255, .2);
+    border-color: rgba(255, 255, 255, .4);
 }
 
-.admin-chatbot-ui .chatbot-quick-actions {
+.admin-chatbot-ui .chatbot-close:focus-visible,
+.admin-chatbot-ui .chatbot-fullscreen:focus-visible,
+.admin-chatbot-ui .chatbot-clear:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 1px;
+}
+
+/* Starter prompts, shown inside the conversation until the first question.
+   They wrap instead of scrolling sideways, and the 34px indent lines them up
+   with the greeting bubble (26px avatar + 8px gap). */
+.admin-chatbot-ui .chat-suggest-wrap {
+    padding-left: 34px;
+    margin-top: -2px;
+}
+
+.admin-chatbot-ui .chat-suggest-label {
+    margin: 0 0 6px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    color: #a5a2c2;
+}
+
+.admin-chatbot-ui .chat-suggest {
     display: flex;
+    flex-wrap: wrap;
     gap: 6px;
-    padding: 8px 12px;
-    background: #fff;
-    border-bottom: 1px solid var(--gp-bg-tint-2);
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.admin-chatbot-ui .chatbot-quick-actions::-webkit-scrollbar {
-    display: none;
 }
 
 .admin-chatbot-ui .chatbot-quick-btn {
-    border: 1px solid #dedcf2;
-    border-radius: 999px;
-    background: var(--gp-bg-tint);
-    color: var(--gp-pri);
     padding: 5px 11px;
+    border: 1px solid #e2e0f5;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--gp-text-mid);
+    font-family: 'Poppins', sans-serif;
     font-size: 11px;
     font-weight: 600;
     white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background .18s ease, color .18s ease, border-color .18s ease;
 }
 
 .admin-chatbot-ui .chatbot-quick-btn:hover {
@@ -172,24 +248,33 @@
     color: #fff;
 }
 
-.admin-chatbot-ui .chatbot-quick-btn:hover svg {
-    stroke: #fff;
+.admin-chatbot-ui .chatbot-quick-btn:focus-visible {
+    outline: 2px solid rgba(11, 4, 77, .35);
+    outline-offset: 2px;
 }
 
 .admin-chatbot-ui .chatbot-messages {
     flex: 1;
-    padding: 14px 12px;
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     overflow-y: auto;
+    scroll-behavior: smooth;
     background:
-        radial-gradient(circle at top right, rgba(11, 4, 77, 0.06), transparent 40%),
+        radial-gradient(circle at 100% 0, rgba(11, 4, 77, .05), transparent 42%),
         #fcfcff;
 }
+
+.admin-chatbot-ui .chatbot-messages::-webkit-scrollbar { width: 8px; }
+.admin-chatbot-ui .chatbot-messages::-webkit-scrollbar-track { background: transparent; }
+.admin-chatbot-ui .chatbot-messages::-webkit-scrollbar-thumb { background: #dcdaee; border-radius: 999px; }
+.admin-chatbot-ui .chatbot-messages::-webkit-scrollbar-thumb:hover { background: #c3c0dd; }
 
 .admin-chatbot-ui .chat-msg {
     display: flex;
     align-items: flex-end;
     gap: 8px;
-    margin-bottom: 10px;
 }
 
 .admin-chatbot-ui .chat-msg.user {
@@ -209,100 +294,349 @@
     border: 1px solid #eceaf8;
 }
 
+/* A run of replies from the assistant keeps its alignment but drops the
+   repeated avatar — the icon on every bubble read as visual noise. */
+.admin-chatbot-ui .chat-msg.bot + .chat-msg.bot .chat-msg-avatar { visibility: hidden; }
+
 .admin-chatbot-ui .chat-msg-bubble {
     max-width: 80%;
-    padding: 10px 12px;
-    border-radius: 14px;
+    padding: 10px 13px;
+    border-radius: 16px;
     font-size: 12.5px;
-    line-height: 1.55;
-    word-break: break-word;
+    line-height: 1.6;
+    overflow-wrap: break-word;
 }
 
 .admin-chatbot-ui .chat-msg.bot .chat-msg-bubble {
     color: var(--gp-pri);
-    background: #f1f0ff;
-    border-bottom-left-radius: 4px;
+    background: #fff;
+    border: 1px solid #ecebf8;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 1px 2px rgba(11, 4, 77, .05);
 }
 
 .admin-chatbot-ui .chat-msg.user .chat-msg-bubble {
     color: #fff;
-    background: var(--gp-pri);
-    border-bottom-right-radius: 4px;
+    background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri));
+    border-bottom-right-radius: 5px;
 }
 
-.admin-chatbot-ui .chatbot-input-row {
-    display: flex;
+/* admin.css carries a bare `p { color: var(--c-muted); font-size: var(--fs-md) }`.
+   A rule that matches the element beats a colour inherited from the bubble no
+   matter how weak it is, so message paragraphs came out muted grey on the navy
+   user bubble — unreadable. Everything inside a bubble takes the bubble's own
+   colour and size. */
+.admin-chatbot-ui .chat-msg-bubble p,
+.admin-chatbot-ui .chat-msg-bubble li {
+    color: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.admin-chatbot-ui .chat-p { margin: 0 0 7px; }
+.admin-chatbot-ui .chat-p:last-of-type { margin-bottom: 0; }
+.admin-chatbot-ui .chat-msg-bubble strong { font-weight: 700; color: inherit; }
+
+.admin-chatbot-ui .chat-list {
+    margin: 4px 0 8px;
+    padding-left: 16px;
+    list-style: none;
+}
+.admin-chatbot-ui .chat-list:last-child { margin-bottom: 0; }
+.admin-chatbot-ui .chat-list li { position: relative; margin-bottom: 3px; }
+.admin-chatbot-ui .chat-list li::before {
+    content: '';
+    position: absolute;
+    left: -11px;
+    top: .58em;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .45;
+}
+
+.admin-chatbot-ui .chat-ts {
+    display: block;
+    margin-top: 6px;
+    font-size: 10px;
+    opacity: .55;
+}
+.admin-chatbot-ui .chat-msg.user .chat-ts { text-align: right; }
+
+.admin-chatbot-ui .chat-typing-indicator {
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
+    gap: 4px;
+    padding: 11px 13px;
+    background: #fff;
+    border: 1px solid #ecebf8;
+    border-radius: 16px;
+    border-bottom-left-radius: 5px;
+}
+
+.admin-chatbot-ui .chat-typing-indicator span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #9f9cc6;
+    animation: adminChatBlink 1.2s infinite ease-in-out;
+}
+.admin-chatbot-ui .chat-typing-indicator span:nth-child(2) { animation-delay: .2s; }
+.admin-chatbot-ui .chat-typing-indicator span:nth-child(3) { animation-delay: .4s; }
+
+@keyframes adminChatBlink {
+    0%, 80%, 100% { opacity: .3; transform: translateY(0); }
+    40% { opacity: 1; transform: translateY(-2px); }
+}
+
+.admin-chatbot-ui .chatbot-composer {
+    padding: 10px 12px 8px;
     border-top: 1px solid #eceaf8;
     background: #fff;
 }
 
-.admin-chatbot-ui .chatbot-input-row input {
+.admin-chatbot-ui .chatbot-input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.admin-chatbot-ui .chatbot-input-row textarea {
     flex: 1;
-    padding: 10px 12px;
+    resize: none;
+    overflow-y: auto;
+    min-height: 38px;
+    max-height: 96px;
+    padding: 9px 12px;
     border: 1.5px solid #e3e1f2;
-    border-radius: 10px;
+    border-radius: 12px;
     outline: none;
+    font-family: 'Poppins', sans-serif;
     font-size: 12.5px;
+    line-height: 1.5;
     color: var(--gp-pri);
     background: #fcfcff;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
 }
 
-.admin-chatbot-ui .chatbot-input-row input:focus {
+.admin-chatbot-ui .chatbot-input-row textarea:focus {
     border-color: var(--gp-pri);
     background: #fff;
-    box-shadow: 0 0 0 3px rgba(11, 4, 77, 0.08);
+    box-shadow: 0 0 0 3px rgba(11, 4, 77, .08);
 }
 
-.admin-chatbot-ui .chatbot-input-row input::placeholder {
-    color: #aba8cc;
+.admin-chatbot-ui .chatbot-input-row textarea::placeholder { color: #aba8cc; }
+
+.admin-chatbot-ui .chatbot-input-row textarea:disabled {
+    background: var(--gp-bg-tint);
+    color: #8f8daf;
+    cursor: not-allowed;
 }
 
-.admin-chatbot-ui .chatbot-send,
+/* Voice and send sit on one baseline with the composer, so the row stays put
+   as the textarea grows. */
+.admin-chatbot-ui .chatbot-input-tools {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
 .admin-chatbot-ui .chatbot-mic,
 .admin-chatbot-ui .chatbot-speaker {
-    width: 38px;
+    width: 34px;
     height: 38px;
     border: none;
     border-radius: 10px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
-    background: var(--gp-pri);
+    color: var(--gp-text-mid);
+    background: transparent;
     cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    transition: background-color .2s ease, color .2s ease;
 }
 
-.admin-chatbot-ui .chatbot-send:hover,
 .admin-chatbot-ui .chatbot-mic:hover,
 .admin-chatbot-ui .chatbot-speaker:hover {
-    background: var(--gp-bad);
-    transform: translateY(-1px);
+    background: var(--gp-bg-tint-2);
+    color: var(--gp-pri);
+}
+
+.admin-chatbot-ui .chatbot-mic:focus-visible,
+.admin-chatbot-ui .chatbot-speaker:focus-visible,
+.admin-chatbot-ui .chatbot-send:focus-visible {
+    outline: 2px solid rgba(11, 4, 77, .35);
+    outline-offset: 2px;
 }
 
 .admin-chatbot-ui .chatbot-mic.listening {
-    background: #ef4444;
+    background: #fdecec;
+    color: #dc2626;
     animation: admin-chatbot-pulse 1.4s ease infinite;
 }
 
 .admin-chatbot-ui .chatbot-speaker.speaking {
-    background: #16a34a;
+    background: #e8f7ee;
+    color: #15803d;
 }
 
-.admin-chatbot-ui .typing-indicator .chat-msg-bubble {
-    min-width: 74px;
-    color: #7a78a3;
-    font-style: italic;
+.admin-chatbot-ui .chatbot-send {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: var(--gp-pri);
+    cursor: pointer;
+    transition: background-color .2s ease, transform .2s ease;
+}
+
+.admin-chatbot-ui .chatbot-send:hover:not(:disabled) {
+    background: var(--gp-pri-2);
+    transform: translateY(-1px);
+}
+
+.admin-chatbot-ui .chatbot-send:disabled {
+    background: #d7d5ea;
+    cursor: not-allowed;
+}
+
+.admin-chatbot-ui .chatbot-hint {
+    margin: 7px 2px 0;
+    font-size: 10px;
+    color: #a5a2c2;
+    text-align: center;
+}
+
+.admin-chatbot-ui .chatbot-hint kbd {
+    font-family: inherit;
+    font-size: 9.5px;
+    font-weight: 600;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: var(--gp-bg-tint-2);
+    color: var(--gp-text-mid);
+    border: 1px solid #e5e3f5;
+}
+
+/* Confirmation sheet — covers the panel it belongs to rather than the page, so
+   the question stays attached to the thing being cleared. */
+.admin-chatbot-ui .chat-confirm {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(11, 4, 77, .28);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+.admin-chatbot-ui .chat-confirm.is-open {
+    display: flex;
+    animation: adminChatConfirmIn .16s ease;
+}
+
+@keyframes adminChatConfirmIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.admin-chatbot-ui .chat-confirm-card {
+    width: 100%;
+    max-width: 340px;
+    padding: 18px 18px 14px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(11, 4, 77, .26);
+    text-align: center;
+}
+
+.admin-chatbot-ui .chat-confirm-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 10px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fbeceb;
+    color: var(--gp-bad);
+}
+
+.admin-chatbot-ui .chat-confirm-title {
+    margin: 0 0 5px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gp-pri);
+}
+
+.admin-chatbot-ui .chat-confirm-text {
+    margin: 0 0 14px;
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--gp-text-mid);
+}
+
+.admin-chatbot-ui .chat-confirm-actions { display: flex; gap: 8px; }
+
+.admin-chatbot-ui .chat-confirm-btn {
+    flex: 1;
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.admin-chatbot-ui .chat-confirm-btn.is-cancel {
+    border: 1.5px solid #e5e3f5;
+    background: #fff;
+    color: var(--gp-text-mid);
+}
+.admin-chatbot-ui .chat-confirm-btn.is-cancel:hover {
+    border-color: var(--gp-pri);
+    color: var(--gp-pri);
+    background: var(--gp-bg-tint);
+}
+
+.admin-chatbot-ui .chat-confirm-btn.is-danger {
+    border: 1.5px solid var(--gp-bad);
+    background: var(--gp-bad);
+    color: #fff;
+}
+.admin-chatbot-ui .chat-confirm-btn.is-danger:hover { background: #7a1914; border-color: #7a1914; }
+
+.admin-chatbot-ui .chat-confirm-btn:focus-visible {
+    outline: 2px solid rgba(11, 4, 77, .4);
+    outline-offset: 2px;
 }
 
 @keyframes admin-chatbot-pulse {
     0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
     70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
     100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-chatbot-ui .chat-fab,
+    .admin-chatbot-ui .chat-fab-ico,
+    .admin-chatbot-ui .chatbot-window.open,
+    .admin-chatbot-ui .chat-confirm.is-open,
+    .admin-chatbot-ui .chatbot-status-dot,
+    .admin-chatbot-ui .chatbot-mic.listening,
+    .admin-chatbot-ui .chat-typing-indicator span { animation: none; transition: none; }
+    .admin-chatbot-ui .chatbot-messages { scroll-behavior: auto; }
 }
 
 @media (max-width: 768px) {
@@ -315,28 +649,21 @@
 
     .admin-chatbot-ui .chatbot-window {
         right: 16px;
-        bottom: 88px;
+        bottom: 84px;
         width: calc(100vw - 32px);
-        height: calc(100vh - 120px);
+        height: calc(100vh - 108px);
+        border-radius: 16px;
     }
 
     .admin-chatbot-ui .chatbot-window.fullscreen-mode {
         width: 100vw;
     }
+
+    .admin-chatbot-ui .chatbot-hint { display: none; }
 }
 
 @media (max-width: 480px) {
-    .admin-chatbot-ui .chatbot-window {
-        height: calc(100vh - 118px);
-    }
-
-    .admin-chatbot-ui .chatbot-header {
-        padding: 10px 12px;
-    }
-
-    .admin-chatbot-ui .chatbot-quick-actions {
-        padding: 7px 10px;
-    }
+    .admin-chatbot-ui .chatbot-header { padding: 10px 12px; }
 }
 
 /* ══════════ Utility (adminChatbot.blade.php + partials) ══════════ */

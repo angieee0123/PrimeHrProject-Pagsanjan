@@ -591,3 +591,251 @@ textarea.form-input {
 .ded-notice-banner { background: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: #1565c0; }
 .ded-notice-text { font-size: 13px; }
 .ded-notice-banner-teal { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: #1e40af; }
+
+/* ══════════ Loans tab — the Employee Loans table ══════════
+   Scoped to `.lt-table` / `#loans-tab` so none of it reaches the five sibling
+   tabs that share .payroll-table. Two things this table relied on did not
+   exist anywhere in the codebase: `.badge` and `.action-btn` are declared in
+   the markup of three deductions partials but have no rule in any stylesheet,
+   so the badges rendered as bare coloured text and the row actions as default
+   browser buttons. The `.lt-` classes below replace them for this table. */
+
+/* The table never scrolls sideways: `fixed` layout at 100% width makes every
+   column a share of the card rather than a function of its content, so long
+   names wrap inside their cell instead of pushing the table wider than its
+   wrapper. The eight percentages below total 100. */
+.lt-table { width: 100%; table-layout: fixed; }
+.lt-table th.lt-c-employee { width: 19%; }
+.lt-table th.lt-c-loan     { width: 15%; }
+.lt-table th.lt-c-balance  { width: 12%; }
+.lt-table th.lt-c-progress { width: 12%; }
+.lt-table th.lt-c-amort    { width: 13%; }
+.lt-table th.lt-c-term     { width: 10%; }
+.lt-table th.lt-c-status   { width: 11%; }
+.lt-table th.lt-c-actions  { width: 8%;  }
+
+.lt-table thead th {
+    padding: 12px 14px;
+    font-size: 11px;
+    letter-spacing: .5px;
+    white-space: nowrap;
+}
+.lt-table tbody td {
+    padding: 14px;
+    vertical-align: middle;
+    overflow-wrap: break-word;
+}
+
+/* Money reads down the column, so it is right-aligned and tabular — digits of
+   the same rank line up between rows. */
+.lt-table th.lt-num,
+.lt-table td.lt-num { text-align: right; }
+.lt-table td.lt-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.lt-employee { display: flex; align-items: center; gap: 11px; }
+.lt-employee-text { min-width: 0; }
+.lt-avatar {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #ecebf6;
+}
+.lt-avatar-initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .3px;
+}
+
+/* Three text ranks, used in every cell: title, supporting line, plain value. */
+.lt-table .lt-primary { margin: 0; font-size: 13px; font-weight: 600; color: var(--gp-pri); line-height: 1.35; }
+.lt-table .lt-secondary { margin: 2px 0 0; font-size: 11px; color: #8f8daf; line-height: 1.4; }
+.lt-table .lt-muted { margin: 0; font-size: 12.5px; color: #56547a; }
+.lt-table .lt-amount { margin: 0; font-size: 13px; font-weight: 600; color: var(--gp-pri); font-variant-numeric: tabular-nums; }
+.lt-table .lt-amount.is-due { color: #a16207; }
+.lt-table .lt-amount.is-settled { color: #15803d; }
+.lt-unit { margin-left: 2px; font-size: 11px; font-weight: 600; color: #8f8daf; }
+
+.lt-loan-meta { display: flex; align-items: center; gap: 7px; margin-top: 5px; }
+.lt-code { font-family: 'Courier New', monospace; font-size: 10.5px; color: #8f8daf; }
+
+.lt-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.lt-tag.is-gsis { background: #eef0fb; color: var(--gp-pri); border-color: #d9dcf4; }
+.lt-tag.is-pagibig { background: #e9f6ee; color: #15803d; border-color: #c6e7d3; }
+.lt-tag.is-other { background: #f1f0f7; color: #56547a; border-color: #e2e0ee; }
+.lt-tag.is-custom {
+    margin-left: 4px;
+    background: #fbf6e3;
+    color: #8a6d1f;
+    border-color: #eddfae;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.lt-progress { display: flex; flex-direction: column; gap: 6px; }
+/* Wraps rather than overflows: on a narrow column the paid figure drops to its
+   own line instead of colliding with the percentage. */
+.lt-progress-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 8px; }
+.lt-progress-pct { font-size: 12px; font-weight: 700; color: var(--gp-pri); font-variant-numeric: tabular-nums; }
+.lt-progress-note { font-size: 10.5px; color: #8f8daf; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lt-progress-note.is-settled { font-weight: 600; color: #15803d; }
+.lt-progress-bar { height: 6px; border-radius: 999px; background: #ecebf6; overflow: hidden; }
+.lt-progress-fill { height: 100%; border-radius: 999px; transition: width .35s ease; }
+.lt-progress-fill.is-active { background: linear-gradient(90deg, #2a1d8f, #0b044d); }
+.lt-progress-fill.is-settled { background: linear-gradient(90deg, #22a355, #15803d); }
+.lt-progress-fill.is-suspended { background: linear-gradient(90deg, #d8b74a, #c9a227); }
+
+.lt-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px 4px 9px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.lt-status::before { content: ''; width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; background: currentColor; }
+.lt-status.is-active { background: #e9f6ee; color: #15803d; border-color: rgba(21, 128, 61, .22); }
+.lt-status.is-suspended { background: #fbf3e0; color: #8a6d1f; border-color: rgba(201, 162, 39, .32); }
+.lt-status.is-completed { background: #f1f0f7; color: #56547a; border-color: rgba(86, 84, 122, .2); }
+
+/* Centred, not flushed right: an icon-only column pinned to the card edge reads
+   as falling off it. The header label sits directly over the ⋮ button. */
+.lt-table th.lt-c-actions,
+.lt-table td.lt-c-actions { text-align: center; padding-left: 4px; padding-right: 4px; }
+.lt-actions { display: flex; align-items: center; justify-content: center; }
+.lt-action-btn {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: #8f8daf;
+    cursor: pointer;
+    transition: background .16s ease, color .16s ease, border-color .16s ease;
+}
+.lt-action-btn:hover,
+.lt-action-btn.is-open { background: #f2f1fb; border-color: #e2e0ee; color: var(--gp-pri); }
+.lt-action-btn:focus-visible { outline: 2px solid rgba(11, 4, 77, .35); outline-offset: 2px; }
+
+/* Fixed, and relocated to <body> by loans.js — see the comment there for why it
+   cannot be positioned inside the cell. Coordinates come from the button. */
+.lt-menu {
+    display: none;
+    position: fixed;
+    z-index: 1200;
+    min-width: 176px;
+    padding: 6px;
+    background: #fff;
+    border: 1px solid #ecebf6;
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(11, 4, 77, .14), 0 2px 6px rgba(11, 4, 77, .06);
+}
+.lt-menu.is-open { display: block; animation: ltMenuIn .14s ease; }
+
+@keyframes ltMenuIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.lt-menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 7px;
+    background: none;
+    color: #3f3d63;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+}
+.lt-menu-item svg { flex-shrink: 0; opacity: .9; }
+.lt-menu-item:hover { background: #f5f4fd; color: var(--gp-pri); }
+.lt-menu-item:focus-visible { outline: 2px solid rgba(11, 4, 77, .3); outline-offset: -2px; }
+.lt-menu-item.is-danger { color: #8e1e18; }
+.lt-menu-item.is-danger:hover { background: #fdf0ef; color: #8e1e18; }
+.lt-menu-sep { height: 1px; margin: 5px 4px; background: #f0effe; }
+
+.lt-table td.lt-empty { padding: 48px 20px; text-align: center; }
+.lt-empty-body { display: flex; flex-direction: column; align-items: center; max-width: 380px; margin: 0 auto; }
+.lt-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: #f2f1fb;
+    color: var(--gp-pri);
+}
+.lt-empty-title { margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--gp-pri); }
+.lt-empty-sub { margin: 0; font-size: 12px; color: #8f8daf; line-height: 1.5; }
+.lt-empty-cta {
+    margin-top: 14px;
+    padding: 8px 18px;
+    border: none;
+    border-radius: 999px;
+    background: var(--gp-pri);
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .16s ease;
+}
+.lt-empty-cta:hover { background: var(--gp-pri-2); }
+
+/* .table-wrapper is a scroll container by default (overflow:auto in admin.css).
+   The fixed layout above means there is nothing left to scroll, so drop the
+   container entirely rather than leave a scrollbar that can still appear from a
+   sub-pixel rounding difference. */
+#loans-tab .table-wrapper { overflow: visible; }
+
+/* Narrow viewports drop columns rather than squeeze all eight — everything
+   dropped here is still on the row's View details. */
+@media (max-width: 1280px) {
+    .lt-table thead th,
+    .lt-table tbody td { padding-left: 11px; padding-right: 11px; }
+    .lt-code { display: none; }
+}
+
+@media (max-width: 1100px) {
+    .lt-table th.lt-c-term,
+    .lt-table td.lt-c-term { display: none; }
+}
+
+@media (max-width: 900px) {
+    .lt-table th.lt-c-amort,
+    .lt-table td.lt-c-amort { display: none; }
+    .lt-avatar { width: 32px; height: 32px; }
+}

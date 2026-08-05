@@ -12,15 +12,15 @@
                 <tr>
                     <th>Employee</th>
                     <th>Department</th>
-                    <th>Present</th>
-                    <th>Leave</th>
-                    <th>Absent</th>
-                    <th>Late</th>
-                    <th>½ Day</th>
-                    <th>OT</th>
+                    <th class="th-center">Present</th>
+                    <th class="th-center">Leave</th>
+                    <th class="th-center">Absent</th>
+                    <th class="th-center">Late</th>
+                    <th class="th-center">½ Day</th>
+                    <th class="th-center">OT</th>
                     <th>Rate</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th class="row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody id="attendanceSummaryBody">
@@ -63,7 +63,7 @@
                         </div>
                     </td>
                     <td><span class="badge-status {{ $record['status'] === 'Complete' ? 'processed' : 'pending' }}">{{ $record['status'] }}</span></td>
-                    <td>
+                    <td class="row-menu-cell">
                         <div class="row-actions">
                             <button class="act-btn" title="Actions" onclick="toggleActionMenu(event, 'action-menu-{{ $index }}')">
                                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>

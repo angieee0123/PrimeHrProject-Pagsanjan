@@ -60,7 +60,7 @@
                     <th onclick="sortTravelOrders('travel_date')" class="to-th-sort">Travel Date {!! $sortIcon !!}</th>
                     <th class="to-ta-center">Duration</th>
                     <th onclick="sortTravelOrders('status')" class="to-th-sort to-ta-center">Status {!! $sortIcon !!}</th>
-                    <th class="to-ta-center">Actions</th>
+                    <th class="to-ta-center row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -98,20 +98,47 @@
                             <span class="badge-status to-badge-cancelled">Cancelled</span>
                         @endif
                     </td>
-                    <td data-label="Actions">
-                        <div class="row-actions">
-                            <button class="btn-view" onclick="viewTravelOrder({{ $order->id }})">View</button>
+                    <td data-label="Actions" class="row-menu-cell">
+                        <button type="button" class="row-menu-btn" data-menu="travelRowMenu{{ $order->id }}"
+                                onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                title="Actions" aria-label="Actions for the travel order to {{ $order->destination }}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        {{-- Opened by app.js, which relocates it to <body> and
+                             positions it fixed — .table-section clips its overflow, so a menu
+                             left in this cell would be cut off at the card edge. --}}
+                        <div class="row-menu" id="travelRowMenu{{ $order->id }}" role="menu" aria-label="Travel order actions">
+                            <button type="button" role="menuitem" class="row-menu-item"
+                                    onclick="closeRowMenu(); viewTravelOrder({{ $order->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                View details
+                            </button>
                             @if($order->status === 'awaiting_companions' && !$order->companions->where('status', 'pending')->count())
-                                <form method="POST" action="{{ route('travelorder.forward', $order->id) }}" class="to-inline" onsubmit="return confirm('Forward this travel order to HR for approval?');">
+                                <form method="POST" action="{{ route('travelorder.forward', $order->id) }}" class="row-menu-form" onsubmit="return confirm('Forward this travel order to HR for approval?');">
                                     @csrf
-                                    <button type="submit" class="btn-edit to-btn-accept">Forward to HR</button>
+                                    <button type="submit" role="menuitem" class="row-menu-item is-accept">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                                        </svg>
+                                        Forward to HR
+                                    </button>
                                 </form>
                             @endif
                             @if(in_array($order->status, ['pending', 'awaiting_companions']))
-                                <form method="POST" action="{{ route('travelorder.delete', $order->id) }}" class="to-inline" onsubmit="return confirm('Are you sure you want to cancel this travel order?');">
+                                <div class="row-menu-sep"></div>
+                                <form method="POST" action="{{ route('travelorder.delete', $order->id) }}" class="row-menu-form" onsubmit="return confirm('Cancel this travel order to {{ $order->destination }}? This cannot be undone.');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn-edit to-btn-reject">Cancel</button>
+                                    <button type="submit" role="menuitem" class="row-menu-item is-danger">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                                        </svg>
+                                        Cancel travel order
+                                    </button>
                                 </form>
                             @endif
                         </div>

@@ -39,7 +39,7 @@
                 <th>Max Terms</th>
                 <th>Employees Using</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th class="row-menu-head">Actions</th>
             </tr>
         </thead>
         <tbody id="loanTypesTableBody">
@@ -122,35 +122,36 @@
                             <span class="badge ded-badge-inactive">Inactive</span>
                         @endif
                     </td>
-                    <td>
-                        <div class="ded-actions">
-                            <button class="action-btn" onclick="viewLoanTypeDetails({{ $loanType->id }})" title="View Details">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                </svg>
+                    <td class="row-menu-cell">
+                        <button type="button" class="row-menu-btn" data-menu="loanTypeMenu{{ $loanType->id }}"
+                                onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                title="Actions" aria-label="Actions for {{ $loanType->name }}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        <div class="row-menu" id="loanTypeMenu{{ $loanType->id }}" role="menu" aria-label="Loan type actions">
+                            <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); viewLoanTypeDetails({{ $loanType->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                View details
                             </button>
-                            <button class="action-btn" onclick="editLoanType({{ $loanType->id }})" title="Edit">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                                </svg>
+                            <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); editLoanType({{ $loanType->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                Edit loan type
                             </button>
-                            @if($employeesCount == 0)
-                                <button class="action-btn ded-danger-btn" onclick="deleteLoanType({{ $loanType->id }}, '{{ $loanType->name }}')" title="Delete">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="3 6 5 6 21 6"/>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                    </svg>
-                                </button>
-                            @else
-                                <button class="action-btn ded-disabled-btn" disabled title="Cannot delete - in use by {{ $employeesCount }} employee(s)">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="3 6 5 6 21 6"/>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                    </svg>
-                                </button>
-                            @endif
+                            <div class="row-menu-sep"></div>
+                        @if($employeesCount == 0)
+                            <button type="button" role="menuitem" class="row-menu-item is-danger" onclick="closeRowMenu(); deleteLoanType({{ $loanType->id }}, '{{ $loanType->name }}')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                Delete loan type
+                            </button>
+                        @else
+                            <button type="button" role="menuitem" class="row-menu-item" disabled
+                                    title="Cannot delete — in use by {{ $employeesCount }} employee(s)">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                In use by {{ $employeesCount }} — cannot delete
+                            </button>
+                        @endif
                         </div>
                     </td>
                 </tr>

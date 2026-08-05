@@ -29,7 +29,7 @@
                     <th>Destination</th>
                     <th>Travel Date</th>
                     <th class="to-ta-center">Your Response</th>
-                    <th class="to-ta-center">Actions</th>
+                    <th class="to-ta-center row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -55,12 +55,38 @@
                             <span class="badge-status on-hold">Rejected</span>
                         @endif
                     </td>
-                    <td data-label="Actions">
-                        <div class="row-actions to-justify-center">
-                            <button class="btn-view" onclick="viewTravelOrder({{ $inviteOrder->id }})">View</button>
+                    <td data-label="Actions" class="row-menu-cell">
+                        <button type="button" class="row-menu-btn" data-menu="companionRowMenu{{ $inviteOrder->id }}"
+                                onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                title="Actions" aria-label="Actions for the invitation to {{ $inviteOrder->destination }}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        <div class="row-menu" id="companionRowMenu{{ $inviteOrder->id }}" role="menu" aria-label="Invitation actions">
+                            <button type="button" role="menuitem" class="row-menu-item"
+                                    onclick="closeRowMenu(); viewTravelOrder({{ $inviteOrder->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                View details
+                            </button>
                             @if($invitation->status === 'pending' && $inviteOrder->status === 'awaiting_companions')
-                                <button class="btn-edit to-btn-accept" onclick="respondToCompanionRequest({{ $inviteOrder->id }}, 'accepted')">Accept</button>
-                                <button class="btn-edit to-btn-reject" onclick="respondToCompanionRequest({{ $inviteOrder->id }}, 'rejected')">Reject</button>
+                                <div class="row-menu-sep"></div>
+                                <button type="button" role="menuitem" class="row-menu-item is-accept"
+                                        onclick="closeRowMenu(); respondToCompanionRequest({{ $inviteOrder->id }}, 'accepted')">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                    Accept invitation
+                                </button>
+                                <button type="button" role="menuitem" class="row-menu-item is-danger"
+                                        onclick="closeRowMenu(); respondToCompanionRequest({{ $inviteOrder->id }}, 'rejected')">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                    </svg>
+                                    Decline invitation
+                                </button>
                             @endif
                         </div>
                     </td>

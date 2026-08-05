@@ -17,7 +17,7 @@
                     <th class="to-th">Purpose</th>
                     <th class="to-th">Travel Date</th>
                     <th class="to-th to-th-center">Duration</th>
-                    <th class="to-th to-th-center">Actions</th>
+                    <th class="to-th to-th-center row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody id="pendingOrdersTableBody">

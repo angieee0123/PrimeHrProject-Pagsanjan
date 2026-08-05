@@ -118,7 +118,7 @@
                     <th>Type of Position</th>
                     <th>Conducted / Sponsored By</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th class="row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody id="adminTrainingBody">
@@ -184,20 +184,33 @@
                             <span class="verify-badge pending">Pending</span>
                         @endif
                     </td>
-                    <td>
-                        <div class="admin-action-group">
-                            <button type="button" class="btn-admin-review {{ $t->status !== 'pending' ? 'btn-admin-review-muted' : '' }}" onclick="reviewSubmission(this)">Review</button>
-                            @if($t->status === 'pending')
-                            <form method="POST" action="{{ route('admin.training.approve', $t->id) }}" style="margin:0;" onsubmit="return confirm('Approve this training submission?')">
+                    <td class="row-menu-cell">
+                        <button type="button" class="row-menu-btn" data-menu="trainingAdminMenu{{ $t->id }}"
+                                onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                title="Actions" aria-label="Actions for {{ $t->title }}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        <div class="row-menu" id="trainingAdminMenu{{ $t->id }}" role="menu" aria-label="Training submission actions">
+                            <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); reviewSubmission({{ $t->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+                                Review submission
+                            </button>
+                        @if($t->status === 'pending')
+                            <div class="row-menu-sep"></div>
+                            <form method="POST" action="{{ route('admin.training.approve', $t->id) }}" class="row-menu-form" onsubmit="return confirm('Approve this training submission?')">
                                 @csrf
-                                <button type="submit" class="btn-admin-approve" title="Approve">
-                                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                <button type="submit" role="menuitem" class="row-menu-item is-accept">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Approve
                                 </button>
                             </form>
-                            <button type="button" class="btn-admin-reject" title="Reject" onclick="openRejectModal(this)">
-                                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            <button type="button" role="menuitem" class="row-menu-item is-danger" onclick="closeRowMenu(); openRejectModal({{ $t->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                Reject
                             </button>
-                            @endif
+                        @endif
                         </div>
                     </td>
                 </tr>
@@ -464,8 +477,20 @@
         filterAdminTraining();
     };
 
-    window.reviewSubmission = function (btn) {
-        const row = btn.closest('tr');
+    /* Accepts a row id, a <tr>, or any element inside one. The row actions now
+       live in a ⋮ menu that app.js moves to <body> while it is open, so a
+       menu button has no ancestor <tr> to climb to — closest('tr') returned
+       null and both handlers silently did nothing. */
+    function resolveTrainingRow(ref) {
+        if (ref && ref.closest) {
+            const row = ref.closest('tr');
+            if (row) return row;
+        }
+        return document.querySelector('#adminTrainingBody tr[data-id="' + ref + '"]');
+    }
+
+    window.reviewSubmission = function (ref) {
+        const row = resolveTrainingRow(ref);
         if (!row) return;
         activeRow = row;
         const d = row.dataset;
@@ -532,8 +557,8 @@
         form.submit();
     };
 
-    window.openRejectModal = function (btn) {
-        activeRow = btn.closest ? btn.closest('tr') : btn;
+    window.openRejectModal = function (ref) {
+        activeRow = resolveTrainingRow(ref);
         if (!activeRow) return;
         const id = activeRow.dataset.id;
         if (!id) { showToast('Could not find training ID.'); return; }

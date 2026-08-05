@@ -286,7 +286,7 @@
                                 <th>Completed Date</th>
                                 <th>Rating</th>
                                 <th>Status</th>
-                                <th>Actions</th>
+                                <th class="row-menu-head">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -302,12 +302,22 @@
                                     </div>
                                 </td>
                                 <td><span class="badge-status on-hold">Completed</span></td>
-                                <td>
-                                    <div class="row-actions">
-                                        <button class="btn-view" onclick="openEvaluation('EVAL-2025-01', 'Jan-Jun 2025', 4.8, 'Jun 28, 2025', 'Mayor Office', 'Excellent performance and leadership skills demonstrated. Shows strong commitment to professional development and training completion.', ['Leadership', 'Communication', 'Problem Solving', 'Training Completion'], ['Time Management'])">View</button>
-                                        <button class="btn-download">
-                                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                            Download
+                                <td class="row-menu-cell">
+                                    <button type="button" class="row-menu-btn" data-menu="evalRowMenuEVAL202501"
+                                            onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                            title="Actions" aria-label="Actions for evaluation EVAL-2025-01">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                                        </svg>
+                                    </button>
+                                    <div class="row-menu" id="evalRowMenuEVAL202501" role="menu" aria-label="Evaluation actions">
+                                        <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); openEvaluation('EVAL-2025-01', 'Jan-Jun 2025', 4.8, 'Jun 28, 2025', 'Mayor Office', 'Excellent performance and leadership skills demonstrated. Shows strong commitment to professional development and training completion.', ['Leadership', 'Communication', 'Problem Solving', 'Training Completion'], ['Time Management'])">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            View evaluation
+                                        </button>
+                                        <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu()">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                            Download copy
                                         </button>
                                     </div>
                                 </td>
@@ -324,12 +334,22 @@
                                     </div>
                                 </td>
                                 <td><span class="badge-status on-hold">Completed</span></td>
-                                <td>
-                                    <div class="row-actions">
-                                        <button class="btn-view" onclick="openEvaluation('EVAL-2024-02', 'Jul-Dec 2024', 4.7, 'Dec 20, 2024', 'Mayor Office', 'Consistently high performance with excellent patient care and teamwork.', ['Teamwork', 'Patient Care', 'Punctuality'], ['Documentation'])">View</button>
-                                        <button class="btn-download">
-                                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                            Download
+                                <td class="row-menu-cell">
+                                    <button type="button" class="row-menu-btn" data-menu="evalRowMenuEVAL202402"
+                                            onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                            title="Actions" aria-label="Actions for evaluation EVAL-2024-02">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                                        </svg>
+                                    </button>
+                                    <div class="row-menu" id="evalRowMenuEVAL202402" role="menu" aria-label="Evaluation actions">
+                                        <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); openEvaluation('EVAL-2024-02', 'Jul-Dec 2024', 4.7, 'Dec 20, 2024', 'Mayor Office', 'Consistently high performance with excellent patient care and teamwork.', ['Teamwork', 'Patient Care', 'Punctuality'], ['Documentation'])">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            View evaluation
+                                        </button>
+                                        <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu()">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                            Download copy
                                         </button>
                                     </div>
                                 </td>
@@ -346,12 +366,22 @@
                                     </div>
                                 </td>
                                 <td><span class="badge-status on-hold">Completed</span></td>
-                                <td>
-                                    <div class="row-actions">
-                                        <button class="btn-view" onclick="openEvaluation('EVAL-2024-01', 'Jan-Jun 2024', 4.6, 'Jun 25, 2024', 'Mayor Office', 'Good performance with notable improvement in clinical skills and communication.', ['Clinical Skills', 'Communication', 'Initiative'], ['Time Management'])">View</button>
-                                        <button class="btn-download">
-                                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                            Download
+                                <td class="row-menu-cell">
+                                    <button type="button" class="row-menu-btn" data-menu="evalRowMenuEVAL202401"
+                                            onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                            title="Actions" aria-label="Actions for evaluation EVAL-2024-01">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                                        </svg>
+                                    </button>
+                                    <div class="row-menu" id="evalRowMenuEVAL202401" role="menu" aria-label="Evaluation actions">
+                                        <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); openEvaluation('EVAL-2024-01', 'Jan-Jun 2024', 4.6, 'Jun 25, 2024', 'Mayor Office', 'Good performance with notable improvement in clinical skills and communication.', ['Clinical Skills', 'Communication', 'Initiative'], ['Time Management'])">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            View evaluation
+                                        </button>
+                                        <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu()">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                            Download copy
                                         </button>
                                     </div>
                                 </td>
@@ -368,12 +398,22 @@
                                     </div>
                                 </td>
                                 <td><span class="badge-status on-hold">Completed</span></td>
-                                <td>
-                                    <div class="row-actions">
-                                        <button class="btn-view" onclick="openEvaluation('EVAL-2023-02', 'Jul-Dec 2023', 4.5, 'Dec 18, 2023', 'Mayor Office', 'Solid performance with consistent dedication to duties and patient welfare.', ['Dedication', 'Patient Care', 'Reliability'], ['Leadership Skills'])">View</button>
-                                        <button class="btn-download">
-                                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                            Download
+                                <td class="row-menu-cell">
+                                    <button type="button" class="row-menu-btn" data-menu="evalRowMenuEVAL202302"
+                                            onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                            title="Actions" aria-label="Actions for evaluation EVAL-2023-02">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                                        </svg>
+                                    </button>
+                                    <div class="row-menu" id="evalRowMenuEVAL202302" role="menu" aria-label="Evaluation actions">
+                                        <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); openEvaluation('EVAL-2023-02', 'Jul-Dec 2023', 4.5, 'Dec 18, 2023', 'Mayor Office', 'Solid performance with consistent dedication to duties and patient welfare.', ['Dedication', 'Patient Care', 'Reliability'], ['Leadership Skills'])">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            View evaluation
+                                        </button>
+                                        <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu()">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                            Download copy
                                         </button>
                                     </div>
                                 </td>

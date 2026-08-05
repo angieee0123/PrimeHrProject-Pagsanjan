@@ -1,17 +1,7 @@
 // Admin Pass Slip Dashboard — tab switching, filters, form preview modal
-
-window.togglePassSlipActionMenu = function(event, btn) {
-    event.stopPropagation();
-    const menu = btn.nextElementSibling;
-    document.querySelectorAll('.ps-action-menu').forEach(m => {
-        if (m !== menu) m.style.display = 'none';
-    });
-    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-}
-
-document.addEventListener('click', () => {
-    document.querySelectorAll('.ps-action-menu').forEach(m => m.style.display = 'none');
-});
+//
+// Row action menus use the shared ⋮ menu in resources/js/app.js
+// (window.toggleRowMenu), which both layouts load.
 
 window.currentPassSlipId = null;
 

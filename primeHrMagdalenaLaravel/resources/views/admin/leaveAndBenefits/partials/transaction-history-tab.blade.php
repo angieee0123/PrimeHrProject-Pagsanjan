@@ -32,7 +32,7 @@
                         Date <span class="sort-icon">{{ request('sort_by') == 'transaction_date' || !request('sort_by') ? (request('sort_order', 'desc') == 'asc' ? '↑' : '↓') : '⇅' }}</span>
                     </th>
                     <th style="text-align: center;">Reference</th>
-                    <th style="text-align: center;">Actions</th>
+                    <th class="row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody id="transactionsTableBody">

@@ -26,7 +26,7 @@
                     <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid #eef2f6;">Period</th>
                     <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid #eef2f6;">Days</th>
                     <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid #eef2f6;">Status</th>
-                    <th style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid #eef2f6;">Actions</th>
+                    <th class="row-menu-head" style="position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #667085; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid #eef2f6;">Actions</th>
                 </tr>
             </thead>
             <tbody id="leaveRequestsTableBody">
@@ -89,7 +89,7 @@
                             <span style="display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #f3f4f6; color: #6b7280;">Cancelled</span>
                         @endif
                     </td>
-                    <td style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
+                    <td class="row-menu-cell" style="padding: 14px 16px; border-bottom: 1px solid #eef2f6;">
                         <div style="position: relative; display: flex; justify-content: center;">
                             <button class="action-ellipsis-btn" onclick="toggleLeaveActionMenu(event, this)" title="Actions" style="background: none; border: none; color: #8f8daf; cursor: pointer; padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='var(--gp-pri)'" onmouseout="this.style.background='none'; this.style.color='#8f8daf'">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>

@@ -29,7 +29,7 @@
                     <th>Net Pay</th>
                     <th>Pay Date</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th class="row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,13 +47,28 @@
                             <span class="badge-status processed">Processed</span>
                         @endif
                     </td>
-                    <td>
-                        <div class="row-actions">
-                            <button class="btn-action btn-view" onclick="viewPayslipDetail({{ $payslip->id }})" title="View Details">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <td class="row-menu-cell">
+                        <button type="button" class="row-menu-btn" data-menu="payslipRowMenu{{ $payslip->id }}"
+                                onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                title="Actions" aria-label="Actions for this payslip">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        <div class="row-menu" id="payslipRowMenu{{ $payslip->id }}" role="menu" aria-label="Payslip actions">
+                            <button type="button" role="menuitem" class="row-menu-item"
+                                    onclick="closeRowMenu(); viewPayslipDetail({{ $payslip->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                View details
                             </button>
-                            <button class="btn-action btn-print" onclick="printPayslipDirect({{ $payslip->id }})" title="Print">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                            <button type="button" role="menuitem" class="row-menu-item"
+                                    onclick="closeRowMenu(); printPayslipDirect({{ $payslip->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+                                </svg>
+                                Print payslip
                             </button>
                         </div>
                     </td>

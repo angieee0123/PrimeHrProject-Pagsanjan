@@ -133,7 +133,7 @@
                     <th class="ps-th">Date</th>
                     <th class="ps-th ps-th-center">Time Out</th>
                     <th class="ps-th ps-th-center">Time In</th>
-                    <th class="ps-th ps-th-center">Actions</th>
+                    <th class="ps-th ps-th-center row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -159,13 +159,31 @@
                     <td class="ps-td ps-td-strong">{{ $slip->date ? $slip->date->format('M d, Y') : '' }}</td>
                     <td class="ps-td ps-td-center">{{ $slip->time_out ? \Carbon\Carbon::parse($slip->time_out)->format('g:i A') : '' }}</td>
                     <td class="ps-td ps-td-center">{{ $slip->time_in ? \Carbon\Carbon::parse($slip->time_in)->format('g:i A') : '' }}</td>
-                    <td class="ps-td">
-                        <div class="ps-row-actions">
-                            <form method="POST" action="{{ route('admin.passslip.approve', $slip->id) }}" class="ps-inline-form">
+                    <td class="ps-td row-menu-cell">
+                        <button type="button" class="row-menu-btn" data-menu="pendingSlipMenu{{ $slip->id }}"
+                                onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                title="Actions" aria-label="Actions for {{ $slip->employee->first_name ?? '' }} {{ $slip->employee->last_name ?? '' }}'s pass slip">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        <div class="row-menu" id="pendingSlipMenu{{ $slip->id }}" role="menu" aria-label="Pass slip actions">
+                            <form method="POST" action="{{ route('admin.passslip.approve', $slip->id) }}" class="row-menu-form">
                                 @csrf
-                                <button type="submit" onclick="return confirm('Approve this pass slip?')" class="ps-btn-approve">Approve</button>
+                                <button type="submit" role="menuitem" class="row-menu-item is-accept" onclick="return confirm('Approve this pass slip?')">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                    Approve
+                                </button>
                             </form>
-                            <button onclick="disapprovePassSlip({{ $slip->id }})" class="ps-btn-disapprove">Disapprove</button>
+                            <button type="button" role="menuitem" class="row-menu-item is-danger"
+                                    onclick="closeRowMenu(); disapprovePassSlip({{ $slip->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                                Disapprove
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -208,7 +226,7 @@
                     <th class="ps-th">Date</th>
                     <th class="ps-th">Approved By</th>
                     <th class="ps-th">Approved Date</th>
-                    <th class="ps-th ps-th-center">Form</th>
+                    <th class="ps-th ps-th-center row-menu-head">Form</th>
                 </tr>
             </thead>
             <tbody>
@@ -234,23 +252,25 @@
                     <td class="ps-td ps-td-strong">{{ $slip->date ? $slip->date->format('M d, Y') : '' }}</td>
                     <td class="ps-td ps-td-green">{{ $slip->approver->name ?? 'Admin User' }}</td>
                     <td class="ps-td ps-td-muted">{{ $slip->approved_at ? $slip->approved_at->format('M d, Y') : 'N/A' }}</td>
-                    <td class="ps-td">
-                        <div class="ps-form-actions-wrap">
-                            <button class="ps-ellipsis-btn" onclick="togglePassSlipActionMenu(event, this)" title="Actions">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                    <td class="ps-td row-menu-cell">
+                        <button type="button" class="row-menu-btn" data-menu="approvedSlipMenu{{ $slip->id }}"
+                                onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                title="Actions" aria-label="Actions for pass slip {{ $slip->slip_number }}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        <div class="row-menu" id="approvedSlipMenu{{ $slip->id }}" role="menu" aria-label="Pass slip actions">
+                            <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); openPassSlipFormModal(
+                                {{ $slip->id }},
+                                '{{ addslashes(($slip->employee->first_name ?? '') . ' ' . ($slip->employee->last_name ?? '')) }}',
+                                '{{ $slip->employee->employee_id ?? 'N/A' }}',
+                                '{{ $slip->type === 'official_activity' ? 'Official Activity' : 'Personal Reason' }}',
+                                '{{ $slip->slip_number }}'
+                            )">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                View form
                             </button>
-                            <div class="ps-action-menu" style="display: none;">
-                                <button onclick="openPassSlipFormModal(
-                                    {{ $slip->id }},
-                                    '{{ addslashes(($slip->employee->first_name ?? '') . ' ' . ($slip->employee->last_name ?? '')) }}',
-                                    '{{ $slip->employee->employee_id ?? 'N/A' }}',
-                                    '{{ $slip->type === 'official_activity' ? 'Official Activity' : 'Personal Reason' }}',
-                                    '{{ $slip->slip_number }}'
-                                )">
-                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                    View Form
-                                </button>
-                            </div>
                         </div>
                     </td>
                 </tr>

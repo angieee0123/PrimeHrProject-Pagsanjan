@@ -46,7 +46,13 @@
     text-align: left;
     border-bottom: 1px solid #eef2f6;
 }
-.to-th-center { text-align: center; }
+/* `.payroll-table thead th { text-align: left }` in admin.css is (0,1,2) and
+   beats a lone class (0,1,0) whatever the load order, so these header
+   alignments were silently ignored and every centred column header rendered
+   left above centred cells. The qualified selector is (0,2,2) and wins; the
+   bare one is kept for the same class used on a <td>. */
+.to-th-center,
+.payroll-table thead th.to-th-center { text-align: center; }
 .to-th-wide { min-width: 200px; }
 
 .to-row { transition: all 0.15s ease; }

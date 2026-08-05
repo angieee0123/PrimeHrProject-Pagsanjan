@@ -1,53 +1,5 @@
 /* Styles for passSlip.blade.php */
 
-.ps-ellipsis-btn {
-    background: none;
-    border: none;
-    color: #8f8daf;
-    cursor: pointer;
-    padding: 6px 10px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-.ps-ellipsis-btn:hover {
-    background: #f1f5f9;
-    color: #0b044d;
-}
-.ps-action-menu {
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15);
-    z-index: 100;
-    min-width: 160px;
-    margin-top: 6px;
-    overflow: hidden;
-    animation: psSlideDown 0.2s ease-out;
-}
-.ps-action-menu button {
-    width: 100%;
-    padding: 11px 14px;
-    border: none;
-    background: none;
-    text-align: left;
-    font-size: 12px;
-    color: #0b044d;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.ps-action-menu button:hover {
-    background: #f2f1fb;
-}
 @keyframes psSlideDown {
     from { opacity: 0; transform: translateY(-8px); }
     to { opacity: 1; transform: translateY(0); }
@@ -99,7 +51,13 @@
     text-align: left;
     border-bottom: 1px solid #eef2f6;
 }
-.ps-th-center { text-align: center; }
+/* `.payroll-table thead th { text-align: left }` in admin.css is (0,1,2) and
+   beats a lone class (0,1,0) whatever the load order, so these header
+   alignments were silently ignored and every centred column header rendered
+   left above centred cells. The qualified selector is (0,2,2) and wins; the
+   bare one is kept for the same class used on a <td>. */
+.ps-th-center,
+.payroll-table thead th.ps-th-center { text-align: center; }
 
 .ps-row { transition: all 0.15s ease; }
 .ps-row:hover { background: #f9fafb; }
@@ -132,7 +90,6 @@
     flex-shrink: 0;
 }
 
-.ps-row-actions { display: flex; gap: 6px; justify-content: center; }
 .ps-inline-form { margin: 0; }
 .ps-btn-approve {
     padding: 6px 12px;
@@ -154,7 +111,6 @@
     font-weight: 700;
     cursor: pointer;
 }
-.ps-form-actions-wrap { position: relative; display: flex; justify-content: center; }
 
 .ps-empty-td { text-align: center; padding: 60px 20px; border-bottom: none; }
 .ps-empty-icon {

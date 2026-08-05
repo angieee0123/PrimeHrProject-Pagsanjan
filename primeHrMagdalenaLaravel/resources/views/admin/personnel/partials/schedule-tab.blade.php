@@ -43,7 +43,7 @@
                     <th>PM In</th>
                     <th>PM Out</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th class="row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody id="scheduleTableBody">
@@ -88,7 +88,7 @@
                             <span class="badge-status on-hold">Not Set</span>
                         @endif
                     </td>
-                    <td>
+                    <td class="row-menu-cell">
                         <div class="row-actions">
                             <!-- Desktop: Individual Buttons -->
                             <div class="action-buttons-desktop">

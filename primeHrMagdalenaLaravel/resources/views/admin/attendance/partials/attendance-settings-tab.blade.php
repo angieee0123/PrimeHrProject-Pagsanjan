@@ -23,11 +23,11 @@
                         <th>Type</th>
                         <th>Name</th>
                         <th>Effectivity</th>
-                        <th>Not Required</th>
-                        <th>Legacy Flags</th>
+                        <th class="th-center">Not Required</th>
+                        <th class="th-center">Legacy Flags</th>
                         <th>Reason</th>
                         <th>Created By</th>
-                        <th>Actions</th>
+                        <th class="row-menu-head">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="exemptionsTableBody">
@@ -123,21 +123,25 @@
                         <td data-label="Created By">
                             {{ $exemption->creator->username ?? 'System' }}
                         </td>
-                        <td data-label="Actions">
-                            <div class="row-actions">
-                                <button class="btn-edit" onclick="editExemption({{ $exemption->id }})" title="Edit">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                                    </svg>
-                                </button>
-                                <button class="btn-delete" onclick="deleteExemption({{ $exemption->id }})" title="Delete">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <polyline points="3 6 5 6 21 6"/>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                    </svg>
-                                </button>
-                            </div>
+                        <td data-label="Actions" class="row-menu-cell">
+                        <button type="button" class="row-menu-btn" data-menu="exemptionMenu{{ $exemption->id }}"
+                                onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                title="Actions" aria-label="Actions for this exemption">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        <div class="row-menu" id="exemptionMenu{{ $exemption->id }}" role="menu" aria-label="Exemption actions">
+                            <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); editExemption({{ $exemption->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                Edit exemption
+                            </button>
+                            <div class="row-menu-sep"></div>
+                            <button type="button" role="menuitem" class="row-menu-item is-danger" onclick="closeRowMenu(); deleteExemption({{ $exemption->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                Delete exemption
+                            </button>
+                        </div>
                         </td>
                     </tr>
                     @empty

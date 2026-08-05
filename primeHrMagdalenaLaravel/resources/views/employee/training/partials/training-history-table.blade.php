@@ -42,7 +42,7 @@
                             <th>Type of Position</th>
                             <th>Conducted / Sponsored By</th>
                             <th>Verification Status</th>
-                                <th>Actions</th>
+                                <th class="row-menu-head">Actions</th>
                             </tr>
                         </thead>
                     <tbody id="trainingHistoryBody">
@@ -91,22 +91,36 @@
                                     <span class="verify-badge pending">Pending</span>
                                 @endif
                                 </td>
-                            <td>
-                                <div style="display:flex;gap:6px;align-items:center;">
+                            <td class="row-menu-cell">
+                                @if($t->certificate_path || $t->status === 'pending')
+                                <button type="button" class="row-menu-btn" data-menu="trainingRowMenu{{ $t->id }}"
+                                        onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                        title="Actions" aria-label="Actions for {{ $t->title }}">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                                    </svg>
+                                </button>
+                                <div class="row-menu" id="trainingRowMenu{{ $t->id }}" role="menu" aria-label="Training record actions">
                                     @if($t->certificate_path)
-                                    <a href="{{ route('employee.training.certificate', $t->id) }}" target="_blank" class="btn-view-cert" title="View Certificate">
-                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <a href="{{ route('employee.training.certificate', $t->id) }}" target="_blank" role="menuitem" class="row-menu-item" onclick="closeRowMenu()">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        View certificate
                                     </a>
                                     @endif
                                     @if($t->status === 'pending')
-                                    <form method="POST" action="{{ route('employee.training.delete', $t->id) }}" onsubmit="return confirm('Delete this training record?')" style="margin:0;">
+                                    @if($t->certificate_path)<div class="row-menu-sep"></div>@endif
+                                    <form method="POST" action="{{ route('employee.training.delete', $t->id) }}" class="row-menu-form" onsubmit="return confirm('Delete this training record? This cannot be undone.')">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="btn-view-cert" title="Delete" style="color:#8e1e18;">
-                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                        <button type="submit" role="menuitem" class="row-menu-item is-danger">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                            Delete record
                                         </button>
                                     </form>
                                     @endif
-                                    </div>
+                                </div>
+                                @else
+                                    <span class="row-menu-empty">—</span>
+                                @endif
                                 </td>
                             </tr>
                         @empty

@@ -25,7 +25,7 @@
                     <th onclick="sortLeaveTypes('annual_limit')" style="cursor: pointer;">Annual Limit {!! $sortIcon !!}</th>
                     <th style="min-width: 320px; padding-left: 24px; padding-right: 24px;">Attachment</th>
                     <th onclick="sortLeaveTypes('is_active')" style="cursor: pointer; text-align: right;">Status {!! $sortIcon !!}</th>
-                    <th style="text-align: center;">Actions</th>
+                    <th class="row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -48,7 +48,7 @@
                     <td data-label="Status" style="text-align: right;">
                         <span class="badge-status {{ $type->is_active ? 'processed' : 'on-hold' }}">{{ $type->is_active ? 'Active' : 'Inactive' }}</span>
                     </td>
-                    <td data-label="Actions">
+                    <td data-label="Actions" class="row-menu-cell">
                         <div style="position: relative; display: flex; justify-content: center;">
                             <button class="lt-ellipsis-btn" onclick="toggleLeaveTypeActionMenu(event, this)" title="Actions">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>

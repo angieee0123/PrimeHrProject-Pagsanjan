@@ -196,8 +196,14 @@
 .pr-close-frost:hover { background: rgba(255,255,255,0.2); color: #fff; }
 .pr-body-pad24 { padding: 24px; }
 .pr-footer-tint { background: #f7f6fc; }
-.pr-th-center { text-align: center; }
-.pr-th-right { text-align: right; }
+/* Qualified as well as bare: `.payroll-table thead th { text-align: left }`
+   in admin.css is (0,1,2) and outranks a lone class (0,1,0) whatever the
+   load order, so these header alignments were being ignored. The bare
+   selectors still serve the same classes used on <td>. */
+.pr-th-center,
+.payroll-table thead th.pr-th-center { text-align: center; }
+.pr-th-right,
+.payroll-table thead th.pr-th-right { text-align: right; }
 .pr-hidden { display: none; }
 .pr-summary-bar-tight { margin-top: 0; margin-bottom: 16px; }
 .pr-w-5 { width: 5%; }

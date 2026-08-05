@@ -32,7 +32,7 @@
                 <th>Base</th>
                 <th>Max Amount</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th class="th-center">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -84,7 +84,7 @@
                         <span class="badge-status pending">Inactive</span>
                     @endif
                 </td>
-                <td>
+                <td class="td-center">
                     <div class="row-actions">
                         <button class="btn-view" onclick="editDeductionType('{{ $type->code }}')">Edit</button>
                     </div>

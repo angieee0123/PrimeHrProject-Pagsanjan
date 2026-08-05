@@ -5,6 +5,52 @@ let isWakeWordListening = false;
 let isSpeaking = false;
 let speechSynthesis = window.speechSynthesis;
 let currentUtterance = null;
+let isAwaitingReply = false;
+// Captured at load so "Clear conversation" can put the starter prompts back.
+let chatSuggestHtml = '';
+
+const CHATBOT_GREETING = "Hello! I'm the PRIME HRIS Assistant. I can help you with employee information, departments, and HR data. I understand natural questions like \"How many people work here?\" or \"Find John Doe\" or \"Who's in the Mayor's office?\" Try asking me anything!";
+const CHATBOT_BOT_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+
+function chatbotTimestamp() {
+    return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
+function escapeChatHtml(text) {
+    const el = document.createElement('div');
+    el.textContent = text;
+    return el.innerHTML;
+}
+
+/* Escape first, then apply the markdown subset the assistant emits. Replies are
+   built from HR records, so raw interpolation into innerHTML let any stray
+   markup in a name or remark render as live HTML. Bullet runs become a real
+   list and blank lines become paragraphs — every newline used to be a <br>,
+   which flattened long answers into one dense block. */
+function formatChatMessage(raw) {
+    const lines = escapeChatHtml(raw).split('\n');
+    let html = '';
+    let inList = false;
+
+    lines.forEach(line => {
+        const bullet = line.match(/^\s*[•\-*]\s+(.*)$/);
+        if (bullet) {
+            if (!inList) { html += '<ul class="chat-list">'; inList = true; }
+            html += '<li>' + bullet[1] + '</li>';
+            return;
+        }
+        if (inList) { html += '</ul>'; inList = false; }
+        if (line.trim() !== '') html += '<p class="chat-p">' + line + '</p>';
+    });
+    if (inList) html += '</ul>';
+
+    return html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
+function scrollChatToBottom() {
+    const container = document.getElementById('chatbotMessages');
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+}
 
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -26,7 +72,7 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
 
             // Open chatbot if closed
             const chatWindow = document.getElementById('chatbotWindow');
-            if (chatWindow.style.display === 'none') {
+            if (!chatWindow.classList.contains('open')) {
                 toggleChatbot();
             }
 
@@ -243,32 +289,29 @@ function startVoiceInput() {
     stopWakeWordListening();
 
     isListening = true;
-    const micButton = document.getElementById('micButton');
-    const micIcon = document.getElementById('micIcon');
-    const micActiveIcon = document.getElementById('micActiveIcon');
-    const chatInput = document.getElementById('chatInput');
-
-    micButton.classList.add('listening');
-    micIcon.style.display = 'none';
-    micActiveIcon.style.display = 'block';
-    chatInput.placeholder = 'Nakikinig...';
+    applyMicChrome(true);
 
     try { recognition.start(); } catch(e) { console.warn('Recognition start:', e.message); }
 }
 
 function stopVoiceInput() {
     isListening = false;
-    const micButton = document.getElementById('micButton');
-    const micIcon = document.getElementById('micIcon');
-    const micActiveIcon = document.getElementById('micActiveIcon');
-    const chatInput = document.getElementById('chatInput');
-
-    micButton.classList.remove('listening');
-    micIcon.style.display = 'block';
-    micActiveIcon.style.display = 'none';
-    chatInput.placeholder = 'Type your question...';
+    applyMicChrome(false);
 
     try { recognition.stop(); } catch(e) {}
+}
+
+function applyMicChrome(listening) {
+    const micButton = document.getElementById('micButton');
+    const chatInput = document.getElementById('chatInput');
+
+    micButton.classList.toggle('listening', listening);
+    micButton.setAttribute('aria-pressed', String(listening));
+    micButton.setAttribute('aria-label', listening ? 'Stop voice input' : 'Voice input');
+    micButton.title = listening ? 'Stop listening' : 'Voice input';
+    document.getElementById('micIcon').classList.toggle('cb-hidden', listening);
+    document.getElementById('micActiveIcon').classList.toggle('cb-hidden', !listening);
+    chatInput.placeholder = listening ? 'Nakikinig…' : 'Type your question…';
 }
 
 // Load voices when available
@@ -290,8 +333,35 @@ window.addEventListener('DOMContentLoaded', function() {
         console.log('🎤 Ready! Say "Hey Anna" to activate chatbot');
     }, 2000);
 
+    const suggestions = document.getElementById('chatSuggestions');
+    if (suggestions) chatSuggestHtml = suggestions.outerHTML;
+
+    const greeting = document.getElementById('chatbotGreeting');
+    if (greeting) {
+        greeting.innerHTML = formatChatMessage(CHATBOT_GREETING)
+            + '<span class="chat-ts">' + chatbotTimestamp() + '</span>';
+    }
+
+    const input = document.getElementById('chatInput');
+    if (input) {
+        input.addEventListener('input', function () {
+            autosizeChatInput();
+            syncChatSendState();
+        });
+        input.addEventListener('keydown', handleChatKeyPress);
+    }
+
     restoreChatbotUiState();
     restoreChatbotHistory();
+});
+
+// Escape backs out of the confirmation first, then the panel.
+document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (isClearConfirmOpen()) { closeClearConfirm(); return; }
+
+    const chatWindow = document.getElementById('chatbotWindow');
+    if (chatWindow && chatWindow.classList.contains('open')) toggleChatbot();
 });
 
 let isFullscreen = false;
@@ -303,18 +373,19 @@ function restoreChatbotUiState() {
         const chatWindow = document.getElementById('chatbotWindow');
         const fab = document.querySelector('.chat-fab');
 
-        chatWindow.style.display = 'flex';
+        // The ✕ icon and the hidden badge are driven by .chat-fab.open in CSS,
+        // so restoring the state is a single class either side.
+        chatWindow.classList.add('open');
+        chatWindow.setAttribute('aria-hidden', 'false');
         fab.classList.add('open');
-        document.querySelector('.chat-fab-icon-open').style.display = 'none';
-        document.querySelector('.chat-fab-icon-close').style.display = 'block';
-        document.querySelector('.chat-fab-badge').style.display = 'none';
+        fab.setAttribute('aria-expanded', 'true');
+        fab.setAttribute('aria-label', 'Close HRIS assistant');
     }
 
     if (localStorage.getItem('chatbotFullscreen') === 'true') {
         isFullscreen = true;
         document.getElementById('chatbotWindow').classList.add('fullscreen-mode');
-        document.getElementById('fullscreenIcon').style.display = 'none';
-        document.getElementById('fullscreenExitIcon').style.display = 'block';
+        applyFullscreenChrome(true);
     }
 }
 
@@ -328,58 +399,57 @@ function restoreChatbotHistory() {
                 const messagesContainer = document.getElementById('chatbotMessages');
                 messagesContainer.innerHTML = '';
                 data.history.forEach(turn => {
-                    addChatMessage(turn.role === 'user' ? 'user' : 'bot', turn.content);
+                    addChatMessage(turn.role === 'user' ? 'user' : 'bot', turn.content, false);
                 });
             }
         })
         .catch(error => console.error('Error restoring chatbot history:', error));
 }
 
+function applyFullscreenChrome(expanded) {
+    const button = document.getElementById('fullscreenButton');
+    document.getElementById('fullscreenIcon').classList.toggle('cb-hidden', expanded);
+    document.getElementById('fullscreenExitIcon').classList.toggle('cb-hidden', !expanded);
+    button.setAttribute('aria-pressed', String(expanded));
+    button.setAttribute('aria-label', expanded ? 'Shrink panel' : 'Expand panel');
+    button.title = expanded ? 'Shrink panel' : 'Expand panel';
+}
+
 function toggleFullscreen() {
     const chatWindow = document.getElementById('chatbotWindow');
-    const fullscreenIcon = document.getElementById('fullscreenIcon');
-    const fullscreenExitIcon = document.getElementById('fullscreenExitIcon');
 
     isFullscreen = !isFullscreen;
     localStorage.setItem('chatbotFullscreen', isFullscreen ? 'true' : 'false');
 
-    if (isFullscreen) {
-        chatWindow.classList.add('fullscreen-mode');
-        fullscreenIcon.style.display = 'none';
-        fullscreenExitIcon.style.display = 'block';
-    } else {
-        chatWindow.classList.remove('fullscreen-mode');
-        fullscreenIcon.style.display = 'block';
-        fullscreenExitIcon.style.display = 'none';
-    }
+    chatWindow.classList.toggle('fullscreen-mode', isFullscreen);
+    applyFullscreenChrome(isFullscreen);
 }
 
 function toggleChatbot() {
-    const window = document.getElementById('chatbotWindow');
+    const chatWindow = document.getElementById('chatbotWindow');
     const fab = document.querySelector('.chat-fab');
-    const openIcon = document.querySelector('.chat-fab-icon-open');
-    const closeIcon = document.querySelector('.chat-fab-icon-close');
-    const badge = document.querySelector('.chat-fab-badge');
+    const isOpen = chatWindow.classList.contains('open');
 
-    if (window.style.display === 'none') {
-        window.style.display = 'flex';
-        fab.classList.add('open');
-        openIcon.style.display = 'none';
-        closeIcon.style.display = 'block';
-        badge.style.display = 'none';
-        localStorage.setItem('chatbotOpen', 'true');
-    } else {
-        window.style.display = 'none';
-        fab.classList.remove('open');
-        openIcon.style.display = 'block';
-        closeIcon.style.display = 'none';
-        badge.style.display = 'block';
+    chatWindow.classList.toggle('open', !isOpen);
+    chatWindow.setAttribute('aria-hidden', String(isOpen));
+    fab.classList.toggle('open', !isOpen);
+    fab.setAttribute('aria-expanded', String(!isOpen));
+    fab.setAttribute('aria-label', isOpen ? 'Open HRIS assistant' : 'Close HRIS assistant');
+    localStorage.setItem('chatbotOpen', isOpen ? 'false' : 'true');
+
+    if (isOpen) {
         stopVoiceInput();
-        localStorage.setItem('chatbotOpen', 'false');
+        fab.focus();
+    } else {
+        const input = document.getElementById('chatInput');
+        if (input) input.focus();
+        scrollChatToBottom();
     }
 }
 
 function sendChatMessage() {
+    if (isAwaitingReply) return;
+
     const input = document.getElementById('chatInput');
     const message = input.value.trim();
 
@@ -387,6 +457,8 @@ function sendChatMessage() {
 
     addChatMessage('user', message);
     input.value = '';
+    autosizeChatInput();
+    setChatAwaiting(true);
 
     addTypingIndicator();
 
@@ -414,16 +486,45 @@ function sendChatMessage() {
         removeTypingIndicator();
         console.error('Error:', error);
         addChatMessage('bot', 'Sorry, I couldn\'t process your request. Please try again.');
-    });
+    })
+    .finally(() => setChatAwaiting(false));
 }
 
 function sendPredefinedMessage(message) {
+    if (isAwaitingReply) return;
     document.getElementById('chatInput').value = message;
     sendChatMessage();
 }
 
+/* Opens the in-panel sheet rather than a browser confirm(), and names what is
+   actually at stake — the count of messages, and the fact that this also wipes
+   the assistant's server-side memory of the thread, which the old one-liner
+   never said. */
 function clearChatbotConversation() {
-    if (!confirm('Clear the conversation?')) return;
+    const messages = document.querySelectorAll('#chatbotMessages .chat-msg').length;
+
+    document.getElementById('chatClearConfirmText').textContent = messages <= 1
+        ? 'There is nothing to clear yet — this chat only has the welcome message.'
+        : 'This removes all ' + messages + ' messages and resets what the assistant '
+          + 'remembers of this thread. Employee records are not affected.';
+
+    document.getElementById('chatClearConfirm').classList.add('is-open');
+    document.getElementById('chatClearConfirmCancel').focus();
+}
+
+function closeClearConfirm() {
+    document.getElementById('chatClearConfirm').classList.remove('is-open');
+    const input = document.getElementById('chatInput');
+    if (input) input.focus();
+}
+
+function isClearConfirmOpen() {
+    const sheet = document.getElementById('chatClearConfirm');
+    return !!sheet && sheet.classList.contains('is-open');
+}
+
+function confirmClearChatbotConversation() {
+    closeClearConfirm();
 
     fetch('/chatbot/chat', {
         method: 'POST',
@@ -436,59 +537,58 @@ function clearChatbotConversation() {
     }).catch(error => console.error('Error clearing chatbot memory:', error));
 
     const messagesContainer = document.getElementById('chatbotMessages');
-    messagesContainer.innerHTML = `
-        <div class="chat-msg bot">
-            <div class="chat-msg-avatar">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-            </div>
-            <div class="chat-msg-bubble">Hello! I'm the PRIME HRIS Assistant. I can help you with employee information, departments, and HR data. I understand natural questions like "How many people work here?" or "Find John Doe" or "Who's in the Mayor's office?" Try asking me anything!</div>
-        </div>
-    `;
+    messagesContainer.innerHTML = '';
+    addChatMessage('bot', CHATBOT_GREETING);
+    messagesContainer.insertAdjacentHTML('beforeend', chatSuggestHtml);
 }
 
-function addChatMessage(from, text) {
+// withTime is false for turns replayed from session history, which carry no
+// timestamp of their own — stamping them "now" would be a lie.
+function removeChatSuggestions() {
+    const el = document.getElementById('chatSuggestions');
+    if (el) el.remove();
+}
+
+function addChatMessage(from, text, withTime = true) {
     const messagesContainer = document.getElementById('chatbotMessages');
+    if (from === 'user') removeChatSuggestions();
+
     const messageDiv = document.createElement('div');
     messageDiv.className = `chat-msg ${from}`;
 
-    // Convert markdown-style formatting to HTML
-    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    text = text.replace(/\n/g, '<br>');
-
     if (from === 'bot') {
-        messageDiv.innerHTML = `
-            <div class="chat-msg-avatar">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-            </div>
-            <div class="chat-msg-bubble">${text}</div>
-        `;
-    } else {
-        messageDiv.innerHTML = `<div class="chat-msg-bubble">${text}</div>`;
+        const avatar = document.createElement('div');
+        avatar.className = 'chat-msg-avatar';
+        avatar.innerHTML = CHATBOT_BOT_ICON;
+        messageDiv.appendChild(avatar);
     }
 
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-msg-bubble';
+    bubble.innerHTML = formatChatMessage(text);
+
+    if (withTime) {
+        const ts = document.createElement('span');
+        ts.className = 'chat-ts';
+        ts.textContent = chatbotTimestamp();
+        bubble.appendChild(ts);
+    }
+
+    messageDiv.appendChild(bubble);
     messagesContainer.appendChild(messageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    scrollChatToBottom();
 }
 
 function addTypingIndicator() {
     const messagesContainer = document.getElementById('chatbotMessages');
     const typingDiv = document.createElement('div');
-    typingDiv.className = 'chat-msg bot typing-indicator';
+    typingDiv.className = 'chat-msg bot';
     typingDiv.id = 'typingIndicator';
-    typingDiv.innerHTML = `
-        <div class="chat-msg-avatar">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-        </div>
-        <div class="chat-msg-bubble">Typing...</div>
-    `;
+    typingDiv.innerHTML = '<div class="chat-msg-avatar">' + CHATBOT_BOT_ICON + '</div>'
+        + '<div class="chat-typing-indicator" role="status" aria-label="Assistant is typing">'
+        + '<span></span><span></span><span></span></div>';
     messagesContainer.appendChild(typingDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    scrollChatToBottom();
 }
 
 function removeTypingIndicator() {
@@ -498,14 +598,40 @@ function removeTypingIndicator() {
     }
 }
 
+// Locks the composer while a request is in flight, so a slow reply cannot be
+// overtaken by a second question.
+function setChatAwaiting(awaiting) {
+    isAwaitingReply = awaiting;
+    const input = document.getElementById('chatInput');
+    input.disabled = awaiting;
+    syncChatSendState();
+    if (!awaiting) input.focus();
+}
+
+function syncChatSendState() {
+    const input = document.getElementById('chatInput');
+    const button = document.getElementById('chatSendButton');
+    if (input && button) button.disabled = isAwaitingReply || input.value.trim() === '';
+}
+
+function autosizeChatInput() {
+    const input = document.getElementById('chatInput');
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 96) + 'px';
+}
+
+// Enter sends; Shift+Enter is a new line.
 function handleChatKeyPress(event) {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
         sendChatMessage();
     }
 }
 
 window.toggleChatbot = toggleChatbot;
 window.clearChatbotConversation = clearChatbotConversation;
+window.confirmClearChatbotConversation = confirmClearChatbotConversation;
+window.closeClearConfirm = closeClearConfirm;
 window.toggleFullscreen = toggleFullscreen;
 window.sendPredefinedMessage = sendPredefinedMessage;
 window.toggleSpeaker = toggleSpeaker;

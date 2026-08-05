@@ -1,5 +1,81 @@
 import './bootstrap';
 
+/* ── Shared table row action menu (⋮) ───────────────────────────────────────
+   One implementation for every table whose row has two or more actions, on
+   both layouts (app.blade.php and employee.blade.php each load this file).
+
+   Markup contract:
+     <button class="row-menu-btn" data-menu="rowMenu{id}" onclick="toggleRowMenu(event)"
+             aria-haspopup="menu" aria-expanded="false"> ⋮ </button>
+     <div class="row-menu" id="rowMenu{id}" role="menu"> …row-menu-item… </div>
+
+   The menu cannot stay inside its <td>: .table-section sets overflow:hidden, so
+   an absolutely positioned menu is clipped at the card edge, and position:fixed
+   does not escape either, because .glass-shell puts backdrop-filter on
+   .table-section, which makes it the containing block for fixed descendants.
+   So the open menu is moved to <body>, positioned from the button's viewport
+   rect, and put back on close. */
+let _openRowMenu = null;
+let _rowMenuHome = null;
+
+window.closeRowMenu = function () {
+    document.querySelectorAll('.row-menu-btn.is-open').forEach(btn => {
+        btn.classList.remove('is-open');
+        btn.setAttribute('aria-expanded', 'false');
+    });
+
+    if (!_openRowMenu) return;
+    _openRowMenu.classList.remove('is-open');
+    _openRowMenu.style.top = '';
+    _openRowMenu.style.left = '';
+    // insertBefore with a null reference appends, which is what we want when the
+    // menu was the last child of its cell.
+    _rowMenuHome.parent.insertBefore(_openRowMenu, _rowMenuHome.next);
+    _openRowMenu = null;
+    _rowMenuHome = null;
+};
+
+window.toggleRowMenu = function (e) {
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    const menu = document.getElementById(btn.dataset.menu);
+    if (!menu) return;
+
+    const wasOpen = menu === _openRowMenu;
+    window.closeRowMenu();
+    if (wasOpen) return;
+
+    _rowMenuHome = { parent: menu.parentNode, next: menu.nextSibling };
+    document.body.appendChild(menu);
+    menu.classList.add('is-open');
+
+    const rect = btn.getBoundingClientRect();
+    let top = rect.bottom + 6;
+    if (top + menu.offsetHeight > window.innerHeight - 8) {
+        top = Math.max(8, rect.top - menu.offsetHeight - 6);
+    }
+    menu.style.top = top + 'px';
+    menu.style.left = Math.max(8, rect.right - menu.offsetWidth) + 'px';
+
+    btn.classList.add('is-open');
+    btn.setAttribute('aria-expanded', 'true');
+    _openRowMenu = menu;
+};
+
+document.addEventListener('click', function (e) {
+    // A handler can detach its own target — a form in the menu submitting, or a
+    // row being re-rendered. Anything no longer in the document cannot be judged
+    // as inside or outside, so leave the menu alone.
+    if (!document.contains(e.target)) return;
+    if (_openRowMenu && _openRowMenu.contains(e.target)) return;
+    window.closeRowMenu();
+});
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') window.closeRowMenu(); });
+// Capture phase: a scroll container's own scroll does not bubble to window.
+window.addEventListener('scroll', () => window.closeRowMenu(), true);
+window.addEventListener('resize', () => window.closeRowMenu());
+
 // ── Logout confirmation modal ──
 // Exposed on window because the sidebar buttons wire up via inline onclick.
 window.openLogoutModal = function () {

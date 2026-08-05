@@ -60,7 +60,7 @@
                     <th class="ps-ta-center">Time Out</th>
                     <th class="ps-ta-center">Time In</th>
                     <th onclick="sortPassSlips('status')" class="ps-th-sort ps-ta-center">Status {!! $sortIcon !!}</th>
-                    <th class="ps-ta-center">Actions</th>
+                    <th class="ps-ta-center row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -89,14 +89,33 @@
                             <span class="badge-status ps-badge-cancelled">Cancelled</span>
                         @endif
                     </td>
-                    <td data-label="Actions">
-                        <div class="row-actions">
-                            <button class="btn-view" onclick="viewPassSlip({{ $slip->id }})">View</button>
+                    <td data-label="Actions" class="row-menu-cell">
+                        <button type="button" class="row-menu-btn" data-menu="passSlipRowMenu{{ $slip->id }}"
+                                onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                title="Actions" aria-label="Actions for pass slip {{ $slip->slip_number ?? $slip->id }}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        <div class="row-menu" id="passSlipRowMenu{{ $slip->id }}" role="menu" aria-label="Pass slip actions">
+                            <button type="button" role="menuitem" class="row-menu-item"
+                                    onclick="closeRowMenu(); viewPassSlip({{ $slip->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                View details
+                            </button>
                             @if($slip->status === 'pending')
-                                <form method="POST" action="{{ route('passslip.delete', $slip->id) }}" class="ps-inline" onsubmit="return confirm('Are you sure you want to cancel this pass slip?');">
+                                <div class="row-menu-sep"></div>
+                                <form method="POST" action="{{ route('passslip.delete', $slip->id) }}" class="row-menu-form" onsubmit="return confirm('Cancel this pass slip? This cannot be undone.');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn-edit ps-btn-reject">Cancel</button>
+                                    <button type="submit" role="menuitem" class="row-menu-item is-danger">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                                        </svg>
+                                        Cancel pass slip
+                                    </button>
                                 </form>
                             @endif
                         </div>

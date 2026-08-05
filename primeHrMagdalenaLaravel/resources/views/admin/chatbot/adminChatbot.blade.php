@@ -2,14 +2,16 @@
 @include('admin.chatbot.partials.fab-button')
 
 <!-- Chatbot Window -->
-<div class="chatbot-window" id="chatbotWindow" style="display: none;">
+<div class="chatbot-window" id="chatbotWindow" role="dialog" aria-labelledby="chatbotTitle" aria-hidden="true">
     @include('admin.chatbot.partials.chatbot-header')
 
-    @include('admin.chatbot.partials.quick-actions')
-
+    {{-- quick-actions is included inside messages: the starter prompts sit in
+         the conversation rather than in a pinned strip above it. --}}
     @include('admin.chatbot.partials.messages')
 
     @include('admin.chatbot.partials.input-row')
+
+    @include('admin.chatbot.partials.clear-confirm')
 </div>
 </div>
 

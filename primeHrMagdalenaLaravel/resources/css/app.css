@@ -1478,3 +1478,115 @@ body.dark-mode .tab-btn.active { color: var(--gp-border); border-bottom-color: v
 @media (max-width: 480px) {
   .logout-modal-actions { flex-direction: column-reverse; }
 }
+/* ══════════ Shared table row action menu (⋮) ══════════
+   Paired with window.toggleRowMenu in resources/js/app.js, which both layouts
+   load. Used by every table row carrying two or more actions.
+
+   Unscoped on purpose: the open menu is moved to <body> to escape
+   .table-section's overflow clipping, so any selector rooted at a page wrapper
+   would stop matching the moment it opens. */
+.row-menu-btn {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: #8f8daf;
+    cursor: pointer;
+    transition: background .16s ease, color .16s ease, border-color .16s ease;
+}
+.row-menu-btn:hover,
+.row-menu-btn.is-open { background: #f2f1fb; border-color: #e2e0ee; color: #0b044d; }
+.row-menu-btn:focus-visible { outline: 2px solid rgba(11, 4, 77, .35); outline-offset: 2px; }
+
+.row-menu {
+    display: none;
+    position: fixed;
+    z-index: 1200;
+    min-width: 190px;
+    padding: 6px;
+    background: #fff;
+    border: 1px solid #ecebf6;
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(11, 4, 77, .14), 0 2px 6px rgba(11, 4, 77, .06);
+}
+.row-menu.is-open { display: block; animation: rowMenuIn .14s ease; }
+
+@keyframes rowMenuIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* Wrapper for the POST forms some actions need, so they do not add layout. */
+.row-menu-form { margin: 0; display: block; }
+
+.row-menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 7px;
+    background: none;
+    color: #3f3d63;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+}
+.row-menu-item svg { flex-shrink: 0; opacity: .9; }
+.row-menu-item:hover { background: #f5f4fd; color: #0b044d; }
+.row-menu-item:focus-visible { outline: 2px solid rgba(11, 4, 77, .3); outline-offset: -2px; }
+.row-menu-item.is-accept { color: #15803d; }
+.row-menu-item.is-accept:hover { background: #e8f9ef; color: #15803d; }
+.row-menu-item.is-danger { color: #8e1e18; }
+.row-menu-item.is-danger:hover { background: #fdf0ef; color: #8e1e18; }
+
+.row-menu-sep { height: 1px; margin: 5px 4px; background: #f0effe; }
+
+/* An action that exists but is not available right now — kept visible with
+   its reason in the title, rather than dropped, so the menu does not change
+   shape between rows. */
+.row-menu-item:disabled { color: #b8b6cf; cursor: not-allowed; }
+.row-menu-item:disabled:hover { background: none; color: #b8b6cf; }
+
+/* The actions column shrinks to the ⋮ once its buttons are behind it, and the
+   header centres over it so the label sits directly above the button.
+
+   Both selectors are qualified with .payroll-table to clear the base
+   `.payroll-table thead th { text-align: left }` in admin.css / employee.css
+   (0,1,2) and the per-page `.ps-td` / `.to-td` cell rules (0,1,0) — app.css
+   loads before both, so matching their specificity would lose on order. */
+.payroll-table thead th.row-menu-head,
+.payroll-table td.row-menu-cell { text-align: center; }
+.row-menu-cell { white-space: nowrap; }
+
+/* Rows whose actions are all conditional and none apply: keeps the column
+   width steady instead of collapsing to an empty cell. */
+.row-menu-empty { color: #b8b6cf; font-size: 12px; }
+
+/* Several action cells wrap their buttons in a flex row. text-align on the cell
+   does not move flex children, so the ⋮ stayed pinned left under a centred
+   header until the wrapper is told to centre too. */
+.row-menu-cell > .row-actions,
+.row-menu-cell > .ded-actions,
+.row-menu-cell > .lt-actions,
+.td-center > .row-actions { justify-content: center; }
+
+/* Column alignment utilities: put these on a <th>/<td> so a header always
+   states the same alignment as the content under it. Qualified with
+   .payroll-table to clear `.payroll-table thead th { text-align: left }`,
+   which app.css would otherwise lose to on both specificity and load order. */
+.payroll-table thead th.th-center,
+.payroll-table td.td-center { text-align: center; }
+.payroll-table thead th.th-right,
+.payroll-table td.td-right { text-align: right; }

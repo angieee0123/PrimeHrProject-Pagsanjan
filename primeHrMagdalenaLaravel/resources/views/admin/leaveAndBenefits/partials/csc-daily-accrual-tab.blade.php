@@ -23,7 +23,7 @@
                     <th style="text-align: center;">Effective Date</th>
                     <th style="text-align: center;">End Date</th>
                     <th style="text-align: center;">Status</th>
-                    <th style="text-align: center;">Actions</th>
+                    <th class="row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody id="accrualRatesTableBody">
@@ -62,10 +62,23 @@
                             {{ $rate->is_active ? 'Active' : 'Inactive' }}
                         </span>
                     </td>
-                    <td data-label="Actions" style="text-align: center;">
-                        <div class="row-actions">
-                            <button class="btn-view" onclick="viewAccrualRate({{ $rate->id }})">View</button>
-                            <button class="btn-edit" onclick="editAccrualRate({{ $rate->id }})">Edit</button>
+                    <td data-label="Actions" class="row-menu-cell">
+                        <button type="button" class="row-menu-btn" data-menu="accrualMenu{{ $rate->id }}"
+                                onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                title="Actions" aria-label="Actions for this accrual rate">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        <div class="row-menu" id="accrualMenu{{ $rate->id }}" role="menu" aria-label="Accrual rate actions">
+                            <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); viewAccrualRate({{ $rate->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                View rate
+                            </button>
+                            <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); editAccrualRate({{ $rate->id }})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                Edit rate
+                            </button>
                         </div>
                     </td>
                 </tr>

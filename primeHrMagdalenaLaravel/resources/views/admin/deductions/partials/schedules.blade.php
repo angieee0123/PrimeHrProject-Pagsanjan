@@ -27,7 +27,7 @@
                 <th>Active Deductions</th>
                 <th>Active Loans</th>
                 <th>Last Updated</th>
-                <th>Actions</th>
+                <th class="th-center">Actions</th>
             </tr>
         </thead>
         <tbody id="schedulesTableBody">
@@ -76,7 +76,7 @@
                     <td class="ded-text-muted-sm">
                         {{ $emp['updated_at'] ? \Carbon\Carbon::parse($emp['updated_at'])->format('M d, Y') : 'N/A' }}
                     </td>
-                    <td>
+                    <td class="td-center">
                         <div class="row-actions">
                             <button class="btn-view" onclick="openAssignDeductionScheduleModal({{ $emp['id'] }}, '{{ $emp['name'] }}')">Manage Schedule</button>
                         </div>

@@ -1,7 +1,68 @@
 window._loanCurrentPage = 1;
 window._loanRowsPerPage = 10;
 
+/* ── Row actions (⋮) ────────────────────────────────────────────────────────
+   The menu cannot stay inside its <td>: .table-section sets overflow:hidden, so
+   an absolutely positioned menu is clipped at the card edge. position:fixed does
+   not escape either, because the glass styling puts backdrop-filter on
+   .table-section, which makes it the containing block for its fixed descendants.
+   So the open menu is moved to <body>, positioned from the button's viewport
+   rect, and put back on close. */
+let _loanOpenMenu = null;
+let _loanMenuHome = null;
+
+window.closeLoanMenu = function () {
+    document.querySelectorAll('.lt-menu-btn.is-open').forEach(btn => {
+        btn.classList.remove('is-open');
+        btn.setAttribute('aria-expanded', 'false');
+    });
+
+    if (!_loanOpenMenu) return;
+    _loanOpenMenu.classList.remove('is-open');
+    _loanOpenMenu.style.top = '';
+    _loanOpenMenu.style.left = '';
+    // insertBefore with a null reference appends, which is what we want when the
+    // menu was the last child of its cell.
+    _loanMenuHome.parent.insertBefore(_loanOpenMenu, _loanMenuHome.next);
+    _loanOpenMenu = null;
+    _loanMenuHome = null;
+};
+
+window.toggleLoanMenu = function (e) {
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    const menu = document.getElementById(btn.dataset.menu);
+    if (!menu) return;
+
+    const wasOpen = menu === _loanOpenMenu;
+    closeLoanMenu();
+    if (wasOpen) return;
+
+    _loanMenuHome = { parent: menu.parentNode, next: menu.nextSibling };
+    document.body.appendChild(menu);
+    menu.classList.add('is-open');
+
+    const rect = btn.getBoundingClientRect();
+    let top = rect.bottom + 6;
+    if (top + menu.offsetHeight > window.innerHeight - 8) {
+        top = Math.max(8, rect.top - menu.offsetHeight - 6);
+    }
+    menu.style.top = top + 'px';
+    menu.style.left = Math.max(8, rect.right - menu.offsetWidth) + 'px';
+
+    btn.classList.add('is-open');
+    btn.setAttribute('aria-expanded', 'true');
+    _loanOpenMenu = menu;
+};
+
+document.addEventListener('click', () => closeLoanMenu());
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLoanMenu(); });
+// Capture phase: the table wrapper's own scroll does not bubble to window.
+window.addEventListener('scroll', () => closeLoanMenu(), true);
+window.addEventListener('resize', () => closeLoanMenu());
+
 function filterLoans() {
+    closeLoanMenu();
     const searchTerm = document.getElementById('searchLoan').value.toLowerCase();
     const loanTypeFilter = document.getElementById('filterLoanType').value;
     const statusFilter = document.getElementById('filterLoanStatus').value;
@@ -29,6 +90,9 @@ function filterLoans() {
 }
 
 window.updateLoanPagination = function () {
+    // A menu parked in <body> would survive its own row being paged out.
+    closeLoanMenu();
+
     const rows = window._loanFilteredRows || [];
     const total = rows.length;
     const perPage = window._loanRowsPerPage;

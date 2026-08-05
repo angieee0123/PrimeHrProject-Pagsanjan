@@ -67,7 +67,7 @@
                             <polyline points="18 15 12 9 6 15"></polyline>
                         </svg>
                     </th>
-                    <th style="width: 12%;">Actions</th>
+                    <th class="row-menu-head" style="width: 12%;">Actions</th>
                 </tr>
             </thead>
             <tbody id="personnelTableBody">
@@ -108,10 +108,10 @@
                     </td>
                     <td class="position-cell">{{ $position }}</td>
                     <td><span class="dept-tag">{{ $department }}</span></td>
-                    <td><span class="badge-emptype">{{ $empType }}</span></td>
+                    <td class="td-center"><span class="badge-emptype">{{ $empType }}</span></td>
                     <td style="font-size: 12px; color: #56547a; white-space: nowrap; text-align: center;">{{ $dateHired }}</td>
                     <td style="text-align: center;"><span class="badge-status {{ $status === 'Active' ? 'processed' : 'on-hold' }}">{{ $status }}</span></td>
-                    <td>
+                    <td class="row-menu-cell">
                         <div class="row-actions">
                             <!-- Desktop: Individual Buttons -->
                             <div class="action-buttons-desktop">

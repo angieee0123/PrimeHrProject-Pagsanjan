@@ -122,7 +122,7 @@ $avgRating        = $performance->whereNotNull('rating')->avg('rating') ?? 0;
                     <th>Evaluator</th>
                     <th>Rating</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th class="row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody id="performance-table-body">
@@ -165,12 +165,25 @@ $avgRating        = $performance->whereNotNull('rating')->avg('rating') ?? 0;
                         @endif
                     </td>
                     <td><span class="badge-status {{ $statusClass }}">{{ $perf['status'] }}</span></td>
-                    <td>
-                        <div class="row-actions">
-                            <button class="btn-view" onclick="viewPerformance('{{ $perf['id'] }}')">View</button>
-                            @if($perf['status'] === 'Pending')
-                            <button class="btn-evaluate" onclick="showEvaluateModal('{{ $perf['id'] }}')">Evaluate</button>
-                            @endif
+                    <td class="row-menu-cell">
+                        <button type="button" class="row-menu-btn" data-menu="perfMenu{{ $perf['id'] }}"
+                                onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                title="Actions" aria-label="Actions for evaluation {{ $perf['id'] }}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        <div class="row-menu" id="perfMenu{{ $perf['id'] }}" role="menu" aria-label="Performance actions">
+                            <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); viewPerformance('{{ $perf['id'] }}')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                View evaluation
+                            </button>
+                        @if($perf['status'] === 'Pending')
+                            <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); showEvaluateModal('{{ $perf['id'] }}')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                Evaluate
+                            </button>
+                        @endif
                         </div>
                     </td>
                 </tr>
