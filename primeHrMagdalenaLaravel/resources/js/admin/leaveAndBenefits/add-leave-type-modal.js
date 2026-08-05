@@ -40,6 +40,7 @@ window.closeAddLeaveTypeModal = function() {
     const modal = document.getElementById('addLeaveTypeModal');
     if (modal) {
         modal.classList.remove('active');
+        modal.style.display = '';
         document.body.style.overflow = '';
     }
 };
@@ -135,7 +136,6 @@ window.editLeaveType = function(code) {
             const modal = document.getElementById('addLeaveTypeModal');
             if (modal) {
                 modal.classList.add('active');
-                modal.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
             }
         })

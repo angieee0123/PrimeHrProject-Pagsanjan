@@ -406,50 +406,45 @@
 }
 
 @media print {
-    body * {
-        visibility: hidden;
-    }
+    body * { visibility: hidden; }
 
     #payslipDetailModal,
-    #payslipDetailModal * {
-        visibility: visible;
-    }
+    #payslipDetailModal * { visibility: visible; }
 
     #payslipDetailModal {
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
+        position: fixed !important;
+        display: flex !important;
+        visibility: visible !important;
+        left: 0; top: 0;
+        width: 100%; height: 100%;
         background: white;
         z-index: 9999;
-    }
-
-    .modal-overlay {
-        position: static;
-        background: none;
+        align-items: flex-start;
+        justify-content: center;
         padding: 0;
     }
 
     .modal-container {
         box-shadow: none;
-        max-width: 100%;
-        max-height: none;
+        max-width: 100% !important;
+        max-height: none !important;
+        width: 100%;
         border-radius: 0;
+        overflow: visible;
     }
 
     .modal-header,
-    .modal-footer {
-        display: none !important;
-    }
+    .modal-footer { display: none !important; }
 
     .modal-body {
-        padding: 15mm;
+        padding: 10mm 15mm;
         overflow: visible;
         font-size: 11px;
     }
 
+    /* ── Header / Logo ── */
     .payslip-header {
+        text-align: center;
         margin-bottom: 10px;
         padding-bottom: 8px;
         border-bottom: 2px solid #000;
@@ -457,97 +452,85 @@
     }
 
     .payslip-logo {
-        flex-direction: row;
-        justify-content: center;
+        flex-direction: column;
         align-items: center;
-        gap: 15px;
+        gap: 4px;
     }
 
     .logo-image {
-        width: 100px;
-        height: 100px;
+        width: 70px; height: 70px;
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
     }
 
-    .payslip-logo h2 {
-        font-size: 20px;
-        margin: 0;
-    }
+    .payslip-logo h2 { font-size: 15px; margin: 0; }
+    .payslip-logo p  { font-size: 11px; margin: 0; }
+    .payslip-title   { font-size: 14px; margin: 4px 0 0; letter-spacing: 3px; }
 
-    .payslip-logo p {
-        font-size: 13px;
-        margin: 0;
-    }
-
-    .payslip-title {
-        font-size: 18px;
-        margin: 5px 0 0 0;
-        letter-spacing: 3px;
-    }
-
+    /* ── Info grid — keep 2-column layout ── */
     .payslip-info-grid {
-        display: table;
-        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
         margin-bottom: 10px;
-        border: 1px solid #000;
+        border: 1px solid #ccc;
+        border-radius: 0;
+        background: #fff;
+        padding: 0;
     }
 
     .info-group {
-        display: table-row;
+        display: flex;
+        flex-direction: column;
+        padding: 4px 8px;
+        border-bottom: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+        gap: 1px;
     }
 
     .info-group label {
-        display: table-cell;
-        padding: 3px 8px;
-        font-size: 9px;
-        font-weight: 600;
-        border-bottom: 1px solid #ddd;
-        width: 30%;
-        background: #f5f5f5;
+        font-size: 8px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #555;
     }
 
     .info-group strong {
-        display: table-cell;
-        padding: 3px 8px;
         font-size: 10px;
-        border-bottom: 1px solid #ddd;
-        border-left: 1px solid #ddd;
+        color: #000;
     }
 
-    .payslip-divider {
-        height: 0;
-        margin: 8px 0;
-        border: none;
-    }
+    /* ── Divider ── */
+    .payslip-divider { height: 0; margin: 6px 0; border: none; }
 
-    .payslip-section {
-        page-break-inside: avoid;
-        margin-bottom: 8px;
-    }
+    /* ── Sections ── */
+    .payslip-section { page-break-inside: avoid; margin-bottom: 8px; }
 
     .section-title {
-        font-size: 11px;
-        margin: 0 0 5px 0;
+        font-size: 10px;
+        margin: 0 0 4px;
         padding: 3px 8px;
         background: #000;
-        color: white;
+        color: #fff;
         text-transform: uppercase;
         letter-spacing: 1px;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
     }
 
+    /* ── Earnings / Deductions table rows ── */
     .payslip-table {
         display: table;
         width: 100%;
-        border: 1px solid #000;
+        border: 1px solid #ccc;
         border-collapse: collapse;
+        gap: 0;
     }
 
     .table-row {
         display: table-row;
-        padding: 0;
-        margin: 0;
-        background: white;
+        padding: 0; margin: 0;
+        background: #fff;
         border-radius: 0;
     }
 
@@ -557,6 +540,7 @@
         font-size: 10px;
         border-bottom: 1px solid #ddd;
         width: 70%;
+        color: #333;
     }
 
     .table-row strong {
@@ -567,70 +551,53 @@
         border-left: 1px solid #ddd;
         text-align: right;
         width: 30%;
+        color: #000;
     }
 
-    .table-row.highlight {
-        background: #f9f9f9;
-        border: none;
-    }
+    .table-row.highlight { background: #f9f9f9; }
 
     .table-row.total {
-        background: #000 !important;
-        border-bottom: 2px solid #000;
+        background: #1a1a2e !important;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
     }
 
     .table-row.total span,
     .table-row.total strong {
-        color: white !important;
+        color: #fff !important;
         font-size: 11px;
         font-weight: 700;
         border-bottom: none;
         padding: 5px 8px;
     }
 
+    .deduction-amount { color: #cc0000 !important; }
+
+    /* ── Net Pay ── */
     .net-pay-box {
-        display: table;
-        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         padding: 8px 12px;
-        background: #000 !important;
-        border: 2px solid #000;
+        background: #1a1a2e !important;
         border-radius: 0;
         margin: 8px 0;
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
     }
 
-    .net-pay-box span {
-        display: table-cell;
-        font-size: 12px;
-        font-weight: 700;
-        color: white;
-        width: 70%;
-    }
+    .net-pay-box span  { font-size: 12px; font-weight: 700; color: #fff; }
+    .net-pay-box strong { font-size: 16px; font-weight: 700; color: #fff; }
 
-    .net-pay-box strong {
-        display: table-cell;
-        font-size: 16px;
-        font-weight: 700;
-        color: white;
-        text-align: right;
-        width: 30%;
-    }
-
+    /* ── Footer / Status ── */
     .payslip-footer {
-        margin-top: 10px;
-        padding-top: 8px;
+        margin-top: 8px;
+        padding-top: 6px;
         border-top: 1px solid #000;
-        font-size: 9px;
     }
 
-    .status-info {
-        margin-bottom: 5px;
-    }
-
-    .status-info label {
-        font-size: 9px;
-    }
+    .status-info { margin-bottom: 4px; }
+    .status-info label { font-size: 9px; }
 
     .badge-status {
         padding: 2px 8px;
@@ -639,20 +606,11 @@
         -webkit-print-color-adjust: exact;
     }
 
-    .notes-info {
-        margin-top: 5px;
-    }
+    .notes-info { margin-top: 4px; }
+    .notes-info label { font-size: 9px; }
+    .notes-info p { font-size: 9px; padding: 4px; background: #f5f5f5; }
 
-    .notes-info label {
-        font-size: 9px;
-    }
-
-    .notes-info p {
-        font-size: 9px;
-        padding: 5px;
-        background: #f5f5f5;
-    }
-
+    /* ── Signatures ── */
     .signature-section {
         margin-top: 20px;
         padding-top: 10px;
@@ -661,47 +619,22 @@
     }
 
     .signature-row {
-        display: table;
-        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
     }
 
-    .signature-box {
-        display: table-cell;
-        width: 50%;
-        text-align: center;
-        padding: 0 10px;
-    }
+    .signature-box { text-align: center; }
 
     .signature-line {
-        width: 100%;
-        height: 40px;
+        width: 100%; height: 40px;
         border-bottom: 1px solid #000;
         margin-bottom: 5px;
     }
 
-    .signature-label {
-        font-size: 9px;
-        font-weight: 600;
-        color: #000;
-        margin: 0 0 3px 0;
-        text-transform: uppercase;
-    }
+    .signature-label { font-size: 9px; font-weight: 600; color: #000; margin: 0 0 3px; text-transform: uppercase; }
+    .signature-name  { font-size: 10px; font-weight: 600; color: #000; margin: 0 0 3px; }
+    .signature-date  { font-size: 8px; color: #000; margin: 0; }
 
-    .signature-name {
-        font-size: 10px;
-        font-weight: 600;
-        color: #000;
-        margin: 0 0 3px 0;
-    }
-
-    .signature-date {
-        font-size: 8px;
-        color: #000;
-        margin: 0;
-    }
-
-    @page {
-        margin: 15mm;
-        size: A4 portrait;
-    }
+    @page { margin: 15mm; size: A4 portrait; }
 }

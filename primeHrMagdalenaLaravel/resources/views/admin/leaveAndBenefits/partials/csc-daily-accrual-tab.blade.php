@@ -136,6 +136,9 @@
     </div>
 </section>
 
+@include('admin.leaveAndBenefits.modals.view-accrual-rate-modal')
+@include('admin.leaveAndBenefits.modals.edit-accrual-rate-modal')
+
 @push('scripts')
     @vite('resources/js/admin/leaveAndBenefits/csc-daily-accrual-tab.js')
 @endpush

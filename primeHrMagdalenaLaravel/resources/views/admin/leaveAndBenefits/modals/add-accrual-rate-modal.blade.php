@@ -130,8 +130,10 @@
         </div>
 
         <div class="modal-footer">
-            <button type="button" class="btn-cancel" onclick="closeAccrualRateModal()">Cancel</button>
-            <button type="submit" class="btn-submit">Add Accrual Rate</button>
+            <button type="button" class="btn-cancel" onclick="closeAccrualRateModal()"
+                    style="flex:none; padding:9px 22px;">Cancel</button>
+            <button type="submit" class="btn-submit"
+                    style="flex:none; padding:9px 22px;">Add Accrual Rate</button>
         </div>
     </form>
 </x-modal-container>
@@ -162,8 +164,10 @@
     </div>
 
     <div class="modal-footer">
-        <button type="button" class="btn-cancel" onclick="closeCalculatorModal()">Close</button>
-        <button type="button" class="btn-submit" onclick="applyCalculatedRate()">Apply Rate</button>
+        <button type="button" class="btn-cancel" onclick="closeCalculatorModal()"
+                style="flex:none; padding:9px 22px;">Close</button>
+        <button type="button" class="btn-submit" onclick="applyCalculatedRate()"
+                style="flex:none; padding:9px 22px;">Apply Rate</button>
     </div>
 </x-modal-container>
 

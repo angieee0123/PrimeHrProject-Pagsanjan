@@ -532,6 +532,10 @@ class LeaveController extends Controller
 
         $accrualRate->update($validated);
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Accrual rate updated successfully!']);
+        }
+
         return redirect()->route('admin.leave')->with('success', 'Accrual rate updated successfully!');
     }
 

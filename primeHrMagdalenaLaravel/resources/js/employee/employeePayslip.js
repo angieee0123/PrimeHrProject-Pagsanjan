@@ -63,7 +63,7 @@ document.addEventListener('keydown', function(e) {
 let currentPayslipData = null;
 
 function viewPayslipDetail(id) {
-    fetch(`/permanent/payslip/${id}/details`, {
+    fetch(`/employee/payslip/${id}/details`, {
         method: 'GET',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -166,10 +166,34 @@ function printPayslip() {
 }
 
 function printPayslipDirect(id) {
-    viewPayslipDetail(id);
-    setTimeout(() => {
-        window.print();
-    }, 500);
+    fetch(`/employee/payslip/${id}/details`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            currentPayslipData = data.payslip;
+            populatePayslipDetailModal(data.payslip);
+            // Make modal visible to print engine but not to the user
+            const modal = document.getElementById('payslipDetailModal');
+            modal.style.visibility = 'hidden';
+            modal.style.display = 'flex';
+            window.print();
+            modal.style.display = 'none';
+            modal.style.visibility = '';
+            currentPayslipData = null;
+        } else {
+            alert('Error: ' + (data.message || 'Failed to load payslip'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to load payslip');
+    });
 }
 
 window.openModal = openModal;

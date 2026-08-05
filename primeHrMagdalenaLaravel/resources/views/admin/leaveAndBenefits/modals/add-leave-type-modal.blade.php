@@ -71,9 +71,11 @@
             <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">Upload policy document, memo, or reference file (PDF only, max 5MB)</p>
         </div>
 
-        <div class="form-actions">
-            <button type="button" class="btn-cancel" onclick="closeAddLeaveTypeModal()">Cancel</button>
-            <button type="submit" class="btn-submit">Add Leave Type</button>
+        <div class="form-actions" style="justify-content: flex-end;">
+            <button type="button" class="btn-cancel" onclick="closeAddLeaveTypeModal()"
+                    style="flex:none; padding:9px 22px;">Cancel</button>
+            <button type="submit" class="btn-submit"
+                    style="flex:none; padding:9px 22px;">Add Leave Type</button>
         </div>
     </form>
 </x-modal-container>
