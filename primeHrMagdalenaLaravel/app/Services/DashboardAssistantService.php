@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
  */
 class DashboardAssistantService
 {
-    public function __construct(private AiAccessPolicy $policy)
+    public function __construct(private AiAccessPolicy $policy, private ChartDataService $charts)
     {
     }
 
@@ -166,10 +166,20 @@ class DashboardAssistantService
             ->map(fn ($r) => "- {$r['department']}: {$r['absence_rate']}% ({$r['absent_days']} of {$r['total_days']} days)")
             ->implode("\n");
 
+        $withAbsences = $ranked->where('absent_days', '>', 0)->values()->all();
+
         return [
             'answer' => "**{$top['department']}** has the highest absenteeism at **{$top['absence_rate']}%** "
                 . "over the last 3 months ({$totalAbsences} recorded absences in total).\n\n{$lines}",
             'data' => ['since' => $since, 'total_absences' => $totalAbsences, 'departments' => $ranked->all()],
+            'charts' => empty($withAbsences) ? [] : [$this->charts->buildCategoryChart(
+                'Absenteeism by department (last 3 months)',
+                'Absence rate (%)',
+                'Absence rate',
+                $withAbsences,
+                'department',
+                'absence_rate',
+            )],
         ];
     }
 
@@ -218,6 +228,14 @@ class DashboardAssistantService
         return [
             'answer' => "**Headcount by department:**\n\n{$lines}{$note}",
             'data' => ['departments' => $rows, 'unassigned' => $unassigned],
+            'charts' => empty($rows) ? [] : [$this->charts->buildCategoryChart(
+                'Headcount by department',
+                'Employees',
+                'Employees',
+                $rows,
+                'department',
+                'count',
+            )],
         ];
     }
 

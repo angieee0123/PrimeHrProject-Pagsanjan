@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Feature 6: Automatic Charts.
@@ -36,7 +37,7 @@ class ChartDataService
     private const PALETTE_LIGHT = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
     private const PALETTE_DARK = ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767'];
 
-    public function __construct(private AiAccessPolicy $policy)
+    public function __construct(private AiAccessPolicy $policy, private SafeSqlService $sql)
     {
     }
 
@@ -65,10 +66,17 @@ class ChartDataService
         };
 
         if ($chart === null) {
+            $fallback = $this->genericChartFromQuery($user, $question, $history);
+
+            if ($fallback !== null) {
+                return $fallback;
+            }
+
             return [
                 'answer' => "I can chart: **monthly attendance**, **leave utilisation**, **leave by type**, "
                     . "**headcount by department**, **gender distribution**, **hiring trend**, **payroll expenses**, "
-                    . "and **absenteeism comparisons**.\n\nFor example: \"generate a graph of monthly attendance\".",
+                    . "and **absenteeism comparisons**.\n\nOr ask me to chart any breakdown, e.g. \"graph documents "
+                    . "uploaded per month\" — I'll chart it if the result comes back as a category and a number.",
                 'data' => [],
             ];
         }
@@ -85,6 +93,103 @@ class ChartDataService
             'data' => $this->asTableRows($chart),
             'charts' => [$this->decorate($chart)],
         ];
+    }
+
+    /**
+     * The 8 named subjects above cover the common phrasings with tuned SQL and
+     * titles. Anything else that still carries chart intent ("graph documents
+     * uploaded per month") gets one attempt through the same validated
+     * NL→SQL pipeline the `data_query` intent uses — if the result comes back
+     * shaped as exactly one label column and one numeric column, it is
+     * chartable; anything wider or narrower is not a form this can guess at
+     * safely, so it is left to the caller's static guidance message instead.
+     *
+     * @param array<int, array{role: string, content: string}> $history
+     */
+    private function genericChartFromQuery(User $user, string $question, array $history): ?array
+    {
+        $result = $this->sql->query($user, $question, $history);
+        $rows = $result['data'] ?? [];
+
+        if (!empty($result['blocked']) || empty($rows) || !is_array($rows[0] ?? null)) {
+            return null;
+        }
+
+        if (count($rows) > self::MAX_CATEGORIES) {
+            return null;
+        }
+
+        $keys = array_keys($rows[0]);
+
+        if (count($keys) !== 2) {
+            return null;
+        }
+
+        [$labelKey, $valueKey] = is_numeric($rows[0][$keys[0]] ?? null) ? [$keys[1], $keys[0]] : [$keys[0], $keys[1]];
+
+        if (!is_numeric($rows[0][$valueKey] ?? null)) {
+            return null;
+        }
+
+        $chart = $this->buildCategoryChart(
+            $this->titleFromKeys($labelKey, $valueKey),
+            Str::headline($labelKey),
+            Str::headline($valueKey),
+            $rows,
+            $labelKey,
+            $valueKey,
+        );
+
+        return [
+            'answer' => $this->narrate($user, $question, $chart, $history),
+            'data' => $rows,
+            'charts' => [$chart],
+        ];
+    }
+
+    private function titleFromKeys(string $labelKey, string $valueKey): string
+    {
+        return Str::headline($valueKey) . ' by ' . Str::headline($labelKey);
+    }
+
+    /**
+     * Turn any label/value row set into a ready chart spec — magnitude
+     * comparison, one hue, tail folded past MAX_SERIES rather than inventing
+     * a 9th colour. Reuses the same foldTail()/decorate() logic every named
+     * chart subject in this class is built from, so a caller outside this
+     * class (DashboardAssistantService cross-linking a metric to a chart) or
+     * the generic fallback above gets an identically-styled chart for free.
+     *
+     * @param array<int, array<string, mixed>> $rows
+     */
+    public function buildCategoryChart(
+        string $title,
+        string $xLabel,
+        string $seriesName,
+        array $rows,
+        string $labelKey,
+        string $valueKey,
+        string $orientation = 'horizontal',
+    ): array {
+        $folded = $this->foldTail(
+            collect($rows)->map(fn (array $row) => [
+                'label' => (string) ($row[$labelKey] ?? ''),
+                'value' => is_numeric($row[$valueKey] ?? null) ? $row[$valueKey] + 0 : 0,
+            ])->all()
+        );
+
+        return $this->decorate([
+            'type' => 'bar',
+            'color_role' => 'sequential',
+            'orientation' => $orientation,
+            'title' => $title,
+            'x_label' => $xLabel,
+            'y_label' => '',
+            'labels' => array_column($folded, 'label'),
+            'series' => [
+                ['name' => $seriesName, 'values' => array_column($folded, 'value')],
+            ],
+        ]);
     }
 
     private function detectSubject(string $question): ?string

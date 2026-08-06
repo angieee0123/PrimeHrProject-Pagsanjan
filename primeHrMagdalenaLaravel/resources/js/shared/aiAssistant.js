@@ -53,6 +53,52 @@
         return div.innerHTML;
     }
 
+    function inlineFormat(line) {
+        return line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    /**
+     * The assistant's narration is markdown-ish (**bold**, "- item" bullet
+     * lines, "1. item" numbered lines — see HrChatbotAnswerer/DashboardAssistantService).
+     * This renders that small subset as real HTML rather than leaving list
+     * markers as literal hyphens in the bubble.
+     */
+    function renderMarkdown(text) {
+        const lines = escapeHtml(text).split('\n');
+        const blocks = [];
+        let list = null;
+
+        function closeList() {
+            if (list) {
+                blocks.push('<' + list.tag + '>' + list.items.join('') + '</' + list.tag + '>');
+                list = null;
+            }
+        }
+
+        lines.forEach(function (line) {
+            const bullet = line.match(/^[-*]\s+(.+)$/);
+            const numbered = line.match(/^\d+\.\s+(.+)$/);
+            const tag = bullet ? 'ul' : (numbered ? 'ol' : null);
+
+            if (tag) {
+                const content = inlineFormat((bullet || numbered)[1]);
+                if (!list || list.tag !== tag) {
+                    closeList();
+                    list = { tag: tag, items: [] };
+                }
+                list.items.push('<li>' + content + '</li>');
+                return;
+            }
+
+            closeList();
+            blocks.push(line === '' ? '' : inlineFormat(line));
+        });
+
+        closeList();
+
+        return blocks.join('<br>');
+    }
+
     function renderConversationList(items, opts) {
         opts = opts || {};
         renderedItems = items;
@@ -136,7 +182,7 @@
 
         const bubble = document.createElement('div');
         bubble.className = 'ai-msg-bubble';
-        bubble.innerHTML = escapeHtml(content).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+        bubble.innerHTML = renderMarkdown(content == null ? '' : String(content));
 
         // Charts, then the table, then the export button — the assistant's
         // prose summarises, and these carry the detail.
@@ -352,7 +398,14 @@
                 conversation_id: activeConversationId,
             }),
         })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                if (!r.ok) {
+                    const err = new Error('HTTP ' + r.status);
+                    err.isHttpError = true;
+                    throw err;
+                }
+                return r.json();
+            })
             .then(function (data) {
                 removeTyping();
                 appendMessage('assistant', data.response || "Sorry, I couldn't process that.", null, {
@@ -377,9 +430,12 @@
 
                 if (!isSearching) renderConversationList(conversations, {});
             })
-            .catch(function () {
+            .catch(function (err) {
                 removeTyping();
-                appendMessage('assistant', "Sorry, something went wrong reaching the assistant. Please try again.");
+                const message = err && err.isHttpError
+                    ? "Sorry, the assistant hit an error processing that. Please try again."
+                    : "Sorry, I couldn't reach the assistant — check your connection and try again.";
+                appendMessage('assistant', message);
             })
             .finally(function () {
                 inputEl.disabled = false;

@@ -3,15 +3,21 @@
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 /**
- * The HR chatbot "brain": text-to-SQL against the live schema, policy-question
- * shortcuts, and bilingual narration. Extracted out of ChatbotController so both
- * the session-backed floating widget and the DB-backed full-page AI Assistant
- * call the exact same logic instead of maintaining two copies of this prompt
+ * The HR chatbot "brain": policy-question shortcuts and DB-free conversational
+ * fallback, bilingual. Extracted out of ChatbotController so both the
+ * session-backed floating widget and the DB-backed full-page AI Assistant call
+ * the exact same logic instead of maintaining two copies of this prompt
  * engineering.
+ *
+ * Deliberately has no database access. Anything that needs real records is
+ * handled upstream by SafeSqlService (validated, table-allow-listed, row-capped,
+ * gated to org-wide roles) before a question ever reaches here — see
+ * AiQueryService::dataQuery(). This class only used to run its own independent
+ * text-to-SQL pipeline against the full schema with none of those guards; that
+ * was removed because it was reachable by every role, including self-scoped
+ * employee accounts, whenever a question fell through pattern matching.
  */
 class HrChatbotAnswerer
 {
@@ -200,25 +206,14 @@ TEXT;
             return $policyAnswer;
         }
 
-        // Get DB schema
-        $schema = $this->getDbSchema();
-
-        // Ask the LLM to generate SQL
-        $sql = $this->generateSql($user, $message, $schema, $history);
-
-        if (!$sql || strtoupper(substr(trim($sql), 0, 6)) !== 'SELECT') {
-            return $this->askDirectly($user, $message, $history);
-        }
-
-        // Execute SQL
-        try {
-            $results = DB::select($sql);
-        } catch (\Throwable $e) {
-            Log::error('Chatbot SQL error: ' . $e->getMessage() . ' | SQL: ' . $sql);
-            return $this->askDirectly($user, $message, $history);
-        }
-
-        return $this->narrateResults($user, $message, $sql, $results, $history);
+        // Anything that needs real records goes through SafeSqlService before
+        // reaching here (see AiQueryService::dataQuery) — this is the DB-free
+        // conversational tail, not a second text-to-SQL pipeline. It used to
+        // run its own unrestricted DB::select() against every table in the
+        // schema (including users/personal_access_tokens/sessions) with no
+        // allow-list, no forbidden-keyword check, and no row cap — that has
+        // been removed in favour of the single validated path.
+        return $this->askDirectly($user, $message, $history);
     }
 
     private function formatHistory(array $history): string
@@ -234,139 +229,6 @@ TEXT;
         }
 
         return implode("\n", $lines);
-    }
-
-    private function getDbSchema(): string
-    {
-        $tables = DB::select('SHOW TABLES');
-        $dbName = DB::getDatabaseName();
-        $key    = "Tables_in_{$dbName}";
-
-        $schema = '';
-        foreach ($tables as $row) {
-            $table   = $row->$key;
-            $columns = DB::select("DESCRIBE `{$table}`");
-            $cols    = implode(', ', array_map(function($c) { return "{$c->Field} ({$c->Type})"; }, $columns));
-            $schema .= "Table `{$table}`: {$cols}\n";
-        }
-
-        return $schema;
-    }
-
-    private function generateSql(?User $user, string $question, string $schema, array $history = []): ?string
-    {
-        $knowledge   = self::SYSTEM_KNOWLEDGE;
-        $today       = now()->toDateString();       // e.g. 2026-07-04
-        $yesterday   = now()->subDay()->toDateString();
-        $tomorrow    = now()->addDay()->toDateString();
-        $thisMonth   = now()->format('Y-m');         // e.g. 2026-07
-        $conversation = $this->formatHistory($history);
-
-        $prompt = <<<PROMPT
-You are a MySQL expert for the Prime HRIS Magdalena system. Generate a valid MySQL SELECT query to answer the user's question.
-
-SYSTEM KNOWLEDGE:
-{$knowledge}
-
-Database Schema:
-{$schema}
-
-CONVERSATION SO FAR (use this to resolve pronouns like "siya"/"he"/"her" and follow-up references to a previously mentioned employee, date, or topic):
-{$conversation}
-
-CRITICAL RULES — follow exactly:
-- Only generate SELECT queries, never INSERT, UPDATE, DELETE, or DROP
-- Return ONLY the raw SQL query — no explanation, no markdown, no backticks
-- Use JOINs when data spans multiple tables (e.g. employee name + government_ids)
-- For employee name searches always use LIKE on BOTH first_name AND last_name
-- If the question refers back to someone/something from the conversation above (e.g. "him", "her", "siya", "that employee"), resolve it using the conversation history instead of returning CANNOT_ANSWER
-- If the question cannot be answered from the schema, return: CANNOT_ANSWER
-- "today" means date = '{$today}'
-- "yesterday" or "kahapon" means date = '{$yesterday}'
-- "tomorrow" or "bukas" means date = '{$tomorrow}'
-- "this month" means date LIKE '{$thisMonth}%'
-- am_in, am_out, pm_in, pm_out are VARCHAR time strings (e.g. '07:45:00') — compare as strings
-- "early bird" or "earliest" means smallest (earliest) am_in value where am_in IS NOT NULL AND am_in != ''
-- "top 5 early birds today" example SQL:
-  SELECT e.first_name, e.last_name, a.am_in FROM attendance a
-  JOIN employees e ON e.id = a.employee_id
-  WHERE a.date = '{$today}' AND a.am_in IS NOT NULL AND a.am_in != ''
-  ORDER BY a.am_in ASC LIMIT 5
-- "who was late" means am_in > '08:05:00'
-- "absent today" means employees with no attendance row for date = '{$today}'
-
-LATE MINUTES COMPUTATION IN SQL:
-- AM late minutes: GREATEST(0, TIME_TO_SEC(am_in)/60 - 485) when am_in IS NOT NULL AND am_in > '08:05:00', else 0
-- PM late minutes: GREATEST(0, TIME_TO_SEC(pm_in)/60 - 785) when pm_in IS NOT NULL AND pm_in > '13:05:00', else 0
-- Total late minutes expression:
-  (CASE WHEN am_in > '08:05:00' THEN GREATEST(0, TIME_TO_SEC(am_in)/60 - 485) ELSE 0 END +
-   CASE WHEN pm_in > '13:05:00' THEN GREATEST(0, TIME_TO_SEC(pm_in)/60 - 785) ELSE 0 END)
-- VL deduction in days: total_late_minutes / 480
-- LWOP days (when VL=0 and SL=0): total_late_minutes / 480
-- Salary deduction from LWOP: (monthly_rate / 22) * lwop_days — join designations for monthly_rate
-- For "late deduction" or "VL deducted" queries, always SELECT: employee name, am_in, pm_in, total late minutes, VL deduction (days), and available VL credits
-- For "LWOP" queries, also include: SL credits, LWOP days, and estimated salary deduction
-
-User Question: {$question}
-
-SQL Query:
-PROMPT;
-
-        $content = $this->callAi($user, $prompt, 0.1, 400);
-
-        if (!$content || str_contains(strtoupper($content), 'CANNOT_ANSWER')) {
-            return null;
-        }
-
-        // Strip any accidental markdown fences
-        $content = preg_replace('/```[a-z]*\n?/i', '', $content);
-        $content = trim($content, "`\n ");
-
-        return $content;
-    }
-
-    private function narrateResults(?User $user, string $question, string $sql, array $results, array $history = []): string
-    {
-        $knowledge = self::SYSTEM_KNOWLEDGE;
-        $preview = count($results) > 0
-            ? json_encode(array_slice($results, 0, 10), JSON_PRETTY_PRINT)
-            : 'No results found';
-
-        $total        = count($results);
-        $conversation = $this->formatHistory($history);
-
-        $prompt = <<<PROMPT
-You are a friendly HR assistant for Prime HRIS Magdalena. A user asked a question, a SQL query was run, and here are the results. Answer naturally and conversationally, as a continuation of the ongoing chat below — don't reintroduce yourself or restate things already established in the conversation.
-
-SYSTEM KNOWLEDGE:
-{$knowledge}
-
-CONVERSATION SO FAR:
-{$conversation}
-
-Latest User Question: {$question}
-SQL Query Used: {$sql}
-Query Results (first 10): {$preview}
-Total Records Found: {$total}
-
-Instructions:
-- Answer in a friendly, concise tone (3-5 sentences max), like you're picking up the conversation naturally
-- Never dump raw field names or key/value pairs — turn the data into a natural sentence (e.g. "Jeremy clocked in at 8:11 AM yesterday, about 6.5 minutes late")
-- If no results, say so politely and suggest checking the spelling or name
-- All monetary amounts in Philippine Peso (PHP), never use dollar signs
-- Match the user's language (Tagalog or English) and mirror the tone of the conversation so far
-- Never expose raw SQL to the user
-- If the question involves late deductions or leave computation, explain the math step-by-step:
-    * How many minutes late (AM and/or PM)
-    * How many VL days were deducted (late_minutes / 480)
-    * Whether SL was used after VL was exhausted
-    * Whether any LWOP applies and how much salary is affected
-    * Use plain language: e.g. "30 minutes late = 0.0625 VL day deducted"
-- If the result shows LWOP, always mention the estimated salary deduction in PHP
-- If the result shows leave balances, mention remaining VL and SL credits after deduction
-PROMPT;
-
-        return $this->callAi($user, $prompt, 0.7, 400) ?? $this->buildFallbackNarration($results);
     }
 
     private function askDirectly(?User $user, string $question, array $history = []): string
@@ -507,27 +369,5 @@ PROMPT;
     private function callAi(?User $user, string $prompt, float $temperature, int $maxTokens): ?string
     {
         return AiChatService::complete($user, $prompt, $temperature, $maxTokens);
-    }
-
-    private function buildFallbackNarration(array $results): string
-    {
-        if (empty($results)) {
-            return "I couldn't find any matching records for that. Could you double-check the name or details and try again?";
-        }
-
-        $first = (array) $results[0];
-        $parts = [];
-        foreach ($first as $key => $value) {
-            $label   = ucwords(str_replace('_', ' ', $key));
-            $parts[] = "{$label}: {$value}";
-        }
-
-        $summary = implode(', ', $parts);
-        $total   = count($results);
-        $intro   = $total > 1
-            ? "I found {$total} matching records — here's the first one:"
-            : "Here's what I found:";
-
-        return "{$intro} {$summary}.";
     }
 }

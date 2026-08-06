@@ -380,14 +380,16 @@
     margin-bottom: 6px;
 }
 
-/* The table's own scroll container: wide result sets stay inside the bubble. */
+/* The table's own scroll container: wide result sets stay inside the bubble.
+   Same glass treatment as the dashboard's .chart-card (glassSystem.css) so
+   generated UI reads as one system with the rest of the role's page. */
 .ai-table-scroll {
     overflow-x: auto;
     max-height: 420px;
     overflow-y: auto;
-    border: 1px solid var(--gp-line, #e3e1f0);
-    border-radius: 10px;
-    background: var(--gp-surface, #fff);
+    border: 1px solid var(--gp-glass-border, #e3e1f0);
+    border-radius: var(--gp-radius-card, 10px);
+    background: linear-gradient(180deg, var(--gp-glass-strong, #fff), var(--gp-glass, #fff));
 }
 
 .ai-table {
@@ -475,9 +477,9 @@
 
 .ai-chart {
     padding: 10px;
-    border: 1px solid var(--gp-line, #e3e1f0);
-    border-radius: 10px;
-    background: var(--gp-surface, #fff);
+    border: 1px solid var(--gp-glass-border, #e3e1f0);
+    border-radius: var(--gp-radius-card, 10px);
+    background: linear-gradient(180deg, var(--gp-glass-strong, #fff), var(--gp-glass, #fff));
     overflow-x: auto;
 }
 .ai-chart svg { display: block; }

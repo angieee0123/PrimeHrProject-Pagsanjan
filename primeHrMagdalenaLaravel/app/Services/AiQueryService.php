@@ -59,7 +59,7 @@ class AiQueryService
         $started = microtime(true);
 
         try {
-            $result = $this->dispatch($intent, $user, $resolved, $message, $history);
+            $result = $this->dispatch($intent, $user, $resolved, $history);
         } catch (\Throwable $e) {
             Log::error('AI Assistant failure', [
                 'user_id' => $user->id,
@@ -140,7 +140,7 @@ class AiQueryService
      * @param array<int, array{role: string, content: string}> $history
      * @return array{answer: string, data?: mixed, charts?: mixed, download?: array}
      */
-    private function dispatch(string $intent, User $user, string $resolved, string $original, array $history): array
+    private function dispatch(string $intent, User $user, string $resolved, array $history): array
     {
         return match ($intent) {
             'employee_search' => $this->employees->search($user, $resolved, $history),
@@ -150,14 +150,17 @@ class AiQueryService
             'chart' => $this->charts->generate($user, $resolved, $history),
             'workflow' => $this->workflows->handle($user, $resolved, $history),
             'data_query' => $this->dataQuery($user, $resolved, $history),
-            default => ['answer' => $this->fallback->answer($user, $original, $history)],
+            default => $this->dataQuery($user, $resolved, $history),
         };
     }
 
     /**
      * Structured data questions go through generated SQL; if that is blocked
      * or comes back empty-handed, fall through to the existing chatbot brain
-     * so the user still gets an answer.
+     * so the user still gets an answer. This is also where the `general` /
+     * unmatched intent lands, so a question that isn't caught by any pattern
+     * still gets a real, validated, table-backed answer whenever the data
+     * exists, instead of unverifiable prose.
      *
      * @param array<int, array{role: string, content: string}> $history
      */

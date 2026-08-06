@@ -20,7 +20,7 @@ class ChartRenderer
 {
     private const WIDTH = 720;
     private const HEIGHT = 340;
-    private const PAD_TOP = 16;
+    private const PAD_TOP = 34;
     private const PAD_BOTTOM = 44;
     private const PAD_LEFT = 56;
     private const PAD_RIGHT = 16;
@@ -44,12 +44,14 @@ class ChartRenderer
 
         $legend = ($chart['legend'] ?? false) ? $this->renderLegend($chart) : '';
         $height = self::HEIGHT + (($chart['legend'] ?? false) ? 28 : 0);
+        $titleText = $chart['title'] ?? 'Chart';
 
-        return '<svg class="viz" role="img" aria-label="' . $this->esc($chart['title'] ?? 'Chart') . '" '
+        return '<svg class="viz" role="img" aria-label="' . $this->esc($titleText) . '" '
             . 'viewBox="0 0 ' . self::WIDTH . ' ' . $height . '" width="100%" '
             . 'xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;overflow:visible">'
             . $this->styleBlock($chart)
-            . '<title>' . $this->esc($chart['title'] ?? 'Chart') . '</title>'
+            . '<title>' . $this->esc($titleText) . '</title>'
+            . '<text class="ttl ink" x="0" y="18">' . $this->esc($titleText) . '</text>'
             . $body
             . $legend
             . '</svg>';
