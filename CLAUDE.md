@@ -125,9 +125,19 @@ A USB scanner gun works too: it types the payload and presses Enter, which the
 manual-entry box accepts. Camera decoding uses html5-qrcode from a CDN, matching
 how the QR *generator* is already loaded on the Personnel page.
 
+A scan is a real attendance record, not a parallel log: it writes the same
+`attendance` row the DTR, accredited hours, and payroll read. `AttendanceScannerTest`
+follows one scan from the HTTP request through to `daily_salary_computations`
+so that stays true.
+
 ```bash
-php artisan test tests/Unit/AttendanceQrServiceTest.php tests/Unit/AttendancePunchServiceTest.php
+php artisan test tests/Unit/AttendanceQrServiceTest.php \
+  tests/Unit/AttendancePunchServiceTest.php tests/Feature/AttendanceScannerTest.php
 ```
+
+Attendance tests build their tables from `Tests\Support\BuildsAttendanceSchema`
+— a punch reaches a long way past `attendance`, and every table in that chain
+has to exist for a single scan to complete.
 
 ---
 
