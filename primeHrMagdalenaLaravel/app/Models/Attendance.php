@@ -10,8 +10,16 @@ class Attendance extends Model
 
     protected $table = 'attendance';
 
+    // `attendance_type` and `remarks` were missing here while both
+    // LeaveApplicationObserver and TravelOrderObserver passed them to
+    // Attendance::create(), so mass assignment silently discarded them and
+    // every approved leave or travel day was stored as REGULAR. That is the
+    // column the dashboard, reports, and the AI Assistant all count leave and
+    // absence from, and it is what the attendance scanner checks before
+    // punching over a day another workflow owns.
     protected $fillable = [
-        'employee_id', 'date', 'am_in', 'am_out', 'pm_in', 'pm_out', 'ot_in', 'ot_out', 'accredited_hours', 'total_hours'
+        'employee_id', 'date', 'am_in', 'am_out', 'pm_in', 'pm_out', 'ot_in', 'ot_out', 'accredited_hours', 'total_hours',
+        'attendance_type', 'remarks'
     ];
 
     protected $casts = [

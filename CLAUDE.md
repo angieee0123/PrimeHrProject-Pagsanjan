@@ -59,6 +59,75 @@ More things worth knowing:
   cannot be answered without adding columns.
 - **Employee photos** live on `employees.photo` as a public URL
   (`/storage/employees/photos/x.png`), not in `documents`.
+- **`attendance.attendance_type` and `.remarks` were missing from the model's
+  `$fillable`** while both `LeaveApplicationObserver` and `TravelOrderObserver`
+  passed them to `Attendance::create()`, so mass assignment silently discarded
+  them and every approved leave or travel day was stored as `REGULAR`. Fixed —
+  but rows written before the fix are still wrong, and that is the column the
+  dashboard, reports, and the AI Assistant all count leave and absence from.
+  A backfill from `leave_applications` / `travel_orders` would be needed to
+  correct history.
+
+---
+
+## Attendance capture (QR scanner → biometric)
+
+The municipality wants a biometric reader but has not bought one. The QR
+scanner is that device's stand-in, built so the swap is a driver change rather
+than a rewrite.
+
+```
+QR badge scan  ─┐
+                ├─→ AttendancePunchService::punch()
+biometric ──────┘        └─ writes one slot on `attendance`
+   (later)               └─ AttendanceComputationService re-accredits the day
+                         └─ AccreditedHoursLog → DailySalaryComputation
+                         └─ late/undertime leave deductions
+```
+
+Adding the reader means one new caller passing `source: 'biometric'`. Nothing
+about schedules, grace, pass slips, or payroll moves.
+
+- **`AttendanceComputationService`** holds `computeAccreditedHours()`,
+  `computeTotalHours()`, and `creditPassSlipGapMinutes()`, which used to be
+  private to `AttendanceController`. The controller's correction path now
+  delegates to it, so a scanned 08:03 arrival earns exactly the grace a manually
+  corrected one does. Change accreditation here, never in the controller.
+- **`AttendanceQrService`** signs the badge: `PHRM1.{employeeId}.{hmac}`, keyed
+  by a value derived from `APP_KEY`. The badge used to encode a bare employee id,
+  which made it forgeable by anyone who could count — and attendance feeds
+  payroll, so the badge is a payroll credential. Bare-numeric codes are rejected
+  by name ("old unsigned card, reissue it") rather than accepted for
+  compatibility. **Rotating `APP_KEY` invalidates every printed badge**; that is
+  the intended revocation path.
+- **`AttendancePunchService`** owns the punch rules:
+  - a day already marked `LEAVE`/`TRAVEL_ORDER`/`HOLIDAY` is **refused**, not
+    overwritten — the observers own those days and a punch would erase the
+    approval's trace from the DTR;
+  - a re-read of the same slot within 90 seconds is a **duplicate**, so a camera
+    firing twice cannot rewrite an arrival time;
+  - **leave deductions are withheld until the day is complete.** An unfinished
+    day accredits as an eight-hour absence, so running deductions after a lone
+    morning punch charges a full day of leave to someone still at their desk.
+    `AccreditedHoursLog` and the salary figure still update on every punch so the
+    DTR reads live.
+- **`attendance_punches`** logs every punch as captured — slot, timestamp,
+  source, device, operator, and the value it replaced. `attendance` only holds
+  each slot's current value, which cannot answer what an auditor asks.
+
+The kiosk lives at `/admin/attendance/scanner`, so `EnsureRoleForArea` already
+restricts it to `admin`/`hr` — it is staffed, not self-service. **The operator
+picks the slot**; `suggestSlot()` only pre-highlights one, because a badge
+should not move the button between aiming and scanning. When the wall-mounted
+reader arrives and there is no operator, that method becomes the authority.
+
+A USB scanner gun works too: it types the payload and presses Enter, which the
+manual-entry box accepts. Camera decoding uses html5-qrcode from a CDN, matching
+how the QR *generator* is already loaded on the Personnel page.
+
+```bash
+php artisan test tests/Unit/AttendanceQrServiceTest.php tests/Unit/AttendancePunchServiceTest.php
+```
 
 ---
 

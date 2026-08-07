@@ -111,4 +111,21 @@ class Employee extends Model
             ->where('end_date', '>=', $date)
             ->first();
     }
+
+    public function attendancePunches()
+    {
+        return $this->hasMany(AttendancePunch::class);
+    }
+
+    /**
+     * The signed string printed in this employee's attendance QR badge.
+     *
+     * An accessor rather than a lookup in the view, so every place that prints
+     * a badge signs it the same way and none of them can fall back to the bare
+     * id the scanner now rejects.
+     */
+    public function getQrPayloadAttribute(): string
+    {
+        return app(\App\Services\AttendanceQrService::class)->payloadFor($this);
+    }
 }

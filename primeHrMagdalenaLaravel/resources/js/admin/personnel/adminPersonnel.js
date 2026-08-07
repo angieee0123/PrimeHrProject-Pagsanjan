@@ -499,14 +499,27 @@ window.printQRCode = printQRCode;
 // QR Code Functions
 let currentQRData = null;
 
-function generateQRCode(employeeId, employeeName) {
-    currentQRData = { employeeId, employeeName };
-    
+/**
+ * @param {string} payload  The signed badge string from Employee::$qr_payload.
+ *   The badge used to encode a bare employee id, which meant a forged QR of
+ *   "42" would punch in as employee 42 at the attendance scanner. The server
+ *   signs it now and the scanner rejects anything unsigned, so a badge printed
+ *   without this argument would scan as invalid.
+ */
+function generateQRCode(employeeId, employeeName, payload) {
+    currentQRData = { employeeId, employeeName, payload };
+
     document.getElementById('qrEmployeeName').textContent = employeeName;
     document.getElementById('qrEmployeeId').textContent = `Employee ID: ${employeeId}`;
     document.getElementById('qrCodeModal').style.display = 'flex';
     document.getElementById('qrCodeContainer').innerHTML = '<p style="color:#6b6a8a;">Generating QR Code...</p>';
-    
+
+    if (!payload) {
+        document.getElementById('qrCodeContainer').innerHTML =
+            '<p style="color:#a52820;">This badge cannot be generated because it is missing its signature. Please reload the page.</p>';
+        return;
+    }
+
     // Generate QR code using QRCode.js library
     setTimeout(() => {
         const qrContainer = document.getElementById('qrCodeContainer');
@@ -519,7 +532,7 @@ function generateQRCode(employeeId, employeeName) {
         qrWrapper.style.display = 'inline-block';
         
         new QRCode(qrWrapper, {
-            text: String(employeeId),
+            text: payload,
             width: 256,
             height: 256,
             colorDark: '#0b044d',

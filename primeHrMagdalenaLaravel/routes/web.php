@@ -307,6 +307,15 @@ Route::get('/admin/performance', function () {
     return view('admin.performance.adminPerformance');
 })->middleware('auth')->name('admin.performance');
 
+// QR Attendance Scanner — the staffed kiosk standing in for a biometric
+// reader. Registered before the parameterised attendance routes so `scanner`
+// is never read as an id. Throttled because a kiosk in a busy lobby is the
+// one screen that can hammer the punch endpoint by accident.
+Route::get('/admin/attendance/scanner', [\App\Http\Controllers\AttendanceScannerController::class, 'index'])->middleware('auth')->name('admin.attendance.scanner');
+Route::post('/admin/attendance/scanner/punch', [\App\Http\Controllers\AttendanceScannerController::class, 'punch'])->middleware(['auth', 'throttle:60,1'])->name('admin.attendance.scanner.punch');
+Route::post('/admin/attendance/scanner/suggest', [\App\Http\Controllers\AttendanceScannerController::class, 'suggest'])->middleware(['auth', 'throttle:60,1'])->name('admin.attendance.scanner.suggest');
+Route::get('/admin/attendance/scanner/recent', [\App\Http\Controllers\AttendanceScannerController::class, 'recent'])->middleware('auth')->name('admin.attendance.scanner.recent');
+
 Route::get('/admin/attendance', [AttendanceController::class, 'index'])->middleware('auth')->name('admin.attendance');
 Route::get('/admin/attendance/detailed/{employeeId}', [AttendanceController::class, 'detailedDTR'])->middleware('auth')->name('admin.attendance.detailed');
 Route::get('/admin/attendance/detailed/{employeeId}/export', [AttendanceController::class, 'exportDetailedDTR'])->middleware('auth')->name('admin.attendance.detailed.export');

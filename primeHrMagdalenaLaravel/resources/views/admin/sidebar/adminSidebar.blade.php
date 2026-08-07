@@ -27,6 +27,7 @@ $navGroups = [
     ],
     'Time & Absence' => [
         ['id' => 'admin.attendance',   'label' => 'Attendance',            'icon' => 'attendance',    'route' => route('admin.attendance')],
+        ['id' => 'admin.attendance.scanner', 'label' => 'Attendance Scanner', 'icon' => 'scanner',    'route' => route('admin.attendance.scanner')],
         ['id' => 'admin.leave',        'label' => 'Leave & Benefits',      'icon' => 'leave',         'route' => route('admin.leave')],
         ['id' => 'admin.travelorder',  'label' => 'Travel Orders',         'icon' => 'travelorder',   'route' => route('admin.travelorder')],
         ['id' => 'admin.passslip',     'label' => 'Pass Slips',            'icon' => 'passslip',      'route' => route('admin.passslip')],

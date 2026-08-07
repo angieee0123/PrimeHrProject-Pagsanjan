@@ -129,7 +129,7 @@
                                     </svg>
                                     <span>Edit</span>
                                 </button>
-                                <button class="btn-qr" onclick="generateQRCode({{ $employee->id }}, '{{ $fullName }}')" title="QR Code">
+                                <button class="btn-qr" onclick="generateQRCode({{ $employee->id }}, '{{ $fullName }}', '{{ $employee->qr_payload }}')" title="QR Code">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <rect x="3" y="3" width="7" height="7"/>
                                         <rect x="14" y="3" width="7" height="7"/>
@@ -182,7 +182,7 @@
                                         </svg>
                                         <span>Edit Record</span>
                                     </button>
-                                    <button class="action-menu-item" onclick="generateQRCode({{ $employee->id }}, '{{ $fullName }}')">
+                                    <button class="action-menu-item" onclick="generateQRCode({{ $employee->id }}, '{{ $fullName }}', '{{ $employee->qr_payload }}')">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <rect x="3" y="3" width="7" height="7"/>
                                             <rect x="14" y="3" width="7" height="7"/>
