@@ -167,6 +167,18 @@ Two things follow from one role serving every audience:
   "what can you do?" cannot advertise something the caller would then be
   refused. It costs no model call.
 
+- **Scoping is disclosed, never silent.** Some capabilities *block* a
+  non-org-wide caller (`dashboard`, `chart`, `workflow`, generated SQL); the
+  rest *narrow* the query instead (`employee_search`, `document_search`,
+  `report`). Narrowing silently produces false statements: an employee asking
+  "show me everyone in the Mayor's Office" gets their own row and a narration
+  reading "1 employee in the Mayor's Office", and an empty result reads as "that
+  person has no files" when it means "not yours to see". So those three append
+  `AiAccessPolicy::scopeNotice()` to every answer — including the empty and
+  fallback branches — and pass `scopePromptNote()` into the narration prompt.
+  The notice is appended in PHP rather than left to the prompt, because the
+  disclosure has to hold when the model ignores its instructions.
+
 Answers may carry `follow_ups` — suggested next questions, rendered as clickable
 chips. They are static prompt text with nothing to scope, they are not stored on
 the turn (stale suggestions help nobody), and the UI keeps them on the newest

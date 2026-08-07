@@ -488,19 +488,29 @@ class DocumentSearchService
      */
     private function narrate(User $user, string $query, Collection $rows, array $params, array $history, array $files): string
     {
+        $notice = $this->policy->scopeNotice($user);
+
         if ($rows->isEmpty()) {
             $hint = !empty($params['employee_name'])
                 ? " for {$params['employee_name']}"
                 : '';
 
+            // For a self-scoped caller "no files found for Pedro Santos" is not
+            // a statement about Pedro's files — it means the search never left
+            // this user's own records. Say which.
             return "I could not find any uploaded files{$hint} matching that description. "
-                . 'Try naming the employee, or the kind of document (contract, certificate, medical, ID).';
+                . 'Try naming the employee, or the kind of document (contract, certificate, medical, ID).'
+                . ($notice ? "\n\n{$notice}" : '');
         }
 
-        $system = <<<'PROMPT'
+        $scopeNote = $this->policy->scopePromptNote($user);
+
+        $system = <<<PROMPT
 You are the PRIME HRIS Assistant reporting the result of a file search. The
 list below is the complete result set from the HR database, already filtered to
 files this user may access. It is your ONLY source of truth.
+
+{$scopeNote}
 
 - Say how many files matched and name the most relevant ones.
 - For each, give the employee, document type, and upload date.
@@ -533,15 +543,13 @@ PROMPT;
 
         $answer = AiChatService::chat($user, $system, $messages, 0.3, 700);
 
-        if (!$answer) {
-            return $this->fallbackNarration($rows);
-        }
-
         // Last line of defence against a model that names a file we never found.
         // The prompt already forbids it; this makes the guarantee structural.
-        return $this->mentionsUnknownFile($answer, $rows)
-            ? $this->fallbackNarration($rows)
-            : $answer;
+        if (!$answer || $this->mentionsUnknownFile($answer, $rows)) {
+            $answer = $this->fallbackNarration($rows);
+        }
+
+        return $answer . ($notice ? "\n\n{$notice}" : '');
     }
 
     /**

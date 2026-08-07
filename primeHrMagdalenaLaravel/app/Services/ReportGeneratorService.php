@@ -511,18 +511,26 @@ class ReportGeneratorService
         }
 
         $rowCount = count($report['rows']);
+        $notice = $this->policy->scopeNotice($user);
 
         if ($rowCount === 0) {
-            return "**{$report['title']}** produced no rows — there are no records in that period.";
+            // Without the notice this reads as "the organisation has no records
+            // this period", when for a self-scoped caller it means only that
+            // *they* have none.
+            return "**{$report['title']}** produced no rows — there are no records in that period."
+                . ($notice ? "\n\n{$notice}" : '');
         }
 
         $totals = collect($report['totals'])->map(fn ($v, $k) => "{$k}: {$v}")->implode(' · ');
 
         $audience = $this->policy->audienceLabel($user);
+        $scopeNote = $this->policy->scopePromptNote($user);
 
         $system = <<<PROMPT
 You are the PRIME HRIS Assistant introducing a report you just generated for
 {$audience}.
+
+{$scopeNote}
 
 - Open with the report title and period, and the headline totals.
 - Note the two or three most significant findings from the sample rows
@@ -542,6 +550,7 @@ PROMPT;
 
         $answer = AiChatService::chat($user, $system, $messages, 0.3, 700);
 
-        return $answer ?: "**{$report['title']}**\n\n{$rowCount} row(s). {$totals}\n\nThe full table is shown below and can be exported to PDF.";
+        return ($answer ?: "**{$report['title']}**\n\n{$rowCount} row(s). {$totals}\n\nThe full table is shown below and can be exported to PDF.")
+            . ($notice ? "\n\n{$notice}" : '');
     }
 }

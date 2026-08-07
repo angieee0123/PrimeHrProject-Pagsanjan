@@ -122,6 +122,43 @@ class AiAccessPolicy
     }
 
     /**
+     * A sentence telling the caller their answer was narrowed to their own
+     * record, or null when nothing was narrowed.
+     *
+     * Scoping silently is worse than refusing. An employee who asks "show me
+     * everyone in the Mayor's Office" gets their own row back, and a narration
+     * that opens "1 employee in the Mayor's Office" states an org-wide fact
+     * that is false — the filter, not the roster, produced that 1. The same
+     * goes for an empty result: "no files matched" reads as "the file does not
+     * exist" when it means "not yours to see". Every capability that scopes a
+     * result rather than blocking it appends this.
+     */
+    public function scopeNotice(User $user): ?string
+    {
+        if ($this->hasOrgWideAccess($user)) {
+            return null;
+        }
+
+        return $this->ownEmployeeId($user) === null
+            ? 'Your account is not linked to an employee record, so no HR data is visible to it. Please ask HR to link your account.'
+            : 'Note: this covers only your own records. Other employees\' records are not visible to your account.';
+    }
+
+    /**
+     * The same fact as scopeNotice(), phrased for a narration prompt so the
+     * model does not describe a self-scoped result as an organisation-wide one.
+     */
+    public function scopePromptNote(User $user): string
+    {
+        return $this->hasOrgWideAccess($user)
+            ? 'This user has organisation-wide access, so the results cover the whole organisation.'
+            : 'IMPORTANT: this user may only see their OWN employee record, so the results below were '
+                . 'filtered to that one person. Never describe the count as an organisation-wide figure '
+                . '(do not write "there is 1 employee in that department"); say the results are limited '
+                . 'to their own record.';
+    }
+
+    /**
      * What this user may ask the assistant, in plain language. Drives the
      * "what can you do?" answer, so it stays in step with the scoping rules
      * above rather than being restated in a prompt that can drift from them.

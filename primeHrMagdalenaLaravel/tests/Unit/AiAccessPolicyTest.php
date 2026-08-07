@@ -179,4 +179,53 @@ class AiAccessPolicyTest extends TestCase
 
         $this->assertStringContainsString('1 = 0', $query->toSql());
     }
+
+    /**
+     * Silent scoping is its own defect. An employee who asks "show me everyone
+     * in the Mayor's Office" gets their own row back; without a notice the
+     * narration reports "1 employee" as though that were the department's
+     * headcount.
+     */
+    #[Test]
+    public function a_self_scoped_caller_is_told_the_answer_was_narrowed(): void
+    {
+        $notice = $this->policy->scopeNotice($this->user(['employee'], 9));
+
+        $this->assertNotNull($notice);
+        $this->assertStringContainsString('your own records', $notice);
+    }
+
+    #[Test]
+    public function an_org_wide_caller_gets_no_scope_notice(): void
+    {
+        $this->assertNull($this->policy->scopeNotice($this->user(['admin'], 3)));
+        $this->assertNull($this->policy->scopeNotice($this->user(['hr'], null)));
+        $this->assertNull($this->policy->scopeNotice($this->user(['mayor'], 7)));
+    }
+
+    #[Test]
+    public function an_orphaned_account_is_told_why_it_sees_nothing(): void
+    {
+        $notice = $this->policy->scopeNotice($this->user(['employee'], null));
+
+        $this->assertNotNull($notice);
+        $this->assertStringContainsString('not linked to an employee record', $notice);
+    }
+
+    /**
+     * The prompt-side half of the same fact. A narration prompt that omits it
+     * lets the model state a self-scoped count as an organisation-wide one.
+     */
+    #[Test]
+    public function the_narration_prompt_note_distinguishes_the_two_audiences(): void
+    {
+        $this->assertStringContainsString(
+            'own',
+            $this->policy->scopePromptNote($this->user(['employee'], 9))
+        );
+        $this->assertStringContainsString(
+            'organisation-wide',
+            $this->policy->scopePromptNote($this->user(['admin'], 3))
+        );
+    }
 }

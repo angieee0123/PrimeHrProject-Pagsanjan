@@ -218,6 +218,12 @@ class EmployeeSearchService
      */
     private function narrate(User $user, string $query, Collection $rows, array $params, array $history): string
     {
+        // An employee reaching this capability gets their own record back, so
+        // addressing them as HR staff reads as though they were looking at
+        // someone else's file. AiAccessPolicy owns the distinction.
+        $audience = $this->policy->audienceLabel($user);
+        $notice = $this->policy->scopeNotice($user);
+
         if ($rows->isEmpty()) {
             $applied = empty($params)
                 ? 'no specific filters'
@@ -227,17 +233,20 @@ class EmployeeSearchService
                     array_values($params)
                 ));
 
-            return "No employees matched that search ({$applied}). Try a different name, department, or year.";
+            // "No employees matched" would otherwise assert the person does not
+            // exist, when for a self-scoped caller it only means they are not
+            // the person searched for.
+            return "No employees matched that search ({$applied}). Try a different name, department, or year."
+                . ($notice ? "\n\n{$notice}" : '');
         }
 
-        // An employee reaching this capability gets their own record back, so
-        // addressing them as HR staff reads as though they were looking at
-        // someone else's file. AiAccessPolicy owns the distinction.
-        $audience = $this->policy->audienceLabel($user);
+        $scopeNote = $this->policy->scopePromptNote($user);
 
         $system = <<<PROMPT
 You are the PRIME HRIS Assistant. You are given the result of an employee
 lookup that has ALREADY been filtered to what this user is allowed to see.
+
+{$scopeNote}
 
 Summarise the results conversationally for {$audience}:
 - Lead with how many employees matched.
@@ -257,7 +266,10 @@ PROMPT;
 
         $answer = AiChatService::chat($user, $system, $messages, 0.3, 700);
 
-        return $answer ?: $this->fallbackNarration($rows);
+        // Appended rather than left to the prompt: the scope note above steers
+        // the model, but the disclosure has to hold even when it ignores it.
+        return ($answer ?: $this->fallbackNarration($rows))
+            . ($notice ? "\n\n{$notice}" : '');
     }
 
     /**

@@ -192,7 +192,9 @@ DATABASE KEY TABLES:
 - employee_deductions: Active deductions per employee
 - trainings: Training/seminar records with verification status
 - travel_orders: Travel order requests with approval status
-- users: User accounts with status (Active/Inactive) and roles (JSON array, e.g. ["hr","mayor"])
+
+Note: `users` is NOT queryable. Account status and roles live there, and the
+assistant is not permitted to read it — a query referencing it is rejected.
 TEXT;
 
     /**
