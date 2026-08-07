@@ -155,9 +155,16 @@ class AiQueryService
     }
 
     /**
-     * Structured data questions go through generated SQL; if that is blocked
-     * or comes back empty-handed, fall through to the existing chatbot brain
-     * so the user still gets an answer.
+     * Structured data questions go through generated SQL. If the statement
+     * merely failed to work, fall through to the chatbot brain so the user
+     * still gets an answer.
+     *
+     * A *blocked* result is different, and must not fall through. Blocking is a
+     * permission decision — SafeSqlService refuses either because the caller
+     * lacks org-wide access or because the statement was unsafe. Routing that
+     * to another answerer would mean the denial itself is what triggers the
+     * second attempt, so the user is answered precisely because they were told
+     * no. Return the refusal instead.
      *
      * @param array<int, array{role: string, content: string}> $history
      */
@@ -165,7 +172,11 @@ class AiQueryService
     {
         $result = $this->sql->query($user, $question, $history);
 
-        if (!empty($result['blocked']) || (isset($result['error']) && empty($result['data']))) {
+        if (!empty($result['blocked'])) {
+            return $result;
+        }
+
+        if (isset($result['error']) && empty($result['data'])) {
             return ['answer' => $this->fallback->answer($user, $question, $history)];
         }
 

@@ -438,7 +438,7 @@ Route::get('/admin/settings/theme-css', function (\Illuminate\Http\Request $requ
 })->middleware('auth')->name('admin.settings.theme-css');
 
 // Chatbot API
-Route::post('/chatbot/chat', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware('auth')->name('chatbot.chat');
+Route::post('/chatbot/chat', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware(['auth', 'throttle:20,1'])->name('chatbot.chat');
 Route::get('/chatbot/history', [\App\Http\Controllers\ChatbotController::class, 'history'])->middleware('auth')->name('chatbot.history');
 
 // AI Assistant — full-page, persisted & searchable chat history. Same controller
@@ -447,7 +447,10 @@ foreach (['admin', 'employee', 'mayor'] as $aiArea) {
     Route::get("/{$aiArea}/ai-assistant", [\App\Http\Controllers\AiAssistantController::class, 'index'])->middleware('auth')->name("{$aiArea}.ai-assistant");
     Route::get("/{$aiArea}/ai-assistant/conversations/{conversation}", [\App\Http\Controllers\AiAssistantController::class, 'messages'])->middleware('auth')->name("{$aiArea}.ai-assistant.messages");
     Route::get("/{$aiArea}/ai-assistant/search", [\App\Http\Controllers\AiAssistantController::class, 'search'])->middleware('auth')->name("{$aiArea}.ai-assistant.search");
-    Route::post("/{$aiArea}/ai-assistant/message", [\App\Http\Controllers\AiAssistantController::class, 'send'])->middleware('auth')->name("{$aiArea}.ai-assistant.send");
+    // Throttled: one question can spend several provider calls (memory rewrite,
+    // intent classification, SQL generation retries, narration) against a
+    // shared org API key, so an unbounded endpoint is a cost and quota risk.
+    Route::post("/{$aiArea}/ai-assistant/message", [\App\Http\Controllers\AiAssistantController::class, 'send'])->middleware(['auth', 'throttle:20,1'])->name("{$aiArea}.ai-assistant.send");
     Route::get("/{$aiArea}/ai-assistant/export/{token}", [\App\Http\Controllers\AiAssistantController::class, 'export'])->middleware('auth')->name("{$aiArea}.ai-assistant.export");
     Route::delete("/{$aiArea}/ai-assistant/conversations/{conversation}", [\App\Http\Controllers\AiAssistantController::class, 'destroy'])->middleware('auth')->name("{$aiArea}.ai-assistant.destroy");
 }

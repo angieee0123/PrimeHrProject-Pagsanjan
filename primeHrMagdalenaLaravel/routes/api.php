@@ -99,13 +99,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/training/{id}/certificate', [MobileTrainingController::class, 'certificate']);
 
         // HR chatbot (employee-scoped)
-        Route::post('/chatbot', [MobileChatbotController::class, 'chat']);
+        Route::post('/chatbot', [MobileChatbotController::class, 'chat'])->middleware('throttle:20,1');
     });
 
     // AI Assistant — same AiQueryService the web UI uses, so permissions and
     // audit logging are identical across both surfaces.
     Route::prefix('ai')->group(function () {
-        Route::post('/query', [AiAssistantController::class, 'query']);
+        // Same reasoning as the web surface: one question can spend several
+        // provider calls against a shared org API key.
+        Route::post('/query', [AiAssistantController::class, 'query'])->middleware('throttle:20,1');
         Route::get('/export/{token}', [AiAssistantController::class, 'export']);
         // Same AiFileResolver + AiAccessPolicy gate as the web surface.
         Route::get('/file/{source}/{ref}', [AiAssistantController::class, 'file'])

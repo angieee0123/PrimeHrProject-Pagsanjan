@@ -139,6 +139,20 @@ the data still comes back, just without prose.
 - **Permission-aware retrieval.** `admin`/`hr`/`mayor` see the organisation;
   everyone else is scoped to their own employee record. A user with no linked
   employee row gets an impossible predicate (`1 = 0`), never an unfiltered query.
+- **A refusal ends the request.** `AiQueryService::dataQuery()` returns a blocked
+  result as-is. It must never fall through to another answerer: blocking is a
+  permission decision, so re-routing it would make the denial itself the trigger
+  for a second, unscoped attempt. Only a query that *failed* falls back.
+- **The general fallback is gated too.** `HrChatbotAnswerer` is the assistant's
+  catch-all, which makes its text-to-SQL a security boundary rather than a
+  convenience. It runs SQL only for callers `canRunGeneratedSql()` allows, passes
+  every statement through `SafeSqlService::validate()` + `enforceRowCap()`, and
+  describes only `SafeSqlService::allowedTables()` to the model — so `users` and
+  `personal_access_tokens` are never even named in the prompt. Callers without
+  that permission still get the policy shortcuts and knowledge-base answer.
+- **Assistant endpoints are throttled** at 20 requests/minute (both web areas,
+  `/api/ai/query`, and both chatbot widgets). One question can spend several
+  provider calls against a shared org key.
 - **Audit trail** at `storage/logs/ai_audit-*.log`, 90-day retention. Records the
   asker, roles, scope, intent, row count, and duration — counts, never the rows
   themselves, so the log does not become a second copy of HR data.
@@ -161,7 +175,8 @@ the data still comes back, just without prose.
 Run the security suite with:
 
 ```bash
-php artisan test tests/Unit/SafeSqlValidationTest.php tests/Unit/AiAccessPolicyTest.php tests/Unit/AiFileResolverTest.php
+php artisan test tests/Unit/SafeSqlValidationTest.php tests/Unit/AiAccessPolicyTest.php \
+  tests/Unit/AiFileResolverTest.php tests/Unit/AiQueryRoutingTest.php
 ```
 
 ### Document content search

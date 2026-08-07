@@ -12,9 +12,24 @@ use Illuminate\Support\Facades\Log;
  * the session-backed floating widget and the DB-backed full-page AI Assistant
  * call the exact same logic instead of maintaining two copies of this prompt
  * engineering.
+ *
+ * This class is also the assistant's general-purpose fallback, which makes its
+ * SQL path a security boundary rather than a convenience: it is reached by
+ * questions that did not classify into any scoped capability. So the same two
+ * gates the dedicated text-to-SQL feature uses apply here as well —
+ * AiAccessPolicy decides whether generated SQL may run for this caller at all,
+ * and SafeSqlService validates every statement before it reaches the database.
+ * Callers without that permission still get the policy shortcuts and the
+ * knowledge-base answer, which is what most general questions want anyway.
  */
 class HrChatbotAnswerer
 {
+    public function __construct(
+        private AiAccessPolicy $policy,
+        private SafeSqlService $safeSql,
+    ) {
+    }
+
     private const SYSTEM_KNOWLEDGE = <<<'TEXT'
 === PRIME HRIS MAGDALENA SYSTEM RULES ===
 
@@ -200,19 +215,43 @@ TEXT;
             return $policyAnswer;
         }
 
+        // Generated SQL joins arbitrary tables, so it cannot be scoped to one
+        // employee's own rows after the fact — the same reason
+        // canRunGeneratedSql() restricts the dedicated feature to org-wide
+        // roles. Everyone else is answered from the knowledge base instead of
+        // being handed an unscoped query over the whole database.
+        if ($user === null || !$this->policy->canRunGeneratedSql($user)) {
+            return $this->askDirectly($user, $message, $history);
+        }
+
         // Get DB schema
         $schema = $this->getDbSchema();
 
         // Ask the LLM to generate SQL
         $sql = $this->generateSql($user, $message, $schema, $history);
 
-        if (!$sql || strtoupper(substr(trim($sql), 0, 6)) !== 'SELECT') {
+        if (!$sql) {
+            return $this->askDirectly($user, $message, $history);
+        }
+
+        // "Starts with SELECT" is not a safety check: it passes a statement
+        // that unions in `users`, hides a keyword in an executable comment, or
+        // returns the entire table. Run the real validator.
+        $verdict = $this->safeSql->validate($sql);
+
+        if (!$verdict['safe']) {
+            Log::channel('ai_audit')->warning('chatbot.sql_rejected', [
+                'user_id' => $user->id,
+                'reason' => $verdict['reason'],
+                'sql' => $sql,
+            ]);
+
             return $this->askDirectly($user, $message, $history);
         }
 
         // Execute SQL
         try {
-            $results = DB::select($sql);
+            $results = DB::select($this->safeSql->enforceRowCap($sql));
         } catch (\Throwable $e) {
             Log::error('Chatbot SQL error: ' . $e->getMessage() . ' | SQL: ' . $sql);
             return $this->askDirectly($user, $message, $history);
@@ -236,17 +275,28 @@ TEXT;
         return implode("\n", $lines);
     }
 
+    /**
+     * Describe only the tables the assistant is allowed to read.
+     *
+     * This used to walk `SHOW TABLES` and describe everything, which put
+     * `users`, `personal_access_tokens`, `sessions`, and `password_reset_tokens`
+     * into the prompt — tables SafeSqlService deliberately excludes, sent to a
+     * third-party model on every question. Describing only the allow-list means
+     * the model never learns those tables exist, so it cannot be talked into
+     * referencing one.
+     */
     private function getDbSchema(): string
     {
-        $tables = DB::select('SHOW TABLES');
-        $dbName = DB::getDatabaseName();
-        $key    = "Tables_in_{$dbName}";
-
         $schema = '';
-        foreach ($tables as $row) {
-            $table   = $row->$key;
-            $columns = DB::select("DESCRIBE `{$table}`");
-            $cols    = implode(', ', array_map(function($c) { return "{$c->Field} ({$c->Type})"; }, $columns));
+
+        foreach (SafeSqlService::allowedTables() as $table) {
+            try {
+                $columns = DB::select("DESCRIBE `{$table}`");
+            } catch (\Throwable) {
+                continue; // Table not present in this deployment.
+            }
+
+            $cols = implode(', ', array_map(function ($c) { return "{$c->Field} ({$c->Type})"; }, $columns));
             $schema .= "Table `{$table}`: {$cols}\n";
         }
 

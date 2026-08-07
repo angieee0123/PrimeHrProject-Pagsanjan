@@ -92,6 +92,18 @@ class SafeSqlService
     }
 
     /**
+     * The allow-list, for callers that need to describe the readable schema
+     * without going through generation — notably HrChatbotAnswerer, which must
+     * not show the model a table this service would refuse to query.
+     *
+     * @return array<int, string>
+     */
+    public static function allowedTables(): array
+    {
+        return self::ALLOWED_TABLES;
+    }
+
+    /**
      * @param array<int, array{role: string, content: string}> $history
      */
     public function query(User $user, string $question, array $history = []): array
@@ -371,9 +383,10 @@ PROMPT;
     }
 
     /**
-     * Guarantee a row cap even if the model omitted one.
+     * Guarantee a row cap even if the model omitted one. Public because every
+     * path that executes generated SQL must apply it, not just this one.
      */
-    private function enforceRowCap(string $sql): string
+    public function enforceRowCap(string $sql): string
     {
         if (preg_match('/\bLIMIT\s+(\d+)/i', $sql, $m)) {
             return (int) $m[1] <= self::MAX_ROWS
