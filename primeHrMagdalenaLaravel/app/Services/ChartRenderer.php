@@ -11,10 +11,16 @@ namespace App\Services;
  * dependency-free.
  *
  * Mark treatment follows the house data-viz rules: thin marks with rounded
- * data-ends anchored to the baseline, 2px lines, 8px markers, a 2px surface
+ * data-ends anchored to the baseline, 2.5px lines, 7px markers, a 2px surface
  * gap between adjacent fills, recessive grid and axes, text in ink colours
  * rather than the series colour, and a legend whenever there is more than one
  * series.
+ *
+ * Presentation matches the admin dashboard's Chart.js cards, so an assistant
+ * chart and a dashboard chart read as the same object: Poppins throughout,
+ * 11px tick labels in --gp-text-soft, horizontal gridlines in --gp-bg-tint
+ * with no vertical grid, circular legend swatches, and trend lines drawn at
+ * 2.5px with tension 0.4, a 10%-opacity area beneath, and white-ringed points.
  */
 class ChartRenderer
 {
@@ -26,6 +32,9 @@ class ChartRenderer
     private const PAD_RIGHT = 16;
     private const BAR_RADIUS = 4;
     private const GAP = 2;
+
+    /** Chart.js's line tension on the dashboard's two chart cards. */
+    private const TENSION = 0.4;
 
     /**
      * @param array<string, mixed> $chart
@@ -45,7 +54,12 @@ class ChartRenderer
         $legend = ($chart['legend'] ?? false) ? $this->renderLegend($chart) : '';
         $height = self::HEIGHT + (($chart['legend'] ?? false) ? 28 : 0);
 
+        // data-chart-title feeds the card header the assistant panel wraps this
+        // in (buildChart() in aiAssistant.js). It travels on the SVG rather
+        // than in the response payload so a replayed turn — re-rendered from
+        // its stored spec, and shipping the markup alone — is titled too.
         return '<svg class="viz" role="img" aria-label="' . $this->esc($chart['title'] ?? 'Chart') . '" '
+            . 'data-chart-title="' . $this->esc($chart['title'] ?? 'Chart') . '" '
             . 'viewBox="0 0 ' . self::WIDTH . ' ' . $height . '" width="100%" '
             . 'xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;overflow:visible">'
             . $this->styleBlock($chart)
@@ -77,17 +91,24 @@ class ChartRenderer
             $darkRules .= ".s{$i}{fill:{$hex};stroke:{$hex}}";
         }
 
+        // Colours below are the dashboard's Chart.js values, not generic
+        // neutrals: ticks --gp-text-soft, gridlines --gp-bg-tint, axis
+        // --gp-border, legend labels the #64748b the dashboard legends use.
+        // dompdf resolves this stylesheet but ignores the media block, so a
+        // printed chart keeps the light set — which is what paper wants.
         return '<style>'
-            . '.viz{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}'
-            . '.ink{fill:#0b0b0b}.ink-2{fill:#52514e}'
-            . '.grid{stroke:#e5e5e2;stroke-width:1}.axis{stroke:#c9c8c4;stroke-width:1}'
+            . '.viz{font-family:Poppins,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}'
+            . '.ink{fill:#3f3d63}.ink-2{fill:#8f8daf}'
+            . '.grid{stroke:#f7f6fc;stroke-width:1}.axis{stroke:#ecebf6;stroke-width:1}'
             . '.lbl{font-size:11px}.val{font-size:11px;font-variant-numeric:tabular-nums}'
-            . '.ttl{font-size:13px;font-weight:600}'
+            . '.leg{font-size:11px;font-weight:600;fill:#64748b}'
+            . '.ttl{font-size:13px;font-weight:700}'
             . $rules
-            . '.ring{stroke:#fcfcfb}'
+            . '.ring{stroke:#ffffff}'
             . '@media (prefers-color-scheme:dark){'
-            . '.ink{fill:#ffffff}.ink-2{fill:#c3c2b7}'
-            . '.grid{stroke:#333330}.axis{stroke:#4a4a46}'
+            . '.ink{fill:#e6e5f2}.ink-2{fill:#a3a1c0}'
+            . '.grid{stroke:#2a2942}.axis{stroke:#3a3856}'
+            . '.leg{fill:#a3a1c0}'
             . $darkRules
             . '.ring{stroke:#1a1a19}'
             . '}'
@@ -119,7 +140,7 @@ class ChartRenderer
             $svg .= $this->roundedTopBar($x, $y, $barW, $h, 's0');
 
             if ($chart['direct_label'] ?? true) {
-                $svg .= '<text class="val ink-2" x="' . round($x + $barW / 2, 1) . '" y="' . round($y - 5, 1)
+                $svg .= '<text class="val ink" x="' . round($x + $barW / 2, 1) . '" y="' . round($y - 5, 1)
                     . '" text-anchor="middle">' . $this->fmt($value, $chart['format'] ?? 'number') . '</text>';
             }
 
@@ -155,7 +176,7 @@ class ChartRenderer
 
             $svg .= $this->roundedEndBar($labelW, $y, $w, $barH, 's0');
 
-            $svg .= '<text class="val ink-2" x="' . round($labelW + $w + 6, 1) . '" y="' . round($y + $barH / 2 + 4, 1)
+            $svg .= '<text class="val ink" x="' . round($labelW + $w + 6, 1) . '" y="' . round($y + $barH / 2 + 4, 1)
                 . '">' . $this->fmt($value, $chart['format'] ?? 'number') . '</text>';
         }
 
@@ -212,7 +233,7 @@ class ChartRenderer
                 $x += $w;
             }
 
-            $svg .= '<text class="val ink-2" x="' . round($x + 6, 1) . '" y="' . round($y + $barH / 2 + 4, 1)
+            $svg .= '<text class="val ink" x="' . round($x + 6, 1) . '" y="' . round($y + $barH / 2 + 4, 1)
                 . '">' . $this->fmt($totals[$i], $chart['format'] ?? 'number') . '</text>';
         }
 
@@ -255,7 +276,7 @@ class ChartRenderer
                     $svg .= $this->roundedEndBar($labelW, $y, $w, $barH, 's' . ($si % 8));
                 }
 
-                $svg .= '<text class="val ink-2" x="' . round($labelW + $w + 6, 1) . '" y="' . round($y + $barH / 2 + 4, 1)
+                $svg .= '<text class="val ink" x="' . round($labelW + $w + 6, 1) . '" y="' . round($y + $barH / 2 + 4, 1)
                     . '">' . $this->fmt($value, $chart['format'] ?? 'number') . '</text>';
             }
         }
@@ -291,27 +312,35 @@ class ChartRenderer
             foreach ($s['values'] as $i => $value) {
                 $x = self::PAD_LEFT + $step * $i;
                 $y = $baseline - ($max > 0 ? ($value / $max) * $plotH : 0);
-                $points[] = round($x, 1) . ',' . round($y, 1);
+                $points[] = [$x, $y];
             }
 
             if (empty($points)) {
                 continue;
             }
 
+            $path = $this->smoothPath($points, self::PAD_TOP, $baseline);
+
             // fill/stroke overrides go in an inline style, not presentation
             // attributes: the .sN class also sets fill, and a class beats a
             // presentation attribute in SVG — which would paint the line as a
             // filled blob.
-            $svg .= '<polyline class="s' . ($si % 8) . '" style="fill:none" stroke-width="2" stroke-linejoin="round" '
-                . 'stroke-linecap="round" points="' . implode(' ', $points) . '"/>';
 
-            // 8px markers with a 2px surface ring so overlapping series stay
+            // The tinted area under the line, as on the dashboard's trend
+            // cards. Flat 10% rather than a gradient: dompdf does not resolve
+            // gradient fills, and a printed chart must not lose the band.
+            $svg .= '<path class="s' . ($si % 8) . '" style="stroke:none" fill-opacity="0.1" d="' . $path
+                . 'L' . round(end($points)[0], 1) . ',' . round($baseline, 1)
+                . 'L' . round($points[0][0], 1) . ',' . round($baseline, 1) . 'Z"/>';
+
+            $svg .= '<path class="s' . ($si % 8) . '" style="fill:none" stroke-width="2.5" stroke-linejoin="round" '
+                . 'stroke-linecap="round" d="' . $path . '"/>';
+
+            // 7px markers with a 2px surface ring so overlapping series stay
             // readable where lines cross.
-            foreach ($s['values'] as $i => $value) {
-                $x = self::PAD_LEFT + $step * $i;
-                $y = $baseline - ($max > 0 ? ($value / $max) * $plotH : 0);
-                $svg .= '<circle class="s' . ($si % 8) . ' ring" cx="' . round($x, 1) . '" cy="' . round($y, 1)
-                    . '" r="4" stroke-width="2"/>';
+            foreach ($points as $point) {
+                $svg .= '<circle class="s' . ($si % 8) . ' ring" cx="' . round($point[0], 1) . '" cy="'
+                    . round($point[1], 1) . '" r="3.5" stroke-width="2"/>';
             }
         }
 
@@ -325,7 +354,7 @@ class ChartRenderer
                 $value = $s['values'][$last];
                 $x = self::PAD_LEFT + $step * $last;
                 $y = $baseline - ($max > 0 ? ($value / $max) * $plotH : 0);
-                $svg .= '<text class="val ink-2" x="' . round($x - 4, 1) . '" y="' . round($y - 10, 1)
+                $svg .= '<text class="val ink" x="' . round($x - 4, 1) . '" y="' . round($y - 10, 1)
                     . '" text-anchor="end">' . $this->fmt($value, $chart['format'] ?? 'number') . '</text>';
             }
         }
@@ -336,6 +365,58 @@ class ChartRenderer
         }
 
         return $svg . $this->axisLine($baseline);
+    }
+
+    /**
+     * Chart.js's spline curve at TENSION, so a trend line here bends exactly
+     * like the ones on the dashboard's chart cards. Control points are clamped
+     * to the plot box: a smooth curve through a spiky series otherwise
+     * overshoots past the axis, drawing values the data does not contain.
+     *
+     * @param array<int, array{0: float, 1: float}> $points
+     */
+    private function smoothPath(array $points, float $top, float $bottom): string
+    {
+        $count = count($points);
+
+        if ($count === 0) {
+            return '';
+        }
+
+        $path = 'M' . round($points[0][0], 1) . ',' . round($points[0][1], 1);
+
+        if ($count === 1) {
+            return $path;
+        }
+
+        $before = [];
+        $after = [];
+
+        foreach ($points as $i => $point) {
+            $prev = $points[$i - 1] ?? $point;
+            $next = $points[$i + 1] ?? $point;
+
+            $d01 = hypot($point[0] - $prev[0], $point[1] - $prev[1]);
+            $d12 = hypot($next[0] - $point[0], $next[1] - $point[1]);
+            $span = $d01 + $d12;
+
+            $fa = $span > 0 ? self::TENSION * ($d01 / $span) : 0;
+            $fb = $span > 0 ? self::TENSION * ($d12 / $span) : 0;
+
+            $dx = $next[0] - $prev[0];
+            $dy = $next[1] - $prev[1];
+
+            $before[$i] = [$point[0] - $fa * $dx, min($bottom, max($top, $point[1] - $fa * $dy))];
+            $after[$i] = [$point[0] + $fb * $dx, min($bottom, max($top, $point[1] + $fb * $dy))];
+        }
+
+        for ($i = 0; $i < $count - 1; $i++) {
+            $path .= 'C' . round($after[$i][0], 1) . ',' . round($after[$i][1], 1)
+                . ' ' . round($before[$i + 1][0], 1) . ',' . round($before[$i + 1][1], 1)
+                . ' ' . round($points[$i + 1][0], 1) . ',' . round($points[$i + 1][1], 1);
+        }
+
+        return $path;
     }
 
     private function yGrid(float $max, float $plotH, string $format): string
@@ -413,12 +494,13 @@ class ChartRenderer
         $x = self::PAD_LEFT;
         $y = self::HEIGHT + 12;
 
+        // Circular swatches, matching the dashboard's `usePointStyle` legends.
         foreach ($chart['series'] as $i => $series) {
-            $svg .= '<rect class="s' . ($i % 8) . '" x="' . round($x, 1) . '" y="' . ($y - 8) . '" width="10" height="10" rx="2"/>';
-            $svg .= '<text class="lbl ink-2" x="' . round($x + 15, 1) . '" y="' . $y . '">'
+            $svg .= '<circle class="s' . ($i % 8) . '" cx="' . round($x + 5, 1) . '" cy="' . ($y - 4) . '" r="5"/>';
+            $svg .= '<text class="leg" x="' . round($x + 16, 1) . '" y="' . $y . '">'
                 . $this->esc((string) $series['name']) . '</text>';
 
-            $x += 22 + mb_strlen((string) $series['name']) * 6.2;
+            $x += 24 + mb_strlen((string) $series['name']) * 6.2;
         }
 
         return $svg;

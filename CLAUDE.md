@@ -185,7 +185,22 @@ held to deliberately: never a dual-axis chart, categorical hues assigned in
 fixed order and never cycled (the tail folds into "Other" past 8), and every
 chart ships beside its data table. The palette is validated for colour-vision
 deficiency; the accompanying table is also what satisfies the contrast relief
-requirement for the lighter hues.
+requirement for the lighter hues. Slot 0 — the single-series hue — is the admin
+dashboard's own chart blue, so a one-series chart from the assistant matches the
+cards on that page.
+
+Tables and charts the assistant generates wear the **admin dashboard's card
+design**, not a chat-only look: `.table-section` / `.chart-card` shell, a
+`.table-header` title block, `.payroll-table`'s gold-underlined micro-caps
+header with zebra rows, and a `.table-footer` strip. `ChartRenderer` matches the
+dashboard's Chart.js settings too — Poppins, 11px ticks in `--gp-text-soft`,
+gridlines in `--gp-bg-tint`, circular legend swatches, and 2.5px trend lines at
+tension 0.4 over a 10% area fill. Keep the two in step when either moves.
+
+Two constraints on that fill: it is a flat `fill-opacity`, never a gradient
+(dompdf's SVG library paints `url(#…)` fills solid **black**), and the chart
+title rides on the SVG as `data-chart-title` so a replayed turn — re-rendered
+from its stored spec, shipping the markup alone — still gets a card header.
 
 ---
 

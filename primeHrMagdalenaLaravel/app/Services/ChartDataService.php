@@ -32,8 +32,16 @@ class ChartDataService
     private const MAX_SERIES = 8;
     private const MAX_CATEGORIES = 12;
 
-    /** Categorical slots, fixed order. Index 0 is also the single-series hue. */
-    private const PALETTE_LIGHT = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
+    /**
+     * Categorical slots, fixed order. Index 0 is also the single-series hue,
+     * and carries the admin dashboard's chart blue (#1e40af — the hue its
+     * attendance line and payroll area fill are drawn in) so a single-series
+     * chart from the assistant matches the ones on the dashboard. It is darker
+     * than the generic blue it replaced, so its contrast against the surface
+     * improves, and its neighbour is still the orange that CVD separation at
+     * this end of the ramp relies on.
+     */
+    private const PALETTE_LIGHT = ['#1e40af', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
     private const PALETTE_DARK = ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767'];
 
     public function __construct(private AiAccessPolicy $policy)

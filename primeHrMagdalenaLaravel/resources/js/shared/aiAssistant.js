@@ -357,12 +357,52 @@
         return note;
     }
 
-    /** Chart SVG is generated server-side, so it renders identically in a PDF. */
+    /**
+     * Chart SVG is generated server-side, so it renders identically in a PDF.
+     * Here it is wrapped in the dashboard's chart-card shell: a titled header
+     * over the plot. The title rides on the SVG as `data-chart-title` (see
+     * ChartRenderer) rather than in a parallel payload field, so a replayed
+     * turn — which is re-rendered from its stored spec and ships the SVG alone
+     * — gets its header back too.
+     */
     function buildChart(svg) {
         const holder = document.createElement('div');
         holder.className = 'ai-chart';
-        holder.innerHTML = svg;
+
+        const body = document.createElement('div');
+        body.className = 'ai-chart-body';
+        body.innerHTML = svg;
+
+        const root = body.querySelector('svg');
+        const title = root ? root.getAttribute('data-chart-title') : null;
+        const sub = root ? root.getAttribute('data-chart-sub') : null;
+
+        if (title) holder.appendChild(buildCardHead(title, sub));
+        holder.appendChild(body);
+
         return holder;
+    }
+
+    /** The .table-header / .chart-header block shared by both card types. */
+    function buildCardHead(title, sub) {
+        const head = document.createElement('div');
+        head.className = 'ai-card-head';
+
+        const block = document.createElement('div');
+        const heading = document.createElement('p');
+        heading.className = 'ai-card-title';
+        heading.textContent = title;
+        block.appendChild(heading);
+
+        if (sub) {
+            const caption = document.createElement('p');
+            caption.className = 'ai-card-sub';
+            caption.textContent = sub;
+            block.appendChild(caption);
+        }
+
+        head.appendChild(block);
+        return head;
     }
 
     function buildExportButton(token) {
@@ -385,10 +425,7 @@
         holder.className = 'ai-table-wrap';
 
         if (spec.title) {
-            const cap = document.createElement('div');
-            cap.className = 'ai-table-title';
-            cap.textContent = spec.title;
-            holder.appendChild(cap);
+            holder.appendChild(buildCardHead(spec.title, rowCount(rows.length)));
         }
 
         const scroller = document.createElement('div');
@@ -431,32 +468,68 @@
         scroller.appendChild(table);
         holder.appendChild(scroller);
 
-        if (rows.length > COLLAPSE_AT) {
-            const toggle = document.createElement('button');
-            toggle.type = 'button';
-            toggle.className = 'ai-table-toggle';
-            toggle.textContent = 'Show all ' + rows.length + ' rows';
-            toggle.addEventListener('click', function () {
-                const expanded = holder.classList.toggle('expanded');
-                toggle.textContent = expanded
-                    ? 'Show fewer rows'
-                    : 'Show all ' + rows.length + ' rows';
-            });
-            holder.appendChild(toggle);
-        }
+        // Footer strip, the dashboard's .table-footer: how much of the result
+        // set is on screen (plus any totals) on the left, the control that
+        // changes it on the right.
+        const collapsed = rows.length > COLLAPSE_AT;
+        const totals = spec.totals && Object.keys(spec.totals).length ? spec.totals : null;
 
-        if (spec.totals && Object.keys(spec.totals).length) {
+        if (collapsed || totals) {
             const foot = document.createElement('div');
-            foot.className = 'ai-table-totals';
-            Object.keys(spec.totals).forEach(function (label) {
-                const chip = document.createElement('span');
-                chip.innerHTML = '<em>' + escapeHtml(label) + '</em> ' + escapeHtml(String(spec.totals[label]));
-                foot.appendChild(chip);
-            });
+            foot.className = 'ai-table-foot';
+
+            const left = document.createElement('div');
+            left.className = 'ai-table-foot-left';
+
+            if (collapsed) {
+                const count = document.createElement('span');
+                count.className = 'ai-table-count';
+                count.innerHTML = 'Showing <strong>' + COLLAPSE_AT + '</strong> of <strong>'
+                    + rows.length + '</strong> rows';
+                left.appendChild(count);
+            }
+
+            if (totals) {
+                const chips = document.createElement('div');
+                chips.className = 'ai-table-totals';
+                Object.keys(totals).forEach(function (label) {
+                    const chip = document.createElement('span');
+                    chip.innerHTML = '<em>' + escapeHtml(label) + '</em> ' + escapeHtml(String(totals[label]));
+                    chips.appendChild(chip);
+                });
+                left.appendChild(chips);
+            }
+
+            foot.appendChild(left);
+
+            if (collapsed) {
+                const count = left.querySelector('.ai-table-count');
+                const toggle = document.createElement('button');
+                toggle.type = 'button';
+                toggle.className = 'ai-table-toggle';
+                toggle.textContent = 'Show all ' + rows.length + ' rows';
+                toggle.addEventListener('click', function () {
+                    const expanded = holder.classList.toggle('expanded');
+                    toggle.textContent = expanded
+                        ? 'Show fewer rows'
+                        : 'Show all ' + rows.length + ' rows';
+                    count.innerHTML = expanded
+                        ? 'Showing all <strong>' + rows.length + '</strong> rows'
+                        : 'Showing <strong>' + COLLAPSE_AT + '</strong> of <strong>'
+                            + rows.length + '</strong> rows';
+                });
+                foot.appendChild(toggle);
+            }
+
             holder.appendChild(foot);
         }
 
         return holder;
+    }
+
+    /** Sub-line under a generated table's title: "48 rows", "1 row". */
+    function rowCount(total) {
+        return total + (total === 1 ? ' row' : ' rows');
     }
 
     function formatCell(value, format) {

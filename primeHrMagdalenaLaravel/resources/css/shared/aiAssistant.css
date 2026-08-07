@@ -354,10 +354,20 @@
 
 /* ══ Generated UI inside assistant replies ══
    The assistant can answer with a rendered table and/or chart, not just prose
-   ("generate a table of employees with 2+ absences"). These live inside the
-   message bubble, so two things matter: the bubble sets `white-space: pre-wrap`
-   for chat text and that has to be reset here, and wide content must scroll
-   inside its own box rather than pushing the thread sideways. */
+   ("generate a table of employees with 2+ absences").
+
+   These deliberately reuse the admin dashboard's card language rather than a
+   chat-only look: the card shell is .table-section / .chart-card, the header is
+   .table-header (title over a quieter sub-line), the grid is .payroll-table
+   (uppercase micro-caps on the tint, underlined in the accent gold, zebra rows,
+   row hover), and the strip underneath is .table-footer. A table the assistant
+   generates should read as the same object as a table on the dashboard.
+
+   Two things stay chat-specific: the bubble sets `white-space: pre-wrap` for
+   chat text and that has to be reset here, and wide content must scroll inside
+   its own box rather than pushing the thread sideways. Type is also one step
+   down from the dashboard's (14px title / 12.5px cells against 15px / 13px) —
+   these cards sit inside a message bubble, not on a full-width page. */
 
 /* A reply carrying generated UI needs more room than a sentence does. */
 .ai-msg.assistant:has(.ai-table-wrap),
@@ -365,19 +375,47 @@
     max-width: 94%;
 }
 
+/* Card shell — .table-section / .chart-card. */
 .ai-table-wrap,
 .ai-chart {
     white-space: normal;
-    margin: 10px 0 2px;
+    margin: 12px 0 2px;
+    background: #fff;
+    border: 1.5px solid #eceaf8;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .03), 0 1px 2px rgba(15, 23, 42, .02);
+    transition: box-shadow .2s, border-color .2s;
 }
 
-.ai-table-title {
-    font-size: 11px;
+.ai-table-wrap:hover,
+.ai-chart:hover {
+    border-color: #e2e1f0;
+    box-shadow: 0 6px 22px rgba(11, 4, 77, .08), 0 2px 6px rgba(11, 4, 77, .04);
+}
+
+/* Card header — .table-header / .chart-header. */
+.ai-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1.5px solid var(--gp-bg-tint-2, #f2f1fb);
+}
+
+.ai-card-title {
+    margin: 0 0 3px;
+    font-size: 14px;
     font-weight: 700;
-    letter-spacing: .04em;
-    text-transform: uppercase;
+    color: var(--gp-pri, #0b044d);
+}
+
+.ai-card-sub {
+    margin: 0;
+    font-size: 11.5px;
     color: var(--gp-text-soft, #8f8daf);
-    margin-bottom: 6px;
 }
 
 /* The table's own scroll container: wide result sets stay inside the bubble. */
@@ -385,15 +423,16 @@
     overflow-x: auto;
     max-height: 420px;
     overflow-y: auto;
-    border: 1px solid var(--gp-line, #e3e1f0);
-    border-radius: 10px;
-    background: var(--gp-surface, #fff);
 }
 
+/* separate/0, not collapse: the header row is sticky inside the scroller, and a
+   collapsed table drops the borders of a sticky header as it scrolls. Same
+   reason the dashboard's own sticky-header directory table does it. */
 .ai-table {
     width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12.5px;
     line-height: 1.45;
 }
 
@@ -401,14 +440,15 @@
     position: sticky;
     top: 0;
     z-index: 1;
-    background: var(--gp-pri, #0b044d);
-    color: #fff;
+    background: var(--gp-bg-tint-2, #f2f1fb);
+    color: var(--gp-pri, #0b044d);
     text-align: left;
     font-size: 10.5px;
     font-weight: 700;
-    letter-spacing: .04em;
+    letter-spacing: .8px;
     text-transform: uppercase;
-    padding: 7px 10px;
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--gp-accent-gold, #c9a227);
     white-space: nowrap;
 }
 
@@ -416,9 +456,9 @@
    harder to scan than a column you scroll to. The scroll container above
    handles the overflow. */
 .ai-table tbody td {
-    padding: 6px 10px;
-    border-top: 1px solid var(--gp-line, #e3e1f0);
-    color: var(--gp-ink, #1E2247);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--gp-border, #ecebf6);
+    color: var(--gp-pri, #0b044d);
     vertical-align: middle;
     white-space: nowrap;
     max-width: 320px;
@@ -426,9 +466,10 @@
     text-overflow: ellipsis;
 }
 
-.ai-table tbody tr:nth-child(even) td {
-    background: var(--gp-bg-tint, #f8f7fd);
-}
+.ai-table tbody tr { transition: background .15s ease; }
+.ai-table tbody tr:nth-child(even) { background: var(--gp-bg-tint, #f7f6fc); }
+.ai-table tbody tr:hover { background: var(--gp-bg-tint-2, #f2f1fb); }
+.ai-table tbody tr:last-child td { border-bottom: none; }
 
 /* Numbers align right and share a common digit width so columns scan cleanly. */
 .ai-table .num {
@@ -439,48 +480,83 @@
 .ai-row-hidden { display: none; }
 .ai-table-wrap.expanded .ai-row-hidden { display: table-row; }
 
-.ai-table-toggle {
-    margin-top: 6px;
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--gp-pri, #0b044d);
-    background: transparent;
-    border: 1px solid var(--gp-line, #e3e1f0);
-    border-radius: 999px;
-    cursor: pointer;
+/* Footer strip — .table-footer: what you are looking at on the left, the
+   control that changes it on the right. */
+.ai-table-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 11px 16px;
+    border-top: 1.5px solid var(--gp-bg-tint-2, #f2f1fb);
+    font-size: 11.5px;
+    color: var(--gp-text-soft, #8f8daf);
 }
-.ai-table-toggle:hover {
-    background: var(--gp-bg-tint, #f8f7fd);
+
+.ai-table-foot-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
 }
+
+.ai-table-count strong { color: var(--gp-pri, #0b044d); font-weight: 700; }
 
 .ai-table-totals {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: 8px;
 }
+
+/* Totals read as .dept-tag chips rather than another line of prose. */
 .ai-table-totals span {
-    padding: 3px 9px;
+    padding: 4px 10px;
     font-size: 11px;
-    border-radius: 999px;
-    background: var(--gp-surface, #fff);
-    border: 1px solid var(--gp-line, #e3e1f0);
-    color: var(--gp-ink, #1E2247);
+    font-weight: 600;
+    border-radius: 6px;
+    background: var(--gp-bg-tint, #f7f6fc);
+    border: 1px solid var(--gp-border, #ecebf6);
+    color: var(--gp-pri, #0b044d);
+    white-space: nowrap;
 }
+
 .ai-table-totals em {
     font-style: normal;
+    font-weight: 600;
     color: var(--gp-text-soft, #8f8daf);
 }
 
-.ai-chart {
-    padding: 10px;
-    border: 1px solid var(--gp-line, #e3e1f0);
-    border-radius: 10px;
-    background: var(--gp-surface, #fff);
+/* .btn-export, the dashboard's own table-header control. */
+.ai-table-toggle {
+    flex-shrink: 0;
+    height: 30px;
+    padding: 0 14px;
+    font-size: 11.5px;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--gp-pri, #0b044d);
+    background: #fff;
+    border: 1.5px solid var(--gp-border, #ecebf6);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all .2s;
+}
+
+.ai-table-toggle:hover {
+    border-color: var(--gp-pri, #0b044d);
+    background: #f4f3ff;
+}
+
+/* The chart's plot area. The card clips its own corners, so the scroll for a
+   wide chart lives on this inner box. */
+.ai-chart-body {
+    padding: 14px 16px 16px;
     overflow-x: auto;
 }
-.ai-chart svg { display: block; }
+
+.ai-chart-body svg { display: block; }
 
 .ai-export-btn {
     display: inline-flex;
@@ -521,7 +597,12 @@
     .ai-msg.assistant:has(.ai-chart) {
         max-width: 100%;
     }
-    .ai-table { font-size: 11px; }
+    .ai-card-head,
+    .ai-table-foot { padding: 11px 12px; }
+    .ai-chart-body { padding: 12px; }
+    .ai-table { font-size: 11.5px; }
+    .ai-table thead th,
+    .ai-table tbody td { padding: 8px 10px; }
 }
 
 /* ── File & image results ────────────────────────────────────────────────
