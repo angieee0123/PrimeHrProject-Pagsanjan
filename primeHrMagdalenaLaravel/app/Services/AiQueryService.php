@@ -280,7 +280,7 @@ class AiQueryService
             // which would otherwise swallow "list"/"download" and answer with
             // a table of rows instead of the file itself.
             $this->wantsStoredFile($q) => 'document_search',
-            (bool) preg_match('/\b(generate|create|prepare|produce|export|download|draft)\b.*\b(report|summary|payslip|letter|certificate|checklist|preview)\b/', $q) => $this->reportOrWorkflow($q),
+            (bool) preg_match('/\b(generate|create|prepare|produce|export|download|draft|issue)\b.*\b(report|summary|payslip|letter|certificate|checklist|preview)\b/', $q) => $this->reportOrWorkflow($q),
             (bool) preg_match('/\b(report)\b/', $q) => 'report',
             // "table"/"list of" asks for tabular output over arbitrary criteria,
             // which is the generated-SQL path — the table itself is attached to
@@ -294,8 +294,14 @@ class AiQueryService
             // use and get them refused for asking about themselves.
             $this->isSelfReferential($q) => 'self_service',
             (bool) preg_match('/\b(how many|how much|count|total|number of|who has|which department|pending|missing|expir\w+|overview|dashboard)\b/', $q) => 'dashboard',
-            (bool) preg_match('/\bwhere\s+is\b|\bfind\b|\bshow\s+me\b.*\bemployees?\b|\bemployees?\s+(?:hired|appointed|in|from|with)\b|\bwho\s+is\b/', $q) => 'employee_search',
+            // Transactional nouns beat the employee-lookup rule below, which
+            // would otherwise claim "employees with more than 5 late arrivals"
+            // on its `employees?\s+with` branch — and EmployeeSearchService
+            // only does name, department, and hire-date lookups, so it cannot
+            // count anything. A question naming attendance, leave, or payroll
+            // is about those records even when it also says "employees".
             (bool) preg_match('/\b(leave|attendance|payroll|salary|deduction|absent|late|overtime|credits?|balance|dtr)\b/', $q) => 'data_query',
+            (bool) preg_match('/\bwhere\s+is\b|\bfind\b|\bshow\s+me\b.*\bemployees?\b|\bemployees?\s+(?:hired|appointed|in|from|with)\b|\bwho\s+is\b/', $q) => 'employee_search',
             default => $this->classifyWithModel($message, $user, $history),
         };
     }
@@ -314,6 +320,15 @@ class AiQueryService
     private function wantsStoredFile(string $q): bool
     {
         if (preg_match('/\b(how\s+many|count|total\s+number)\b/', $q)) {
+            return false;
+        }
+
+        // "draft a certificate of employment" asks us to *produce* a document,
+        // which is the workflow capability — without this, the noun list below
+        // matches "certificate" and answers with a search for existing ones.
+        // Only unambiguous authoring verbs count: "download the certificate"
+        // and "export the contract" are still retrieval.
+        if (preg_match('/\b(draft|write|compose|issue)\b/', $q)) {
             return false;
         }
 
