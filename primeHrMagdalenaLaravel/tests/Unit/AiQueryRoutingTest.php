@@ -314,6 +314,59 @@ class AiQueryRoutingTest extends TestCase
     }
 
     /**
+     * Tagalog puts the possessor after the noun and drops "my" entirely, so
+     * "ano ang mga leave credits na meron ako" carried no marker the English
+     * patterns recognised. It was classified as an org-wide data question and
+     * answered with generated SQL — "no rows" — to an employee whose own leave
+     * page was showing 136 days of credits.
+     */
+    #[Test]
+    public function tagalog_self_reference_routes_to_self_service(): void
+    {
+        foreach ([
+            'ano ang mga leave credits na meron ako ?',
+            'ilang VL credits ang natitira sa akin?',
+            'meron pa ba akong leave credits',
+            'ilan ang natitirang sick leave ko',
+        ] as $question) {
+            $this->assertSame('self_service', $this->intentOf($question, ['employee'], 5), $question);
+        }
+    }
+
+    /**
+     * The counterpart: the Tagalog markers must not claim a question that has
+     * no possessor in it. Asserted on the predicate rather than through ask(),
+     * because an unmatched question falls through to the model classifier and
+     * that needs a provider this connection has no table for.
+     */
+    #[Test]
+    public function tagalog_markers_do_not_claim_org_wide_questions(): void
+    {
+        $method = new \ReflectionMethod(AiQueryService::class, 'isSelfReferential');
+        $method->setAccessible(true);
+
+        $assistant = $this->assistant(
+            $this->createMock(SafeSqlService::class),
+            $this->createMock(HrChatbotAnswerer::class),
+        );
+
+        foreach ([
+            'ilan ang empleyado sa bawat department',
+            'sino ang mga absent ngayong buwan',
+            'ilan ang leave applications na pending',
+        ] as $question) {
+            $this->assertFalse($method->invoke($assistant, $question), $question);
+        }
+
+        foreach ([
+            'ano ang mga leave credits na meron ako',
+            'ilang vl credits ang natitira sa akin',
+        ] as $question) {
+            $this->assertTrue($method->invoke($assistant, $question), $question);
+        }
+    }
+
+    /**
      * A file search renders each row as a clickable card, so attaching a table
      * of the same rows repeats every file name, type, size, and date in a
      * wider, less readable form directly beneath the cards.

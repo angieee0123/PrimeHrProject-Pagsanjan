@@ -14,16 +14,18 @@ use Illuminate\Support\Str;
 
 class EmployeeChatbotService
 {
-    private const SYSTEM_KNOWLEDGE = <<<'TEXT'
-PRIME HRIS Magdalena — policies and processes (answer for any employee):
+    public function __construct(private HrPolicyFactsService $facts)
+    {
+    }
 
-ATTENDANCE & LEAVE:
-- Late minutes deduct from VL first, then SL. 480 minutes = 1 work day.
-- Grace period: 5 minutes for AM In (8:00) and PM In (13:00).
-- Working hours: AM 8:00–12:00, PM 13:00–17:00 (8 hours). Weekends are non-working.
-- LWOP applies when late exceeds available leave credits.
-- Leave types include VL, SL, SPL, and others per CSC rules.
-
+    /**
+     * The self-service navigation map. Menu paths live in Blade views, so there
+     * is no table to read them from — unlike the policy figures above them,
+     * which used to be typed here too (480, the 5-minute grace, "8:00–13:00",
+     * "VL first then SL") and now come from HrPolicyFactsService, scoped to
+     * *this* employee's own schedule rather than a assumed standard one.
+     */
+    private const NAVIGATION = <<<'TEXT'
 HOW TO USE THE SYSTEM (employee self-service):
 - Leave: Leave & Benefits → File Leave (select type, dates, reason; attach if required).
 - Payslip: Payslip section to view/download periods.
@@ -34,6 +36,11 @@ HOW TO USE THE SYSTEM (employee self-service):
 
 PRIVACY: Employees may only view their own HR records, not coworkers' data.
 TEXT;
+
+    private function knowledge(Employee $employee): string
+    {
+        return $this->facts->knowledgeBlock($employee) . "\n\n" . self::NAVIGATION;
+    }
 
     /**
      * The same self-scoped answer `handle()` produces, in the shape
@@ -90,7 +97,16 @@ TEXT;
             );
         }
 
-        $policy = $this->getPolicyAnswer($message);
+        // "How much leave did my late cost?" is a computation, not a policy
+        // question, and it must not be answered by the model applying the rules
+        // in its prompt — that is arithmetic on someone's pay. Run the real
+        // conversion over the employee's own logged minutes instead.
+        $computed = $this->computedDeductionAnswer($employee, $message);
+        if ($computed !== null) {
+            return $this->result($computed['answer'], $computed['follow_up']);
+        }
+
+        $policy = $this->getPolicyAnswer($employee, $message);
         if ($policy !== null) {
             return $this->result($policy['answer'], $policy['follow_up']);
         }
@@ -176,34 +192,145 @@ TEXT;
         return false;
     }
 
-    private function getPolicyAnswer(string $question): ?array
+    /**
+     * "How much leave did my late cost?" answered from the employee's own
+     * logged minutes, using the system's own conversion.
+     *
+     * The prompt used to carry a worked example ("30 mins late → 0.0625 VL
+     * day") and the model was left to apply it. That is arithmetic on a real
+     * person's pay done by a language model from a remembered rule — the exact
+     * thing that produces a confident wrong number. `accredited_hours_log`
+     * already stores the minutes the system computed, and
+     * CscTimeConversionService already owns the conversion, so this reads both
+     * and states the result.
+     *
+     * @return array{answer: string, follow_up: array<int, string>}|null
+     */
+    private function computedDeductionAnswer(Employee $employee, string $message): ?array
+    {
+        $q = Str::lower($message);
+
+        $asksCost = preg_match('/\b(how\s+much|magkano|ilan|how\s+many)\b/u', $q)
+            && preg_match('/\b(late|undertime|deduct\w*|nabawas|bawas)\b/u', $q);
+
+        if (!$asksCost) {
+            return null;
+        }
+
+        $f = $this->facts->facts();
+        $minutesPerDay = $f['conversion']['minutes_per_day'];
+        $order = $f['payroll']['deduction_order'];
+
+        $year = $this->detectYear($message);
+
+        try {
+            $totals = \App\Models\AccreditedHoursLog::query()
+                ->where('employee_id', $employee->id)
+                ->whereYear('created_at', $year)
+                ->selectRaw('COALESCE(SUM(late_minutes),0) late, COALESCE(SUM(undertime_minutes),0) undertime, COUNT(*) days')
+                ->first();
+        } catch (\Throwable) {
+            return null; // Fall through to the ordinary path rather than guess.
+        }
+
+        $late = (int) ($totals->late ?? 0);
+        $undertime = (int) ($totals->undertime ?? 0);
+
+        if ($late === 0 && $undertime === 0) {
+            return [
+                'answer' => "You have **no late or undertime minutes recorded for {$year}**, so nothing has "
+                    . 'been deducted from your leave credits on that basis.',
+                'follow_up' => ['What is my leave balance?', 'What is my attendance this month?'],
+            ];
+        }
+
+        // The system's own conversion, not a restated formula.
+        $lateDays = CscTimeConversionService::convertMinutesToDays($late);
+        $undertimeDays = CscTimeConversionService::convertMinutesToDays($undertime);
+        $totalDays = $lateDays + $undertimeDays;
+
+        $lines = ["**Your late and undertime for {$year}**", ''];
+
+        if ($late > 0) {
+            $lines[] = "- Late: **{$late} minute(s)** = " . $this->days($lateDays) . ' day(s)';
+        }
+
+        if ($undertime > 0) {
+            $lines[] = "- Undertime: **{$undertime} minute(s)** = " . $this->days($undertimeDays) . ' day(s)';
+        }
+
+        $lines[] = '- Total to be covered by leave credits: **' . $this->days($totalDays) . ' day(s)**';
+        $lines[] = '';
+        $lines[] = "At {$minutesPerDay} minutes = 1 work day, drawn from **" . implode('** then **', $order)
+            . '**. Anything your credits cannot cover becomes LWOP.';
+        $lines[] = '';
+        $lines[] = '_Computed from your accredited-hours log, not estimated._';
+
+        return [
+            'answer' => implode("\n", $lines),
+            'follow_up' => ['What is my leave balance?', 'What is my attendance this month?', 'What is LWOP?'],
+        ];
+    }
+
+    /** Leave-credit days are carried to 4 decimals by the CSC conversion. */
+    private function days(float $value): string
+    {
+        return rtrim(rtrim(number_format($value, 4, '.', ''), '0'), '.') ?: '0';
+    }
+
+    private function detectYear(string $message): int
+    {
+        return preg_match('/\b(20\d{2})\b/', $message, $m) ? (int) $m[1] : (int) date('Y');
+    }
+
+    private function getPolicyAnswer(Employee $employee, string $question): ?array
     {
         $q = Str::lower($question);
 
+        // Read, never written into the sentence — see HrPolicyFactsService.
+        $f = $this->facts->facts();
+        $minutesPerDay = $f['conversion']['minutes_per_day'];
+        $grace = $f['attendance']['grace_minutes'];
+        $order = $f['payroll']['deduction_order'];
+        $orderText = '**' . implode('** first, then **', $order) . '**';
+
         if (preg_match('/\b(late|na-late|nalate)\b/u', $q)) {
             return [
-                'answer' => 'Late deduction is automatic: late minutes are taken from **VL** first, then **SL**. The system uses **480 minutes = 1 work day**. There is a **5-minute grace period** for AM and PM time-in. If leave credits cannot cover the late time, the remainder becomes **LWOP** (Leave Without Pay).',
-                'follow_up' => ['What is my leave balance?', 'What is LWOP?', 'What are the working hours?'],
+                'answer' => "Late deduction is automatic: late minutes are taken from {$orderText}. "
+                    . "The system uses **{$minutesPerDay} minutes = 1 work day**. There is a "
+                    . "**{$grace}-minute grace period** after your scheduled AM and PM time-in. "
+                    . 'If leave credits cannot cover the late time, the remainder becomes **LWOP** (Leave Without Pay).',
+                'follow_up' => ['How much leave did my late cost?', 'What is my leave balance?', 'What are the working hours?'],
             ];
         }
 
         if (preg_match('/\b(grace\s*period|grace)\b/u', $q)) {
+            $s = $this->facts->scheduleFor($employee);
+
             return [
-                'answer' => 'The grace period is **5 minutes** for both AM In (8:00) and PM In (13:00). Clocking in within that window is not counted as late.',
+                'answer' => "The grace period is **{$grace} minutes** after AM In (**{$s['am_in']}**) and "
+                    . "PM In (**{$s['pm_in']}**) on {$s['source']}. Clocking in within that window is not "
+                    . 'counted as late.',
                 'follow_up' => ['How is late deduction calculated?', 'What are my attendance records?'],
             ];
         }
 
         if (preg_match('/\b(lwop|leave without pay)\b/u', $q)) {
             return [
-                'answer' => '**LWOP (Leave Without Pay)** applies when your late or undertime minutes exceed your available VL/SL credits. Those uncovered minutes can affect your accredited hours and pay.',
-                'follow_up' => ['What is my leave balance?', 'How is late deduction calculated?'],
+                'answer' => '**LWOP (Leave Without Pay)** applies when your late or undertime minutes exceed '
+                    . 'your available ' . implode('/', $order) . ' credits. Those uncovered minutes reduce '
+                    . 'your accredited hours and your pay for that day.',
+                'follow_up' => ['How much leave did my late cost?', 'What is my leave balance?'],
             ];
         }
 
         if (preg_match('/\b(working hours|schedule|oras ng trabaho)\b/u', $q)) {
+            $s = $this->facts->scheduleFor($employee);
+            $hours = $f['conversion']['hours_per_day'];
+
             return [
-                'answer' => 'Standard schedule: **AM 8:00–12:00**, **PM 13:00–17:00** (8 hours total). Saturday and Sunday are non-working days.',
+                'answer' => "Your schedule: **AM {$s['am_in']}–{$s['am_out']}**, "
+                    . "**PM {$s['pm_in']}–{$s['pm_out']}** ({$hours} hours total), from {$s['source']}.",
                 'follow_up' => ['How do I file leave?', 'View my attendance'],
             ];
         }
@@ -307,33 +434,40 @@ TEXT;
         }
 
         $lines[] = '=== SYSTEM KNOWLEDGE (share when relevant) ===';
-        $lines[] = self::SYSTEM_KNOWLEDGE;
+        $lines[] = $this->knowledge($employee);
 
         return implode("\n", array_filter($lines));
     }
 
     private function leaveContext(int $employeeId, int $year): string
     {
-        $balances = LeaveBalance::where('employee_id', $employeeId)
-            ->where('year', $year)
-            ->where('total_credits', '>', 0)
-            ->with('leaveType:leave_code,leave_name')
-            ->get();
+        // Deliberately NOT filtered to $year. Balance rows are not rewritten
+        // each January, so an employee's live credits can be stored under an
+        // older year — and this filter used to answer "walang leave balances"
+        // to someone whose own Leave & Benefits page was showing 136.25 SL
+        // days. LeaveBalance::currentFor() is the same selection that page
+        // makes, so the two can no longer disagree.
+        $balances = LeaveBalance::currentFor($employeeId)
+            ->filter(fn (LeaveBalance $b) => (float) $b->total_credits > 0)
+            ->values();
 
-        $out = "\n=== YOUR LEAVE BALANCES (FY {$year}) ===\n";
+        $balances->load('leaveType:leave_code,leave_name');
+
+        $out = "\n=== YOUR CURRENT LEAVE BALANCES ===\n";
         if ($balances->isEmpty()) {
-            $out .= "No leave balances on file for this year.\n";
+            $out .= "No leave balances on file.\n";
         } else {
             foreach ($balances as $b) {
                 $name = $b->leaveType->leave_name ?? $b->leave_code;
                 $out .= sprintf(
-                    "- %s (%s): %.1f available, %.1f used, %.1f pending (total %.1f)\n",
+                    "- %s (%s): %.2f available, %.2f used, %.2f pending (total credits %.2f, as of FY %d)\n",
                     $name,
                     $b->leave_code,
                     $b->available_credits,
                     $b->used_credits,
                     $b->pending_credits,
-                    $b->total_credits
+                    $b->total_credits,
+                    $b->year
                 );
             }
         }

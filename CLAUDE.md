@@ -48,6 +48,16 @@ More things worth knowing:
   hold several at once.
 - **`employees`, `employment_details`, `government_ids`, and `documents` have no
   `updated_at`** — their models set `public $timestamps = false`.
+- **`leave_balances` rows are not rewritten each January.** A row is written
+  when credits are next computed, so an employee's *current* figures routinely
+  sit under an older `year` (employee 8's live VL/SL balances are stored under
+  2023). "Current balance" is therefore the latest row per `leave_code`, never
+  `where('year', now()->year)` — that filter returns nothing and reads as "you
+  have no leave credits". `LeaveBalance::currentFor()` owns this rule; the
+  employee leave pages and the AI Assistant both call it so they cannot report
+  different credits for the same person. Note the employee **dashboard and
+  profile still filter by current year** and so show 0 for such an employee —
+  a pre-existing inconsistency, not yet reconciled.
 - **`attendance.accredited_hours` is NULL on most rows.** It is only populated
   once payroll computes the day. Treating NULL as "worked zero hours" reports
   almost everyone as absent — use `attendance_type = 'ABSENT'` to count absences.
@@ -179,6 +189,58 @@ Two things follow from one role serving every audience:
   The notice is appended in PHP rather than left to the prompt, because the
   disclosure has to hold when the model ignores its instructions.
 
+### The assistant never states a rule it did not read
+
+Its knowledge used to be a ~165-line string constant in `HrChatbotAnswerer`
+(and a smaller one in `EmployeeChatbotService`) restating the grace period,
+480-minute conversion, `÷ 22` LWOP formula, working hours, and the leave types.
+Every line was a second copy of a rule that lives somewhere real, and the copy
+had already drifted: it named **7 leave types where `leave_types_config` holds
+20 active ones**, so Bereavement, Forced, Adoption, Study, Terminal, Wellness
+and seven others were answered as though they did not exist. That constant is
+also injected into the text-to-SQL prompt, so a stale rule produced a wrong
+*query*, not merely a wrong sentence.
+
+`HrPolicyFactsService` now assembles that block at runtime:
+
+| Fact | Read from |
+|---|---|
+| leave types, limits, attachment + service requirements | `leave_types_config` |
+| accrual rate per month | `leave_accrual_rates` |
+| 480 min = 1 day, 8 h, half-day | `CscTimeConversionService` constants |
+| grace minutes, default schedule | `AttendanceComputationService::GRACE_MINUTES` etc. |
+| `÷ 22` daily rate | `DailySalaryComputation::WORKING_DAYS_PER_MONTH` |
+| VL-then-SL order | `LateDeductionService::DEDUCTION_ORDER` |
+| the caller's working hours | their own `schedules` row, not a stated standard |
+
+Those constants were promoted from literals *specifically* so this service can
+read them — a bare `+ 5` or `/ 22` beside a prompt saying "5 minutes" / "÷ 22"
+is the drift this design removes. Only navigation ("Leave Management > File
+Leave Application") stays hard-coded, because menu paths live in Blade views
+and there is no table to read them from. **If a fact cannot be read from the
+system, it does not belong in the prompt** — a missing config table makes the
+assistant say so rather than fall back to a list.
+
+Two consequences worth keeping:
+
+- **Per-person arithmetic is never left to the model.** "How much leave did my
+  late cost?" is answered by `EmployeeChatbotService::computedDeductionAnswer()`,
+  which sums the employee's own `accredited_hours_log` minutes and converts them
+  with `CscTimeConversionService`. The prompt used to carry a worked example and
+  let the model apply it — arithmetic on a real person's pay, from a remembered
+  rule.
+- **Policy questions are their own intent.** `AiQueryService::wantsPolicy()` is
+  checked after `how_to` but **before** the stored-file and `data_query` rules,
+  because "can I file bereavement leave" matched the file-noun list (answered
+  with a document search) and "what leave types are available" matched
+  `data_query`'s noun list — which *refused* every employee for lack of
+  org-wide access, for a question about policy that has no records in it.
+  `wantsPolicy()` returns false for self-referential questions so "how much
+  leave did **my** late cost" still reaches the calculator above.
+
+`tests/Unit/HrPolicyFactsTest.php` pins the anti-drift property directly: edit
+`annual_limit`, and the answer changes.
+
 Answers may carry `follow_ups` — suggested next questions, rendered as clickable
 chips. They are static prompt text with nothing to scope, they are not stored on
 the turn (stale suggestions help nobody), and the UI keeps them on the newest
@@ -212,6 +274,7 @@ question
 |---|---|
 | `AiQueryService` | Orchestrator: intent detection, routing, audit logging |
 | `AiAccessPolicy` | **The single source of truth for permissions.** All scoping goes through it |
+| `HrPolicyFactsService` | **The single source of truth for HR rules the assistant states.** Reads them from the live config |
 | `AiChatService` | LLM calls. Resolves provider per-user → org default → `.env` Groq |
 | `EmployeeSearchService` | Employee / department / hire-date lookups |
 | `DocumentSearchService` | Files across `documents`, training certificates, employee photos |

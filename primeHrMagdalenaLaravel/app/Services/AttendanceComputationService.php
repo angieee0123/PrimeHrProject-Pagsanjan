@@ -19,6 +19,22 @@ use App\Models\Employee;
 class AttendanceComputationService
 {
     /**
+     * Minutes of grace after AM In and PM In before a punch counts as late.
+     *
+     * Named rather than inlined because the AI Assistant quotes this figure to
+     * employees. A literal `+ 5` here and the sentence "the grace period is 5
+     * minutes" typed into a prompt are two copies of one rule, and only one of
+     * them changes when the policy does.
+     */
+    public const GRACE_MINUTES = 5;
+
+    /** Fallback schedule, in minutes past midnight, when an employee has no `schedules` row. */
+    public const DEFAULT_AM_START = 480;   // 08:00
+    public const DEFAULT_AM_END = 720;     // 12:00
+    public const DEFAULT_PM_START = 780;   // 13:00
+    public const DEFAULT_PM_END = 1020;    // 17:00
+
+    /**
      * Compute accredited hours and create detailed log.
      * Returns array with accredited minutes and log data.
      */
@@ -55,12 +71,12 @@ class AttendanceComputationService
         $toMin = fn($t) => $t ? (int)(explode(':', $t)[0]) * 60 + (int)(explode(':', $t)[1]) : null;
 
         // Use employee's schedule or defaults
-        $AM_START   = $schedule ? $toMin($schedule->am_in) : 480;  // Default 08:00
-        $AM_END     = $schedule ? $toMin($schedule->am_out) : 720;  // Default 12:00
-        $AM_GRACE   = $AM_START + 5;  // 5 minutes grace
-        $PM_START   = $schedule ? $toMin($schedule->pm_in) : 780;  // Default 13:00
-        $PM_END     = $schedule ? $toMin($schedule->pm_out) : 1020; // Default 17:00
-        $PM_GRACE   = $PM_START + 5;  // 5 minutes grace
+        $AM_START   = $schedule ? $toMin($schedule->am_in) : self::DEFAULT_AM_START;
+        $AM_END     = $schedule ? $toMin($schedule->am_out) : self::DEFAULT_AM_END;
+        $AM_GRACE   = $AM_START + self::GRACE_MINUTES;
+        $PM_START   = $schedule ? $toMin($schedule->pm_in) : self::DEFAULT_PM_START;
+        $PM_END     = $schedule ? $toMin($schedule->pm_out) : self::DEFAULT_PM_END;
+        $PM_GRACE   = $PM_START + self::GRACE_MINUTES;
 
         // Abandoned: AM in only with no AM out and no PM in (after exemption auto-fill)
         if ($amIn && !$amOut && !$pmIn && !($exemption && $exemption->exempt_from_abandoned)) {

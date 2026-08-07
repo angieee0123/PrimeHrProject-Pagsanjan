@@ -11,6 +11,16 @@ use App\Services\CscTimeConversionService;
 
 class LateDeductionService
 {
+    /**
+     * Leave balances drawn on to cover late time, in the order they are drawn.
+     *
+     * The order below is enforced by the sequence of the two blocks in
+     * processLateDeduction(); this constant is what the AI Assistant reads so
+     * it describes the real order instead of a remembered one. Reordering the
+     * blocks without reordering this would make the assistant lie.
+     */
+    public const DEDUCTION_ORDER = ['VL', 'SL'];
+
     public function processLateDeduction(AccreditedHoursLog $log): void
     {
         if ($log->late_minutes <= 0 || $log->late_deducted_from_leave) {

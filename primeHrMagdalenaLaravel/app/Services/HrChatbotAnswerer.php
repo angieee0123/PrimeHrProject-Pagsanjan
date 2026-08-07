@@ -27,80 +27,32 @@ class HrChatbotAnswerer
     public function __construct(
         private AiAccessPolicy $policy,
         private SafeSqlService $safeSql,
+        private HrPolicyFactsService $facts,
     ) {
     }
 
-    private const SYSTEM_KNOWLEDGE = <<<'TEXT'
-=== PRIME HRIS MAGDALENA SYSTEM RULES ===
+    /**
+     * Everything the model is told about how this system works.
+     *
+     * The computational half — conversion factors, the grace period, working
+     * hours, leave types and their limits, the LWOP formula — comes from
+     * HrPolicyFactsService, which reads the live config tables and the service
+     * constants. It used to be typed out here, and had already drifted: this
+     * constant listed 7 leave types where `leave_types_config` holds 20 active
+     * ones, so Bereavement, Forced, Solo Parent and ten others were invisible
+     * to every answer the assistant gave.
+     *
+     * Only the navigation guide below stays hard-coded, because menu paths are
+     * a property of the Blade views rather than of any table — there is nothing
+     * to read them from.
+     */
+    private function knowledge(?\App\Models\Employee $employee = null): string
+    {
+        return $this->facts->knowledgeBlock($employee) . "\n\n" . self::NAVIGATION_GUIDE;
+    }
 
-ATTENDANCE & LEAVE POLICIES:
-1. LATE DEDUCTION FROM LEAVE:
-   - YES, vacation leave (VL) is deducted when an employee is late
-   - System automatically deducts late minutes from VL first, then SL (Sick Leave)
-   - Conversion: 480 minutes = 1 work day (8 hours)
-   - Grace period: 5 minutes for both AM In (8:00) and PM In (13:00)
-   - If late is fully covered by leave credits, employee gets full 8 hours accredited
-   - If partially covered, remaining late time becomes LWOP (Leave Without Pay)
-
-2. ATTENDANCE STATUS:
-   - Present: All 4 time logs (AM In/Out, PM In/Out) recorded
-   - Absent: No time logs at all on working day
-   - Incomplete: Has some attendance but missing logs
-   - On Leave: Approved leave application
-
-3. WORKING HOURS:
-   - Standard schedule: AM 8:00-12:00, PM 13:00-17:00 (8 hours total)
-   - Weekends (Saturday/Sunday) are non-working days
-   - Overtime (OT) is tracked separately after PM Out
-
-4. LEAVE TYPES:
-   - VL (Vacation Leave): Accrued, cumulative, monetizable
-   - SL (Sick Leave): Accrued, cumulative, monetizable
-   - SPL (Special Privilege Leave): 3 days annually
-   - ML (Maternity Leave): 105 days
-   - PL (Paternity Leave): 7 days
-   - VAWC Leave: 10 days
-   - Solo Parent Leave: 7 days
-
-5. DEDUCTIONS:
-   - GSIS (Government Service Insurance System)
-   - PhilHealth (Philippine Health Insurance)
-   - Pag-IBIG (Home Development Mutual Fund)
-   - Loans: GSIS Salary, GSIS Policy, GSIS Emergency, Pag-IBIG MPL, Pag-IBIG Calamity
-
-6. LATE-TO-LEAVE DEDUCTION COMPUTATION (Step-by-Step):
-   STEP 1 — Compute AM late minutes:
-     - If am_in > '08:05:00': AM late minutes = TIME_TO_SEC(am_in)/60 - 485  (i.e. minutes past 08:05)
-     - If am_in <= '08:05:00' or null: AM late minutes = 0
-   STEP 2 — Compute PM late minutes:
-     - If pm_in > '13:05:00': PM late minutes = TIME_TO_SEC(pm_in)/60 - 785  (i.e. minutes past 13:05)
-     - If pm_in <= '13:05:00' or null: PM late minutes = 0
-   STEP 3 — Total late minutes = AM late minutes + PM late minutes
-   STEP 4 — Convert to day fraction: late_days = total_late_minutes / 480
-   STEP 5 — Deduct from VL first:
-     - If available VL credits >= late_days → full late covered by VL, no LWOP
-     - If available VL credits < late_days → VL fully consumed, check SL for remainder
-   STEP 6 — Deduct remaining from SL:
-     - If SL credits >= remaining → covered by SL, no LWOP
-     - If SL credits < remaining → remaining becomes LWOP
-   STEP 7 — LWOP salary impact:
-     - LWOP days = uncovered late minutes / 480
-     - Salary deduction = (monthly_rate / 22) * LWOP days  (22 = working days per month)
-
-   EXAMPLES:
-     - 30 mins late → 30/480 = 0.0625 VL day deducted
-     - 60 mins late → 60/480 = 0.125 VL day deducted
-     - 480 mins late (full day) → 1.0 VL day deducted
-     - Employee with 0 VL, 0 SL, 30 mins late → 0.0625 LWOP day → salary deduction = (monthly_rate/22) * 0.0625
-     - Employee with 0.05 VL, 30 mins late → VL covers 0.05 days (24 mins), remaining 6 mins → check SL
-
-7. ACCREDITED HOURS:
-   - If late is fully covered by leave: accredited_hours = 8.0 (full day)
-   - If partially covered (LWOP applies): accredited_hours = 8 - (LWOP_minutes / 60)
-   - Absent with approved leave: accredited_hours = 8.0
-   - Absent without leave: accredited_hours = 0
-
-8. HOW-TO GUIDE — SYSTEM NAVIGATION:
+    private const NAVIGATION_GUIDE = <<<'TEXT'
+=== HOW-TO GUIDE — SYSTEM NAVIGATION ===
 
    HOW TO FILE A LEAVE APPLICATION:
    1. Go to Leave Management > File Leave Application
@@ -178,23 +130,12 @@ ATTENDANCE & LEAVE POLICIES:
    3. Filter by department, date range, or individual employee
    4. Export to PDF or print directly from the system
 
-DATABASE KEY TABLES:
-- employees: Employee master data (first_name, last_name, employee_id, email, birth_date, sex, civil_status)
-- government_ids: GSIS, PhilHealth, Pag-IBIG, TIN, license numbers per employee
-- employment_details: Position, department, employment status, salary grade, appointment date
-- departments: Department/office list with head and personnel count
-- designations: Position titles with salary grade and monthly rate
-- attendance: Daily time records (am_in, am_out, pm_in, pm_out, ot_in, ot_out, accredited_hours)
-- leave_balances: Employee leave credits by year (available_credits, used_credits, pending_credits)
-- leave_applications: Leave requests with status (pending/approved/rejected)
-- leave_transactions: Leave credit/debit history
-- salary_computations: Payslip records (basic_pay, net_pay, deductions, period)
-- employee_deductions: Active deductions per employee
-- trainings: Training/seminar records with verification status
-- travel_orders: Travel order requests with approval status
-
 Note: `users` is NOT queryable. Account status and roles live there, and the
 assistant is not permitted to read it — a query referencing it is rejected.
+
+The readable tables and their real columns are supplied separately, straight
+from the database schema. Never rely on a remembered column name — this system
+has several that differ from the obvious guess.
 TEXT;
 
     /**
@@ -324,7 +265,7 @@ TEXT;
 
     private function generateSql(?User $user, string $question, string $schema, array $history = []): ?string
     {
-        $knowledge   = self::SYSTEM_KNOWLEDGE;
+        $knowledge   = $this->knowledge();
         $today       = now()->toDateString();       // e.g. 2026-07-04
         $yesterday   = now()->subDay()->toDateString();
         $tomorrow    = now()->addDay()->toDateString();
@@ -396,7 +337,7 @@ PROMPT;
 
     private function narrateResults(?User $user, string $question, string $sql, array $results, array $history = []): string
     {
-        $knowledge = self::SYSTEM_KNOWLEDGE;
+        $knowledge = $this->knowledge();
         $preview = count($results) > 0
             ? json_encode(array_slice($results, 0, 10), JSON_PRETTY_PRINT)
             : 'No results found';
@@ -440,7 +381,7 @@ PROMPT;
 
     private function askDirectly(?User $user, string $question, array $history = []): string
     {
-        $knowledge    = self::SYSTEM_KNOWLEDGE;
+        $knowledge    = $this->knowledge();
         $conversation = $this->formatHistory($history);
 
         $prompt = <<<PROMPT
@@ -460,46 +401,152 @@ PROMPT;
             ?? "I'm not sure how to answer that. Could you rephrase or ask about employees, attendance, leave balances, or HR policies?";
     }
 
+    /**
+     * The leave types this system is actually configured with.
+     *
+     * Previously a hand-written list of seven. `leave_types_config` holds 20
+     * active rows, so Bereavement, Forced, Adoption, Study, Terminal, Wellness
+     * and seven others were answered as though they did not exist.
+     */
+    private function leaveTypesAnswer(): string
+    {
+        $types = $this->facts->facts()['leave_types'];
+
+        if (empty($types)) {
+            return 'I could not read the leave type configuration just now, so I would rather not list '
+                . 'leave types from memory. Please try again shortly.';
+        }
+
+        $count = count($types);
+        $lines = ["**Leave types configured in PRIME HRIS ({$count}):**"];
+
+        foreach ($types as $t) {
+            $notes = [];
+
+            if ($t['annual_limit'] > 0) {
+                $notes[] = $this->trimNumber($t['annual_limit']) . ' day(s)/year';
+            }
+
+            if ($t['accrual_per_month'] !== null) {
+                $notes[] = 'accrues ' . $this->trimNumber($t['accrual_per_month']) . '/month';
+            }
+
+            if ($t['cumulative']) {
+                $notes[] = 'carries over';
+            }
+
+            if ($t['monetizable']) {
+                $notes[] = 'monetizable';
+            }
+
+            if ($t['requires_attachment']) {
+                $notes[] = 'needs an attachment';
+            }
+
+            $lines[] = "- **{$t['code']}** ({$t['name']})" . ($notes ? ' — ' . implode(', ', $notes) : '');
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Accrual described from `leave_accrual_rates`, not from memory.
+     */
+    private function accrualAnswer(): string
+    {
+        $accrued = array_filter(
+            $this->facts->facts()['leave_types'],
+            fn (array $t) => $t['accrual_per_month'] !== null
+        );
+
+        if (empty($accrued)) {
+            return 'No leave type is currently configured with a monthly accrual rate in this system.';
+        }
+
+        $lines = ['**How leave credits are earned:**'];
+
+        foreach ($accrued as $t) {
+            $bits = ['**' . $this->trimNumber($t['accrual_per_month']) . ' day(s) per month**'];
+
+            if ($t['annual_limit'] > 0) {
+                $bits[] = 'up to ' . $this->trimNumber($t['annual_limit']) . '/year';
+            }
+
+            $bits[] = $t['cumulative'] ? 'carries over year to year' : 'does not carry over';
+
+            if ($t['monetizable']) {
+                $bits[] = 'monetizable';
+            }
+
+            $lines[] = "- **{$t['code']}** ({$t['name']}) — " . implode(', ', $bits);
+        }
+
+        $lines[] = '';
+        $lines[] = 'Every other leave type is granted per entitlement rather than accrued.';
+
+        return implode("\n", $lines);
+    }
+
+    /** 15.00 → "15", 1.2500 → "1.25". */
+    private function trimNumber(float $value): string
+    {
+        return rtrim(rtrim(number_format($value, 4, '.', ''), '0'), '.');
+    }
+
     private function getPolicyAnswer(string $question): ?string
     {
         $q = strtolower($question);
 
+        // Every figure below is read from HrPolicyFactsService rather than
+        // written into the sentence. These shortcuts are the answers that never
+        // reach a model, so a stale number here is quoted verbatim to the user
+        // with no chance of the surrounding data contradicting it.
+        $f = $this->facts->facts();
+        $minutesPerDay = $f['conversion']['minutes_per_day'];
+        $perMonth = $f['payroll']['working_days_per_month'];
+        $order = $f['payroll']['deduction_order'];
+        $orderText = implode('**, then **', $order);
+
         if (preg_match('/\b(grace\s*period)\b/', $q)) {
-            return 'The grace period is **5 minutes** for both AM In (8:00) and PM In (13:00). Clocking in within that window is not counted as late.';
+            $g = $f['attendance']['grace_minutes'];
+
+            return "The grace period is **{$g} minute(s)** after AM In and after PM In. "
+                . 'Clocking in within that window is not counted as late. '
+                . 'Your exact start times come from your assigned schedule.';
         }
         if (preg_match('/\blwop\b/', $q) && !preg_match('/\b(who|which|employee|list|show|how many)\b/', $q)) {
-            return '**LWOP (Leave Without Pay)** is applied when late minutes exceed available VL and SL credits. The uncovered minutes are converted to days (÷480) and deducted from salary: **(monthly_rate ÷ 22) × LWOP days**.';
+            return '**LWOP (Leave Without Pay)** is applied when late or undertime exceeds your available **'
+                . implode('** and **', $order) . "** credits. The uncovered minutes are converted to days "
+                . "(÷{$minutesPerDay}) and deducted from salary: **(monthly rate ÷ {$perMonth}) × LWOP days**.";
         }
         if (preg_match('/\b(working hours?|oras ng trabaho)\b/', $q)) {
-            return 'Standard working hours: **AM 8:00–12:00**, **PM 13:00–17:00** (8 hours total). Saturday and Sunday are non-working days.';
+            $s = $this->facts->scheduleFor(null);
+            $h = $f['conversion']['hours_per_day'];
+
+            return "Working hours are **AM {$s['am_in']}–{$s['am_out']}** and **PM {$s['pm_in']}–{$s['pm_out']}** "
+                . "({$h} hours total) on the {$s['source']}. Schedules are assigned per employee, so check "
+                . 'your own if it differs.';
         }
         if (preg_match('/\b(how.*(late.*deduct|deduct.*late)|late.*comput|comput.*late|late.*vl|vl.*late)\b/', $q)) {
+            $g = $f['attendance']['grace_minutes'];
+
             return implode("\n", [
                 '**How Late Deductions Work in PRIME HRIS:**',
-                '1. Compute late minutes: AM late = minutes past 08:05 | PM late = minutes past 13:05',
-                '2. Total late minutes ÷ 480 = fraction of a day to deduct',
-                '3. Deduct from **VL** first. If VL is exhausted, deduct from **SL**.',
-                '4. Any remaining uncovered minutes become **LWOP**.',
-                '5. LWOP salary deduction = **(monthly rate ÷ 22) × LWOP days**',
+                "1. Late minutes are counted from your scheduled AM In / PM In, after a **{$g}-minute** grace period.",
+                "2. Total late minutes ÷ {$minutesPerDay} = the fraction of a day to deduct.",
+                "3. Deducted from **{$orderText}**, in that order.",
+                '4. Anything those credits cannot cover becomes **LWOP**.',
+                "5. LWOP salary deduction = **(monthly rate ÷ {$perMonth}) × LWOP days**",
                 '',
-                '**Example:** 30 mins late → 30÷480 = **0.0625 VL day** deducted.',
-                '**Example:** 60 mins late, 0 VL, 0 SL → 60÷480 = **0.125 LWOP day** → salary deduction = monthly_rate ÷ 22 × 0.125',
+                'Ask "how much leave did my late cost?" and I will compute it from your own records '
+                    . 'rather than from an example.',
             ]);
         }
         if (preg_match('/\b(how.*(vl|vacation leave).*(accru|earn|comput)|vl.*(accru|earn)|leave.*(accru|earn))\b/', $q)) {
-            return 'VL and SL are accrued monthly. Both are cumulative (carry over year to year) and monetizable. SPL is fixed at 3 days per year and does not carry over.';
+            return $this->accrualAnswer();
         }
         if (preg_match('/\b(leave types?|kinds? of leave|uri ng leave|anong leave)\b/', $q)) {
-            return implode("\n", [
-                '**Leave Types in PRIME HRIS:**',
-                '- **VL** (Vacation Leave) — accrued, cumulative, monetizable',
-                '- **SL** (Sick Leave) — accrued, cumulative, monetizable',
-                '- **SPL** (Special Privilege Leave) — 3 days/year',
-                '- **ML** (Maternity Leave) — 105 days',
-                '- **PL** (Paternity Leave) — 7 days',
-                '- **VAWC Leave** — 10 days',
-                '- **Solo Parent Leave** — 7 days',
-            ]);
+            return $this->leaveTypesAnswer();
         }
         if (preg_match('/\b(how.*(file|apply|submit).*(leave|vl|sl|vacation|sick)|mag.*file.*leave|pano.*mag.*leave)\b/', $q)) {
             return implode("\n", [
@@ -567,7 +614,9 @@ PROMPT;
             ]);
         }
         if (preg_match('/\b(absent.*deduct|deduct.*absent|no.*show|nawala)\b/', $q)) {
-            return '**Absent without leave** = 1 full LWOP day. Salary deduction = **(monthly rate ÷ 22) × 1**. If the employee has VL/SL, they can file a leave application to cover the absence and avoid LWOP.';
+            return '**Absent without leave** = 1 full LWOP day. Salary deduction = '
+                . "**(monthly rate ÷ {$perMonth}) × 1**. Filing a leave application against available **"
+                . implode('**/**', $order) . '** credits covers the absence and avoids LWOP.';
         }
 
         return null;

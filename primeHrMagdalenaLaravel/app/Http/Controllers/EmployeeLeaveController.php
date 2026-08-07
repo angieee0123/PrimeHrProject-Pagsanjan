@@ -34,13 +34,15 @@ class EmployeeLeaveController extends Controller
             ->orderBy('leave_name')
             ->get();
         
-        // Manually attach the latest balance for each leave type
+        // Attach each type's current balance. LeaveBalance::currentFor() owns
+        // the "latest row per code, not the current year" rule — the AI
+        // Assistant reads the same method, so the chat and this page cannot
+        // report different credits for the same employee.
+        $currentBalances = LeaveBalance::currentFor($employee->id);
+
         foreach ($leaveTypes as $leaveType) {
-            $latestBalance = LeaveBalance::where('employee_id', $employee->id)
-                ->where('leave_code', $leaveType->leave_code)
-                ->orderBy('year', 'desc')
-                ->first();
-            
+            $latestBalance = $currentBalances->get($leaveType->leave_code);
+
             // Create a collection with just this balance for consistency with blade template
             $leaveType->setRelation('leaveBalances', $latestBalance ? collect([$latestBalance]) : collect());
         }

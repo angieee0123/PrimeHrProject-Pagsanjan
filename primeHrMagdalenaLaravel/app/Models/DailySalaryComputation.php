@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DailySalaryComputation extends Model
 {
+    /**
+     * Working days a monthly rate is divided by to get a daily rate.
+     *
+     * Named because the AI Assistant quotes the LWOP formula
+     * (monthly ÷ 22 × days) to employees; a literal here and a "22" typed into
+     * a prompt would be two copies of one rule.
+     */
+    public const WORKING_DAYS_PER_MONTH = 22;
+
     protected $fillable = [
         'employee_id',
         'accredited_hours_log_id',
@@ -122,7 +131,7 @@ class DailySalaryComputation extends Model
         }
         
         // Calculate rates (22 working days, 8 hours per day)
-        $dailyRate = $monthlyRate > 0 ? $monthlyRate / 22 : 0;
+        $dailyRate = $monthlyRate > 0 ? $monthlyRate / self::WORKING_DAYS_PER_MONTH : 0;
         $hourlyRate = $dailyRate > 0 ? $dailyRate / 8 : 0;
         
         // Calculate pay components using data from accredited_hours_log

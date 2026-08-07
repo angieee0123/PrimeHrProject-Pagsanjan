@@ -287,6 +287,18 @@ class AiQueryService
             // application" is a how-to, but the file-noun list matches "file"
             // and would answer it with a document search.
             $this->wantsHowTo($q) => 'how_to',
+            // Questions about what the *rules* are, as opposed to what the
+            // records say. Placed here for two reasons, both of which produced
+            // wrong answers before it existed:
+            //
+            //  - it must beat the stored-file rule, because "anong uri ng leave
+            //    ang pwede kong i-file" and "can I file bereavement leave"
+            //    both contain "file" and were answered with a document search;
+            //  - it must beat data_query, whose noun list claims "leave",
+            //    "late" and "credits", so "what leave types are available" was
+            //    sent down the generated-SQL path and *refused* for every
+            //    employee — a policy question they are entitled to an answer to.
+            $this->wantsPolicy($q) => 'how_to',
             // "show me his 201 file", "list all documents of Juan" — asking to
             // see a stored file beats both the report and the table rules,
             // which would otherwise swallow "list"/"download" and answer with
@@ -400,6 +412,42 @@ class AiQueryService
     }
 
     /**
+     * Whether the question asks what a rule *is* — the leave types this system
+     * offers, how credits accrue, how late is deducted, the grace period, LWOP,
+     * working hours, or whether a leave may be filed at all.
+     *
+     * These are answered from HrPolicyFactsService, which reads the live
+     * `leave_types_config` and the service constants, so they cost no model
+     * call and cannot drift from the system. Crucially they are answerable for
+     * *every* role: an employee asking "what leave can I file?" is asking about
+     * policy, not about anyone's records, and refusing it for lack of org-wide
+     * access was simply wrong.
+     */
+    private function wantsPolicy(string $q): bool
+    {
+        // A question about the caller's own figures is not a policy question,
+        // even though it names the same nouns — "how much leave did my late
+        // cost" is computed from their log, not quoted from the rulebook.
+        if ($this->isSelfReferential($q)) {
+            return false;
+        }
+
+        return (bool) preg_match(
+            '/\bleave\s+types?\b|\btypes?\s+of\s+leave\b|\bkinds?\s+of\s+leave\b'
+            . '|\buri\s+ng\s+leave\b|\banong\s+(?:mga\s+)?leave\b'
+            . '|\b(?:leave|credits?|vl|sl)\b.{0,20}\baccru\w+'
+            . '|\baccru\w+.{0,20}\b(?:leave|credits?|vl|sl)\b'
+            . '|\bgrace\s*period\b'
+            . '|\blwop\b|\bleave\s+without\s+pay\b'
+            . '|\b(?:late|undertime)\b.{0,30}\b(?:deduct\w+|comput\w+|calculat\w+)\b'
+            . '|\b(?:deduct\w+|comput\w+|calculat\w+)\b.{0,30}\b(?:late|undertime)\b'
+            . '|\bworking\s+hours?\b|\boras\s+ng\s+trabaho\b'
+            . '|\b(?:can|may|pwede|entitled\s+to)\b.{0,40}\b(?:file|avail|apply\s+for)\b.{0,25}\bleave\b/',
+            $q
+        );
+    }
+
+    /**
      * Whether the question is about the caller's own HR records.
      *
      * Deliberately narrow: the self-reference has to attach to a personal HR
@@ -424,6 +472,33 @@ class AiQueryService
 
         // "do I have any pending leave", "I have how many VL left"
         if (preg_match('/\bi\s+have\b.{0,40}\b' . $ownNouns . '\b/', $q)) {
+            return true;
+        }
+
+        // Tagalog puts the possessor after the noun and drops "my" entirely:
+        // "ano ang mga leave credits na meron AKO", "ilang VL ang natitira sa
+        // AKIN", "leave ko". Without these the question reads as org-wide and
+        // goes to generated SQL — which answered "no rows" to an employee whose
+        // own leave page was showing 136 days of credits.
+        if (preg_match(
+            '/\b' . $ownNouns . '\b.{0,40}\b(?:meron|mayroon|natitira|natirang|naiwan|ako|akin|ko)\b/',
+            $q
+        )) {
+            return true;
+        }
+
+        // "meron ba akong leave credits", "natitirang VL ko"
+        //
+        // "ilan"/"ilang" ("how many") is deliberately absent: it is a bare
+        // quantifier, not a possessor, and including it claimed "ilan ang leave
+        // applications na pending" — an organisation-wide count — as a question
+        // about the asker's own credits. The genuinely personal phrasings that
+        // open with "ilan" carry a possessor later ("…natitira sa akin"), which
+        // the rule above already matches.
+        if (preg_match(
+            '/\b(?:meron|mayroon|natitira|natirang|naiwan)\b.{0,40}\b' . $ownNouns . '\b/',
+            $q
+        )) {
             return true;
         }
 

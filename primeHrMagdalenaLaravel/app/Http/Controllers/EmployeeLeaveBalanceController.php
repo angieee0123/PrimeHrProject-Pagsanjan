@@ -65,13 +65,14 @@ class EmployeeLeaveBalanceController extends Controller
             ->orderBy('leave_name')
             ->get();
         
-        // Manually attach the latest balance for each leave type (not filtered by year)
+        // Current balance per type — latest row per code, deliberately not
+        // filtered by year. The rule lives in LeaveBalance::currentFor(), which
+        // the AI Assistant also reads, so this page and the chat agree.
+        $currentBalances = \App\Models\LeaveBalance::currentFor($employee->id);
+
         foreach ($leaveTypes as $leaveType) {
-            $latestBalance = \App\Models\LeaveBalance::where('employee_id', $employee->id)
-                ->where('leave_code', $leaveType->leave_code)
-                ->orderBy('year', 'desc')
-                ->first();
-            
+            $latestBalance = $currentBalances->get($leaveType->leave_code);
+
             // Attach as collection for consistency with blade template
             $leaveType->setRelation('leaveBalances', $latestBalance ? collect([$latestBalance]) : collect());
         }
