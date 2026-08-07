@@ -118,8 +118,27 @@ function calOpenDayModal(cell, label) {
     modal.style.display = 'flex';
 }
 
+// ---------- Filter bar ----------
+// Travel orders carry no leave type, so "Travel orders only" makes the leave-type
+// select meaningless. Disabling it says so immediately and keeps it out of the
+// submitted query — the controller drops the pair server-side either way, so a
+// URL typed by hand lands in the same place.
+function calSyncLeaveTypeField() {
+    const type = document.getElementById('lcType');
+    const leaveCode = document.getElementById('lcLeaveCode');
+    if (!type || !leaveCode) return;
+
+    const travelOnly = type.value === 'travel';
+    if (travelOnly) leaveCode.value = '';
+    leaveCode.disabled = travelOnly;
+    leaveCode.closest('.fld')?.classList.toggle('is-disabled', travelOnly);
+}
+
 // ---------- Wire up ----------
 document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('lcType')?.addEventListener('change', calSyncLeaveTypeField);
+    calSyncLeaveTypeField();
+
     document.querySelectorAll('.cal-marker').forEach(marker => {
         marker.addEventListener('click', () => calOpenDetail(calParse(marker, 'data-payload')));
         marker.addEventListener('mouseenter', () => calShowTooltip(marker));

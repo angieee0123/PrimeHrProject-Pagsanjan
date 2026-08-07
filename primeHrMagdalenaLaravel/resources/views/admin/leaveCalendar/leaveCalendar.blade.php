@@ -21,10 +21,7 @@
     <div class="filter-card lc-toolbar">
         <div class="filter-card-fields lc-nav">
             <span class="lc-toolbar-label">Month</span>
-            @php
-                $monthNavBase = route('admin.leaveCalendar', $embed ? ['embed' => 1] : []);
-                $monthNavSep  = str_contains($monthNavBase, '?') ? '&' : '?';
-            @endphp
+            @php $monthNavSep = str_contains($monthNavBase, '?') ? '&' : '?'; @endphp
             <a href="{{ $prevUrl }}" class="btn-ghost lc-nav-btn" aria-label="Previous month">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             </a>
@@ -47,6 +44,85 @@
             <span class="lc-legend-item"><span class="lc-legend-dot is-pending-swatch"></span>Pending (dashed)</span>
         </div>
     </div>
+
+    {{-- Filter bar — narrows the calendar to what this viewer wants to judge.
+         Filtering happens in the query, so the stat strip and the "+X more"
+         counts below describe the filtered month, not the whole one. The month
+         travels as a hidden field so filtering keeps you where you are. --}}
+    <form method="GET" action="{{ $filterAction }}" class="filter-card lc-filterbar" id="lcFilterForm">
+        <input type="hidden" name="month" value="{{ $currentMonth }}">
+        @if($embed)<input type="hidden" name="embed" value="1">@endif
+
+        <div class="filter-card-fields lc-filter-fields">
+            <span class="lc-toolbar-label">Show</span>
+
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>
+                <select name="type" class="fc-select" id="lcType" title="Record type">
+                    <option value="">Leave &amp; Travel</option>
+                    <option value="leave"  {{ $filterType === 'leave'  ? 'selected' : '' }}>Leave only</option>
+                    <option value="travel" {{ $filterType === 'travel' ? 'selected' : '' }}>Travel orders only</option>
+                </select>
+            </div>
+
+            <div class="fc-divider"></div>
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <select name="status" class="fc-select" title="Approval status">
+                    <option value="">All statuses</option>
+                    <option value="approved" {{ $filterStatus === 'approved' ? 'selected' : '' }}>Approved only</option>
+                    <option value="pending"  {{ $filterStatus === 'pending'  ? 'selected' : '' }}>Pending only</option>
+                </select>
+            </div>
+
+            <div class="fc-divider"></div>
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+                <select name="department" class="fc-select" title="Department">
+                    <option value="">All departments</option>
+                    @foreach($departments as $dept)
+                        <option value="{{ $dept->id }}" {{ $filterDept === $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="fc-divider"></div>
+            {{-- A leave code is something only leave applications carry: picking
+                 one hides travel orders, and "Travel orders only" makes this
+                 select meaningless, so it disables rather than quietly emptying
+                 the month. leaveCalendar.js mirrors that on change. --}}
+            <div class="fld" data-leave-type-field>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <select name="leave_code" class="fc-select" id="lcLeaveCode"
+                        title="Leave type — selecting one shows leave records only"
+                        @disabled($filterType === 'travel')>
+                    <option value="">All leave types</option>
+                    @foreach($leaveTypes as $lt)
+                        <option value="{{ $lt->leave_code }}" {{ $filterLeave === $lt->leave_code ? 'selected' : '' }}>{{ $lt->leave_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-card-actions lc-filter-actions">
+            <button type="submit" class="btn-solid">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Filter
+            </button>
+            @if($hasFilters)
+                <a href="{{ $clearUrl }}" class="btn-ghost lc-clear-btn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Clear
+                </a>
+            @endif
+        </div>
+    </form>
+
+    @if($hasFilters && $filterLeave !== '' && $filterType !== 'leave')
+        <p class="lc-filter-note">
+            Showing leave only — travel orders carry no leave type.
+        </p>
+    @endif
 
     {{-- Summary stat strip --}}
     <div class="lc-stats">
@@ -76,6 +152,14 @@
         </div>
     </div>
 
+    {{-- An empty month reads very differently when it is the filter emptying it. --}}
+    @if($hasFilters && $summary['leave'] + $summary['travel'] === 0)
+        <div class="lc-empty-note">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>No leave or travel matches these filters in {{ $monthLabel }}. <a href="{{ $clearUrl }}">Clear filters</a> to see the whole month.</span>
+        </div>
+    @endif
+
     <div class="lc-card">
         {{-- Weekday header --}}
         <div class="lc-grid lc-weekdays">
@@ -101,7 +185,10 @@
                         <div class="cal-markers" data-day-label="{{ $day['date']->format('l, F j, Y') }}">
                             @foreach($day['events'] as $ev)
                                 @php
-                                    $summary = [
+                                    // Named apart from the month-level $summary above — this
+                                    // loop runs after the stat strip, but reusing the name
+                                    // would clobber it for anything added between them.
+                                    $evSummary = [
                                         'name'         => $ev['name'],
                                         'type_label'   => $ev['type_label'],
                                         'sub'          => $ev['sub'],
@@ -112,7 +199,7 @@
                                 @endphp
                                 <button type="button"
                                         class="cal-marker type-{{ $ev['type'] }} status-{{ $ev['status'] }}"
-                                        data-summary='@json($summary)'
+                                        data-summary='@json($evSummary)'
                                         data-payload='@json($ev['payload'])'
                                         aria-label="{{ $ev['name'] }} — {{ $ev['type_label'] }} ({{ $ev['status_label'] }})">
                                     @if($ev['photo'])

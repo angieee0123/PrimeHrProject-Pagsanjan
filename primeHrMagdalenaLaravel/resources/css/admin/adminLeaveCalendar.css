@@ -32,6 +32,12 @@
    the calendar a little more room by tightening the strip above it. */
 .lc-embed-wrap .lc-weeks-6 { gap: 11px; }
 .lc-embed-wrap .lc-weeks-6 .lc-stat { padding: 12px 15px; }
+/* The filter bar is a second control row inside a fixed-height modal, so it
+   pays for itself out of its own padding rather than the week rows'. */
+.lc-embed-wrap .lc-filterbar { padding: 7px 12px; margin-top: -28px; }
+.lc-embed-wrap .lc-weeks-6 .lc-toolbar { padding: 7px 12px; }
+.lc-embed-wrap .lc-weeks-6 .lc-filter-actions .btn-solid,
+.lc-embed-wrap .lc-weeks-6 .lc-filter-actions .btn-ghost { height: 34px; }
 .lc-embed-wrap .lc-weeks-6 .lc-card { padding: 13px; }
 .lc-embed-wrap .lc-weeks-6 .lc-grid { gap: 6px; }
 .lc-embed-wrap .lc-weeks-6 .lc-weekdays { margin-bottom: 7px; padding-bottom: 7px; }
@@ -108,6 +114,47 @@
     font-size: 11.5px; font-weight: 700; color: var(--gp-pri);
     background: #eef0fb; padding: 5px 12px; border-radius: 999px;
 }
+
+/* ---------- Filter bar ----------
+   A second .filter-card directly under the month toolbar. The two read as one
+   control block, so the pull-up cancels most of the gap the flex column and
+   .filter-card's own margin-bottom would otherwise leave between them. */
+.lc-filterbar { flex-wrap: wrap; row-gap: 10px; margin-top: -26px; }
+.lc-filter-fields { flex-wrap: wrap; row-gap: 8px; }
+.lc-filter-actions { gap: 8px !important; }
+.lc-filter-actions .btn-solid,
+.lc-filter-actions .btn-ghost {
+    height: 38px;
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12.5px;
+    padding: 0 16px !important;
+}
+.lc-filterbar .fc-select { min-width: 140px; }
+/* "Travel orders only" leaves nothing for the leave-type select to say. */
+.lc-filterbar .fld.is-disabled { opacity: 0.45; }
+.lc-filterbar .fld.is-disabled .fc-select { cursor: not-allowed; }
+
+/* Note under the bar: says out loud why travel disappeared when a leave type
+   is picked, rather than leaving it to be discovered. */
+.lc-filter-note {
+    margin: -26px 0 0;
+    font-size: 11.5px; font-weight: 600; color: #64748b;
+    padding-left: 4px;
+}
+.lc-filter-note + .lc-stats { margin-top: 4px; }
+
+/* Empty result — an empty month reads differently when the filter emptied it. */
+.lc-empty-note {
+    display: flex; align-items: center; gap: 9px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: rgba(245, 158, 11, 0.09);
+    border: 1px solid rgba(245, 158, 11, 0.24);
+    color: #92590b;
+    font-size: 12.5px; font-weight: 600;
+}
+.lc-empty-note svg { flex: 0 0 auto; }
+.lc-empty-note a { color: var(--gp-pri); text-decoration: underline; }
 
 /* ---------- Summary stat strip (glassy KPI cards, DTR-modal style) ---------- */
 .lc-stats {

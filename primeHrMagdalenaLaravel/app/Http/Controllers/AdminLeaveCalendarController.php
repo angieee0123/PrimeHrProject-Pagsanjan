@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
 use App\Models\LeaveApplication;
+use App\Models\LeaveType;
 use App\Models\TravelOrder;
 use Carbon\Carbon;
 
@@ -13,6 +15,11 @@ class AdminLeaveCalendarController extends Controller
      * order each day so the admin can judge coverage before approving new
      * requests. Shows approved AND pending records; pending is styled distinctly
      * in the view. Full-page reload paging via ?month=YYYY-MM.
+     *
+     * Filters (?type, ?status, ?department, ?leave_code) narrow the calendar to
+     * what the viewer actually wants to judge. They are applied in the query,
+     * not hidden in CSS, so the stat strip and the "+X more" counts describe the
+     * filtered month rather than the unfiltered one.
      */
     public function index()
     {
@@ -31,14 +38,56 @@ class AdminLeaveCalendarController extends Controller
         $gridStart = $cursor->copy()->startOfMonth()->startOfWeek(Carbon::SUNDAY);
         $gridEnd   = $cursor->copy()->endOfMonth()->endOfWeek(Carbon::SATURDAY);
 
+        // ---- Filters ----------------------------------------------------
+        // Unknown values fall back to "no filter" rather than an empty calendar,
+        // so a hand-edited URL cannot make the page look like nobody is out.
+        $filterType   = in_array(request('type'), ['leave', 'travel'], true) ? request('type') : '';
+        $filterStatus = in_array(request('status'), ['approved', 'pending'], true) ? request('status') : '';
+        $filterDept   = ctype_digit((string) request('department')) ? (int) request('department') : null;
+        $filterLeave  = trim((string) request('leave_code'));
+
+        $departments = Department::whereHas('employmentDetails')->orderBy('name')->get(['id', 'name']);
+        $leaveTypes  = LeaveType::orderBy('leave_name')->get(['leave_code', 'leave_name']);
+
+        if ($filterLeave !== '' && !$leaveTypes->contains('leave_code', $filterLeave)) {
+            $filterLeave = '';
+        }
+        // Travel orders carry no leave type, so "travel only" plus a leave code
+        // describes nothing at all. The explicit type choice wins and the code
+        // is dropped — otherwise a stale select silently empties the calendar.
+        if ($filterType === 'travel') {
+            $filterLeave = '';
+        }
+        if ($filterDept !== null && !$departments->contains('id', $filterDept)) {
+            $filterDept = null;
+        }
+
+        $showLeaves = $filterType !== 'travel';
+        $showTravel = $filterType !== 'leave' && $filterLeave === '';
+
+        $filters = array_filter([
+            'type'       => $filterType,
+            'status'     => $filterStatus,
+            'department' => $filterDept,
+            'leave_code' => $filterLeave,
+        ], fn($v) => $v !== '' && $v !== null);
+
         $eventsByDate = [];
 
         // ---- Leaves overlapping the visible grid (approved + pending) ----
-        $leaves = LeaveApplication::with(['employee', 'leaveType'])
-            ->whereIn('status', ['approved', 'pending'])
-            ->whereDate('start_date', '<=', $gridEnd)
-            ->whereDate('end_date', '>=', $gridStart)
-            ->get();
+        $leaves = collect();
+        if ($showLeaves) {
+            $leaves = LeaveApplication::with(['employee', 'leaveType'])
+                ->whereIn('status', $filterStatus !== '' ? [$filterStatus] : ['approved', 'pending'])
+                ->when($filterLeave !== '', fn($q) => $q->where('leave_code', $filterLeave))
+                ->when($filterDept !== null, fn($q) => $q->whereHas(
+                    'employee.employmentDetail',
+                    fn($d) => $d->where('department_id', $filterDept)
+                ))
+                ->whereDate('start_date', '<=', $gridEnd)
+                ->whereDate('end_date', '>=', $gridStart)
+                ->get();
+        }
 
         foreach ($leaves as $leave) {
             $emp = $leave->employee;
@@ -81,11 +130,24 @@ class AdminLeaveCalendarController extends Controller
 
         // ---- Travel orders overlapping the visible grid (approved + pending) ----
         // 'awaiting_companions' is a pre-approval state, so it counts as pending.
-        $travelOrders = TravelOrder::with('employee')
-            ->whereIn('status', ['approved', 'pending', 'awaiting_companions'])
-            ->whereDate('travel_date', '<=', $gridEnd)
-            ->whereDate('return_date', '>=', $gridStart)
-            ->get();
+        $travelStatuses = match ($filterStatus) {
+            'approved' => ['approved'],
+            'pending'  => ['pending', 'awaiting_companions'],
+            default    => ['approved', 'pending', 'awaiting_companions'],
+        };
+
+        $travelOrders = collect();
+        if ($showTravel) {
+            $travelOrders = TravelOrder::with('employee')
+                ->whereIn('status', $travelStatuses)
+                ->when($filterDept !== null, fn($q) => $q->whereHas(
+                    'employee.employmentDetail',
+                    fn($d) => $d->where('department_id', $filterDept)
+                ))
+                ->whereDate('travel_date', '<=', $gridEnd)
+                ->whereDate('return_date', '>=', $gridStart)
+                ->get();
+        }
 
         foreach ($travelOrders as $order) {
             $emp = $order->employee;
@@ -144,8 +206,10 @@ class AdminLeaveCalendarController extends Controller
         // Header + navigation. When opened inside the floating-button modal the
         // page loads with ?embed=1 (bare layout, no sidebar/FAB); the month
         // links must carry that flag so paging stays inside the modal iframe.
+        // The active filters ride along too — stepping to the next month is
+        // still the same question, so it should not silently widen the answer.
         $embed = request()->boolean('embed');
-        $q = $embed ? ['embed' => 1] : [];
+        $q = array_merge($embed ? ['embed' => 1] : [], $filters);
 
         $monthLabel   = $cursor->format('F Y');
         $currentMonth = $cursor->format('Y-m');   // feeds the <input type="month"> jump-to picker
@@ -172,12 +236,30 @@ class AdminLeaveCalendarController extends Controller
         ];
         $peopleOut = $summary['people'];
 
+        // Drives the "no records match" hint: an empty month reads very
+        // differently when it is the filter doing the emptying.
+        $hasFilters = count($filters) > 0;
+
+        // Base for the <input type="month"> jump-to picker, which appends
+        // &month=YYYY-MM client-side; carries embed + filters like the arrows do.
+        $monthNavBase = route('admin.leaveCalendar', $q);
+
+        // The filter form posts month as a hidden field, so its action carries
+        // only the embed flag — the selects themselves supply the rest.
+        $filterAction = route('admin.leaveCalendar', $embed ? ['embed' => 1] : []);
+        $clearUrl     = route('admin.leaveCalendar', array_merge(
+            $embed ? ['embed' => 1] : [],
+            ['month' => $cursor->format('Y-m')]
+        ));
+
         // Note: the per-day avatar cap (5) lives in the view/CSS — markers past
         // the 5th are hidden via .cal-markers .cal-marker:nth-child(n+6) and
         // surfaced through the "+X more" day popover.
 
         return view('admin.leaveCalendar.leaveCalendar', compact(
-            'days', 'monthLabel', 'currentMonth', 'prevUrl', 'nextUrl', 'todayUrl', 'peopleOut', 'summary', 'embed'
+            'days', 'monthLabel', 'currentMonth', 'prevUrl', 'nextUrl', 'todayUrl', 'peopleOut', 'summary', 'embed',
+            'departments', 'leaveTypes', 'filterType', 'filterStatus', 'filterDept', 'filterLeave',
+            'hasFilters', 'filterAction', 'clearUrl', 'monthNavBase'
         ));
     }
 
