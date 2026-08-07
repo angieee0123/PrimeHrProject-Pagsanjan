@@ -112,6 +112,12 @@ class AiAssistantController extends Controller
             $payload['table'] = $result['table'];
         }
 
+        // Suggested next questions, when the capability that answered offers
+        // them. Static prompt text, so there is nothing here to scope.
+        if (!empty($result['follow_ups'])) {
+            $payload['follow_ups'] = $result['follow_ups'];
+        }
+
         // Files and images the answer is about. Each carries a link back to
         // AiFileController, which re-checks permission when it is opened —
         // these are references to database rows, not storage paths.

@@ -573,6 +573,41 @@
 }
 .ai-export-btn:hover { opacity: .9; }
 
+/* Suggested next questions. Outlined rather than filled, so a row of them
+   never competes with the export button — that one is an action on the answer,
+   these are only invitations. */
+.ai-followups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.ai-followup-chip {
+    padding: 5px 11px;
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-align: left;
+    color: var(--gp-pri, #0b044d);
+    background: var(--gp-glass, #fff);
+    border: 1px solid var(--gp-border, #ecebf6);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+
+.ai-followup-chip:hover {
+    background: var(--gp-bg-tint-2, #f2f1fb);
+    border-color: var(--gp-pri, #0b044d);
+}
+
+.ai-followup-chip:focus-visible {
+    outline: 2px solid var(--gp-pri, #0b044d);
+    outline-offset: 2px;
+}
+
 /* Notes under a replayed turn: when its figures were pulled, or why part of
    the answer is no longer shown. Quieter than the answer they annotate. */
 .ai-msg-note {

@@ -35,6 +35,31 @@ HOW TO USE THE SYSTEM (employee self-service):
 PRIVACY: Employees may only view their own HR records, not coworkers' data.
 TEXT;
 
+    /**
+     * The same self-scoped answer `handle()` produces, in the shape
+     * AiQueryService dispatches (`answer` + `follow_ups`).
+     *
+     * This exists so the web assistant and the mobile chatbot share one
+     * employee-facing brain instead of diverging. Every context builder below
+     * filters on the employee's own id, which is what makes this path safe for
+     * a caller who may not run generated SQL.
+     *
+     * No history parameter: the orchestrator resolves follow-ups into a
+     * standalone question before dispatching, so the message arriving here
+     * already names its own subject.
+     *
+     * @return array{answer: string, follow_ups: array<int, string>}
+     */
+    public function assist(Employee $employee, string $message): array
+    {
+        $result = $this->handle($employee, $message);
+
+        return [
+            'answer' => $result['response'],
+            'follow_ups' => $result['follow_up_questions'] ?? [],
+        ];
+    }
+
     public function handle(Employee $employee, string $message): array
     {
         $message = trim($message);

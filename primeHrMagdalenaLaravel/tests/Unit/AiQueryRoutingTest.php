@@ -9,6 +9,7 @@ use App\Services\ConversationMemoryService;
 use App\Services\DashboardAssistantService;
 use App\Services\DocumentSearchService;
 use App\Services\EmployeeSearchService;
+use App\Services\EmployeeChatbotService;
 use App\Services\HrChatbotAnswerer;
 use App\Services\AiQueryService;
 use App\Services\ReportGeneratorService;
@@ -59,8 +60,11 @@ class AiQueryRoutingTest extends TestCase
      * Every collaborator the orchestrator needs, with the two that matter for a
      * given test supplied by the caller.
      */
-    private function assistant(SafeSqlService $sql, HrChatbotAnswerer $fallback): AiQueryService
-    {
+    private function assistant(
+        SafeSqlService $sql,
+        HrChatbotAnswerer $fallback,
+        ?EmployeeChatbotService $selfService = null,
+    ): AiQueryService {
         return new AiQueryService(
             new AiAccessPolicy(),
             new ConversationMemoryService(),
@@ -72,7 +76,23 @@ class AiQueryRoutingTest extends TestCase
             $this->createMock(WorkflowAssistantService::class),
             $sql,
             $fallback,
+            $selfService ?? $this->createMock(EmployeeChatbotService::class),
         );
+    }
+
+    /**
+     * Classify a question without exercising any capability behind it. Every
+     * collaborator is a mock, so the returned intent is the routing decision
+     * on its own.
+     */
+    private function intentOf(string $question, array $roles = ['employee'], ?int $employeeId = null): string
+    {
+        $assistant = $this->assistant(
+            $this->createMock(SafeSqlService::class),
+            $this->createMock(HrChatbotAnswerer::class),
+        );
+
+        return $assistant->ask($this->user($roles, $employeeId), $question)['intent'];
     }
 
     /**
@@ -141,5 +161,155 @@ class AiQueryRoutingTest extends TestCase
         $result = $assistant->ask($this->user(['hr'], 1), 'list all employees with their salary grade');
 
         $this->assertSame('Here is what I know about leave policy instead.', $result['answer']);
+    }
+
+    /**
+     * The reason step 1's refusal is acceptable: a question about the asker's
+     * own records no longer goes near generated SQL, so an employee is
+     * answered rather than denied.
+     */
+    #[Test]
+    public function questions_about_ones_own_records_route_to_self_service(): void
+    {
+        foreach ([
+            'what is my leave balance?',
+            'show my latest payslip',
+            'how many VL credits do I have left?',
+            'do I have any pending leave',
+            'my attendance this month',
+            'aking payslip',
+            'who am i',
+        ] as $question) {
+            $this->assertSame('self_service', $this->intentOf($question), "misrouted: {$question}");
+        }
+    }
+
+    /**
+     * The self-reference has to attach to a personal HR noun. An HR officer
+     * asking about their department means the department, not themselves —
+     * a blanket match on "my" would silently narrow the answer to one row.
+     */
+    #[Test]
+    public function a_possessive_about_something_other_than_own_records_is_not_self_service(): void
+    {
+        $this->assertSame('dashboard', $this->intentOf('how many employees are in my department', ['hr'], 1));
+        $this->assertSame('report', $this->intentOf('generate the payroll report for my department', ['hr'], 1));
+    }
+
+    /**
+     * "How do I check my leave balance" is a how-to, not a lookup of that
+     * balance — so the how-to rule has to be tested ahead of self-service.
+     */
+    #[Test]
+    public function how_to_questions_route_to_the_knowledge_base(): void
+    {
+        foreach ([
+            'how do i file a leave application?',
+            'how to add a training record',
+            'how do I check my leave balance',
+            'paano mag-file ng leave',
+            'pano mag time in',
+            'what is the process for a travel order',
+        ] as $question) {
+            $this->assertSame('how_to', $this->intentOf($question), "misrouted: {$question}");
+        }
+    }
+
+    /**
+     * A how-to is answered from curated policy and the knowledge base, never
+     * from generated SQL — `explain()` rather than `answer()`.
+     */
+    #[Test]
+    public function a_how_to_never_reaches_the_sql_answerer(): void
+    {
+        $fallback = $this->createMock(HrChatbotAnswerer::class);
+        $fallback->expects($this->never())->method('answer');
+        $fallback->expects($this->once())
+            ->method('explain')
+            ->willReturn('Go to Leave Management > File Leave Application.');
+
+        $assistant = $this->assistant($this->createMock(SafeSqlService::class), $fallback);
+
+        $result = $assistant->ask($this->user(['employee'], 5), 'how do i file a leave application?');
+
+        $this->assertSame('Go to Leave Management > File Leave Application.', $result['answer']);
+    }
+
+    /**
+     * An account with no employee row has no "own" records. It must be told
+     * so, not handed someone else's.
+     */
+    #[Test]
+    public function self_service_for_an_unlinked_account_explains_rather_than_guesses(): void
+    {
+        $selfService = $this->createMock(EmployeeChatbotService::class);
+        $selfService->expects($this->never())->method('assist');
+
+        $assistant = $this->assistant(
+            $this->createMock(SafeSqlService::class),
+            $this->createMock(HrChatbotAnswerer::class),
+            $selfService,
+        );
+
+        $result = $assistant->ask($this->user(['employee'], null), 'what is my leave balance?');
+
+        $this->assertSame('self_service', $result['intent']);
+        $this->assertStringContainsString('not linked to an employee record', $result['answer']);
+    }
+
+    /**
+     * "how many" is a count for the dashboard, not an instruction — the how-to
+     * rule must not swallow it.
+     */
+    #[Test]
+    public function how_many_is_still_a_dashboard_question(): void
+    {
+        $this->assertSame('dashboard', $this->intentOf('how many employees are on leave today', ['hr'], 1));
+    }
+
+    #[Test]
+    public function asking_what_the_assistant_can_do_is_answered_without_a_model_call(): void
+    {
+        foreach ([
+            'what can you do?',
+            'what can i ask you',
+            'who are you',
+            'anong kaya mo',
+            'help',
+        ] as $question) {
+            $this->assertSame('capabilities', $this->intentOf($question), "misrouted: {$question}");
+        }
+    }
+
+    /**
+     * "help me find Juan" is a search. A bare "help" is the only form that
+     * means the capability list.
+     */
+    #[Test]
+    public function help_with_an_object_is_not_a_capability_question(): void
+    {
+        $this->assertNotSame('capabilities', $this->intentOf('help me find Juan dela Cruz', ['hr'], 1));
+    }
+
+    /**
+     * The capability list is built from AiAccessPolicy, so it cannot offer an
+     * employee something their scope would then refuse.
+     */
+    #[Test]
+    public function the_capability_list_matches_the_callers_scope(): void
+    {
+        $assistant = $this->assistant(
+            $this->createMock(SafeSqlService::class),
+            $this->createMock(HrChatbotAnswerer::class),
+        );
+
+        $employee = $assistant->ask($this->user(['employee'], 5), 'what can you do?');
+        $hr = $assistant->ask($this->user(['hr'], 1), 'what can you do?');
+
+        $this->assertStringContainsString('your own records', $employee['answer']);
+        $this->assertStringNotContainsString('Organisation-wide', $employee['answer']);
+        $this->assertNotEmpty($employee['follow_ups']);
+
+        $this->assertStringContainsString('Organisation-wide', $hr['answer']);
     }
 }

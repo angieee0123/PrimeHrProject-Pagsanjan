@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -29,6 +30,7 @@ class AiQueryService
         private WorkflowAssistantService $workflows,
         private SafeSqlService $sql,
         private HrChatbotAnswerer $fallback,
+        private EmployeeChatbotService $selfService,
     ) {
     }
 
@@ -150,8 +152,77 @@ class AiQueryService
             'chart' => $this->charts->generate($user, $resolved, $history),
             'workflow' => $this->workflows->handle($user, $resolved, $history),
             'data_query' => $this->dataQuery($user, $resolved, $history),
+            'self_service' => $this->ownRecords($user, $resolved),
+            'how_to' => ['answer' => $this->fallback->explain($user, $resolved, $history)],
+            'capabilities' => $this->capabilities($user),
             default => ['answer' => $this->fallback->answer($user, $original, $history)],
         };
+    }
+
+    /**
+     * "What can you do?" — usually the first thing anyone asks.
+     *
+     * Answered from AiAccessPolicy rather than a prompt, for two reasons: the
+     * list then cannot promise a capability the caller is not permitted to use,
+     * and it costs no model call. The follow-ups are live examples the user can
+     * click straight into.
+     *
+     * @return array{answer: string, follow_ups: array<int, string>}
+     */
+    private function capabilities(User $user): array
+    {
+        $lines = array_map(
+            fn (string $item) => "- {$item}",
+            $this->policy->describeCapabilities($user)
+        );
+
+        $orgWide = $this->policy->hasOrgWideAccess($user);
+
+        $opening = $orgWide
+            ? "I'm the PRIME HRIS Assistant. You have organisation-wide access, so I can help with:"
+            : "I'm the PRIME HRIS Assistant. I can help you with:";
+
+        $closing = $orgWide
+            ? "\n\nAsk in plain language — English or Tagalog. I can also draw charts and export any table to PDF."
+            : "\n\nAsk in plain language — English or Tagalog. For privacy I can only show your own records, "
+                . 'not other employees\'.';
+
+        return [
+            'answer' => $opening . "\n" . implode("\n", $lines) . $closing,
+            'follow_ups' => $orgWide
+                ? ['How many employees are on leave today?', 'Generate an attendance summary report', 'What is my leave balance?']
+                : ['What is my leave balance?', 'Show my latest payslip', 'How do I file a leave request?'],
+        ];
+    }
+
+    /**
+     * Answer a question about the caller's own HR records.
+     *
+     * This is the path that makes the assistant useful to an employee. It does
+     * not generate SQL, so it does not need the org-wide permission that
+     * generated SQL does: every query behind it filters on this employee's own
+     * id. `admin`/`hr`/`mayor` reach it too — "what is my leave balance" means
+     * their own record regardless of what else they may see.
+     *
+     * @return array{answer: string, follow_ups?: array<int, string>}
+     */
+    private function ownRecords(User $user, string $question): array
+    {
+        $employeeId = $this->policy->ownEmployeeId($user);
+
+        $employee = $employeeId === null ? null : Employee::find($employeeId);
+
+        // An account with no linked employee row has no "own" records to show.
+        // Say so plainly rather than falling through to a path that would
+        // answer from someone else's data.
+        if (!$employee) {
+            return [
+                'answer' => 'Your account is not linked to an employee record, so I cannot look up your '
+                    . 'personal HR information. Please ask HR to link your account.',
+            ];
+        }
+
+        return $this->selfService->assist($employee, $question);
     }
 
     /**
@@ -196,7 +267,14 @@ class AiQueryService
 
         // Order matters: the more specific verbs win over the nouns they contain.
         return match (true) {
+            // First, because it is unambiguous and usually the opening question.
+            $this->wantsCapabilities($q) => 'capabilities',
             (bool) preg_match('/\b(graph|chart|plot|visuali[sz]e|pie|bar\s+chart|line\s+chart|trend\s+(?:graph|chart))\b/', $q) => 'chart',
+            // Checked before the stored-file rule because "file" is a verb at
+            // least as often as it is a noun here: "how do I file a leave
+            // application" is a how-to, but the file-noun list matches "file"
+            // and would answer it with a document search.
+            $this->wantsHowTo($q) => 'how_to',
             // "show me his 201 file", "list all documents of Juan" — asking to
             // see a stored file beats both the report and the table rules,
             // which would otherwise swallow "list"/"download" and answer with
@@ -209,6 +287,12 @@ class AiQueryService
             // every row-bearing answer downstream.
             (bool) preg_match('/\b(table|tabulate|spreadsheet|list\s+(?:of|all|the)|breakdown\s+of)\b/', $q) => 'data_query',
             (bool) preg_match('/\b(draft|write|compose)\b.*\b(letter|memo|notice|email)\b|\bonboarding\b|\bapproval\s+summary\b/', $q) => 'workflow',
+            // "What is my leave balance?" — the caller's own records. Must beat
+            // both the dashboard rule ("how many leave credits do I have") and
+            // the data_query rule ("my attendance this month"), which would
+            // otherwise send an employee down a path they are not permitted to
+            // use and get them refused for asking about themselves.
+            $this->isSelfReferential($q) => 'self_service',
             (bool) preg_match('/\b(how many|how much|count|total|number of|who has|which department|pending|missing|expir\w+|overview|dashboard)\b/', $q) => 'dashboard',
             (bool) preg_match('/\bwhere\s+is\b|\bfind\b|\bshow\s+me\b.*\bemployees?\b|\bemployees?\s+(?:hired|appointed|in|from|with)\b|\bwho\s+is\b/', $q) => 'employee_search',
             (bool) preg_match('/\b(leave|attendance|payroll|salary|deduction|absent|late|overtime|credits?|balance|dtr)\b/', $q) => 'data_query',
@@ -249,6 +333,77 @@ class AiQueryService
     }
 
     /**
+     * Whether the user is asking what the assistant itself can do.
+     *
+     * "help" only counts on its own: "help me find Juan" is a search, and
+     * answering that with a capability list would be useless.
+     */
+    private function wantsCapabilities(string $q): bool
+    {
+        return (bool) preg_match(
+            '/\bwhat\s+(?:can|could)\s+(?:you|i|we)\s+(?:do|ask|help|search)\b'
+            . '|\bwhat\s+(?:do|are)\s+you\b|\bwho\s+are\s+you\b'
+            . '|\bwhat\s+(?:questions|things)\s+can\b'
+            . '|\bano(?:ng)?\s+(?:ang\s+)?(?:kaya|magagawa|pwede)\b'
+            . '|^\s*(?:help|tulong)\s*[?!.]*$/',
+            $q
+        );
+    }
+
+    /**
+     * Whether the user is asking how something works or how to do it, as
+     * opposed to asking for a value out of the database.
+     *
+     * Tagalog is matched alongside English here because the knowledge base
+     * behind this intent already answers in both, and a question typed as
+     * "paano mag-file ng leave?" would otherwise match no pattern at all and
+     * fall through to the model classifier.
+     */
+    private function wantsHowTo(string $q): bool
+    {
+        // "how many" / "how much" are counts, not instructions — the dashboard
+        // owns those, and \s+(?:do|can|…) already excludes them.
+        return (bool) preg_match(
+            '/\bhow\s+(?:do|does|can|should|would)\s+(?:i|we|you|an?\s+employee)\b'
+            . '|\bhow\s+to\b'
+            . '|\b(?:pa?ano|papaano)\b'
+            . '|\bwhat\s+is\s+the\s+(?:process|procedure|policy|rule|step)/',
+            $q
+        );
+    }
+
+    /**
+     * Whether the question is about the caller's own HR records.
+     *
+     * Deliberately narrow: the self-reference has to attach to a personal HR
+     * noun. A blanket match on "my" would capture "my department's headcount"
+     * from an HR officer and wrongly narrow it to their own row.
+     */
+    private function isSelfReferential(string $q): bool
+    {
+        $ownNouns = '(?:leave|vl|sl|spl|credits?|balances?|payslip|pay\s*slip|salary|sweldo|sahod|'
+            . 'net\s*pay|deductions?|attendance|dtr|absences?|late|undertime|overtime|'
+            . 'trainings?|seminars?|travel\s*orders?|profile|records?|info(?:rmation)?|details)';
+
+        // "my leave balance", "aking payslip", "my remaining VL credits"
+        if (preg_match('/\b(?:my|mine|aking|akin)\b(?:\s+\w+){0,3}\s*\b' . $ownNouns . '\b/', $q)) {
+            return true;
+        }
+
+        // "how many leave credits do I have", "what leave can I still use"
+        if (preg_match('/\b' . $ownNouns . '\b.{0,40}\b(?:do|did|can|will|should)\s+i\b/', $q)) {
+            return true;
+        }
+
+        // "do I have any pending leave", "I have how many VL left"
+        if (preg_match('/\bi\s+have\b.{0,40}\b' . $ownNouns . '\b/', $q)) {
+            return true;
+        }
+
+        return (bool) preg_match('/\bwho\s+am\s+i\b|\bmy\s+(?:profile|info|account|details)\b/', $q);
+    }
+
+    /**
      * "Generate a payroll preview" is a workflow; "generate the payroll
      * report" is a report. Split on the noun.
      */
@@ -278,8 +433,11 @@ dashboard        — counts, totals, "how many", pending items, overview metrics
 report           — asking for a generated report of records
 chart            — asking for a graph or visualisation
 workflow         — drafting a letter, checklist, summary, or preview document
+self_service     — the asker's OWN records ("my leave balance", "my payslip")
+how_to           — how to do something in the system, or what a policy says
+capabilities     — what the assistant itself can do
 data_query       — any other question answerable from HR records
-general          — HR policy, how-to, or conversational
+general          — conversational, or none of the above
 PROMPT;
 
         $messages = array_slice($history, -4);
@@ -288,7 +446,8 @@ PROMPT;
         $label = strtolower(trim((string) AiChatService::chat($user, $system, $messages, 0.0, 12)));
         $label = preg_replace('/[^a-z_]/', '', $label) ?? '';
 
-        $known = ['employee_search', 'document_search', 'dashboard', 'report', 'chart', 'workflow', 'data_query', 'general'];
+        $known = ['employee_search', 'document_search', 'dashboard', 'report', 'chart', 'workflow',
+            'self_service', 'how_to', 'capabilities', 'data_query', 'general'];
 
         return in_array($label, $known, true) ? $label : 'general';
     }

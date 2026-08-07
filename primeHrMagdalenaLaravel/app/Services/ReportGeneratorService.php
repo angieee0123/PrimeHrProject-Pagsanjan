@@ -518,9 +518,11 @@ class ReportGeneratorService
 
         $totals = collect($report['totals'])->map(fn ($v, $k) => "{$k}: {$v}")->implode(' · ');
 
-        $system = <<<'PROMPT'
+        $audience = $this->policy->audienceLabel($user);
+
+        $system = <<<PROMPT
 You are the PRIME HRIS Assistant introducing a report you just generated for
-an HR administrator.
+{$audience}.
 
 - Open with the report title and period, and the headline totals.
 - Note the two or three most significant findings from the sample rows

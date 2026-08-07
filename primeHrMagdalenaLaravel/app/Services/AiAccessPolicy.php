@@ -106,6 +106,54 @@ class AiAccessPolicy
     }
 
     /**
+     * Who the assistant is talking to, for narration prompts.
+     *
+     * The same capability answers both audiences — an employee searching
+     * employees gets their own record back, an HR officer gets the
+     * organisation — so the prose has to know which it is. Prompts that
+     * hard-code "an HR administrator" address an employee as though they were
+     * staff looking at someone else's file.
+     */
+    public function audienceLabel(User $user): string
+    {
+        return $this->hasOrgWideAccess($user)
+            ? 'an HR administrator'
+            : 'an employee viewing their own records';
+    }
+
+    /**
+     * What this user may ask the assistant, in plain language. Drives the
+     * "what can you do?" answer, so it stays in step with the scoping rules
+     * above rather than being restated in a prompt that can drift from them.
+     *
+     * @return array<int, string>
+     */
+    public function describeCapabilities(User $user): array
+    {
+        $everyone = [
+            'Your own leave balances, credits, and recent applications',
+            'Your payslips, deductions, and net pay',
+            'Your attendance and DTR records',
+            'Your trainings and travel orders',
+            'How to use PRIME HRIS — filing leave, travel orders, viewing your payslip',
+            'HR policy questions — grace periods, late deductions, leave types',
+        ];
+
+        if (!$this->hasOrgWideAccess($user)) {
+            return $everyone;
+        }
+
+        return array_merge($everyone, [
+            'Organisation-wide questions — headcount, absences, pending approvals',
+            'Employee lookups by name, department, position, or hire date',
+            'Uploaded files and documents across all employees',
+            'Generated reports and charts, exportable to PDF',
+            'Ad-hoc questions answered from the database directly',
+            'Drafting HR letters, checklists, and payroll previews',
+        ]);
+    }
+
+    /**
      * Short description of the caller's scope, for prompt context and audit
      * lines.
      */

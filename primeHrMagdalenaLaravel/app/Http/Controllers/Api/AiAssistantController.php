@@ -87,6 +87,12 @@ class AiAssistantController extends Controller
             $payload['table'] = $result['table'];
         }
 
+        // Suggested next questions, when the capability that answered offers
+        // them. Static prompt text, so there is nothing here to scope.
+        if (!empty($result['follow_ups'])) {
+            $payload['follow_ups'] = $result['follow_ups'];
+        }
+
         // Same file cards the web chat shows, repointed at the token-auth
         // endpoint below so the mobile client can fetch them.
         if (!empty($result['files'])) {

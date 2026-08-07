@@ -64,9 +64,41 @@ More things worth knowing:
 
 ## The AI Assistant
 
-One natural-language interface over every HR module. Users ask questions; the
-assistant classifies intent, routes to the service that owns that capability,
-scopes results to what the asker may see, and narrates the answer.
+One natural-language interface over every HR module, for **every** role —
+employees, HR, admin, and the mayor all talk to the same assistant. Users ask
+questions; it classifies intent, routes to the service that owns that
+capability, scopes results to what the asker may see, and narrates the answer.
+
+Three audiences, one brain. What differs is which capability answers:
+
+- **anyone** → `self_service` (their own records), `how_to` (policy, navigation),
+  and `capabilities` ("what can you do?")
+- **`admin`/`hr`/`mayor`** → additionally the org-wide capabilities: generated
+  SQL, reports, charts, dashboards, cross-employee search
+
+Two things follow from one role serving every audience:
+
+- **Narration addresses the caller.** `AiAccessPolicy::audienceLabel()` decides
+  whether a prompt says "an HR administrator" or "an employee viewing their own
+  records" — `EmployeeSearchService` and `ReportGeneratorService` are reachable
+  by both, so a hard-coded persona there writes to an employee as if they were
+  staff reading someone else's file.
+- **The capability list comes from the policy, not a prompt.**
+  `describeCapabilities()` sits beside the scoping rules it describes, so
+  "what can you do?" cannot advertise something the caller would then be
+  refused. It costs no model call.
+
+Answers may carry `follow_ups` — suggested next questions, rendered as clickable
+chips. They are static prompt text with nothing to scope, they are not stored on
+the turn (stale suggestions help nobody), and the UI keeps them on the newest
+turn only.
+
+Intent routing lives in one `match(true)` in `AiQueryService::detectIntent()` and
+**its order is load-bearing** — `how_to` is checked before the stored-file rule
+because "how do I *file* a leave" would otherwise match the file-noun list, and
+`self_service` before `dashboard`/`data_query` so "how many VL credits do I
+have" is not treated as an org-wide count. `tests/Unit/AiQueryRoutingTest.php`
+pins these; add a case there before reordering anything.
 
 ### Request flow
 
@@ -76,6 +108,8 @@ question
    ├─ ConversationMemoryService   resolve "generate a report" → "…of Juan's leave"
    ├─ AiQueryService              classify intent (patterns first, model as fallback)
    ├─ AiAccessPolicy              scope every query to the caller's permissions
+   │                              self_service → own records; how_to → no query
+
    ├─ <capability service>        run the actual query
    ├─ AiChatService               narrate the rows in plain language
    └─ ai_audit log                who asked what, which capability, how many rows
@@ -93,6 +127,8 @@ question
 | `AiFileResolver` | Turns a `source:id` file reference back into bytes, permission-checked |
 | `SemanticSearchService` | Meaning-based expansion (maternity → pregnancy, parental…) |
 | `SafeSqlService` | Natural-language → validated read-only SQL |
+| `EmployeeChatbotService` | **Self-service:** the caller's own leave, payslip, DTR, training, travel |
+| `HrChatbotAnswerer` | HR policy + system how-to from a curated knowledge base; general fallback |
 | `DashboardAssistantService` | Counts, absenteeism, pending approvals, headcount |
 | `ReportGeneratorService` | 7 report types with columns and totals |
 | `ChartDataService` | Chart specs (form + series + palette) |

@@ -171,6 +171,10 @@
                 if (attachments.export_token && exportUrl) {
                     bubble.appendChild(buildExportButton(attachments.export_token));
                 }
+
+                if (attachments.follow_ups && attachments.follow_ups.length) {
+                    bubble.appendChild(buildFollowUps(attachments.follow_ups));
+                }
             }
 
             // Only replayed turns carry a generation time. Figures in HR move,
@@ -405,6 +409,34 @@
         return head;
     }
 
+    /**
+     * Suggested next questions, as chips that ask themselves when clicked.
+     *
+     * Discoverability is the whole point: most people do not know what to ask
+     * an HR assistant, and a list of real questions teaches that faster than
+     * any help text. Only the latest turn keeps its chips — see sendMessage,
+     * which clears older ones so the thread does not fill with stale prompts.
+     */
+    function buildFollowUps(items) {
+        const holder = document.createElement('div');
+        holder.className = 'ai-followups';
+
+        items.forEach(function (question) {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'ai-followup-chip';
+            chip.textContent = question;
+            chip.addEventListener('click', function () {
+                if (inputEl.disabled) return;
+                inputEl.value = question;
+                sendMessage();
+            });
+            holder.appendChild(chip);
+        });
+
+        return holder;
+    }
+
     function buildExportButton(token) {
         const link = document.createElement('a');
         link.className = 'ai-export-btn';
@@ -603,6 +635,10 @@
         const text = inputEl.value.trim();
         if (!text) return;
 
+        // Suggestions belong to the newest turn only; leaving them behind would
+        // stack a thread's worth of chips that no longer follow from anything.
+        messagesEl.querySelectorAll('.ai-followups').forEach(function (el) { el.remove(); });
+
         appendMessage('user', text);
         inputEl.value = '';
         inputEl.disabled = true;
@@ -630,6 +666,7 @@
                     files: data.files,
                     chart_svg: data.chart_svg,
                     export_token: data.export_token,
+                    follow_ups: data.follow_ups,
                 });
 
                 const isNewConversation = activeConversationId === null;

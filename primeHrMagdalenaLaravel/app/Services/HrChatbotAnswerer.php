@@ -196,6 +196,23 @@ DATABASE KEY TABLES:
 TEXT;
 
     /**
+     * Explain how something works, from curated policy and the knowledge base
+     * only — never from generated SQL.
+     *
+     * "How do I file a leave?" is a question about the system, not about the
+     * data in it, so there is nothing to query. Routing it here means every
+     * caller gets the same deterministic answer regardless of role, and the
+     * common case costs no model call at all.
+     *
+     * @param array<int, array{role: string, content: string}> $history
+     */
+    public function explain(?User $user, string $message, array $history = []): string
+    {
+        return $this->getPolicyAnswer(trim($message))
+            ?? $this->askDirectly($user, $message, $history);
+    }
+
+    /**
      * Answer a single question given the conversation so far.
      *
      * @param array<int, array{role: string, content: string}> $history

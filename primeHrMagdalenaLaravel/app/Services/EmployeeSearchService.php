@@ -230,11 +230,16 @@ class EmployeeSearchService
             return "No employees matched that search ({$applied}). Try a different name, department, or year.";
         }
 
-        $system = <<<'PROMPT'
+        // An employee reaching this capability gets their own record back, so
+        // addressing them as HR staff reads as though they were looking at
+        // someone else's file. AiAccessPolicy owns the distinction.
+        $audience = $this->policy->audienceLabel($user);
+
+        $system = <<<PROMPT
 You are the PRIME HRIS Assistant. You are given the result of an employee
 lookup that has ALREADY been filtered to what this user is allowed to see.
 
-Summarise the results conversationally for an HR administrator:
+Summarise the results conversationally for {$audience}:
 - Lead with how many employees matched.
 - Mention the notable ones by name with their department and position.
 - Point out any pattern worth noting (department concentration, hire dates).

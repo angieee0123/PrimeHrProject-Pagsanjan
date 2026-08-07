@@ -109,6 +109,42 @@ class AiAccessPolicyTest extends TestCase
         $this->assertFalse($this->policy->canUseAssistant($this->user([], 1)));
     }
 
+    /**
+     * Narration prompts address the caller. An employee reaching a shared
+     * capability must not be written to as though they were HR staff looking
+     * at someone else's file.
+     */
+    #[Test]
+    public function the_audience_label_follows_the_callers_access(): void
+    {
+        $this->assertSame('an HR administrator', $this->policy->audienceLabel($this->user(['hr'], 1)));
+        $this->assertSame(
+            'an employee viewing their own records',
+            $this->policy->audienceLabel($this->user(['employee'], 5))
+        );
+    }
+
+    /**
+     * The "what can you do?" list is derived from the same policy that scopes
+     * the queries, so it cannot advertise a capability the caller would then
+     * be refused.
+     */
+    #[Test]
+    public function the_capability_list_never_promises_more_than_the_scope_allows(): void
+    {
+        $employee = $this->policy->describeCapabilities($this->user(['employee'], 5));
+        $hr = $this->policy->describeCapabilities($this->user(['hr'], 1));
+
+        $this->assertNotEmpty($employee);
+        $this->assertCount(count($employee) + 6, $hr);
+
+        // Nothing org-wide may appear in an employee's list.
+        foreach ($employee as $item) {
+            $this->assertStringNotContainsStringIgnoringCase('all employees', $item);
+            $this->assertStringNotContainsStringIgnoringCase('organisation-wide', $item);
+        }
+    }
+
     #[Test]
     public function scoping_a_query_adds_a_self_filter_for_employees(): void
     {
