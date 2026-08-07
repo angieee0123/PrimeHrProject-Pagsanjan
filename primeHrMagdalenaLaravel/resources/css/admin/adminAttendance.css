@@ -1032,8 +1032,8 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
 #detailed-tab .dtl-avatar-group {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 10px 8px;
     padding-right: 18px;
     border-right: 1px solid rgba(15,23,42,.08);
 }
@@ -1041,19 +1041,60 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
     padding-right: 0;
     border-right: none;
 }
+/* The chip is a column — avatar over its in/out times. The avatar keeps its
+   own fixed 30px box (.dtl-avatar-face) so the circle and the hover zoom stay
+   geometrically correct now that the chip itself is taller than it is wide. */
 #detailed-tab .dtl-avatar-chip {
     position: relative;
-    width: 30px;
-    height: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 46px;
     padding: 0;
     border: none;
     background: none;
     cursor: pointer;
-    border-radius: 50%;
 }
 #detailed-tab .dtl-avatar-chip:hover {
     z-index: 30;
 }
+#detailed-tab .dtl-avatar-face {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+#detailed-tab .dtl-chip-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.25;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: -.1px;
+    font-variant-numeric: tabular-nums;
+}
+#detailed-tab .dtl-chip-in { color: var(--ink, #0b044d); }
+#detailed-tab .dtl-chip-out { color: var(--muted, #56547a); font-weight: 500; }
+/* Scanned in but not yet out — the normal state of anyone still at work. */
+#detailed-tab .dtl-chip-out.is-pending { color: #c9c8db; }
+/* Wraps to two lines rather than truncating, so it matches the height of the
+   two-line time chips beside it and "Sick Leave" stays readable. Longer leave
+   names still clamp, with the full text in the tooltip. */
+#detailed-tab .dtl-chip-note {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 46px;
+    color: var(--muted, #56547a);
+    font-weight: 500;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+#detailed-tab .status-absent .dtl-chip-note { color: var(--danger); }
 #detailed-tab .dtl-avatar-img {
     display: flex;
     align-items: center;
@@ -1068,8 +1109,10 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
     box-sizing: border-box;
     transition: transform .25s cubic-bezier(.4,0,.2,1), filter .25s ease;
 }
+/* Scale chosen so the zoomed avatar stops just short of its own time label
+   rather than covering the times the chip now exists to show. */
 #detailed-tab .dtl-avatar-chip:hover .dtl-avatar-img {
-    transform: translateY(-14px) scale(2.8);
+    transform: translateY(-14px) scale(2.2);
     filter: drop-shadow(0 14px 22px rgba(11,4,77,.35));
 }
 #detailed-tab .dtl-avatar-fallback { display: flex; }

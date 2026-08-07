@@ -60,12 +60,19 @@ return [
     |--------------------------------------------------------------------------
     |
     | Here you may specify the default timezone for your application, which
-    | will be used by the PHP date and date-time functions. The timezone
-    | is set to "UTC" by default as it is suitable for most use cases.
+    | will be used by the PHP date and date-time functions.
+    |
+    | This must stay on Philippine local time. Attendance is wall-clock data:
+    | schedules store 08:00/12:00/13:00/17:00 as local times, grace and late
+    | minutes are measured against them, and a punch's calendar date decides
+    | which DTR day it lands on. Running the app on UTC shifted every scan
+    | back 8 hours — a badge scanned at 00:05 on Aug 8 was stored as 16:05 on
+    | Aug 7, so it was absent from the day the employee actually worked and
+    | was scored 8 hours late on the day before.
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'Asia/Manila'),
 
     /*
     |--------------------------------------------------------------------------

@@ -144,13 +144,38 @@
                                 <div class="dtl-avatar-group">
                                     @foreach($recordsByStatus[$statusKey] as $record)
                                         @php
-                                            $timeLabel = match(true) {
+                                            // First and last real punch of the day, across every slot.
+                                            // Pairing am_in with pm_out (as this did) drops am_out and
+                                            // pm_in entirely, so a scanned half-day — in at 16:00, out at
+                                            // 16:12 — rendered as "16:00 – —" and the time-out was
+                                            // invisible. Each column can also hold a marker such as
+                                            // ABSENT / ON LEAVE / ON TRAVEL instead of a time, so only
+                                            // values that actually look like a clock time count here.
+                                            $punchTimes = collect([
+                                                $record['am_in'] ?? null, $record['am_out'] ?? null,
+                                                $record['pm_in'] ?? null, $record['pm_out'] ?? null,
+                                                $record['ot_in'] ?? null, $record['ot_out'] ?? null,
+                                            ])->filter(fn($t) => $t && preg_match('/^\d{1,2}:\d{2}$/', $t))->values();
+
+                                            $timeIn  = $punchTimes->min();
+                                            $timeOut = $punchTimes->count() > 1 ? $punchTimes->max() : null;
+
+                                            // A day with real punches shows them even when it is also
+                                            // flagged absent (a lone time-in is classed ABSENT): the ring
+                                            // colour and the day's stat chips already carry the status,
+                                            // and hiding the punch makes a scan look like it never landed.
+                                            $statusNote = match(true) {
                                                 $record['is_on_leave'] => $record['leave_info']['leave_type'] ?? 'On Leave',
+                                                (bool) $punchTimes->count() => null,
                                                 $record['is_absent'] => 'Absent',
-                                                ($record['am_in'] || $record['pm_out']) => trim(($record['am_in'] ?? '—') . ' – ' . ($record['pm_out'] ?? '—')),
                                                 $isWeekendDay => 'Weekend',
                                                 default => 'No record',
                                             };
+
+                                            $timeLabel = $statusNote ?? ($timeIn . ' – ' . ($timeOut ?? 'no time out yet'));
+                                            if ($record['is_absent'] && $punchTimes->count()) {
+                                                $timeLabel .= ' • Absent (incomplete punches)';
+                                            }
                                             if ($record['is_on_pass_slip'] && $record['pass_slip_info']) {
                                                 $psLabels = collect($record['pass_slip_info'])->map(fn($s) => ($s['type'] === 'official_activity' ? 'Official Activity' : 'Personal Reason') . ($s['destination'] ? ' – ' . $s['destination'] : ''))->join(', ');
                                                 $timeLabel .= ' • Pass Slip: ' . $psLabels;
@@ -164,12 +189,25 @@
                                                 onclick="openCorrectModal('new_{{ $record['employee_id'] }}_{{ $dateKey }}', '{{ $record['date'] }}')"
                                             @endif
                                         >
-                                            @if(!empty($record['photo']))
-                                                <img src="{{ $record['photo'] }}" alt="{{ $record['employee_name'] }}" class="dtl-avatar-img">
-                                            @else
-                                                <span class="dtl-avatar-img dtl-avatar-fallback" style="background: {{ $avatarColors[$record['employee_id'] % count($avatarColors)] }}">{{ getInitials($record['employee_name']) }}</span>
-                                            @endif
-                                            <span class="dtl-status-dot"></span>
+                                            <span class="dtl-avatar-face">
+                                                @if(!empty($record['photo']))
+                                                    <img src="{{ $record['photo'] }}" alt="{{ $record['employee_name'] }}" class="dtl-avatar-img">
+                                                @else
+                                                    <span class="dtl-avatar-img dtl-avatar-fallback" style="background: {{ $avatarColors[$record['employee_id'] % count($avatarColors)] }}">{{ getInitials($record['employee_name']) }}</span>
+                                                @endif
+                                                <span class="dtl-status-dot"></span>
+                                            </span>
+                                            {{-- The times were previously only inside data-tooltip, so
+                                                 reading a day's actual in/out meant hovering every
+                                                 avatar one at a time. --}}
+                                            <span class="dtl-chip-time">
+                                                @if($statusNote)
+                                                    <span class="dtl-chip-note">{{ $statusNote }}</span>
+                                                @else
+                                                    <span class="dtl-chip-in">{{ $timeIn }}</span>
+                                                    <span class="dtl-chip-out {{ $timeOut ? '' : 'is-pending' }}">{{ $timeOut ?? '—' }}</span>
+                                                @endif
+                                            </span>
                                         </button>
                                     @endforeach
                                 </div>
