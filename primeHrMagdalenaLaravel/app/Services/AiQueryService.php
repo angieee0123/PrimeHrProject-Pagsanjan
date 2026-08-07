@@ -103,6 +103,18 @@ class AiQueryService
             return $result;
         }
 
+        // A file search already renders each row as a clickable card, so a
+        // table beneath them repeats the same file name, type, size, and date
+        // in a wider, less useful form. Suppress it — but only when every row
+        // actually became a card: buildFileAttachments() drops rows whose file
+        // is missing from storage and caps the rest, and those rows exist
+        // nowhere else, so a partial card set still needs its table.
+        $files = $result['files'] ?? null;
+
+        if (is_array($files) && count($files) === count($rows)) {
+            return $result;
+        }
+
         if (!empty($result['report']['columns'])) {
             $result['table'] = $result['report'];
 

@@ -325,7 +325,24 @@ PDF and DOCX extraction runs locally. Scanned files need Tesseract
 for trend, stacked bar for part-to-whole, grouped bar for comparisons. Rules
 held to deliberately: never a dual-axis chart, categorical hues assigned in
 fixed order and never cycled (the tail folds into "Other" past 8), and every
-chart ships beside its data table. The palette is validated for colour-vision
+chart ships beside its data table. A measure that cannot share the axis (a count
+of days beside pesos) goes on the spec as `table_extra` — table-only columns —
+rather than becoming a second axis.
+
+**Chart requests are parsed bilingually**, like the rest of the assistant:
+`detectSubject()` matches "sahod"/"suweldo" as well as "salary", and
+`detectGranularity()` reads "kada linggo" as well as "weekly". Granularity is
+checked finest-first, because "weekly sa buwan ng January–August" names months
+for the *range*, not the bucket — check monthly first and the chart silently
+comes back monthly. `tests/Unit/ChartRequestParsingTest.php` pins this.
+
+Payroll charts read from one of two tables and they are not interchangeable:
+`salary_computations` holds whole periods and a true `net_pay`, so it answers
+organisation-wide monthly expense but can never be cut finer than a period;
+`daily_salary_computations` holds one row per worked day, so it buckets to any
+grain and filters to one employee — but its `daily_gross_pay` is
+basic + OT − late − undertime, i.e. pay **earned before** GSIS/PhilHealth/
+Pag-IBIG and loans. It is labelled "Pay earned", never "net pay". The palette is validated for colour-vision
 deficiency; the accompanying table is also what satisfies the contrast relief
 requirement for the lighter hues. Slot 0 — the single-series hue — is the admin
 dashboard's own chart blue, so a one-series chart from the assistant matches the

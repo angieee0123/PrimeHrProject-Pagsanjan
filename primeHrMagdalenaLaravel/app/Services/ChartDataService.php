@@ -67,7 +67,7 @@ class ChartDataService
             'headcount' => $this->headcountByDepartment(),
             'gender' => $this->genderDistribution($question),
             'hiring' => $this->hiringTrend($question),
-            'payroll' => $this->payrollTrend($question),
+            'payroll' => $this->payrollTrend($user, $question),
             'absenteeism_compare' => $this->absenteeismComparison($question),
             default => null,
         };
@@ -95,19 +95,32 @@ class ChartDataService
         ];
     }
 
+    /**
+     * Which chart the question is asking for.
+     *
+     * Tagalog sits alongside English in every pattern because the rest of the
+     * assistant already answers in both — HrChatbotAnswerer narrates in Tagalog
+     * and AiQueryService::wantsHowTo() matches "paano". This method was the
+     * English-only link in that chain, so "graph ng sahod ni Jeremy" matched
+     * nothing and fell through to the "I can chart:" list, which reads as a
+     * refusal of a question the database can answer perfectly well.
+     */
     private function detectSubject(string $question): ?string
     {
         $q = strtolower($question);
 
         return match (true) {
-            (bool) preg_match('/\bcompar\w+\b/', $q) && (bool) preg_match('/\b(absen\w+|attendance)\b/', $q) => 'absenteeism_compare',
-            (bool) preg_match('/\battendance\b|\bdtr\b|\bpresent\b/', $q) => 'attendance_trend',
-            (bool) preg_match('/\bleave\b.*\b(type|kind|breakdown|category)\b|\bby\s+leave\s+type\b/', $q) => 'leave_by_type',
-            (bool) preg_match('/\bleave\b|\bvacation\b|\bsick\b|\bcredits?\b/', $q) => 'leave_utilisation',
-            (bool) preg_match('/\bgender\b|\bsex\b|\bmale\b|\bfemale\b/', $q) => 'gender',
-            (bool) preg_match('/\b(headcount|department\s+size|per\s+department|by\s+department|personnel)\b/', $q) => 'headcount',
-            (bool) preg_match('/\b(hiring|hired|appointment|recruitment|new\s+hires?)\b/', $q) => 'hiring',
-            (bool) preg_match('/\b(payroll|salary|expense|compensation|net\s+pay)\b/', $q) => 'payroll',
+            (bool) preg_match('/\b(compar\w+|ihambing|paghambing)\b/', $q) && (bool) preg_match('/\b(absen\w+|attendance|liban)\b/', $q) => 'absenteeism_compare',
+            (bool) preg_match('/\battendance\b|\bdtr\b|\bpresent\b|\bpagpasok\b|\bpumasok\b/', $q) => 'attendance_trend',
+            (bool) preg_match('/\bleave\b.*\b(type|kind|breakdown|category)\b|\bby\s+leave\s+type\b|\buri\s+ng\s+leave\b/', $q) => 'leave_by_type',
+            (bool) preg_match('/\bleave\b|\bvacation\b|\bsick\b|\bcredits?\b|\bbakasyon\b/', $q) => 'leave_utilisation',
+            (bool) preg_match('/\bgender\b|\bsex\b|\bmale\b|\bfemale\b|\bkasarian\b|\blalaki\b|\bbabae\b/', $q) => 'gender',
+            (bool) preg_match('/\b(headcount|department\s+size|per\s+department|by\s+department|personnel|bilang\s+ng\s+empleyado)\b/', $q) => 'headcount',
+            (bool) preg_match('/\b(hiring|hired|appointment|recruitment|new\s+hires?|natanggap\s+na\s+empleyado)\b/', $q) => 'hiring',
+            // "sahod", "suweldo"/"sweldo" are the words actually used for pay here.
+            // Bare "pay" is included too: "the monthly pay of Jeremy" named no
+            // other keyword and so fell through to the capability list.
+            (bool) preg_match('/\b(payroll|salary|salaries|pay|earnings|take\s*home|expense|compensation|sahod|suweldo|sweldo|kita)\b/', $q) => 'payroll',
             default => null,
         };
     }
@@ -303,13 +316,45 @@ class ChartDataService
         ];
     }
 
-    private function payrollTrend(string $question): array
+    /**
+     * Pay over time, for the organisation or for one named employee.
+     *
+     * Two tables can answer this and they are not interchangeable:
+     *
+     *  - `salary_computations` holds whole payroll periods. It is the right
+     *    source for organisation-wide expense, and it carries a real net_pay
+     *    (statutory deductions and loans included) — but a period cannot be cut
+     *    finer than itself, so it can never answer "weekly".
+     *  - `daily_salary_computations` holds one row per worked day, so it buckets
+     *    to any grain and filters to one employee. Its `daily_gross_pay` is
+     *    basic + OT − late − undertime: pay *earned*, before GSIS/PhilHealth/
+     *    Pag-IBIG and loans. Labelling it "net pay" would overstate take-home,
+     *    so it is labelled "Pay earned" instead.
+     *
+     * Anything finer than monthly, or scoped to a person, therefore comes from
+     * the daily table; the organisation-wide monthly view keeps the periods.
+     */
+    private function payrollTrend(User $user, string $question): array
     {
-        $year = $this->detectYear($question);
+        $employee = $this->detectEmployee($user, $question);
+        $range = $this->detectMonthRange($question);
+        $grain = $this->detectGranularity($question);
 
+        return ($grain === 'monthly' && $employee === null)
+            ? $this->payrollFromPeriods($range)
+            : $this->payrollFromDailyRows($employee, $range, $grain);
+    }
+
+    /**
+     * Organisation-wide expense per payroll period.
+     *
+     * @param array{start: Carbon, end: Carbon, label: string} $range
+     */
+    private function payrollFromPeriods(array $range): array
+    {
         $rows = DB::table('salary_computations')
             ->selectRaw('MONTH(period_start) AS m, ROUND(SUM(net_pay), 2) AS net, ROUND(SUM(gross_pay), 2) AS gross')
-            ->whereYear('period_start', $year)
+            ->whereBetween('period_start', [$range['start']->toDateString(), $range['end']->toDateString()])
             ->groupByRaw('MONTH(period_start)')
             ->orderByRaw('MONTH(period_start)')
             ->get();
@@ -318,7 +363,7 @@ class ChartDataService
         return [
             'type' => 'line',
             'color_role' => 'categorical',
-            'title' => "Payroll expense — {$year}",
+            'title' => "Payroll expense — {$range['label']}",
             'x_label' => 'Month',
             'y_label' => 'Amount (PHP)',
             'format' => 'money',
@@ -327,6 +372,208 @@ class ChartDataService
                 ['name' => 'Gross pay', 'values' => $rows->map(fn ($r) => (float) $r->gross)->all()],
                 ['name' => 'Net pay', 'values' => $rows->map(fn ($r) => (float) $r->net)->all()],
             ],
+        ];
+    }
+
+    /**
+     * Pay bucketed to day, ISO week, or month, optionally for one employee.
+     *
+     * @param array{start: Carbon, end: Carbon, label: string} $range
+     */
+    private function payrollFromDailyRows(?object $employee, array $range, string $grain): array
+    {
+        // WEEKDAY() is 0 on Monday, so subtracting it lands on the ISO week
+        // start — the same Monday for every day in that week.
+        $bucket = match ($grain) {
+            'daily' => 'DATE(work_date)',
+            'weekly' => 'DATE(DATE_SUB(work_date, INTERVAL WEEKDAY(work_date) DAY))',
+            default => "DATE_FORMAT(work_date, '%Y-%m-01')",
+        };
+
+        $query = DB::table('daily_salary_computations')
+            ->selectRaw("{$bucket} AS bucket, COUNT(*) AS days_paid, "
+                . 'ROUND(SUM(daily_gross_pay), 2) AS earned, '
+                . 'ROUND(SUM(late_deduction + undertime_deduction), 2) AS deductions')
+            ->whereBetween('work_date', [$range['start']->toDateString(), $range['end']->toDateString()])
+            ->groupByRaw($bucket)
+            ->orderByRaw($bucket);
+
+        if ($employee !== null) {
+            $query->where('employee_id', $employee->id);
+        }
+
+        $rows = $query->get();
+
+        $who = $employee !== null ? " — {$employee->name}" : ' — organisation';
+        $grainLabel = ['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly'][$grain] ?? 'Weekly';
+
+        return [
+            'type' => 'line',
+            'color_role' => 'sequential',
+            'title' => "{$grainLabel} pay{$who}, {$range['label']}",
+            'x_label' => $grain === 'monthly' ? 'Month' : ($grain === 'weekly' ? 'Week starting' : 'Date'),
+            'y_label' => 'Pay earned (PHP)',
+            'format' => 'money',
+            'labels' => $rows->map(fn ($r) => $this->bucketLabel((string) $r->bucket, $grain, $range))->all(),
+            'series' => [
+                ['name' => 'Pay earned', 'values' => $rows->map(fn ($r) => (float) $r->earned)->all()],
+            ],
+            // Table-only, because they do not share the peso axis. A week that
+            // dips is almost always a short week, and the chart alone cannot
+            // say so — "Days paid" is what makes the dip readable.
+            'table_extra' => [
+                'Days paid' => $rows->map(fn ($r) => (int) $r->days_paid)->all(),
+                'Late/undertime deducted' => $rows->map(fn ($r) => (float) $r->deductions)->all(),
+            ],
+        ];
+    }
+
+    /**
+     * @param array{start: Carbon, end: Carbon, label: string} $range
+     */
+    private function bucketLabel(string $bucket, string $grain, array $range): string
+    {
+        $date = Carbon::parse($bucket);
+
+        // The ISO week holding 1 January starts in the previous December, so an
+        // unclamped label puts "Wk Dec 29" at the head of a Jan–Aug chart —
+        // a date outside the window the user asked for. Only the in-range days
+        // were summed, so the label should name the range's own first day. The
+        // "Days paid" column still shows the week is partial.
+        if ($date->lt($range['start'])) {
+            $date = $range['start']->copy();
+        }
+
+        return match ($grain) {
+            'monthly' => $date->format('M Y'),
+            'weekly' => 'Wk ' . $date->format('M d'),
+            default => $date->format('M d'),
+        };
+    }
+
+    /**
+     * Granularity asked for, finest wins.
+     *
+     * Order matters: "weekly sa buwan ng January–August" contains both "weekly"
+     * and "buwan" (month). The month words there name the *range*, not the
+     * bucket, so the finer unit has to be checked first or the chart silently
+     * comes back monthly.
+     */
+    private function detectGranularity(string $question): string
+    {
+        $q = strtolower($question);
+
+        if (preg_match('/\b(daily|per\s+day|each\s+day|araw-?araw|kada\s+araw)\b/', $q)) {
+            return 'daily';
+        }
+
+        if (preg_match('/\b(weekly|per\s+week|each\s+week|by\s+week|lingguhan|linggo|kada\s+linggo)\b/', $q)) {
+            return 'weekly';
+        }
+
+        return 'monthly';
+    }
+
+    /**
+     * The employee a question names, or null for an organisation-wide chart.
+     *
+     * A bare first or last name only counts when a possessive marker precedes
+     * it ("ni Jeremy", "of Ana", "for Pedro"). Without that rule an employee
+     * called May or June would silently narrow every chart mentioning those
+     * months to one person.
+     */
+    private function detectEmployee(User $user, string $question): ?object
+    {
+        $q = ' ' . preg_replace('/[^a-z0-9\s]/', ' ', strtolower($question)) . ' ';
+        $q = preg_replace('/\s+/', ' ', $q) ?? $q;
+
+        $query = DB::table('employees')->select('id', 'first_name', 'last_name');
+        $this->policy->scopeEmployeeQuery($query, $user, 'employees.id');
+
+        $best = null;
+        $bestLength = 0;
+
+        foreach ($query->limit(500)->get() as $row) {
+            $first = trim(strtolower((string) $row->first_name));
+            $last = trim(strtolower((string) $row->last_name));
+            $full = trim("{$first} {$last}");
+
+            foreach (array_filter([$full, $last, $first]) as $needle) {
+                if (!str_contains($q, " {$needle} ")) {
+                    continue;
+                }
+
+                if ($needle !== $full
+                    && !preg_match('/\b(ni|kay|para kay|of|for|para|s)\s+' . preg_quote($needle, '/') . '\b/', $q)) {
+                    continue;
+                }
+
+                if (strlen($needle) > $bestLength) {
+                    $bestLength = strlen($needle);
+                    $best = (object) [
+                        'id' => (int) $row->id,
+                        'name' => trim(((string) $row->first_name) . ' ' . ((string) $row->last_name)),
+                    ];
+                }
+            }
+        }
+
+        return $best;
+    }
+
+    /**
+     * The window a question asks for: a single month, a span between two named
+     * months, or the whole year.
+     *
+     * @return array{start: Carbon, end: Carbon, label: string}
+     */
+    private function detectMonthRange(string $question): array
+    {
+        $year = $this->detectYear($question);
+        $q = strtolower($question);
+
+        $months = ['january' => 1, 'february' => 2, 'march' => 3, 'april' => 4, 'may' => 5, 'june' => 6,
+            'july' => 7, 'august' => 8, 'september' => 9, 'october' => 10, 'november' => 11, 'december' => 12];
+
+        $found = [];
+
+        foreach ($months as $name => $number) {
+            // "May" is also an ordinary English word and the Tagalog for "has",
+            // so it only counts as a month when the question is already talking
+            // about dates — an explicit year or another month name.
+            if ($name === 'may' && !preg_match('/\b20\d{2}\b/', $q)) {
+                continue;
+            }
+
+            if (preg_match('/\b' . $name . '\b/', $q, $m, PREG_OFFSET_CAPTURE)) {
+                $found[$number] = $m[0][1];
+            }
+        }
+
+        if (empty($found)) {
+            return [
+                'start' => Carbon::create($year, 1, 1)->startOfDay(),
+                'end' => Carbon::create($year, 12, 31)->endOfDay(),
+                'label' => (string) $year,
+            ];
+        }
+
+        // Ordered by where they appear in the sentence, so "August back to
+        // January" reads the same as "January to August".
+        asort($found);
+        $numbers = array_keys($found);
+        $from = min($numbers[0], end($numbers));
+        $to = max($numbers[0], end($numbers));
+
+        $start = Carbon::create($year, $from, 1)->startOfMonth();
+        $end = Carbon::create($year, $to, 1)->endOfMonth();
+
+        return [
+            'start' => $start,
+            'end' => $end,
+            'label' => $from === $to
+                ? $start->format('F Y')
+                : $start->format('M') . '–' . $end->format('M Y'),
         ];
     }
 
@@ -437,6 +684,10 @@ class ChartDataService
         $chart['orientation'] ??= 'vertical';
         $chart['format'] ??= 'number';
 
+        // Consumed by asTableRows() already; the renderer and the stored spec
+        // have no use for it.
+        unset($chart['table_extra']);
+
         return $chart;
     }
 
@@ -455,6 +706,13 @@ class ChartDataService
 
             foreach ($chart['series'] as $series) {
                 $row[$series['name']] = $series['values'][$i] ?? 0;
+            }
+
+            // Columns that belong beside the chart but not on its axis — a
+            // count of days cannot share a peso scale, and a second axis is
+            // never the answer here.
+            foreach ($chart['table_extra'] ?? [] as $name => $values) {
+                $row[$name] = $values[$i] ?? 0;
             }
 
             $rows[] = $row;

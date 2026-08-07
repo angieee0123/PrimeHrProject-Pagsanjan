@@ -666,7 +666,17 @@
     background: var(--gp-surface-soft, #f6f5fb);
     cursor: zoom-in;
 }
-.ai-file-image figcaption { padding: 8px 10px; }
+.ai-file-image figcaption {
+    padding: 8px 10px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 8px;
+}
+/* The caption's meta block must be the part that shrinks: the Open/Download
+   pair is fixed-width and truncating it would hide the actions themselves. */
+.ai-file-image figcaption .ai-file-meta { min-width: 0; flex: 1 1 auto; }
+.ai-file-image figcaption .ai-file-actions { flex-direction: row; gap: 8px; }
 .ai-file-image.is-broken::before {
     content: 'Preview unavailable';
     display: flex;
@@ -756,9 +766,26 @@
     background: #fff;
 }
 .ai-lightbox-caption {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
     font-size: 12px;
     color: #fff;
     text-align: center;
+}
+/* The overlay is dark, so these links cannot inherit the card's ink colour. */
+.ai-lightbox-actions { flex-direction: row; gap: 10px; cursor: auto; }
+.ai-lightbox-actions .ai-file-link {
+    color: #fff;
+    padding: 4px 12px;
+    border: 1px solid rgba(255, 255, 255, .45);
+    border-radius: 999px;
+    cursor: pointer;
+}
+.ai-lightbox-actions .ai-file-link:hover {
+    text-decoration: none;
+    background: rgba(255, 255, 255, .16);
 }
 
 @media (max-width: 860px) {

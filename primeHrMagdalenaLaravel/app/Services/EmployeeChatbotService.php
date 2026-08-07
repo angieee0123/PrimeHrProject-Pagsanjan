@@ -375,14 +375,19 @@ TEXT;
             $out .= "No payslip records found.\n";
         } else {
             foreach ($payslips as $p) {
-                $ded = ($p->late_deduction ?? 0) + ($p->undertime_deduction ?? 0) + ($p->other_deductions ?? 0);
+                $ded = (float) ($p->late_deduction ?? 0) + (float) ($p->undertime_deduction ?? 0) + (float) ($p->other_deductions ?? 0);
+
+                // Thousands separators come from number_format, not sprintf:
+                // PHP has no `%,.2f` flag (that is C/Python), and passing one
+                // throws "Unknown format specifier" — which is what turned
+                // every "show my latest payslip" into a generic error.
                 $out .= sprintf(
-                    "- %s to %s: Basic PHP %,.2f, Deductions PHP %,.2f, Net PHP %,.2f (%s)\n",
+                    "- %s to %s: Basic PHP %s, Deductions PHP %s, Net PHP %s (%s)\n",
                     $p->period_start->format('M d, Y'),
                     $p->period_end->format('M d, Y'),
-                    $p->basic_pay,
-                    $ded,
-                    $p->net_pay,
+                    number_format((float) $p->basic_pay, 2),
+                    number_format($ded, 2),
+                    number_format((float) $p->net_pay, 2),
                     $p->status ?? 'processed'
                 );
             }

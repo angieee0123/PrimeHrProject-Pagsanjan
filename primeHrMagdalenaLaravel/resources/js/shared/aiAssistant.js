@@ -222,7 +222,9 @@
         img.alt = file.label || file.name;
         img.loading = 'lazy';
         // A record can point at a file the browser cannot render; say so rather
-        // than leaving a broken image icon in the thread.
+        // than leaving a broken image icon in the thread. The actions below stay
+        // put, because a preview the browser refuses to draw is still a file the
+        // user is entitled to download — removing them would strand it.
         img.addEventListener('error', function () {
             card.classList.add('is-broken');
             img.remove();
@@ -231,10 +233,26 @@
 
         const caption = document.createElement('figcaption');
         caption.appendChild(fileMeta(file));
+        // An image used to be viewable but not savable: the thumbnail opened a
+        // lightbox and that was all, so download_url went unused on exactly the
+        // cards people most often want to keep — ID scans and photos.
+        caption.appendChild(fileActions(file));
 
         card.appendChild(img);
         card.appendChild(caption);
         return card;
+    }
+
+    /**
+     * Open (inline, new tab) and Download (forced attachment) for any card.
+     * Both point at AiFileController, which re-checks access per request.
+     */
+    function fileActions(file) {
+        const actions = document.createElement('div');
+        actions.className = 'ai-file-actions';
+        actions.appendChild(fileLink(file.url, 'Open', '_blank', false));
+        actions.appendChild(fileLink(file.download_url, 'Download', null, true));
+        return actions;
     }
 
     function buildDocCard(file) {
@@ -249,14 +267,9 @@
         body.className = 'ai-file-body';
         body.appendChild(fileMeta(file));
 
-        const actions = document.createElement('div');
-        actions.className = 'ai-file-actions';
-        actions.appendChild(fileLink(file.url, 'Open', '_blank', false));
-        actions.appendChild(fileLink(file.download_url, 'Download', null, true));
-
         card.appendChild(icon);
         card.appendChild(body);
-        card.appendChild(actions);
+        card.appendChild(fileActions(file));
         return card;
     }
 
@@ -318,7 +331,17 @@
 
         const caption = document.createElement('div');
         caption.className = 'ai-lightbox-caption';
-        caption.textContent = [file.label, file.employee_name].filter(Boolean).join(' — ');
+
+        const title = document.createElement('span');
+        title.textContent = [file.label, file.employee_name].filter(Boolean).join(' — ');
+        caption.appendChild(title);
+
+        const actions = fileActions(file);
+        actions.className = 'ai-file-actions ai-lightbox-actions';
+        // The overlay closes on click, so a click that lands on a link would
+        // dismiss the lightbox and swallow the navigation with it.
+        actions.addEventListener('click', function (e) { e.stopPropagation(); });
+        caption.appendChild(actions);
 
         function close() {
             overlay.remove();

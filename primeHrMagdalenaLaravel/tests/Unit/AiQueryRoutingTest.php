@@ -312,4 +312,90 @@ class AiQueryRoutingTest extends TestCase
 
         $this->assertStringContainsString('Organisation-wide', $hr['answer']);
     }
+
+    /**
+     * A file search renders each row as a clickable card, so attaching a table
+     * of the same rows repeats every file name, type, size, and date in a
+     * wider, less readable form directly beneath the cards.
+     */
+    #[Test]
+    public function a_fully_carded_file_search_gets_no_duplicate_table(): void
+    {
+        $result = $this->fileSearchResult(rows: 2, files: 2);
+
+        $this->assertArrayNotHasKey('table', $result);
+    }
+
+    /**
+     * The cards are not always the whole story: buildFileAttachments() drops a
+     * row whose file is missing from storage and caps the rest at 12. Those
+     * rows appear nowhere else, so suppressing the table would lose them.
+     */
+    #[Test]
+    public function a_partially_carded_file_search_keeps_its_table(): void
+    {
+        $result = $this->fileSearchResult(rows: 3, files: 2);
+
+        $this->assertArrayHasKey('table', $result);
+        $this->assertSame(3, $result['table']['row_count']);
+    }
+
+    /**
+     * An answer carrying rows but no cards at all — generated SQL, a report —
+     * is unaffected by the file-card rule.
+     */
+    #[Test]
+    public function a_row_bearing_answer_without_files_still_gets_a_table(): void
+    {
+        $result = $this->fileSearchResult(rows: 2, files: null);
+
+        $this->assertArrayHasKey('table', $result);
+    }
+
+    /**
+     * Drive the orchestrator through document_search with a stubbed service so
+     * the row/card counts are exactly what the assertion needs.
+     *
+     * @return array<string, mixed>
+     */
+    private function fileSearchResult(int $rows, ?int $files): array
+    {
+        $payload = [
+            'answer' => 'Found some files.',
+            'data' => array_map(
+                fn (int $i) => ['id' => $i, 'file_name' => "scan-{$i}.png", 'document_type' => 'GSIS ID scan'],
+                range(1, $rows)
+            ),
+        ];
+
+        if ($files !== null) {
+            $payload['files'] = array_map(
+                fn (int $i) => ['id' => "government_ids-{$i}", 'name' => "scan-{$i}.png"],
+                range(1, $files)
+            );
+        }
+
+        $documents = $this->createMock(DocumentSearchService::class);
+        $documents->method('search')->willReturn($payload);
+
+        $assistant = new AiQueryService(
+            new AiAccessPolicy(),
+            new ConversationMemoryService(),
+            $this->createMock(EmployeeSearchService::class),
+            $documents,
+            $this->createMock(DashboardAssistantService::class),
+            $this->createMock(ReportGeneratorService::class),
+            $this->createMock(ChartDataService::class),
+            $this->createMock(WorkflowAssistantService::class),
+            $this->createMock(SafeSqlService::class),
+            $this->createMock(HrChatbotAnswerer::class),
+            $this->createMock(EmployeeChatbotService::class),
+        );
+
+        $result = $assistant->ask($this->user(['hr'], 1), 'show me my gsis id scan');
+
+        $this->assertSame('document_search', $result['intent']);
+
+        return $result;
+    }
 }
