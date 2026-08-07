@@ -27,13 +27,21 @@ class ReportPdfService
      * Stash a report for later export. Returns the token the UI puts on its
      * download button.
      *
+     * `$stableFor` names a report that will be stashed repeatedly — a stored
+     * conversation turn re-issues its token every time the thread is opened.
+     * Deriving the token from that name keeps each turn to one cache entry
+     * instead of one per view. It stays unguessable (keyed on APP_KEY) and
+     * download() still checks ownership, so a shared token is no shortcut in.
+     *
      * @param array<string, mixed> $report
      * @param array<int, array<string, mixed>> $rows
      * @param array<int, array<string, mixed>>|null $charts
      */
-    public function stash(User $user, array $report, array $rows, ?array $charts = null): string
+    public function stash(User $user, array $report, array $rows, ?array $charts = null, ?string $stableFor = null): string
     {
-        $token = Str::random(40);
+        $token = $stableFor === null
+            ? Str::random(40)
+            : hash_hmac('sha256', "{$stableFor}:{$user->id}", (string) config('app.key'));
 
         Cache::put($this->key($token), [
             'user_id' => $user->id,

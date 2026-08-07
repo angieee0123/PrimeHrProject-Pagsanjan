@@ -497,6 +497,25 @@
 }
 .ai-export-btn:hover { opacity: .9; }
 
+/* Notes under a replayed turn: when its figures were pulled, or why part of
+   the answer is no longer shown. Quieter than the answer they annotate. */
+.ai-msg-note {
+    margin-top: 8px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: var(--gp-text-soft, #8f8daf);
+}
+
+.ai-msg-snapshot {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    letter-spacing: .02em;
+    background: var(--gp-bg-tint-2, #f2f1fb);
+}
+
 @media (max-width: 860px) {
     .ai-msg.assistant:has(.ai-table-wrap),
     .ai-msg.assistant:has(.ai-chart) {

@@ -142,22 +142,41 @@
         // is the answer and the prose is the caption. Then charts, the table,
         // and the export button.
         if (attachments) {
-            if (attachments.files && attachments.files.length) {
-                bubble.appendChild(buildFiles(attachments.files));
+            // The server withholds a stored payload it cannot re-verify against
+            // the reader's current access; say so rather than showing a reply
+            // whose table has silently vanished.
+            if (attachments.withheld) {
+                bubble.appendChild(buildNote(
+                    'The table and files from this answer are not shown — they could not be re-checked against your current access. Ask again to see what you can view now.'
+                ));
+            } else {
+                if (attachments.files && attachments.files.length) {
+                    bubble.appendChild(buildFiles(attachments.files));
+                }
+
+                if (attachments.chart_svg) {
+                    attachments.chart_svg.forEach(function (svg) {
+                        bubble.appendChild(buildChart(svg));
+                    });
+                }
+
+                if (attachments.table && attachments.data && attachments.data.length) {
+                    bubble.appendChild(buildTable(attachments.table, attachments.data));
+                }
+
+                if (attachments.data_omitted) {
+                    bubble.appendChild(buildNote('The rows behind this answer were too large to keep. Ask again for the current figures.'));
+                }
+
+                if (attachments.export_token && exportUrl) {
+                    bubble.appendChild(buildExportButton(attachments.export_token));
+                }
             }
 
-            if (attachments.chart_svg) {
-                attachments.chart_svg.forEach(function (svg) {
-                    bubble.appendChild(buildChart(svg));
-                });
-            }
-
-            if (attachments.table && attachments.data && attachments.data.length) {
-                bubble.appendChild(buildTable(attachments.table, attachments.data));
-            }
-
-            if (attachments.export_token && exportUrl) {
-                bubble.appendChild(buildExportButton(attachments.export_token));
+            // Only replayed turns carry a generation time. Figures in HR move,
+            // so an old table is labelled with the day it was true.
+            if (attachments.generated_at) {
+                bubble.appendChild(buildSnapshotNote(attachments.generated_at));
             }
         }
 
@@ -314,6 +333,30 @@
         document.body.appendChild(overlay);
     }
 
+    function buildNote(text) {
+        const note = document.createElement('p');
+        note.className = 'ai-msg-note';
+        note.textContent = text;
+        return note;
+    }
+
+    /**
+     * Marks a replayed attachment with when its figures were pulled. Headcount,
+     * balances, and pending approvals all move; a table reopened next month is
+     * a record of that day, not of today.
+     */
+    function buildSnapshotNote(iso) {
+        const date = new Date(iso);
+        const note = document.createElement('p');
+        note.className = 'ai-msg-note ai-msg-snapshot';
+        note.textContent = isNaN(date.getTime())
+            ? 'Saved from an earlier answer.'
+            : 'Data as of ' + date.toLocaleString('en-US', {
+                month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+            });
+        return note;
+    }
+
     /** Chart SVG is generated server-side, so it renders identically in a PDF. */
     function buildChart(svg) {
         const holder = document.createElement('div');
@@ -452,7 +495,12 @@
                     return;
                 }
                 data.messages.forEach(function (m) {
-                    appendMessage(m.role, m.content, new Date(m.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+                    appendMessage(
+                        m.role,
+                        m.content,
+                        new Date(m.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                        m.attachments
+                    );
                 });
             })
             .catch(function () { showWelcome(); });

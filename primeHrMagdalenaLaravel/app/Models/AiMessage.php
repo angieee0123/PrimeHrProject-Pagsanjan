@@ -10,6 +10,11 @@ class AiMessage extends Model
         'conversation_id',
         'role',
         'content',
+        'attachments',
+    ];
+
+    protected $casts = [
+        'attachments' => 'array',
     ];
 
     public function conversation()

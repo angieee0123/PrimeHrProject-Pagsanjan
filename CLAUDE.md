@@ -143,6 +143,13 @@ the data still comes back, just without prose.
   asker, roles, scope, intent, row count, and duration — counts, never the rows
   themselves, so the log does not become a second copy of HR data.
 - **Export tokens** are bound to the generating user and expire after an hour.
+  Replayed history turns re-issue theirs under a stable per-message name so one
+  turn holds one cache entry however often the thread is reopened.
+- **Stored turns are re-authorised on read.** `ai_messages.attachments` keeps the
+  table, rows, file cards, and chart specs of an answer, along with the
+  `AiAccessPolicy` scope the asker held. `messages()` withholds the payload
+  unless that scope still matches the reader's, so a user whose access narrows
+  does not keep a readable copy of a wider answer in their history.
 - **Files are never linked straight to `/storage`.** A file card in chat points
   at `AiFileController` and carries a *database reference* (`documents/41`,
   `government_ids/7-gsis_file_path`) rather than a path, so there is nothing to
