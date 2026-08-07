@@ -504,3 +504,129 @@
     }
     .ai-table { font-size: 11px; }
 }
+
+/* ── File & image results ────────────────────────────────────────────────
+   Cards for files the assistant found. Images preview at a fixed height so a
+   mixed result set stays on one tidy grid; documents get an extension chip. */
+.ai-files {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.ai-file {
+    border: 1px solid var(--gp-line, #e3e1f0);
+    border-radius: 10px;
+    background: var(--gp-surface, #fff);
+    overflow: hidden;
+}
+
+.ai-file-image { margin: 0; }
+.ai-file-image img {
+    display: block;
+    width: 100%;
+    height: 132px;
+    object-fit: cover;
+    background: var(--gp-surface-soft, #f6f5fb);
+    cursor: zoom-in;
+}
+.ai-file-image figcaption { padding: 8px 10px; }
+.ai-file-image.is-broken::before {
+    content: 'Preview unavailable';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 132px;
+    font-size: 11px;
+    color: var(--gp-text-soft, #8f8daf);
+    background: var(--gp-surface-soft, #f6f5fb);
+}
+
+.ai-file-doc {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+}
+
+.ai-file-icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: #fff;
+    background: var(--gp-pri, #0b044d);
+}
+.ai-file-icon-pdf { background: #b3261e; }
+.ai-file-icon-doc,
+.ai-file-icon-docx { background: #1a52a8; }
+.ai-file-icon-xls,
+.ai-file-icon-xlsx,
+.ai-file-icon-csv { background: #1a6b3c; }
+
+.ai-file-body { min-width: 0; flex: 1 1 auto; }
+
+.ai-file-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ai-file-name {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--gp-ink, #1E2247);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ai-file-sub {
+    font-size: 10.5px;
+    color: var(--gp-text-soft, #8f8daf);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ai-file-actions { display: flex; flex-direction: column; gap: 4px; flex: 0 0 auto; }
+.ai-file-link {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--gp-pri, #0b044d);
+    white-space: nowrap;
+}
+.ai-file-link:hover { text-decoration: underline; }
+
+.ai-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    background: rgba(12, 10, 30, .82);
+    cursor: zoom-out;
+}
+.ai-lightbox img {
+    max-width: min(92vw, 900px);
+    max-height: 82vh;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #fff;
+}
+.ai-lightbox-caption {
+    font-size: 12px;
+    color: #fff;
+    text-align: center;
+}
+
+@media (max-width: 860px) {
+    .ai-msg.assistant:has(.ai-files) { max-width: 100%; }
+    .ai-files { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}

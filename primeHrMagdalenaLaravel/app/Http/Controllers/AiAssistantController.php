@@ -111,6 +111,13 @@ class AiAssistantController extends Controller
             $payload['table'] = $result['table'];
         }
 
+        // Files and images the answer is about. Each carries a link back to
+        // AiFileController, which re-checks permission when it is opened —
+        // these are references to database rows, not storage paths.
+        if (!empty($result['files'])) {
+            $payload['files'] = $result['files'];
+        }
+
         if (!empty($charts)) {
             $payload['charts'] = $charts;
             $payload['chart_svg'] = collect($charts)

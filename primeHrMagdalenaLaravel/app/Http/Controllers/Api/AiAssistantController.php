@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AiConversation;
+use App\Services\AiFileResolver;
 use App\Services\AiQueryService;
 use App\Services\ChartRenderer;
 use App\Services\ReportPdfService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -84,6 +87,16 @@ class AiAssistantController extends Controller
             $payload['table'] = $result['table'];
         }
 
+        // Same file cards the web chat shows, repointed at the token-auth
+        // endpoint below so the mobile client can fetch them.
+        if (!empty($result['files'])) {
+            $payload['files'] = array_map(function (array $file) {
+                $url = url("/api/ai/file/{$file['source']}/{$file['ref']}");
+
+                return ['url' => $url, 'download_url' => $url . '?download=1'] + $file;
+            }, $result['files']);
+        }
+
         if (!empty($result['charts'])) {
             $payload['charts'] = $result['charts'];
             $payload['chart_svg'] = collect($result['charts'])
@@ -104,6 +117,40 @@ class AiAssistantController extends Controller
         }
 
         return response()->json($payload);
+    }
+
+    /**
+     * GET /api/ai/file/{source}/{ref}
+     *
+     * Streams a file the assistant surfaced. The reference names a database row
+     * rather than a path, and AiFileResolver re-checks AiAccessPolicy on every
+     * request — identical to the web surface.
+     */
+    public function file(Request $request, AiFileResolver $files, string $source, string $ref)
+    {
+        $result = $files->resolve($request->user(), $source, $ref);
+
+        Log::channel('ai_audit')->info('assistant.file', [
+            'user_id' => $request->user()->id,
+            'surface' => 'api',
+            'source' => $source,
+            'ref' => $ref,
+            'outcome' => $result['success'] ? 'served' : 'denied',
+        ]);
+
+        if (!$result['success']) {
+            return response()->json(
+                ['status' => 'error', 'message' => $result['error']],
+                $result['status'] ?? 404
+            );
+        }
+
+        return Storage::disk($result['disk'])->response(
+            $result['path'],
+            $result['file_name'],
+            ['Content-Type' => $result['mime'], 'X-Content-Type-Options' => 'nosniff'],
+            $result['inline'] && !$request->boolean('download') ? 'inline' : 'attachment'
+        );
     }
 
     /**

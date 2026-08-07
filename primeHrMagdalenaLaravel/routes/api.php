@@ -107,6 +107,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('ai')->group(function () {
         Route::post('/query', [AiAssistantController::class, 'query']);
         Route::get('/export/{token}', [AiAssistantController::class, 'export']);
+        // Same AiFileResolver + AiAccessPolicy gate as the web surface.
+        Route::get('/file/{source}/{ref}', [AiAssistantController::class, 'file'])
+            ->where('source', '[a-z_]+')
+            ->where('ref', '[A-Za-z0-9_\-]+')
+            ->name('api.ai.file');
         Route::get('/conversations', [AiAssistantController::class, 'index']);
         Route::get('/conversations/{conversation}', [AiAssistantController::class, 'show']);
         Route::delete('/conversations/{conversation}', [AiAssistantController::class, 'destroy']);

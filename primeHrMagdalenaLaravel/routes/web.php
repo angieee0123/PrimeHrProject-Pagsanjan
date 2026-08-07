@@ -452,6 +452,15 @@ foreach (['admin', 'employee', 'mayor'] as $aiArea) {
     Route::delete("/{$aiArea}/ai-assistant/conversations/{conversation}", [\App\Http\Controllers\AiAssistantController::class, 'destroy'])->middleware('auth')->name("{$aiArea}.ai-assistant.destroy");
 }
 
+// Files the assistant surfaces in chat. Area-agnostic on purpose: the answer to
+// "may I see this file?" is AiAccessPolicy's, not the URL prefix's, and it is
+// re-checked on every fetch inside the controller.
+Route::get('/ai-assistant/file/{source}/{ref}', [\App\Http\Controllers\AiFileController::class, 'show'])
+    ->middleware('auth')
+    ->where('source', '[a-z_]+')
+    ->where('ref', '[A-Za-z0-9_\-]+')
+    ->name('ai-assistant.file');
+
 // Notification API Routes
 Route::post('/api/notifications/mark-all-read', function (\Illuminate\Http\Request $request) {
     \App\Services\NotificationService::markAllAsRead(Auth::id(), $request->input('audience'));

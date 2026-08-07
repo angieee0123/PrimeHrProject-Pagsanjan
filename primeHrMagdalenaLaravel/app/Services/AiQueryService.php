@@ -186,6 +186,11 @@ class AiQueryService
         // Order matters: the more specific verbs win over the nouns they contain.
         return match (true) {
             (bool) preg_match('/\b(graph|chart|plot|visuali[sz]e|pie|bar\s+chart|line\s+chart|trend\s+(?:graph|chart))\b/', $q) => 'chart',
+            // "show me his 201 file", "list all documents of Juan" — asking to
+            // see a stored file beats both the report and the table rules,
+            // which would otherwise swallow "list"/"download" and answer with
+            // a table of rows instead of the file itself.
+            $this->wantsStoredFile($q) => 'document_search',
             (bool) preg_match('/\b(generate|create|prepare|produce|export|download|draft)\b.*\b(report|summary|payslip|letter|certificate|checklist|preview)\b/', $q) => $this->reportOrWorkflow($q),
             (bool) preg_match('/\b(report)\b/', $q) => 'report',
             // "table"/"list of" asks for tabular output over arbitrary criteria,
@@ -193,12 +198,43 @@ class AiQueryService
             // every row-bearing answer downstream.
             (bool) preg_match('/\b(table|tabulate|spreadsheet|list\s+(?:of|all|the)|breakdown\s+of)\b/', $q) => 'data_query',
             (bool) preg_match('/\b(draft|write|compose)\b.*\b(letter|memo|notice|email)\b|\bonboarding\b|\bapproval\s+summary\b/', $q) => 'workflow',
-            (bool) preg_match('/\b(file|files|document|documents|upload(?:ed)?|attachment|scan(?:ned)?|pdf|docx?|contract|certificate|photo|picture|image|id\s*card|passport|licen[sc]e)\b/', $q) => 'document_search',
             (bool) preg_match('/\b(how many|how much|count|total|number of|who has|which department|pending|missing|expir\w+|overview|dashboard)\b/', $q) => 'dashboard',
             (bool) preg_match('/\bwhere\s+is\b|\bfind\b|\bshow\s+me\b.*\bemployees?\b|\bemployees?\s+(?:hired|appointed|in|from|with)\b|\bwho\s+is\b/', $q) => 'employee_search',
             (bool) preg_match('/\b(leave|attendance|payroll|salary|deduction|absent|late|overtime|credits?|balance|dtr)\b/', $q) => 'data_query',
             default => $this->classifyWithModel($message, $user, $history),
         };
+    }
+
+    /**
+     * Whether the user is asking to *see a stored file*, as opposed to asking
+     * a question about records.
+     *
+     * Two ways to qualify:
+     *  - naming a kind of upload outright ("her PhilHealth scan", "the 201 file")
+     *  - a display verb plus something showable ("show me Ana's photo")
+     *
+     * "how many documents were uploaded" is deliberately excluded — that is a
+     * count, and the dashboard owns it.
+     */
+    private function wantsStoredFile(string $q): bool
+    {
+        if (preg_match('/\b(how\s+many|count|total\s+number)\b/', $q)) {
+            return false;
+        }
+
+        $fileNouns = '(?:file|files|document|documents|attachment|attachments|upload(?:s|ed)?|scan(?:s|ned)?|'
+            . 'pdf|docx?|xlsx?|photo|photos|picture|pictures|image|images|headshot|'
+            . 'contract|certificate|certificates|diploma|transcript|resume|cv|passport|licen[sc]e|'
+            . 'id\s*card|government\s*id|gsis|philhealth|pag-?ibig|tin|saln|clearance|201\s*file)';
+
+        if (preg_match('/\b' . $fileNouns . '\b/', $q)) {
+            return true;
+        }
+
+        return (bool) preg_match(
+            '/\b(show|display|open|view|preview|see|send|give|get|fetch|attach|pull\s+up)\b.{0,40}\b(id|ids|copy|copies)\b/',
+            $q
+        );
     }
 
     /**

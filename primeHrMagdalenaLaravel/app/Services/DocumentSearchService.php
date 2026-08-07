@@ -10,6 +10,7 @@ use App\Models\Training;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -50,6 +51,7 @@ class DocumentSearchService
     public function __construct(
         private AiAccessPolicy $policy,
         private SemanticSearchService $semantic,
+        private AiFileResolver $resolver,
     ) {
     }
 
@@ -68,11 +70,13 @@ class DocumentSearchService
             ->take(self::MAX_RESULTS)
             ->values();
 
+        $files = $this->buildFileAttachments($rows);
+
         return [
-            'answer' => $this->narrate($user, $query, $rows, $params, $history),
-            'data' => $rows->all(),
+            'answer' => $this->narrate($user, $query, $rows, $params, $history, $files),
+            'data' => $rows->map(fn (array $r) => collect($r)->except(['file_path', 'url'])->all())->all(),
             'count' => $rows->count(),
-            'files' => $this->buildFileAttachments($rows),
+            'files' => $files,
         ];
     }
 
@@ -80,40 +84,51 @@ class DocumentSearchService
      * The clickable file cards the chat UI renders — a smaller, browser-ready
      * view distinct from `data` (the full row set used for narration/tables).
      *
+     * Two things happen here that matter:
+     *
+     *  - a row whose file is not actually on disk is dropped, so the chat never
+     *    offers a card that 404s when clicked;
+     *  - the URL is a reference to the database row (`documents/41`), never a
+     *    storage path, so opening it re-runs the permission check.
+     *
      * @param Collection<int, array<string, mixed>> $rows
      * @return array<int, array<string, mixed>>
      */
     private function buildFileAttachments(Collection $rows): array
     {
-        return $rows->take(self::MAX_FILE_CARDS)->map(fn (array $r) => [
-            'id' => $r['source'] . '-' . $r['id'],
-            'name' => $r['file_name'],
-            'type' => strtolower(pathinfo((string) $r['file_name'], PATHINFO_EXTENSION)),
-            'label' => $r['document_type'],
-            'employee_name' => $r['employee_name'],
-            'uploaded_at' => $r['uploaded_at'],
-            'size' => $r['file_size'],
-            'url' => $this->toPublicUrl($r['url'] ?? $r['file_path']),
-        ])->values()->all();
+        return $rows
+            ->filter(fn (array $r) => $this->resolver->existsOnDisk($r['file_path'] ?? null))
+            ->take(self::MAX_FILE_CARDS)
+            ->map(function (array $r) {
+                $ref = (string) $r['id'];
+                $isImage = $this->resolver->isImage($r['file_name']);
+
+                return [
+                    'id' => $r['source'] . '-' . $ref,
+                    'source' => $r['source'],
+                    'ref' => $ref,
+                    'name' => $r['file_name'],
+                    'type' => strtolower(pathinfo((string) $r['file_name'], PATHINFO_EXTENSION)),
+                    'is_image' => $isImage,
+                    'label' => $r['document_type'],
+                    'employee_name' => $r['employee_name'],
+                    'uploaded_at' => $r['uploaded_at'],
+                    'size' => $r['file_size'],
+                    'url' => $this->fileUrl($r['source'], $ref),
+                    'download_url' => $this->fileUrl($r['source'], $ref) . '?download=1',
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     /**
-     * Uploads in this app are stored in a couple of inconsistent shapes —
-     * employee photos and government ID scans are already public URLs
-     * ("/storage/…"), but training certificates are bare disk paths. Either
-     * way, this returns something a browser can fetch directly.
+     * The authenticated, policy-checked endpoint that streams a file. Built
+     * from the row's identity rather than its path — see AiFileController.
      */
-    private function toPublicUrl(?string $stored): ?string
+    private function fileUrl(string $source, string $ref): string
     {
-        if (!$stored) {
-            return null;
-        }
-
-        if (str_starts_with($stored, 'http://') || str_starts_with($stored, 'https://') || str_starts_with($stored, '/storage/')) {
-            return $stored;
-        }
-
-        return '/storage/' . ltrim(preg_replace('#^storage/#', '', $stored) ?? $stored, '/');
+        return route('ai-assistant.file', ['source' => $source, 'ref' => $ref], false);
     }
 
     /**
@@ -127,6 +142,15 @@ class DocumentSearchService
             $params['employee_name'] = trim($m[1]);
         } elseif (preg_match('/\b(?:for|of|belonging\s+to|related\s+to|about)\s+(?:employee\s+)?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/', $query, $m)) {
             $params['employee_name'] = trim($m[1]);
+        } elseif (preg_match('/\b(?:for|of|belonging\s+to|about)\s+(?:employee\s+)?((?:[a-z]+\s+){0,3}[a-z]+)\s*$/i', $query, $m)) {
+            // Same phrasing typed without capitals ("photo of juan dela cruz").
+            // Only the tail of the question is considered, and only once the
+            // stopwords that would otherwise be read as a name are stripped.
+            $name = $this->stripNonNameWords($m[1]);
+
+            if ($name !== '') {
+                $params['employee_name'] = $name;
+            }
         }
 
         if (preg_match('/\b(?:employee\s*)?(?:id|no\.?)\s*[:#]?\s*(\d{4}-\d{2,4}|\d+)\b/i', $query, $m)) {
@@ -151,6 +175,30 @@ class DocumentSearchService
         }
 
         return $params;
+    }
+
+    /**
+     * Words that follow "of"/"for" but are never part of a person's name.
+     * Without this, "files of the employees" searches for an employee called
+     * "the employees" and returns nothing.
+     */
+    private function stripNonNameWords(string $candidate): string
+    {
+        $stopwords = [
+            'the', 'a', 'an', 'all', 'any', 'our', 'my', 'his', 'her', 'their', 'this', 'that', 'these', 'those',
+            'employee', 'employees', 'staff', 'everyone', 'anyone', 'him', 'them', 'us', 'me', 'it',
+            'file', 'files', 'document', 'documents', 'photo', 'photos', 'picture', 'pictures', 'image', 'images',
+            'scan', 'scans', 'record', 'records', 'upload', 'uploads', 'attachment', 'attachments',
+            'department', 'office', 'system', 'database', 'today', 'yesterday',
+        ];
+
+        $words = preg_split('/\s+/', trim($candidate)) ?: [];
+        $words = array_values(array_filter(
+            $words,
+            fn (string $w) => $w !== '' && !in_array(strtolower($w), $stopwords, true)
+        ));
+
+        return implode(' ', $words);
     }
 
     /**
@@ -290,7 +338,7 @@ class DocumentSearchService
                 'document_type' => 'Employee photo',
                 'file_name' => basename((string) $employee->photo),
                 'file_type' => $this->typeLabel($employee->photo),
-                'file_size' => $this->humanFileSize($this->toDiskPath($employee->photo)),
+                'file_size' => $this->humanFileSize($employee->photo),
                 'uploaded_at' => $employee->created_at,
                 'status' => 'active',
                 'file_path' => $employee->photo,
@@ -345,7 +393,7 @@ class DocumentSearchService
                     'document_type' => $label,
                     'file_name' => basename($path),
                     'file_type' => $this->typeLabel($path),
-                    'file_size' => $this->humanFileSize($this->toDiskPath($path)),
+                    'file_size' => $this->humanFileSize($path),
                     'uploaded_at' => $govId->employee?->created_at,
                     'status' => 'active',
                     'file_path' => $path,
@@ -355,19 +403,6 @@ class DocumentSearchService
         }
 
         return $rows->values();
-    }
-
-    /**
-     * employees.photo holds a public URL ("/storage/employees/photos/x.png");
-     * the disk path is what follows /storage/.
-     */
-    private function toDiskPath(?string $stored): ?string
-    {
-        if (!$stored) {
-            return null;
-        }
-
-        return ltrim(preg_replace('#^/?storage/#', '', $stored) ?? $stored, '/');
     }
 
     /**
@@ -407,72 +442,51 @@ class DocumentSearchService
     }
 
     /**
-     * Files in this app are written to the public disk; fall back to the
-     * default disk before giving up so we do not report a size of "Unknown"
-     * for perfectly readable files.
+     * Files in this app are written to the public disk; AiFileResolver falls
+     * back to the default disk before giving up, so we do not report a size of
+     * "Unknown" for perfectly readable files. It also normalises the two path
+     * shapes in use (bare disk paths and stored "/storage/…" URLs).
      */
     private function humanFileSize(?string $path): string
     {
-        if (!$path) {
+        $disk = $this->resolver->diskFor($path);
+
+        if ($disk === null) {
             return 'Unknown';
         }
 
-        foreach (['public', 'local'] as $disk) {
-            try {
-                if (Storage::disk($disk)->exists($path)) {
-                    $bytes = Storage::disk($disk)->size($path);
-
-                    return match (true) {
-                        $bytes < 1024 => $bytes . ' B',
-                        $bytes < 1048576 => round($bytes / 1024, 1) . ' KB',
-                        default => round($bytes / 1048576, 2) . ' MB',
-                    };
-                }
-            } catch (\Throwable) {
-                // Try the next disk.
-            }
+        try {
+            $bytes = Storage::disk($disk)->size((string) $this->resolver->toDiskPath($path));
+        } catch (\Throwable) {
+            return 'Unknown';
         }
 
-        return 'Unknown';
+        return match (true) {
+            $bytes < 1024 => $bytes . ' B',
+            $bytes < 1048576 => round($bytes / 1024, 1) . ' KB',
+            default => round($bytes / 1048576, 2) . ' MB',
+        };
     }
 
     /**
      * Resolve a stored file for download, enforcing ownership first.
+     * Delegates to AiFileResolver so there is exactly one gate in front of
+     * assistant-served files.
      *
      * @return array{success: bool, disk?: string, path?: string, file_name?: string, error?: string}
      */
     public function resolveForDownload(User $user, int $documentId): array
     {
-        $document = Document::find($documentId);
-
-        if (!$document) {
-            return ['success' => false, 'error' => 'Document not found'];
-        }
-
-        if (!$this->policy->canAccessEmployee($user, $document->employee_id ? (int) $document->employee_id : null)) {
-            return ['success' => false, 'error' => 'You do not have permission to access this document'];
-        }
-
-        foreach (['public', 'local'] as $disk) {
-            if (Storage::disk($disk)->exists($document->file_path)) {
-                return [
-                    'success' => true,
-                    'disk' => $disk,
-                    'path' => $document->file_path,
-                    'file_name' => basename((string) $document->file_path),
-                ];
-            }
-        }
-
-        return ['success' => false, 'error' => 'The file record exists but the file is missing from storage'];
+        return $this->resolver->resolve($user, 'documents', (string) $documentId);
     }
 
     /**
      * @param Collection<int, array<string, mixed>> $rows
      * @param array<string, mixed> $params
      * @param array<int, array{role: string, content: string}> $history
+     * @param array<int, array<string, mixed>> $files
      */
-    private function narrate(User $user, string $query, Collection $rows, array $params, array $history): string
+    private function narrate(User $user, string $query, Collection $rows, array $params, array $history, array $files): string
     {
         if ($rows->isEmpty()) {
             $hint = !empty($params['employee_name'])
@@ -485,29 +499,90 @@ class DocumentSearchService
 
         $system = <<<'PROMPT'
 You are the PRIME HRIS Assistant reporting the result of a file search. The
-list has already been filtered to files this user may access.
+list below is the complete result set from the HR database, already filtered to
+files this user may access. It is your ONLY source of truth.
 
 - Say how many files matched and name the most relevant ones.
 - For each, give the employee, document type, and upload date.
 - If the user asked for the "latest", lead with the newest one.
-- Never invent a file, a date, or a path that is not in the data.
+- Use ONLY file names, employees, and dates that appear in the data. Do not
+  invent a file, a date, a path, or a download link, and do not guess at what a
+  file contains — you have not read it.
+- If the data does not answer the question, say so plainly rather than filling
+  the gap.
+- The files themselves are shown to the user as cards beneath your reply, so do
+  not write out links.
 - Under 150 words, conversational, no raw JSON.
 PROMPT;
 
         $payload = json_encode(
-            $rows->take(20)->map(fn (array $r) => collect($r)->except('file_path')->all())->all(),
+            $rows->take(20)->map(fn (array $r) => collect($r)->except(['file_path', 'url'])->all())->all(),
             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
         );
+
+        $missing = $rows->count() - count($files);
+        $note = $missing > 0
+            ? "\n\nNote: {$missing} of these records have no file present in storage — mention that they are recorded but the file is missing."
+            : '';
 
         $messages = $history;
         $messages[] = [
             'role' => 'user',
-            'content' => "Question: {$query}\n\nMatched {$rows->count()} file(s):\n{$payload}",
+            'content' => "Question: {$query}\n\nMatched {$rows->count()} file(s):\n{$payload}{$note}",
         ];
 
         $answer = AiChatService::chat($user, $system, $messages, 0.3, 700);
 
-        return $answer ?: $this->fallbackNarration($rows);
+        if (!$answer) {
+            return $this->fallbackNarration($rows);
+        }
+
+        // Last line of defence against a model that names a file we never found.
+        // The prompt already forbids it; this makes the guarantee structural.
+        return $this->mentionsUnknownFile($answer, $rows)
+            ? $this->fallbackNarration($rows)
+            : $answer;
+    }
+
+    /**
+     * True when the narration contains something shaped like a file name that
+     * is not in the result set. Only filename-like tokens are checked — prose
+     * about the search itself is left alone.
+     *
+     * @param Collection<int, array<string, mixed>> $rows
+     */
+    private function mentionsUnknownFile(string $answer, Collection $rows): bool
+    {
+        if (!preg_match_all('/[\w\-. ()]+\.(pdf|docx?|xlsx?|csv|jpe?g|png|gif|webp|bmp)\b/i', $answer, $matches)) {
+            return false;
+        }
+
+        $known = $rows->map(fn (array $r) => strtolower(trim((string) $r['file_name'])))->all();
+
+        foreach ($matches[0] as $mentioned) {
+            $mentioned = strtolower(trim($mentioned));
+
+            // A model may shorten a stored name; accept a mention that any real
+            // file name contains, and reject anything with no basis in the data.
+            $grounded = false;
+            foreach ($known as $name) {
+                if ($name !== '' && ($name === $mentioned || str_contains($name, $mentioned))) {
+                    $grounded = true;
+                    break;
+                }
+            }
+
+            if (!$grounded) {
+                Log::channel('ai_audit')->warning('assistant.ungrounded_file_mention', [
+                    'mentioned' => $mentioned,
+                    'result_count' => $rows->count(),
+                ]);
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

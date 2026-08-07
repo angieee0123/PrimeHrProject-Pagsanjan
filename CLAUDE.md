@@ -90,6 +90,7 @@ question
 | `AiChatService` | LLM calls. Resolves provider per-user → org default → `.env` Groq |
 | `EmployeeSearchService` | Employee / department / hire-date lookups |
 | `DocumentSearchService` | Files across `documents`, training certificates, employee photos |
+| `AiFileResolver` | Turns a `source:id` file reference back into bytes, permission-checked |
 | `SemanticSearchService` | Meaning-based expansion (maternity → pregnancy, parental…) |
 | `SafeSqlService` | Natural-language → validated read-only SQL |
 | `DashboardAssistantService` | Counts, absenteeism, pending approvals, headcount |
@@ -106,8 +107,10 @@ question
 ```
 POST   /{admin|employee|mayor}/ai-assistant/message      web UI
 GET    /{admin|employee|mayor}/ai-assistant/export/{token}
+GET    /ai-assistant/file/{source}/{ref}                 file/image results
 POST   /api/ai/query                                     mobile (sanctum)
 GET    /api/ai/export/{token}
+GET    /api/ai/file/{source}/{ref}
 ```
 
 Both surfaces call the same `AiQueryService`, so permissions and audit logging
@@ -140,11 +143,18 @@ the data still comes back, just without prose.
   asker, roles, scope, intent, row count, and duration — counts, never the rows
   themselves, so the log does not become a second copy of HR data.
 - **Export tokens** are bound to the generating user and expire after an hour.
+- **Files are never linked straight to `/storage`.** A file card in chat points
+  at `AiFileController` and carries a *database reference* (`documents/41`,
+  `government_ids/7-gsis_file_path`) rather than a path, so there is nothing to
+  traverse. `AiFileResolver` re-reads the row and re-checks `AiAccessPolicy` on
+  every fetch — a link copied out of the chat is useless to someone who may not
+  see that employee. Served files carry `X-Content-Type-Options: nosniff`, and
+  SVG is never served inline.
 
 Run the security suite with:
 
 ```bash
-php artisan test tests/Unit/SafeSqlValidationTest.php tests/Unit/AiAccessPolicyTest.php
+php artisan test tests/Unit/SafeSqlValidationTest.php tests/Unit/AiAccessPolicyTest.php tests/Unit/AiFileResolverTest.php
 ```
 
 ### Document content search
@@ -179,7 +189,16 @@ php artisan test
 ```
 
 Note: 4 tests in `tests/Feature/ChatbotControllerTest.php` fail with 403 and did
-so before the AI Assistant work — they are unrelated to it.
+so before the AI Assistant work — they are unrelated to it. `ExampleTest` fails
+for the same pre-existing reason (`system_ai_settings` is missing on the test
+connection).
+
+**`RefreshDatabase` does not work in this project.** The migration
+`2026_04_15_182306_add_timestamps_to_tables` emits MySQL-only
+`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`, which SQLite rejects, so the
+migration set cannot run on the test connection at all. Tests that need tables
+build the few they touch with `Schema::create` in `setUp()` — see
+`tests/Unit/AiFileResolverTest.php`.
 
 ---
 

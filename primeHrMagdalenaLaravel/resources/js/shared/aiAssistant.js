@@ -138,9 +138,14 @@
         bubble.className = 'ai-msg-bubble';
         bubble.innerHTML = escapeHtml(content).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
 
-        // Charts, then the table, then the export button — the assistant's
-        // prose summarises, and these carry the detail.
+        // Files first — when someone asks for a photo or a contract, the file
+        // is the answer and the prose is the caption. Then charts, the table,
+        // and the export button.
         if (attachments) {
+            if (attachments.files && attachments.files.length) {
+                bubble.appendChild(buildFiles(attachments.files));
+            }
+
             if (attachments.chart_svg) {
                 attachments.chart_svg.forEach(function (svg) {
                     bubble.appendChild(buildChart(svg));
@@ -164,6 +169,149 @@
         wrap.appendChild(bubble);
         messagesEl.appendChild(wrap);
         messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    /**
+     * File results, rendered as cards. Images preview inline and open in a
+     * lightbox; everything else gets an icon card that opens or downloads.
+     *
+     * Every URL here came from the server as a reference to a database row, so
+     * a card can only ever point at a real record the user is allowed to see —
+     * the endpoint re-checks that on click.
+     */
+    function buildFiles(files) {
+        const grid = document.createElement('div');
+        grid.className = 'ai-files';
+
+        files.forEach(function (file) {
+            grid.appendChild(file.is_image ? buildImageCard(file) : buildDocCard(file));
+        });
+
+        return grid;
+    }
+
+    function buildImageCard(file) {
+        const card = document.createElement('figure');
+        card.className = 'ai-file ai-file-image';
+
+        const img = document.createElement('img');
+        img.src = file.url;
+        img.alt = file.label || file.name;
+        img.loading = 'lazy';
+        // A record can point at a file the browser cannot render; say so rather
+        // than leaving a broken image icon in the thread.
+        img.addEventListener('error', function () {
+            card.classList.add('is-broken');
+            img.remove();
+        });
+        img.addEventListener('click', function () { openLightbox(file); });
+
+        const caption = document.createElement('figcaption');
+        caption.appendChild(fileMeta(file));
+
+        card.appendChild(img);
+        card.appendChild(caption);
+        return card;
+    }
+
+    function buildDocCard(file) {
+        const card = document.createElement('div');
+        card.className = 'ai-file ai-file-doc';
+
+        const icon = document.createElement('span');
+        icon.className = 'ai-file-icon ai-file-icon-' + (file.type || 'bin');
+        icon.textContent = (file.type || 'file').toUpperCase().slice(0, 4);
+
+        const body = document.createElement('div');
+        body.className = 'ai-file-body';
+        body.appendChild(fileMeta(file));
+
+        const actions = document.createElement('div');
+        actions.className = 'ai-file-actions';
+        actions.appendChild(fileLink(file.url, 'Open', '_blank', false));
+        actions.appendChild(fileLink(file.download_url, 'Download', null, true));
+
+        card.appendChild(icon);
+        card.appendChild(body);
+        card.appendChild(actions);
+        return card;
+    }
+
+    function fileMeta(file) {
+        const meta = document.createElement('div');
+        meta.className = 'ai-file-meta';
+
+        const name = document.createElement('strong');
+        name.className = 'ai-file-name';
+        name.textContent = file.label || file.name;
+        name.title = file.name;
+        meta.appendChild(name);
+
+        const detail = [file.employee_name, formatFileDate(file.uploaded_at), file.size]
+            .filter(Boolean)
+            .join(' · ');
+
+        if (detail) {
+            const sub = document.createElement('span');
+            sub.className = 'ai-file-sub';
+            sub.textContent = detail;
+            meta.appendChild(sub);
+        }
+
+        return meta;
+    }
+
+    function fileLink(href, label, target, download) {
+        const link = document.createElement('a');
+        link.className = 'ai-file-link';
+        link.href = href;
+        link.textContent = label;
+        if (target) {
+            link.target = target;
+            link.rel = 'noopener';
+        }
+        if (download) link.setAttribute('download', '');
+        return link;
+    }
+
+    function formatFileDate(value) {
+        if (!value) return '';
+        const date = new Date(value);
+        return isNaN(date.getTime())
+            ? ''
+            : date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    }
+
+    /** Full-size view for image results, dismissed with a click or Escape. */
+    function openLightbox(file) {
+        const overlay = document.createElement('div');
+        overlay.className = 'ai-lightbox';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-label', file.label || file.name);
+
+        const img = document.createElement('img');
+        img.src = file.url;
+        img.alt = file.label || file.name;
+
+        const caption = document.createElement('div');
+        caption.className = 'ai-lightbox-caption';
+        caption.textContent = [file.label, file.employee_name].filter(Boolean).join(' — ');
+
+        function close() {
+            overlay.remove();
+            document.removeEventListener('keydown', onKey);
+        }
+
+        function onKey(e) {
+            if (e.key === 'Escape') close();
+        }
+
+        overlay.addEventListener('click', close);
+        document.addEventListener('keydown', onKey);
+
+        overlay.appendChild(img);
+        overlay.appendChild(caption);
+        document.body.appendChild(overlay);
     }
 
     /** Chart SVG is generated server-side, so it renders identically in a PDF. */
@@ -358,6 +506,7 @@
                 appendMessage('assistant', data.response || "Sorry, I couldn't process that.", null, {
                     table: data.table,
                     data: data.data,
+                    files: data.files,
                     chart_svg: data.chart_svg,
                     export_token: data.export_token,
                 });
