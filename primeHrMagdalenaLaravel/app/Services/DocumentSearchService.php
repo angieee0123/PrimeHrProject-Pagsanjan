@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Document;
 use App\Models\DocumentExtraction;
 use App\Models\Employee;
+use App\Models\GovernmentId;
 use App\Models\Training;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,6 +26,11 @@ use Illuminate\Support\Facades\Storage;
 class DocumentSearchService
 {
     private const MAX_RESULTS = 50;
+
+    /** Cap on the clickable file cards shown in chat — a broad search still
+     *  narrates and tables every match, but the thread shouldn't turn into a
+     *  wall of thumbnails. */
+    private const MAX_FILE_CARDS = 12;
 
     /** Extension → human label, used for describing hits. */
     private const TYPE_LABELS = [
@@ -57,6 +63,7 @@ class DocumentSearchService
         $rows = $this->searchDocuments($user, $params)
             ->concat($this->searchTrainingCertificates($user, $params))
             ->concat($this->searchEmployeePhotos($user, $params))
+            ->concat($this->searchGovernmentIds($user, $params))
             ->sortByDesc('uploaded_at')
             ->take(self::MAX_RESULTS)
             ->values();
@@ -65,7 +72,48 @@ class DocumentSearchService
             'answer' => $this->narrate($user, $query, $rows, $params, $history),
             'data' => $rows->all(),
             'count' => $rows->count(),
+            'files' => $this->buildFileAttachments($rows),
         ];
+    }
+
+    /**
+     * The clickable file cards the chat UI renders — a smaller, browser-ready
+     * view distinct from `data` (the full row set used for narration/tables).
+     *
+     * @param Collection<int, array<string, mixed>> $rows
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildFileAttachments(Collection $rows): array
+    {
+        return $rows->take(self::MAX_FILE_CARDS)->map(fn (array $r) => [
+            'id' => $r['source'] . '-' . $r['id'],
+            'name' => $r['file_name'],
+            'type' => strtolower(pathinfo((string) $r['file_name'], PATHINFO_EXTENSION)),
+            'label' => $r['document_type'],
+            'employee_name' => $r['employee_name'],
+            'uploaded_at' => $r['uploaded_at'],
+            'size' => $r['file_size'],
+            'url' => $this->toPublicUrl($r['url'] ?? $r['file_path']),
+        ])->values()->all();
+    }
+
+    /**
+     * Uploads in this app are stored in a couple of inconsistent shapes —
+     * employee photos and government ID scans are already public URLs
+     * ("/storage/…"), but training certificates are bare disk paths. Either
+     * way, this returns something a browser can fetch directly.
+     */
+    private function toPublicUrl(?string $stored): ?string
+    {
+        if (!$stored) {
+            return null;
+        }
+
+        if (str_starts_with($stored, 'http://') || str_starts_with($stored, 'https://') || str_starts_with($stored, '/storage/')) {
+            return $stored;
+        }
+
+        return '/storage/' . ltrim(preg_replace('#^storage/#', '', $stored) ?? $stored, '/');
     }
 
     /**
@@ -89,7 +137,7 @@ class DocumentSearchService
         // also matches rows typed as "med cert" / "health clearance".
         // Trailing (?:s|es)? so "contracts" and "certificates" match the same
         // concept as their singular forms.
-        if (preg_match('/\b(contract|agreement|appointment|certificate|training|medical|health|clearance|licen[sc]e|passport|photo|picture|image|id\s*card|government\s*id|birth\s*certificate|diploma|transcript|resume|cv|leave\s*form|travel\s*order|payslip|memo|evaluation|disciplinary)(?:s|es)?\b/i', $query, $m)) {
+        if (preg_match('/\b(contract|agreement|appointment|certificate|training|medical|health|clearance|licen[sc]e|passport|photo|picture|image|id\s*card|government\s*id|gsis|philhealth|pag-?ibig|tin|birth\s*certificate|diploma|transcript|resume|cv|leave\s*form|travel\s*order|payslip|memo|evaluation|disciplinary)(?:s|es)?\b/i', $query, $m)) {
             $params['document_type'] = strtolower(trim($m[1]));
             $params['type_terms'] = $this->semantic->expandTerms($params['document_type']);
         }
@@ -248,6 +296,65 @@ class DocumentSearchService
                 'file_path' => $employee->photo,
                 'url' => $employee->photo,
             ])->values();
+    }
+
+    /**
+     * Government ID scans (GSIS, PhilHealth, Pag-IBIG, TIN, professional
+     * license) — one `government_ids` row per employee, but up to five
+     * scans, so each populated column becomes its own result row.
+     *
+     * @param array<string, mixed> $params
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function searchGovernmentIds(User $user, array $params): Collection
+    {
+        $wantsGovId = ($params['document_type'] ?? null) === null
+            || in_array($params['document_type'], ['government id', 'id card', 'license', 'gsis', 'philhealth', 'pag-ibig', 'pagibig', 'tin'], true);
+
+        if (!$wantsGovId) {
+            return collect();
+        }
+
+        $query = GovernmentId::query()->with('employee');
+
+        $this->applyEmployeeFilters($query, $params);
+        $this->policy->scopeByEmployeeId($query, $user);
+
+        $scanColumns = [
+            'gsis_file_path' => 'GSIS ID scan',
+            'philhealth_file_path' => 'PhilHealth ID scan',
+            'pagibig_file_path' => 'Pag-IBIG ID scan',
+            'tin_file_path' => 'TIN ID scan',
+            'license_file_path' => 'Professional License scan',
+        ];
+
+        $rows = collect();
+
+        foreach ($query->get() as $govId) {
+            foreach ($scanColumns as $column => $label) {
+                $path = $govId->{$column};
+                if (!$path) {
+                    continue;
+                }
+
+                $rows->push([
+                    'id' => $govId->id . '-' . $column,
+                    'source' => 'government_ids',
+                    'employee_id' => $govId->employee_id,
+                    'employee_name' => $this->employeeName($govId->employee),
+                    'document_type' => $label,
+                    'file_name' => basename($path),
+                    'file_type' => $this->typeLabel($path),
+                    'file_size' => $this->humanFileSize($this->toDiskPath($path)),
+                    'uploaded_at' => $govId->employee?->created_at,
+                    'status' => 'active',
+                    'file_path' => $path,
+                    'url' => $path,
+                ]);
+            }
+        }
+
+        return $rows->values();
     }
 
     /**
