@@ -12,8 +12,10 @@ let chatSuggestHtml = '';
 const CHATBOT_GREETING = "Hello! I'm the PRIME HRIS Assistant. I can help you with employee information, departments, and HR data. I understand natural questions like \"How many people work here?\" or \"Find John Doe\" or \"Who's in the Mayor's office?\" Try asking me anything!";
 const CHATBOT_BOT_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
 
-function chatbotTimestamp() {
-    return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+function chatbotTimestamp(iso) {
+    const at = iso ? new Date(iso) : new Date();
+    return (isNaN(at) ? new Date() : at)
+        .toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
 
 function escapeChatHtml(text) {
@@ -389,8 +391,13 @@ function restoreChatbotUiState() {
     }
 }
 
-// The conversation itself lives in the Laravel session (see ChatbotController)
-// so re-fetch and re-render it here instead of showing the static greeting.
+// The conversation is stored in `ai_conversations` (see ChatbotController), so
+// re-fetch and re-render it here instead of showing the static greeting. It
+// used to live in the Laravel session, which meant logging out — or leaving the
+// tab for two hours — silently discarded the thread.
+//
+// Each turn carries its own timestamp and, for answers that had them, the file
+// cards: a replayed answer should look like the answer, not a summary of it.
 function restoreChatbotHistory() {
     fetch('/chatbot/history', { headers: { 'Accept': 'application/json' } })
         .then(response => response.json())
@@ -399,7 +406,15 @@ function restoreChatbotHistory() {
                 const messagesContainer = document.getElementById('chatbotMessages');
                 messagesContainer.innerHTML = '';
                 data.history.forEach(turn => {
-                    addChatMessage(turn.role === 'user' ? 'user' : 'bot', turn.content, false);
+                    addChatMessage(
+                        turn.role === 'user' ? 'user' : 'bot',
+                        turn.content,
+                        true,
+                        turn.created_at
+                    );
+                    if (turn.attachments && !turn.attachments.withheld) {
+                        addChatFiles(turn.attachments.files);
+                    }
                 });
             }
         })
@@ -476,6 +491,11 @@ function sendChatMessage() {
         removeTypingIndicator();
         if (data.status === 'success') {
             addChatMessage('bot', data.response);
+            // The answer's attachments, not just its prose — a file search here
+            // used to drop its cards even though ChatbotController and the full
+            // AI Assistant page run the identical AiQueryService call.
+            addChatFiles(data.files);
+            addChatFollowUps(data.follow_ups);
             // Automatically speak the bot's response
             speakText(data.response);
         } else {
@@ -497,16 +517,19 @@ function sendPredefinedMessage(message) {
 }
 
 /* Opens the in-panel sheet rather than a browser confirm(), and names what is
-   actually at stake — the count of messages, and the fact that this also wipes
+   actually at stake — the count of messages, and the fact that this also resets
    the assistant's server-side memory of the thread, which the old one-liner
-   never said. */
+   never said. Nothing is deleted: the next question opens a new conversation
+   and this one stays on the AI Assistant page, so the sheet must not promise a
+   removal it does not perform. */
 function clearChatbotConversation() {
     const messages = document.querySelectorAll('#chatbotMessages .chat-msg').length;
 
     document.getElementById('chatClearConfirmText').textContent = messages <= 1
         ? 'There is nothing to clear yet — this chat only has the welcome message.'
-        : 'This removes all ' + messages + ' messages and resets what the assistant '
-          + 'remembers of this thread. Employee records are not affected.';
+        : 'This starts a fresh thread, so the assistant stops using these '
+          + messages + ' messages as context. The conversation is kept — you can '
+          + 'still find it on the AI Assistant page.';
 
     document.getElementById('chatClearConfirm').classList.add('is-open');
     document.getElementById('chatClearConfirmCancel').focus();
@@ -542,14 +565,15 @@ function confirmClearChatbotConversation() {
     messagesContainer.insertAdjacentHTML('beforeend', chatSuggestHtml);
 }
 
-// withTime is false for turns replayed from session history, which carry no
-// timestamp of their own — stamping them "now" would be a lie.
 function removeChatSuggestions() {
     const el = document.getElementById('chatSuggestions');
     if (el) el.remove();
 }
 
-function addChatMessage(from, text, withTime = true) {
+/* `at` is the ISO timestamp of a turn replayed from storage; live turns omit it
+   and are stamped now. A replayed turn used to carry no time at all, because
+   the session history it came from never recorded one. */
+function addChatMessage(from, text, withTime = true, at = null) {
     const messagesContainer = document.getElementById('chatbotMessages');
     if (from === 'user') removeChatSuggestions();
 
@@ -570,12 +594,105 @@ function addChatMessage(from, text, withTime = true) {
     if (withTime) {
         const ts = document.createElement('span');
         ts.className = 'chat-ts';
-        ts.textContent = chatbotTimestamp();
+        ts.textContent = chatbotTimestamp(at);
         bubble.appendChild(ts);
     }
 
     messageDiv.appendChild(bubble);
     messagesContainer.appendChild(messageDiv);
+    scrollChatToBottom();
+}
+
+/* File cards for an answer that carries them.
+   Every card points at AiFileController with a database reference rather than a
+   storage path, so opening one re-runs the AiAccessPolicy check — the same
+   guarantee the full page relies on. */
+function addChatFiles(files) {
+    if (!Array.isArray(files) || files.length === 0) return;
+
+    const container = document.getElementById('chatbotMessages');
+    const grid = document.createElement('div');
+    grid.className = 'chat-files';
+
+    files.forEach(function (file) {
+        const card = document.createElement('div');
+        card.className = 'chat-file';
+
+        if (file.is_image) {
+            const img = document.createElement('img');
+            img.src = file.url;
+            img.alt = file.label || file.name;
+            img.loading = 'lazy';
+            // A preview the browser cannot draw must not strand the file: the
+            // actions below stay put so it is still openable.
+            img.addEventListener('error', function () { img.remove(); });
+            card.appendChild(img);
+        }
+
+        const meta = document.createElement('div');
+        meta.className = 'chat-file-meta';
+
+        const name = document.createElement('strong');
+        name.textContent = file.label || file.name;
+        name.title = file.name;
+        meta.appendChild(name);
+
+        const sub = [file.employee_name, file.size].filter(Boolean).join(' · ');
+        if (sub) {
+            const detail = document.createElement('span');
+            detail.textContent = sub;
+            meta.appendChild(detail);
+        }
+
+        const actions = document.createElement('div');
+        actions.className = 'chat-file-actions';
+        actions.appendChild(chatFileLink(file.url, 'Open', true));
+        actions.appendChild(chatFileLink(file.download_url, 'Download', false));
+
+        meta.appendChild(actions);
+        card.appendChild(meta);
+        grid.appendChild(card);
+    });
+
+    container.appendChild(grid);
+    scrollChatToBottom();
+}
+
+function chatFileLink(href, label, newTab) {
+    const link = document.createElement('a');
+    link.className = 'chat-file-link';
+    link.href = href;
+    link.textContent = label;
+    if (newTab) {
+        link.target = '_blank';
+        link.rel = 'noopener';
+    } else {
+        link.setAttribute('download', '');
+    }
+    return link;
+}
+
+/* Suggested next questions. Newest turn only, matching the full page — leaving
+   them behind stacks a thread's worth of chips that no longer follow. */
+function addChatFollowUps(followUps) {
+    document.querySelectorAll('#chatbotMessages .chat-followups').forEach(el => el.remove());
+
+    if (!Array.isArray(followUps) || followUps.length === 0) return;
+
+    const container = document.getElementById('chatbotMessages');
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-followups';
+
+    followUps.forEach(function (question) {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'chatbot-quick-btn';
+        chip.textContent = question;
+        chip.addEventListener('click', function () { sendPredefinedMessage(question); });
+        wrap.appendChild(chip);
+    });
+
+    container.appendChild(wrap);
     scrollChatToBottom();
 }
 

@@ -57,11 +57,16 @@
                 @if($isPermanent ?? false)
                 <button class="chatbot-quick-btn" onclick="quickAskPermanent('How do I file a leave request?')">Leave</button>
                 @endif
-                <button class="chatbot-quick-btn" onclick="quickAskPermanent('Check my payslip')">Payslip</button>
-                <button class="chatbot-quick-btn" onclick="quickAskPermanent('View my attendance')">Attendance</button>
-                <button class="chatbot-quick-btn" onclick="quickAskPermanent('My training programs')">Training</button>
-                <button class="chatbot-quick-btn" onclick="quickAskPermanent('My performance rating')">Performance</button>
-                <button class="chatbot-quick-btn" onclick="quickAskPermanent('HR contact information')">HR contact</button>
+                <button class="chatbot-quick-btn" onclick="quickAskPermanent('What is my leave balance?')">Leave balance</button>
+                <button class="chatbot-quick-btn" onclick="quickAskPermanent('Show my latest payslip')">Payslip</button>
+                <button class="chatbot-quick-btn" onclick="quickAskPermanent('What is my attendance this month?')">Attendance</button>
+                <button class="chatbot-quick-btn" onclick="quickAskPermanent('What are my trainings?')">Training</button>
+                {{-- "Performance" and "HR contact" were offered here while the
+                     schema has no performance/evaluation table and no HR contact
+                     record — the old canned answers invented a 4.8/5.0 rating and
+                     a phone number. Replaced with questions the assistant can
+                     actually answer from the database. --}}
+                <button class="chatbot-quick-btn" onclick="quickAskPermanent('What leave types can I file?')">Leave types</button>
             </div>
         </div>
     </div>
@@ -99,15 +104,21 @@
 </div>
 
 <script>
-const CHAT_GREETING = "Hello! I'm your PRIME HRIS assistant. I can help you with leave requests, payslip inquiries, attendance records, training programs, and performance evaluations. How can I assist you today?";
+// No "performance evaluations": this schema has no performance table, so
+// offering it invites a question the assistant cannot answer from data.
+const CHAT_GREETING = "Hello! I'm your PRIME HRIS assistant. I can look up your own leave balances, payslips, attendance records, trainings and travel orders, and explain how to use the system. How can I assist you today?";
 const CHAT_BOT_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
 
 let chatBusy = false;
 // Captured at load so "Clear conversation" can put the starter prompts back.
 let chatSuggestHtml = '';
 
-function getPermanentTimestamp() {
-    return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+/* `iso` is the stored time of a turn replayed from history; live turns pass
+   nothing and are stamped now. */
+function getPermanentTimestamp(iso) {
+    const at = iso ? new Date(iso) : new Date();
+    return (isNaN(at) ? new Date() : at)
+        .toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
 
 function escapeChatHtml(text) {
@@ -172,7 +183,7 @@ function removeChatSuggestions() {
     if (el) el.remove();
 }
 
-function addPermanentMessage(text, isUser) {
+function addPermanentMessage(text, isUser, at) {
     const container = document.getElementById('chatbot-messages');
     if (isUser) removeChatSuggestions();
 
@@ -192,7 +203,7 @@ function addPermanentMessage(text, isUser) {
 
     const ts = document.createElement('span');
     ts.className = 'chat-ts';
-    ts.textContent = getPermanentTimestamp();
+    ts.textContent = getPermanentTimestamp(at);
     bubble.appendChild(ts);
 
     wrapper.appendChild(bubble);
@@ -249,8 +260,9 @@ function clearPermanentChat() {
             'There is nothing to clear yet — this chat only has the welcome message.';
     } else {
         document.getElementById('chat-confirm-text').textContent =
-            'This removes all ' + bubbles + ' messages from this chat. Your leave, payslip and '
-            + 'training records are not affected.';
+            'This starts a fresh chat, so the assistant stops using these ' + bubbles
+            + ' messages as context. The conversation is kept, and your leave, payslip '
+            + 'and training records are not affected.';
     }
 
     sheet.classList.add('is-open');
@@ -268,6 +280,22 @@ function isClearConfirmOpen() {
 }
 
 function confirmClearPermanentChat() {
+    // Tell the server too, not just the bubbles. The assistant resolves
+    // pronouns against the stored thread — wiping only the screen would leave
+    // "cleared" turns still steering the next answer while the employee
+    // believes they started fresh. The thread itself is kept; the next question
+    // simply opens a new one.
+    fetch('/chatbot/chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ message: '', reset: true }),
+    }).catch(function () { /* The bubbles still clear; nothing useful to show. */ });
+
     const container = document.getElementById('chatbot-messages');
     container.innerHTML = '';
     addPermanentMessage(CHAT_GREETING, false);
@@ -282,7 +310,19 @@ function quickAskPermanent(question) {
     sendPermanentMessage();
 }
 
-function sendPermanentMessage() {
+/* Asks the same assistant the full AI Assistant page asks.
+
+   This used to answer from a hard-coded if/else that never contacted the
+   server: it told every employee their vacation balance was 12.5 days, quoted a
+   payslip for "Jun 16-30, 2025", and reported a 4.8/5.0 performance rating from
+   a table this schema does not have. None of it was read from anywhere, and the
+   widget ships on ten employee pages.
+
+   /chatbot/chat is ChatbotController, which calls AiQueryService — the same
+   orchestrator, AiAccessPolicy scoping, HrPolicyFactsService rules and audit
+   logging as the full page. Answers here are now the employee's real records or
+   an honest refusal. */
+async function sendPermanentMessage() {
     if (chatBusy) return;
 
     const input = document.getElementById('chat-input');
@@ -295,41 +335,97 @@ function sendPermanentMessage() {
     setChatBusy(true);
     showPermanentTyping();
 
-    setTimeout(() => {
+    try {
+        const response = await fetch('/chatbot/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ message: text }),
+        });
+
+        const data = await response.json().catch(() => ({}));
+
         removePermanentTyping();
-        addPermanentMessage(getPermanentResponse(text), false);
+
+        if (!response.ok || !data.response) {
+            // Say that the answer could not be fetched. Never substitute a
+            // stand-in figure — an invented balance is worse than no answer.
+            addPermanentMessage(
+                data.error
+                    || "Sorry, I couldn't reach your records just now. Please try again in a moment.",
+                false
+            );
+        } else {
+            addPermanentMessage(data.response, false);
+            renderChatFollowUps(data.follow_ups);
+        }
+    } catch (e) {
+        removePermanentTyping();
+        addPermanentMessage(
+            "Sorry, I couldn't reach your records just now. Please check your connection and try again.",
+            false
+        );
+    } finally {
         setChatBusy(false);
-    }, 800);
+    }
 }
 
-function getPermanentResponse(question) {
-    const q = question.toLowerCase();
+/* Suggested next questions, as the full page renders them: newest turn only,
+   so a thread does not accumulate stale chips. */
+function renderChatFollowUps(followUps) {
+    document.querySelectorAll('#chatbot-messages .chat-followups').forEach(el => el.remove());
 
-    if (q.includes('leave') || q.includes('vacation') || q.includes('sick')) {
-        return "To file a leave request:\n\n**1.** Go to the **Leave** section in the sidebar\n**2.** Click **File Leave Request**\n**3.** Select leave type (Vacation, Sick, Emergency)\n**4.** Choose dates and provide reason\n**5.** Submit for approval\n\nYour current leave balance:\n• Vacation: 12.5 days\n• Sick: 10 days\n• Emergency: 3 days";
-    }
+    if (!Array.isArray(followUps) || followUps.length === 0) return;
 
-    if (q.includes('payslip') || q.includes('payroll') || q.includes('salary')) {
-        return "Your latest payslip for **Jun 16-30, 2025**:\n\n**Basic Pay:** ₱16,921.50\n**Deductions:** ₱3,384.00\n**Net Pay:** ₱13,537.50\n\nYou can view and download your payslip from the **Dashboard** or **Payroll** section. Next pay date is **Jun 30, 2025**.";
-    }
+    const container = document.getElementById('chatbot-messages');
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-followups';
 
-    if (q.includes('attendance') || q.includes('dtr') || q.includes('time')) {
-        return "Your attendance summary:\n\n**Current Month:** 95% attendance\n**Days Present:** 20 days\n**Days Absent:** 1 day\n\nYou can view your complete DTR records in the **Attendance** section. Make sure to log in and out daily using the biometric system.";
-    }
+    followUps.forEach(function (question) {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'chatbot-quick-btn';
+        chip.textContent = question;
+        chip.addEventListener('click', function () { quickAskPermanent(question); });
+        wrap.appendChild(chip);
+    });
 
-    if (q.includes('training') || q.includes('course') || q.includes('program')) {
-        return "Your training programs:\n\n**In Progress:**\n• Leadership Development Program (65% complete)\n\n**Completed:**\n• Customer Service Excellence\n• Digital Literacy Training\n\n**Available:**\n• Advanced Communication Skills\n• Project Management Basics\n\nVisit the **Training** section to enroll in new programs or continue your current training.";
-    }
+    container.appendChild(wrap);
+    scrollChatToBottom();
+}
 
-    if (q.includes('performance') || q.includes('evaluation') || q.includes('rating')) {
-        return "Your performance summary:\n\n**Latest Rating:** 4.8 / 5.0 (Jan-Jun 2025)\n**Average Rating:** 4.7 / 5.0\n**Total Evaluations:** 4\n\n**Active Goals:**\n• Complete Advanced Leadership Training (65%)\n• Reduce Processing Time by 20% (45%)\n• Complete Safety Certification (30%)\n\nView detailed reports in the **Performance** section.";
-    }
 
-    if (q.includes('contact') || q.includes('hr') || q.includes('help')) {
-        return "**HR Contact Information:**\n\n📧 Email: hr@primehris.gov.ph\n📞 Phone: (123) 456-7890\n🏢 Office: Municipal Hall, 2nd Floor\n⏰ Hours: Mon-Fri, 8:00 AM - 5:00 PM\n\nFor urgent concerns, you can also visit the HR office directly or send a message through the system.";
-    }
+/* The conversation is stored in `ai_conversations` (see ChatbotController), and
+   it keeps accumulating as the employee moves between pages — the assistant
+   resolves "his"/"that one" against it. Re-rendering only the greeting would
+   hide the turns those pronouns refer to, so restore them, exactly as the admin
+   chathead does.
 
-    return `I'm processing your request about "${question}". I can help you with:\n\n• **Leave requests** and balance inquiries\n• **Payslip** and payroll information\n• **Attendance** and DTR records\n• **Training programs** and enrollment\n• **Performance** evaluations and goals\n• **HR contact** information\n\nPlease ask me anything about these topics!`;
+   It used to be kept in the Laravel session, which logout discards, so an
+   employee came back the next morning to an empty panel and an assistant that
+   had forgotten the thread. */
+function restoreChatHistory() {
+    fetch('/chatbot/history', {
+        headers: { 'Accept': 'application/json' },
+        credentials: 'same-origin',
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== 'success' || !Array.isArray(data.history) || data.history.length === 0) {
+                return;
+            }
+
+            const container = document.getElementById('chatbot-messages');
+            container.innerHTML = '';
+            data.history.forEach(function (turn) {
+                addPermanentMessage(turn.content, turn.role === 'user', turn.created_at);
+            });
+        })
+        .catch(function () { /* Keep the greeting; a lost history is not an error worth showing. */ });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -341,6 +437,8 @@ document.addEventListener('DOMContentLoaded', function () {
         greeting.innerHTML = formatChatMessage(CHAT_GREETING)
             + '<span class="chat-ts">' + getPermanentTimestamp() + '</span>';
     }
+
+    restoreChatHistory();
 
     const input = document.getElementById('chat-input');
     input.addEventListener('input', function () {

@@ -460,6 +460,17 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
     letter-spacing: .6px; text-transform: uppercase; color: #a5a2c2;
 }
 .chat-suggest { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Suggested follow-up questions on the newest turn. The employee chathead now
+   answers from the same AiQueryService as the AI Assistant page, so it receives
+   the same follow_ups the full page renders. */
+.chat-followups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-left: 34px;
+    margin-top: 8px;
+}
 .chatbot-quick-btn {
     padding: 5px 11px; border-radius: 999px;
     border: 1px solid #e2e0f5; background: #fff;

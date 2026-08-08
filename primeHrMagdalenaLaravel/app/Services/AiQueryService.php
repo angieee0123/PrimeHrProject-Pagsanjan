@@ -425,24 +425,38 @@ class AiQueryService
      */
     private function wantsPolicy(string $q): bool
     {
-        // A question about the caller's own figures is not a policy question,
-        // even though it names the same nouns — "how much leave did my late
-        // cost" is computed from their log, not quoted from the rulebook.
-        if ($this->isSelfReferential($q)) {
-            return false;
-        }
-
-        return (bool) preg_match(
+        // Subjects whose answer is the rulebook however the asker phrases it.
+        // "What leave types can I file?" reads as self-referential — "leave …
+        // can I" — but there is no personal figure in it; the answer is the
+        // configured list either way. Guarding these behind isSelfReferential()
+        // sent that exact question to the stored-file rule, which matched the
+        // verb "file" and replied with a document search.
+        if (preg_match(
             '/\bleave\s+types?\b|\btypes?\s+of\s+leave\b|\bkinds?\s+of\s+leave\b'
             . '|\buri\s+ng\s+leave\b|\banong\s+(?:mga\s+)?leave\b'
             . '|\b(?:leave|credits?|vl|sl)\b.{0,20}\baccru\w+'
             . '|\baccru\w+.{0,20}\b(?:leave|credits?|vl|sl)\b'
             . '|\bgrace\s*period\b'
             . '|\blwop\b|\bleave\s+without\s+pay\b'
-            . '|\b(?:late|undertime)\b.{0,30}\b(?:deduct\w+|comput\w+|calculat\w+)\b'
-            . '|\b(?:deduct\w+|comput\w+|calculat\w+)\b.{0,30}\b(?:late|undertime)\b'
             . '|\bworking\s+hours?\b|\boras\s+ng\s+trabaho\b'
             . '|\b(?:can|may|pwede|entitled\s+to)\b.{0,40}\b(?:file|avail|apply\s+for)\b.{0,25}\bleave\b/',
+            $q
+        )) {
+            return true;
+        }
+
+        // Deduction *mechanics* are policy, but the same words asked about
+        // oneself are a computation: "how is late deducted" is the rulebook,
+        // "how much did my late cost" is a sum over this employee's own
+        // accredited-hours log, which EmployeeChatbotService performs. Only the
+        // impersonal form belongs here.
+        if ($this->isSelfReferential($q)) {
+            return false;
+        }
+
+        return (bool) preg_match(
+            '/\b(?:late|undertime)\b.{0,30}\b(?:deduct\w+|comput\w+|calculat\w+)\b'
+            . '|\b(?:deduct\w+|comput\w+|calculat\w+)\b.{0,30}\b(?:late|undertime)\b/',
             $q
         );
     }

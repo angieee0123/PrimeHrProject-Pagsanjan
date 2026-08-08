@@ -367,7 +367,44 @@ class AiQueryRoutingTest extends TestCase
     }
 
     /**
-     * A file search renders each row as a clickable card, so attaching a table
+     * Policy questions belong to every role, and must beat the file-noun rule.
+     *
+     * "What leave types can I file?" is one of the chathead's own suggestion
+     * chips. It reads as self-referential ("leave … can I"), which used to
+     * suppress the policy rule and drop the question onto the stored-file rule,
+     * where the verb "file" answered it with a document search.
+     */
+    #[Test]
+    public function policy_questions_beat_the_file_noun_rule(): void
+    {
+        foreach ([
+            'What leave types can I file?',
+            'can I file bereavement leave?',
+            'anong mga uri ng leave ang pwede kong i-file?',
+        ] as $question) {
+            $this->assertSame('how_to', $this->intentOf($question, ['employee'], 5), $question);
+        }
+    }
+
+    /**
+     * The counterpart: a question about the asker's own figures is a
+     * computation over their records, not a quote from the rulebook.
+     */
+    #[Test]
+    public function personal_deduction_questions_stay_self_service(): void
+    {
+        $this->assertSame(
+            'self_service',
+            $this->intentOf('how much leave did my late cost this year?', ['employee'], 5)
+        );
+        $this->assertSame(
+            'how_to',
+            $this->intentOf('how is late deduction calculated?', ['employee'], 5)
+        );
+    }
+
+    /**
+     * A file search renders each row as a clickable table, so attaching a table
      * of the same rows repeats every file name, type, size, and date in a
      * wider, less readable form directly beneath the cards.
      */

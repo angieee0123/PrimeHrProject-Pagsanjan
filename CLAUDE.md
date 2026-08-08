@@ -274,6 +274,7 @@ question
 |---|---|
 | `AiQueryService` | Orchestrator: intent detection, routing, audit logging |
 | `AiAccessPolicy` | **The single source of truth for permissions.** All scoping goes through it |
+| `AiConversationStore` | **Where a thread is kept.** Conversation lookup, prompt history, and storing/replaying a turn's attachments — shared by the full page and both chatheads |
 | `HrPolicyFactsService` | **The single source of truth for HR rules the assistant states.** Reads them from the live config |
 | `AiChatService` | LLM calls. Resolves provider per-user → org default → `.env` Groq |
 | `EmployeeSearchService` | Employee / department / hire-date lookups |
@@ -305,6 +306,75 @@ GET    /api/ai/file/{source}/{ref}
 
 Both surfaces call the same `AiQueryService`, so permissions and audit logging
 cannot drift between them.
+
+### The chatheads run the same brain as the full page
+
+There are three chat surfaces and they must not diverge:
+
+| Surface | Path |
+|---|---|
+| Full-page AI Assistant | `aiAssistant.js` → `AiAssistantController` → `AiQueryService` |
+| Admin chathead (floating) | `adminChatbot.js` → `/chatbot/chat` → `ChatbotController` → `AiQueryService` |
+| Employee chathead (floating) | `employeeChatbot.blade.php` → `/chatbot/chat` → same |
+
+The employee chathead **used to answer from a hard-coded `if/else` that never
+contacted the server** — it told every employee their vacation balance was 12.5
+days, quoted a payslip for "Jun 16-30, 2025", and reported a 4.8/5.0 performance
+rating from a table this schema does not have. It shipped on ten employee pages,
+and none of the grounding work above reached it because it ran no server code at
+all. It now `fetch`es `/chatbot/chat` like the admin one. **Neither widget may
+ever answer from a local string** — an invented balance is worse than no answer,
+so a failed request says the records could not be reached.
+
+`ChatbotController` returns the whole answer (`files`, `charts`, `follow_ups`),
+not just `response`: both widgets render file cards and follow-up chips, so the
+same question cannot give a visibly poorer answer in the chathead than on the
+page.
+
+Suggestion chips must name questions the system can answer. "Performance" and
+"HR contact" were offered while no performance table and no HR-contact record
+exist; they are gone.
+
+### One conversation store, three surfaces
+
+`AiConversationStore` owns where a thread is kept and what survives being kept
+there. Both `AiAssistantController` and `ChatbotController` go through it, so
+the two surfaces cannot drift on what a saved answer keeps or on who may read
+it back.
+
+The chatheads used to keep their thread in the **Laravel session**, which meant
+it did not survive `AuthController`'s `session()->invalidate()` on logout, the
+120-minute `SESSION_LIFETIME`, or a different browser — the widget looked like
+it remembered right up until it silently did not. Session storage also held
+`role`/`content` only, so a replayed turn dropped the file cards and tables the
+answer originally carried, and nothing asked in a widget was findable from the
+full page's history or search. Chathead turns are now rows in
+`ai_conversations` / `ai_messages` like everything else.
+
+- **A chathead question continues the caller's newest conversation**
+  (`continueLatestOrStart()`), so the widget and the full page are one thread.
+  Note the full page still lands on its welcome screen and forks a new
+  conversation on refresh — so what the chathead continues is whatever was last
+  used, which after a page refresh is that refresh's new thread.
+- **"Clear conversation" starts a new thread; it never deletes.** The thread is
+  shared with the full page, so deleting would destroy history the user did not
+  ask to lose. A session flag (`chatbot_start_new_thread`) makes the *next*
+  question open a fresh conversation; losing that flag with the session is
+  harmless. Both widgets' confirmation sheets say this — they used to promise a
+  removal that no longer happens.
+- **`history()` re-authorises on read** through `replayAttachments()`, the same
+  as the full page: a turn saved under org-wide scope is withheld from an
+  account that has since narrowed.
+- **`history()` must `reorder()` before `orderByDesc('id')`.** The `messages()`
+  relation sorts oldest-first, so an appended `latest()` becomes a *secondary*
+  key that never takes effect — the limit then took the oldest turns and
+  `reverse()` handed the model the start of the thread, backwards, as its
+  "recent" context. That bug shipped in the full page before the extraction.
+- The relation itself breaks `created_at` ties with `id`, because a question and
+  its answer are written in the same second and would otherwise replay with the
+  assistant speaking first.
+
+`tests/Unit/AiConversationStoreTest.php` pins all of this.
 
 ### LLM configuration
 
