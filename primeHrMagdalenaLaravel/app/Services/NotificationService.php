@@ -4,9 +4,19 @@ namespace App\Services;
 
 use App\Models\Notification;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
+    protected static function createNotification(array $attributes, ?string $audience = null): Notification
+    {
+        if ($audience !== null && Notification::hasAudienceColumn()) {
+            $attributes['audience'] = $audience;
+        }
+
+        return Notification::create($attributes);
+    }
+
     /**
      * Create a leave request notification for admin
      */
@@ -23,16 +33,15 @@ class NotificationService
         foreach ($admins as $admin) {
             if (!$admin->wantsNotification('leave_requests')) continue;
 
-            Notification::create([
+            self::createNotification([
                 'user_id' => $admin->id,
                 'type' => 'leave_request',
-                'audience' => 'admin',
                 'title' => 'New Leave Request',
                 'message' => "{$employeeName} submitted a {$leaveApplication->leaveType->leave_name} request for {$leaveApplication->number_of_days} day(s).",
                 'link' => route('admin.leave', ['highlight' => $leaveApplication->id]),
                 'related_id' => $leaveApplication->id,
                 'related_type' => 'App\Models\LeaveApplication',
-            ]);
+            ], 'admin');
         }
     }
 
@@ -44,7 +53,7 @@ class NotificationService
         $employee = $leaveApplication->employee;
         
         if (!$employee->user) {
-            \Log::warning('Cannot send notification: Employee has no user account', [
+            Log::warning('Cannot send notification: Employee has no user account', [
                 'employee_id' => $employee->id
             ]);
             return;
@@ -54,20 +63,19 @@ class NotificationService
         $message = "Your {$leaveApplication->leaveType->leave_name} request has been {$statusText}.";
         
         try {
-            Notification::create([
+            self::createNotification([
                 'user_id' => $employee->user->id,
                 'type' => 'leave_request',
-                'audience' => 'employee',
                 'title' => "Leave Request {$statusText}",
                 'message' => $message,
                 'link' => route('employee.leave', ['highlight' => $leaveApplication->id]),
                 'related_id' => $leaveApplication->id,
                 'related_type' => 'App\Models\LeaveApplication',
-            ]);
+            ], 'employee');
             
-            \Log::info('Notification created successfully', ['user_id' => $employee->user->id]);
+            Log::info('Notification created successfully', ['user_id' => $employee->user->id]);
         } catch (\Exception $e) {
-            \Log::error('Failed to create notification: ' . $e->getMessage());
+            Log::error('Failed to create notification: ' . $e->getMessage());
         }
     }
 
@@ -86,16 +94,15 @@ class NotificationService
         foreach ($admins as $admin) {
             if (!$admin->wantsNotification('training_submissions')) continue;
 
-            Notification::create([
+            self::createNotification([
                 'user_id' => $admin->id,
                 'type' => 'training',
-                'audience' => 'admin',
                 'title' => 'New Training Submission',
                 'message' => "{$employeeName} submitted a training record: {$training->title}",
                 'link' => route('admin.training'),
                 'related_id' => $training->id,
                 'related_type' => 'App\Models\Training',
-            ]);
+            ], 'admin');
         }
     }
 
@@ -111,16 +118,15 @@ class NotificationService
         $statusText = $status === 'verified' ? 'Verified' : 'Rejected';
         $message = "Your training record '{$training->title}' has been {$statusText}.";
         
-        Notification::create([
+        self::createNotification([
             'user_id' => $employee->user->id,
             'type' => 'training',
-            'audience' => 'employee',
             'title' => "Training {$statusText}",
             'message' => $message,
             'link' => route('employee.training'),
             'related_id' => $training->id,
             'related_type' => 'App\Models\Training',
-        ]);
+        ], 'employee');
     }
 
     /**
@@ -141,14 +147,13 @@ class NotificationService
         }
         
         foreach ($users as $user) {
-            Notification::create([
+            self::createNotification([
                 'user_id' => $user->id,
                 'type' => 'payroll',
-                'audience' => 'employee',
                 'title' => 'Payroll Available',
                 'message' => "Your payslip for {$period} is now available.",
                 'link' => route('employee.payslip'),
-            ]);
+            ], 'employee');
         }
     }
 
@@ -161,16 +166,15 @@ class NotificationService
         
         if (!$employee->user) return;
         
-        Notification::create([
+        self::createNotification([
             'user_id' => $employee->user->id,
             'type' => 'attendance',
-            'audience' => 'employee',
             'title' => 'Attendance Corrected',
             'message' => "Your attendance record for " . date('M d, Y', strtotime($attendance->date)) . " has been corrected by HR.",
             'link' => route('employee.attendance'),
             'related_id' => $attendance->id,
             'related_type' => 'App\Models\Attendance',
-        ]);
+        ], 'employee');
     }
 
     /**
@@ -188,13 +192,12 @@ class NotificationService
         $audience = in_array($role, ['admin', 'hr'], true) ? 'admin' : 'system';
 
         foreach ($users as $user) {
-            Notification::create([
+            self::createNotification([
                 'user_id' => $user->id,
                 'type' => 'system',
-                'audience' => $audience,
                 'title' => $title,
                 'message' => $message,
-            ]);
+            ], $audience);
         }
     }
 
@@ -235,16 +238,15 @@ class NotificationService
         foreach ($admins as $admin) {
             if (!$admin->wantsNotification('employee_requests')) continue;
 
-            Notification::create([
+            self::createNotification([
                 'user_id' => $admin->id,
                 'type' => 'request',
-                'audience' => 'admin',
                 'title' => 'Payslip Request',
                 'message' => "{$employeeName} requested a payslip: {$request->description}",
                 'link' => route('admin.requests'),
                 'related_id' => $request->id,
                 'related_type' => 'App\\Models\\EmployeeRequest',
-            ]);
+            ], 'admin');
         }
     }
 
@@ -263,16 +265,15 @@ class NotificationService
         foreach ($admins as $admin) {
             if (!$admin->wantsNotification('employee_requests')) continue;
 
-            Notification::create([
+            self::createNotification([
                 'user_id' => $admin->id,
                 'type' => 'request',
-                'audience' => 'admin',
                 'title' => 'Deduction Inquiry',
                 'message' => "{$employeeName} has a question about deductions: {$request->description}",
                 'link' => route('admin.requests'),
                 'related_id' => $request->id,
                 'related_type' => 'App\\Models\\EmployeeRequest',
-            ]);
+            ], 'admin');
         }
     }
 
@@ -291,16 +292,15 @@ class NotificationService
         foreach ($admins as $admin) {
             if (!$admin->wantsNotification('employee_requests')) continue;
 
-            Notification::create([
+            self::createNotification([
                 'user_id' => $admin->id,
                 'type' => 'request',
-                'audience' => 'admin',
                 'title' => $request->request_type_name,
                 'message' => "{$employeeName} submitted a request: {$request->title}",
                 'link' => route('admin.requests'),
                 'related_id' => $request->id,
                 'related_type' => 'App\\Models\\EmployeeRequest',
-            ]);
+            ], 'admin');
         }
     }
 
@@ -317,16 +317,15 @@ class NotificationService
         $filerName = $filer->first_name . ' ' . $filer->last_name;
         $dates = $travelOrder->formatted_dates;
 
-        Notification::create([
+        self::createNotification([
             'user_id' => $companionEmployee->user->id,
             'type' => 'travel_order',
-            'audience' => 'employee',
             'title' => 'Travel Order Companion Request',
             'message' => "{$filerName} included you as a companion on travel order {$travelOrder->order_number} to {$travelOrder->destination} ({$dates}). Please accept or reject the request.",
             'link' => route('employee.travelorder', ['highlight' => $travelOrder->id]),
             'related_id' => $travelOrder->id,
             'related_type' => 'App\\Models\\TravelOrder',
-        ]);
+        ], 'employee');
     }
 
     /**
@@ -346,16 +345,15 @@ class NotificationService
             $message .= ' All companions have responded — you can now forward it to HR for approval.';
         }
 
-        Notification::create([
+        self::createNotification([
             'user_id' => $filer->user->id,
             'type' => 'travel_order',
-            'audience' => 'employee',
             'title' => "Companion Request {$statusText}",
             'message' => $message,
             'link' => route('employee.travelorder', ['highlight' => $travelOrder->id]),
             'related_id' => $travelOrder->id,
             'related_type' => 'App\\Models\\TravelOrder',
-        ]);
+        ], 'employee');
     }
 
     /**
@@ -375,16 +373,15 @@ class NotificationService
         foreach ($admins as $admin) {
             if (!$admin->wantsNotification('travel_orders')) continue;
 
-            Notification::create([
+            self::createNotification([
                 'user_id' => $admin->id,
                 'type' => 'travel_order',
-                'audience' => 'admin',
                 'title' => 'New Travel Order Request',
                 'message' => "{$filerName} submitted travel order {$travelOrder->order_number} to {$travelOrder->destination}{$companionText}.",
                 'link' => route('admin.travelorder', ['highlight' => $travelOrder->id]),
                 'related_id' => $travelOrder->id,
                 'related_type' => 'App\\Models\\TravelOrder',
-            ]);
+            ], 'admin');
         }
     }
 
@@ -417,16 +414,15 @@ class NotificationService
         }
 
         foreach ($recipients as $recipient) {
-            Notification::create([
+            self::createNotification([
                 'user_id' => $recipient['user_id'],
                 'type' => 'travel_order',
-                'audience' => 'employee',
                 'title' => "Travel Order {$statusText}",
                 'message' => $recipient['message'],
                 'link' => route('employee.travelorder', ['highlight' => $travelOrder->id]),
                 'related_id' => $travelOrder->id,
                 'related_type' => 'App\\Models\\TravelOrder',
-            ]);
+            ], 'employee');
         }
     }
 
@@ -446,15 +442,14 @@ class NotificationService
             $message .= " Response: {$request->admin_response}";
         }
         
-        Notification::create([
+        self::createNotification([
             'user_id' => $employee->user->id,
             'type' => 'request',
-            'audience' => 'employee',
             'title' => "Request {$statusText}",
             'message' => $message,
             'link' => route('employee.requests'),
             'related_id' => $request->id,
             'related_type' => 'App\\Models\\EmployeeRequest',
-        ]);
+        ], 'employee');
     }
 }

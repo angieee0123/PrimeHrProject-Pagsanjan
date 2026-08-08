@@ -243,14 +243,19 @@ class EmployeeTravelOrderController extends Controller
         // Let invited companions know the trip was called off before deleting
         foreach ($travelOrder->companions()->with('employee.user')->get() as $companion) {
             if ($companion->employee && $companion->employee->user) {
-                Notification::create([
+                $notificationData = [
                     'user_id' => $companion->employee->user->id,
                     'type' => 'travel_order',
-                    'audience' => 'employee',
                     'title' => 'Travel Order Cancelled',
                     'message' => "Travel order {$travelOrder->order_number} to {$travelOrder->destination}, where you were invited as a companion, has been cancelled by the filer.",
                     'link' => route('employee.travelorder'),
-                ]);
+                ];
+
+                if (Notification::hasAudienceColumn()) {
+                    $notificationData['audience'] = 'employee';
+                }
+
+                Notification::create($notificationData);
             }
         }
 

@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class Notification extends Model
 {
+    protected static ?bool $hasAudienceColumn = null;
+
     protected $fillable = [
         'user_id',
         'type',
@@ -55,6 +58,10 @@ class Notification extends Model
 
     public function scopeForAdmin($query)
     {
+        if (!self::hasAudienceColumn()) {
+            return $query;
+        }
+
         return $query->whereIn('audience', ['admin', 'system']);
     }
 
@@ -64,7 +71,20 @@ class Notification extends Model
      */
     public function scopeForEmployee($query)
     {
+        if (!self::hasAudienceColumn()) {
+            return $query;
+        }
+
         return $query->whereIn('audience', ['employee', 'system']);
+    }
+
+    public static function hasAudienceColumn(): bool
+    {
+        if (self::$hasAudienceColumn === null) {
+            self::$hasAudienceColumn = Schema::hasColumn('notifications', 'audience');
+        }
+
+        return self::$hasAudienceColumn;
     }
 
     public function getTimeAgoAttribute()
