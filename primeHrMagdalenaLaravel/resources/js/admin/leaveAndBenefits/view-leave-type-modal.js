@@ -30,7 +30,7 @@ window.viewLeaveType = function(code) {
                     configContainer.appendChild(badge);
                 });
             } else {
-                configContainer.innerHTML = '<span style="color: #9ca3af; font-size: 13px;">No special configuration</span>';
+                configContainer.innerHTML = '<span style="color: var(--theme-neutral-600); font-size: 13px;">No special configuration</span>';
             }
 
             const attachmentGroup = document.getElementById('viewAttachmentInfoGroup');

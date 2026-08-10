@@ -1,4 +1,7 @@
 import './bootstrap';
+// The app's own confirm dialog, replacing window.confirm() everywhere.
+// Loaded here because every layout loads app.js and any page may ask.
+import './shared/confirmDialog.js';
 
 /* ── Shared table row action menu (⋮) ───────────────────────────────────────
    One implementation for every table whose row has two or more actions, on

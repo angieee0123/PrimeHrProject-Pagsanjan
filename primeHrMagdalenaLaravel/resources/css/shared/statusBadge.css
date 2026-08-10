@@ -1,0 +1,104 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Status badges — one definition for every status the app shows.
+
+   These were spread across four stylesheets that each knew a different
+   subset. app.css defined `processed / pending / on-hold`; admin.css
+   defined `processed|active / pending / rejected|inactive` with different
+   colours; adminAttendance.css and adminDashboard.css re-stated two of them
+   again in raw hex. Meanwhile `cancelled` and `approved` were used in views
+   but defined nowhere, so those statuses rendered as bare uppercase text
+   with no badge at all, and a `class="badge-status"` filled in by JS had no
+   resting appearance either.
+
+   Everything below is expressed in the generated semantic scale, so badges
+   follow the active palette and keep their meaning: green reads approved
+   under every theme because SEMANTIC_HUES are fixed.
+
+   Vocabulary — the intention-revealing names are the ones to use in new
+   markup; the rest are aliases kept because ~85 existing call sites use
+   them and renaming them all would be churn without benefit.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    line-height: 1.5;
+    white-space: nowrap;
+    /* Neutral resting state. A badge whose class is set by JS after load —
+       there are 13 of those — used to render as unstyled text until the
+       script ran, or permanently if it set no modifier. */
+    background: var(--theme-neutral-100);
+    color: var(--theme-text-mid);
+    border-color: var(--theme-neutral-300);
+}
+
+.badge-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: currentColor;
+}
+
+/* ── Approved / active / done ── */
+.badge-status.is-success,
+.badge-status.processed,
+.badge-status.approved,
+.badge-status.active,
+.badge-status.completed {
+    background: var(--theme-success-subtle);
+    color: var(--theme-success-emphasis);
+    border-color: var(--theme-success-border);
+}
+
+/* ── Waiting on somebody ── */
+.badge-status.is-warning,
+.badge-status.pending,
+.badge-status.scheduled {
+    background: var(--theme-warning-subtle);
+    color: var(--theme-warning-emphasis);
+    border-color: var(--theme-warning-border);
+}
+
+/* ── Refused or failed. `on-hold` is the legacy name for this. ── */
+.badge-status.is-danger,
+.badge-status.rejected,
+.badge-status.on-hold,
+.badge-status.overdue {
+    background: var(--theme-danger-subtle);
+    color: var(--theme-danger-emphasis);
+    border-color: var(--theme-danger-border);
+}
+
+/* ── Withdrawn, not set, not applicable: no fault, no action. These were
+      the ones rendering with no badge at all. ── */
+.badge-status.is-neutral,
+.badge-status.cancelled,
+.badge-status.inactive,
+.badge-status.not-set {
+    background: var(--theme-neutral-100);
+    color: var(--theme-text-mid);
+    border-color: var(--theme-neutral-300);
+}
+
+/* ── Informational classification rather than a state ── */
+.badge-status.is-info,
+.badge-status.info {
+    background: var(--theme-info-subtle);
+    color: var(--theme-info-emphasis);
+    border-color: var(--theme-info-border);
+}
+
+/* A badge that is only a label — a category, a type — carries no dot,
+   because the dot reads as "state". */
+.badge-status.is-label::before,
+.badge-status.is-info::before { display: none; }

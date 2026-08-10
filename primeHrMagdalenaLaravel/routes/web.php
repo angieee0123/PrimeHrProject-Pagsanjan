@@ -158,10 +158,14 @@ Route::post('/admin/schedules/assign', [\App\Http\Controllers\ScheduleController
 Route::post('/admin/schedules/bulk-assign', [\App\Http\Controllers\ScheduleController::class, 'bulkAssign'])->middleware('auth')->name('admin.schedules.bulk-assign');
 Route::post('/admin/schedules/check-overlap', [\App\Http\Controllers\ScheduleController::class, 'checkOverlap'])->middleware('auth')->name('admin.schedules.check-overlap');
 Route::get('/admin/schedules/employee/{employeeId}', [\App\Http\Controllers\ScheduleController::class, 'forEmployee'])->middleware('auth')->name('admin.schedules.employee');
+// Literal segments must be declared before the `{id}` wildcard: Laravel
+// matches in declaration order, so with `export` below it "/admin/schedules/
+// export" resolved to show('export') → Schedule::findOrFail('export') → 404,
+// which is what the Work Schedules Export button was hitting.
+Route::get('/admin/schedules/export', [\App\Http\Controllers\ScheduleController::class, 'export'])->middleware('auth')->name('admin.schedules.export');
 Route::get('/admin/schedules/{id}', [\App\Http\Controllers\ScheduleController::class, 'show'])->middleware('auth')->name('admin.schedules.show');
 Route::delete('/admin/schedules/{id}/delete', [\App\Http\Controllers\ScheduleController::class, 'destroy'])->middleware('auth')->name('admin.schedules.delete');
 Route::delete('/admin/schedules/{id}/remove', [\App\Http\Controllers\ScheduleController::class, 'remove'])->middleware('auth')->name('admin.schedules.remove');
-Route::get('/admin/schedules/export', [\App\Http\Controllers\ScheduleController::class, 'export'])->middleware('auth')->name('admin.schedules.export');
 
 Route::post('/admin/personnel/{id}/status', function (\Illuminate\Http\Request $request, $id) {
     $employee = \App\Models\Employee::findOrFail($id);
@@ -440,11 +444,16 @@ Route::post('/admin/settings/notifications', [\App\Http\Controllers\AdminSetting
 Route::post('/admin/settings/ai', [\App\Http\Controllers\AdminSettingsController::class, 'updateAiSettings'])->middleware('auth')->name('admin.settings.ai');
 Route::post('/admin/settings/photo', [\App\Http\Controllers\AdminSettingsController::class, 'updatePhoto'])->middleware('auth')->name('admin.settings.photo');
 Route::post('/admin/settings/system-ai', [\App\Http\Controllers\AdminSettingsController::class, 'updateSystemAiSettings'])->middleware('auth')->name('admin.settings.systemAi');
-Route::post('/admin/settings/theme', [\App\Http\Controllers\AdminSettingsController::class, 'updateTheme'])->middleware('auth')->name('admin.settings.theme');
-Route::get('/admin/settings/theme-css', function (\Illuminate\Http\Request $request) {
-    $theme = $request->query('theme', 'default');
-    return response(\App\Services\SystemTheme::toCss($theme), 200)->header('Content-Type', 'text/css');
-})->middleware('auth')->name('admin.settings.theme-css');
+// Appearance — personal palette for every signed-in user, organisation
+// palette for administrators. The global routes are separate endpoints so
+// the authorisation difference is visible here, not buried in a branch.
+Route::middleware('auth')->group(function () {
+    Route::post('/settings/appearance/preview', [\App\Http\Controllers\AppearanceController::class, 'preview'])->name('appearance.preview');
+    Route::post('/settings/appearance', [\App\Http\Controllers\AppearanceController::class, 'updatePersonal'])->name('appearance.update');
+    Route::delete('/settings/appearance', [\App\Http\Controllers\AppearanceController::class, 'resetPersonal'])->name('appearance.reset');
+    Route::post('/admin/settings/appearance/global', [\App\Http\Controllers\AppearanceController::class, 'updateGlobal'])->name('appearance.global.update');
+    Route::delete('/admin/settings/appearance/global', [\App\Http\Controllers\AppearanceController::class, 'resetGlobal'])->name('appearance.global.reset');
+});
 
 // Chatbot API
 Route::post('/chatbot/chat', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware(['auth', 'throttle:20,1'])->name('chatbot.chat');
@@ -539,7 +548,9 @@ Route::post('/admin/deductions/schedules/update', [\App\Http\Controllers\Deducti
 
 // Loan Type Management Routes
 Route::post('/admin/deductions/loan-types/store', [\App\Http\Controllers\LoanTypeController::class, 'store'])->middleware('auth')->name('admin.deductions.loan-types.store');
-Route::get('/admin/deductions/types/{code}', [\App\Http\Controllers\DeductionController::class, 'showType'])->middleware('auth')->name('admin.deductions.types.show');
+// {identifier}: the Deduction Types tab passes a code, the Loan Types tab an
+// id. See DeductionController::showType().
+Route::get('/admin/deductions/types/{identifier}', [\App\Http\Controllers\DeductionController::class, 'showType'])->middleware('auth')->name('admin.deductions.types.show');
 Route::put('/admin/deductions/loan-types/{id}', [\App\Http\Controllers\LoanTypeController::class, 'update'])->middleware('auth')->name('admin.deductions.loan-types.update');
 Route::delete('/admin/deductions/loan-types/{id}', [\App\Http\Controllers\LoanTypeController::class, 'destroy'])->middleware('auth')->name('admin.deductions.loan-types.delete');
 

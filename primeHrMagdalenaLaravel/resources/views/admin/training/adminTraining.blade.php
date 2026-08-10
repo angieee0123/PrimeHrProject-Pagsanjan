@@ -216,7 +216,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" style="text-align:center;padding:40px;color:#8f8daf;">
+                    <td colspan="8" style="text-align:center;padding:40px;color:var(--gp-text-soft);">
                         No training submissions yet.
                     </td>
                 </tr>
@@ -421,7 +421,7 @@
             if (!emptyRow) {
                 emptyRow = document.createElement('tr');
                 emptyRow.id = 'adminTrainingNoResults';
-                emptyRow.innerHTML = '<td colspan="8" style="text-align:center;padding:40px;color:#56547a;">No records found matching your search.</td>';
+                emptyRow.innerHTML = '<td colspan="8" style="text-align:center;padding:40px;color:var(--gp-text-mid);">No records found matching your search.</td>';
                 document.getElementById('adminTrainingBody').appendChild(emptyRow);
             }
         } else if (emptyRow) {
@@ -444,13 +444,13 @@
         if (page > 1) html += '<button class="page-btn" onclick="goToPage(' + (page - 1) + ')">‹</button>';
         if (startPage > 1) {
             html += '<button class="page-btn" onclick="goToPage(1)">1</button>';
-            if (startPage > 2) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
+            if (startPage > 2) html += '<span style="padding:0 8px;color:var(--gp-text-soft);">...</span>';
         }
         for (let i = startPage; i <= endPage; i++) {
             html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
         }
         if (endPage < totalPages) {
-            if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
+            if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:var(--gp-text-soft);">...</span>';
             html += '<button class="page-btn" onclick="goToPage(' + totalPages + ')">' + totalPages + '</button>';
         }
         if (page < totalPages) html += '<button class="page-btn" onclick="goToPage(' + (page + 1) + ')">›</button>';

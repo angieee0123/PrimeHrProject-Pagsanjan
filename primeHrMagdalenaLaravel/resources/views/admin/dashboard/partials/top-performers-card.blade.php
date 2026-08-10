@@ -39,8 +39,8 @@
                         </div>
                         <span class="enterprise-metric">{{ $emp['rate'] }}%</span>
                     </div>
-                    <div style="width:100%;height:6px;background:#eef2f6;border-radius:3px;overflow:hidden">
-                        <div style="width:{{ $emp['rate'] }}%;height:100%;background:linear-gradient(90deg,#150c63,#0b044d);border-radius:3px;transition:width 0.3s ease"></div>
+                    <div style="width:100%;height:6px;background:var(--theme-neutral-200);border-radius:3px;overflow:hidden">
+                        <div style="width:{{ $emp['rate'] }}%;height:100%;background:linear-gradient(90deg,var(--gp-pri-2),var(--gp-pri));border-radius:3px;transition:width 0.3s ease"></div>
                     </div>
                 </div>
             </div>
@@ -65,8 +65,8 @@
                         </div>
                         <span class="enterprise-metric">{{ $emp['rate'] }}%</span>
                     </div>
-                    <div style="width:100%;height:6px;background:#eef2f6;border-radius:3px;overflow:hidden">
-                        <div style="width:{{ $emp['rate'] }}%;height:100%;background:linear-gradient(90deg,#150c63,#0b044d);border-radius:3px;transition:width 0.3s ease"></div>
+                    <div style="width:100%;height:6px;background:var(--theme-neutral-200);border-radius:3px;overflow:hidden">
+                        <div style="width:{{ $emp['rate'] }}%;height:100%;background:linear-gradient(90deg,var(--gp-pri-2),var(--gp-pri));border-radius:3px;transition:width 0.3s ease"></div>
                     </div>
                 </div>
             </div>

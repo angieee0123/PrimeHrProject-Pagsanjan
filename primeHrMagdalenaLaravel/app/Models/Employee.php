@@ -84,6 +84,27 @@ class Employee extends Model
         return $this->hasMany(Schedule::class);
     }
 
+    /**
+     * The schedule in force today, or null.
+     *
+     * `schedule()` is a hasMany — an employee accumulates dated schedule
+     * rows — so "their schedule" is always a question about a date. The
+     * Work Schedules table and its CSV export were each answering it their
+     * own way, and the export's answer (`$employee->schedule`, a Collection)
+     * was not an answer at all: reading `->am_in` off it threw, and the
+     * Collection being permanently truthy meant every row reported a
+     * schedule as "Assigned" whether one existed or not.
+     */
+    public function currentSchedule(): ?Schedule
+    {
+        $today = now()->format('Y-m-d');
+
+        return $this->schedule
+            ->where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->first();
+    }
+
     public function leaveBalances()
     {
         return $this->hasMany(LeaveBalance::class);

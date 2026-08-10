@@ -8,7 +8,7 @@
             <!-- Leave Type Selection -->
             <div class="form-group" style="grid-column: span 2;">
                 <label class="form-label">
-                    Leave Type <span style="color: #8e1e18;">*</span>
+                    Leave Type <span style="color: var(--theme-danger);">*</span>
                 </label>
                 <select name="leave_type_id" class="form-input" required>
                     <option value="">Select Leave Type</option>
@@ -26,7 +26,7 @@
             <!-- Accrual Frequency -->
             <div class="form-group">
                 <label class="form-label">
-                    Accrual Frequency <span style="color: #8e1e18;">*</span>
+                    Accrual Frequency <span style="color: var(--theme-danger);">*</span>
                 </label>
                 <select name="accrual_frequency" class="form-input" required onchange="updateAccrualHint()">
                     <option value="daily">Daily</option>
@@ -39,7 +39,7 @@
             <!-- Days of Service Required -->
             <div class="form-group">
                 <label class="form-label">
-                    Days of Service Required <span style="color: #8e1e18;">*</span>
+                    Days of Service Required <span style="color: var(--theme-danger);">*</span>
                 </label>
                 <input type="number" name="days_of_service_required" class="form-input" step="0.01" min="0.01" value="1.00" required>
                 <small class="form-hint" id="serviceHint">Service period to earn credits</small>
@@ -48,7 +48,7 @@
             <!-- Credits Earned Per Period -->
             <div class="form-group" style="grid-column: span 2;">
                 <label class="form-label">
-                    Credits Earned Per Period <span style="color: #8e1e18;">*</span>
+                    Credits Earned Per Period <span style="color: var(--theme-danger);">*</span>
                 </label>
                 <input type="number" name="credits_earned_per_period" class="form-input" step="0.0001" min="0.0001" value="0.0417" required>
                 <small class="form-hint" id="creditsHint">
@@ -59,7 +59,7 @@
             <!-- Effective Date -->
             <div class="form-group">
                 <label class="form-label">
-                    Effective Date <span style="color: #8e1e18;">*</span>
+                    Effective Date <span style="color: var(--theme-danger);">*</span>
                 </label>
                 <input type="date" name="effective_date" class="form-input" required>
                 <small class="form-hint">When this rate becomes active</small>
@@ -77,7 +77,7 @@
             <!-- Status -->
             <div class="form-group">
                 <label class="form-label">
-                    Status <span style="color: #8e1e18;">*</span>
+                    Status <span style="color: var(--theme-danger);">*</span>
                 </label>
                 <select name="is_active" class="form-input" required>
                     <option value="1">Active</option>
@@ -158,7 +158,7 @@
     </div>
 
     <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 16px; margin-top: 16px;">
-        <p style="margin: 0 0 8px 0; color: #15803d; font-size: 13px; font-weight: 600;">Calculated Rate:</p>
+        <p style="margin: 0 0 8px 0; color: var(--theme-success); font-size: 13px; font-weight: 600;">Calculated Rate:</p>
         <p style="margin: 0; color: #166534; font-size: 24px; font-weight: 700;" id="calculatedRate">0.0417</p>
         <p style="margin: 8px 0 0 0; color: #166534; font-size: 12px;" id="calculationFormula">15 ÷ 360 = 0.0417 credits per day</p>
     </div>

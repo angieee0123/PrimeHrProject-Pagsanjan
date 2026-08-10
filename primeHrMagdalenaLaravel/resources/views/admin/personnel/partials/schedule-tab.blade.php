@@ -20,7 +20,12 @@
                 </svg>
                 Export
             </button>
-            <button class="modal-btn-primary" onclick="openBulkScheduleModal()" style="padding: 8px 18px; font-size: 12.5px; display: flex; align-items: center; gap: 6px; background: #150c63;">
+            {{-- The same solid pill as "Add Employee" on the Employee Records
+                 tab. It used to be a .modal-btn-primary carrying inline
+                 padding, size and a hard-coded navy background — which both
+                 reproduced .btn-export's metrics by hand and pinned the colour
+                 so it could not follow the theme. The classes supply all of it. --}}
+            <button class="btn-export adm-btn-primary-solid" onclick="openBulkScheduleModal()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                     <line x1="16" y1="2" x2="16" y2="6"/>
@@ -53,18 +58,17 @@
                     $department = $employee->employmentDetail && $employee->employmentDetail->departmentRelation
                         ? $employee->employmentDetail->departmentRelation->name
                         : 'N/A';
-                    // Get current active schedule
-                    $currentSchedule = $employee->schedule->where('start_date', '<=', now()->format('Y-m-d'))
-                        ->where('end_date', '>=', now()->format('Y-m-d'))
-                        ->first();
+                    // One rule for "the schedule in force today", shared with
+                    // the CSV export — see Employee::currentSchedule().
+                    $currentSchedule = $employee->currentSchedule();
                 @endphp
                 <tr>
                     <td>
                         <div class="emp-cell">
                             @if($employee->photo)
-                                <img src="{{ $employee->photo }}" alt="{{ $fullName }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
+                                <img src="{{ $employee->photo }}" alt="{{ $fullName }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--gp-border);">
                             @else
-                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #ecebf6;">
+                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid var(--gp-border);">
                                     {{ getInitials($fullName) }}
                                 </div>
                             @endif
@@ -75,17 +79,17 @@
                         </div>
                     </td>
                     <td><span class="dept-tag">{{ $department }}</span></td>
-                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->am_in)->format('g:i A') : '--:--' }}</td>
-                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->am_out)->format('g:i A') : '--:--' }}</td>
-                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->pm_in)->format('g:i A') : '--:--' }}</td>
-                    <td style="font-size: 13px; color: #0b044d; font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->pm_out)->format('g:i A') : '--:--' }}</td>
+                    <td style="font-size: 13px; color: var(--gp-pri); font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->am_in)->format('g:i A') : '--:--' }}</td>
+                    <td style="font-size: 13px; color: var(--gp-pri); font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->am_out)->format('g:i A') : '--:--' }}</td>
+                    <td style="font-size: 13px; color: var(--gp-pri); font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->pm_in)->format('g:i A') : '--:--' }}</td>
+                    <td style="font-size: 13px; color: var(--gp-pri); font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->pm_out)->format('g:i A') : '--:--' }}</td>
                     <td>
                         @if($currentSchedule)
                             <span class="badge-status processed">Active</span>
                         @elseif($employee->schedule->count() > 0)
                             <span class="badge-status pending">Scheduled</span>
                         @else
-                            <span class="badge-status on-hold">Not Set</span>
+                            <span class="badge-status is-neutral">Not Set</span>
                         @endif
                     </td>
                     <td class="row-menu-cell">
@@ -143,7 +147,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" style="text-align: center; padding: 40px; color: #56547a;">
+                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--gp-text-mid);">
                         No employees found.
                     </td>
                 </tr>
@@ -155,7 +159,7 @@
     <div class="table-footer">
         <div style="display: flex; align-items: center; gap: 12px;">
             <p>Showing <strong id="schedShowingStart">1</strong>-<strong id="schedShowingEnd">10</strong> of <strong id="schedTotalRecords">{{ $employees->count() }}</strong> records</p>
-            <select id="schedRowsPerPageSelect" onchange="changeScheduleRowsPerPage(this.value)" style="padding: 6px 12px; border: 1.5px solid #ecebf6; border-radius: 6px; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif; color: #0b044d; background: #fff; cursor: pointer;">
+            <select id="schedRowsPerPageSelect" onchange="changeScheduleRowsPerPage(this.value)" style="padding: 6px 12px; border: 1.5px solid var(--gp-border); border-radius: 6px; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; color: var(--gp-pri); background: #fff; cursor: pointer;">
                 <option value="10" selected>10 per page</option>
                 <option value="25">25 per page</option>
                 <option value="50">50 per page</option>

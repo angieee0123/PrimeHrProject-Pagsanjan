@@ -1,3 +1,16 @@
+{{--
+    Loan Type Registry.
+
+    Was nine columns, nine of whose 27 cells carried no information: "Max
+    Terms" was the literal string "N/A" on every row, and Interest Rate and
+    Max Loanable read percentage_rate / max_amount, which are null for every
+    loan type. Those three are now one "Limits" cell that shows what is
+    actually set and says so plainly when nothing is.
+
+    The listing also filtered to is_active, so the Status column could only
+    ever read Active and the toolbar's Active/Inactive filter had nothing to
+    switch between. It now lists both, which is what a registry should show.
+--}}
 <div id="loan-types-tab" class="ded-hidden">
 <section class="table-section">
     <div class="table-header">
@@ -28,16 +41,13 @@
 </div>
 
 <div class="table-wrapper">
-    <table class="payroll-table">
+    <table class="payroll-table ded-loantypes-table">
         <thead>
             <tr>
-                <th>Code</th>
-                <th>Loan Type Name</th>
+                <th>Loan type</th>
                 <th>Provider</th>
-                <th>Max Loanable</th>
-                <th>Interest Rate</th>
-                <th>Max Terms</th>
-                <th>Employees Using</th>
+                <th>Limits</th>
+                <th class="ded-num-col">In use</th>
                 <th>Status</th>
                 <th class="row-menu-head">Actions</th>
             </tr>
@@ -45,83 +55,63 @@
         <tbody id="loanTypesTableBody">
             @php
                 $loanTypes = \App\Models\DeductionType::where('category', 'LOAN')
-                    ->where('is_active', true)
+                    ->orderBy('is_active', 'desc')
                     ->orderBy('name')
                     ->get();
             @endphp
-            
+
             @forelse($loanTypes as $loanType)
                 @php
-                    // Determine provider from code
-                    $provider = 'OTHER';
-                    $providerDisplay = 'Other';
+                    // Provider is inferred from the code — there is no provider
+                    // column on deduction_types.
                     if (str_contains($loanType->code, 'GSIS')) {
-                        $provider = 'GSIS';
-                        $providerDisplay = 'GSIS';
-                    } elseif (str_contains($loanType->code, 'PAGIBIG')) {
-                        $provider = 'PAG-IBIG';
-                        $providerDisplay = 'Pag-IBIG';
+                        $provider = 'GSIS';        $providerDisplay = 'GSIS';
+                    } elseif (str_contains($loanType->code, 'PAGIBIG') || str_contains($loanType->code, 'PAG-IBIG')) {
+                        $provider = 'PAG-IBIG';    $providerDisplay = 'Pag-IBIG';
+                    } else {
+                        $provider = 'OTHER';       $providerDisplay = 'Other';
                     }
-                    
-                    // Count employees using this loan type
+
                     $employeesCount = \App\Models\EmployeeDeduction::where('deduction_type_id', $loanType->id)
                         ->where('status', 'ACTIVE')
                         ->distinct('employee_id')
                         ->count();
+
+                    // Only state a limit that exists. Printing "N/A" three
+                    // times per row told the reader nothing.
+                    $limits = [];
+                    if ($loanType->max_amount)      $limits[] = 'up to ₱' . number_format($loanType->max_amount, 2);
+                    if ($loanType->percentage_rate) $limits[] = $loanType->percentage_rate . '% interest';
                 @endphp
-                <tr data-loan-type="{{ strtolower($loanType->name) }}" 
-                    data-provider="{{ $provider }}" 
+                <tr data-loan-type="{{ strtolower($loanType->name) }}"
+                    data-provider="{{ $provider }}"
                     data-status="{{ $loanType->is_active ? '1' : '0' }}">
                     <td>
-                        <span class="ded-mono-code">
-                            {{ $loanType->code }}
-                        </span>
+                        <p class="ded-cell-title" title="{{ $loanType->name }}">{{ $loanType->name }}</p>
+                        <p class="ded-cell-sub"><span class="ded-code ded-code-lead">{{ $loanType->code }}</span></p>
                     </td>
+
+                    <td><span class="ded-chip is-other">{{ $providerDisplay }}</span></td>
+
                     <td>
-                        <div>
-                            <p class="ded-cell-title">{{ $loanType->name }}</p>
-                            <p class="ded-cell-sub">{{ $loanType->category }}</p>
-                        </div>
-                    </td>
-                    <td>
-                        @php
-                            $providerColors = [
-                                'GSIS' => ['bg' => '#0b044d18', 'text' => '#0b044d'],
-                                'PAG-IBIG' => ['bg' => '#15803d18', 'text' => '#15803d'],
-                                'OTHER' => ['bg' => '#56547a18', 'text' => '#56547a'],
-                            ];
-                            $providerColor = $providerColors[$provider] ?? $providerColors['OTHER'];
-                        @endphp
-                        <span class="badge" style="background: {{ $providerColor['bg'] }}; color: {{ $providerColor['text'] }};">
-                            {{ $providerDisplay }}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="ded-text-muted-sm">
-                            {{ $loanType->max_amount ? '₱' . number_format($loanType->max_amount, 2) : 'No limit' }}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="ded-text-muted-sm">
-                            {{ $loanType->percentage_rate ? $loanType->percentage_rate . '%' : 'N/A' }}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="ded-text-muted-sm">N/A</span>
-                    </td>
-                    <td>
-                        <div class="ded-row-flex">
-                            <span style="font-size:14px;" class="ded-cell-title">{{ $employeesCount }}</span>
-                            <span class="ded-cell-sub" style="font-size:11px;">{{ $employeesCount == 1 ? 'employee' : 'employees' }}</span>
-                        </div>
-                    </td>
-                    <td>
-                        @if($loanType->is_active)
-                            <span class="badge ded-badge-active">Active</span>
+                        @if($limits)
+                            <span class="ded-text-muted-sm">{{ implode(' · ', $limits) }}</span>
                         @else
-                            <span class="badge ded-badge-inactive">Inactive</span>
+                            <span class="ded-text-faint-sm ded-auto">Set per employee</span>
                         @endif
                     </td>
+
+                    <td class="ded-num-col">
+                        <p class="ded-amount">{{ $employeesCount }}</p>
+                        <p class="ded-cell-sub">{{ $employeesCount === 1 ? 'employee' : 'employees' }}</p>
+                    </td>
+
+                    <td>
+                        <span class="badge-status {{ $loanType->is_active ? 'processed' : 'is-neutral' }}">
+                            {{ $loanType->is_active ? 'Active' : 'Inactive' }}
+                        </span>
+                    </td>
+
                     <td class="row-menu-cell">
                         <button type="button" class="row-menu-btn" data-menu="loanTypeMenu{{ $loanType->id }}"
                                 onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
@@ -140,7 +130,7 @@
                                 Edit loan type
                             </button>
                             <div class="row-menu-sep"></div>
-                        @if($employeesCount == 0)
+                        @if($employeesCount === 0)
                             <button type="button" role="menuitem" class="row-menu-item is-danger" onclick="closeRowMenu(); deleteLoanType({{ $loanType->id }}, '{{ $loanType->name }}')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                 Delete loan type
@@ -157,8 +147,10 @@
                 </tr>
             @empty
                 <tr id="noLoanTypesRow">
-                    <td colspan="9" class="ded-empty-cell">
-                        No loan types registered. Click "Register Loan Type" to add a new loan type.
+                    <td colspan="6" class="ded-empty-cell">
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="ded-empty-icon"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        <p class="ded-empty-title">No loan types registered</p>
+                        <p class="ded-empty-sub">Use <strong>Register Loan Type</strong> to add the first one.</p>
                     </td>
                 </tr>
             @endforelse

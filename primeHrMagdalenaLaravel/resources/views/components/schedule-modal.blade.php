@@ -18,7 +18,7 @@
             </x-slot:icon>
             <form ...>
                 <div style="padding:24px; ...">...</div>
-                <div style="padding:16px 24px; border-top:1px solid #f2f1fb; ...">...</div>
+                <div style="padding:16px 24px; border-top:1px solid var(--gp-bg-tint-2); ...">...</div>
             </form>
         </x-schedule-modal>
 
@@ -40,7 +40,7 @@
 
 <div id="{{ $id }}" {{ $attributes }} style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; {{ $overlayStyle }}">
     <div style="background:#fff; border-radius:12px; width:100%; max-width:{{ $maxWidth }}; box-shadow:0 8px 32px rgba(11,4,77,0.2); overflow:hidden; {{ $boxStyle }}">
-        <div style="background:linear-gradient(135deg, #0b044d 0%, #150c63 100%); padding:20px 24px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="background:linear-gradient(135deg, var(--gp-pri) 0%, var(--gp-pri-2) 100%); padding:20px 24px; display:flex; justify-content:space-between; align-items:center;">
             <div style="display:flex; align-items:center; gap:12px;">
                 <div style="width:40px; height:40px; background:rgba(255,255,255,0.12); border-radius:10px; display:flex; align-items:center; justify-content:center;">
                     {{ $icon }}

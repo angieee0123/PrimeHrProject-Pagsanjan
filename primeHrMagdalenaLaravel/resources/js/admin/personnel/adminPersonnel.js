@@ -126,7 +126,7 @@ function displayPage(page) {
     const pageRows = allRows.slice(start, end);
 
     if (pageRows.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #6b6a8a;">No employees found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--theme-neutral-700);">No employees found.</td></tr>';
     } else {
         pageRows.forEach(row => tbody.appendChild(row));
     }
@@ -245,7 +245,7 @@ function displayFilteredPage(visibleRows) {
     const pageRows = visibleRows.slice(start, end);
 
     if (pageRows.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #6b6a8a;">No employees found matching the filters.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--theme-neutral-700);">No employees found matching the filters.</td></tr>';
     } else {
         pageRows.forEach(row => tbody.appendChild(row));
     }
@@ -401,19 +401,19 @@ function confirmStatusChange(employeeId, newStatus) {
     const error = document.getElementById('confirmError');
     
     if (isActivating) {
-        iconWrap.style.background = '#e8f9ef';
-        icon.style.stroke = '#15803d';
+        iconWrap.style.background = 'var(--theme-success-subtle)';
+        icon.style.stroke = 'var(--theme-success)';
         icon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
         title.textContent = 'Activate Employee Account';
         message.textContent = 'Are you sure you want to activate this employee account? The employee will be able to access the system.';
-        submitBtn.style.background = '#15803d';
+        submitBtn.style.background = 'var(--theme-success)';
     } else {
         iconWrap.style.background = '#fee8e8';
-        icon.style.stroke = '#8e1e18';
+        icon.style.stroke = 'var(--theme-danger)';
         icon.innerHTML = '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>';
         title.textContent = 'Deactivate Employee Account';
         message.textContent = 'Are you sure you want to deactivate this employee account? The employee will no longer be able to access the system.';
-        submitBtn.style.background = '#8e1e18';
+        submitBtn.style.background = 'var(--theme-danger)';
     }
     
     input.value = '';
@@ -433,7 +433,7 @@ function submitConfirmation() {
     const typed = input.value.trim().replace(/\s+/g, ' ').toLowerCase();
     if (typed !== 'yes i confirm') {
         error.style.display = 'block';
-        input.style.borderColor = '#8e1e18';
+        input.style.borderColor = 'var(--theme-danger)';
         return;
     }
     
@@ -512,7 +512,7 @@ function generateQRCode(employeeId, employeeName, payload) {
     document.getElementById('qrEmployeeName').textContent = employeeName;
     document.getElementById('qrEmployeeId').textContent = `Employee ID: ${employeeId}`;
     document.getElementById('qrCodeModal').style.display = 'flex';
-    document.getElementById('qrCodeContainer').innerHTML = '<p style="color:#6b6a8a;">Generating QR Code...</p>';
+    document.getElementById('qrCodeContainer').innerHTML = '<p style="color:var(--theme-neutral-700);">Generating QR Code...</p>';
 
     if (!payload) {
         document.getElementById('qrCodeContainer').innerHTML =
@@ -867,7 +867,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (filter.value) {
                 const clearBtn = document.createElement('button');
                 clearBtn.innerHTML = '×';
-                clearBtn.style.cssText = 'position:absolute;right:30px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:20px;color:#6b6a8a;cursor:pointer;padding:0;width:24px;height:24px;';
+                clearBtn.style.cssText = 'position:absolute;right:30px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:20px;color:var(--theme-neutral-700);cursor:pointer;padding:0;width:24px;height:24px;';
                 clearBtn.onclick = (e) => {
                     e.preventDefault();
                     filter.value = '';
@@ -1141,8 +1141,8 @@ if (dropZone) {
 
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
-        dropZone.style.borderColor = '#0b044d';
-        dropZone.style.background = '#f0effe';
+        dropZone.style.borderColor = 'var(--gp-pri)';
+        dropZone.style.background = 'var(--theme-primary-light)';
     });
 
     dropZone.addEventListener('dragleave', (e) => {
@@ -1186,8 +1186,8 @@ function handleFileSelect(event) {
     document.getElementById('fileName').textContent = file.name;
     document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
     document.getElementById('fileInfo').style.display = 'block';
-    document.getElementById('dropZone').style.borderColor = '#15803d';
-    document.getElementById('dropZone').style.background = '#e8f9ef';
+    document.getElementById('dropZone').style.borderColor = 'var(--theme-success)';
+    document.getElementById('dropZone').style.background = 'var(--theme-success-subtle)';
 }
 
 function removeFile() {

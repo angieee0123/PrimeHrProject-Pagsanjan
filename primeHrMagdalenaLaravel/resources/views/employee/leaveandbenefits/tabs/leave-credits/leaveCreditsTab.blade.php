@@ -85,13 +85,13 @@
                 @endphp
                 <tr class="leave-credit-row" data-type="{{ $type->is_accrued ? 'accrued' : 'fixed' }}" data-available="{{ $available }}" data-leave-code="{{ $type->leave_code }}">
                     <td>
-                        <span class="badge-emptype" style="background: {{ ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'][$loop->index % 6] }}; color: white; border-color: {{ ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'][$loop->index % 6] }};">
+                        <span class="badge-emptype" style="background: {{ ['var(--gp-pri)', 'var(--theme-danger)', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'][$loop->index % 6] }}; color: white; border-color: {{ ['var(--gp-pri)', 'var(--theme-danger)', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'][$loop->index % 6] }};">
                             {{ $type->leave_code }}
                         </span>
                     </td>
                     <td>
                         <div class="emp-cell">
-                            <div class="emp-avatar" style="background: {{ ['#ede9fe', '#fee2e2', '#dbeafe', '#fef3c7', '#d1fae5', '#fce7f3'][$loop->index % 6] }}; color: {{ ['#7c3aed', '#dc2626', '#2563eb', '#f59e0b', '#10b981', '#ec4899'][$loop->index % 6] }};">
+                            <div class="emp-avatar" style="background: {{ ['#ede9fe', '#fee2e2', '#dbeafe', '#fef3c7', '#d1fae5', '#fce7f3'][$loop->index % 6] }}; color: {{ ['#7c3aed', 'var(--theme-danger)', '#2563eb', '#f59e0b', '#10b981', '#ec4899'][$loop->index % 6] }};">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
                                 </svg>
@@ -126,7 +126,7 @@
                     <td>
                         <div class="lb-flex-gap-8">
                             <div class="lb-progress-track">
-                                <div class="lb-progress-fill" style="width: {{ min($percentage, 100) }}%; background: {{ $percentage > 70 ? '#15803d' : ($percentage > 30 ? '#d9bb00' : '#8e1e18') }};"></div>
+                                <div class="lb-progress-fill" style="width: {{ min($percentage, 100) }}%; background: {{ $percentage > 70 ? 'var(--theme-success)' : ($percentage > 30 ? '#d9bb00' : 'var(--theme-danger)') }};"></div>
                             </div>
                             <span class="lb-pct-text">{{ number_format(min($percentage, 100), 0) }}%</span>
                         </div>
@@ -220,9 +220,9 @@
             $totalRemaining = $totalAccumulated - $totalUsed;
         @endphp
         <div class="lb-mb-32">
-            <div style="background: linear-gradient(135deg, {{ ['#ede9fe', '#fee2e2', '#dbeafe', '#fef3c7', '#d1fae5', '#fce7f3'][$loop->index % 6] }} 0%, transparent 100%); padding: 16px; border-radius: 8px; border-left: 4px solid {{ ['#7c3aed', '#dc2626', '#2563eb', '#f59e0b', '#10b981', '#ec4899'][$loop->index % 6] }}; margin-bottom: 16px;">
+            <div style="background: linear-gradient(135deg, {{ ['#ede9fe', '#fee2e2', '#dbeafe', '#fef3c7', '#d1fae5', '#fce7f3'][$loop->index % 6] }} 0%, transparent 100%); padding: 16px; border-radius: 8px; border-left: 4px solid {{ ['#7c3aed', 'var(--theme-danger)', '#2563eb', '#f59e0b', '#10b981', '#ec4899'][$loop->index % 6] }}; margin-bottom: 16px;">
                 <div class="lb-flex-gap-12">
-                    <div class="lb-stat-icon-box-sm" style="background: {{ ['#7c3aed', '#dc2626', '#2563eb', '#f59e0b', '#10b981', '#ec4899'][$loop->index % 6] }};">
+                    <div class="lb-stat-icon-box-sm" style="background: {{ ['#7c3aed', 'var(--theme-danger)', '#2563eb', '#f59e0b', '#10b981', '#ec4899'][$loop->index % 6] }};">
                         {{ substr($type->leave_code, 0, 1) }}
                     </div>
                     <div>
@@ -272,7 +272,7 @@
                                     @endphp
                                     <div class="lb-progress-fill" style="width: {{ min($barPercentage, 100) }}%; background: {{ $yearEndBalance > 0 ? '#10b981' : '#ef4444' }};"></div>
                                 </div>
-                                <span class="lb-fw600 lb-minw-50" style="color: {{ $yearEndBalance > 0 ? '#059669' : '#dc2626' }};">
+                                <span class="lb-fw600 lb-minw-50" style="color: {{ $yearEndBalance > 0 ? '#059669' : 'var(--theme-danger)' }};">
                                     {{ number_format($yearEndBalance, 2) }}
                                 </span>
                             </div>

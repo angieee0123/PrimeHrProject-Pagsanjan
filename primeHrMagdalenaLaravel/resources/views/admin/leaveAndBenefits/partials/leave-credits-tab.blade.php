@@ -51,9 +51,9 @@
                             <td data-label="Employee" style="text-align: left;" rowspan="{{ $balances->count() }}">
                                 <div class="emp-cell">
                                     @if($balance->employee->photo)
-                                        <img src="{{ $balance->employee->photo }}" alt="{{ $balance->employee->first_name }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
+                                        <img src="{{ $balance->employee->photo }}" alt="{{ $balance->employee->first_name }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--gp-border);">
                                     @else
-                                        <div class="emp-avatar" style="background: {{ $avatarColors[($balance->employee_id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #ecebf6;">
+                                        <div class="emp-avatar" style="background: {{ $avatarColors[($balance->employee_id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid var(--gp-border);">
                                             {{ strtoupper(substr($balance->employee->first_name ?? 'N', 0, 1) . substr($balance->employee->last_name ?? 'A', 0, 1)) }}
                                         </div>
                                     @endif
@@ -64,12 +64,12 @@
                                 </div>
                             </td>
                             @endif
-                            <td data-label="Year" style="font-weight: 600; color: #56547a;">
+                            <td data-label="Year" style="font-weight: 600; color: var(--gp-text-mid);">
                                 {{ $balance->year }}
                             </td>
                             <td data-label="Leave Type">
                                 <div class="emp-cell">
-                                    <div class="emp-avatar" style="background: {{ ['#ede9fe', '#fee2e2', '#dbeafe', '#fef3c7', '#d1fae5', '#fce7f3'][$index % 6] }}; color: {{ ['#7c3aed', '#dc2626', '#2563eb', '#f59e0b', '#10b981', '#ec4899'][$index % 6] }}; margin-left: 0;">
+                                    <div class="emp-avatar" style="background: {{ ['#ede9fe', '#fee2e2', '#dbeafe', '#fef3c7', '#d1fae5', '#fce7f3'][$index % 6] }}; color: {{ ['#7c3aed', 'var(--theme-danger)', '#2563eb', '#f59e0b', '#10b981', '#ec4899'][$index % 6] }}; margin-left: 0;">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
                                         </svg>
@@ -81,7 +81,7 @@
                                 </div>
                             </td>
                             <td data-label="Total Credits" class="pay-cell">
-                                <strong>{{ number_format($balance->total_credits, 2) }}</strong> <span style="font-size: 11px; color: #6b7280;">days</span>
+                                <strong>{{ number_format($balance->total_credits, 2) }}</strong> <span style="font-size: 11px; color: var(--theme-neutral-700);">days</span>
                             </td>
                             <td data-label="Used" class="deduction">
                                 {{ number_format($balance->used_credits, 2) }}
@@ -101,10 +101,10 @@
                             </td>
                             <td data-label="Progress">
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="flex: 1; height: 6px; background: #f2f1fb; border-radius: 3px; overflow: hidden; min-width: 80px;">
-                                        <div style="width: {{ min($percentage, 100) }}%; height: 100%; background: {{ $percentage > 70 ? '#15803d' : ($percentage > 30 ? '#c9a227' : '#8e1e18') }}; transition: width 0.3s;"></div>
+                                    <div style="flex: 1; height: 6px; background: var(--gp-bg-tint-2); border-radius: 3px; overflow: hidden; min-width: 80px;">
+                                        <div style="width: {{ min($percentage, 100) }}%; height: 100%; background: {{ $percentage > 70 ? 'var(--theme-success)' : ($percentage > 30 ? '#c9a227' : 'var(--theme-danger)') }}; transition: width 0.3s;"></div>
                                     </div>
-                                    <span style="font-size: 12px; color: #56547a; font-weight: 600; min-width: 38px;">{{ number_format(min($percentage, 100), 0) }}%</span>
+                                    <span style="font-size: 12px; color: var(--gp-text-mid); font-weight: 600; min-width: 38px;">{{ number_format(min($percentage, 100), 0) }}%</span>
                                 </div>
                             </td>
                         </tr>
@@ -116,8 +116,8 @@
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" style="margin: 0 auto 16px; display: block;">
                             <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        <p style="margin: 0; font-size: 15px; color: #6b7280; font-weight: 500;">No leave credits found</p>
-                        <p style="margin: 8px 0 0 0; font-size: 13px; color: #9ca3af;">Employee leave balances will appear here once initialized</p>
+                        <p style="margin: 0; font-size: 15px; color: var(--theme-neutral-700); font-weight: 500;">No leave credits found</p>
+                        <p style="margin: 8px 0 0 0; font-size: 13px; color: var(--theme-neutral-600);">Employee leave balances will appear here once initialized</p>
                     </td>
                 </tr>
                 @endif

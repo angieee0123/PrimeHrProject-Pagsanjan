@@ -1,5 +1,5 @@
 // DTR Detail Modal (quick-view Daily Time Record + PDF export)
-const avatarColors = ['#0b044d', '#8e1e18', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
+const avatarColors = ['var(--gp-pri)', 'var(--theme-danger)', '#1a0f6e', '#5a0f0b', '#2d1a8e', '#6b3fa0'];
 const getInitials = name => name.split(' ').filter(n => /^[A-Z]/.test(n)).map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
 let currentDTRRecord = null;

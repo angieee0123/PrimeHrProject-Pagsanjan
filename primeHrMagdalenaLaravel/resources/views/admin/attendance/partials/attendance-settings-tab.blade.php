@@ -39,7 +39,7 @@
                             @elseif($exemption->exemption_type === 'department')
                                 <span class="badge-status pending">Department</span>
                             @else
-                                <span class="badge-status on-hold">Designation</span>
+                                <span class="badge-status is-info is-label">Designation</span>
                             @endif
                         </td>
                         <td data-label="Name">

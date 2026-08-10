@@ -96,10 +96,24 @@ class PassSlipController extends Controller
 
         $passSlip = PassSlip::where('id', $id)
             ->where('employee_id', $employee->id)
-            ->with('approver')
+            ->with('approver.employee')
             ->firstOrFail();
 
-        return response()->json($passSlip);
+        // Who signed the slip, resolved here rather than in the modal's JS.
+        // `users` has no `name` column — only `username` — so the modal's
+        // `approver.name` was always undefined and fell back to a hard-coded
+        // "Admin User", printing a made-up approver on a real approval.
+        $approver = $passSlip->approver;
+        $approverName = null;
+        if ($approver) {
+            $approverName = trim(
+                ($approver->employee->first_name ?? '') . ' ' . ($approver->employee->last_name ?? '')
+            ) ?: $approver->username;
+        }
+
+        return response()->json(
+            $passSlip->toArray() + ['approver_name' => $approverName]
+        );
     }
 
     /**

@@ -76,9 +76,9 @@ $currentRoute = Route::currentRouteName();
     <div class="sidebar-footer" id="sidebar-footer">
         <div class="user-avatar-wrap">
             @if($mayorEmployee && $mayorEmployee->photo)
-                <img src="{{ $mayorEmployee->photo }}" class="user-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
+                <img src="{{ $mayorEmployee->photo }}" class="user-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--gp-border);">
             @else
-                <div class="user-avatar" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#0b044d; color:white; font-weight:600; font-size:13px; border:2px solid #ecebf6;">
+                <div class="user-avatar" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--gp-pri); color:white; font-weight:600; font-size:13px; border:2px solid var(--gp-border);">
                     {{ $mayorInitials }}
                 </div>
             @endif

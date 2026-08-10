@@ -9,7 +9,7 @@ function closeEditDeductionTypeModal(event) {
 
 function editDeductionType(code) {
     // Fetch deduction type data
-    fetch(`/admin/deductions/types/${code}`)
+    fetch(`/admin/deductions/types/${encodeURIComponent(code)}`)
         .then(response => response.json())
         .then(data => {
             // Populate form fields

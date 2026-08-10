@@ -12,14 +12,14 @@
 <style>
 input.topbar-search-input[type="text"] {
     background: rgba(255,255,255,.55) !important; border: 1.5px solid rgba(11,4,77,.12) !important; border-radius: 9px !important;
-    padding: 9px 12px 9px 34px; font-size: 12.5px; color: #0b044d !important; outline: none; width: 260px;
+    padding: 9px 12px 9px 34px; font-size: 12.5px; color: var(--gp-pri) !important; outline: none; width: 260px;
     font-family: inherit; box-shadow: none;
     backdrop-filter: blur(8px) saturate(160%) !important; -webkit-backdrop-filter: blur(8px) saturate(160%) !important;
     transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
-input.topbar-search-input[type="text"]::placeholder { color: #aaa8cc; }
+input.topbar-search-input[type="text"]::placeholder { color: var(--theme-neutral-500); }
 input.topbar-search-input[type="text"]:focus {
-    background: #fff !important; border-color: #0b044d !important;
+    background: #fff !important; border-color: var(--gp-pri) !important;
     backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
     box-shadow: 0 0 0 3px rgba(11,4,77,.12);
 }

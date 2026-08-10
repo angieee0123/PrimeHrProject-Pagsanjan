@@ -32,7 +32,7 @@
 /* Breakdown panel */
 .admin-training .training-breakdown-panel {
     background: #fff;
-    border: 1.5px solid #eceaf8;
+    border: 1.5px solid var(--gp-border);
     border-radius: 14px;
     padding: 18px 22px;
     margin-bottom: 16px;
@@ -84,7 +84,7 @@
 }
 .admin-training .training-mini-bar {
     height: 5px;
-    background: #eceaf8;
+    background: var(--gp-border);
     border-radius: 99px;
     overflow: hidden;
 }
@@ -137,7 +137,7 @@
 .admin-training .training-filter-chip {
     padding: 6px 14px;
     border-radius: 20px;
-    border: 1.5px solid #e5e4f0;
+    border: 1.5px solid var(--theme-neutral-300);
     background: #fff;
     font-size: 12px;
     font-weight: 600;
@@ -164,7 +164,7 @@
 .admin-training .training-title-text { font-size: 13.5px; font-weight: 600; color: var(--gp-pri); line-height: 1.35; }
 .admin-training .training-ref-doc { font-size: 11px; color: var(--gp-text-soft); font-weight: 500; }
 .admin-training .training-table-date { font-size: 12.5px; color: var(--gp-text-mid); white-space: nowrap; }
-.admin-training .training-date-sep { margin: 0 4px; color: #aaa8cc; }
+.admin-training .training-date-sep { margin: 0 4px; color: var(--theme-neutral-500); }
 
 .admin-training .training-hours-pill {
     display: inline-flex;
@@ -179,7 +179,7 @@
     background: var(--gp-bg-tint-2);
 }
 .admin-training .training-hours-pill-pending { background: #fbf6e3; color: var(--gp-accent-gold); }
-.admin-training .training-hours-pill-muted { background: var(--gp-bg-tint); color: #aaa8cc; }
+.admin-training .training-hours-pill-muted { background: var(--gp-bg-tint); color: var(--theme-neutral-500); }
 
 .admin-training .payroll-table tbody tr.training-row-verified { border-left: 3px solid #22c55e; }
 .admin-training .payroll-table tbody tr.training-row-pending { border-left: 3px solid var(--gp-accent-gold); }
@@ -237,7 +237,7 @@
     width: 34px;
     height: 34px;
     border-radius: 8px;
-    border: 1.5px solid #e5e4f0;
+    border: 1.5px solid var(--theme-neutral-300);
     background: #fff;
     color: var(--gp-pri);
     cursor: pointer;
@@ -251,7 +251,7 @@
 .admin-training .btn-view-cert:hover,
 .admin-training .btn-admin-review:hover {
     border-color: var(--gp-pri);
-    background: #f4f3ff;
+    background: var(--theme-primary-soft);
 }
 .admin-training .btn-admin-review {
     height: 34px;
@@ -269,11 +269,11 @@
 }
 .admin-training .btn-admin-review:hover { background: var(--gp-pri); color: #fff; }
 .admin-training .btn-admin-review-muted {
-    border-color: #e5e4f0;
+    border-color: var(--theme-neutral-300);
     color: var(--gp-text-mid);
 }
 .admin-training .btn-admin-review-muted:hover {
-    background: #f4f3ff;
+    background: var(--theme-primary-soft);
     color: var(--gp-pri);
     border-color: var(--gp-pri);
 }
@@ -343,7 +343,7 @@
     font-size: 13px;
     font-weight: 600;
     border-radius: 10px;
-    box-shadow: 0 8px 28px rgba(11, 4, 77, 0.25);
+    box-shadow: 0 8px 28px rgba(var(--theme-primary-rgb), 0.25);
     opacity: 0;
     visibility: hidden;
     transform: translateY(12px);
@@ -379,7 +379,7 @@
     padding: 0;
     overflow: hidden;
     border: none;
-    box-shadow: 0 24px 64px rgba(11, 4, 77, 0.22), 0 8px 24px rgba(11, 4, 77, 0.12);
+    box-shadow: 0 24px 64px rgba(var(--theme-primary-rgb), 0.22), 0 8px 24px rgba(var(--theme-primary-rgb), 0.12);
 }
 #adminFlashSuccessModal .admin-success-modal-accent {
     height: 6px;
@@ -458,12 +458,12 @@
     padding: 12px 24px;
     border-radius: 10px;
     font-size: 14px;
-    box-shadow: 0 4px 14px rgba(11, 4, 77, 0.25);
+    box-shadow: 0 4px 14px rgba(var(--theme-primary-rgb), 0.25);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 #adminFlashSuccessModal .admin-success-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(11, 4, 77, 0.3);
+    box-shadow: 0 6px 20px rgba(var(--theme-primary-rgb), 0.3);
 }
 
 #reviewModal .modal-box.training-view-cert-modal,
@@ -488,7 +488,7 @@
     padding: 24px 20px;
     background: var(--gp-bg-tint);
     border-radius: 12px;
-    border: 1.5px dashed #e5e4f0;
+    border: 1.5px dashed var(--theme-neutral-300);
 }
 #reviewModal .training-cert-preview-icon {
     display: flex;
@@ -521,7 +521,7 @@
 #rejectModal .training-form-field textarea {
     width: 100%;
     padding: 10px 12px;
-    border: 1.5px solid #e5e4f0;
+    border: 1.5px solid var(--theme-neutral-300);
     border-radius: 8px;
     font-size: 13px;
     color: var(--gp-pri);
@@ -534,7 +534,7 @@
 #rejectModal .training-form-field textarea:focus {
     outline: none;
     border-color: var(--gp-pri);
-    box-shadow: 0 0 0 3px rgba(11, 4, 77, 0.08);
+    box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), 0.08);
 }
 #rejectModal .training-field-hint {
     font-size: 11px;

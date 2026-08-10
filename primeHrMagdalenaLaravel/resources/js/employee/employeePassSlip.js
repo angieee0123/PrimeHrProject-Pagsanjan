@@ -45,8 +45,21 @@ if (overlay) {
     });
 }
 
+// Escape closes whichever modal is actually open. It used to always call
+// closePassSlipModal(), which reset the *File* form — so pressing Escape on
+// the detail modal left it on screen and silently wiped a half-filled form
+// behind it.
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
+    if (e.key !== 'Escape') return;
+
+    const detail = document.getElementById('viewPassSlipDetailModal');
+    if (detail && detail.style.display === 'flex') {
+        closePassSlipDetailModal();
+        return;
+    }
+
+    const file = document.getElementById('filePassSlipModal');
+    if (file && file.style.display === 'flex') {
         closePassSlipModal();
     }
 });
@@ -209,11 +222,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const length = this.value.length;
             reasonCounter.textContent = `${length} / 300`;
             if (length > 300) {
-                reasonCounter.style.color = '#dc2626';
+                reasonCounter.style.color = 'var(--theme-danger)';
             } else if (length > 270) {
-                reasonCounter.style.color = '#d97706';
+                reasonCounter.style.color = 'var(--theme-warning)';
             } else {
-                reasonCounter.style.color = '#9ca3af';
+                reasonCounter.style.color = 'var(--theme-neutral-600)';
             }
         });
     }
@@ -221,6 +234,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ── View Pass Slip Detail modal ──
 let currentPassSlipId = null;
+
+/** Endpoint for one pass slip, built from the route the server published. */
+function passSlipUrl(which, id) {
+    const template = (window.passSlipData || {})[which];
+
+    return template ? template.replace('__ID__', encodeURIComponent(id)) : null;
+}
+
+/**
+ * "2026-08-05T00:00:00.000000Z" → "Aug 5, 2026".
+ *
+ * Reads the calendar date off the string rather than through `new Date()`:
+ * a date-only value arrives as UTC midnight, which any negative-offset
+ * viewer would render as the previous day.
+ */
+function formatPassSlipDate(value) {
+    if (!value) return 'Not specified';
+    const [y, m, d] = String(value).slice(0, 10).split('-').map(Number);
+    if (!y || !m || !d) return value;
+
+    return new Date(y, m - 1, d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+/** "13:00:00" → "1:00 PM", matching how the history table prints times. */
+function formatPassSlipTime(value) {
+    if (!value) return 'Not specified';
+    const [h, min] = String(value).split(':').map(Number);
+    if (Number.isNaN(h) || Number.isNaN(min)) return value;
+    const suffix = h >= 12 ? 'PM' : 'AM';
+
+    return `${((h + 11) % 12) + 1}:${String(min).padStart(2, '0')} ${suffix}`;
+}
 
 function closePassSlipDetailModal() {
     document.getElementById('viewPassSlipDetailModal').style.display = 'none';
@@ -231,14 +276,25 @@ function closePassSlipDetailModal() {
 function viewPassSlip(id) {
     currentPassSlipId = id;
 
-    fetch(`/permanent/passslip/${id}`)
-        .then(response => response.json())
+    const url = passSlipUrl('showUrl', id);
+    if (!url) {
+        // showPassSlipError() writes into a box inside the *File* Pass Slip
+        // modal, which is closed while viewing details — routing a detail
+        // failure there would report nothing at all.
+        alert('Pass slip details are unavailable on this page.');
+        return;
+    }
+
+    fetch(url, { headers: { 'Accept': 'application/json' } })
+        .then(response => {
+            if (!response.ok) throw new Error(`Request failed (${response.status})`);
+            return response.json();
+        })
         .then(data => {
             // Set header info
-            document.getElementById('detailSlipId').textContent = data.id;
+            document.getElementById('detailSlipId').textContent = data.slip_number || data.id;
             document.getElementById('detailReason').textContent = data.reason;
-            document.getElementById('detailSlipDate').textContent =
-                new Date(data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            document.getElementById('detailSlipDate').textContent = formatPassSlipDate(data.date);
 
             // Set status badge
             const statusBadge = document.getElementById('detailPassSlipStatus');
@@ -259,27 +315,28 @@ function viewPassSlip(id) {
             // Set pass slip details
             document.getElementById('detailReasonFull').textContent = data.reason;
             document.getElementById('detailDestination').textContent = data.destination || 'Not specified';
-            document.getElementById('detailDate').textContent = new Date(data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-            document.getElementById('detailTimeOut').textContent = data.time_out || 'Not specified';
-            document.getElementById('detailTimeIn').textContent = data.time_in || 'Not specified';
+            document.getElementById('detailDate').textContent = formatPassSlipDate(data.date);
+            document.getElementById('detailTimeOut').textContent = formatPassSlipTime(data.time_out);
+            document.getElementById('detailTimeIn').textContent = formatPassSlipTime(data.time_in);
 
             // Show/hide approval section
             const approvalSection = document.getElementById('detailApprovalSection');
             if (data.status !== 'pending' && data.approved_by) {
                 approvalSection.style.display = 'block';
-                document.getElementById('detailApprovedBy').textContent = data.approver ?
-                    data.approver.name :
-                    'Admin User';
-                document.getElementById('detailApprovedAt').textContent = data.approved_at ?
-                    new Date(data.approved_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) :
-                    'N/A';
+                // Resolved server-side (`users` has no `name` column). No
+                // invented fallback: "Admin User" used to be printed for
+                // whoever actually signed the slip.
+                document.getElementById('detailApprovedBy').textContent = data.approver_name || '—';
+                document.getElementById('detailApprovedAt').textContent = formatPassSlipDate(data.approved_at);
             } else {
                 approvalSection.style.display = 'none';
             }
 
-            // Show/hide remarks
+            // Remarks show whenever the approver left any — they were gated on
+            // `status === 'rejected'`, which hid the note attached to an
+            // approval ("approved, be back by 3pm") entirely.
             const remarksSection = document.getElementById('detailRemarksSection');
-            if (data.status === 'rejected' && data.remarks) {
+            if (data.remarks) {
                 remarksSection.style.display = 'block';
                 document.getElementById('detailRemarks').textContent = data.remarks;
             } else {
@@ -308,23 +365,27 @@ function viewPassSlip(id) {
             document.body.style.overflow = 'hidden';
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to load pass slip details');
+            console.error('Pass slip details failed to load:', error);
+            alert('Could not load that pass slip. Please refresh the page and try again.');
         });
 }
 
 function cancelPassSlip() {
     if (!currentPassSlipId) return;
 
+    const url = passSlipUrl('cancelUrl', currentPassSlipId);
+    if (!url) return;
+
     if (confirm('Are you sure you want to cancel this pass slip?')) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/permanent/passslip/${currentPassSlipId}`;
+        form.action = url;
 
         const csrf = document.createElement('input');
         csrf.type = 'hidden';
         csrf.name = '_token';
-        csrf.value = document.querySelector('meta[name="csrf-token"]')?.content;
+        csrf.value = (window.passSlipData || {}).csrfToken
+            || document.querySelector('meta[name="csrf-token"]')?.content;
         form.appendChild(csrf);
 
         const method = document.createElement('input');

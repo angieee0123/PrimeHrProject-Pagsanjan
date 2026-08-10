@@ -17,11 +17,11 @@
         </div>
     </div>
 
-    <div style="padding:16px 24px; border-top:1px solid #f2f1fb; display:flex; justify-content:flex-end; gap:10px;">
-        <button onclick="closeViewSchedulesModal()" style="padding:10px 24px; background:#fff; border:1.5px solid #ecebf6; border-radius:8px; font-size:13px; font-weight:600; color:#56547a; cursor:pointer; font-family:'Poppins',sans-serif;">
+    <div style="padding:16px 24px; border-top:1px solid var(--gp-bg-tint-2); display:flex; justify-content:flex-end; gap:10px;">
+        <button onclick="closeViewSchedulesModal()" style="padding:10px 24px; background:#fff; border:1.5px solid var(--gp-border); border-radius:8px; font-size:13px; font-weight:600; color:var(--gp-text-mid); cursor:pointer; font-family:'Poppins',sans-serif;">
             Close
         </button>
-        <button onclick="openAddScheduleFromView()" style="padding:10px 24px; background:#0b044d; border:none; border-radius:8px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:8px;">
+        <button onclick="openAddScheduleFromView()" style="padding:10px 24px; background:var(--gp-pri); border:none; border-radius:8px; font-size:13px; font-weight:600; color:#fff; cursor:pointer; font-family:'Poppins',sans-serif; display:flex; align-items:center; gap:8px;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="12" y1="5" x2="12" y2="19"/>
                 <line x1="5" y1="12" x2="19" y2="12"/>

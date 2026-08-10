@@ -65,7 +65,7 @@
         </div>
         <p class="stat-value">{{ $attendanceRate }}<span class="eh-unit-label">%</span></p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:{{ $lateDays > 0 ? '#b7791f' : '#15803d' }}"></span>
+            <span class="stat-dot" style="background:{{ $lateDays > 0 ? '#b7791f' : 'var(--theme-success)' }}"></span>
             <p class="stat-sub">
                 {{ $presentDays }} of {{ $totalDays }} days
                 @if($lateDays > 0) · {{ $lateDays }} late @endif

@@ -13,13 +13,13 @@
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Applications</p>
-            <div class="stat-icon-wrap" style="background:#f2f1fb">
+            <div class="stat-icon-wrap" style="background:var(--gp-bg-tint-2)">
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             </div>
         </div>
         <p class="stat-value">{{ number_format($stats['total']) }}</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#0b044d"></span>
+            <span class="stat-dot" style="background:var(--gp-pri)"></span>
             <p class="stat-sub">All records</p>
         </div>
     </div>
@@ -33,7 +33,7 @@
         </div>
         <p class="stat-value">{{ number_format($stats['approved']) }}</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#15803d"></span>
+            <span class="stat-dot" style="background:var(--theme-success)"></span>
             <p class="stat-sub">Approved leave</p>
         </div>
     </div>
@@ -41,7 +41,7 @@
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Pending</p>
-            <div class="stat-icon-wrap" style="background:#fbf6e3">
+            <div class="stat-icon-wrap" style="background:var(--theme-warning-subtle)">
                 <svg width="17" height="17" fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
         </div>
@@ -61,7 +61,7 @@
         </div>
         <p class="stat-value">{{ number_format($stats['rejected']) }}</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#8e1e18"></span>
+            <span class="stat-dot" style="background:var(--theme-danger)"></span>
             <p class="stat-sub">Rejected applications</p>
         </div>
     </div>
@@ -69,7 +69,7 @@
 
 {{-- Applications Table --}}
 <div class="table-section" style="margin:0">
-    <div class="table-header" style="background:linear-gradient(135deg,#f2f1fb 0%,#fff 100%)">
+    <div class="table-header" style="background:linear-gradient(135deg,var(--gp-bg-tint-2) 0%,#fff 100%)">
         <div>
             <p class="table-title">Leave Applications</p>
             <p class="table-sub">{{ number_format($stats['total']) }} filed · read-only</p>
@@ -77,7 +77,7 @@
         <div class="table-actions">
             <div style="position:relative">
                 <svg width="14" height="14" fill="none" stroke="#8f8daf" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input type="text" id="mayorLeaveSearch" placeholder="Search employees..." oninput="mayorFilterLeave()" style="font-size:11px;padding:6px 12px 6px 32px;border-radius:6px;border:1.5px solid #e5e4f0;width:200px;font-family:inherit">
+                <input type="text" id="mayorLeaveSearch" placeholder="Search employees..." oninput="mayorFilterLeave()" style="font-size:11px;padding:6px 12px 6px 32px;border-radius:6px;border:1.5px solid var(--theme-neutral-300);width:200px;font-family:inherit">
             </div>
             <select class="filter-select" id="mayorLeaveType" onchange="mayorFilterLeave()">
                 <option value="">All Leave Types</option>
@@ -122,9 +122,9 @@
                         <td>
                             <div class="emp-cell">
                                 @if($emp->photo)
-                                    <img src="{{ $emp->photo }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #ecebf6">
+                                    <img src="{{ $emp->photo }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--gp-border)">
                                 @else
-                                    <div style="width:36px;height:36px;border-radius:50%;background:{{ $avatarColors[$index % count($avatarColors)] }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:12px;border:2px solid #ecebf6">{{ $initials }}</div>
+                                    <div style="width:36px;height:36px;border-radius:50%;background:{{ $avatarColors[$index % count($avatarColors)] }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:12px;border:2px solid var(--gp-border)">{{ $initials }}</div>
                                 @endif
                                 <div>
                                     <p class="emp-name">{{ $fullName }}</p>
@@ -133,17 +133,17 @@
                             </div>
                         </td>
                         <td><span class="dept-tag">{{ $leaveTypeName }}</span></td>
-                        <td style="font-size:12px;color:#56547a;white-space:nowrap">{{ $leave->start_date->format('M d') }} – {{ $leave->end_date->format('M d, Y') }}</td>
+                        <td style="font-size:12px;color:var(--gp-text-mid);white-space:nowrap">{{ $leave->start_date->format('M d') }} – {{ $leave->end_date->format('M d, Y') }}</td>
                         <td style="text-align:center">{{ $leave->number_of_days }}</td>
                         <td><span class="badge-status {{ $statusClass }}">{{ ucfirst($leave->status) }}</span></td>
-                        <td style="font-size:11.5px;color:#8f8daf;white-space:nowrap">{{ $leave->created_at->format('M d, Y') }}</td>
+                        <td style="font-size:11.5px;color:var(--gp-text-soft);white-space:nowrap">{{ $leave->created_at->format('M d, Y') }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" style="text-align:center;padding:32px 0;color:#94a3b8;font-size:12.5px">No leave applications yet</td></tr>
+                    <tr><td colspan="6" style="text-align:center;padding:32px 0;color:var(--theme-neutral-600);font-size:12.5px">No leave applications yet</td></tr>
                 @endforelse
             </tbody>
         </table>
-        <p id="mayorLeaveNoResults" style="display:none;text-align:center;padding:32px 0;color:#94a3b8;font-size:12.5px;margin:0">No applications match your search/filter</p>
+        <p id="mayorLeaveNoResults" style="display:none;text-align:center;padding:32px 0;color:var(--theme-neutral-600);font-size:12.5px;margin:0">No applications match your search/filter</p>
     </div>
 </div>
 

@@ -107,7 +107,11 @@
                             </button>
                             @if($slip->status === 'pending')
                                 <div class="row-menu-sep"></div>
-                                <form method="POST" action="{{ route('passslip.delete', $slip->id) }}" class="row-menu-form" onsubmit="return confirm('Cancel this pass slip? This cannot be undone.');">
+                                <form method="POST" action="{{ route('passslip.delete', $slip->id) }}" class="row-menu-form"
+                                      data-confirm-title="Cancel this pass slip?"
+                                      data-confirm="Pass slip for {{ $slip->date->format('M d, Y') }} will be withdrawn. This cannot be undone."
+                                      data-confirm-action="Cancel pass slip"
+                                      data-confirm-cancel="Keep it">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" role="menuitem" class="row-menu-item is-danger">

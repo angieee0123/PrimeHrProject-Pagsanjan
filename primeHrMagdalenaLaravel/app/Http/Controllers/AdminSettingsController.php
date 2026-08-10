@@ -48,8 +48,8 @@ class AdminSettingsController extends Controller
             'systemAiModel' => $systemAi?->model,
             'systemAiMaskedKey' => $systemAi?->maskedKey(),
             'activeTheme'       => SystemAiSetting::current()->theme ?? 'default',
-            'themePalettes'     => SystemTheme::all(),
-            'customThemeColor'  => SystemAiSetting::current()->custom_theme_primary ?? '#6366f1',
+            'themePalettes'     => SystemTheme::all(SystemAiSetting::current()->custom_theme_primary),
+            'customThemeColor'  => SystemAiSetting::current()->custom_theme_primary ?? SystemTheme::DEFAULT_CUSTOM_SEED,
             'themeSecondary'    => SystemAiSetting::current()->theme_secondary,
             'themeAccent'       => SystemAiSetting::current()->theme_accent,
             'themeMuted'        => SystemAiSetting::current()->theme_muted,
@@ -172,32 +172,9 @@ class AdminSettingsController extends Controller
         return response()->json(['success' => true, 'message' => 'AI provider settings saved.']);
     }
 
-    public function updateTheme(Request $request)
-    {
-        $user = Auth::user();
-        if (!$user->hasRole('admin')) {
-            return response()->json(['success' => false, 'message' => 'Only administrators can change the system theme.'], 403);
-        }
-        $hex = 'regex:/^#[0-9a-fA-F]{6}$/';
-        $data = $request->validate([
-            'theme'        => ['required', 'string', 'in:' . implode(',', array_keys(SystemTheme::PALETTES))],
-            'custom_color' => ['nullable', 'string', $hex],
-            'secondary'    => ['nullable', 'string', $hex],
-            'accent'       => ['nullable', 'string', $hex],
-            'muted'        => ['nullable', 'string', $hex],
-        ]);
-        $update = [
-            'theme'            => $data['theme'],
-            'theme_secondary'  => $data['secondary'] ?? null,
-            'theme_accent'     => $data['accent']    ?? null,
-            'theme_muted'      => $data['muted']     ?? null,
-        ];
-        if ($data['theme'] === 'custom' && !empty($data['custom_color'])) {
-            $update['custom_theme_primary'] = $data['custom_color'];
-        }
-        SystemAiSetting::current()->update($update);
-        return response()->json(['success' => true, 'message' => 'Theme updated successfully.', 'theme' => $data['theme']]);
-    }
+    // Theme endpoints moved to AppearanceController: a palette is now a
+    // per-user preference with an organisation-wide default, so it is no
+    // longer an admin-settings-only concern.
 
     public function updateSystemAiSettings(Request $request)
     {        $user = Auth::user();

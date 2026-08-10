@@ -373,7 +373,7 @@ function autoFillForm(data, filename) {
     const isPdf = filename.toLowerCase().endsWith('.pdf');
     document.getElementById('certFileName2').textContent = filename;
     document.getElementById('certFileIcon2').innerHTML = isPdf
-        ? '<svg width="32" height="32" fill="none" stroke="#8e1e18" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
+        ? '<svg width="32" height="32" fill="none" stroke="var(--theme-danger)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
         : '<svg width="32" height="32" fill="none" stroke="#0369a1" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
 }
 
@@ -499,7 +499,7 @@ function viewCertificate(btn) {
 
     document.getElementById('vcFile').textContent = filename;
     document.getElementById('vcFileIcon').innerHTML = isPdf
-        ? '<svg width="40" height="40" fill="none" stroke="#8e1e18" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
+        ? '<svg width="40" height="40" fill="none" stroke="var(--theme-danger)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
         : '<svg width="40" height="40" fill="none" stroke="#0369a1" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
 
     openModal('viewCertModal');

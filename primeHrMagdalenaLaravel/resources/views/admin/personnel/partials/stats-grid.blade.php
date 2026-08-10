@@ -3,13 +3,13 @@
     <div class="stat-card personnel-stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Personnel</p>
-            <div class="stat-icon-wrap" style="background:#f2f1fb">
+            <div class="stat-icon-wrap" style="background:var(--gp-bg-tint-2)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0b044d" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
         </div>
         <h2 class="stat-value">{{ $stats['total'] }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#0b044d"></span>
+            <span class="stat-dot" style="background:var(--gp-pri)"></span>
             <p class="stat-sub">All records</p>
         </div>
     </div>
@@ -23,7 +23,7 @@
         </div>
         <h2 class="stat-value">{{ $stats['active'] }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#15803d"></span>
+            <span class="stat-dot" style="background:var(--theme-success)"></span>
             <p class="stat-sub">Currently active</p>
         </div>
     </div>
@@ -37,7 +37,7 @@
         </div>
         <h2 class="stat-value">{{ $stats['inactive'] }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#8e1e18"></span>
+            <span class="stat-dot" style="background:var(--theme-danger)"></span>
             <p class="stat-sub">Deactivated accounts</p>
         </div>
     </div>
@@ -45,7 +45,7 @@
     <div class="stat-card personnel-stat-card">
         <div class="stat-top">
             <p class="stat-label">Permanent</p>
-            <div class="stat-icon-wrap" style="background:#fbf6e3">
+            <div class="stat-icon-wrap" style="background:var(--theme-warning-subtle)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
             </div>
         </div>

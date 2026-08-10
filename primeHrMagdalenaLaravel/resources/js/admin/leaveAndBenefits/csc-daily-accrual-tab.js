@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(data => {
             if (data.success !== false) {
                 submitBtn.innerHTML = '✓ Saved!';
-                submitBtn.style.background = '#15803d';
+                submitBtn.style.background = 'var(--theme-success)';
                 setTimeout(() => {
                     document.getElementById('editAccrualRateModal').classList.remove('active');
                     window.location.reload();

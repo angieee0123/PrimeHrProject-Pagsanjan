@@ -20,43 +20,43 @@
 .permanent-leavebenefits .lb-required { color: #8e1e18; }
 .permanent-leavebenefits .lb-field-label { display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--gp-pri); margin-bottom: 8px; }
 .permanent-leavebenefits .lb-panel-label { display: block; font-weight: 600; color: var(--gp-pri); margin-bottom: 12px; font-size: 13px; }
-.permanent-leavebenefits .lb-sublabel { font-size: 12px; color: #6b7280; margin-bottom: 6px; display: block; }
-.permanent-leavebenefits .lb-subtext { font-size: 12px; color: #374151; margin-bottom: 8px; }
-.permanent-leavebenefits .lb-hint { margin: 8px 0 0 0; font-size: 11px; color: #9ca3af; }
-.permanent-leavebenefits .lb-text-muted-11 { color: #9ca3af; font-size: 11px; }
-.permanent-leavebenefits .lb-text-muted-12 { color: #9ca3af; font-size: 12px; }
-.permanent-leavebenefits .lb-text-soft-12 { color: #6b7280; font-size: 12px; }
+.permanent-leavebenefits .lb-sublabel { font-size: 12px; color: var(--theme-neutral-700); margin-bottom: 6px; display: block; }
+.permanent-leavebenefits .lb-subtext { font-size: 12px; color: var(--theme-neutral-800); margin-bottom: 8px; }
+.permanent-leavebenefits .lb-hint { margin: 8px 0 0 0; font-size: 11px; color: var(--theme-neutral-600); }
+.permanent-leavebenefits .lb-text-muted-11 { color: var(--theme-neutral-600); font-size: 11px; }
+.permanent-leavebenefits .lb-text-muted-12 { color: var(--theme-neutral-600); font-size: 12px; }
+.permanent-leavebenefits .lb-text-soft-12 { color: var(--theme-neutral-700); font-size: 12px; }
 .permanent-leavebenefits .lb-info-text { margin: 0; font-size: 12px; color: #0369a1; line-height: 1.5; }
 .permanent-leavebenefits .lb-warn-text { margin: 0; font-size: 12px; color: #92400e; line-height: 1.5; }
 .permanent-leavebenefits .lb-error-text { margin: 0; color: #991b1b; font-size: 13px; line-height: 1.5; }
-.permanent-leavebenefits .lb-remarks-text { color: #6b7280; font-style: italic; }
-.permanent-leavebenefits .lb-upload-title { margin: 0 0 4px 0; font-size: 13px; color: #374151; font-weight: 500; }
-.permanent-leavebenefits .lb-days-label { font-size: 13px; color: #6b7280; font-weight: 500; }
-.permanent-leavebenefits .lb-empty-title { margin: 0; font-size: 15px; color: #6b7280; font-weight: 500; }
-.permanent-leavebenefits .lb-empty-sub { margin: 8px 0 0 0; font-size: 13px; color: #9ca3af; }
+.permanent-leavebenefits .lb-remarks-text { color: var(--theme-neutral-700); font-style: italic; }
+.permanent-leavebenefits .lb-upload-title { margin: 0 0 4px 0; font-size: 13px; color: var(--theme-neutral-800); font-weight: 500; }
+.permanent-leavebenefits .lb-days-label { font-size: 13px; color: var(--theme-neutral-700); font-weight: 500; }
+.permanent-leavebenefits .lb-empty-title { margin: 0; font-size: 15px; color: var(--theme-neutral-700); font-weight: 500; }
+.permanent-leavebenefits .lb-empty-sub { margin: 8px 0 0 0; font-size: 13px; color: var(--theme-neutral-600); }
 .permanent-leavebenefits .lb-banner-title { margin: 0; font-size: 15px; font-weight: 600; color: #1f2937; }
-.permanent-leavebenefits .lb-banner-sub { margin: 4px 0 0 0; font-size: 12px; color: #6b7280; }
-.permanent-leavebenefits .lb-pct-text { font-size: 12px; color: #6b6a8a; font-weight: 600; min-width: 38px; }
+.permanent-leavebenefits .lb-banner-sub { margin: 4px 0 0 0; font-size: 12px; color: var(--theme-neutral-700); }
+.permanent-leavebenefits .lb-pct-text { font-size: 12px; color: var(--theme-neutral-700); font-weight: 600; min-width: 38px; }
 
-.permanent-leavebenefits .lb-panel { background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px; }
-.permanent-leavebenefits .lb-panel-bordered { background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e5e7eb; }
+.permanent-leavebenefits .lb-panel { background: var(--theme-neutral-50); padding: 16px; border-radius: 8px; margin-bottom: 20px; }
+.permanent-leavebenefits .lb-panel-bordered { background: var(--theme-neutral-50); padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--theme-neutral-300); }
 .permanent-leavebenefits .lb-info-box { margin-top: 8px; padding: 10px; background: #f0f9ff; border-left: 3px solid #0ea5e9; border-radius: 4px; }
 .permanent-leavebenefits .lb-warn-box { margin-top: 8px; padding: 10px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px; }
 .permanent-leavebenefits .lb-error-box { padding: 12px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 6px; margin-bottom: 16px; }
-.permanent-leavebenefits .lb-days-box { margin-top: 12px; padding: 12px; background: #fff; border-radius: 6px; border: 2px dashed #d1d5db; }
-.permanent-leavebenefits .lb-days-input { width: 70px; padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 14px; font-weight: 700; color: var(--gp-pri); text-align: center; background: #f9fafb; }
-.permanent-leavebenefits .lb-dropzone { border: 2px dashed #d1d5db; border-radius: 8px; padding: 20px; text-align: center; background: #fafafa; transition: all 0.2s; }
+.permanent-leavebenefits .lb-days-box { margin-top: 12px; padding: 12px; background: #fff; border-radius: 6px; border: 2px dashed var(--theme-neutral-400); }
+.permanent-leavebenefits .lb-days-input { width: 70px; padding: 6px 10px; border: 1px solid var(--theme-neutral-300); border-radius: 4px; font-size: 14px; font-weight: 700; color: var(--gp-pri); text-align: center; background: var(--theme-neutral-50); }
+.permanent-leavebenefits .lb-dropzone { border: 2px dashed var(--theme-neutral-400); border-radius: 8px; padding: 20px; text-align: center; background: #fafafa; transition: all 0.2s; }
 .permanent-leavebenefits .lb-file-name-box { margin-top: 12px; padding: 8px 12px; background: #f0f9ff; border-radius: 4px; font-size: 12px; color: #0369a1; }
 .permanent-leavebenefits .lb-filter-summary { background: #f0f9ff; border-left: 4px solid #0284c7; padding: 12px 16px; margin: 0 0 16px 0; border-radius: 4px; font-size: 13px; color: #0c4a6e; }
-.permanent-leavebenefits .lb-date-filter-box { display: flex; gap: 6px; align-items: center; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 6px 10px; }
+.permanent-leavebenefits .lb-date-filter-box { display: flex; gap: 6px; align-items: center; background: #fff; border: 1px solid var(--theme-neutral-300); border-radius: 6px; padding: 6px 10px; }
 
-.permanent-leavebenefits .lb-select-lg { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff; cursor: pointer; transition: all 0.2s; }
-.permanent-leavebenefits .lb-input-md { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px; font-family: inherit; }
-.permanent-leavebenefits .lb-select-md { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 13px; }
-.permanent-leavebenefits .lb-textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical; line-height: 1.6; }
+.permanent-leavebenefits .lb-select-lg { width: 100%; padding: 12px; border: 2px solid var(--theme-neutral-300); border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff; cursor: pointer; transition: all 0.2s; }
+.permanent-leavebenefits .lb-input-md { width: 100%; padding: 10px; border: 2px solid var(--theme-neutral-300); border-radius: 6px; font-size: 13px; font-family: inherit; }
+.permanent-leavebenefits .lb-select-md { width: 100%; padding: 10px; border: 2px solid var(--theme-neutral-300); border-radius: 6px; font-size: 13px; }
+.permanent-leavebenefits .lb-textarea { width: 100%; padding: 12px; border: 2px solid var(--theme-neutral-300); border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical; line-height: 1.6; }
 .permanent-leavebenefits .lb-radio-label { font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
 
-.permanent-leavebenefits .lb-modal-footer { border-top: 1px solid #e5e7eb; padding: 16px 24px; background: #f9fafb; }
+.permanent-leavebenefits .lb-modal-footer { border-top: 1px solid var(--theme-neutral-300); padding: 16px 24px; background: var(--theme-neutral-50); }
 .permanent-leavebenefits .lb-btn-pad-sm { padding: 10px 20px; }
 .permanent-leavebenefits .lb-btn-submit { padding: 10px 24px; display: flex; align-items: center; gap: 8px; }
 .permanent-leavebenefits .lb-btn-danger { background: #dc2626; }
@@ -80,22 +80,22 @@
     border-color: var(--gp-pri-2);
     transform: translateY(-1px);
 }
-.permanent-leavebenefits .lb-toggle-btn { padding: 6px 14px; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; background: #fff; color: #6b7280; transition: all 0.2s; }
+.permanent-leavebenefits .lb-toggle-btn { padding: 6px 14px; border: 1px solid var(--theme-neutral-300); border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; background: #fff; color: var(--theme-neutral-700); transition: all 0.2s; }
 .permanent-leavebenefits .lb-toggle-btn.active { background: #0284c7; color: #fff; }
 .permanent-leavebenefits .lb-btn-apply { background: #0284c7; color: #fff; padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
-.permanent-leavebenefits .lb-btn-clear { background: #f3f4f6; color: #6b7280; padding: 6px 14px; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
-.permanent-leavebenefits .lb-btn-clear:hover { background: #e5e7eb !important; border-color: #d1d5db !important; }
+.permanent-leavebenefits .lb-btn-clear { background: #f3f4f6; color: var(--theme-neutral-700); padding: 6px 14px; border: 1px solid var(--theme-neutral-300); border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
+.permanent-leavebenefits .lb-btn-clear:hover { background: var(--theme-neutral-300) !important; border-color: var(--theme-neutral-400) !important; }
 .permanent-leavebenefits .lb-btn-filter:hover { background: #0369a1 !important; }
 
 .permanent-leavebenefits .filter-input { padding: 4px 8px; border: none; background: transparent; font-size: 13px; }
 .permanent-leavebenefits .filter-input:focus { outline: none; }
-.permanent-leavebenefits .filter-select { padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 13px; background: #fff; cursor: pointer; }
+.permanent-leavebenefits .filter-select { padding: 6px 10px; border: 1px solid var(--theme-neutral-300); border-radius: 6px; font-size: 13px; background: #fff; cursor: pointer; }
 .permanent-leavebenefits .filter-select:focus { outline: none; border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1); }
 
 .permanent-leavebenefits .lb-file-row { display: flex; align-items: center; justify-content: space-between; }
 .permanent-leavebenefits .lb-file-info { display: flex; align-items: center; gap: 8px; }
 .permanent-leavebenefits .lb-file-name-text { font-weight: 500; }
-.permanent-leavebenefits .lb-file-size { color: #6b7280; font-size: 11px; }
+.permanent-leavebenefits .lb-file-size { color: var(--theme-neutral-700); font-size: 11px; }
 
 .permanent-leavebenefits .lb-progress-track { flex: 1; height: 6px; background: #f0effe; border-radius: 3px; overflow: hidden; }
 .permanent-leavebenefits .lb-progress-fill { height: 100%; transition: width 0.3s; }
@@ -104,17 +104,17 @@
 .permanent-leavebenefits .lb-stat-icon-box { width: 40px; height: 40px; background: #0284c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 18px; }
 .permanent-leavebenefits .lb-stat-icon-box-sm { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 14px; }
 .permanent-leavebenefits .lb-table { width: 100%; border-collapse: collapse; }
-.permanent-leavebenefits .lb-thead-row { background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
+.permanent-leavebenefits .lb-thead-row { background: var(--theme-neutral-50); border-bottom: 2px solid var(--theme-neutral-300); }
 .permanent-leavebenefits .lb-th-left { padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: #4b5563; }
 .permanent-leavebenefits .lb-th-center { padding: 12px; text-align: center; font-size: 12px; font-weight: 600; color: #4b5563; }
 .permanent-leavebenefits .lb-th-right { padding: 12px; text-align: right; font-size: 12px; font-weight: 600; color: #4b5563; }
-.permanent-leavebenefits .lb-tr-row { border-bottom: 1px solid #e5e7eb; transition: background 0.2s; }
-.permanent-leavebenefits .lb-tr-row:hover { background: #f9fafb; }
+.permanent-leavebenefits .lb-tr-row { border-bottom: 1px solid var(--theme-neutral-300); transition: background 0.2s; }
+.permanent-leavebenefits .lb-tr-row:hover { background: var(--theme-neutral-50); }
 .permanent-leavebenefits .lb-td { padding: 14px 12px; }
 .permanent-leavebenefits .lb-ta-right { text-align: right; }
 .permanent-leavebenefits .lb-ta-center { text-align: center; }
 .permanent-leavebenefits .lb-fw600 { font-weight: 600; }
-.permanent-leavebenefits .lb-empty-td { padding: 20px; text-align: center; color: #9ca3af; }
+.permanent-leavebenefits .lb-empty-td { padding: 20px; text-align: center; color: var(--theme-neutral-600); }
 .permanent-leavebenefits .lb-td-alloc { color: #0284c7; }
 .permanent-leavebenefits .lb-td-used { color: #dc2626; }
 .permanent-leavebenefits .lb-td-carried { color: #7c3aed; }
@@ -126,7 +126,7 @@
 
 .permanent-leavebenefits .page-ellipsis { min-width: 20px; color: #9999bb; font-size: 13px; font-weight: 600; text-align: center; -webkit-user-select: none; user-select: none; }
 
-.permanent-leavebenefits .lb-c-muted { color: #6b6a8a; }
+.permanent-leavebenefits .lb-c-muted { color: var(--theme-neutral-700); }
 .permanent-leavebenefits .lb-c-primary { color: var(--gp-pri); }
 .permanent-leavebenefits .lb-c-green { color: #15803d; }
 .permanent-leavebenefits .lb-w-150 { width: 150px; }
@@ -134,20 +134,20 @@
 .permanent-leavebenefits .lb-fs-12 { font-size: 12px; }
 .permanent-leavebenefits .lb-th-sort { text-align: center; cursor: pointer; }
 .permanent-leavebenefits .lb-source-cell { text-align: left; font-size: 12px; padding-left: 16px; }
-.permanent-leavebenefits .lb-source-remark { color: #6b6a8a; display: block; margin-top: 2px; padding-left: 20px; }
+.permanent-leavebenefits .lb-source-remark { color: var(--theme-neutral-700); display: block; margin-top: 2px; padding-left: 20px; }
 .permanent-leavebenefits .lb-source-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.permanent-leavebenefits .lb-source-box { background: #f7f6ff; padding: 12px; border-radius: 8px; border-left: 3px solid var(--gp-pri); }
-.permanent-leavebenefits .lb-source-remarks-text { color: #6b7280; font-size: 13px; line-height: 1.5; }
+.permanent-leavebenefits .lb-source-box { background: var(--theme-primary-soft); padding: 12px; border-radius: 8px; border-left: 3px solid var(--gp-pri); }
+.permanent-leavebenefits .lb-source-remarks-text { color: var(--theme-neutral-700); font-size: 13px; line-height: 1.5; }
 .permanent-leavebenefits #employeeTransactionDetailModal .modal-box { max-width: 600px; }
 
 .permanent-leavebenefits .lb-modal-body-scroll { max-height: 70vh; overflow-y: auto; }
-.permanent-leavebenefits .lb-label-note { font-weight: 400; color: #6b7280; }
+.permanent-leavebenefits .lb-label-note { font-weight: 400; color: var(--theme-neutral-700); }
 .permanent-leavebenefits .lb-label-block { display: block; font-weight: 600; color: var(--gp-pri); margin-bottom: 8px; font-size: 13px; }
-.permanent-leavebenefits .lb-hint-tight { margin: 0; font-size: 11px; color: #9ca3af; }
+.permanent-leavebenefits .lb-hint-tight { margin: 0; font-size: 11px; color: var(--theme-neutral-600); }
 .permanent-leavebenefits .lb-flex-gap-12 { display: flex; align-items: center; gap: 12px; }
 .permanent-leavebenefits .lb-m0 { margin: 0; }
 .permanent-leavebenefits .lb-select-inline { width: auto; padding: 6px 10px; font-size: 13px; }
-.permanent-leavebenefits .lb-fw500-muted { color: #6b6a8a; font-weight: 500; }
+.permanent-leavebenefits .lb-fw500-muted { color: var(--theme-neutral-700); font-weight: 500; }
 .permanent-leavebenefits .lb-c-amber { color: #d9bb00; font-weight: 600; }
 .permanent-leavebenefits .lb-mb-32 { margin-bottom: 32px; }
 .permanent-leavebenefits .lb-stats-banner { background: linear-gradient(135deg, #f0f9ff 0%, transparent 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #0284c7; margin-bottom: 16px; }

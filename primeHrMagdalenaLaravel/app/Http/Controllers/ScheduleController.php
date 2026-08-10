@@ -240,6 +240,15 @@ class ScheduleController extends Controller
         return redirect()->route('admin.personnel')->with('error', 'Schedule not found.');
     }
 
+    /**
+     * Work Schedules → CSV.
+     *
+     * The rows are built before streaming starts. They used to be assembled
+     * inside the stream callback, which runs after the 200 and the CSV
+     * headers have already gone out — so the catch below could never fire
+     * and a failure reached the browser as a raw 500 mid-download instead
+     * of the intended redirect.
+     */
     public function export()
     {
         try {
@@ -247,39 +256,52 @@ class ScheduleController extends Controller
                 ->orderBy('last_name')
                 ->get();
 
+            $time = fn (?string $value) => $value ? Carbon::parse($value)->format('g:i A') : '--:--';
+
+            $rows = $employees->map(function (Employee $emp) use ($time) {
+                $schedule = $emp->currentSchedule();
+
+                $middle = $emp->middle_name ? substr($emp->middle_name, 0, 1) . '. ' : '';
+                $suffix = $emp->suffix ? ' ' . $emp->suffix : '';
+
+                return [
+                    $emp->employee_id,
+                    trim($emp->first_name . ' ' . $middle . $emp->last_name . $suffix),
+                    $emp->employmentDetail?->departmentRelation?->name ?? 'N/A',
+                    $time($schedule?->am_in),
+                    $time($schedule?->am_out),
+                    $time($schedule?->pm_in),
+                    $time($schedule?->pm_out),
+                    // The same three states the table shows, so the CSV and
+                    // the screen cannot disagree about who has a schedule.
+                    match (true) {
+                        (bool) $schedule            => 'Active',
+                        $emp->schedule->isNotEmpty() => 'Scheduled',
+                        default                      => 'Not Set',
+                    },
+                ];
+            })->all();
+
             $headers = [
                 'Content-Type'        => 'text/csv',
                 'Content-Disposition' => 'attachment; filename=schedules_' . now()->format('Y-m-d') . '.csv',
             ];
 
-            $callback = function () use ($employees) {
+            return response()->stream(function () use ($rows) {
                 $file = fopen('php://output', 'w');
-                fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+                // BOM so Excel reads the UTF-8 names correctly.
+                fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
                 fputcsv($file, ['Employee ID', 'Employee Name', 'Department', 'AM In', 'AM Out', 'PM In', 'PM Out', 'Status']);
 
-                foreach ($employees as $emp) {
-                    $fullName = trim($emp->first_name . ' ' . ($emp->middle_name ? substr($emp->middle_name, 0, 1) . '. ' : '') . $emp->last_name . ($emp->suffix ? ' ' . $emp->suffix : ''));
-                    $department = $emp->employmentDetail && $emp->employmentDetail->departmentRelation
-                        ? $emp->employmentDetail->departmentRelation->name
-                        : 'N/A';
-                    $schedule = $emp->schedule;
-
-                    fputcsv($file, [
-                        $emp->employee_id,
-                        $fullName,
-                        $department,
-                        $schedule->am_in ?? '--:--',
-                        $schedule->am_out ?? '--:--',
-                        $schedule->pm_in ?? '--:--',
-                        $schedule->pm_out ?? '--:--',
-                        $schedule ? 'Assigned' : 'Not Set',
-                    ]);
+                foreach ($rows as $row) {
+                    fputcsv($file, $row);
                 }
-                fclose($file);
-            };
 
-            return response()->stream($callback, 200, $headers);
-        } catch (\Exception $e) {
+                fclose($file);
+            }, 200, $headers);
+        } catch (\Throwable $e) {
+            report($e);
+
             return redirect()->route('admin.personnel')->with('error', 'Export failed: ' . $e->getMessage());
         }
     }

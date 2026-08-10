@@ -67,7 +67,7 @@
                             <span class="badge-status cancelled">{{ ucfirst($transaction->transaction_type) }}</span>
                         @endif
                     </td>
-                    <td data-label="Amount" class="lb-ta-center lb-fw600" style="color: {{ $transaction->amount >= 0 ? '#15803d' : '#dc2626' }};">
+                    <td data-label="Amount" class="lb-ta-center lb-fw600" style="color: {{ $transaction->amount >= 0 ? 'var(--theme-success)' : 'var(--theme-danger)' }};">
                         {{ $transaction->amount >= 0 ? '+' : '' }}{{ number_format($transaction->amount, 2) }} days
                     </td>
                     <td data-label="Before" class="lb-ta-center lb-c-muted">
@@ -105,7 +105,7 @@
                                     <circle cx="12" cy="12" r="10"/>
                                     <polyline points="12 6 12 12 16 14"/>
                                 </svg>
-                                <span class="lb-fw600" style="color: #a16207;">Late Deduction</span>
+                                <span class="lb-fw600" style="color: var(--theme-warning);">Late Deduction</span>
                             </div>
                             <small class="lb-source-remark">{{ $remarks }}</small>
                         @elseif($isUndertimeDeduction)
@@ -114,7 +114,7 @@
                                     <circle cx="12" cy="12" r="10"/>
                                     <polyline points="12 6 12 12 8 10"/>
                                 </svg>
-                                <span class="lb-fw600" style="color: #8e1e18;">Undertime Deduction</span>
+                                <span class="lb-fw600" style="color: var(--theme-danger);">Undertime Deduction</span>
                             </div>
                             <small class="lb-source-remark">{{ $remarks }}</small>
                         @elseif($isLeaveApp)

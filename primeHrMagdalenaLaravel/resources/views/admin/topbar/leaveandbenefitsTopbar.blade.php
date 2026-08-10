@@ -11,7 +11,7 @@
 
 <style>
 .welcome-banner {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Poppins', sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Poppins', sans-serif !important;
 }
 </style>
 

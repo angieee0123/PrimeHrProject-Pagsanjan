@@ -67,12 +67,10 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
                 <span>AI / Chatbot</span>
             </button>
-            @if($isSystemAdmin)
             <button class="settings-nav-item" onclick="switchSettingsTab('theme', this)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/><path d="M2 12h20"/><path d="M12 2c2.76 4 4 8 4 10s-1.24 6-4 10"/><path d="M12 2c-2.76 4-4 8-4 10s1.24 6 4 10"/></svg>
-                <span>Theme</span>
+                <span>Appearance</span>
             </button>
-            @endif
         </div>
 
         <div class="settings-tip">
@@ -343,83 +341,28 @@
             </div>
             @endif
         </div>
-        {{-- Theme --}}
-        @if($isSystemAdmin)
+        {{-- Appearance --}}
+        {{-- Two scopes, kept visually and conceptually apart: "My Appearance"
+             changes only this account, "System Appearance" changes the default
+             everyone without a personal theme sees. Both render the same shared
+             partial so they cannot drift on how a palette is presented. --}}
         <div id="tab-theme" class="hidden">
             <div class="settings-section">
-                <h3 class="settings-section-title">System Color Theme</h3>
+                <h3 class="settings-section-title">My Appearance</h3>
                 <div class="settings-section-content">
-                    <p class="settings-row-desc" style="margin-bottom:20px">Choose a color palette for the entire system. This applies to all users — admin, employees, and mayor.</p>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:24px">
-                        @foreach($themePalettes as $palette)
-                        @if($palette['key'] === 'custom')
-                        <button type="button"
-                            onclick="selectTheme('custom')"
-                            id="theme-card-custom"
-                            style="border:2px solid {{ $activeTheme === 'custom' ? ($customThemeColor ?? '#6366f1') : '#e5e7eb' }};border-radius:12px;padding:16px 14px;background:{{ $activeTheme === 'custom' ? '#fafafe' : '#fff' }};cursor:pointer;text-align:left;transition:all .18s ease;position:relative">
-                            <div id="custom-color-preview" style="width:40px;height:40px;border-radius:10px;background:{{ $customThemeColor ?? '#6366f1' }};margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.15)"></div>
-                            <p style="font-size:13px;font-weight:700;color:#111827;margin:0 0 4px">Custom Color</p>
-                            <input type="color" id="customColorPicker"
-                                value="{{ $customThemeColor ?? '#6366f1' }}"
-                                onclick="event.stopPropagation()"
-                                oninput="onCustomColorChange(this.value)"
-                                style="width:100%;height:28px;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;padding:2px 4px;background:#fff">
-                            @if($activeTheme === 'custom')
-                            <span class="theme-check" style="position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;background:{{ $customThemeColor ?? '#6366f1' }};display:flex;align-items:center;justify-content:center">
-                                <svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            @endif
-                        </button>
-                        @else
-                        <button type="button"
-                            onclick="selectTheme('{{ $palette['key'] }}')"
-                            id="theme-card-{{ $palette['key'] }}"
-                            style="border:2px solid {{ $activeTheme === $palette['key'] ? $palette['preview'] : '#e5e7eb' }};border-radius:12px;padding:16px 14px;background:{{ $activeTheme === $palette['key'] ? '#fafafe' : '#fff' }};cursor:pointer;text-align:left;transition:all .18s ease;position:relative">
-                            <div style="width:40px;height:40px;border-radius:10px;background:{{ $palette['preview'] }};margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.15)"></div>
-                            <p style="font-size:13px;font-weight:700;color:#111827;margin:0 0 2px">{{ $palette['label'] }}</p>
-                            <p style="font-size:11px;color:#6b7280;margin:0">{{ $palette['key'] === 'default' ? 'System default' : $palette['preview'] }}</p>
-                            @if($activeTheme === $palette['key'])
-                            <span style="position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;background:{{ $palette['preview'] }};display:flex;align-items:center;justify-content:center">
-                                <svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            @endif
-                        </button>
-                        @endif
-                        @endforeach
-                    </div>
-                    <p class="settings-message error hidden" id="themeMsg"></p>
-
-                    {{-- Color overrides panel --}}
-                    <div id="theme-overrides-panel" style="margin-bottom:24px;padding:20px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px">
-                        <p style="font-size:12px;font-weight:700;color:#374151;letter-spacing:0.6px;text-transform:uppercase;margin:0 0 4px">Customize Colors</p>
-                        <p style="font-size:11.5px;color:#6b7280;margin:0 0 16px;line-height:1.5">Fine-tune the selected palette. Leave as-is to use the palette defaults.</p>
-                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px">
-                            <div>
-                                <label style="display:block;font-size:10.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:6px">Secondary</label>
-                                <p style="font-size:10.5px;color:#9ca3af;margin:0 0 6px;line-height:1.4">Button gradients, active tabs &amp; pagination</p>
-                                <input type="color" id="override-secondary" style="width:100%;height:36px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;padding:2px 4px">
-                            </div>
-                            <div>
-                                <label style="display:block;font-size:10.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:6px">Accent</label>
-                                <p style="font-size:10.5px;color:#9ca3af;margin:0 0 6px;line-height:1.4">Links, focus rings, chart tabs, form labels</p>
-                                <input type="color" id="override-accent" style="width:100%;height:36px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;padding:2px 4px">
-                            </div>
-                            <div>
-                                <label style="display:block;font-size:10.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:6px">Muted</label>
-                                <p style="font-size:10.5px;color:#9ca3af;margin:0 0 6px;line-height:1.4">Stat labels, table subtitles, sidebar nav text</p>
-                                <input type="color" id="override-muted" style="width:100%;height:36px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;padding:2px 4px">
-                            </div>
-                        </div>
-                        <button type="button" onclick="resetThemeOverrides()" style="margin-top:14px;font-size:11.5px;font-weight:600;color:#6b7280;background:none;border:1px solid #e5e7eb;border-radius:8px;padding:6px 14px;cursor:pointer">↺ Reset to palette defaults</button>
-                    </div>
-
-                    <div class="settings-save-bar">
-                        <button class="settings-btn-save" id="themeSaveBtn" onclick="saveTheme()">Apply Theme</button>
-                    </div>
+                    @include('settings.partials.appearance', ['scope' => 'personal'])
                 </div>
             </div>
+
+            @if($isSystemAdmin)
+            <div class="settings-section">
+                <h3 class="settings-section-title">System Appearance (everyone)</h3>
+                <div class="settings-section-content">
+                    @include('settings.partials.appearance', ['scope' => 'global'])
+                </div>
+            </div>
+            @endif
         </div>
-        @endif
     </div>
 </div>
 </div>
@@ -452,16 +395,9 @@
         email: @json($user->email),
         contactNumber: @json($contactNumber),
         aiDefaultModels: @json($aiDefaultModels),
-        activeTheme: @json($activeTheme),
-        customThemeColor: @json($customThemeColor),
-        themeSecondary: @json($themeSecondary),
-        themeAccent: @json($themeAccent),
-        themeMuted: @json($themeMuted),
-        themePalettes: @json($themePalettes),
-        themeRoute: '{{ route('admin.settings.theme') }}',
         csrfToken: '{{ csrf_token() }}',
     };
 </script>
-    @vite('resources/js/admin/settings/adminSettings.js')
+    @vite(['resources/js/admin/settings/adminSettings.js', 'resources/js/shared/appearance.js'])
 @endpush
 @endsection

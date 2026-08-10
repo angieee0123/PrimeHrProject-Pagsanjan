@@ -1,7 +1,7 @@
 /* ── Overlay & Box ── */
-.adm-overlay { display: none; position: fixed; inset: 0; background: rgba(11,4,77,0.45); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 24px; }
+.adm-overlay { display: none; position: fixed; inset: 0; background: rgba(var(--theme-primary-rgb),0.45); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 24px; }
 .adm-overlay.open { display: flex; }
-.adm-box { background: #fff; border-radius: 16px; width: 100%; max-width: 500px; box-shadow: 0 24px 64px rgba(11,4,77,0.2); overflow: hidden; animation: admSlideUp 0.25s ease; }
+.adm-box { background: #fff; border-radius: 16px; width: 100%; max-width: 500px; box-shadow: 0 24px 64px rgba(var(--theme-primary-rgb),0.2); overflow: hidden; animation: admSlideUp 0.25s ease; }
 @keyframes admSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ── Modal Header ── */
@@ -21,7 +21,7 @@
 .adm-req { color: var(--gp-bad); }
 .adm-opt { color: var(--gp-text-soft); font-weight: 400; }
 .adm-field input, .adm-field select, .adm-field textarea { padding: 10px 13px; border: 1.5px solid var(--gp-border); border-radius: 9px; font-size: 13px; font-family: 'Poppins', sans-serif; color: var(--gp-pri); background: var(--gp-bg-tint); outline: none; width: 100%; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; }
-.adm-field input:focus, .adm-field select:focus, .adm-field textarea:focus { border-color: var(--gp-pri); background: #fff; box-shadow: 0 0 0 3px rgba(11,4,77,0.07); }
+.adm-field input:focus, .adm-field select:focus, .adm-field textarea:focus { border-color: var(--gp-pri); background: #fff; box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb),0.07); }
 .adm-field input::placeholder, .adm-field textarea::placeholder { color: #c0bedd; }
 .adm-field textarea { resize: vertical; }
 .adm-field-err { font-size: 11px; color: var(--gp-bad); }
@@ -50,9 +50,9 @@
 .vdm-row strong { font-size: 13px; color: var(--gp-pri); font-weight: 600; }
 
 /* ── Feedback Modals ── */
-.fb-overlay { display: none; position: fixed; inset: 0; background: rgba(11,4,77,0.5); backdrop-filter: blur(4px); z-index: 1100; align-items: center; justify-content: center; padding: 24px; }
+.fb-overlay { display: none; position: fixed; inset: 0; background: rgba(var(--theme-primary-rgb),0.5); backdrop-filter: blur(4px); z-index: 1100; align-items: center; justify-content: center; padding: 24px; }
 .fb-overlay.open { display: flex; }
-.fb-box { background: #fff; border-radius: 20px; width: 100%; max-width: 380px; padding: 36px 32px; text-align: center; box-shadow: 0 24px 64px rgba(11,4,77,0.2); animation: admSlideUp 0.25s ease; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.fb-box { background: #fff; border-radius: 20px; width: 100%; max-width: 380px; padding: 36px 32px; text-align: center; box-shadow: 0 24px 64px rgba(var(--theme-primary-rgb),0.2); animation: admSlideUp 0.25s ease; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .fb-icon-wrap { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
 .fb-icon-success { background: #e8f9ef; border: 2px solid #bbf7d0; }
 .fb-icon-failed  { background: #fdf0ef; border: 2px solid #f5d0ce; }
@@ -84,8 +84,8 @@
 .filter-bar-left { display: flex; align-items: center; gap: 10px; flex: 1; flex-wrap: wrap; }
 .filter-label { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gp-text-soft); font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; white-space: nowrap; }
 .filter-bar select { font-size: 13px; padding: 9px 16px; border: none; border-radius: 8px; color: var(--gp-pri); background: var(--gp-bg-tint); cursor: pointer; font-family: 'Poppins', sans-serif; outline: none; transition: box-shadow 0.2s; min-width: 150px; }
-.filter-bar select:focus { box-shadow: 0 0 0 2px rgba(11,4,77,0.15); }
-.filter-bar select.active-filter { background: #ebe9ff; font-weight: 600; box-shadow: 0 0 0 2px rgba(11,4,77,0.15); }
+.filter-bar select:focus { box-shadow: 0 0 0 2px rgba(var(--theme-primary-rgb),0.15); }
+.filter-bar select.active-filter { background: #ebe9ff; font-weight: 600; box-shadow: 0 0 0 2px rgba(var(--theme-primary-rgb),0.15); }
 .filter-clear { font-size: 12.5px; color: var(--gp-bad); background: #fee8e8; border: none; border-radius: 8px; padding: 9px 14px; cursor: pointer; font-family: 'Poppins', sans-serif; display: none; transition: background 0.2s; white-space: nowrap; margin-left: auto; }
 .filter-clear:hover { background: #fecaca; }
 .filter-clear.visible { display: inline-flex; align-items: center; gap: 5px; }
@@ -149,7 +149,7 @@
 
 /* ── Stats grid ── */
 .dep-stats-grid { margin-bottom: 20px; }
-.dep-icon-purple { background: #f2f1fb; }
+.dep-icon-purple { background: var(--gp-bg-tint-2); }
 .dep-icon-green { background: #e8f9ef; }
 .dep-icon-yellow { background: #fbf6e3; }
 .dep-icon-red { background: #fdf0ef; }
@@ -167,7 +167,7 @@
     border: none;
     border-radius: 8px;
     color: var(--gp-pri);
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
     font-family: 'Poppins', sans-serif;
     outline: none;
     cursor: pointer;
@@ -180,49 +180,126 @@
 .adm-accent-purple { background: var(--gp-pri-2); }
 
 /* ── Bulk Import modal ── */
-.bim-step1-box {
-    background: #f0fdf4;
-    border: 1.5px solid #bbf7d0;
-    border-radius: 10px;
-    padding: 16px 18px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-.bim-step1-left { display: flex; align-items: center; gap: 12px; }
-.bim-step1-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 9px;
-    background: #15803d;
-    display: flex;
+/* ── Import Departments ──────────────────────────────────────────────────
+   Shares addDepartment's vocabulary: .adm-body / .adm-field / .adm-footer do
+   the structural work, and only the import-specific pieces live here. Every
+   colour is a theme variable — the previous version pinned #15803d, #c7c5e8
+   and #e8e6f8, and set the drop-zone border from an inline `ondragover`
+   handler carrying a literal navy, so none of it followed the palette.
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* Numbered step marker, so "download then upload" reads as an order. */
+.bim-step-num {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
     flex-shrink: 0;
+    background: var(--gp-pri);
+    color: var(--theme-on-primary);
+    font-size: 11px;
+    font-weight: 700;
 }
-.bim-step1-title { font-size: 13px; font-weight: 700; color: #15803d; margin-bottom: 2px; }
-.bim-step1-desc { font-size: 12px; color: #56547a; }
-.bim-download-link { white-space: nowrap; text-decoration: none; display: flex; align-items: center; gap: 6px; font-size: 12.5px; }
-.bim-step2-label { font-size: 12px; font-weight: 700; color: var(--gp-pri); margin-bottom: 8px; letter-spacing: .4px; }
-.bim-drop-zone { border: 2px dashed #c7c5e8; border-radius: 10px; padding: 28px; text-align: center; cursor: pointer; transition: border-color .2s; }
-.bim-drop-icon { margin-bottom: 8px; }
-.bim-drop-label { font-size: 13px; font-weight: 600; color: var(--gp-pri); margin-bottom: 4px; }
-.bim-drop-sub { font-size: 12px; color: #8f8daf; }
-.bim-columns-box { background: #f7f6fc; border-radius: 10px; padding: 14px 16px; margin-top: 4px; }
-.bim-columns-label { font-size: 11px; font-weight: 700; color: var(--gp-pri); margin-bottom: 8px; letter-spacing: .4px; }
-.bim-columns-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
-.bim-column-chip { background: #fff; border-radius: 6px; padding: 6px 10px; font-size: 11.5px; font-weight: 600; color: var(--gp-pri-2); border: 1px solid #e8e6f8; }
-.bim-columns-note { font-size: 11px; color: #8f8daf; margin-top: 8px; }
-.bim-footer { margin-top: 16px; padding: 0; }
+.bim-step-num-inline { margin-right: 6px; vertical-align: -4px; }
+
+.bim-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px;
+    border: 1px solid var(--gp-border);
+    border-radius: 10px;
+    background: var(--gp-bg-tint);
+}
+.bim-step-text { flex: 1; min-width: 0; }
+.bim-step-title { font-size: 12.5px; font-weight: 700; color: var(--gp-pri); margin: 0 0 2px; }
+.bim-step-desc { font-size: 11.5px; color: var(--gp-text-mid); margin: 0; line-height: 1.45; }
+.bim-download-link {
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    padding: 8px 14px;
+}
+
+.bim-drop-zone {
+    border: 2px dashed var(--theme-neutral-400);
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--gp-text-soft);
+    background: var(--gp-bg-tint);
+    transition: border-color .18s ease, background .18s ease, color .18s ease;
+}
+.bim-drop-zone:hover,
+.bim-drop-zone:focus-visible {
+    outline: none;
+    border-color: var(--theme-accent);
+    background: var(--theme-primary-soft);
+}
+/* Dragging and "file chosen" are class states, not inline styles written by
+   the drag handlers — that is what let a literal navy back in. */
+.bim-drop-zone.is-dragging {
+    border-color: var(--theme-accent);
+    background: var(--theme-primary-light);
+    color: var(--theme-accent);
+}
+.bim-drop-zone.has-file {
+    border-style: solid;
+    border-color: var(--theme-success);
+    background: var(--theme-success-subtle);
+    color: var(--theme-success-emphasis);
+}
+.bim-drop-icon { margin: 0 auto 8px; display: block; }
+.bim-drop-label { font-size: 13px; font-weight: 600; color: var(--gp-pri); margin: 0 0 3px; }
+.bim-drop-zone.has-file .bim-drop-label { color: var(--theme-success-emphasis); }
+.bim-drop-sub { font-size: 11.5px; color: var(--gp-text-soft); margin: 0; }
+
+.bim-columns-box {
+    background: var(--gp-bg-tint);
+    border: 1px solid var(--gp-border);
+    border-radius: 10px;
+    padding: 13px 15px;
+}
+.bim-columns-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+    color: var(--gp-text-mid);
+    margin: 0 0 9px;
+}
+.bim-columns-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.bim-column-chip {
+    background: #fff;
+    border: 1px solid var(--theme-neutral-300);
+    border-radius: 6px;
+    padding: 6px 9px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gp-pri-2);
+    text-align: center;
+}
+.bim-columns-note { font-size: 11px; color: var(--gp-text-soft); margin: 9px 0 0; line-height: 1.5; }
+.bim-columns-note strong { color: var(--gp-text-mid); }
+
+@media (max-width: 520px) {
+    .bim-step { flex-wrap: wrap; }
+    .bim-columns-grid { grid-template-columns: repeat(2, 1fr); }
+}
 
 /* ── View Department modal ── */
 .vdm-stat-icon-navy { background: linear-gradient(135deg,var(--gp-pri),var(--gp-pri-2)); }
 .vdm-stat-icon-green { background: linear-gradient(135deg,#15803d,#22c55e); }
 .vdm-stat-icon-gold { background: linear-gradient(135deg,#c9a227,#fbbf24); }
 .vdm-stat-val-green { color: #15803d; }
-.vdm-desc-val { color: #56547a; font-size: 12.5px; text-align: right; max-width: 60%; }
+.vdm-desc-val { color: var(--gp-text-mid); font-size: 12.5px; text-align: right; max-width: 60%; }
 
 /* ── Import Summary modal ── */
 .ism-counts { display: flex; gap: 12px; justify-content: center; margin: 12px 0; }
@@ -232,7 +309,7 @@
 .ism-count-val { font-size: 22px; font-weight: 800; margin: 0; }
 .ism-count-val-green { color: #15803d; }
 .ism-count-val-red { color: #8e1e18; }
-.ism-count-caption { font-size: 11px; color: #56547a; margin: 2px 0 0; }
+.ism-count-caption { font-size: 11px; color: var(--gp-text-mid); margin: 2px 0 0; }
 .ism-skipped-wrap { width: 100%; }
 .ism-skipped-label { font-size: 11px; font-weight: 700; color: #8e1e18; margin-bottom: 6px; letter-spacing: .4px; text-align: left; }
 .ism-skipped-list { background: #fff5f5; border: 1.5px solid #fecaca; border-radius: 8px; padding: 10px 12px; max-height: 160px; overflow-y: auto; text-align: left; }
@@ -241,9 +318,9 @@
 
 /* ── Client-rendered table rows (departments/designations) ── */
 .dep-avatar-sm { font-size: 11px; }
-.dept-tag-purple { background: #f2f1fb; color: var(--gp-pri-2); }
+.dept-tag-purple { background: var(--gp-bg-tint-2); color: var(--gp-pri-2); }
 .dep-td-accent { font-size: 13px; color: var(--gp-pri); }
 .dep-td-green { font-size: 13px; font-weight: 600; color: #15803d; }
-.dep-empty-td { text-align: center; color: #8f8daf; padding: 32px; font-size: 13px; }
-.dep-page-ellipsis { padding: 0 4px; color: #8f8daf; }
+.dep-empty-td { text-align: center; color: var(--gp-text-soft); padding: 32px; font-size: 13px; }
+.dep-page-ellipsis { padding: 0 4px; color: var(--gp-text-soft); }
 .page-btn:disabled { opacity: .5; cursor: not-allowed; }

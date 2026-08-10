@@ -214,8 +214,8 @@ window.closeEmployeeWizard = function() {
         document.getElementById('step2-edit').style.display     = 'none';
         const empStatusEl = document.getElementById('wizard-employment-status');
         const salaryEl    = document.getElementById('wizard-salary-grade');
-        empStatusEl.setAttribute('readonly',''); empStatusEl.style.cssText = 'background:#f7f6ff;color:#6b6a8a;cursor:not-allowed;';
-        salaryEl.setAttribute('readonly','');    salaryEl.style.cssText    = 'background:#f7f6ff;color:#6b6a8a;cursor:not-allowed;';
+        empStatusEl.setAttribute('readonly',''); empStatusEl.style.cssText = 'background:#f7f6ff;color:var(--theme-neutral-700);cursor:not-allowed;';
+        salaryEl.setAttribute('readonly','');    salaryEl.style.cssText    = 'background:#f7f6ff;color:var(--theme-neutral-700);cursor:not-allowed;';
     }
 }
 
@@ -257,11 +257,19 @@ function updateWizardUI() {
     document.querySelector(`.wizard-step[data-step="${currentStep}"]`).classList.add('active');
 
     document.getElementById('stepIndicator').textContent = `Step ${currentStep} of ${totalSteps}`;
-    document.getElementById('prevBtn').style.display = currentStep > 1 ? 'block' : 'none';
-    document.getElementById('nextBtn').style.display   = currentStep < totalSteps ? 'block' : 'none';
+    // 'inline-flex', not 'block': .wizard-btn lays its icon and label out as
+    // a flex row, and an inline style here beats the class. Showing the
+    // button as a block turned it back into normal flow, where Tailwind's
+    // `svg { display: block }` put the tick on its own line above "Submit".
     const isEdit = !!window.wizardIsEditMode;
-    document.getElementById('submitBtn').style.display  = (!isEdit && currentStep === totalSteps) ? 'block' : 'none';
-    document.getElementById('updateBtn').style.display  = (isEdit  && currentStep === totalSteps) ? 'block' : 'none';
+    const show = (id, visible) => {
+        document.getElementById(id).style.display = visible ? 'inline-flex' : 'none';
+    };
+
+    show('prevBtn', currentStep > 1);
+    show('nextBtn', currentStep < totalSteps);
+    show('submitBtn', !isEdit && currentStep === totalSteps);
+    show('updateBtn', isEdit && currentStep === totalSteps);
 }
 
 function validateCurrentStep() {
@@ -332,7 +340,7 @@ function generateReview() {
 
     let html = '';
 
-    html += reviewSection('👤 Personal Information', [
+    html += reviewSection('<svg class="wizard-review-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Personal Information', [
         reviewRow([['Employee ID', get('employee_id')], ['Full Name', fullName]]),
         reviewRow([['Date of Birth', formatWizardDate(get('birth_date'))], ['Place of Birth', get('place_of_birth')]]),
         reviewRow([['Sex', get('sex')], ['Civil Status', get('civil_status')]]),
@@ -342,13 +350,13 @@ function generateReview() {
     ]);
 
     html += isEdit
-        ? reviewSection('🔐 Role / Access Level', [reviewRow([['Roles', roles]])])
-        : reviewSection('🔐 Account Setup', [
+        ? reviewSection('<svg class="wizard-review-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Role / Access Level', [reviewRow([['Roles', roles]])])
+        : reviewSection('<svg class="wizard-review-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Account Setup', [
             reviewRow([['Username', get('username')], ['Email', get('user_email')]]),
-            reviewRow([['Password', get('password') ? 'Set ✓' : ''], ['Roles', roles]]),
+            reviewRow([['Password', get('password') ? 'Set' : ''], ['Roles', roles]]),
         ]);
 
-    html += reviewSection('💼 Employment Details', [
+    html += reviewSection('<svg class="wizard-review-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Employment Details', [
         reviewRow([['Department', selectedOptionText(form, 'department')], ['Position', selectedOptionText(form, 'designation_id')]]),
         reviewRow([['Employment Type/Status', get('employment_status')], ['Appointment Date', formatWizardDate(get('appointment_date'))]]),
         reviewRow([['Salary Grade', get('salary_grade')], ['Step Increment', get('step_increment')]]),
@@ -356,7 +364,7 @@ function generateReview() {
 
     const addressLine = [get('house_no'), get('street'), get('barangay'), get('city'), get('province')].filter(Boolean).join(', ');
     const address = [addressLine, get('zip_code')].filter(Boolean).join(' ');
-    html += reviewSection('📞 Contact Information', [
+    html += reviewSection('<svg class="wizard-review-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Contact Information', [
         reviewRow([['Mobile Number', get('mobile_number')], ['Landline Number', get('landline_number')]]),
         reviewRow([['Emergency Contact Person', get('emergency_contact_person')], ['Emergency Contact Number', get('emergency_contact_number')]]),
         reviewRow([['Residential Address', address]]),
@@ -367,7 +375,7 @@ function generateReview() {
         return (f && f.name) ? f.name : '';
     };
 
-    html += reviewSection('🪪 Government IDs', [
+    html += reviewSection('<svg class="wizard-review-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.2"/><line x1="14" y1="10" x2="19" y2="10"/><line x1="14" y1="14" x2="18" y2="14"/></svg> Government IDs', [
         reviewRow([['GSIS Number', get('gsis_no')], ['GSIS Scan', govIdFileName('gsis_file')]]),
         reviewRow([['PhilHealth Number', get('philhealth_no')], ['PhilHealth Scan', govIdFileName('philhealth_file')]]),
         reviewRow([['PAG-IBIG Number', get('pagibig_no')], ['PAG-IBIG Scan', govIdFileName('pagibig_file')]]),
@@ -390,7 +398,7 @@ function setGovIdStatus(idType, message, tone) {
     const el = govIdStatusEl(idType);
     if (!el) return;
     el.textContent = message;
-    el.style.color = tone === 'error' ? '#8e1e18' : (tone === 'success' ? '#15803d' : '#56547a');
+    el.style.color = tone === 'error' ? 'var(--theme-danger)' : (tone === 'success' ? 'var(--theme-success)' : 'var(--gp-text-mid)');
 }
 
 function clearGovIdOcrStatuses() {

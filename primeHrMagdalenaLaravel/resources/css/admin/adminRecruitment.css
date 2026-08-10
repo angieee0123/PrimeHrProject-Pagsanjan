@@ -1,7 +1,7 @@
 /* ── adminRecruitment.css ── */
 
 /* Stat icon wrap colours */
-.rc-icon-primary { background: rgba(11,4,77,0.1); }
+.rc-icon-primary { background: rgba(var(--theme-primary-rgb),0.1); }
 .rc-icon-success { background: rgba(21,128,61,0.1); }
 .rc-icon-warning { background: rgba(217,187,0,0.1); }
 .rc-icon-danger  { background: rgba(142,30,24,0.1); }
@@ -23,7 +23,7 @@
 /* Job card */
 .job-card {
     background: #fff;
-    border: 1.5px solid #eceaf8;
+    border: 1.5px solid var(--gp-border);
     border-radius: 14px;
     padding: 20px;
     cursor: pointer;
@@ -42,7 +42,7 @@
 }
 .job-card:hover {
     border-color: var(--gp-pri);
-    box-shadow: 0 8px 24px rgba(11,4,77,0.12);
+    box-shadow: 0 8px 24px rgba(var(--theme-primary-rgb),0.12);
     transform: translateY(-2px);
 }
 .job-card:hover::before { opacity: 1; }
@@ -111,7 +111,7 @@
 .empty-icon {
     width: 80px; height: 80px;
     margin: 0 auto 20px;
-    background: linear-gradient(135deg, var(--gp-bg-tint) 0%, #eceaf8 100%);
+    background: linear-gradient(135deg, var(--gp-bg-tint) 0%, var(--gp-border) 100%);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
 }

@@ -31,10 +31,10 @@ window.showPerformerDetails = function (emp, period, rank) {
         'poor': 'Poor'
     };
     const tierColors = {
-        'excellent': 'background:#e8f9ef;color:#15803d',
-        'good': 'background:#e8f9ef;color:#15803d',
-        'needs_improvement': 'background:#fbf6e3;color:#c9a227',
-        'poor': 'background:#fde8e8;color:#8e1e18'
+        'excellent': 'background:var(--theme-success-subtle);color:var(--theme-success)',
+        'good': 'background:var(--theme-success-subtle);color:var(--theme-success)',
+        'needs_improvement': 'background:#fbf6e3;color:var(--theme-warning)',
+        'poor': 'background:#fde8e8;color:var(--theme-danger)'
     };
     tierEl.textContent = tierLabels[emp.tier] || emp.tier;
     tierEl.style.cssText = 'font-size:12px;padding:4px 10px;border-radius:999px;font-weight:700;' + tierColors[emp.tier];

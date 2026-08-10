@@ -17,7 +17,7 @@
     gap: 4px;
     padding: 5px;
     background: var(--gp-bg-tint-2);
-    border: 1px solid #e2e1f0;
+    border: 1px solid var(--theme-neutral-300);
     border-radius: 14px;
     margin-bottom: 20px;
 }
@@ -41,7 +41,7 @@
 .tab-btn.active {
     color: #fff;
     background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri));
-    box-shadow: 0 4px 12px rgba(11,4,77,.25);
+    box-shadow: 0 4px 12px rgba(var(--theme-primary-rgb),.25);
 }
 
 /* Tab Content */
@@ -53,7 +53,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(15,12,40,0.42);
+    background: rgba(var(--theme-primary-rgb),0.42);
     -webkit-backdrop-filter: blur(8px) saturate(150%);
     backdrop-filter: blur(8px) saturate(150%);
     z-index: 2000;
@@ -68,7 +68,7 @@
     max-width: 420px;
     padding: 32px;
     text-align: center;
-    box-shadow: 0 20px 50px rgba(15,23,42,.16), 0 2px 10px rgba(15,23,42,.05);
+    box-shadow: 0 20px 50px rgba(var(--theme-shadow-rgb),.16), 0 2px 10px rgba(var(--theme-shadow-rgb),.05);
 }
 
 .qr-modal-header {
@@ -172,7 +172,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(15,12,40,0.42);
+    background: rgba(var(--theme-primary-rgb),0.42);
     -webkit-backdrop-filter: blur(8px) saturate(150%);
     backdrop-filter: blur(8px) saturate(150%);
     z-index: 2000;
@@ -187,7 +187,7 @@
     max-width: 450px;
     padding: 32px;
     text-align: center;
-    box-shadow: 0 20px 50px rgba(15,23,42,.16), 0 2px 10px rgba(15,23,42,.05);
+    box-shadow: 0 20px 50px rgba(var(--theme-shadow-rgb),.16), 0 2px 10px rgba(var(--theme-shadow-rgb),.05);
 }
 
 .personnel-modal-icon {
@@ -239,7 +239,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(15,12,40,0.42);
+    background: rgba(var(--theme-primary-rgb),0.42);
     -webkit-backdrop-filter: blur(8px) saturate(150%);
     backdrop-filter: blur(8px) saturate(150%);
     z-index: 2000;
@@ -253,7 +253,7 @@
     width: 100%;
     max-width: 480px;
     padding: 32px;
-    box-shadow: 0 20px 50px rgba(15,23,42,.16), 0 2px 10px rgba(15,23,42,.05);
+    box-shadow: 0 20px 50px rgba(var(--theme-shadow-rgb),.16), 0 2px 10px rgba(var(--theme-shadow-rgb),.05);
 }
 
 .confirm-modal-icon {
@@ -304,7 +304,7 @@
     transition: border-color .2s cubic-bezier(.4,0,.2,1), box-shadow .2s cubic-bezier(.4,0,.2,1);
 }
 .confirm-input:focus {
-    outline: none; border-color: var(--gp-pri); box-shadow: 0 0 0 4px rgba(11,4,77,.08);
+    outline: none; border-color: var(--gp-pri); box-shadow: 0 0 0 4px rgba(var(--theme-primary-rgb),.08);
 }
 
 .confirm-error {
@@ -353,5 +353,5 @@
 
 /* Table section shadow override for personnel */
 .personnel-table-section {
-    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+    box-shadow: 0 2px 12px rgba(var(--theme-shadow-rgb), 0.06);
 }

@@ -28,7 +28,7 @@
 .ec-toolbar { flex-wrap: wrap; row-gap: 10px; }
 .ec-nav { align-items: center; gap: 10px !important; flex: 0 1 auto !important; }
 .ec-toolbar-label {
-    font-size: 10.5px; font-weight: 600; color: #9aa1b5;
+    font-size: 10.5px; font-weight: 600; color: var(--theme-neutral-600);
     text-transform: uppercase; letter-spacing: 0.5px; padding-right: 2px; white-space: nowrap;
 }
 .ec-nav-btn { width: 38px; height: 38px; padding: 0 !important; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
@@ -39,8 +39,8 @@
     background: transparent; padding: 6px 10px; cursor: pointer;
     transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
-.ec-month-input:hover { background: rgba(11, 4, 77, 0.05); border-color: rgba(11, 4, 77, 0.12); }
-.ec-month-input:focus { outline: none; background: #fff; border-color: var(--gp-pri); box-shadow: 0 0 0 4px rgba(11, 4, 77, 0.08); }
+.ec-month-input:hover { background: rgba(var(--theme-primary-rgb), 0.05); border-color: rgba(var(--theme-primary-rgb), 0.12); }
+.ec-month-input:focus { outline: none; background: #fff; border-color: var(--gp-pri); box-shadow: 0 0 0 4px rgba(var(--theme-primary-rgb), 0.08); }
 .ec-month-input::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.55; }
 .ec-month-input:hover::-webkit-calendar-picker-indicator { opacity: 0.9; }
 
@@ -59,17 +59,17 @@
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.55));
     backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%);
     border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 16px; padding: 16px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(15, 23, 42, 0.04);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(var(--theme-shadow-rgb), 0.04);
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }
-.ec-stat:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.9); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 28px rgba(11, 4, 77, 0.1); }
+.ec-stat:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.9); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 28px rgba(var(--theme-primary-rgb), 0.1); }
 .ec-stat-ico { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(255, 255, 255, 0.6); }
-.ec-stat-ico.is-days    { background: #eef0fb; color: var(--gp-pri); }
+.ec-stat-ico.is-days    { background: var(--theme-neutral-200); color: var(--gp-pri); }
 .ec-stat-ico.is-leave   { background: #e9f9ef; color: #2fa860; }
 .ec-stat-ico.is-travel  { background: #eaf1ff; color: #4F7CFF; }
 .ec-stat-ico.is-pending { background: #fbf6e3; color: #eba417; }
 .ec-stat-body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.ec-stat-num { margin: 0; font-size: 20px; font-weight: 700; color: #1a1f36; line-height: 1.1; letter-spacing: -0.4px; }
+.ec-stat-num { margin: 0; font-size: 20px; font-weight: 700; color: var(--gp-ink); line-height: 1.1; letter-spacing: -0.4px; }
 .ec-stat-lbl { margin: 0; font-size: 11px; font-weight: 500; color: #697086; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---------- Calendar card ---------- */
@@ -77,11 +77,11 @@
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.6));
     backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%);
     border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 16px; padding: 16px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(15, 23, 42, 0.04);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(var(--theme-shadow-rgb), 0.04);
 }
 .ec-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
 .ec-weekdays { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eef0f5; }
-.ec-weekday { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: #94a3b8; text-transform: uppercase; padding: 2px 0; }
+.ec-weekday { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: var(--theme-neutral-600); text-transform: uppercase; padding: 2px 0; }
 .ec-weekday.is-weekend { color: #b4b9c6; }
 
 /* ---------- Day cell ---------- */
@@ -91,7 +91,7 @@
     background: #fff; display: flex; flex-direction: column; gap: 6px; overflow: hidden;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.ec-day:hover { border-color: #d7d9ec; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06); }
+.ec-day:hover { border-color: #d7d9ec; box-shadow: 0 4px 14px rgba(var(--theme-shadow-rgb), 0.06); }
 .ec-day.is-muted { background: #fafbfd; }
 .ec-day.is-muted .ec-day-num { color: #c3c0d6; }
 .ec-day.is-weekend { background: #e6e8f1; }
@@ -136,7 +136,7 @@
 .ec-tooltip {
     position: fixed; z-index: 4000; max-width: 240px;
     background: var(--gp-pri); color: #fff; border-radius: 11px; padding: 11px 13px;
-    box-shadow: 0 10px 28px rgba(11, 4, 77, 0.34); pointer-events: none;
+    box-shadow: 0 10px 28px rgba(var(--theme-primary-rgb), 0.34); pointer-events: none;
 }
 .ec-tip-name { font-size: 12.5px; font-weight: 700; margin: 0 0 5px; }
 .ec-tip-line { font-size: 11px; margin: 0 0 3px; color: #d8d5f0; display: flex; align-items: center; gap: 5px; }
@@ -151,22 +151,22 @@
 .ec-tip-status.is-pending  { background: #fef3c7; color: #92400e; }
 
 /* ---------- Day popover ---------- */
-.ec-day-modal { position: fixed; inset: 0; z-index: 3500; background: rgba(11, 4, 77, 0.3); display: flex; align-items: center; justify-content: center; padding: 20px; }
-.ec-day-modal-panel { background: #fff; border-radius: 16px; width: 100%; max-width: 420px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(11, 4, 77, 0.3); overflow: hidden; }
+.ec-day-modal { position: fixed; inset: 0; z-index: 3500; background: rgba(var(--theme-primary-rgb), 0.3); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.ec-day-modal-panel { background: #fff; border-radius: 16px; width: 100%; max-width: 420px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(var(--theme-primary-rgb), 0.3); overflow: hidden; }
 .ec-day-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #eef0f5; }
 .ec-day-modal-head h3 { font-size: 14.5px; font-weight: 800; color: var(--gp-pri); margin: 0; }
-.ec-day-modal-close { background: none; border: none; cursor: pointer; font-size: 15px; color: #94a3b8; padding: 4px; }
+.ec-day-modal-close { background: none; border: none; cursor: pointer; font-size: 15px; color: var(--theme-neutral-600); padding: 4px; }
 .ec-day-modal-close:hover { color: var(--gp-pri); }
 .ec-day-modal-list { padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-.ec-day-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; background: #f8f9fc; }
+.ec-day-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; background: var(--theme-neutral-50); }
 .ec-day-row-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .ec-day-row.kind-leave-approved .ec-day-row-dot { background: #16a34a; }
 .ec-day-row.kind-leave-pending .ec-day-row-dot { background: #f59e0b; }
 .ec-day-row.kind-travel-approved .ec-day-row-dot,
 .ec-day-row.kind-travel-pending .ec-day-row-dot { background: #3b82f6; }
 .ec-day-row-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.ec-day-row-name { font-size: 13px; font-weight: 700; color: #1e293b; }
-.ec-day-row-sub { font-size: 11px; color: #64748b; }
+.ec-day-row-name { font-size: 13px; font-weight: 700; color: var(--theme-neutral-900); }
+.ec-day-row-sub { font-size: 11px; color: var(--theme-neutral-700); }
 .ec-day-row-status { flex-shrink: 0; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
 .ec-day-row-status.is-approved { background: #dcfce7; color: #15803d; }
 .ec-day-row-status.is-pending  { background: #fef3c7; color: #92400e; }

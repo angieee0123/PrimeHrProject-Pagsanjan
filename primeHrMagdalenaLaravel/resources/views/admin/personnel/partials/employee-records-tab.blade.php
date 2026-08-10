@@ -6,7 +6,7 @@
             <p class="table-sub">Municipal Government of Pagsanjan · {{ $employees->count() }} of {{ $employees->count() }} records</p>
         </div>
         <div class="table-actions">
-            <button class="btn-export" onclick="openBulkImportModal()" style="background:#15803d; color:#fff; border-color:#15803d;">
+            <button class="btn-export" onclick="openBulkImportModal()" style="background:var(--theme-success); color:#fff; border-color:var(--theme-success);">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="17 8 12 3 7 8"/>
@@ -94,9 +94,9 @@
                     <td>
                         <div class="emp-cell">
                             @if($employee->photo)
-                                <img src="{{ $employee->photo }}" alt="{{ $fullName }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
+                                <img src="{{ $employee->photo }}" alt="{{ $fullName }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--gp-border);">
                             @else
-                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #ecebf6;">
+                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid var(--gp-border);">
                                     {{ getInitials($fullName) }}
                                 </div>
                             @endif
@@ -109,7 +109,7 @@
                     <td class="position-cell">{{ $position }}</td>
                     <td><span class="dept-tag">{{ $department }}</span></td>
                     <td class="td-center"><span class="badge-emptype">{{ $empType }}</span></td>
-                    <td style="font-size: 12px; color: #56547a; white-space: nowrap; text-align: center;">{{ $dateHired }}</td>
+                    <td style="font-size: 12px; color: var(--gp-text-mid); white-space: nowrap; text-align: center;">{{ $dateHired }}</td>
                     <td style="text-align: center;"><span class="badge-status {{ $status === 'Active' ? 'processed' : 'on-hold' }}">{{ $status }}</span></td>
                     <td class="row-menu-cell">
                         <div class="row-actions">
@@ -217,7 +217,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 40px; color: #56547a;">
+                    <td colspan="7" style="text-align: center; padding: 40px; color: var(--gp-text-mid);">
                         No employees found. Click "Add Employee" to register new personnel.
                     </td>
                 </tr>
@@ -229,7 +229,7 @@
     <div class="table-footer">
         <div style="display: flex; align-items: center; gap: 12px;">
             <p>Showing <strong id="showingStart">1</strong>-<strong id="showingEnd">10</strong> of <strong id="totalRecords">{{ $employees->count() }}</strong> records</p>
-            <select id="rowsPerPageSelect" onchange="changeRowsPerPage(this.value)" style="padding: 6px 12px; border: 1.5px solid #ecebf6; border-radius: 6px; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif; color: #0b044d; background: #fff; cursor: pointer;">
+            <select id="rowsPerPageSelect" onchange="changeRowsPerPage(this.value)" style="padding: 6px 12px; border: 1.5px solid var(--gp-border); border-radius: 6px; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; color: var(--gp-pri); background: #fff; cursor: pointer;">
                 <option value="10" selected>10 per page</option>
                 <option value="25">25 per page</option>
                 <option value="50">50 per page</option>

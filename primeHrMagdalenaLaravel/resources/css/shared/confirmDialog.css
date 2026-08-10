@@ -1,0 +1,123 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Confirm dialog — the app's own replacement for window.confirm().
+
+   Built entirely from --theme-* variables, so it follows whatever palette
+   and chrome surfaces the viewer has chosen. Imported from app.css, which
+   every layout loads, because the dialog is created on demand by
+   resources/js/shared/confirmDialog.js and can appear on any page.
+
+   The destructive button is --theme-danger rather than the brand colour:
+   under the Crimson palette those are close, but "cancel this leave
+   request" should not look like an ordinary primary action under any theme.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(var(--theme-shadow-rgb), 0.44);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    animation: confirmFade 0.14s ease;
+}
+.confirm-overlay[hidden] { display: none; }
+
+.confirm-card {
+    width: 100%;
+    max-width: 380px;
+    padding: 24px 22px 18px;
+    border-radius: 16px;
+    border: 1px solid var(--theme-border);
+    background: #fff;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    box-shadow: 0 24px 60px rgba(var(--theme-shadow-rgb), 0.28);
+    animation: confirmRise 0.18s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.confirm-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    margin-bottom: 14px;
+}
+.confirm-icon.is-danger   { background: var(--theme-danger-subtle);  color: var(--theme-danger); }
+.confirm-icon.is-question { background: var(--theme-primary-light);  color: var(--theme-accent); }
+.confirm-icon.is-info     { background: var(--theme-info-subtle);    color: var(--theme-info); }
+
+.confirm-title {
+    font-size: 15.5px;
+    font-weight: 700;
+    color: var(--theme-ink);
+    letter-spacing: -0.15px;
+    margin: 0 0 6px;
+}
+.confirm-text {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--theme-text-mid);
+    margin: 0;
+}
+.confirm-text[hidden] { display: none; }
+
+.confirm-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.confirm-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+.confirm-btn[hidden] { display: none; }
+.confirm-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--theme-focus-ring); }
+
+/* The safe answer is the plain one, and it is the one focus lands on. */
+.confirm-btn.is-keep {
+    border: 1px solid var(--theme-border);
+    background: #fff;
+    color: var(--theme-text-mid);
+}
+.confirm-btn.is-keep:hover { background: var(--theme-bg-tint-2); color: var(--theme-ink); }
+
+.confirm-btn.is-go {
+    border: none;
+    color: #fff;
+}
+.confirm-btn.is-go:hover { transform: translateY(-1px); }
+.confirm-btn.is-go.tone-danger {
+    background: var(--theme-danger);
+    color: var(--theme-danger-fg);
+    box-shadow: 0 6px 16px rgba(var(--theme-shadow-rgb), 0.22);
+}
+.confirm-btn.is-go.tone-question,
+.confirm-btn.is-go.tone-info {
+    background: var(--theme-btn-primary-bg);
+    color: var(--theme-btn-primary-fg);
+    box-shadow: 0 6px 16px rgba(var(--theme-shadow-rgb), 0.22);
+}
+
+@keyframes confirmFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes confirmRise { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 480px) {
+    .confirm-actions { flex-direction: column-reverse; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .confirm-overlay, .confirm-card { animation: none; }
+    .confirm-btn.is-go:hover { transform: none; }
+}

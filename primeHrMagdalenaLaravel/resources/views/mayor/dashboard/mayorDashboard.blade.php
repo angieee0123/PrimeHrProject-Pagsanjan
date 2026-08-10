@@ -49,13 +49,13 @@
          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
         <div class="stat-top">
             <p class="stat-label">Total Employees</p>
-            <div class="stat-icon-wrap" style="background:#f2f1fb">
+            <div class="stat-icon-wrap" style="background:var(--gp-bg-tint-2)">
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
         </div>
         <p class="stat-value">{{ number_format($stats['total_employees']) }}</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#0b044d"></span>
+            <span class="stat-dot" style="background:var(--gp-pri)"></span>
             <p class="stat-sub">+{{ $stats['new_this_month'] }} new this month</p>
         </div>
     </div>
@@ -67,13 +67,13 @@
             {{-- The title stays stable; when the records lag, the date is
                  disclosed in the sub-line rather than bracketed into the label. --}}
             <p class="stat-label">{{ $stats['attendance_is_live'] ? 'Present Today' : 'Present' }}</p>
-            <div class="stat-icon-wrap" style="background:#f2f1fb">
+            <div class="stat-icon-wrap" style="background:var(--gp-bg-tint-2)">
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
             </div>
         </div>
         <p class="stat-value">{{ number_format($stats['present_today']) }}<span class="mayor-stat-of"> / {{ number_format($stats['expected_today']) }}</span></p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#15803d"></span>
+            <span class="stat-dot" style="background:var(--theme-success)"></span>
             <p class="stat-sub">
                 {{ $stats['attendance_rate'] }}% attendance rate
                 @unless($stats['attendance_is_live']) · as of {{ $stats['attendance_label'] }} @endunless
@@ -88,7 +88,7 @@
             {{-- Badge removed: it repeated the pending count that the sub-line
                  below already states. --}}
             <p class="stat-label">On Leave Today</p>
-            <div class="stat-icon-wrap" style="background:#f2f1fb">
+            <div class="stat-icon-wrap" style="background:var(--gp-bg-tint-2)">
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
         </div>
@@ -104,13 +104,13 @@
          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
         <div class="stat-top">
             <p class="stat-label">Monthly Payroll</p>
-            <div class="stat-icon-wrap" style="background:#f2f1fb">
+            <div class="stat-icon-wrap" style="background:var(--gp-bg-tint-2)">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="#0b044d" stroke="none"><text x="3" y="19" font-size="17" font-weight="bold" font-family="Arial, sans-serif">₱</text></svg>
             </div>
         </div>
         <p class="stat-value mayor-stat-value-sm">{{ $money($stats['monthly_payroll']) }}</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#0b044d"></span>
+            <span class="stat-dot" style="background:var(--gp-pri)"></span>
             <p class="stat-sub">{{ $stats['payroll_label'] }} total</p>
         </div>
     </div>

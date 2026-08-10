@@ -2,10 +2,10 @@
 <x-modal id="detailedDTRModal" close="closeDetailedDTRModal" box-class="modal-box-wide" title="{{ $employee->first_name }} {{ $employee->last_name }}" title-id="detailedName" subtitle="{{ $employee->employee_id }}" subtitle-id="detailedEmpId">
     <x-slot:eyebrow>DETAILED DTR · <span id="detailedPeriod">{{ strtoupper($periodDisplay) }}</span></x-slot:eyebrow>
     <div class="modal-body" style="padding: 0;">
-        <div class="detailed-dtr-filters" style="padding: 16px 24px; border-bottom: 1px solid #f0effe; display: flex; gap: 12px; align-items: center;">
-            <span style="font-size: 12px; font-weight: 600; color: #6b6a8a;">Date Range:</span>
+        <div class="detailed-dtr-filters" style="padding: 16px 24px; border-bottom: 1px solid var(--theme-primary-light); display: flex; gap: 12px; align-items: center;">
+            <span style="font-size: 12px; font-weight: 600; color: var(--theme-neutral-700);">Date Range:</span>
             <input type="date" id="detailedStartDate" class="filter-select-sm" style="width: auto;" value="{{ now()->startOfMonth()->format('Y-m-d') }}">
-            <span style="font-size: 12px; color: #9999bb;">to</span>
+            <span style="font-size: 12px; color: var(--gp-text-soft);">to</span>
             <input type="date" id="detailedEndDate" class="filter-select-sm" style="width: auto;" value="{{ now()->endOfMonth()->format('Y-m-d') }}">
             <button class="btn-filter" onclick="loadDetailedDTR()">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
@@ -18,7 +18,7 @@
             </button>
         </div>
         <div style="max-height: 500px; overflow-y: auto; padding: 24px;">
-            <div id="detailedDTRLoading" style="text-align: center; padding: 40px; color: #9999bb;">
+            <div id="detailedDTRLoading" style="text-align: center; padding: 40px; color: var(--gp-text-soft);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite; margin: 0 auto;">
                     <circle cx="12" cy="12" r="10" opacity="0.25"/>
                     <path d="M12 2a10 10 0 0 1 10 10" opacity="0.75"/>
@@ -49,16 +49,16 @@
             </table>
         </div>
     </div>
-    <div class="modal-footer" style="background: #fafafe; border-top: 1px solid #f0effe;">
+    <div class="modal-footer" style="background: #fafafe; border-top: 1px solid var(--theme-primary-light);">
         <div style="flex: 1; display: flex; gap: 16px; font-size: 12px; flex-wrap: wrap;">
-            <div><span style="color: #9999bb;">Total Days:</span> <strong id="detailedTotalDays" style="color: #0b044d;">0</strong></div>
-            <div><span style="color: #9999bb;">Present:</span> <strong id="detailedTotalPresent" style="color: #15803d;">0</strong></div>
-            <div><span style="color: #9999bb;">Absent:</span> <strong id="detailedTotalAbsent" style="color: #8e1e18;">0</strong></div>
-            <div><span style="color: #9999bb;">Incomplete:</span> <strong id="detailedTotalIncomplete" style="color: #d9bb00;">0</strong></div>
-            <div><span style="color: #9999bb;">Abandoned:</span> <strong id="detailedTotalAbandoned" style="color: #d97706;">0</strong></div>
-            <div><span style="color: #9999bb;">Late:</span> <strong id="detailedTotalLate" style="color: #a16207;">0 times</strong></div>
-            <div><span style="color: #9999bb;">Total Late:</span> <strong id="detailedTotalLateMinutes" style="color: #a16207;">0 min</strong></div>
-            <div><span style="color: #9999bb;">Total Undertime:</span> <strong id="detailedTotalUndertime" style="color: #8e1e18;">0 min</strong></div>
+            <div><span style="color: var(--gp-text-soft);">Total Days:</span> <strong id="detailedTotalDays" style="color: var(--gp-pri);">0</strong></div>
+            <div><span style="color: var(--gp-text-soft);">Present:</span> <strong id="detailedTotalPresent" style="color: var(--theme-success);">0</strong></div>
+            <div><span style="color: var(--gp-text-soft);">Absent:</span> <strong id="detailedTotalAbsent" style="color: var(--theme-danger);">0</strong></div>
+            <div><span style="color: var(--gp-text-soft);">Incomplete:</span> <strong id="detailedTotalIncomplete" style="color: #d9bb00;">0</strong></div>
+            <div><span style="color: var(--gp-text-soft);">Abandoned:</span> <strong id="detailedTotalAbandoned" style="color: var(--theme-warning);">0</strong></div>
+            <div><span style="color: var(--gp-text-soft);">Late:</span> <strong id="detailedTotalLate" style="color: var(--theme-warning);">0 times</strong></div>
+            <div><span style="color: var(--gp-text-soft);">Total Late:</span> <strong id="detailedTotalLateMinutes" style="color: var(--theme-warning);">0 min</strong></div>
+            <div><span style="color: var(--gp-text-soft);">Total Undertime:</span> <strong id="detailedTotalUndertime" style="color: var(--theme-danger);">0 min</strong></div>
         </div>
         <button class="modal-btn-ghost" onclick="closeDetailedDTRModal()">Close</button>
     </div>
@@ -72,24 +72,24 @@
 
 .filter-select-sm {
     padding: 6px 12px;
-    border: 1.5px solid #e8e7f5;
+    border: 1.5px solid var(--theme-neutral-200);
     border-radius: 8px;
     font-size: 12px;
     font-family: 'Poppins', sans-serif;
-    color: #0b044d;
+    color: var(--gp-pri);
     background: #fff;
     cursor: pointer;
 }
 
 .filter-select-sm:focus {
     outline: none;
-    border-color: #0b044d;
+    border-color: var(--gp-pri);
 }
 
 .btn-filter {
     height: 32px;
     padding: 0 14px;
-    background: #0b044d;
+    background: var(--gp-pri);
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -104,18 +104,18 @@
 }
 
 .btn-filter:hover {
-    background: #1a0f6e;
+    background: var(--gp-pri-2);
 }
 
 .btn-export-sm {
     height: 32px;
     padding: 0 14px;
     background: #fff;
-    border: 1.5px solid #e4e3f0;
+    border: 1.5px solid var(--theme-neutral-300);
     border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
-    color: #0b044d;
+    color: var(--gp-pri);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -125,8 +125,8 @@
 }
 
 .btn-export-sm:hover {
-    border-color: #0b044d;
-    background: #f4f3ff;
+    border-color: var(--gp-pri);
+    background: var(--theme-primary-soft);
 }
 
 .detailed-dtr-table {
@@ -136,7 +136,7 @@
 }
 
 .detailed-dtr-table thead tr {
-    background: #f7f6ff;
+    background: var(--theme-primary-soft);
 }
 
 .detailed-dtr-table th {
@@ -144,24 +144,24 @@
     padding: 10px 12px;
     font-size: 10px;
     font-weight: 700;
-    color: #9999bb;
+    color: var(--gp-text-soft);
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    border-bottom: 1.5px solid #f0effe;
+    border-bottom: 1.5px solid var(--theme-primary-light);
     white-space: nowrap;
 }
 
 .detailed-dtr-table td {
     padding: 12px;
     font-size: 12px;
-    color: #0b044d;
-    border-bottom: 1px solid #f7f6ff;
+    color: var(--gp-pri);
+    border-bottom: 1px solid var(--theme-primary-soft);
     vertical-align: middle;
     white-space: nowrap;
 }
 
 .detailed-dtr-table tbody tr:hover {
-    background: #fafafe;
+    background: var(--theme-neutral-50);
 }
 
 .detailed-dtr-table tbody tr:last-child td {
@@ -260,15 +260,15 @@ function displayDetailedDTR(records) {
             statusColor = '#0b044d';
             statusBg = '#0b044d18';
             const travelInfo = record.travel_order_info;
-            leaveDeductionCell = `<div style="font-size: 11px; color: #0b044d; font-weight: 600;">${travelInfo.order_number}</div>
-                                  <div style="font-size: 10px; color: #6b6a8a; margin-top: 2px;">${travelInfo.destination} (${travelInfo.duration} days)</div>`;
+            leaveDeductionCell = `<div style="font-size: 11px; color: var(--gp-pri); font-weight: 600;">${travelInfo.order_number}</div>
+                                  <div style="font-size: 10px; color: var(--theme-neutral-700); margin-top: 2px;">${travelInfo.destination} (${travelInfo.duration} days)</div>`;
         } else if (isOnLeave) {
             status = '✓ On Leave';
             statusColor = '#6b6a8a';
             statusBg = '#6b6a8a18';
             const leaveInfo = record.leave_info;
-            leaveDeductionCell = `<div style="font-size: 11px; color: #6b6a8a; font-weight: 600;">${leaveInfo.leave_code}</div>
-                                  <div style="font-size: 10px; color: #9999bb; margin-top: 2px;">${leaveInfo.leave_type} (${leaveInfo.days} days)</div>`;
+            leaveDeductionCell = `<div style="font-size: 11px; color: var(--theme-neutral-700); font-weight: 600;">${leaveInfo.leave_code}</div>
+                                  <div style="font-size: 10px; color: var(--gp-text-soft); margin-top: 2px;">${leaveInfo.leave_type} (${leaveInfo.days} days)</div>`;
         } else if (!hasAmIn && !hasPmIn) {
             // No clock in at all = Absent
             status = 'Absent';
@@ -308,18 +308,18 @@ function displayDetailedDTR(records) {
 
         row.innerHTML = `
             <td><strong>${record.date}</strong></td>
-            <td style="color: #6b6a8a;">${record.day}</td>
-            <td><span style="font-family: 'Courier New', monospace; color: ${hasAmIn || isOnLeave || isOnTravelOrder ? '#0b044d' : '#9999bb'};">${record.am_in || '--:--'}</span></td>
-            <td><span style="font-family: 'Courier New', monospace; color: ${hasAmOut || isOnLeave || isOnTravelOrder ? '#0b044d' : '#9999bb'};">${record.am_out || '--:--'}</span></td>
-            <td><span style="font-family: 'Courier New', monospace; color: ${hasPmIn || isOnLeave || isOnTravelOrder ? '#0b044d' : '#9999bb'};">${record.pm_in || '--:--'}</span></td>
-            <td><span style="font-family: 'Courier New', monospace; color: ${hasPmOut || isOnLeave || isOnTravelOrder ? '#0b044d' : '#9999bb'};">${record.pm_out || '--:--'}</span></td>
+            <td style="color: var(--theme-neutral-700);">${record.day}</td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${hasAmIn || isOnLeave || isOnTravelOrder ? 'var(--gp-pri)' : 'var(--gp-text-soft)'};">${record.am_in || '--:--'}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${hasAmOut || isOnLeave || isOnTravelOrder ? 'var(--gp-pri)' : 'var(--gp-text-soft)'};">${record.am_out || '--:--'}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${hasPmIn || isOnLeave || isOnTravelOrder ? 'var(--gp-pri)' : 'var(--gp-text-soft)'};">${record.pm_in || '--:--'}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${hasPmOut || isOnLeave || isOnTravelOrder ? 'var(--gp-pri)' : 'var(--gp-text-soft)'};">${record.pm_out || '--:--'}</span></td>
             <td><span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: ${statusBg}; color: ${statusColor};">${status}</span></td>
-            <td><span style="font-family: 'Courier New', monospace; color: ${record.ot_in ? '#0b044d' : '#9999bb'};">${record.ot_in || '--:--'}</span></td>
-            <td><span style="font-family: 'Courier New', monospace; color: ${record.ot_out ? '#0b044d' : '#9999bb'};">${record.ot_out || '--:--'}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${record.ot_in ? 'var(--gp-pri)' : 'var(--gp-text-soft)'};">${record.ot_in || '--:--'}</span></td>
+            <td><span style="font-family: 'Courier New', monospace; color: ${record.ot_out ? 'var(--gp-pri)' : 'var(--gp-text-soft)'};">${record.ot_out || '--:--'}</span></td>
             <td>${isOnLeave || isOnTravelOrder ? '-' : record.undertime_display}</td>
             <td>${isOnLeave || isOnTravelOrder ? '-' : record.late_display}</td>
             <td><strong>${record.total_hours}</strong></td>
-            <td><strong style="color: #15803d;">${(record.accredited_minutes / 60).toFixed(1)} hrs</strong></td>
+            <td><strong style="color: var(--theme-success);">${(record.accredited_minutes / 60).toFixed(1)} hrs</strong></td>
             <td>${leaveDeductionCell}</td>
         `;
         tbody.appendChild(row);

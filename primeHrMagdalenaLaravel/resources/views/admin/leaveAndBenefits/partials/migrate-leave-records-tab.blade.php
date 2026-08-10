@@ -50,13 +50,13 @@
     </div>
 
     <!-- Migration Status -->
-    <div style="background: white; border: 1px solid #eceaf8; border-radius: 8px; padding: 20px; text-align: center;">
+    <div style="background: white; border: 1px solid var(--gp-border); border-radius: 8px; padding: 20px; text-align: center;">
         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" style="margin: 0 auto 16px; display: block;">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="17 8 12 3 7 8"/>
             <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
-        <p style="margin: 0 0 8px 0; font-size: 15px; color: #6b7280; font-weight: 500;">Ready to migrate leave records</p>
-        <p style="margin: 0; font-size: 13px; color: #9ca3af;">Click the "Migrate Records" button to import historical leave data from an Excel file</p>
+        <p style="margin: 0 0 8px 0; font-size: 15px; color: var(--theme-neutral-700); font-weight: 500;">Ready to migrate leave records</p>
+        <p style="margin: 0; font-size: 13px; color: var(--theme-neutral-600);">Click the "Migrate Records" button to import historical leave data from an Excel file</p>
     </div>
 </section>

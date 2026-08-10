@@ -32,33 +32,33 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Leave Requests</p>
-            <div class="stat-icon-wrap" style="background: #f2f1fb;">
+            <div class="stat-icon-wrap" style="background: var(--gp-bg-tint-2);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
             </div>
         </div>
         <h2 class="stat-value">{{ $leaveApplications->count() }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #0b044d;"></span>
+            <span class="stat-dot" style="background: var(--gp-pri);"></span>
             <p class="stat-sub">All time</p>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Approved</p>
-            <div class="stat-icon-wrap" style="background: #e8f9ef;">
+            <div class="stat-icon-wrap" style="background: var(--theme-success-subtle);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
         </div>
         <h2 class="stat-value">{{ $totalApproved }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #15803d;"></span>
+            <span class="stat-dot" style="background: var(--theme-success);"></span>
             <p class="stat-sub">This period</p>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Pending Approval</p>
-            <div class="stat-icon-wrap" style="background: #fbf6e3;">
+            <div class="stat-icon-wrap" style="background: var(--theme-warning-subtle);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
         </div>
@@ -77,7 +77,7 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
         </div>
         <h2 class="stat-value">{{ number_format($totalDays, 0) }}</h2>
         <div class="stat-footer">
-            <span class="stat-dot" style="background: #8e1e18;"></span>
+            <span class="stat-dot" style="background: var(--theme-danger);"></span>
             <p class="stat-sub">Across all employees</p>
         </div>
     </div>

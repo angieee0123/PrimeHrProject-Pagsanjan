@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Rejected!';
-                    btn.style.background = '#15803d';
+                    btn.style.background = 'var(--theme-success)';
                     setTimeout(() => {
                         closeRejectModal();
                         location.reload();
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const targetRow = document.querySelector(`[data-leave-app-id="${highlightId}"]`)?.closest('tr');
         if (targetRow) {
             targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            targetRow.style.background = '#f2f1fb';
+            targetRow.style.background = 'var(--gp-bg-tint-2)';
         }
         document.querySelector(`[data-leave-app-id="${highlightId}"]`)?.click();
     }

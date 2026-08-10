@@ -43,7 +43,7 @@
                                     <svg width="40" height="40" fill="none" stroke="#9ca3af" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                                     <p class="training-dropzone-title">Click to upload or drag and drop</p>
                                     <p class="training-dropzone-sub">PDF, JPEG, or PNG · Max 5 MB</p>
-                                    <p class="training-dropzone-sub" style="margin-top:6px; color:#0b044d; font-weight:600;">Certificate details will be auto-extracted</p>
+                                    <p class="training-dropzone-sub" style="margin-top:6px; color:var(--gp-pri); font-weight:600;">Certificate details will be auto-extracted</p>
                                 </button>
                                 <p class="training-file-name" id="trainingFileName" hidden></p>
                             </div>
@@ -54,7 +54,7 @@
                     <div id="certScanState" style="display:none; text-align:center; padding:24px 0;">
                         <div class="cert-scan-spinner"></div>
                         <p class="cert-scan-label" id="certScanLabel">Reading certificate...</p>
-                        <p style="font-size:11px; color:#9999bb; margin-top:4px;">This may take a few seconds</p>
+                        <p style="font-size:11px; color:var(--gp-text-soft); margin-top:4px;">This may take a few seconds</p>
                             </div>
 
                     <div class="training-enroll-note" style="margin-top:16px;">
@@ -129,10 +129,10 @@
                             <div class="cert-file-preview" id="certFilePreview">
                                 <div id="certFileIcon2"></div>
                                 <div>
-                                    <p id="certFileName2" style="font-size:13px; font-weight:600; color:#0b044d; margin:0;"></p>
-                                    <p style="font-size:11px; color:#9999bb; margin:0;">Ready for submission</p>
+                                    <p id="certFileName2" style="font-size:13px; font-weight:600; color:var(--gp-pri); margin:0;"></p>
+                                    <p style="font-size:11px; color:var(--gp-text-soft); margin:0;">Ready for submission</p>
                                 </div>
-                                <button type="button" onclick="resetToStep1()" style="margin-left:auto; background:none; border:none; color:#8e1e18; cursor:pointer; font-size:12px; font-weight:600;">Change</button>
+                                <button type="button" onclick="resetToStep1()" style="margin-left:auto; background:none; border:none; color:var(--theme-danger); cursor:pointer; font-size:12px; font-weight:600;">Change</button>
                             </div>
                         </div>
 </div>

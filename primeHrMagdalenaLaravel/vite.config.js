@@ -42,6 +42,7 @@ export default defineConfig({
                 'resources/css/mayor/mayorDashboard.css',
                 'resources/css/shared/aiAssistant.css',
                 'resources/js/app.js',
+                'resources/js/shared/appearance.js',
                 'resources/js/shared/aiAssistant.js',
                 'resources/js/employee/employeeDashboard.js',
                 'resources/js/employee/employeePayslip.js',

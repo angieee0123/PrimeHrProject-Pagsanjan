@@ -1,6 +1,9 @@
 {{-- View Pass Slip Detail Modal --}}
 <x-modal id="viewPassSlipDetailModal" close="closePassSlipDetailModal" title="-" title-id="detailReason" subtitle="-" subtitle-id="detailSlipDate">
-    <x-slot:eyebrow>PASS SLIP · PS-<span id="detailSlipId">-</span></x-slot:eyebrow>
+    {{-- The literal "PS-" used to be baked in here with the row id after it,
+         which rendered "PS-6" — not the slip's real number. The whole
+         slip_number ("PS-202608-0001") goes in the span instead. --}}
+    <x-slot:eyebrow>PASS SLIP · <span id="detailSlipId">-</span></x-slot:eyebrow>
     <div class="modal-body">
         <div class="modal-emp-row">
             <div class="emp-avatar modal-emp-avatar">{{ strtoupper(substr(auth()->user()->employee->first_name ?? 'E', 0, 1) . substr(auth()->user()->employee->last_name ?? 'E', 0, 1)) }}</div>

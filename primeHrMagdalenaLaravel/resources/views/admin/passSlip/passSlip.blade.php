@@ -144,7 +144,7 @@
                             @if($slip->employee->photo)
                                 <img src="{{ $slip->employee->photo }}" alt="{{ $slip->employee->first_name }}" class="ps-avatar-img">
                             @else
-                                <div style="background: {{ $passSlipColors[$loop->index % 6] }}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; border: 2px solid #e2e8f0; flex-shrink: 0;">{{ strtoupper(substr($slip->employee->first_name ?? 'N', 0, 1) . substr($slip->employee->last_name ?? 'A', 0, 1)) }}</div>
+                                <div style="background: {{ $passSlipColors[$loop->index % 6] }}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; border: 2px solid var(--theme-neutral-300); flex-shrink: 0;">{{ strtoupper(substr($slip->employee->first_name ?? 'N', 0, 1) . substr($slip->employee->last_name ?? 'A', 0, 1)) }}</div>
                             @endif
                             <div class="ps-emp-info">
                                 <p class="ps-emp-name">{{ $slip->employee->first_name ?? '' }} {{ $slip->employee->last_name ?? '' }}</p>
@@ -153,7 +153,7 @@
                         </div>
                     </td>
                     <td class="ps-td ps-td-center">
-                        <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: {{ $slip->type === 'official_activity' ? '#f2f1fb' : '#fbf6e3' }}; color: {{ $slip->type === 'official_activity' ? '#0b044d' : '#c9a227' }};">{{ $slip->type === 'official_activity' ? 'Official' : 'Personal' }}</span>
+                        <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: {{ $slip->type === 'official_activity' ? 'var(--gp-bg-tint-2)' : '#fbf6e3' }}; color: {{ $slip->type === 'official_activity' ? 'var(--gp-pri)' : '#c9a227' }};">{{ $slip->type === 'official_activity' ? 'Official' : 'Personal' }}</span>
                     </td>
                     <td class="ps-td ps-td-muted">{{ Str::limit($slip->reason ?? '', 40) }}</td>
                     <td class="ps-td ps-td-strong">{{ $slip->date ? $slip->date->format('M d, Y') : '' }}</td>
@@ -237,7 +237,7 @@
                             @if($slip->employee->photo)
                                 <img src="{{ $slip->employee->photo }}" alt="{{ $slip->employee->first_name }}" class="ps-avatar-img">
                             @else
-                                <div style="background: {{ $passSlipColors[$loop->index % 6] }}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; border: 2px solid #e2e8f0; flex-shrink: 0;">{{ strtoupper(substr($slip->employee->first_name ?? 'N', 0, 1) . substr($slip->employee->last_name ?? 'A', 0, 1)) }}</div>
+                                <div style="background: {{ $passSlipColors[$loop->index % 6] }}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; border: 2px solid var(--theme-neutral-300); flex-shrink: 0;">{{ strtoupper(substr($slip->employee->first_name ?? 'N', 0, 1) . substr($slip->employee->last_name ?? 'A', 0, 1)) }}</div>
                             @endif
                             <div class="ps-emp-info">
                                 <p class="ps-emp-name">{{ $slip->employee->first_name ?? '' }} {{ $slip->employee->last_name ?? '' }}</p>
@@ -246,7 +246,7 @@
                         </div>
                     </td>
                     <td class="ps-td ps-td-center">
-                        <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: {{ $slip->type === 'official_activity' ? '#f2f1fb' : '#fbf6e3' }}; color: {{ $slip->type === 'official_activity' ? '#0b044d' : '#c9a227' }};">{{ $slip->type === 'official_activity' ? 'Official' : 'Personal' }}</span>
+                        <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: {{ $slip->type === 'official_activity' ? 'var(--gp-bg-tint-2)' : '#fbf6e3' }}; color: {{ $slip->type === 'official_activity' ? 'var(--gp-pri)' : '#c9a227' }};">{{ $slip->type === 'official_activity' ? 'Official' : 'Personal' }}</span>
                     </td>
                     <td class="ps-td ps-td-muted">{{ Str::limit($slip->reason ?? '', 40) }}</td>
                     <td class="ps-td ps-td-strong">{{ $slip->date ? $slip->date->format('M d, Y') : '' }}</td>
@@ -321,7 +321,7 @@
                             @if($slip->employee->photo)
                                 <img src="{{ $slip->employee->photo }}" alt="{{ $slip->employee->first_name }}" class="ps-avatar-img">
                             @else
-                                <div style="background: {{ $passSlipColors[$loop->index % 6] }}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; border: 2px solid #e2e8f0; flex-shrink: 0;">{{ strtoupper(substr($slip->employee->first_name ?? 'N', 0, 1) . substr($slip->employee->last_name ?? 'A', 0, 1)) }}</div>
+                                <div style="background: {{ $passSlipColors[$loop->index % 6] }}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; border: 2px solid var(--theme-neutral-300); flex-shrink: 0;">{{ strtoupper(substr($slip->employee->first_name ?? 'N', 0, 1) . substr($slip->employee->last_name ?? 'A', 0, 1)) }}</div>
                             @endif
                             <div class="ps-emp-info">
                                 <p class="ps-emp-name">{{ $slip->employee->first_name ?? '' }} {{ $slip->employee->last_name ?? '' }}</p>

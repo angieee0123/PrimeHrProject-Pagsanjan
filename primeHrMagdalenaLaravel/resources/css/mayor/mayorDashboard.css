@@ -20,12 +20,12 @@
     transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.25s ease;
 }
 .mayor-stat-clickable:hover { transform: translateY(-4px); }
-.mayor-stat-clickable:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11, 4, 77, 0.16); }
+.mayor-stat-clickable:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), 0.16); }
 /* Deliberately NOT tabular-nums: equal-width digits on a large standalone
    figure read as loosely spaced. They stay on the small aligned numbers in the
    lists and tables below, where column alignment is the point. */
 .mayor-stat-value-sm { font-size: 20px; }
-.mayor-stat-of { font-size: 14px; color: #8f8daf; font-weight: 500; }
+.mayor-stat-of { font-size: 14px; color: var(--gp-text-soft); font-weight: 500; }
 
 /* ---------- Layout ----------
    Mirrors the admin's fixed-rail + flexible-main pattern and its 18px gutter. */
@@ -59,7 +59,7 @@
     margin: 0; line-height: 1.1; letter-spacing: -0.5px;
 }
 .payroll-headline-meta { display: flex; align-items: center; justify-content: flex-end; gap: 7px; margin-top: 4px; }
-.payroll-headline-label { font-size: 10.5px; color: #94a3b8; font-weight: 600; }
+.payroll-headline-label { font-size: 10.5px; color: var(--theme-neutral-600); font-weight: 600; }
 .payroll-delta {
     display: inline-flex; align-items: center; gap: 3px;
     font-size: 10.5px; font-weight: 700;
@@ -130,8 +130,8 @@
     font-size: 30px; font-weight: 800; color: var(--gp-pri);
     line-height: 1; letter-spacing: -1px; margin: 0;
 }
-.mayor-figure-unit { font-size: 15px; font-weight: 600; color: #94a3b8; letter-spacing: 0; margin-left: 3px; }
-.mayor-figure-label { font-size: 11.5px; color: #64748b; font-weight: 500; margin: 6px 0 0; }
+.mayor-figure-unit { font-size: 15px; font-weight: 600; color: var(--theme-neutral-600); letter-spacing: 0; margin-left: 3px; }
+.mayor-figure-label { font-size: 11.5px; color: var(--theme-neutral-700); font-weight: 500; margin: 6px 0 0; }
 
 /* Status tones for the shared ranked-row component. Colour never carries the
    meaning alone — every row is labelled and shows its count. */
@@ -171,7 +171,7 @@
     width: 32px; height: 32px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     color: #fff; font-weight: 700; font-size: 12px;
-    border: 2px solid #e2e1f0; flex-shrink: 0; overflow: hidden;
+    border: 2px solid var(--theme-neutral-300); flex-shrink: 0; overflow: hidden;
 }
 .mayor-avatar-img { object-fit: cover; display: block; }
 
@@ -194,7 +194,7 @@
     transition: background 0.15s ease;
 }
 .mlead-row:last-child { border-bottom: none; }
-.mlead-row:hover { background: #f8fafc; }
+.mlead-row:hover { background: var(--theme-neutral-50); }
 
 /* Rank medals. The old rule painted 1, 2 and 3 the same gold, which threw away
    the ordering the column exists to show. Gold, silver and bronze read as a
@@ -204,7 +204,7 @@
     min-width: 24px; height: 24px; border-radius: 8px;
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 800;
-    background: #eef2f7; color: #94a3b8;
+    background: #eef2f7; color: var(--theme-neutral-600);
     flex-shrink: 0; font-variant-numeric: tabular-nums;
 }
 .mlead-rank-1 .mlead-rank { background: #fbf3d8; color: #a67c0a; box-shadow: inset 0 0 0 1px #f0e2b0; }
@@ -221,12 +221,12 @@
    figures form a readable column down the panel. */
 .mlead-line { display: flex; align-items: baseline; gap: 7px; }
 .mlead-name {
-    font-size: 12.5px; font-weight: 650; color: #1e293b; margin: 0;
+    font-size: 12.5px; font-weight: 650; color: var(--theme-neutral-900); margin: 0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     flex-shrink: 0; max-width: 52%;
 }
 .mlead-role {
-    font-size: 11px; font-weight: 500; color: #94a3b8; margin: 0;
+    font-size: 11px; font-weight: 500; color: var(--theme-neutral-600); margin: 0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .mlead-value {
@@ -278,7 +278,7 @@
     border-radius: 12px;
     transition: background 0.15s ease;
 }
-.mleave-item:hover { background: #f8fafc; }
+.mleave-item:hover { background: var(--theme-neutral-50); }
 
 /* Drawn per item from below its node down to the next, not as one full-height
    rule, so the line stops at the last entry instead of trailing into padding.
@@ -290,7 +290,7 @@
     top: 48px;
     bottom: -2px;
     width: 2px;
-    background: linear-gradient(#e6eaf3, #f1f5f9);
+    background: linear-gradient(#e6eaf3, var(--theme-neutral-100));
     border-radius: 1px;
 }
 
@@ -298,14 +298,14 @@
    oversight view is scanning for — so it gets a wash the settled rows do not.
    The tint fades out early to keep it a hint rather than a highlighted row. */
 .mleave-item.is-pending { background: linear-gradient(90deg, #fffdf4, transparent 60%); }
-.mleave-item.is-pending:hover { background: linear-gradient(90deg, #fffaea, #f8fafc 60%); }
+.mleave-item.is-pending:hover { background: linear-gradient(90deg, #fffaea, var(--theme-neutral-50) 60%); }
 
 .mleave-node { position: relative; flex-shrink: 0; }
 .mleave-node-dot {
     position: absolute; right: -2px; bottom: -2px;
     width: 12px; height: 12px; border-radius: 50%;
     border: 2px solid #fff;
-    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.05);
+    box-shadow: 0 0 0 1px rgba(var(--theme-shadow-rgb), 0.05);
 }
 .mleave-item.is-approved .mleave-node-dot { background: #22c55e; }
 .mleave-item.is-pending  .mleave-node-dot { background: #f59e0b; }
@@ -317,12 +317,12 @@
    so the timestamps form a column down the panel. */
 .mleave-line { display: flex; align-items: baseline; gap: 7px; }
 .mleave-name {
-    font-size: 12.5px; font-weight: 650; color: #1e293b; margin: 0;
+    font-size: 12.5px; font-weight: 650; color: var(--theme-neutral-900); margin: 0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     flex-shrink: 0; max-width: 60%;
 }
 .mleave-pos {
-    font-size: 11px; font-weight: 500; color: #94a3b8; margin: 0;
+    font-size: 11px; font-weight: 500; color: var(--theme-neutral-600); margin: 0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .mleave-ago {
@@ -345,7 +345,7 @@
     border: 1px solid #e9edf5;
 }
 .mleave-chip svg { color: #a3adc2; flex-shrink: 0; }
-.mleave-chip-type { background: #f2f1fb; color: var(--gp-pri); border-color: #e4e2f4; }
+.mleave-chip-type { background: var(--gp-bg-tint-2); color: var(--gp-pri); border-color: #e4e2f4; }
 .mleave-dates { font-variant-numeric: tabular-nums; }
 
 .mleave-status {
@@ -369,7 +369,7 @@
     gap: 6px; padding: 26px 16px; text-align: center;
 }
 .mayor-empty svg { color: #cbd5e1; }
-.mayor-empty p { font-size: 12px; color: #94a3b8; margin: 0; }
+.mayor-empty p { font-size: 12px; color: var(--theme-neutral-600); margin: 0; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1180px) {

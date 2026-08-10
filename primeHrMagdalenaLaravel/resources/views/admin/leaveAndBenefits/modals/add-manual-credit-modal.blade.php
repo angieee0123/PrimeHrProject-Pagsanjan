@@ -8,7 +8,7 @@
         <div class="form-row">
             <!-- Employee Selection -->
             <div class="form-group" style="flex: 1;">
-                <label class="form-label">Employee <span style="color: #8e1e18;">*</span></label>
+                <label class="form-label">Employee <span style="color: var(--theme-danger);">*</span></label>
                 <select name="employee_id" id="manualCreditEmployee" class="form-input" required onchange="loadEmployeeLeaveTypes(this.value)">
                     <option value="">Select Employee</option>
                     @foreach($employees ?? [] as $employee)
@@ -23,7 +23,7 @@
         <div class="form-row">
             <!-- Leave Type Selection -->
             <div class="form-group" style="flex: 1;">
-                <label class="form-label">Leave Type <span style="color: #8e1e18;">*</span></label>
+                <label class="form-label">Leave Type <span style="color: var(--theme-danger);">*</span></label>
                 <select name="leave_code" id="leaveTypeSelect" class="form-input" required onchange="showCurrentBalance(this.value)">
                     <option value="">Select Leave Type</option>
                 </select>
@@ -41,20 +41,20 @@
         <div class="form-row">
             <!-- Credit Amount -->
             <div class="form-group" style="flex: 1;">
-                <label class="form-label" id="amountLabel">Credit Amount (Days) <span style="color: #8e1e18;">*</span></label>
+                <label class="form-label" id="amountLabel">Credit Amount (Days) <span style="color: var(--theme-danger);">*</span></label>
                 <input type="number" name="amount" class="form-input" step="0.000001" min="0.000001" placeholder="e.g., 5.125000 or 0.083333" required onchange="calculateNewBalance()">
-                <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;" id="amountHint">Number of days to add (up to 6 decimals, e.g., 0.125000 = 1 hour)</p>
+                <p style="font-size: 11px; color: var(--gp-text-mid); margin: 4px 0 0 0;" id="amountHint">Number of days to add (up to 6 decimals, e.g., 0.125000 = 1 hour)</p>
             </div>
 
             <!-- Transaction Date -->
             <div class="form-group" style="flex: 1;">
-                <label class="form-label">Transaction Date <span style="color: #8e1e18;">*</span></label>
+                <label class="form-label">Transaction Date <span style="color: var(--theme-danger);">*</span></label>
                 {{-- type=text: flatpickr calendar (busyDatesCalendar.js). Marks the
                      selected employee's leave / travel days for context; nothing is
                      blocked — this is the ledger date the adjustment posts on, which
                      is valid regardless of where the employee happens to be. --}}
                 <input type="text" name="transaction_date" id="manualCreditDate" class="form-input" value="{{ date('Y-m-d') }}" autocomplete="off" required>
-                <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">Date of adjustment</p>
+                <p style="font-size: 11px; color: var(--gp-text-mid); margin: 4px 0 0 0;">Date of adjustment</p>
             </div>
         </div>
 
@@ -67,9 +67,9 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label">Reason / Remarks <span style="color: #8e1e18;">*</span></label>
+            <label class="form-label">Reason / Remarks <span style="color: var(--theme-danger);">*</span></label>
             <textarea name="remarks" class="form-input" rows="3" placeholder="e.g., Manual adjustment for service award, correction of previous error, etc." required></textarea>
-            <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">Explain why this manual adjustment is being made</p>
+            <p style="font-size: 11px; color: var(--gp-text-mid); margin: 4px 0 0 0;">Explain why this manual adjustment is being made</p>
         </div>
 
         <!-- Preview Box -->

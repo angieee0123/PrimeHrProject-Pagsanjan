@@ -1,7 +1,7 @@
 /* ── adminPerformance.css ── */
 
 /* Stat icon wrap colours */
-.pf-icon-primary { background: rgba(11,4,77,0.1); }
+.pf-icon-primary { background: rgba(var(--theme-primary-rgb),0.1); }
 .pf-icon-success { background: rgba(21,128,61,0.1); }
 .pf-icon-warning { background: rgba(217,187,0,0.1); }
 .pf-icon-purple  { background: rgba(107,63,160,0.1); }

@@ -9,11 +9,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     @vite(['resources/css/app.css', 'resources/css/admin/admin.css', 'resources/css/admin/adminDashboard.css', 'resources/css/topbarTheme.css', 'resources/css/mayor/mayor.css'])
     @stack('styles')
-    @php
-        $__s = \App\Models\SystemAiSetting::current();
-        $activeTheme = $__s->theme ?? 'default';
-    @endphp
-    <style>{!! \App\Services\SystemTheme::toCss($activeTheme, $__s->custom_theme_primary, $__s->theme_secondary, $__s->theme_accent, $__s->theme_muted) !!}</style>
+    {{-- The active palette. Organisation-wide: the theme lives on
+         system_ai_settings and there is no per-user theme, so this is
+         the same block for every viewer. Resolved in one place so the
+         layouts cannot drift on how it is assembled. --}}
+    <style>{!! \App\Services\SystemTheme::activeCss() !!}</style>
 </head>
 <body>
     <div class="app-layout">

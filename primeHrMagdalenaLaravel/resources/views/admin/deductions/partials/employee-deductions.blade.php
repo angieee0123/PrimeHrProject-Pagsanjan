@@ -1,3 +1,12 @@
+{{--
+    Employee Deductions.
+
+    Ten columns did not fit: the table measured 1200px inside a 1142px
+    wrapper, so the Actions menu sat past the right edge and every employee
+    name wrapped onto three lines. Two pairs are folded together instead —
+    Category into the deduction it describes, and Start/End into one Period —
+    which brings it to eight and lets each cell hold a single line.
+--}}
 <div id="employee-deductions-tab" class="ded-hidden">
 <section class="table-section">
     <div class="table-header">
@@ -17,145 +26,129 @@
     </div>
 
 <div class="table-wrapper">
-    <table class="payroll-table">
+    <table class="payroll-table ded-emp-table">
         <thead>
             <tr>
                 <th>Employee</th>
                 <th>Department</th>
-                <th>Deduction Type</th>
-                <th>Category</th>
-                <th>Amount/Balance</th>
-                <th>Cutoff Schedule</th>
-                <th>Start Date</th>
-                <th>End Date</th>
+                <th>Deduction</th>
+                <th class="ded-num-col">Amount / Balance</th>
+                <th>Cutoff</th>
+                <th>Period</th>
                 <th>Status</th>
                 <th class="row-menu-head">Actions</th>
             </tr>
         </thead>
         <tbody id="employeeDeductionsTableBody">
             @forelse($employeeDeductions as $deduction)
-                <tr data-employee="{{ strtolower($deduction->employee->first_name . ' ' . $deduction->employee->last_name) }}" 
-                    data-type="{{ $deduction->deductionType->category }}" 
+                @php
+                    $emp        = $deduction->employee;
+                    $type       = $deduction->deductionType;
+                    $fullName   = trim($emp->first_name . ' ' . $emp->last_name);
+                    $department = $emp->employmentDetail->departmentRelation->name ?? 'N/A';
+
+                    // Category drives a themed chip rather than a hand-mixed
+                    // hex with an alpha suffix.
+                    $categoryClass = match ($type->category) {
+                        'MANDATORY' => 'is-mandatory',
+                        'LOAN'      => 'is-loan',
+                        default     => 'is-other',
+                    };
+
+                    // Human wording only. The raw enum (BOTH_SPLIT, 1ST_ONLY)
+                    // used to be printed underneath, which is storage detail
+                    // rather than something an HR officer needs to read.
+                    $cutoff = $type->schedules->first()->cutoff_schedule ?? 'BOTH_SPLIT';
+                    $cutoffLabel = match ($cutoff) {
+                        '1ST_ONLY'  => '1st cutoff',
+                        '2ND_ONLY'  => '2nd cutoff',
+                        'BOTH_FULL' => 'Both — full each',
+                        default     => 'Both — split 50/50',
+                    };
+
+                    $statusClass = match ($deduction->status) {
+                        'ACTIVE'    => 'processed',
+                        'SUSPENDED' => 'pending',
+                        'COMPLETED' => 'is-neutral',
+                        default     => 'is-neutral',
+                    };
+
+                    $isLoan = $type->category === 'LOAN';
+                    $total  = (float) ($deduction->total_amount ?? 0);
+                    $left   = (float) ($deduction->remaining_balance ?? 0);
+                    $paidPc = $total > 0 ? max(0, min(100, round((($total - $left) / $total) * 100))) : 0;
+                @endphp
+                <tr data-employee="{{ strtolower($fullName) }}"
+                    data-type="{{ $type->category }}"
                     data-status="{{ $deduction->status }}">
+
                     <td>
                         <div class="ded-row-flex">
-                            @if($deduction->employee->photo)
-                                <img src="{{ $deduction->employee->photo }}" class="ded-avatar-img">
+                            @if($emp->photo)
+                                <img src="{{ $emp->photo }}" alt="" class="ded-avatar-img" loading="lazy">
                             @else
-                                <div class="avatar ded-avatar-img" style="background: {{ $avatarColors[($deduction->employee_id ?? 0) % count($avatarColors)] }}; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px;">
-                                    {{ getInitials($deduction->employee->first_name . ' ' . $deduction->employee->last_name) }}
-                                </div>
+                                <span class="ded-avatar-img ded-avatar-initials"
+                                      style="background: {{ $avatarColors[($deduction->employee_id ?? 0) % count($avatarColors)] }}"
+                                      aria-hidden="true">{{ getInitials($fullName) }}</span>
                             @endif
-                            <div>
-                                <p class="ded-cell-title">
-                                    {{ $deduction->employee->first_name }} {{ $deduction->employee->last_name }}
-                                </p>
-                                <p class="ded-cell-sub">ID: {{ $deduction->employee->employee_id }}</p>
+                            <div class="ded-emp-text">
+                                <p class="ded-cell-title" title="{{ $fullName }}">{{ $fullName }}</p>
+                                <p class="ded-cell-sub">{{ $emp->employee_id }}</p>
                             </div>
                         </div>
                     </td>
+
+                    <td><span class="dept-tag" title="{{ $department }}">{{ $department }}</span></td>
+
                     <td>
-                        <span class="ded-text-muted-sm">
-                            {{ $deduction->employee->employmentDetail->departmentRelation->name ?? 'N/A' }}
-                        </span>
+                        <p class="ded-cell-title" title="{{ $type->name }}">{{ $type->name }}</p>
+                        <p class="ded-cell-sub">
+                            <span class="ded-chip {{ $categoryClass }}">{{ ucfirst(strtolower($type->category)) }}</span>
+                            <span class="ded-code">{{ $type->code }}</span>
+                        </p>
                     </td>
-                    <td>
-                        <div>
-                            <p class="ded-cell-title">{{ $deduction->deductionType->name }}</p>
-                            <p class="ded-cell-sub">{{ $deduction->deductionType->code }}</p>
-                        </div>
-                    </td>
-                    <td>
-                        @php
-                            $categoryColors = [
-                                'MANDATORY' => ['bg' => '#0b044d18', 'text' => '#0b044d'],
-                                'LOAN' => ['bg' => '#c9a22718', 'text' => '#c9a227'],
-                                'OTHER' => ['bg' => '#56547a18', 'text' => '#56547a'],
-                            ];
-                            $colors = $categoryColors[$deduction->deductionType->category] ?? $categoryColors['OTHER'];
-                        @endphp
-                        <span class="badge" style="background: {{ $colors['bg'] }}; color: {{ $colors['text'] }};">
-                            {{ $deduction->deductionType->category }}
-                        </span>
-                    </td>
-                    <td>
-                        @if($deduction->deductionType->category === 'LOAN')
-                            <div>
-                                <p class="ded-cell-title">
-                                    ₱{{ number_format($deduction->remaining_balance ?? 0, 2) }}
-                                </p>
-                                <p class="ded-cell-sub">
-                                    of ₱{{ number_format($deduction->total_amount ?? 0, 2) }}
-                                </p>
-                            </div>
-                        @elseif($deduction->deductionType->computation_type === 'PERCENTAGE')
-                            <span class="ded-text-sm">
-                                {{ $deduction->deductionType->percentage_rate }}% 
-                                @if($deduction->deductionType->max_amount)
-                                    (max ₱{{ number_format($deduction->deductionType->max_amount, 2) }})
-                                @endif
+
+                    <td class="ded-num-col">
+                        @if($isLoan)
+                            <p class="ded-amount">₱{{ number_format($left, 2) }}</p>
+                            <p class="ded-cell-sub">of ₱{{ number_format($total, 2) }}</p>
+                            {{-- A balance means little without knowing how far
+                                 through the loan the employee is. --}}
+                            <span class="ded-progress" role="img"
+                                  aria-label="{{ $paidPc }} percent repaid">
+                                <span class="ded-progress-fill" style="width: {{ $paidPc }}%"></span>
                             </span>
+                        @elseif($type->computation_type === 'PERCENTAGE')
+                            <p class="ded-amount">{{ $type->percentage_rate }}%</p>
+                            @if($type->max_amount)
+                                <p class="ded-cell-sub">max ₱{{ number_format($type->max_amount, 2) }}</p>
+                            @endif
                         @elseif($deduction->amount)
-                            <span class="ded-text-sm">₱{{ number_format($deduction->amount, 2) }}</span>
+                            <p class="ded-amount">₱{{ number_format($deduction->amount, 2) }}</p>
                         @else
-                            <span class="ded-text-faint-sm">Auto-computed</span>
+                            <p class="ded-cell-sub ded-auto">Auto-computed</p>
                         @endif
                     </td>
+
+                    <td><span class="ded-text-muted-sm">{{ $cutoffLabel }}</span></td>
+
                     <td>
-                        @php
-                            // Get the deduction schedule
-                            $schedule = $deduction->deductionType->schedules->first();
-                            $cutoffSchedule = $schedule ? $schedule->cutoff_schedule : 'BOTH_SPLIT';
-                            
-                            // Display cutoff schedule
-                            if ($cutoffSchedule === '1ST_ONLY') {
-                                $scheduleDisplay = '1st Cutoff Only';
-                                $scheduleColor = '#0b044d';
-                            } elseif ($cutoffSchedule === '2ND_ONLY') {
-                                $scheduleDisplay = '2nd Cutoff Only';
-                                $scheduleColor = '#15803d';
-                            } elseif ($cutoffSchedule === 'BOTH_FULL') {
-                                $scheduleDisplay = 'Both (Full Each)';
-                                $scheduleColor = '#c9a227';
-                            } else { // BOTH_SPLIT
-                                $scheduleDisplay = 'Both (Split 50-50)';
-                                $scheduleColor = '#56547a';
-                            }
-                        @endphp
-                        <div>
-                            <p style="color: {{ $scheduleColor }};" class="ded-cell-title">
-                                {{ $scheduleDisplay }}
-                            </p>
-                            <p class="ded-cell-sub">{{ $cutoffSchedule }}</p>
-                        </div>
+                        <p class="ded-text-muted-sm">{{ \Carbon\Carbon::parse($deduction->start_date)->format('M d, Y') }}</p>
+                        <p class="ded-cell-sub">
+                            @if($deduction->end_date)
+                                to {{ \Carbon\Carbon::parse($deduction->end_date)->format('M d, Y') }}
+                            @else
+                                Ongoing
+                            @endif
+                        </p>
                     </td>
-                    <td>
-                        <span class="ded-text-muted-sm">
-                            {{ \Carbon\Carbon::parse($deduction->start_date)->format('M d, Y') }}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="ded-text-muted-sm">
-                            {{ $deduction->end_date ? \Carbon\Carbon::parse($deduction->end_date)->format('M d, Y') : 'Ongoing' }}
-                        </span>
-                    </td>
-                    <td>
-                        @php
-                            $statusColors = [
-                                'ACTIVE' => ['bg' => '#15803d18', 'text' => '#15803d'],
-                                'SUSPENDED' => ['bg' => '#c9a22718', 'text' => '#c9a227'],
-                                'COMPLETED' => ['bg' => '#56547a18', 'text' => '#56547a'],
-                            ];
-                            $statusColor = $statusColors[$deduction->status] ?? $statusColors['ACTIVE'];
-                        @endphp
-                        <span class="badge" style="background: {{ $statusColor['bg'] }}; color: {{ $statusColor['text'] }};">
-                            {{ $deduction->status }}
-                        </span>
-                    </td>
+
+                    <td><span class="badge-status {{ $statusClass }}">{{ ucfirst(strtolower($deduction->status)) }}</span></td>
+
                     <td class="row-menu-cell">
                         <button type="button" class="row-menu-btn" data-menu="empDeductionMenu{{ $deduction->id }}"
                                 onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
-                                title="Actions" aria-label="Actions for {{ $deduction->employee->first_name }} {{ $deduction->employee->last_name }}">
+                                title="Actions" aria-label="Actions for {{ $fullName }}">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                 <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
                             </svg>
@@ -166,7 +159,7 @@
                                 Edit deduction
                             </button>
                             <div class="row-menu-sep"></div>
-                            <button type="button" role="menuitem" class="row-menu-item is-danger" onclick="closeRowMenu(); deleteEmployeeDeduction({{ $deduction->id }}, '{{ $deduction->employee->first_name }} {{ $deduction->employee->last_name }}', '{{ $deduction->deductionType->name }}')">
+                            <button type="button" role="menuitem" class="row-menu-item is-danger" onclick="closeRowMenu(); deleteEmployeeDeduction({{ $deduction->id }}, '{{ $fullName }}', '{{ $type->name }}')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                 Delete deduction
                             </button>
@@ -175,8 +168,10 @@
                 </tr>
             @empty
                 <tr id="noDataRow">
-                    <td colspan="10" class="ded-empty-cell">
-                        No employee deductions found. Click "Assign Deduction" to add.
+                    <td colspan="8" class="ded-empty-cell">
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="ded-empty-icon"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                        <p class="ded-empty-title">No employee deductions yet</p>
+                        <p class="ded-empty-sub">Use <strong>Assign Deduction</strong> to add the first one.</p>
                     </td>
                 </tr>
             @endforelse

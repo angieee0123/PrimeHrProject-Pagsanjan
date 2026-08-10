@@ -10,7 +10,7 @@
             <button onclick="closeViewModal()" class="view-employee-close">&times;</button>
         </div>
         <div class="view-employee-body" id="viewEmployeeContent">
-            <p style="text-align:center; color:#56547a;">Loading...</p>
+            <p style="text-align:center; color:var(--gp-text-mid);">Loading...</p>
         </div>
     </div>
 </div>

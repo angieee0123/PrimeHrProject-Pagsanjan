@@ -59,7 +59,7 @@ function searchAttendance(query) {
 
     tbody.innerHTML = '';
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 40px; color: #56547a;">No records found matching your search.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--gp-text-mid);">No records found matching your search.</td></tr>';
     } else {
         filtered.forEach(row => tbody.appendChild(row.cloneNode(true)));
     }
@@ -113,13 +113,13 @@ window.updateAttendancePagination = function () {
     if (page > 1) html += '<button class="page-btn" onclick="goToAttendancePage(' + (page - 1) + ')">‹</button>';
     if (startPage > 1) {
         html += '<button class="page-btn" onclick="goToAttendancePage(1)">1</button>';
-        if (startPage > 2) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
+        if (startPage > 2) html += '<span style="padding:0 8px;color:var(--gp-text-soft);">...</span>';
     }
     for (let i = startPage; i <= endPage; i++) {
         html += '<button class="page-btn' + (i === page ? ' active' : '') + '" onclick="goToAttendancePage(' + i + ')">' + i + '</button>';
     }
     if (endPage < totalPages) {
-        if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:#8f8daf;">...</span>';
+        if (endPage < totalPages - 1) html += '<span style="padding:0 8px;color:var(--gp-text-soft);">...</span>';
         html += '<button class="page-btn" onclick="goToAttendancePage(' + totalPages + ')">' + totalPages + '</button>';
     }
     if (page < totalPages) html += '<button class="page-btn" onclick="goToAttendancePage(' + (page + 1) + ')">›</button>';

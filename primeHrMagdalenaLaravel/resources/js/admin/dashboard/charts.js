@@ -1,3 +1,5 @@
+import { themeColor, themeRgba, chartChrome } from '../../shared/themeColors.js';
+
 // Drives both the main chart card (#dynamicChart) and the attendance trend
 // chart card (#attendanceChart) — the two share initCharts() and are wired
 // together in the dashboard's original markup, so they stay in one module.
@@ -12,18 +14,23 @@ let dynamicChart;
 let attendanceChart;
 let gradientPayroll;
 
+// Module scope, not per-function: switchPeriodChart() rebuilds datasets and
+// needs the same chrome initCharts() used. Resolved at import, by which point
+// the theme's <style> block in <head> has already been parsed.
+const chrome = chartChrome();
+
 function initCharts() {
     const ctx1 = document.getElementById('dynamicChart').getContext('2d');
     const ctx2 = document.getElementById('attendanceChart').getContext('2d');
 
     gradientPayroll = ctx1.createLinearGradient(0, 0, 0, 300);
-    gradientPayroll.addColorStop(0, 'rgba(30, 64, 175, 0.25)');
-    gradientPayroll.addColorStop(1, 'rgba(30, 64, 175, 0.01)');
+    gradientPayroll.addColorStop(0, themeRgba('--theme-accent', 0.25));
+    gradientPayroll.addColorStop(1, themeRgba('--theme-accent', 0.01));
 
     // Create gradient for Attendance Chart
     const gradientAtt = ctx2.createLinearGradient(0, 0, 0, 400);
-    gradientAtt.addColorStop(0, 'rgba(30, 64, 175, 0.3)');
-    gradientAtt.addColorStop(1, 'rgba(30, 64, 175, 0.01)');
+    gradientAtt.addColorStop(0, themeRgba('--theme-accent', 0.3));
+    gradientAtt.addColorStop(1, themeRgba('--theme-accent', 0.01));
 
     // Initialize with payroll by designation (week view)
     dynamicChart = new Chart(ctx1, {
@@ -58,7 +65,7 @@ function initCharts() {
                         boxHeight: 12,
                         padding: 12,
                         font: { size: 11, family: 'Poppins', weight: '600' },
-                        color: '#64748b',
+                        color: chrome.tick,
                         usePointStyle: true,
                         pointStyle: 'circle'
                     }
@@ -67,9 +74,9 @@ function initCharts() {
                     mode: 'index',
                     intersect: false,
                     backgroundColor: '#fff',
-                    titleColor: '#0b044d',
+                    titleColor: chrome.ink,
                     bodyColor: '#5a5888',
-                    borderColor: '#eceaf8',
+                    borderColor: chrome.border,
                     borderWidth: 1.5,
                     padding: 12,
                     displayColors: true
@@ -78,9 +85,9 @@ function initCharts() {
             scales: {
                 y: {
                     beginAtZero: true,
-                    grid: { color: '#f7f6fc', drawBorder: false },
+                    grid: { color: chrome.grid, drawBorder: false },
                     ticks: {
-                        color: '#8f8daf',
+                        color: chrome.tick,
                         font: { size: 11, family: 'Poppins' },
                         callback: function (value) {
                             if (value >= 1000000) return '₱' + (value / 1000000).toFixed(1) + 'M';
@@ -92,7 +99,7 @@ function initCharts() {
                 x: {
                     grid: { display: false, drawBorder: false },
                     ticks: {
-                        color: '#8f8daf',
+                        color: chrome.tick,
                         font: { size: 11, family: 'Poppins' },
                         callback: function (value, index) {
                             const labels = this.getLabelForValue(value);
@@ -112,14 +119,14 @@ function initCharts() {
                 {
                     label: 'Attendance Rate (%)',
                     data: attendanceData.week.data,
-                    borderColor: '#1e40af',
+                    borderColor: themeColor('--theme-accent', '#3121ca'),
                     backgroundColor: gradientAtt,
                     borderWidth: 2.5,
                     tension: 0.4,
                     fill: true,
                     pointRadius: 4,
                     pointHoverRadius: 6,
-                    pointBackgroundColor: '#1e40af',
+                    pointBackgroundColor: themeColor('--theme-accent', '#3121ca'),
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     order: 3
@@ -127,14 +134,14 @@ function initCharts() {
                 {
                     label: 'Late Arrivals (%)',
                     data: attendanceData.week.lateData,
-                    borderColor: '#8e1e18',
+                    borderColor: themeColor('--theme-danger', '#c33228'),
                     backgroundColor: 'rgba(142, 30, 24, 0.1)',
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true,
                     pointRadius: 3,
                     pointHoverRadius: 5,
-                    pointBackgroundColor: '#8e1e18',
+                    pointBackgroundColor: themeColor('--theme-danger', '#c33228'),
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     order: 2
@@ -142,14 +149,14 @@ function initCharts() {
                 {
                     label: 'Absent (%)',
                     data: attendanceData.week.absentData,
-                    borderColor: '#6d28d9',
+                    borderColor: themeColor('--theme-warning', '#916e18'),
                     backgroundColor: 'rgba(109, 40, 217, 0.1)',
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true,
                     pointRadius: 3,
                     pointHoverRadius: 5,
-                    pointBackgroundColor: '#6d28d9',
+                    pointBackgroundColor: themeColor('--theme-warning', '#916e18'),
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     order: 1
@@ -169,7 +176,7 @@ function initCharts() {
                         boxHeight: 12,
                         padding: 12,
                         font: { size: 11, family: 'Poppins', weight: '600' },
-                        color: '#64748b',
+                        color: chrome.tick,
                         usePointStyle: true,
                         pointStyle: 'circle'
                     }
@@ -178,9 +185,9 @@ function initCharts() {
                     mode: 'index',
                     intersect: false,
                     backgroundColor: '#fff',
-                    titleColor: '#0b044d',
+                    titleColor: chrome.ink,
                     bodyColor: '#5a5888',
-                    borderColor: '#eceaf8',
+                    borderColor: chrome.border,
                     borderWidth: 1.5,
                     padding: 12,
                     displayColors: true
@@ -190,9 +197,9 @@ function initCharts() {
                 y: {
                     beginAtZero: true,
                     max: 120,
-                    grid: { color: '#f7f6fc', drawBorder: false },
+                    grid: { color: chrome.grid, drawBorder: false },
                     ticks: {
-                        color: '#8f8daf',
+                        color: chrome.tick,
                         font: { size: 11, family: 'Poppins' },
                         padding: 8
                     }
@@ -201,7 +208,7 @@ function initCharts() {
                     offset: false,
                     grid: { display: false, drawBorder: false, offset: false },
                     ticks: {
-                        color: '#8f8daf',
+                        color: chrome.tick,
                         font: { size: 11, family: 'Poppins' },
                         padding: 2,
                         autoSkip: true,
@@ -248,14 +255,14 @@ function switchPeriodChart(period) {
         dynamicChart.data.datasets = [{
             label: 'Total Employees',
             data: employeeData[period].data,
-            borderColor: '#0b044d',
-            backgroundColor: 'rgba(11, 4, 77, 0.1)',
+            borderColor: chrome.ink,
+            backgroundColor: themeRgba('--theme-primary', 0.1),
             borderWidth: 2.5,
             tension: 0.4,
             fill: true,
             pointRadius: 4,
             pointHoverRadius: 6,
-            pointBackgroundColor: '#0b044d',
+            pointBackgroundColor: chrome.ink,
             pointBorderColor: '#fff',
             pointBorderWidth: 2
         }];
@@ -292,7 +299,7 @@ function switchPeriodChart(period) {
             boxHeight: 12,
             padding: 12,
             font: { size: 11, family: 'Poppins', weight: '600' },
-            color: '#64748b',
+            color: chrome.tick,
             usePointStyle: true,
             pointStyle: 'circle'
         };
@@ -326,20 +333,25 @@ window.switchAttendanceChart = function (period) {
     attendanceChart.update();
 };
 
-// Initialize with week view by default
-document.addEventListener('DOMContentLoaded', function () {
+// Initialise with the week view.
+//
+// This ran on DOMContentLoaded while initCharts() ran on window.load — and
+// DOMContentLoaded always fires first, so switchPeriodChart() reached for
+// dynamicChart before it existed and threw "Cannot read properties of
+// undefined (reading 'config')" on every dashboard load. The defaults now
+// run after the charts they configure.
+window.addEventListener('load', () => {
+    initCharts();
+
     switchPeriodChart('week');
-    // Set week as active for attendance chart
+
     const attendanceChartCard = document.getElementById('attendanceChart').closest('.chart-card');
     attendanceChartCard.querySelectorAll('.chart-tab').forEach((t, idx) => {
         t.classList.toggle('active', idx === 0);
     });
+
     attendanceChart.data.labels = attendanceData['week'].labels;
     attendanceChart.data.datasets[0].data = attendanceData['week'].data;
     attendanceChart.data.datasets[1].data = attendanceData['week'].lateData;
     attendanceChart.update();
-});
-
-window.addEventListener('load', () => {
-    initCharts();
 });

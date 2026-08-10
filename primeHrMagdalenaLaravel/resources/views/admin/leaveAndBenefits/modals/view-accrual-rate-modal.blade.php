@@ -5,7 +5,7 @@
     <div class="form-grid">
         <div class="form-group" style="grid-column: span 2;">
             <label class="form-label">Leave Type</label>
-            <div class="form-input" style="background:#f8f8fc; cursor:default; display:flex; align-items:center; gap:10px;">
+            <div class="form-input" style="background:var(--gp-bg-tint); cursor:default; display:flex; align-items:center; gap:10px;">
                 <span id="viewAccrualLeaveCode" class="badge-status processed" style="font-size:12px;"></span>
                 <span id="viewAccrualLeaveName" style="font-weight:600; color:var(--gp-pri);"></span>
             </div>
@@ -13,49 +13,49 @@
 
         <div class="form-group">
             <label class="form-label">Accrual Frequency</label>
-            <div class="form-input" style="background:#f8f8fc; cursor:default;">
+            <div class="form-input" style="background:var(--gp-bg-tint); cursor:default;">
                 <span id="viewAccrualFrequency" class="badge-status"></span>
             </div>
         </div>
 
         <div class="form-group">
             <label class="form-label">Status</label>
-            <div class="form-input" style="background:#f8f8fc; cursor:default;">
+            <div class="form-input" style="background:var(--gp-bg-tint); cursor:default;">
                 <span id="viewAccrualStatus" class="badge-status"></span>
             </div>
         </div>
 
         <div class="form-group">
             <label class="form-label">Days of Service Required</label>
-            <div class="form-input" style="background:#f8f8fc; cursor:default; font-weight:600; color:var(--gp-pri);">
+            <div class="form-input" style="background:var(--gp-bg-tint); cursor:default; font-weight:600; color:var(--gp-pri);">
                 <span id="viewAccrualDaysService"></span>
             </div>
         </div>
 
         <div class="form-group">
             <label class="form-label">Credits Earned Per Period</label>
-            <div class="form-input" style="background:#f8f8fc; cursor:default; font-weight:600; color:#15803d;">
+            <div class="form-input" style="background:var(--gp-bg-tint); cursor:default; font-weight:600; color:var(--theme-success);">
                 <span id="viewAccrualCredits"></span>
             </div>
         </div>
 
         <div class="form-group">
             <label class="form-label">Effective Date</label>
-            <div class="form-input" style="background:#f8f8fc; cursor:default;">
+            <div class="form-input" style="background:var(--gp-bg-tint); cursor:default;">
                 <span id="viewAccrualEffectiveDate"></span>
             </div>
         </div>
 
         <div class="form-group">
             <label class="form-label">End Date</label>
-            <div class="form-input" style="background:#f8f8fc; cursor:default;">
+            <div class="form-input" style="background:var(--gp-bg-tint); cursor:default;">
                 <span id="viewAccrualEndDate"></span>
             </div>
         </div>
 
         <div class="form-group" style="grid-column: span 2;" id="viewAccrualNotesGroup">
             <label class="form-label">Notes / CSC Reference</label>
-            <div class="form-input" style="background:#f8f8fc; cursor:default; min-height:60px; white-space:pre-wrap;">
+            <div class="form-input" style="background:var(--gp-bg-tint); cursor:default; min-height:60px; white-space:pre-wrap;">
                 <span id="viewAccrualNotes"></span>
             </div>
         </div>

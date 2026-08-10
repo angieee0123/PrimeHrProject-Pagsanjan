@@ -13,13 +13,13 @@
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Total Slips</p>
-            <div class="stat-icon-wrap" style="background:#f2f1fb">
+            <div class="stat-icon-wrap" style="background:var(--gp-bg-tint-2)">
                 <svg width="17" height="17" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             </div>
         </div>
         <p class="stat-value">{{ number_format($stats['total']) }}</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#0b044d"></span>
+            <span class="stat-dot" style="background:var(--gp-pri)"></span>
             <p class="stat-sub">All records</p>
         </div>
     </div>
@@ -33,7 +33,7 @@
         </div>
         <p class="stat-value">{{ number_format($stats['approved']) }}</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#15803d"></span>
+            <span class="stat-dot" style="background:var(--theme-success)"></span>
             <p class="stat-sub">Approved slips</p>
         </div>
     </div>
@@ -41,7 +41,7 @@
     <div class="stat-card">
         <div class="stat-top">
             <p class="stat-label">Pending</p>
-            <div class="stat-icon-wrap" style="background:#fbf6e3">
+            <div class="stat-icon-wrap" style="background:var(--theme-warning-subtle)">
                 <svg width="17" height="17" fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
         </div>
@@ -61,7 +61,7 @@
         </div>
         <p class="stat-value">{{ number_format($stats['rejected']) }}</p>
         <div class="stat-footer">
-            <span class="stat-dot" style="background:#8e1e18"></span>
+            <span class="stat-dot" style="background:var(--theme-danger)"></span>
             <p class="stat-sub">Rejected slips</p>
         </div>
     </div>
@@ -69,7 +69,7 @@
 
 {{-- Pass Slips Table --}}
 <div class="table-section" style="margin:0">
-    <div class="table-header" style="background:linear-gradient(135deg,#f2f1fb 0%,#fff 100%)">
+    <div class="table-header" style="background:linear-gradient(135deg,var(--gp-bg-tint-2) 0%,#fff 100%)">
         <div>
             <p class="table-title">Pass Slip Requests</p>
             <p class="table-sub">{{ number_format($stats['total']) }} filed · read-only</p>
@@ -77,7 +77,7 @@
         <div class="table-actions">
             <div style="position:relative">
                 <svg width="14" height="14" fill="none" stroke="#8f8daf" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input type="text" id="mayorSlipSearch" placeholder="Search employees..." oninput="mayorFilterSlip()" style="font-size:11px;padding:6px 12px 6px 32px;border-radius:6px;border:1.5px solid #e5e4f0;width:200px;font-family:inherit">
+                <input type="text" id="mayorSlipSearch" placeholder="Search employees..." oninput="mayorFilterSlip()" style="font-size:11px;padding:6px 12px 6px 32px;border-radius:6px;border:1.5px solid var(--theme-neutral-300);width:200px;font-family:inherit">
             </div>
             <select class="filter-select" id="mayorSlipStatus" onchange="mayorFilterSlip()">
                 <option value="">All Status</option>
@@ -116,9 +116,9 @@
                         <td>
                             <div class="emp-cell">
                                 @if($emp->photo)
-                                    <img src="{{ $emp->photo }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #ecebf6">
+                                    <img src="{{ $emp->photo }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--gp-border)">
                                 @else
-                                    <div style="width:36px;height:36px;border-radius:50%;background:{{ $avatarColors[$index % count($avatarColors)] }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:12px;border:2px solid #ecebf6">{{ $initials }}</div>
+                                    <div style="width:36px;height:36px;border-radius:50%;background:{{ $avatarColors[$index % count($avatarColors)] }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:12px;border:2px solid var(--gp-border)">{{ $initials }}</div>
                                 @endif
                                 <div>
                                     <p class="emp-name">{{ $fullName }}</p>
@@ -128,16 +128,16 @@
                         </td>
                         <td><span class="badge-emptype">{{ $typeLabel }}</span></td>
                         <td>{{ $slip->destination ?? '—' }}</td>
-                        <td style="font-size:12px;color:#56547a;white-space:nowrap">{{ $slip->date->format('M d, Y') }}</td>
-                        <td style="font-size:12px;color:#56547a;white-space:nowrap">{{ $slip->time_out ?? '—' }} / {{ $slip->time_in ?? '—' }}</td>
+                        <td style="font-size:12px;color:var(--gp-text-mid);white-space:nowrap">{{ $slip->date->format('M d, Y') }}</td>
+                        <td style="font-size:12px;color:var(--gp-text-mid);white-space:nowrap">{{ $slip->time_out ?? '—' }} / {{ $slip->time_in ?? '—' }}</td>
                         <td><span class="badge-status {{ $statusClass }}">{{ ucfirst($slip->status) }}</span></td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" style="text-align:center;padding:32px 0;color:#94a3b8;font-size:12.5px">No pass slip requests yet</td></tr>
+                    <tr><td colspan="6" style="text-align:center;padding:32px 0;color:var(--theme-neutral-600);font-size:12.5px">No pass slip requests yet</td></tr>
                 @endforelse
             </tbody>
         </table>
-        <p id="mayorSlipNoResults" style="display:none;text-align:center;padding:32px 0;color:#94a3b8;font-size:12.5px;margin:0">No slips match your search/filter</p>
+        <p id="mayorSlipNoResults" style="display:none;text-align:center;padding:32px 0;color:var(--theme-neutral-600);font-size:12.5px;margin:0">No slips match your search/filter</p>
     </div>
 </div>
 

@@ -59,7 +59,7 @@ function updateSortHeaders(selector, activeCol, dir) {
         if (!icon) return;
         const col = th.dataset.col;
         icon.textContent = col === activeCol ? (dir === 'asc' ? '↑' : '↓') : '⇅';
-        icon.style.color = col === activeCol ? '#0b044d' : '#bbb';
+        icon.style.color = col === activeCol ? 'var(--gp-pri)' : '#bbb';
     });
 }
 
@@ -247,7 +247,7 @@ window.showDeptModal = function(index) {
     document.getElementById('modal-personnel-count').textContent = dept.personnel_count;
     const sb = document.getElementById('modal-status-badge');
     sb.textContent = dept.status;
-    sb.style.color = dept.status === 'Active' ? '#15803d' : '#8e1e18';
+    sb.style.color = dept.status === 'Active' ? 'var(--theme-success)' : 'var(--theme-danger)';
     document.getElementById('modal-head').textContent = dept.head;
     const descRow = document.getElementById('modal-desc-row');
     const descEl  = document.getElementById('modal-desc');

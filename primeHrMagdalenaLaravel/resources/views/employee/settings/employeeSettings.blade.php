@@ -68,6 +68,10 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                         <span>Notifications</span>
                     </button>
+                    <button class="settings-nav-item" onclick="switchTab('theme', this)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/><path d="M2 12h20"/><path d="M12 2c2.76 4 4 8 4 10s-1.24 6-4 10"/><path d="M12 2c-2.76 4-4 8-4 10s1.24 6 4 10"/></svg>
+                        <span>Appearance</span>
+                    </button>
                 </div>
                 
                 <div class="settings-tip">
@@ -299,6 +303,18 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- Appearance: the same picker the admin page uses. Employees
+                     get a personal palette too; only the global scope is
+                     restricted to administrators. --}}
+                <div id="tab-theme" class="hidden">
+                    <div class="settings-section">
+                        <h3 class="settings-section-title">Appearance</h3>
+                        <div class="settings-section-content">
+                            @include('settings.partials.appearance', ['scope' => 'personal'])
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -345,7 +361,7 @@
     function switchTab(tabId, btn) {
         document.querySelectorAll('.settings-nav-item').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        document.querySelectorAll('#tab-profile, #tab-security, #tab-notifications').forEach(t => t.classList.add('hidden'));
+        document.querySelectorAll('#tab-profile, #tab-security, #tab-notifications, #tab-theme').forEach(t => t.classList.add('hidden'));
         document.getElementById('tab-' + tabId).classList.remove('hidden');
     }
 
@@ -622,5 +638,9 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+    @vite('resources/js/shared/appearance.js')
+@endpush
 
 @endsection

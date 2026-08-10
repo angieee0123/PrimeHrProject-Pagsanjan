@@ -39,13 +39,13 @@
     border-left-width: 4px;
     border-radius: 10px;
     background: rgba(212, 160, 23, .07);
-    color: var(--gp-text-mid, #56547a);
+    color: var(--gp-text-mid);
     font-size: 12.5px;
     line-height: 1.55;
 }
 
 .scan-notice svg { flex: none; margin-top: 2px; color: var(--gp-accent-gold, #d4a017); }
-.scan-notice strong { color: var(--gp-pri, #0b044d); }
+.scan-notice strong { color: var(--gp-pri); }
 
 /* ---------- layout ---------- */
 
@@ -68,10 +68,10 @@
 
 .scan-card {
     background: #fff;
-    border: 1px solid var(--gp-border, #ecebf6);
+    border: 1px solid var(--gp-border);
     border-radius: 14px;
     padding: 18px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, .04);
+    box-shadow: 0 1px 3px rgba(var(--theme-shadow-rgb), .04);
 }
 
 .scan-card-header {
@@ -81,22 +81,22 @@
     gap: 12px;
     margin-bottom: 14px;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--gp-bg-tint, #f7f6fc);
+    border-bottom: 1px solid var(--gp-bg-tint);
 }
 
 .scan-card-header h2 {
     margin: 0;
     font-size: 14px;
     font-weight: 700;
-    color: var(--gp-pri, #0b044d);
+    color: var(--gp-pri);
     letter-spacing: .2px;
 }
 
 .scan-status {
     padding: 4px 10px;
     border-radius: 999px;
-    background: var(--gp-bg-tint, #f7f6fc);
-    color: var(--gp-text-soft, #6b6a8a);
+    background: var(--gp-bg-tint);
+    color: var(--gp-text-soft, var(--theme-neutral-700));
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
@@ -110,7 +110,7 @@
     min-width: 26px;
     padding: 3px 9px;
     border-radius: 999px;
-    background: var(--gp-pri, #0b044d);
+    background: var(--gp-pri);
     color: #fff;
     font-size: 11.5px;
     font-weight: 700;
@@ -128,10 +128,10 @@
 
 .scan-slot {
     padding: 11px 8px;
-    border: 1.5px solid var(--gp-border, #ecebf6);
+    border: 1.5px solid var(--gp-border);
     border-radius: 10px;
     background: #fff;
-    color: var(--gp-text-mid, #56547a);
+    color: var(--gp-text-mid);
     font-family: inherit;
     font-size: 12.5px;
     font-weight: 600;
@@ -139,11 +139,11 @@
     transition: border-color .18s, background .18s, color .18s;
 }
 
-.scan-slot:hover { border-color: var(--gp-pri-2, #150c63); }
+.scan-slot:hover { border-color: var(--gp-pri-2); }
 
 .scan-slot.is-active {
-    background: var(--gp-pri, #0b044d);
-    border-color: var(--gp-pri, #0b044d);
+    background: var(--gp-pri);
+    border-color: var(--gp-pri);
     color: #fff;
 }
 
@@ -155,7 +155,7 @@
 
 .scan-slot-hint {
     margin: 0 0 14px;
-    color: var(--gp-text-soft, #6b6a8a);
+    color: var(--gp-text-soft, var(--theme-neutral-700));
     font-size: 11.5px;
     line-height: 1.5;
 }
@@ -199,10 +199,10 @@
 .scan-btn {
     flex: 1;
     padding: 11px 14px;
-    border: 1px solid var(--gp-border, #ecebf6);
+    border: 1px solid var(--gp-border);
     border-radius: 9px;
     background: #fff;
-    color: var(--gp-text-mid, #56547a);
+    color: var(--gp-text-mid);
     font-family: inherit;
     font-size: 13px;
     font-weight: 600;
@@ -210,16 +210,16 @@
     transition: background .18s, opacity .18s;
 }
 
-.scan-btn:hover:not(:disabled) { background: var(--gp-bg-tint, #f7f6fc); }
+.scan-btn:hover:not(:disabled) { background: var(--gp-bg-tint); }
 .scan-btn:disabled { opacity: .45; cursor: not-allowed; }
 
 .scan-btn--primary {
-    background: var(--gp-pri, #0b044d);
-    border-color: var(--gp-pri, #0b044d);
+    background: var(--gp-pri);
+    border-color: var(--gp-pri);
     color: #fff;
 }
 
-.scan-btn--primary:hover:not(:disabled) { background: var(--gp-pri-2, #150c63); }
+.scan-btn--primary:hover:not(:disabled) { background: var(--gp-pri-2); }
 
 /* ---------- handheld / manual entry ---------- */
 
@@ -228,7 +228,7 @@
 .scan-manual label {
     display: block;
     margin-bottom: 6px;
-    color: var(--gp-text-soft, #6b6a8a);
+    color: var(--gp-text-soft, var(--theme-neutral-700));
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
@@ -241,16 +241,16 @@
     flex: 1;
     min-width: 0;
     padding: 10px 12px;
-    border: 1px solid var(--gp-border, #ecebf6);
+    border: 1px solid var(--gp-border);
     border-radius: 9px;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12.5px;
-    color: var(--gp-pri, #0b044d);
+    color: var(--gp-pri);
 }
 
 .scan-manual-row input:focus {
     outline: none;
-    border-color: var(--gp-pri, #0b044d);
+    border-color: var(--gp-pri);
 }
 
 .scan-manual-row .scan-btn { flex: none; }
@@ -260,7 +260,7 @@
 .scan-result-empty {
     padding: 34px 12px;
     text-align: center;
-    color: var(--gp-text-soft, #6b6a8a);
+    color: var(--gp-text-soft, var(--theme-neutral-700));
 }
 
 .scan-result-empty p { margin: 0 0 4px; font-size: 13.5px; font-weight: 600; }
@@ -282,7 +282,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--gp-pri-2, #150c63), var(--gp-pri, #0b044d));
+    background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri));
     color: #fff;
     font-size: 20px;
     font-weight: 700;
@@ -295,25 +295,25 @@
     font-size: 17px;
     font-weight: 700;
     line-height: 1.25;
-    color: var(--gp-pri, #0b044d);
+    color: var(--gp-pri);
 }
 
 .scan-meta {
     margin: 0;
     font-size: 12px;
-    color: var(--gp-text-soft, #6b6a8a);
+    color: var(--gp-text-soft, var(--theme-neutral-700));
 }
 
 .scan-message {
     margin: 0 0 16px;
     padding: 12px 14px;
     border-radius: 10px;
-    border-left: 4px solid var(--gp-border, #ecebf6);
-    background: var(--gp-bg-tint, #f7f6fc);
+    border-left: 4px solid var(--gp-border);
+    background: var(--gp-bg-tint);
     font-size: 13.5px;
     font-weight: 600;
     line-height: 1.45;
-    color: var(--gp-text-mid, #56547a);
+    color: var(--gp-text-mid);
 }
 
 /* Outcome colouring is on the panel, so the operator reads the state from
@@ -345,7 +345,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .7px;
-    color: var(--gp-text-soft, #6b6a8a);
+    color: var(--gp-text-soft, var(--theme-neutral-700));
 }
 
 .scan-day-strip {
@@ -356,7 +356,7 @@
 
 .scan-day-cell {
     padding: 9px 6px;
-    border: 1px solid var(--gp-border, #ecebf6);
+    border: 1px solid var(--gp-border);
     border-radius: 9px;
     text-align: center;
     background: #fff;
@@ -368,7 +368,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .5px;
-    color: var(--gp-text-soft, #6b6a8a);
+    color: var(--gp-text-soft, var(--theme-neutral-700));
 }
 
 .scan-day-cell strong {
@@ -376,14 +376,14 @@
     margin-top: 3px;
     font-size: 13px;
     font-weight: 700;
-    color: var(--gp-pri, #0b044d);
+    color: var(--gp-pri);
 }
 
 .scan-day-cell.is-empty strong { color: #c9c8db; }
 
 .scan-day-cell.is-current {
-    border-color: var(--gp-pri, #0b044d);
-    background: var(--gp-bg-tint, #f7f6fc);
+    border-color: var(--gp-pri);
+    background: var(--gp-bg-tint);
 }
 
 /* ---------- feed ---------- */
@@ -401,7 +401,7 @@
     align-items: center;
     gap: 10px;
     padding: 9px 0;
-    border-bottom: 1px solid var(--gp-bg-tint, #f7f6fc);
+    border-bottom: 1px solid var(--gp-bg-tint);
 }
 
 .scan-feed-item:last-child { border-bottom: none; }
@@ -415,8 +415,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--gp-bg-tint-2, #ecebf6);
-    color: var(--gp-pri, #0b044d);
+    background: var(--gp-bg-tint-2, var(--gp-border));
+    color: var(--gp-pri);
     font-size: 12.5px;
     font-weight: 700;
 }
@@ -429,7 +429,7 @@
     margin: 0;
     font-size: 12.5px;
     font-weight: 600;
-    color: var(--gp-pri, #0b044d);
+    color: var(--gp-pri);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -438,12 +438,12 @@
 .scan-feed-sub {
     margin: 1px 0 0;
     font-size: 11px;
-    color: var(--gp-text-soft, #6b6a8a);
+    color: var(--gp-text-soft, var(--theme-neutral-700));
 }
 
 .scan-feed-empty {
     padding: 26px 6px;
     text-align: center;
-    color: var(--gp-text-soft, #6b6a8a);
+    color: var(--gp-text-soft, var(--theme-neutral-700));
     font-size: 12px;
 }

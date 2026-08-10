@@ -21,7 +21,7 @@
 
 .btn-action {
     padding: 6px 8px;
-    border: 1px solid #e8e7f5;
+    border: 1px solid var(--theme-neutral-200);
     border-radius: 6px;
     background: #fff;
     cursor: pointer;
@@ -36,7 +36,7 @@
 }
 
 .btn-view:hover {
-    background: #f7f6ff;
+    background: var(--theme-primary-soft);
     border-color: var(--gp-pri);
 }
 
@@ -75,7 +75,7 @@
 
 .modal-header {
     padding: 20px 24px;
-    border-bottom: 1px solid #e8e7f5;
+    border-bottom: 1px solid var(--theme-neutral-200);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -93,7 +93,7 @@
     width: 32px;
     height: 32px;
     border: none;
-    background: #f7f6ff;
+    background: var(--theme-primary-soft);
     color: var(--gp-pri);
     font-size: 24px;
     border-radius: 6px;
@@ -105,7 +105,7 @@
 }
 
 .modal-close:hover {
-    background: #e8e7f5;
+    background: var(--theme-neutral-200);
 }
 
 .modal-body {
@@ -116,7 +116,7 @@
 
 .modal-footer {
     padding: 16px 24px;
-    border-top: 1px solid #e8e7f5;
+    border-top: 1px solid var(--theme-neutral-200);
     display: flex;
     gap: 12px;
     justify-content: flex-end;
@@ -125,9 +125,9 @@
 
 .btn-secondary {
     padding: 10px 20px;
-    background: #f7f6ff;
+    background: var(--theme-primary-soft);
     color: var(--gp-pri);
-    border: 1px solid #e8e7f5;
+    border: 1px solid var(--theme-neutral-200);
     border-radius: 6px;
     font-size: 13px;
     font-weight: 600;
@@ -136,7 +136,7 @@
 }
 
 .btn-secondary:hover {
-    background: #e8e7f5;
+    background: var(--theme-neutral-200);
 }
 
 .btn-primary {
@@ -189,7 +189,7 @@
 
 .payslip-logo p {
     font-size: 13px;
-    color: #6b6a8a;
+    color: var(--theme-neutral-700);
     margin: 0;
 }
 
@@ -207,7 +207,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     margin-bottom: 20px;
-    border: 1px solid #e8e7f5;
+    border: 1px solid var(--theme-neutral-200);
     padding: 16px;
     border-radius: 6px;
     background: #fafafe;
@@ -221,7 +221,7 @@
 
 .info-group label {
     font-size: 11px;
-    color: #6b6a8a;
+    color: var(--theme-neutral-700);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -235,7 +235,7 @@
 
 .payslip-divider {
     height: 1px;
-    background: #e8e7f5;
+    background: var(--theme-neutral-200);
     margin: 20px 0;
 }
 
@@ -269,7 +269,7 @@
 
 .table-row span {
     font-size: 13px;
-    color: #6b6a8a;
+    color: var(--theme-neutral-700);
 }
 
 .table-row strong {
@@ -279,8 +279,8 @@
 }
 
 .table-row.highlight {
-    background: #f7f6ff;
-    border: 1px solid #e8e7f5;
+    background: var(--theme-primary-soft);
+    border: 1px solid var(--theme-neutral-200);
 }
 
 .table-row.total {
@@ -323,7 +323,7 @@
 .payslip-footer {
     margin-top: 24px;
     padding-top: 16px;
-    border-top: 1px solid #e8e7f5;
+    border-top: 1px solid var(--theme-neutral-200);
 }
 
 .status-info {
@@ -335,7 +335,7 @@
 
 .status-info label {
     font-size: 12px;
-    color: #6b6a8a;
+    color: var(--theme-neutral-700);
     font-weight: 600;
 }
 
@@ -345,7 +345,7 @@
 
 .notes-info label {
     font-size: 12px;
-    color: #6b6a8a;
+    color: var(--theme-neutral-700);
     font-weight: 600;
     display: block;
     margin-bottom: 6px;
@@ -354,7 +354,7 @@
 .notes-info p {
     font-size: 13px;
     color: var(--gp-pri);
-    background: #f7f6ff;
+    background: var(--theme-primary-soft);
     padding: 12px;
     border-radius: 6px;
     margin: 0;
@@ -363,7 +363,7 @@
 .signature-section {
     margin-top: 40px;
     padding-top: 20px;
-    border-top: 1px solid #e8e7f5;
+    border-top: 1px solid var(--theme-neutral-200);
 }
 
 .signature-row {
@@ -401,7 +401,7 @@
 
 .signature-date {
     font-size: 11px;
-    color: #6b6a8a;
+    color: var(--theme-neutral-700);
     margin: 0;
 }
 

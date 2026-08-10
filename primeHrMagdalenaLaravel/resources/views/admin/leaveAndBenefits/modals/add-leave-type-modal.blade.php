@@ -4,22 +4,22 @@
         @csrf
         <div class="form-row">
             <div class="form-group" style="flex: 1;">
-                <label class="form-label">Leave Code <span style="color: #8e1e18;">*</span></label>
+                <label class="form-label">Leave Code <span style="color: var(--theme-danger);">*</span></label>
                 <input type="text" name="leave_code" class="form-input" placeholder="e.g., SL" maxlength="10" required>
             </div>
             <div class="form-group" style="flex: 2;">
-                <label class="form-label">Leave Name <span style="color: #8e1e18;">*</span></label>
+                <label class="form-label">Leave Name <span style="color: var(--theme-danger);">*</span></label>
                 <input type="text" name="leave_name" class="form-input" placeholder="e.g., Study Leave" maxlength="100" required>
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group" style="flex: 1;">
-                <label class="form-label">Annual Limit (Days) <span style="color: #8e1e18;">*</span></label>
+                <label class="form-label">Annual Limit (Days) <span style="color: var(--theme-danger);">*</span></label>
                 <input type="number" name="annual_limit" class="form-input" placeholder="e.g., 15.00" step="0.01" min="0" required>
             </div>
             <div class="form-group" style="flex: 1;">
-                <label class="form-label">Status <span style="color: #8e1e18;">*</span></label>
+                <label class="form-label">Status <span style="color: var(--theme-danger);">*</span></label>
                 <select name="is_active" class="form-input" required>
                     <option value="1">Active</option>
                     <option value="0">Inactive</option>
@@ -56,7 +56,7 @@
         <div class="form-group">
             <label class="form-label">Attachment Instructions</label>
             <textarea name="attachment_info" class="form-input" rows="2" placeholder="e.g., Medical certificate required if more than 2 consecutive days"></textarea>
-            <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">Instructions shown to employees when filing this leave type</p>
+            <p style="font-size: 11px; color: var(--gp-text-mid); margin: 4px 0 0 0;">Instructions shown to employees when filing this leave type</p>
         </div>
 
         <div class="form-group">
@@ -68,7 +68,7 @@
                     <span id="fileNameDisplay">Choose PDF file or drag here</span>
                 </label>
             </div>
-            <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">Upload policy document, memo, or reference file (PDF only, max 5MB)</p>
+            <p style="font-size: 11px; color: var(--gp-text-mid); margin: 4px 0 0 0;">Upload policy document, memo, or reference file (PDF only, max 5MB)</p>
         </div>
 
         <div class="form-actions" style="justify-content: flex-end;">

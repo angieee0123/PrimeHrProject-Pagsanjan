@@ -11,7 +11,7 @@
 
 <style>
 .welcome-banner {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Poppins', sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Poppins', sans-serif !important;
 }
 </style>
 
@@ -34,7 +34,7 @@ function searchAttendance(query) {
 
     tbody.innerHTML = '';
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#56547a;">No records found matching your search.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--gp-text-mid);">No records found matching your search.</td></tr>';
     } else {
         filtered.forEach(row => tbody.appendChild(row.cloneNode(true)));
     }

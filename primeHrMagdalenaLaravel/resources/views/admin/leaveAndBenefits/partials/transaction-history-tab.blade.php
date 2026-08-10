@@ -41,9 +41,9 @@
                     <td data-label="Employee" style="text-align: left;">
                         <div class="emp-cell">
                             @if($transaction->employee->photo)
-                                <img src="{{ $transaction->employee->photo }}" alt="{{ $transaction->employee->first_name }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
+                                <img src="{{ $transaction->employee->photo }}" alt="{{ $transaction->employee->first_name }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--gp-border);">
                             @else
-                                <div class="emp-avatar" style="background: {{ $avatarColors[($transaction->employee_id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid #ecebf6;">
+                                <div class="emp-avatar" style="background: {{ $avatarColors[($transaction->employee_id ?? 0) % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid var(--gp-border);">
                                     {{ strtoupper(substr($transaction->employee->first_name ?? 'N', 0, 1) . substr($transaction->employee->last_name ?? 'A', 0, 1)) }}
                                 </div>
                             @endif
@@ -71,31 +71,31 @@
                             <span class="badge-status cancelled">{{ ucfirst($transaction->transaction_type) }}</span>
                         @endif
                     </td>
-                    <td data-label="Amount" style="text-align: center; font-weight: 600; color: {{ $transaction->transaction_type === 'credit' || $transaction->transaction_type === 'adjustment' ? '#15803d' : '#d5433c' }};">
+                    <td data-label="Amount" style="text-align: center; font-weight: 600; color: {{ $transaction->transaction_type === 'credit' || $transaction->transaction_type === 'adjustment' ? 'var(--theme-success)' : '#d5433c' }};">
                         {{ $transaction->transaction_type === 'debit' ? '-' : '+' }}{{ number_format(abs($transaction->amount), 2) }} days
                     </td>
-                    <td data-label="Balance Before" style="text-align: center; color: #56547a;">
+                    <td data-label="Balance Before" style="text-align: center; color: var(--gp-text-mid);">
                         {{ number_format($transaction->balance_before, 2) }}
                     </td>
-                    <td data-label="Balance After" style="text-align: center; font-weight: 600; color: #0b044d;">
+                    <td data-label="Balance After" style="text-align: center; font-weight: 600; color: var(--gp-pri);">
                         {{ number_format($transaction->balance_after, 2) }}
                     </td>
-                    <td data-label="Date" style="text-align: center; color: #56547a; font-size: 12px;">
+                    <td data-label="Date" style="text-align: center; color: var(--gp-text-mid); font-size: 12px;">
                         {{ $transaction->transaction_date ? $transaction->transaction_date->format('M d, Y') : 'N/A' }}
                     </td>
                     <td data-label="Reference" style="text-align: center; font-size: 12px;">
                         @if($transaction->reference_type === 'leave_application')
-                            <span style="color: #0b044d; font-weight: 500;">Leave App</span>
+                            <span style="color: var(--gp-pri); font-weight: 500;">Leave App</span>
                         @elseif($transaction->reference_type === 'manual_adjustment')
-                            <span style="color: #8e1e18; font-weight: 500;">Manual</span>
+                            <span style="color: var(--theme-danger); font-weight: 500;">Manual</span>
                         @elseif($transaction->reference_type === 'accrual')
-                            <span style="color: #15803d; font-weight: 500;">Accrual</span>
+                            <span style="color: var(--theme-success); font-weight: 500;">Accrual</span>
                         @elseif($transaction->reference_type === 'initialization')
-                            <span style="color: #56547a; font-weight: 500;">Initialization</span>
+                            <span style="color: var(--gp-text-mid); font-weight: 500;">Initialization</span>
                         @elseif($transaction->reference_type === 'leave_import')
                             <span style="color: #0284c7; font-weight: 500;">Import</span>
                         @else
-                            <span style="color: #56547a;">{{ ucfirst(str_replace('_', ' ', $transaction->reference_type ?? 'N/A')) }}</span>
+                            <span style="color: var(--gp-text-mid);">{{ ucfirst(str_replace('_', ' ', $transaction->reference_type ?? 'N/A')) }}</span>
                         @endif
                     </td>
                     <td data-label="Actions" style="text-align: center;">
@@ -142,8 +142,8 @@
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" style="margin: 0 auto 16px; display: block;">
                             <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        <p style="margin: 0; font-size: 15px; color: #6b7280; font-weight: 500;">No transactions found</p>
-                        <p style="margin: 8px 0 0 0; font-size: 13px; color: #9ca3af;">Leave transactions will appear here</p>
+                        <p style="margin: 0; font-size: 15px; color: var(--theme-neutral-700); font-weight: 500;">No transactions found</p>
+                        <p style="margin: 8px 0 0 0; font-size: 13px; color: var(--theme-neutral-600);">Leave transactions will appear here</p>
                     </td>
                 </tr>
                 @endforelse
@@ -221,7 +221,7 @@
             <span class="modal-section-label">TRANSACTION INFORMATION</span>
             <div class="modal-row"><span>Leave Type</span><strong id="transactionLeaveType">VL</strong></div>
             <div class="modal-row"><span>Transaction Type</span><span class="badge-status pending" id="transactionType">Credit</span></div>
-            <div class="modal-row"><span>Amount</span><strong id="transactionAmount" style="color: #15803d;">+5.00 days</strong></div>
+            <div class="modal-row"><span>Amount</span><strong id="transactionAmount" style="color: var(--theme-success);">+5.00 days</strong></div>
             <div class="modal-row"><span>Balance Before</span><strong id="transactionBalanceBefore">10.00 days</strong></div>
             <div class="modal-row"><span>Balance After</span><strong id="transactionBalanceAfter">15.00 days</strong></div>
             <div class="modal-row"><span>Transaction Date</span><strong id="transactionDate">Jan 15, 2026</strong></div>
@@ -231,7 +231,7 @@
             <div class="modal-row"><span>Processed By</span><strong id="transactionProcessedBy">Admin User</strong></div>
 
             <span class="modal-section-label modal-section-deductions">REMARKS</span>
-            <div class="modal-row"><span id="transactionRemarks" style="color: #6b7280; font-style: italic;">No remarks provided</span></div>
+            <div class="modal-row"><span id="transactionRemarks" style="color: var(--theme-neutral-700); font-style: italic;">No remarks provided</span></div>
         </div>
         <div class="modal-footer">
             <button class="modal-btn-ghost" onclick="closeTransactionDetailModal()">Close</button>
@@ -260,19 +260,19 @@
 
                 <div class="form-row">
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Amount (Days) <span style="color: #8e1e18;">*</span></label>
+                        <label class="form-label">Amount (Days) <span style="color: var(--theme-danger);">*</span></label>
                         <input type="number" name="amount" id="editTransactionAmount" class="form-input" step="0.000001" min="0.000001" required>
                     </div>
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Transaction Date <span style="color: #8e1e18;">*</span></label>
+                        <label class="form-label">Transaction Date <span style="color: var(--theme-danger);">*</span></label>
                         <input type="date" name="transaction_date" id="editTransactionDate" class="form-input" required>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Reason / Remarks <span style="color: #8e1e18;">*</span></label>
+                    <label class="form-label">Reason / Remarks <span style="color: var(--theme-danger);">*</span></label>
                     <textarea name="remarks" id="editTransactionRemarks" class="form-input" rows="3" maxlength="500" required></textarea>
-                    <p style="font-size: 11px; color: #56547a; margin: 4px 0 0 0;">This is a [ADDITION]/[DEDUCTION] adjustment based on the original transaction type; the amount sign cannot be flipped here.</p>
+                    <p style="font-size: 11px; color: var(--gp-text-mid); margin: 4px 0 0 0;">This is a [ADDITION]/[DEDUCTION] adjustment based on the original transaction type; the amount sign cannot be flipped here.</p>
                 </div>
 
                 <div class="form-actions">

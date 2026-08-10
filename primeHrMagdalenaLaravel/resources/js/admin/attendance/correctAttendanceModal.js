@@ -92,13 +92,13 @@ window.calculateTotalHours = function() {
 
     const display = document.getElementById('calculatedTotalHours');
     if (totalHours >= 8) {
-        display.style.color = '#15803d';
+        display.style.color = 'var(--theme-success)';
     } else if (totalHours >= 4) {
         display.style.color = '#d9bb00';
     } else if (totalHours > 0) {
-        display.style.color = '#a16207';
+        display.style.color = 'var(--theme-warning)';
     } else {
-        display.style.color = '#8e1e18';
+        display.style.color = 'var(--theme-danger)';
     }
 }
 
@@ -154,7 +154,7 @@ window.openCorrectModal = function(attendanceId, date) {
             if (validationMessage) {
                 const warningDiv = document.getElementById('correctReason');
                 warningDiv.placeholder = 'REQUIRED: ' + validationMessage + '\n\nExplain why this correction is needed...';
-                warningDiv.style.borderLeft = '3px solid #8e1e18';
+                warningDiv.style.borderLeft = '3px solid var(--theme-danger)';
             }
 
             calculateTotalHours();

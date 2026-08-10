@@ -27,7 +27,9 @@
                     <h3 class="wizard-title" id="wizardTitle">Employee Registration Wizard</h3>
                     <p class="wizard-subtitle"><span id="stepIndicator">Step 1 of 6</span> - <span id="wizardSubtitle">Complete all steps to register</span></p>
                 </div>
-                <button onclick="closeEmployeeWizard()" class="wizard-close-btn">&times;</button>
+                <button onclick="closeEmployeeWizard()" class="wizard-close-btn" aria-label="Close wizard">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
             </div>
 
             <!-- Progress Indicator (steps are clickable to jump between pages) -->
@@ -71,10 +73,10 @@
 
             <!-- STEP 1: Personal Information -->
             <div class="wizard-content active" data-step="1" style="display:block;">
-                <h4 class="wizard-section-title">👤 Personal Information</h4>
+                <h4 class="wizard-section-title"><svg class="wizard-section-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Personal Information</span></h4>
                 <div class="wizard-grid-2">
                     <div>
-                        <label class="wizard-label-text">Employee ID * <span style="color:#0b044d; font-size:11px;">(UNIQUE)</span></label>
+                        <label class="wizard-label-text">Employee ID * <span style="color:var(--gp-pri); font-size:11px;">(UNIQUE)</span></label>
                         <input type="text" name="employee_id" placeholder="e.g. PGS-0001" maxlength="255" class="wizard-input">
                     </div>
                     <div></div>
@@ -175,23 +177,23 @@
             <!-- STEP 2: Account Setup -->
             <div class="wizard-content" data-step="2" style="display:none;">
                 <div id="step2-register">
-                    <h4 class="wizard-section-title">🔐 Account Setup</h4>
+                    <h4 class="wizard-section-title"><svg class="wizard-section-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Account Setup</span></h4>
                     <div class="wizard-info-box">
-                        <p class="wizard-info-title"><strong>ℹ️ Create Login Credentials</strong></p>
+                        <p class="wizard-info-title"><svg class="wizard-info-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><strong>Create Login Credentials</strong></p>
                         <p class="wizard-info-text">Set up username, email, and password for system access</p>
                     </div>
                     <div class="wizard-field">
-                        <label class="wizard-label-text">Username * <span style="color:#0b044d; font-size:11px;">(UNIQUE)</span></label>
+                        <label class="wizard-label-text">Username * <span style="color:var(--gp-pri); font-size:11px;">(UNIQUE)</span></label>
                         <input type="text" name="username" placeholder="e.g. santosjuan" maxlength="255" class="wizard-input">
                         <p class="wizard-hint">Auto-filled from Last Name + First Name — edit if you'd like a different one.</p>
                     </div>
                     <div class="wizard-field">
-                        <label class="wizard-label-text">Email * <span style="color:#0b044d; font-size:11px;">(UNIQUE)</span></label>
+                        <label class="wizard-label-text">Email * <span style="color:var(--gp-pri); font-size:11px;">(UNIQUE)</span></label>
                         <input type="email" name="user_email" placeholder="maria.santos@example.com" maxlength="255" class="wizard-input">
                         <p class="wizard-hint">Must be a valid email address for account notifications.</p>
                     </div>
                     <div class="wizard-field">
-                        <label class="wizard-label-text">Password * <span style="color:#0b044d; font-size:11px;">(Min 8 characters)</span></label>
+                        <label class="wizard-label-text">Password * <span style="color:var(--gp-pri); font-size:11px;">(Min 8 characters)</span></label>
                         <div class="wizard-pw-wrap">
                             <input type="password" name="password" placeholder="••••••••" maxlength="255" class="wizard-input">
                             <button type="button" class="wizard-pw-toggle" onclick="toggleWizardPassword(this)" aria-label="Show password">
@@ -212,7 +214,7 @@
                         </div>
                     </div>
                     <div class="wizard-field">
-                        <label class="wizard-label-text">Role / Access Level * <span style="font-weight:400;color:#56547a;">(select one or more)</span></label>
+                        <label class="wizard-label-text">Role / Access Level * <span style="font-weight:400;color:var(--gp-text-mid);">(select one or more)</span></label>
                         <div class="wizard-role-checkboxes" id="register-roles">
                             <label class="wizard-role-checkbox">
                                 <input type="checkbox" name="roles[]" value="employee" checked>
@@ -235,13 +237,13 @@
                     </div>
                 </div>
                 <div id="step2-edit" style="display:none;">
-                    <h4 class="wizard-section-title">🔐 Account Info</h4>
-                    <div class="wizard-info-box" style="background:#f2f1fb;border-color:#0b044d22;">
-                        <p class="wizard-info-title"><strong>ℹ️ Account credentials cannot be changed here.</strong></p>
+                    <h4 class="wizard-section-title"><svg class="wizard-section-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Account Info</span></h4>
+                    <div class="wizard-info-box" style="background:var(--gp-bg-tint-2);border-color:var(--gp-pri)22;">
+                        <p class="wizard-info-title"><svg class="wizard-info-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><strong>Account credentials cannot be changed here.</strong></p>
                         <p class="wizard-info-text">Username, email, and password are managed separately.</p>
                     </div>
                     <div class="wizard-field">
-                        <label class="wizard-label-text">Role / Access Level * <span style="font-weight:400;color:#56547a;">(select one or more)</span></label>
+                        <label class="wizard-label-text">Role / Access Level * <span style="font-weight:400;color:var(--gp-text-mid);">(select one or more)</span></label>
                         <div class="wizard-role-checkboxes" id="edit-roles">
                             <label class="wizard-role-checkbox">
                                 <input type="checkbox" name="roles[]" value="employee">
@@ -267,7 +269,7 @@
 
             <!-- STEP 3: Employment Details -->
             <div class="wizard-content" data-step="3" style="display:none;">
-                <h4 class="wizard-section-title">💼 Employment Details</h4>
+                <h4 class="wizard-section-title"><svg class="wizard-section-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><span>Employment Details</span></h4>
                 <div class="wizard-field">
                     <label class="wizard-label-text">Department / Office *</label>
                     <select name="department" id="wizard-department" class="wizard-select" onchange="loadDesignations(this.value)">
@@ -287,7 +289,7 @@
                 <div class="wizard-grid-2">
                     <div>
                         <label class="wizard-label-text">Employment Type / Status *</label>
-                        <input type="text" name="employment_status" id="wizard-employment-status" class="wizard-input" placeholder="Auto-filled from designation" readonly style="background:#f7f6fc;color:#56547a;cursor:not-allowed;">
+                        <input type="text" name="employment_status" id="wizard-employment-status" class="wizard-input" placeholder="Auto-filled from designation" readonly style="background:var(--gp-bg-tint);color:var(--gp-text-mid);cursor:not-allowed;">
                     </div>
                     <div>
                         <label class="wizard-label-text">Appointment Date *</label>
@@ -297,7 +299,7 @@
                 <div class="wizard-grid-2">
                     <div>
                         <label class="wizard-label-text">Salary Grade</label>
-                        <input type="text" name="salary_grade" id="wizard-salary-grade" class="wizard-input" placeholder="Auto-filled from designation" readonly style="background:#f7f6fc;color:#56547a;cursor:not-allowed;">
+                        <input type="text" name="salary_grade" id="wizard-salary-grade" class="wizard-input" placeholder="Auto-filled from designation" readonly style="background:var(--gp-bg-tint);color:var(--gp-text-mid);cursor:not-allowed;">
                     </div>
                     <div>
                         <label class="wizard-label-text">Step Increment</label>
@@ -308,7 +310,7 @@
 
             <!-- STEP 4: Contact Information -->
             <div class="wizard-content" data-step="4" style="display:none;">
-                <h4 class="wizard-section-title">📞 Contact Information</h4>
+                <h4 class="wizard-section-title"><svg class="wizard-section-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>Contact Information</span></h4>
                 <div class="wizard-grid-2">
                     <div>
                         <label class="wizard-label-text">Mobile Number</label>
@@ -330,7 +332,7 @@
                     </div>
                 </div>
                 <div class="wizard-address-header">
-                    <h5 class="wizard-address-title">📍 Residential Address</h5>
+                    <h5 class="wizard-address-title"><svg class="wizard-address-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Residential Address</span></h5>
                 </div>
                 <div class="wizard-grid-2">
                     <div>
@@ -366,7 +368,7 @@
 
             <!-- STEP 5: Government IDs -->
             <div class="wizard-content" data-step="5" style="display:none;">
-                <h4 class="wizard-section-title">🪪 Government IDs</h4>
+                <h4 class="wizard-section-title"><svg class="wizard-section-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.2"/><line x1="14" y1="10" x2="19" y2="10"/><line x1="14" y1="14" x2="18" y2="14"/></svg><span>Government IDs</span></h4>
                 <p class="wizard-hint" style="margin-bottom:20px;">Upload a scanned copy or photo of each ID (PDF, JPG, or PNG, max 5MB). The number is read automatically from the scan — please verify it, or type it in by hand if the auto-read doesn't find it.</p>
 
                 @foreach ([
@@ -376,7 +378,7 @@
                     ['key' => 'tin', 'label' => 'TIN', 'placeholder' => 'Tax ID'],
                     ['key' => 'license', 'label' => 'Professional License', 'placeholder' => 'License No.'],
                 ] as $gov)
-                    <div class="wizard-govid-group" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f0effe;">
+                    <div class="wizard-govid-group" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--theme-primary-light);">
                         <div class="wizard-grid-2">
                             <div>
                                 <label class="wizard-label-text">{{ $gov['label'] }} — Scanned ID (Upload)</label>
@@ -396,16 +398,16 @@
 
             <!-- STEP 6: Review -->
             <div class="wizard-content" data-step="6" style="display:none;">
-                <h4 class="wizard-section-title">✅ Review All Information</h4>
+                <h4 class="wizard-section-title"><svg class="wizard-section-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Review All Information</span></h4>
                 <div id="wizardReviewContent" class="wizard-review-content">
-                    <p style="color:#56547a; text-align:center; padding:40px 20px;">Loading review data...</p>
+                    <p style="color:var(--gp-text-mid); text-align:center; padding:40px 20px;">Loading review data...</p>
                 </div>
                 <div class="wizard-success-box">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2" class="wizard-success-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--theme-success)" stroke-width="2" class="wizard-success-icon">
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                     <div>
-                        <p class="wizard-success-title">✓ All steps completed!</p>
+                        <p class="wizard-success-title">All steps completed!</p>
                         <p class="wizard-success-text">Click Submit to register employee.</p>
                     </div>
                 </div>
@@ -425,10 +427,10 @@
                     Next →
                 </button>
                 <button type="submit" id="submitBtn" class="wizard-btn wizard-btn-submit" style="display:none;">
-                    ✓ Submit
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Submit</span>
                 </button>
-                <button type="button" id="updateBtn" class="wizard-btn wizard-btn-submit" style="display:none;background:#150c63;" onclick="submitWizardUpdate()">
-                    ✓ Save Changes
+                <button type="button" id="updateBtn" class="wizard-btn wizard-btn-submit" style="display:none;background:var(--gp-pri-2);" onclick="submitWizardUpdate()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Save Changes</span>
                 </button>
             </div>
         </div>

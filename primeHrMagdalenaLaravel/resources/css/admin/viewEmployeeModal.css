@@ -6,7 +6,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(15,12,40,0.42);
+    background: rgba(var(--theme-primary-rgb),0.42);
     -webkit-backdrop-filter: blur(8px) saturate(150%);
     backdrop-filter: blur(8px) saturate(150%);
     z-index: 2000;
@@ -21,7 +21,7 @@
     width: 100%;
     max-width: 900px;
     margin: 20px;
-    box-shadow: 0 20px 50px rgba(15,23,42,.16), 0 2px 10px rgba(15,23,42,.05);
+    box-shadow: 0 20px 50px rgba(var(--theme-shadow-rgb),.16), 0 2px 10px rgba(var(--theme-shadow-rgb),.05);
     max-height: 90vh;
     display: flex;
     flex-direction: column;

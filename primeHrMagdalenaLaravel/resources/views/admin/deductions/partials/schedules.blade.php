@@ -19,7 +19,7 @@
 </div>
 
 <div class="table-wrapper">
-    <table class="payroll-table">
+    <table class="payroll-table ded-sched-table">
         <thead>
             <tr>
                 <th>Employee</th>
@@ -27,7 +27,7 @@
                 <th>Active Deductions</th>
                 <th>Active Loans</th>
                 <th>Last Updated</th>
-                <th class="th-center">Actions</th>
+                <th class="row-menu-head">Actions</th>
             </tr>
         </thead>
         <tbody id="schedulesTableBody">
@@ -36,21 +36,19 @@
                     <td>
                         <div class="ded-row-flex">
                             @if($emp['photo'] ?? null)
-                                <img src="{{ $emp['photo'] }}" class="ded-avatar-img">
+                                <img src="{{ $emp['photo'] }}" alt="" class="ded-avatar-img" loading="lazy">
                             @else
-                                <div class="avatar ded-avatar-img" style="background: {{ $avatarColors[($emp['id'] ?? 0) % count($avatarColors)] }}; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px;">
-                                    {{ getInitials($emp['name']) }}
-                                </div>
+                                <span class="ded-avatar-img ded-avatar-initials"
+                                      style="background: {{ $avatarColors[($emp['id'] ?? 0) % count($avatarColors)] }}"
+                                      aria-hidden="true">{{ getInitials($emp['name']) }}</span>
                             @endif
-                            <div>
-                                <p class="ded-cell-title">{{ $emp['name'] }}</p>
-                                <p class="ded-cell-sub">ID: {{ $emp['employee_id'] }}</p>
+                            <div class="ded-emp-text">
+                                <p class="ded-cell-title" title="{{ $emp['name'] }}">{{ $emp['name'] }}</p>
+                                <p class="ded-cell-sub">{{ $emp['employee_id'] }}</p>
                             </div>
                         </div>
                     </td>
-                    <td>
-                        <span class="ded-text-muted-sm">{{ $emp['department'] }}</span>
-                    </td>
+                    <td><span class="dept-tag" title="{{ $emp['department'] }}">{{ $emp['department'] }}</span></td>
                     <td>
                         <span class="ded-badge-count is-blue">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -76,16 +74,19 @@
                     <td class="ded-text-muted-sm">
                         {{ $emp['updated_at'] ? \Carbon\Carbon::parse($emp['updated_at'])->format('M d, Y') : 'N/A' }}
                     </td>
-                    <td class="td-center">
-                        <div class="row-actions">
-                            <button class="btn-view" onclick="openAssignDeductionScheduleModal({{ $emp['id'] }}, '{{ $emp['name'] }}')">Manage Schedule</button>
-                        </div>
+                    <td class="row-menu-cell">
+                        <button class="btn-view ded-edit-btn" onclick="openAssignDeductionScheduleModal({{ $emp['id'] }}, '{{ $emp['name'] }}')">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            Schedule
+                        </button>
                     </td>
                 </tr>
             @empty
                 <tr id="noSchedulesRow">
                     <td colspan="6" class="ded-empty-cell">
-                        No employees with active deductions found. Assign deductions to employees first.
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="ded-empty-icon"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <p class="ded-empty-title">No employees with active deductions</p>
+                        <p class="ded-empty-sub">Assign a deduction on the <strong>Employee Deductions</strong> tab first.</p>
                     </td>
                 </tr>
             @endforelse

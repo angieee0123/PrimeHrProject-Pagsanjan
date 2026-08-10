@@ -7,7 +7,7 @@ window.handleFileSelect = function(input) {
 
 window.handleDrop = function(e) {
     e.preventDefault();
-    document.getElementById('drop-zone').style.borderColor = '#c7c5e8';
+    document.getElementById('drop-zone').classList.remove('is-dragging');
     const file = e.dataTransfer.files[0];
     if (file && file.name.endsWith('.csv')) {
         const dt = new DataTransfer();
@@ -18,7 +18,12 @@ window.handleDrop = function(e) {
 }
 
 function updateDropZone(name) {
-    document.getElementById('drop-label').textContent = '✓ ' + name;
-    document.getElementById('drop-zone').style.borderColor = '#15803d';
+    // State via a class, not an inline border colour: the previous version
+    // wrote literal hexes here and in the markup's drag handlers, so the drop
+    // zone was the one part of the modal that ignored the palette.
+    const zone = document.getElementById('drop-zone');
+    zone.classList.remove('is-dragging');
+    zone.classList.add('has-file');
+    document.getElementById('drop-label').textContent = name;
     document.getElementById('import-submit-btn').disabled = false;
 }

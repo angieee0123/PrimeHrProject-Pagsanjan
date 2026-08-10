@@ -8,9 +8,9 @@
                 <line x1="9" y1="9" x2="15" y2="15"></line>
             </svg>
         </div>
-        <h3 style="margin:0 0 12px; font-size:20px; font-weight:700; color:#0b044d;">Export Failed</h3>
-        <p id="exportErrorMessage" style="margin:0 0 24px; font-size:14px; color:#56547a; line-height:1.6;"></p>
-        <button onclick="closeExportErrorModal()" style="padding:12px 32px; background:#8e1e18; color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif; transition:transform .15s ease;">
+        <h3 style="margin:0 0 12px; font-size:20px; font-weight:700; color:var(--gp-pri);">Export Failed</h3>
+        <p id="exportErrorMessage" style="margin:0 0 24px; font-size:14px; color:var(--gp-text-mid); line-height:1.6;"></p>
+        <button onclick="closeExportErrorModal()" style="padding:12px 32px; background:var(--theme-danger); color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif; transition:transform .15s ease;">
             Close
         </button>
     </div>

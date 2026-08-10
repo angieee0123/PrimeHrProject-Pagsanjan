@@ -3,7 +3,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(11, 4, 77, 0.55);
+    background: rgba(var(--theme-primary-rgb), 0.55);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     z-index: 1100;
@@ -18,7 +18,7 @@
     border-radius: 18px;
     padding: 28px 26px 22px;
     text-align: center;
-    box-shadow: 0 25px 60px -12px rgba(11, 4, 77, 0.4);
+    box-shadow: 0 25px 60px -12px rgba(var(--theme-primary-rgb), 0.4);
     animation: wizardDraftPromptIn 0.22s ease;
 }
 @keyframes wizardDraftPromptIn {
@@ -33,7 +33,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f2f1fb;
+    background: var(--gp-bg-tint-2);
     color: var(--gp-pri);
 }
 .wizard-draft-prompt-title {
@@ -45,7 +45,7 @@
 .wizard-draft-prompt-text {
     font-size: 13px;
     line-height: 1.6;
-    color: #56547a;
+    color: var(--gp-text-mid);
     margin: 0 0 22px;
 }
 .wizard-draft-prompt-actions {
@@ -66,10 +66,10 @@
 .wizard-draft-prompt-startover {
     background: #fff;
     border: 1.5px solid #d8d6ec;
-    color: #56547a;
+    color: var(--gp-text-mid);
 }
 .wizard-draft-prompt-startover:hover {
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
     border-color: var(--gp-pri);
     color: var(--gp-pri);
 }
@@ -106,7 +106,7 @@
     margin: 20px auto;
     padding: 0;
     position: relative;
-    box-shadow: 0 8px 32px rgba(11, 4, 77, 0.15);
+    box-shadow: 0 8px 32px rgba(var(--theme-primary-rgb), 0.15);
     max-height: 90vh;
     display: flex;
     flex-direction: column;
@@ -114,12 +114,25 @@
 
 /* Header */
 .wizard-header {
-    background: linear-gradient(135deg, var(--gp-pri) 0%, var(--gp-pri-2) 100%);
-    color: #fff;
-    padding: 24px;
-    border-radius: 12px 12px 0 0;
+    background: linear-gradient(150deg, var(--gp-pri-2) 0%, var(--gp-pri) 62%);
+    color: var(--theme-on-primary);
+    padding: 22px 24px 18px;
+    border-radius: 14px 14px 0 0;
     position: relative;
+    overflow: hidden;
+    isolation: isolate;
     flex-shrink: 0;
+}
+/* Soft bloom so the flat brand panel reads as a surface, not a block of
+   ink — the same treatment the settings profile card uses. */
+.wizard-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(360px 200px at 88% -20%, rgba(var(--theme-on-primary-rgb, 255, 255, 255), 0.16), transparent 62%),
+        radial-gradient(260px 180px at 0% 120%, rgba(var(--theme-on-primary-rgb, 255, 255, 255), 0.09), transparent 60%);
 }
 
 .wizard-header-top {
@@ -131,30 +144,55 @@
 
 .wizard-title {
     margin: 0;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 700;
+    letter-spacing: -0.25px;
 }
 
 .wizard-subtitle {
-    margin: 4px 0 0;
-    font-size: 13px;
-    opacity: 0.9;
+    margin: 5px 0 0;
+    font-size: 12px;
+    letter-spacing: 0.1px;
 }
 
 .wizard-close-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #fff;
-    font-size: 24px;
-    line-height: 1;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: rgba(var(--theme-on-primary-rgb, 255, 255, 255), 0.12);
+    border: 1px solid rgba(var(--theme-on-primary-rgb, 255, 255, 255), 0.18);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.18s ease;
+    line-height: 1;
+    padding: 0;
 }
+.wizard-close-btn:hover {
+    background: rgba(var(--theme-on-primary-rgb, 255, 255, 255), 0.22);
+}
+.wizard-close-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--theme-on-primary-rgb, 255, 255, 255), 0.35);
+}
+
+/* The header is a filled brand panel, so everything on it takes the
+   foreground SystemTheme measured for that fill rather than a literal.
+
+   `color: #fff` on .wizard-header was never reaching these two: .wizard-title
+   is an <h3> and .wizard-subtitle is a <p>, and admin.css sets
+   `h1..h6 { color: var(--c-ink) }` and `p { color: var(--c-muted) }`.
+   Inheritance loses to any matching rule, however weak its selector, so the
+   title rendered in the dark brand colour *on the dark brand panel* — under
+   the gold palette that was #837707 on #837707. */
+.wizard-title,
+.wizard-subtitle,
+.wizard-close-btn {
+    color: var(--theme-on-primary);
+}
+.wizard-subtitle { opacity: 0.82; }
 
 /* Progress Bar */
 #progressBar {
@@ -177,50 +215,50 @@
     cursor: pointer;
 }
 .wizard-step:focus-visible {
-    outline: 2px solid #fff;
+    outline: 2px solid var(--theme-on-primary);
     outline-offset: 3px;
     border-radius: 8px;
 }
 .wizard-step:hover .wizard-circle {
-    background: rgba(255, 255, 255, 0.4);
-    border-color: rgba(255, 255, 255, 0.7);
+    background: rgba(var(--theme-on-primary-rgb, 255, 255, 255), 0.4);
+    border-color: rgba(var(--theme-on-primary-rgb, 255, 255, 255), 0.7);
 }
 .wizard-step:hover .wizard-label {
-    color: #fff;
+    color: var(--theme-on-primary);
 }
 
 .wizard-circle {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    background: rgba(var(--theme-on-primary-rgb, 255, 255, 255), 0.2);
+    color: var(--theme-on-primary);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 13px;
     font-weight: 600;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(var(--theme-on-primary-rgb, 255, 255, 255), 0.3);
     transition: all 0.3s ease;
 }
 
 .wizard-step.active .wizard-circle {
-    background: #fff;
+    background: var(--theme-on-primary);
     color: var(--gp-pri);
-    border-color: #fff;
+    border-color: var(--theme-on-primary);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .wizard-label {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(var(--theme-on-primary-rgb, 255, 255, 255), 0.7);
     font-weight: 500;
     text-align: center;
     white-space: nowrap;
 }
 
 .wizard-step.active .wizard-label {
-    color: #fff;
+    color: var(--theme-on-primary);
     font-weight: 600;
 }
 
@@ -229,7 +267,7 @@
     top: 18px;
     width: 50px;
     height: 2px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(var(--theme-on-primary-rgb, 255, 255, 255), 0.2);
     z-index: -1;
 }
 
@@ -256,15 +294,49 @@
 }
 
 .wizard-section-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
     margin: 0 0 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gp-border);
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.1px;
     color: var(--gp-pri);
 }
+/* The icon sits in a tinted chip so the heading reads as a labelled section
+   rather than a line of text with a picture in front of it. */
+.wizard-section-icon {
+    flex-shrink: 0;
+    box-sizing: content-box;
+    padding: 6px;
+    border-radius: 8px;
+    background: var(--theme-primary-light);
+    color: var(--theme-stat-icon-fg);
+}
+.wizard-address-title,
+.wizard-info-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+/* The review headings are built in JS as `<div class="review-section-title">`
+   with the icon inlined ahead of the label; without this the icon sat on its
+   own line above the text. */
+.review-section-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.wizard-address-icon { flex-shrink: 0; color: var(--theme-accent); }
+.wizard-info-icon,
+.wizard-success-tick { flex-shrink: 0; }
+.wizard-review-icon { flex-shrink: 0; color: var(--theme-accent); }
 
 .wizard-info-box {
-    background: #e8f5ff;
-    border: 1px solid #bfdbfe;
+    background: var(--theme-info-subtle);
+    border: 1px solid var(--theme-info-border);
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 16px;
@@ -273,13 +345,13 @@
 .wizard-info-title {
     margin: 0;
     font-size: 12px;
-    color: #0369a1;
+    color: var(--theme-info-emphasis);
 }
 
 .wizard-info-text {
     margin: 4px 0 0;
     font-size: 11px;
-    color: #0369a1;
+    color: var(--theme-info-emphasis);
 }
 
 .wizard-grid-2 {
@@ -304,7 +376,7 @@
     display: block;
     font-size: 12px;
     font-weight: 600;
-    color: #374151;
+    color: var(--theme-neutral-800);
     margin-bottom: 6px;
 }
 
@@ -327,7 +399,7 @@
 .wizard-select:focus {
     border-color: var(--gp-pri);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(11, 4, 77, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), 0.1);
 }
 
 .wizard-hint {
@@ -361,7 +433,7 @@
 }
 .wizard-pw-toggle:hover {
     color: var(--gp-pri);
-    background: #f2f1fb;
+    background: var(--gp-bg-tint-2);
 }
 
 /* Real-time validation state — the error message swaps into the .wizard-hint
@@ -405,7 +477,7 @@
     border-radius: 6px;
     transition: background 0.15s;
     font-size: 13px;
-    color: #374151;
+    color: var(--theme-neutral-800);
 }
 
 .wizard-role-checkbox:hover {
@@ -436,7 +508,7 @@
 
 /* Review Section */
 .wizard-review-content {
-    background: #f8f8fb;
+    background: var(--gp-bg-tint);
     padding: 20px;
     border-radius: 8px;
     max-height: 300px;
@@ -479,8 +551,8 @@
 }
 
 .wizard-success-box {
-    background: #e8f9ef;
-    border: 1px solid #bbf7d0;
+    background: var(--theme-success-subtle);
+    border: 1px solid var(--theme-success-border);
     border-radius: 8px;
     padding: 12px;
     margin-top: 16px;
@@ -525,10 +597,21 @@
 }
 
 .wizard-btn {
+    /* inline-flex, not the default: Tailwind's preflight sets
+       `svg { display: block }`, so an icon inside a plain button takes a
+       whole line to itself and pushes the label underneath it — which is
+       what stacked the tick above "Submit". Every other icon button in the
+       app (.btn-export, .modal-btn-*) already declares this for the same
+       reason. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
     padding: 10px 20px;
     border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
+    line-height: 1;
     cursor: pointer;
     font-family: 'Poppins', sans-serif;
 }
@@ -742,7 +825,7 @@ body, html {
     /* Ensure table wrapper has proper scrolling */
     .table-wrapper {
         border-radius: 8px;
-        box-shadow: inset 0 0 0 1px rgba(11,4,77,0.08);
+        box-shadow: inset 0 0 0 1px rgba(var(--theme-primary-rgb),0.08);
     }
 }
 
@@ -937,7 +1020,7 @@ body, html {
     backdrop-filter: saturate(180%) blur(20px);
     border: 1.5px solid var(--gp-border);
     border-radius: 14px;
-    box-shadow: 0 16px 40px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.05);
+    box-shadow: 0 16px 40px rgba(var(--theme-shadow-rgb),.14), 0 2px 8px rgba(var(--theme-shadow-rgb),.05);
     min-width: 200px;
     padding: 6px;
     z-index: 1000;

@@ -85,8 +85,8 @@ window.calculateNewBalance = function() {
     if (currentTransactionType === 'deduct' && newBalance < 0) {
         document.getElementById('previewBox').style.background = '#fef2f2';
         document.getElementById('previewBox').style.border = '1px solid #fecaca';
-        document.getElementById('previewIcon').setAttribute('stroke', '#dc2626');
-        document.getElementById('previewTitle').style.color = '#dc2626';
+        document.getElementById('previewIcon').setAttribute('stroke', 'var(--theme-danger)');
+        document.getElementById('previewTitle').style.color = 'var(--theme-danger)';
         document.getElementById('previewText').style.color = '#991b1b';
         document.getElementById('previewText').innerHTML = `
             <strong>⚠️ Warning:</strong> This deduction will result in a negative balance of <strong>${newBalance.toFixed(6)} days</strong>.
@@ -103,14 +103,14 @@ window.calculateNewBalance = function() {
     if (currentTransactionType === 'add') {
         document.getElementById('previewBox').style.background = '#f0fdf4';
         document.getElementById('previewBox').style.border = '1px solid #bbf7d0';
-        document.getElementById('previewIcon').setAttribute('stroke', '#15803d');
-        document.getElementById('previewTitle').style.color = '#15803d';
+        document.getElementById('previewIcon').setAttribute('stroke', 'var(--theme-success)');
+        document.getElementById('previewTitle').style.color = 'var(--theme-success)';
         document.getElementById('previewText').style.color = '#166534';
     } else {
         document.getElementById('previewBox').style.background = '#fef3c7';
         document.getElementById('previewBox').style.border = '1px solid #fde68a';
-        document.getElementById('previewIcon').setAttribute('stroke', '#d97706');
-        document.getElementById('previewTitle').style.color = '#d97706';
+        document.getElementById('previewIcon').setAttribute('stroke', 'var(--theme-warning)');
+        document.getElementById('previewTitle').style.color = 'var(--theme-warning)';
         document.getElementById('previewText').style.color = '#92400e';
     }
 
@@ -136,18 +136,18 @@ window.openManualCreditModal = function(type = 'add') {
     if (type === 'add') {
         document.getElementById('modalTitle').textContent = 'Add Manual Leave Credits';
         document.getElementById('modalSubtitle').textContent = 'Manually add credits to employee leave balance';
-        document.getElementById('amountLabel').innerHTML = 'Credit Amount (Days) <span style="color: #8e1e18;">*</span>';
+        document.getElementById('amountLabel').innerHTML = 'Credit Amount (Days) <span style="color: var(--theme-danger);">*</span>';
         document.getElementById('amountHint').textContent = 'Number of days to add (up to 6 decimals, e.g., 0.125000 = 1 hour)';
         document.getElementById('submitBtn').textContent = 'Add Credits';
-        document.getElementById('submitBtn').style.background = '#0b044d';
+        document.getElementById('submitBtn').style.background = 'var(--gp-pri)';
         document.getElementById('previewTitle').textContent = 'Preview - Adding Credits';
     } else {
         document.getElementById('modalTitle').textContent = 'Deduct Leave Credits';
         document.getElementById('modalSubtitle').textContent = 'Manually deduct credits from employee leave balance';
-        document.getElementById('amountLabel').innerHTML = 'Deduction Amount (Days) <span style="color: #8e1e18;">*</span>';
+        document.getElementById('amountLabel').innerHTML = 'Deduction Amount (Days) <span style="color: var(--theme-danger);">*</span>';
         document.getElementById('amountHint').textContent = 'Number of days to deduct (up to 6 decimals, e.g., 0.125000 = 1 hour)';
         document.getElementById('submitBtn').textContent = 'Deduct Credits';
-        document.getElementById('submitBtn').style.background = '#8e1e18';
+        document.getElementById('submitBtn').style.background = 'var(--theme-danger)';
         document.getElementById('previewTitle').textContent = 'Preview - Deducting Credits';
     }
 

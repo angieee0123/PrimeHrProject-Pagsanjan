@@ -10,7 +10,7 @@
                 <button id="tabSalary" class="chart-tab active" onclick="switchMainChart('salary')" style="font-size:11px">Payroll by Designation</button>
                 <button id="tabEmployees" class="chart-tab" onclick="switchMainChart('employees')" style="font-size:11px">Employees</button>
             </div>
-            <div class="chart-tabs" id="periodTabs" style="border-left:1px solid #e2e8f0;padding-left:8px">
+            <div class="chart-tabs" id="periodTabs" style="border-left:1px solid var(--theme-neutral-300);padding-left:8px">
                 <button class="chart-tab active" onclick="switchPeriodChart('week')">Week</button>
                 <button class="chart-tab" onclick="switchPeriodChart('month')">Month</button>
                 <button class="chart-tab" onclick="switchPeriodChart('year')">Year</button>

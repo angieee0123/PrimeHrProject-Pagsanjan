@@ -27,7 +27,7 @@
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: #e5e3f8;
+    background: var(--theme-neutral-200);
     color: #9999bb;
     display: flex;
     align-items: center;
@@ -40,14 +40,14 @@
 .cert-step-line {
     flex: 1;
     height: 2px;
-    background: #e5e3f8;
+    background: var(--theme-neutral-200);
     margin: 0 10px;
 }
 /* ── Scan spinner ── */
 .cert-scan-spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid #e5e3f8;
+    border: 3px solid var(--theme-neutral-200);
     border-top-color: var(--gp-pri);
     border-radius: 50%;
     animation: certSpin 0.8s linear infinite;
@@ -90,7 +90,7 @@
 .cert-autofilled:focus {
     border-color: var(--gp-pri) !important;
     background: #fff !important;
-    box-shadow: 0 0 0 3px rgba(11,4,77,0.1) !important;
+    box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb),0.1) !important;
 }
 /* ── File preview in step 2 ── */
 .cert-file-preview {
@@ -98,7 +98,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
-    background: #f7f6ff;
-    border: 1.5px solid #e5e3f8;
+    background: var(--theme-primary-soft);
+    border: 1.5px solid var(--theme-neutral-200);
     border-radius: 8px;
 }

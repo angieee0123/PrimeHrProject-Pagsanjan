@@ -21,6 +21,8 @@ class SystemAiSetting extends Model
         'theme_secondary',
         'theme_accent',
         'theme_muted',
+        'sidebar_style',
+        'topbar_style',
     ];
 
     protected function casts(): array

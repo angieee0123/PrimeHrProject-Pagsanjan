@@ -11,7 +11,7 @@
             <!-- Employee Selection -->
             <div style="margin-bottom: 20px;">
                 <label class="form-label">
-                    Select Employee <span style="color: #8e1e18;">*</span>
+                    Select Employee <span style="color: var(--theme-danger);">*</span>
                 </label>
                 <select id="migrateEmployeeId" name="employee_id" required class="form-input" style="width: 100%;">
                     <option value="">-- Choose Employee --</option>
@@ -30,7 +30,7 @@
             <!-- File Upload -->
             <div style="margin-bottom: 20px;">
                 <label class="form-label">
-                    Excel File <span style="color: #8e1e18;">*</span>
+                    Excel File <span style="color: var(--theme-danger);">*</span>
                 </label>
                 <div style="border: 2px dashed #bae6fd; border-radius: 8px; padding: 20px; text-align: center; background: #f0f9ff; cursor: pointer;" id="migrateFileDropZone" onclick="document.getElementById('migrateExcelFile').click()">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="2" style="margin: 0 auto 8px; display: block;">
@@ -42,7 +42,7 @@
                     <p style="margin: 0; color: #0369a1; font-size: 12px; opacity: 0.7;">Supported: .xlsx, .xls (Max 5MB)</p>
                 </div>
                 <input type="file" id="migrateExcelFile" name="excel_file" accept=".xlsx,.xls" required class="form-control" style="display: none;" onchange="updateMigrateFileName(this)">
-                <p id="migrateFileName" style="margin-top: 8px; font-size: 12px; color: #56547a; display: none;">
+                <p id="migrateFileName" style="margin-top: 8px; font-size: 12px; color: var(--gp-text-mid); display: none;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 4px; vertical-align: -1px;">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     </svg>
@@ -92,7 +92,7 @@
                         <line x1="4.22" y1="19.78" x2="7.34" y2="16.66"/>
                         <line x1="16.66" y1="7.34" x2="19.78" y2="4.22"/>
                     </svg>
-                    <span style="color: #15803d; font-size: 13px; font-weight: 500;">Migrating records...</span>
+                    <span style="color: var(--theme-success); font-size: 13px; font-weight: 500;">Migrating records...</span>
                 </div>
             </div>
         </form>
@@ -100,7 +100,7 @@
 
     <div class="modal-footer">
         <button type="button" class="modal-btn-ghost" onclick="closeMigrateLeaveRecordsModal()" id="migrateCancelBtn">Cancel</button>
-        <button type="button" class="modal-btn-primary" onclick="submitMigrateLeaveRecords()" id="migrateSubmitBtn" style="background: #0b044d;">
+        <button type="button" class="modal-btn-primary" onclick="submitMigrateLeaveRecords()" id="migrateSubmitBtn" style="background: var(--gp-pri);">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 6px; vertical-align: -1px;">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="17 8 12 3 7 8"/>

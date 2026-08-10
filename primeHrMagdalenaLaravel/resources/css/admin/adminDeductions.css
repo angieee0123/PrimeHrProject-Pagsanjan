@@ -16,7 +16,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(11, 4, 77, 0.4);
+    background: rgba(var(--theme-primary-rgb), 0.4);
     backdrop-filter: blur(4px);
     z-index: 9999;
     animation: fadeIn 0.2s ease;
@@ -40,7 +40,7 @@
     max-width: 600px;
     max-height: 90vh;
     overflow: hidden;
-    box-shadow: 0 20px 60px rgba(11, 4, 77, 0.3);
+    box-shadow: 0 20px 60px rgba(var(--theme-primary-rgb), 0.3);
     animation: slideUp 0.3s ease;
 }
 
@@ -49,7 +49,7 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: 24px;
-    border-bottom: 1px solid #f2f1fb;
+    border-bottom: 1px solid var(--gp-bg-tint-2);
 }
 
 .modal-title {
@@ -61,14 +61,14 @@
 
 .modal-subtitle {
     font-size: 12px;
-    color: #56547a;
+    color: var(--gp-text-mid);
     margin: 0;
 }
 
 .modal-close {
     background: transparent;
     border: none;
-    color: #56547a;
+    color: var(--gp-text-mid);
     cursor: pointer;
     padding: 4px;
     display: flex;
@@ -79,7 +79,7 @@
 }
 
 .modal-close:hover {
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
     color: var(--gp-pri);
 }
 
@@ -110,7 +110,7 @@
 
 .form-input {
     padding: 10px 12px;
-    border: 1px solid #e5e3f8;
+    border: 1px solid var(--theme-neutral-200);
     border-radius: 6px;
     font-size: 13px;
     color: var(--gp-pri);
@@ -121,7 +121,7 @@
 .form-input:focus {
     outline: none;
     border-color: var(--gp-pri);
-    box-shadow: 0 0 0 3px rgba(11, 4, 77, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), 0.1);
 }
 
 .form-input::placeholder {
@@ -130,7 +130,7 @@
 
 .field-hint {
     font-size: 11px;
-    color: #56547a;
+    color: var(--gp-text-mid);
     margin-top: 4px;
     font-style: italic;
 }
@@ -146,14 +146,14 @@ textarea.form-input {
     justify-content: flex-end;
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid #f2f1fb;
+    border-top: 1px solid var(--gp-bg-tint-2);
 }
 
 .btn-cancel {
     padding: 10px 20px;
-    border: 1px solid #e5e3f8;
+    border: 1px solid var(--theme-neutral-200);
     background: #fff;
-    color: #56547a;
+    color: var(--gp-text-mid);
     font-size: 13px;
     font-weight: 600;
     border-radius: 6px;
@@ -163,7 +163,7 @@ textarea.form-input {
 }
 
 .btn-cancel:hover {
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
     border-color: var(--gp-pri);
     color: var(--gp-pri);
 }
@@ -184,7 +184,7 @@ textarea.form-input {
 .btn-submit:hover {
     background: var(--gp-pri-2);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(11, 4, 77, 0.3);
+    box-shadow: 0 4px 12px rgba(var(--theme-primary-rgb), 0.3);
 }
 
 @keyframes fadeIn {
@@ -211,7 +211,7 @@ textarea.form-input {
 
 /* ══════════ assignDeductionModal — checkbox list ══════════ */
 .checkbox-group {
-    border: 1px solid #e5e3f8;
+    border: 1px solid var(--theme-neutral-200);
     border-radius: 6px;
     padding: 12px;
     max-height: 280px;
@@ -234,7 +234,7 @@ textarea.form-input {
     letter-spacing: 0.5px;
     margin: 0 0 8px 0;
     padding-bottom: 6px;
-    border-bottom: 1px solid #f2f1fb;
+    border-bottom: 1px solid var(--gp-bg-tint-2);
 }
 
 .checkbox-label {
@@ -249,7 +249,7 @@ textarea.form-input {
 }
 
 .checkbox-label:hover {
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -274,7 +274,7 @@ textarea.form-input {
     border-radius: 6px;
     margin-bottom: 16px;
     font-size: 13px;
-    color: #56547a;
+    color: var(--gp-text-mid);
 }
 
 .warning-box svg {
@@ -301,12 +301,12 @@ textarea.form-input {
 }
 
 .btn-link:hover {
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
 }
 
 /* ══════════ editEmployeeDeductionModal ══════════ */
 .ded-info-box {
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
     padding: 12px;
     border-radius: 6px;
     margin-bottom: 16px;
@@ -323,7 +323,7 @@ textarea.form-input {
 
 .ded-info-label {
     font-size: 11px;
-    color: #56547a;
+    color: var(--gp-text-mid);
     font-weight: 600;
 }
 
@@ -336,7 +336,7 @@ textarea.form-input {
 /* ══════════ assignDeductionScheduleModal ══════════ */
 .deduction-schedule-item {
     background: #fff;
-    border: 1.5px solid #ecebf6;
+    border: 1.5px solid var(--gp-border);
     border-radius: 8px;
     padding: 14px;
     display: flex;
@@ -347,7 +347,7 @@ textarea.form-input {
 
 .deduction-schedule-item:hover {
     border-color: var(--gp-pri);
-    box-shadow: 0 2px 8px rgba(11, 4, 77, 0.1);
+    box-shadow: 0 2px 8px rgba(var(--theme-primary-rgb), 0.1);
 }
 
 .deduction-info {
@@ -363,7 +363,7 @@ textarea.form-input {
 
 .deduction-details {
     font-size: 11px;
-    color: #8f8daf;
+    color: var(--gp-text-soft);
     margin: 0;
 }
 
@@ -377,18 +377,18 @@ textarea.form-input {
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    border: 1.5px solid #ecebf6;
+    border: 1.5px solid var(--gp-border);
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
     font-size: 12px;
     font-weight: 600;
-    color: #56547a;
+    color: var(--gp-text-mid);
 }
 
 .cutoff-radio:hover {
     border-color: var(--gp-pri);
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
 }
 
 .cutoff-radio input[type="radio"] {
@@ -404,13 +404,13 @@ textarea.form-input {
 
 .cutoff-radio:has(input[type="radio"]:checked) {
     border-color: var(--gp-pri);
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
     color: var(--gp-pri);
 }
 
 .schedule-history-item {
     background: #fff;
-    border: 1px solid #ecebf6;
+    border: 1px solid var(--gp-border);
     border-radius: 6px;
     padding: 10px 12px;
     margin-bottom: 8px;
@@ -428,7 +428,7 @@ textarea.form-input {
 }
 
 .schedule-details {
-    color: #56547a;
+    color: var(--gp-text-mid);
     font-size: 11px;
 }
 
@@ -463,7 +463,7 @@ textarea.form-input {
 
 #deductionsList::-webkit-scrollbar-track,
 #scheduleHistoryList::-webkit-scrollbar-track {
-    background: #f7f6fc;
+    background: var(--gp-bg-tint);
     border-radius: 10px;
 }
 
@@ -490,7 +490,7 @@ textarea.form-input {
     left: 0;
     right: 0;
     height: 20px;
-    background: linear-gradient(to top, #f7f6fc, transparent);
+    background: linear-gradient(to top, var(--gp-bg-tint), transparent);
     pointer-events: none;
     display: block;
 }
@@ -504,17 +504,17 @@ textarea.form-input {
 .ded-sched-block { margin-bottom: 20px; }
 .ded-sched-label { display: block; font-size: 12px; font-weight: 600; color: var(--gp-pri); margin-bottom: 8px; }
 .ded-sched-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.ded-sched-sublabel { display: block; font-size: 11px; font-weight: 600; color: #56547a; margin-bottom: 6px; }
-.ded-sched-input { width: 100%; padding: 10px 12px; border: 1.5px solid #ecebf6; border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; color: var(--gp-pri); background: #fff; box-sizing: border-box; }
+.ded-sched-sublabel { display: block; font-size: 11px; font-weight: 600; color: var(--gp-text-mid); margin-bottom: 6px; }
+.ded-sched-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--gp-border); border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; color: var(--gp-pri); background: #fff; box-sizing: border-box; }
 .ded-sched-history-section { display: none; margin-bottom: 20px; }
 .ded-sched-history-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .ded-sched-history-label { font-size: 12px; font-weight: 600; color: var(--gp-pri); }
 .ded-sched-toggle-btn { background: transparent; border: none; color: var(--gp-pri); font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-.ded-sched-history-list { display: none; background: #f7f6fc; border: 1.5px solid #ecebf6; border-radius: 8px; padding: 12px; max-height: 200px; overflow-y: auto; }
-.ded-sched-deductions-box { background: #f7f6fc; border: 1.5px solid #ecebf6; border-radius: 10px; padding: 16px; margin-bottom: 20px; }
-.ded-sched-deductions-label { margin: 0 0 12px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #8f8daf; }
+.ded-sched-history-list { display: none; background: var(--gp-bg-tint); border: 1.5px solid var(--gp-border); border-radius: 8px; padding: 12px; max-height: 200px; overflow-y: auto; }
+.ded-sched-deductions-box { background: var(--gp-bg-tint); border: 1.5px solid var(--gp-border); border-radius: 10px; padding: 16px; margin-bottom: 20px; }
+.ded-sched-deductions-label { margin: 0 0 12px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--gp-text-soft); }
 .ded-sched-deductions-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding-right: 8px; }
-.ded-sched-loading { margin: 0; font-size: 13px; color: #8f8daf; text-align: center; padding: 20px; }
+.ded-sched-loading { margin: 0; font-size: 13px; color: var(--gp-text-soft); text-align: center; padding: 20px; }
 .ded-sched-note-box { border-radius: 10px; padding: 12px; display: flex; align-items: start; gap: 10px; margin-bottom: 16px; }
 .ded-sched-note-box.is-green { background: #e8f5e9; border: 1.5px solid #a5d6a7; }
 .ded-sched-note-box.is-gold { background: #fbf6e3; border: 1.5px solid #ecdca4; }
@@ -522,10 +522,10 @@ textarea.form-input {
 .ded-sched-note-text { margin: 0; font-size: 12px; line-height: 1.5; }
 .ded-sched-note-text.is-green { color: #1b5e20; }
 .ded-sched-note-text.is-gold { color: #c9a227; }
-.ded-sched-footer { padding: 16px 24px; border-top: 1px solid #f2f1fb; display: flex; justify-content: flex-end; gap: 10px; }
-.ded-sched-btn-cancel { padding: 10px 24px; background: #fff; border: 1.5px solid #ecebf6; border-radius: 8px; font-size: 13px; font-weight: 600; color: #56547a; cursor: pointer; font-family: 'Poppins', sans-serif; }
+.ded-sched-footer { padding: 16px 24px; border-top: 1px solid var(--gp-bg-tint-2); display: flex; justify-content: flex-end; gap: 10px; }
+.ded-sched-btn-cancel { padding: 10px 24px; background: #fff; border: 1.5px solid var(--gp-border); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--gp-text-mid); cursor: pointer; font-family: 'Poppins', sans-serif; }
 .ded-sched-btn-submit { padding: 10px 24px; background: var(--gp-pri); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 8px; }
-.ded-deduction-badge-inline { display: inline-block; padding: 2px 8px; background: #f2f1fb; border-radius: 4px; font-size: 10px; font-weight: 600; color: var(--gp-pri); margin-right: 6px; }
+.ded-deduction-badge-inline { display: inline-block; padding: 2px 8px; background: var(--gp-bg-tint-2); border-radius: 4px; font-size: 10px; font-weight: 600; color: var(--gp-pri); margin-right: 6px; }
 
 /* ══════════ Page-wide utility classes (replacing inline style="") ══════════ */
 .ded-mb-20 { margin-bottom: 20px; }
@@ -543,9 +543,9 @@ textarea.form-input {
 .ded-required { color: #8e1e18; }
 .ded-col { flex: 1; }
 .ded-col-2 { flex: 2; }
-.ded-readonly-input { background: #f7f6fc; cursor: not-allowed; }
-.ded-field-note { font-size: 11px; color: #56547a; margin: 4px 0 0 0; }
-.ded-field-hint-hidden { font-size: 11px; color: #56547a; margin: 4px 0 0 0; display: none; }
+.ded-readonly-input { background: var(--gp-bg-tint); cursor: not-allowed; }
+.ded-field-note { font-size: 11px; color: var(--gp-text-mid); margin: 4px 0 0 0; }
+.ded-field-hint-hidden { font-size: 11px; color: var(--gp-text-mid); margin: 4px 0 0 0; display: none; }
 .ded-uppercase { text-transform: uppercase; }
 .ded-inline-note { display: block; margin-top: 6px; }
 .ded-info-banner { border-radius: 8px; padding: 12px; display: flex; align-items: start; gap: 10px; margin-top: 16px; }
@@ -556,38 +556,38 @@ textarea.form-input {
 .ded-warn-box { display: none; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 12px; margin-top: 16px; }
 .ded-warn-body { display: flex; align-items: start; gap: 10px; }
 .ded-warn-text { margin: 0; font-size: 12px; color: #856404; line-height: 1.5; }
-.ded-avatar-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #ecebf6; }
+.ded-avatar-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gp-border); }
 .ded-row-flex { display: flex; align-items: center; gap: 10px; }
 .ded-cell-title { font-weight: 600; color: var(--gp-pri); margin: 0; font-size: 13px; }
-.ded-cell-sub { color: #8f8daf; margin: 0; font-size: 11px; }
-.ded-text-sm { font-size: 13px; color: #56547a; }
-.ded-text-muted-sm { font-size: 12px; color: #56547a; }
-.ded-text-faint-sm { font-size: 13px; color: #8f8daf; }
-.ded-empty-cell { text-align: center; padding: 40px; color: #8f8daf; }
-.ded-ellipsis { padding: 0 8px; color: #8f8daf; }
+.ded-cell-sub { color: var(--gp-text-soft); margin: 0; font-size: 11px; }
+.ded-text-sm { font-size: 13px; color: var(--gp-text-mid); }
+.ded-text-muted-sm { font-size: 12px; color: var(--gp-text-mid); }
+.ded-text-faint-sm { font-size: 13px; color: var(--gp-text-soft); }
+.ded-empty-cell { text-align: center; padding: 40px; color: var(--gp-text-soft); }
+.ded-ellipsis { padding: 0 8px; color: var(--gp-text-soft); }
 .ded-actions { display: flex; gap: 6px; }
 .ded-danger-btn { color: #8e1e18; }
 .ded-disabled-btn { opacity: 0.3; cursor: not-allowed; }
-.ded-mono-code { font-family: 'Courier New', monospace; font-size: 12px; color: #56547a; background: #f7f6fc; padding: 4px 8px; border-radius: 4px; }
+.ded-mono-code { font-family: 'Courier New', monospace; font-size: 12px; color: var(--gp-text-mid); background: var(--gp-bg-tint); padding: 4px 8px; border-radius: 4px; }
 .ded-min-w-120 { min-width: 120px; }
 .ded-min-w-16 { min-width: 16px; }
 .ded-progress-track { display: flex; flex-direction: column; gap: 4px; }
-.ded-progress-bar { width: 100%; height: 6px; background: #f2f1fb; border-radius: 3px; overflow: hidden; }
+.ded-progress-bar { width: 100%; height: 6px; background: var(--gp-bg-tint-2); border-radius: 3px; overflow: hidden; }
 .ded-progress-fill { height: 100%; transition: width 0.3s; }
-.ded-progress-pct { font-size: 11px; color: #56547a; }
+.ded-progress-pct { font-size: 11px; color: var(--gp-text-mid); }
 .ded-badge-count { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-.ded-badge-count.is-blue { background: #f2f1fb; color: var(--gp-pri); }
+.ded-badge-count.is-blue { background: var(--gp-bg-tint-2); color: var(--gp-pri); }
 .ded-badge-count.is-gold { background: #fbf6e3; color: #c9a227; }
 .ded-footer-flex { display: flex; align-items: center; gap: 12px; }
 .ded-rows-select { width: auto; padding: 6px 10px; font-size: 13px; }
-.ded-selected-count { color: #56547a; font-weight: 400; margin-left: 8px; }
+.ded-selected-count { color: var(--gp-text-mid); font-weight: 400; margin-left: 8px; }
 .ded-existing-list { margin: 4px 0 0 0; font-size: 12px; }
-.ded-checkbox-value { color: #8f8daf; font-size: 11px; }
-.ded-checkbox-rate { color: #56547a; font-size: 11px; }
+.ded-checkbox-value { color: var(--gp-text-soft); font-size: 11px; }
+.ded-checkbox-rate { color: var(--gp-text-mid); font-size: 11px; }
 .ded-badge-employee-share { background: #fff3e0; color: #e65100; }
 .ded-badge-employer-share { background: #e8f5e9; color: #2e7d32; }
 .ded-badge-active { background: #15803d18; color: #15803d; }
-.ded-badge-inactive { background: #56547a18; color: #56547a; }
+.ded-badge-inactive { background: var(--gp-text-mid)18; color: var(--gp-text-mid); }
 .ded-notice-banner { background: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: #1565c0; }
 .ded-notice-text { font-size: 13px; }
 .ded-notice-banner-teal { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: #1e40af; }
@@ -641,7 +641,7 @@ textarea.form-input {
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #fff;
-    box-shadow: 0 0 0 1px #ecebf6;
+    box-shadow: 0 0 0 1px var(--gp-border);
 }
 .lt-avatar-initials {
     display: flex;
@@ -655,15 +655,15 @@ textarea.form-input {
 
 /* Three text ranks, used in every cell: title, supporting line, plain value. */
 .lt-table .lt-primary { margin: 0; font-size: 13px; font-weight: 600; color: var(--gp-pri); line-height: 1.35; }
-.lt-table .lt-secondary { margin: 2px 0 0; font-size: 11px; color: #8f8daf; line-height: 1.4; }
-.lt-table .lt-muted { margin: 0; font-size: 12.5px; color: #56547a; }
+.lt-table .lt-secondary { margin: 2px 0 0; font-size: 11px; color: var(--gp-text-soft); line-height: 1.4; }
+.lt-table .lt-muted { margin: 0; font-size: 12.5px; color: var(--gp-text-mid); }
 .lt-table .lt-amount { margin: 0; font-size: 13px; font-weight: 600; color: var(--gp-pri); font-variant-numeric: tabular-nums; }
 .lt-table .lt-amount.is-due { color: #a16207; }
 .lt-table .lt-amount.is-settled { color: #15803d; }
-.lt-unit { margin-left: 2px; font-size: 11px; font-weight: 600; color: #8f8daf; }
+.lt-unit { margin-left: 2px; font-size: 11px; font-weight: 600; color: var(--gp-text-soft); }
 
 .lt-loan-meta { display: flex; align-items: center; gap: 7px; margin-top: 5px; }
-.lt-code { font-family: 'Courier New', monospace; font-size: 10.5px; color: #8f8daf; }
+.lt-code { font-family: 'Courier New', monospace; font-size: 10.5px; color: var(--gp-text-soft); }
 
 .lt-tag {
     display: inline-flex;
@@ -677,9 +677,9 @@ textarea.form-input {
     text-transform: uppercase;
     white-space: nowrap;
 }
-.lt-tag.is-gsis { background: #eef0fb; color: var(--gp-pri); border-color: #d9dcf4; }
+.lt-tag.is-gsis { background: var(--theme-neutral-200); color: var(--gp-pri); border-color: #d9dcf4; }
 .lt-tag.is-pagibig { background: #e9f6ee; color: #15803d; border-color: #c6e7d3; }
-.lt-tag.is-other { background: #f1f0f7; color: #56547a; border-color: #e2e0ee; }
+.lt-tag.is-other { background: #f1f0f7; color: var(--gp-text-mid); border-color: #e2e0ee; }
 .lt-tag.is-custom {
     margin-left: 4px;
     background: #fbf6e3;
@@ -694,11 +694,11 @@ textarea.form-input {
    own line instead of colliding with the percentage. */
 .lt-progress-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 8px; }
 .lt-progress-pct { font-size: 12px; font-weight: 700; color: var(--gp-pri); font-variant-numeric: tabular-nums; }
-.lt-progress-note { font-size: 10.5px; color: #8f8daf; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lt-progress-note { font-size: 10.5px; color: var(--gp-text-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .lt-progress-note.is-settled { font-weight: 600; color: #15803d; }
-.lt-progress-bar { height: 6px; border-radius: 999px; background: #ecebf6; overflow: hidden; }
+.lt-progress-bar { height: 6px; border-radius: 999px; background: var(--gp-border); overflow: hidden; }
 .lt-progress-fill { height: 100%; border-radius: 999px; transition: width .35s ease; }
-.lt-progress-fill.is-active { background: linear-gradient(90deg, #2a1d8f, #0b044d); }
+.lt-progress-fill.is-active { background: linear-gradient(90deg, #2a1d8f, var(--gp-pri)); }
 .lt-progress-fill.is-settled { background: linear-gradient(90deg, #22a355, #15803d); }
 .lt-progress-fill.is-suspended { background: linear-gradient(90deg, #d8b74a, #c9a227); }
 
@@ -716,7 +716,7 @@ textarea.form-input {
 .lt-status::before { content: ''; width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; background: currentColor; }
 .lt-status.is-active { background: #e9f6ee; color: #15803d; border-color: rgba(21, 128, 61, .22); }
 .lt-status.is-suspended { background: #fbf3e0; color: #8a6d1f; border-color: rgba(201, 162, 39, .32); }
-.lt-status.is-completed { background: #f1f0f7; color: #56547a; border-color: rgba(86, 84, 122, .2); }
+.lt-status.is-completed { background: #f1f0f7; color: var(--gp-text-mid); border-color: rgba(86, 84, 122, .2); }
 
 /* Centred, not flushed right: an icon-only column pinned to the card edge reads
    as falling off it. The header label sits directly over the ⋮ button. */
@@ -733,13 +733,13 @@ textarea.form-input {
     border: 1px solid transparent;
     border-radius: 8px;
     background: transparent;
-    color: #8f8daf;
+    color: var(--gp-text-soft);
     cursor: pointer;
     transition: background .16s ease, color .16s ease, border-color .16s ease;
 }
 .lt-action-btn:hover,
-.lt-action-btn.is-open { background: #f2f1fb; border-color: #e2e0ee; color: var(--gp-pri); }
-.lt-action-btn:focus-visible { outline: 2px solid rgba(11, 4, 77, .35); outline-offset: 2px; }
+.lt-action-btn.is-open { background: var(--gp-bg-tint-2); border-color: #e2e0ee; color: var(--gp-pri); }
+.lt-action-btn:focus-visible { outline: 2px solid rgba(var(--theme-primary-rgb), .35); outline-offset: 2px; }
 
 /* Fixed, and relocated to <body> by loans.js — see the comment there for why it
    cannot be positioned inside the cell. Coordinates come from the button. */
@@ -750,9 +750,9 @@ textarea.form-input {
     min-width: 176px;
     padding: 6px;
     background: #fff;
-    border: 1px solid #ecebf6;
+    border: 1px solid var(--gp-border);
     border-radius: 10px;
-    box-shadow: 0 12px 28px rgba(11, 4, 77, .14), 0 2px 6px rgba(11, 4, 77, .06);
+    box-shadow: 0 12px 28px rgba(var(--theme-primary-rgb), .14), 0 2px 6px rgba(var(--theme-primary-rgb), .06);
 }
 .lt-menu.is-open { display: block; animation: ltMenuIn .14s ease; }
 
@@ -780,7 +780,7 @@ textarea.form-input {
 }
 .lt-menu-item svg { flex-shrink: 0; opacity: .9; }
 .lt-menu-item:hover { background: #f5f4fd; color: var(--gp-pri); }
-.lt-menu-item:focus-visible { outline: 2px solid rgba(11, 4, 77, .3); outline-offset: -2px; }
+.lt-menu-item:focus-visible { outline: 2px solid rgba(var(--theme-primary-rgb), .3); outline-offset: -2px; }
 .lt-menu-item.is-danger { color: #8e1e18; }
 .lt-menu-item.is-danger:hover { background: #fdf0ef; color: #8e1e18; }
 .lt-menu-sep { height: 1px; margin: 5px 4px; background: #f0effe; }
@@ -795,11 +795,11 @@ textarea.form-input {
     height: 44px;
     margin-bottom: 12px;
     border-radius: 12px;
-    background: #f2f1fb;
+    background: var(--gp-bg-tint-2);
     color: var(--gp-pri);
 }
 .lt-empty-title { margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--gp-pri); }
-.lt-empty-sub { margin: 0; font-size: 12px; color: #8f8daf; line-height: 1.5; }
+.lt-empty-sub { margin: 0; font-size: 12px; color: var(--gp-text-soft); line-height: 1.5; }
 .lt-empty-cta {
     margin-top: 14px;
     padding: 8px 18px;
@@ -838,4 +838,296 @@ textarea.form-input {
     .lt-table th.lt-c-amort,
     .lt-table td.lt-c-amort { display: none; }
     .lt-avatar { width: 32px; height: 32px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Employee Deductions table
+
+   Ten columns overflowed the wrapper (1200px into 1142px), which put the
+   Actions menu past the right edge and wrapped every employee name onto
+   three lines. Category folded into the deduction cell and the two date
+   columns into one Period, leaving eight — so each cell can hold one line
+   and the row height stays even.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.ded-emp-table {
+    table-layout: fixed;
+    width: 100%;
+    /* A table's `min-width` defaults to `auto`, which resolves to its
+       min-content width — 1200px here, so it kept overflowing the 1142px
+       wrapper no matter what the column percentages said. With this, the
+       fixed layout and the ellipsis rules below actually take effect. */
+    min-width: 0;
+}
+.ded-emp-table th,
+.ded-emp-table td { overflow: hidden; }
+.ded-emp-table th:nth-child(1) { width: 19%; }   /* Employee   */
+.ded-emp-table th:nth-child(2) { width: 14%; }   /* Department */
+.ded-emp-table th:nth-child(3) { width: 19%; }   /* Deduction  */
+.ded-emp-table th:nth-child(4) { width: 14%; }   /* Amount     */
+.ded-emp-table th:nth-child(5) { width: 12%; }   /* Cutoff     */
+.ded-emp-table th:nth-child(6) { width: 12%; }   /* Period     */
+.ded-emp-table th:nth-child(7) { width: 10%; }   /* Status     */
+.ded-emp-table th:nth-child(8) { width: 84px; }  /* Actions — wide enough for its own header label */
+
+/* Names and office names are long and their full value is on `title`, so
+   truncating beats wrapping a cell to three lines. */
+.ded-emp-table .ded-cell-title,
+.ded-emp-table .dept-tag {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ded-emp-table .dept-tag { max-width: 100%; }
+.ded-emp-text { min-width: 0; flex: 1; }
+
+.ded-avatar-initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    border-color: transparent;
+    flex-shrink: 0;
+}
+
+/* Category chip — themed, replacing the hand-mixed `#0b044d18` fills that
+   could not follow the palette. */
+.ded-chip {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    vertical-align: 1px;
+}
+.ded-chip.is-mandatory { background: var(--theme-primary-light); color: var(--theme-stat-icon-fg); }
+.ded-chip.is-loan      { background: var(--theme-warning-subtle); color: var(--theme-warning-emphasis); }
+.ded-chip.is-other     { background: var(--theme-neutral-100);    color: var(--theme-text-mid); }
+.ded-code { color: var(--gp-text-soft); margin-left: 6px; font-size: 10.5px; }
+
+/* Money reads as money: right-aligned, tabular figures so digits line up
+   down the column. */
+.ded-num-col { text-align: right; }
+.ded-amount {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gp-pri);
+    font-variant-numeric: tabular-nums;
+}
+.ded-num-col .ded-cell-sub { font-variant-numeric: tabular-nums; }
+.ded-auto { font-style: italic; }
+
+/* Repayment progress. A remaining balance says little on its own — this
+   shows how far through the loan the employee actually is. */
+.ded-progress {
+    display: block;
+    height: 4px;
+    margin-top: 6px;
+    border-radius: 999px;
+    background: var(--theme-neutral-200);
+    overflow: hidden;
+}
+.ded-progress-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--theme-success);
+}
+
+/* Empty state, in place of a bare sentence in a merged cell. */
+.ded-empty-cell { text-align: center; padding: 44px 20px; color: var(--gp-text-soft); }
+.ded-empty-icon { color: var(--theme-neutral-400); margin: 0 auto 10px; display: block; }
+.ded-empty-title { margin: 0 0 4px; font-size: 13.5px; font-weight: 700; color: var(--gp-ink); }
+.ded-empty-sub { margin: 0; font-size: 12px; color: var(--gp-text-soft); }
+.ded-empty-sub strong { color: var(--gp-text-mid); }
+
+@media (max-width: 1200px) {
+    /* Cutoff is the least load-bearing column; it is also on the row menu's
+       edit screen, so it is the one to drop first. */
+    .ded-emp-table th:nth-child(5),
+    .ded-emp-table td:nth-child(5) { display: none; }
+    .ded-emp-table th:nth-child(1) { width: 24%; }
+    .ded-emp-table th:nth-child(3) { width: 22%; }
+}
+
+/* ── Deduction Types table ───────────────────────────────────────────────
+   Six columns rather than ten. Computation type, rate and base salary were
+   three columns of enum values describing one fact, and both amount columns
+   read `max_amount` — which is null on every row, so 18 cells rendered as a
+   bare em-dash.
+   ─────────────────────────────────────────────────────────────────────── */
+
+.ded-types-table { table-layout: fixed; width: 100%; min-width: 0; }
+.ded-types-table th,
+.ded-types-table td { overflow: hidden; }
+.ded-types-table th:nth-child(1) { width: 30%; }  /* Deduction   */
+.ded-types-table th:nth-child(2) { width: 12%; }  /* Category    */
+.ded-types-table th:nth-child(3) { width: 12%; }  /* Borne by    */
+.ded-types-table th:nth-child(4) { width: 24%; }  /* Computation */
+.ded-types-table th:nth-child(5) { width: 12%; }  /* Status      */
+.ded-types-table th:nth-child(6) { width: 96px; } /* Actions     */
+
+.ded-types-table .ded-cell-title {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The code is the row's identifier, so it keeps the monospace treatment but
+   without the leading gap it has when it trails a chip. */
+.ded-code-lead { margin-left: 0; }
+
+/* Computation reads left-to-right as a phrase, unlike the money column on
+   the Employee Deductions table which is right-aligned. */
+.ded-amount-left { text-align: left; }
+
+.ded-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+@media (max-width: 1100px) {
+    /* Who bears the cost is on the edit screen too, so it goes first. */
+    .ded-types-table th:nth-child(3),
+    .ded-types-table td:nth-child(3) { display: none; }
+    .ded-types-table th:nth-child(1) { width: 34%; }
+    .ded-types-table th:nth-child(4) { width: 28%; }
+}
+
+/* ── Schedules / Loan Types / Transactions ───────────────────────────────
+   All three overflowed the 1142px wrapper for the same reason as the two
+   above: a table's `min-width` defaults to `auto`, i.e. its min-content
+   width, which silently beats any column sizing.
+   ─────────────────────────────────────────────────────────────────────── */
+
+.ded-sched-table,
+.ded-loantypes-table,
+.ded-txn-table { table-layout: fixed; width: 100%; min-width: 0; }
+.ded-sched-table th, .ded-sched-table td,
+.ded-loantypes-table th, .ded-loantypes-table td,
+.ded-txn-table th, .ded-txn-table td { overflow: hidden; }
+
+.ded-sched-table .ded-cell-title,
+.ded-sched-table .dept-tag,
+.ded-loantypes-table .ded-cell-title {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Schedules — Employee | Department | Deductions | Loans | Updated | Action */
+.ded-sched-table th:nth-child(1) { width: 26%; }
+.ded-sched-table th:nth-child(2) { width: 20%; }
+.ded-sched-table th:nth-child(3) { width: 16%; }
+.ded-sched-table th:nth-child(4) { width: 14%; }
+.ded-sched-table th:nth-child(5) { width: 13%; }
+.ded-sched-table th:nth-child(6) { width: 126px; }
+
+/* Loan types — Type | Provider | Limits | In use | Status | Actions */
+.ded-loantypes-table th:nth-child(1) { width: 30%; }
+.ded-loantypes-table th:nth-child(2) { width: 13%; }
+.ded-loantypes-table th:nth-child(3) { width: 24%; }
+.ded-loantypes-table th:nth-child(4) { width: 11%; }
+.ded-loantypes-table th:nth-child(5) { width: 12%; }
+.ded-loantypes-table th:nth-child(6) { width: 84px; }
+
+/* Transactions — Date | Employee | Deduction | Cutoff | Amount | Actions */
+.ded-txn-table th:nth-child(1) { width: 14%; }
+.ded-txn-table th:nth-child(2) { width: 26%; }
+.ded-txn-table th:nth-child(3) { width: 24%; }
+.ded-txn-table th:nth-child(4) { width: 12%; }
+.ded-txn-table th:nth-child(5) { width: 14%; }
+.ded-txn-table th:nth-child(6) { width: 84px; }
+
+@media (max-width: 1100px) {
+    /* Least load-bearing column on each table goes first. */
+    .ded-sched-table th:nth-child(5),
+    .ded-sched-table td:nth-child(5) { display: none; }
+    .ded-loantypes-table th:nth-child(2),
+    .ded-loantypes-table td:nth-child(2) { display: none; }
+}
+
+/* ── Loan Type details modal ─────────────────────────────────────────────
+   Replaces a window.alert() that drew its own box out of ╔═╗ characters.
+   Shares the .modal-container shell with editLoanTypeModal so the pair read
+   as one, and takes its colours from the theme like everything else.
+   ─────────────────────────────────────────────────────────────────────── */
+
+.vlt-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--gp-border);
+    border-radius: 12px;
+    background: var(--gp-bg-tint);
+}
+.vlt-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    flex-shrink: 0;
+    background: var(--theme-warning-subtle);
+    color: var(--theme-warning-emphasis);
+}
+.vlt-head-text { flex: 1; min-width: 0; }
+.vlt-name {
+    margin: 0 0 2px;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.vlt-code { margin: 0; }
+
+/* Definition list rather than a table: these are label/value pairs, and a
+   two-column grid keeps them aligned without one. */
+.vlt-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 18px;
+    margin: 0 0 4px;
+}
+.vlt-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gp-bg-tint-2);
+}
+.vlt-row dt {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--gp-text-soft);
+}
+.vlt-row dd {
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--gp-pri);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 560px) {
+    .vlt-grid { grid-template-columns: 1fr; }
 }

@@ -7,7 +7,7 @@
         <div>
             <p class="table-title" style="display:flex;align-items:center;gap:8px">
                 On Leave Today
-                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:{{ $onLeaveTodayList->isEmpty() ? '#e8f9ef' : '#fbf6e3' }};color:{{ $onLeaveTodayList->isEmpty() ? '#15803d' : '#8a6d1f' }}">{{ $onLeaveTodayList->count() }}</span>
+                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:{{ $onLeaveTodayList->isEmpty() ? 'var(--theme-success-subtle)' : '#fbf6e3' }};color:{{ $onLeaveTodayList->isEmpty() ? 'var(--theme-success)' : '#8a6d1f' }}">{{ $onLeaveTodayList->count() }}</span>
             </p>
             <p class="table-sub">
                 {{ $onLeaveTodayList->count() }} of {{ $stats['total_employees'] }} employees · {{ now()->format('M d') }}
@@ -19,11 +19,11 @@
     <div class="enterprise-card-body">
         @if($onLeaveTodayList->isEmpty())
             <div style="text-align:center;padding:34px 12px">
-                <div style="width:46px;height:46px;border-radius:50%;background:#e8f9ef;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+                <div style="width:46px;height:46px;border-radius:50%;background:var(--theme-success-subtle);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
                     <svg width="21" height="21" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
-                <p style="font-size:13px;font-weight:700;color:#0b044d;margin:0 0 4px">Full attendance</p>
-                <p style="font-size:11.5px;color:#8f8daf;margin:0;line-height:1.45">Nobody is on approved leave today</p>
+                <p style="font-size:13px;font-weight:700;color:var(--gp-pri);margin:0 0 4px">Full attendance</p>
+                <p style="font-size:11.5px;color:var(--gp-text-soft);margin:0;line-height:1.45">Nobody is on approved leave today</p>
             </div>
         @else
             <div class="enterprise-list on-leave-list">

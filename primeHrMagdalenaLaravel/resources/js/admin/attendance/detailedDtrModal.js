@@ -50,7 +50,7 @@ window.loadDetailedDTR = function() {
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('detailedDTRLoading').innerHTML = '<p style="color: #8e1e18;">Error loading attendance records</p>';
+            document.getElementById('detailedDTRLoading').innerHTML = '<p style="color: var(--theme-danger);">Error loading attendance records</p>';
         });
 }
 
@@ -91,9 +91,9 @@ function computeAccreditedHours(record) {
     const hrs  = Math.floor(totalMins / 60);
     const mins = totalMins % 60;
 
-    let color = '#15803d';
-    if (totalMins < 480) color = '#a16207';
-    if (totalMins <= 0)  color = '#8e1e18';
+    let color = 'var(--theme-success)';
+    if (totalMins < 480) color = 'var(--theme-warning)';
+    if (totalMins <= 0)  color = 'var(--theme-danger)';
 
     const label = hrs > 0 && mins > 0 ? `${hrs}h ${mins}m` : hrs > 0 ? `${hrs} hrs` : `${mins} min`;
     return { display: `<strong style="color:${color};">${label}</strong>`, minutes: totalMins, incomplete: false };
@@ -251,7 +251,7 @@ function renderDetailedDTR(data) {
             const leaveType = record.leave_info.leave_type || 'Leave';
             const leaveCode = record.leave_info.leave_code || 'N/A';
             const days = record.leave_info.days || 1;
-            leaveDeductionDisplay = `<span style="color:#0b044d;font-weight:600;">${leaveCode}</span><br><small style="color:#6b6a8a;font-size:10px;">${leaveType} (${days} day${days > 1 ? 's' : ''})</small>`;
+            leaveDeductionDisplay = `<span style="color:var(--gp-pri);font-weight:600;">${leaveCode}</span><br><small style="color:var(--theme-neutral-700);font-size:10px;">${leaveType} (${days} day${days > 1 ? 's' : ''})</small>`;
         } else {
             // Late / undertime deducted from leave credits
             const parts = [];
@@ -259,17 +259,17 @@ function renderDetailedDTR(data) {
                 const lt = record.late_deduction_leave_type.replace(/ \((full|partial)\)/, '');
                 const lm = record.late_minutes || 0;
                 const lDays = (lm / 480).toFixed(4);
-                parts.push(`<span style="color:#0b044d;font-weight:600;">${lt}</span><br><small style="color:#6b6a8a;font-size:10px;">Late ${lm}m (${lDays}d)</small>`);
+                parts.push(`<span style="color:var(--gp-pri);font-weight:600;">${lt}</span><br><small style="color:var(--theme-neutral-700);font-size:10px;">Late ${lm}m (${lDays}d)</small>`);
             }
             if (record.undertime_deducted_from_leave && record.undertime_deduction_leave_type) {
                 const ut = record.undertime_deduction_leave_type.replace(/ \((full|partial)\)/, '');
                 const um = record.undertime || 0;
                 const uDays = (um / 480).toFixed(4);
-                parts.push(`<span style="color:#0b044d;font-weight:600;">${ut}</span><br><small style="color:#6b6a8a;font-size:10px;">Undertime ${um}m (${uDays}d)</small>`);
+                parts.push(`<span style="color:var(--gp-pri);font-weight:600;">${ut}</span><br><small style="color:var(--theme-neutral-700);font-size:10px;">Undertime ${um}m (${uDays}d)</small>`);
             }
             if (record.lwop_minutes > 0) {
                 const lwopDays = (record.lwop_minutes / 480).toFixed(4);
-                parts.push(`<span style="color:#dc2626;font-weight:600;">LWOP</span><br><small style="color:#6b6a8a;font-size:10px;">${record.lwop_minutes}m (${lwopDays}d)</small>`);
+                parts.push(`<span style="color:var(--theme-danger);font-weight:600;">LWOP</span><br><small style="color:var(--theme-neutral-700);font-size:10px;">${record.lwop_minutes}m (${lwopDays}d)</small>`);
             }
             if (parts.length) leaveDeductionDisplay = parts.join('<br>');
         }
@@ -457,8 +457,8 @@ function renderDetailedDTR(data) {
     if (scoreTag) {
         let tag = 'Excellent', bg = '#ecfdf3', fg = '#16a34a';
         if (score < 90) { tag = 'Good';  bg = '#eef4ff'; fg = '#3a5bd9'; }
-        if (score < 75) { tag = 'Fair';  bg = '#fff7ed'; fg = '#d97706'; }
-        if (score < 50) { tag = 'Poor';  bg = '#fef2f2'; fg = '#dc2626'; }
+        if (score < 75) { tag = 'Fair';  bg = '#fff7ed'; fg = 'var(--theme-warning)'; }
+        if (score < 50) { tag = 'Poor';  bg = '#fef2f2'; fg = 'var(--theme-danger)'; }
         scoreTag.textContent = tag;
         scoreTag.style.background = bg;
         scoreTag.style.color = fg;

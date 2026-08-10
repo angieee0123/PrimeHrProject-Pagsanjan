@@ -1,3 +1,4 @@
+import { confirmAction, notify } from '../shared/confirmDialog.js';
 import { initBusyDateRange } from '../shared/busyDatesCalendar.js';
 
 // ── Sidebar / mobile menu toggle ──
@@ -180,7 +181,7 @@ function viewEmployeeTransactionDetails(leaveType, type, amount, balanceBefore, 
 
     const amountEl = document.getElementById('empTransactionAmount');
     amountEl.textContent = (amount >= 0 ? '+' : '') + parseFloat(amount).toFixed(2) + ' days';
-    amountEl.style.color = amount >= 0 ? '#15803d' : '#dc2626';
+    amountEl.style.color = amount >= 0 ? 'var(--theme-success)' : 'var(--theme-danger)';
 
     document.getElementById('empTransactionBalanceBefore').textContent = parseFloat(balanceBefore).toFixed(2) + ' days';
     document.getElementById('empTransactionBalanceAfter').textContent = parseFloat(balanceAfter).toFixed(2) + ' days';
@@ -205,24 +206,24 @@ function viewEmployeeTransactionDetails(leaveType, type, amount, balanceBefore, 
         sourceLabel.style.color = '#0891b2';
     } else if (isLateDeduction) {
         sourceIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>';
-        sourceIcon.setAttribute('stroke', '#a16207');
+        sourceIcon.setAttribute('stroke', 'var(--theme-warning)');
         sourceLabel.textContent = 'Late Deduction';
-        sourceLabel.style.color = '#a16207';
+        sourceLabel.style.color = 'var(--theme-warning)';
     } else if (isUndertimeDeduction) {
         sourceIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 8 10"/>';
-        sourceIcon.setAttribute('stroke', '#8e1e18');
+        sourceIcon.setAttribute('stroke', 'var(--theme-danger)');
         sourceLabel.textContent = 'Undertime Deduction';
-        sourceLabel.style.color = '#8e1e18';
+        sourceLabel.style.color = 'var(--theme-danger)';
     } else if (isLeaveApp) {
         sourceIcon.innerHTML = '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>';
-        sourceIcon.setAttribute('stroke', '#0b044d');
+        sourceIcon.setAttribute('stroke', 'var(--gp-pri)');
         sourceLabel.textContent = 'Leave Application';
-        sourceLabel.style.color = '#0b044d';
+        sourceLabel.style.color = 'var(--gp-pri)';
     } else if (isAccrual) {
         sourceIcon.innerHTML = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>';
-        sourceIcon.setAttribute('stroke', '#15803d');
+        sourceIcon.setAttribute('stroke', 'var(--theme-success)');
         sourceLabel.textContent = 'Monthly Accrual';
-        sourceLabel.style.color = '#15803d';
+        sourceLabel.style.color = 'var(--theme-success)';
     } else if (isManual) {
         sourceIcon.innerHTML = '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>';
         sourceIcon.setAttribute('stroke', '#6b3fa0');
@@ -230,9 +231,9 @@ function viewEmployeeTransactionDetails(leaveType, type, amount, balanceBefore, 
         sourceLabel.style.color = '#6b3fa0';
     } else {
         sourceIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>';
-        sourceIcon.setAttribute('stroke', '#6b6a8a');
+        sourceIcon.setAttribute('stroke', 'var(--theme-neutral-700)');
         sourceLabel.textContent = reference;
-        sourceLabel.style.color = '#6b6a8a';
+        sourceLabel.style.color = 'var(--theme-neutral-700)';
     }
 
     remarksEl.textContent = remarks || 'No remarks provided';
@@ -471,13 +472,13 @@ function calculateDays() {
         if (select.value && days > available) {
             document.getElementById('errorMessageText').textContent = `Insufficient leave balance. You have ${available.toFixed(1)} days available but requested ${days.toFixed(1)} days.`;
             document.getElementById('errorMessage').style.display = 'block';
-            document.getElementById('leaveDays').style.color = '#dc2626';
-            document.getElementById('leaveDays').style.borderColor = '#dc2626';
+            document.getElementById('leaveDays').style.color = 'var(--theme-danger)';
+            document.getElementById('leaveDays').style.borderColor = 'var(--theme-danger)';
             return;
         }
 
-        document.getElementById('leaveDays').style.color = '#0b044d';
-        document.getElementById('leaveDays').style.borderColor = '#e5e7eb';
+        document.getElementById('leaveDays').style.color = 'var(--gp-pri)';
+        document.getElementById('leaveDays').style.borderColor = 'var(--theme-neutral-300)';
         document.getElementById('errorMessage').style.display = 'none';
     }
 }
@@ -583,12 +584,12 @@ document.getElementById('leaveReason')?.addEventListener('input', function() {
     counter.textContent = `${length} / 500`;
 
     if (length > 500) {
-        counter.style.color = '#dc2626';
+        counter.style.color = 'var(--theme-danger)';
         this.value = this.value.substring(0, 500);
     } else if (length > 450) {
         counter.style.color = '#f59e0b';
     } else {
-        counter.style.color = '#9ca3af';
+        counter.style.color = 'var(--theme-neutral-600)';
     }
 });
 
@@ -643,7 +644,7 @@ document.getElementById('leaveApplicationForm')?.addEventListener('submit', func
     .then(data => {
         if (data.success) {
             submitBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Success!';
-            submitBtn.style.background = '#15803d';
+            submitBtn.style.background = 'var(--theme-success)';
             setTimeout(() => {
                 closeFileModal();
                 location.reload();
@@ -707,20 +708,28 @@ function cancelLeaveRequest(applicationId, appNumber) {
     .then(data => {
         if (data.success) {
             cancelBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Cancelled!';
-            cancelBtn.style.background = '#15803d';
+            cancelBtn.style.background = 'var(--theme-success)';
             setTimeout(() => {
                 closeModal();
                 location.reload();
             }, 1000);
         } else {
-            alert(data.message || 'Failed to cancel leave request');
+            notify({
+                title: 'Could not cancel',
+                message: data.message || 'The leave request could not be cancelled. Please try again.',
+                tone: 'danger',
+            });
             cancelBtn.disabled = false;
             cancelBtn.innerHTML = originalBtnContent;
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while cancelling the leave request');
+        notify({
+            title: 'Could not cancel',
+            message: 'Something went wrong while cancelling the leave request. Please try again.',
+            tone: 'danger',
+        });
         cancelBtn.disabled = false;
         cancelBtn.innerHTML = originalBtnContent;
     });

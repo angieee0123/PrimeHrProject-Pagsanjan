@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SystemTheme;
+
 use App\Models\Employee;
 use App\Models\Attendance;
 use App\Models\LeaveApplication;
@@ -51,7 +53,7 @@ class AdminDashboardController extends Controller
                 if (!$emp) return null;
 
                 $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
-                $colors = ['#0b044d', '#8e1e18', '#15803d', '#a16207', '#7c3aed'];
+                $colors = SystemTheme::series('primary', 'danger', 'success', 'warning', '#7c3aed');
                 $end = Carbon::parse($leave->end_date);
 
                 return [
@@ -99,7 +101,7 @@ class AdminDashboardController extends Controller
             ->paginate(5)
             ->through(function($emp) {
                 $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
-                $colors = ['#0b044d', '#8e1e18', '#15803d', '#a16207', '#7c3aed'];
+                $colors = SystemTheme::series('primary', 'danger', 'success', 'warning', '#7c3aed');
                 $color = $colors[array_rand($colors)];
                 
                 return [
@@ -125,7 +127,7 @@ class AdminDashboardController extends Controller
             ->map(function($leave) {
                 $emp = $leave->employee;
                 $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
-                $colors = ['#0b044d', '#8e1e18', '#a16207'];
+                $colors = SystemTheme::series('primary', 'danger', 'warning');
                 $color = $colors[array_rand($colors)];
                 
                 $days = Carbon::parse($leave->start_date)->diffInDays(Carbon::parse($leave->end_date)) + 1;
@@ -154,7 +156,7 @@ class AdminDashboardController extends Controller
                 if (!$emp) return null;
                 
                 $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
-                $colors = ['#0b044d', '#8e1e18', '#15803d', '#a16207', '#7c3aed'];
+                $colors = SystemTheme::series('primary', 'danger', 'success', 'warning', '#7c3aed');
                 
                 $days = Carbon::parse($leave->start_date)->diffInDays(Carbon::parse($leave->end_date)) + 1;
                 
@@ -196,7 +198,7 @@ class AdminDashboardController extends Controller
                 if (!$emp) return null;
 
                 $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
-                $colors = ['#0b044d', '#8e1e18', '#a16207'];
+                $colors = SystemTheme::series('primary', 'danger', 'warning');
                 $color = $colors[array_rand($colors)];
 
                 return [
@@ -220,7 +222,7 @@ class AdminDashboardController extends Controller
             ->orderByDesc('employee_count')
             ->get()
             ->map(function($dept, $index) {
-                $colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#6366f1', '#14b8a6'];
+                $colors = SystemTheme::series('accent', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#6366f1', '#14b8a6');
                 return [
                     'name' => $dept->name,
                     'count' => $dept->employee_count,
@@ -275,7 +277,7 @@ class AdminDashboardController extends Controller
                 else                  $tier = 'poor';
 
                 $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
-                $colors   = ['#0b044d', '#8e1e18', '#15803d', '#a16207', '#7c3aed'];
+                $colors   = SystemTheme::series('primary', 'danger', 'success', 'warning', '#7c3aed');
 
                 return [
                     'id'           => $emp->id,
@@ -320,7 +322,7 @@ class AdminDashboardController extends Controller
                 if (!$emp) return null;
 
                 $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
-                $colors = ['#0b044d', '#8e1e18', '#15803d', '#a16207', '#7c3aed'];
+                $colors = SystemTheme::series('primary', 'danger', 'success', 'warning', '#7c3aed');
 
                 $amIn = Carbon::parse($attendance->am_in);
                 $startTime = Carbon::parse('08:00:00');
@@ -369,7 +371,7 @@ class AdminDashboardController extends Controller
                 if (!$emp) return null;
 
                 $initials = strtoupper(substr($emp->first_name, 0, 1) . substr($emp->last_name, 0, 1));
-                $colors = ['#8e1e18', '#a16207', '#0b044d', '#7c3aed', '#15803d'];
+                $colors = SystemTheme::series('danger', 'warning', 'primary', '#7c3aed', 'success');
                 $amIn = Carbon::parse($attendance->am_in);
                 $lateMinutes = $amIn->diffInMinutes(Carbon::parse('08:05:00'));
 
@@ -416,7 +418,7 @@ class AdminDashboardController extends Controller
             ->get()
             ->map(function($earner, $index) {
                 $initials = strtoupper(substr($earner->first_name, 0, 1) . substr($earner->last_name, 0, 1));
-                $colors = ['#0b044d', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#8e1e18', '#a16207'];
+                $colors = SystemTheme::series('primary', '#8b5cf6', 'accent', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', 'danger', 'warning');
                 return [
                     'rank' => $index + 1,
                     'name' => $earner->first_name . ' ' . $earner->last_name,
@@ -563,7 +565,7 @@ class AdminDashboardController extends Controller
             ->limit(5)
             ->get();
         
-        $colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+        $colors = SystemTheme::series('accent', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981');
         
         // Week data - cumulative payroll per day
         $salaryWeek['labels'] = [];

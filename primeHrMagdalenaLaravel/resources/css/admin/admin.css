@@ -56,9 +56,9 @@
   --r-full:        999px;
 
   /* Shadows */
-  --shadow-card:   0 1px 3px rgba(15,23,42,.04), 0 10px 30px rgba(15,23,42,.07);
-  --shadow-hover:  0 2px 4px rgba(15,23,42,.05), 0 16px 40px rgba(11,4,77,.12);
-  --shadow-btn:    0 8px 20px rgba(11,4,77,.35);
+  --shadow-card:   0 1px 3px rgba(var(--theme-shadow-rgb),.04), 0 10px 30px rgba(var(--theme-shadow-rgb),.07);
+  --shadow-hover:  0 2px 4px rgba(var(--theme-shadow-rgb),.05), 0 16px 40px rgba(var(--theme-primary-rgb),.12);
+  --shadow-btn:    0 8px 20px rgba(var(--theme-primary-rgb),.35);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; letter-spacing: 0; }
@@ -81,7 +81,7 @@ body {
 /* Sidebar */
 .sidebar {
   width: 240px; height: 100vh;
-  background: var(--gp-pri); display: flex; flex-direction: column;
+  background: var(--theme-sidebar-bg); display: flex; flex-direction: column;
   flex-shrink: 0; transition: width 0.22s ease;
   position: fixed; left: 0; top: 0; z-index: 200;
   overflow: hidden;
@@ -98,31 +98,31 @@ body {
 
 .sidebar-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding: 18px 16px 14px; border-bottom: 1px solid rgba(var(--theme-sidebar-fg-rgb),0.07);
 }
 .logo { display: flex; align-items: center; gap: 10px; overflow: hidden; }
 .logo-mark { flex-shrink: 0; }
 .logo-text-wrap { overflow: hidden; white-space: nowrap; }
-.logo-text { display: block; font-size: 13.5px; font-weight: 800; color: #ffffff; line-height: 1.2; }
+.logo-text { display: block; font-size: 13.5px; font-weight: 800; color: var(--theme-sidebar-fg); line-height: 1.2; }
 /* 0.4 white measured 3.6:1 at 10px — under the AA floor for text this size. */
-.logo-sub  { display: block; font-size: 10px; color: rgba(255,255,255,0.6); letter-spacing: 0.2px; }
+.logo-sub  { display: block; font-size: 10px; color: rgba(var(--theme-sidebar-fg-rgb),0.6); letter-spacing: 0.2px; }
 
 .toggle-btn {
-  background: rgba(255,255,255,0.08); border: none; color: rgba(255,255,255,0.75);
+  background: rgba(var(--theme-sidebar-fg-rgb),0.08); border: none; color: rgba(var(--theme-sidebar-fg-rgb),0.75);
   width: 24px; height: 24px; border-radius: 6px; cursor: pointer;
   font-size: 16px; display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; transition: background 0.2s;
 }
-.toggle-btn:hover { background: rgba(255,255,255,0.15); }
+.toggle-btn:hover { background: rgba(var(--theme-sidebar-fg-rgb),0.15); }
 
-/* Was rgba(255,255,255,0.3) at 9.5px with 1.5px tracking — 2.49:1 against the
+/* Was rgba(var(--theme-sidebar-fg-rgb),0.3) at 9.5px with 1.5px tracking — 2.49:1 against the
    navy rail, well under the 4.5:1 WCAG AA minimum, and dimmer than the links
    underneath it, which inverted the hierarchy. Now 0.62 (7.3:1), a size up, and
    tighter tracking, because wide letter-spacing on tiny type hurts legibility
    rather than helping it. */
 .nav-section-label {
   font-size: 10.5px; font-weight: 700; letter-spacing: 0.9px;
-  color: rgba(255,255,255,0.62); padding: 16px 18px 6px;
+  color: rgba(var(--theme-sidebar-fg-rgb),0.62); padding: 16px 18px 6px;
   text-transform: uppercase; white-space: nowrap; overflow: hidden;
   text-overflow: ellipsis;
   margin: 0;
@@ -141,21 +141,21 @@ body {
   transition: background 0.18s, color 0.18s;
 }
 .nav-section-toggle .nav-section-label { padding: 0; flex: 1; min-width: 0; }
-.nav-section-toggle:hover { background: rgba(255,255,255,0.07); }
-.nav-section-toggle:hover .nav-section-label { color: #ffffff; }
+.nav-section-toggle:hover { background: rgba(var(--theme-sidebar-fg-rgb),0.07); }
+.nav-section-toggle:hover .nav-section-label { color: var(--theme-sidebar-fg); }
 .nav-section-toggle:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.55);
+  box-shadow: 0 0 0 2px rgba(var(--theme-sidebar-fg-rgb),0.55);
 }
 /* An open section reads as the heading of live content, so it carries full
    weight; shut sections stay one step back. */
-.nav-group:not(.is-collapsed) > .nav-section-toggle .nav-section-label { color: rgba(255,255,255,0.82); }
+.nav-group:not(.is-collapsed) > .nav-section-toggle .nav-section-label { color: rgba(var(--theme-sidebar-fg-rgb),0.82); }
 
 .nav-section-chevron {
-  color: rgba(255,255,255,0.55); flex-shrink: 0;
+  color: rgba(var(--theme-sidebar-fg-rgb),0.55); flex-shrink: 0;
   transition: transform 0.22s cubic-bezier(0.32,0.72,0,1), color 0.18s;
 }
-.nav-section-toggle:hover .nav-section-chevron { color: #ffffff; }
+.nav-section-toggle:hover .nav-section-chevron { color: var(--theme-sidebar-fg); }
 .nav-group.is-collapsed .nav-section-chevron { transform: rotate(-90deg); }
 
 /* Count sits in for the hidden links while a section is shut. */
@@ -164,13 +164,13 @@ body {
   min-width: 19px; padding: 0 6px; height: 18px;
   align-items: center; justify-content: center;
   border-radius: 999px; flex-shrink: 0;
-  background: rgba(255,255,255,0.14);
-  color: rgba(255,255,255,0.75);
+  background: rgba(var(--theme-sidebar-fg-rgb),0.14);
+  color: rgba(var(--theme-sidebar-fg-rgb),0.75);
   font-size: 10px; font-weight: 700; line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 .nav-group.is-collapsed .nav-section-count { display: inline-flex; }
-.nav-section-toggle:hover .nav-section-count { background: rgba(255,255,255,0.22); color: #ffffff; }
+.nav-section-toggle:hover .nav-section-count { background: rgba(var(--theme-sidebar-fg-rgb),0.22); color: var(--theme-sidebar-fg); }
 
 /* Breathing room between shut sections without the sparse look of the old
    asymmetric padding. */
@@ -187,7 +187,7 @@ body {
 .sidebar.collapsed .nav-section-toggle { display: none; }
 .sidebar.collapsed .nav-group-items { display: flex !important; }
 .sidebar.collapsed .nav-group {
-  border-top: 1px solid rgba(255,255,255,0.10);
+  border-top: 1px solid rgba(var(--theme-sidebar-fg-rgb),0.10);
   margin-top: 6px;
   padding-top: 6px;
 }
@@ -197,7 +197,7 @@ body {
 .nav-divider {
   height: 1px;
   margin: 10px 8px 6px;
-  background: rgba(255,255,255,0.12);
+  background: rgba(var(--theme-sidebar-fg-rgb),0.12);
   flex-shrink: 0;
 }
 
@@ -207,24 +207,24 @@ body {
    `hidden` would make links unreachable instead of merely scrollable. */
 .sidebar-nav { flex: 1; min-height: 0; padding: 4px 10px 8px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; }
 .sidebar-nav::-webkit-scrollbar { width: 4px; }
-.sidebar-nav::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-.sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
-.sidebar-nav::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+.sidebar-nav::-webkit-scrollbar-track { background: rgba(var(--theme-sidebar-fg-rgb),0.05); }
+.sidebar-nav::-webkit-scrollbar-thumb { background: rgba(var(--theme-sidebar-fg-rgb),0.15); border-radius: 2px; }
+.sidebar-nav::-webkit-scrollbar-thumb:hover { background: rgba(var(--theme-sidebar-fg-rgb),0.25); }
 
 .nav-item {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 10px; border-radius: 9px; text-decoration: none;
   /* 0.55 was only just over the AA floor; 0.72 gives 9.1:1 and lets the active
      row stand out by weight and fill rather than by everything else being dim. */
-  color: rgba(255,255,255,0.72); font-size: 13px; font-weight: 500;
+  color: rgba(var(--theme-sidebar-fg-rgb),0.72); font-size: 13px; font-weight: 500;
   transition: background 0.18s, color 0.18s; position: relative; white-space: nowrap;
 }
-.nav-item:hover { background: rgba(255,255,255,0.08); color: #ffffff; }
-.nav-item:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(255,255,255,0.55); }
+.nav-item:hover { background: rgba(var(--theme-sidebar-fg-rgb),0.08); color: var(--theme-sidebar-fg); }
+.nav-item:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(var(--theme-sidebar-fg-rgb),0.55); }
 .nav-item.active {
-  background: linear-gradient(90deg, rgba(255,255,255,0.16), rgba(255,255,255,0.09));
-  color: #ffffff; font-weight: 600;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+  background: linear-gradient(90deg, rgba(var(--theme-sidebar-fg-rgb),0.16), rgba(var(--theme-sidebar-fg-rgb),0.09));
+  color: var(--theme-sidebar-fg); font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(var(--theme-sidebar-fg-rgb),0.10);
 }
 .nav-item .nav-icon { opacity: 0.85; transition: opacity 0.18s; }
 .nav-item:hover .nav-icon, .nav-item.active .nav-icon { opacity: 1; }
@@ -247,7 +247,7 @@ body {
 /* Sidebar Footer */
 .sidebar-footer {
   display: flex; align-items: center; gap: 10px;
-  padding: 14px 14px; border-top: 1px solid rgba(255,255,255,0.07);
+  padding: 14px 14px; border-top: 1px solid rgba(var(--theme-sidebar-fg-rgb),0.07);
 }
 .sidebar-footer.collapsed-footer { justify-content: center; padding: 14px 0; }
 
@@ -259,9 +259,9 @@ body {
 .user-avatar {
   width: 40px; height: 40px; border-radius: 50%;
   background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri));
-  border: 2px solid #ecebf6;
+  border: 2px solid var(--gp-border);
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 600; color: #ffffff;
+  font-size: 13px; font-weight: 600; color: var(--theme-sidebar-fg);
   flex-shrink: 0; overflow: hidden;
 }
 /* Photo variant — fills the same circle so the footer never reflows. */
@@ -274,12 +274,12 @@ body {
   background: #22c55e; border: 2px solid var(--gp-pri);
 }
 .user-info { flex: 1; overflow: hidden; }
-.user-name { font-size: 12.5px; font-weight: 700; color: #ffffff; margin: 0 0 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-name { font-size: 12.5px; font-weight: 700; color: var(--theme-sidebar-fg); margin: 0 0 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Same 3.6:1 problem as .logo-sub — raised to clear AA. */
-.user-role { font-size: 10.5px; color: rgba(255,255,255,0.6); margin: 0; }
+.user-role { font-size: 10.5px; color: rgba(var(--theme-sidebar-fg-rgb),0.6); margin: 0; }
 
 .logout-btn {
-  background: rgba(255,255,255,0.07); border: none; color: rgba(255,255,255,0.5);
+  background: rgba(var(--theme-sidebar-fg-rgb),0.07); border: none; color: rgba(var(--theme-sidebar-fg-rgb),0.5);
   width: 30px; height: 30px; border-radius: 8px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; transition: background 0.2s, color 0.2s;
@@ -287,12 +287,12 @@ body {
 .logout-btn:hover { background: rgba(142,30,24,0.3); color: #ff8080; }
 
 .switch-role-btn {
-  background: rgba(255,255,255,0.07); border: none; color: rgba(255,255,255,0.5);
+  background: rgba(var(--theme-sidebar-fg-rgb),0.07); border: none; color: rgba(var(--theme-sidebar-fg-rgb),0.5);
   width: 30px; height: 30px; border-radius: 8px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; transition: background 0.2s, color 0.2s; text-decoration: none;
 }
-.switch-role-btn:hover { background: rgba(11,4,77,0.3); color: #9d97ff; }
+.switch-role-btn:hover { background: rgba(var(--theme-primary-rgb),0.3); color: #9d97ff; }
 
 /* Main Content */
 .main-content {
@@ -310,7 +310,7 @@ body {
 }
 .mobile-overlay {
   display: none; position: fixed; inset: 0;
-  background: rgba(11,4,77,0.5); z-index: 199;
+  background: rgba(var(--theme-primary-rgb),0.5); z-index: 199;
 }
 .mobile-overlay.active { display: block; }
 
@@ -415,7 +415,7 @@ p { color: var(--c-muted); font-size: var(--fs-md); }
   align-items: center;
   justify-content: space-between;
   padding: 18px 20px;
-  border-bottom: 1px solid rgba(15,23,42,.06);
+  border-bottom: 1px solid rgba(var(--theme-shadow-rgb),.06);
   background: transparent;
   border-radius: var(--r-xl) var(--r-xl) 0 0;
 }
@@ -481,7 +481,7 @@ p { color: var(--c-muted); font-size: var(--fs-md); }
 .btn-export {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 0 14px; height: 34px;
-  border: 1px solid rgba(15,23,42,.08); border-radius: var(--r-full);
+  border: 1px solid rgba(var(--theme-shadow-rgb),.08); border-radius: var(--r-full);
   background: rgba(255,255,255,.55);
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
@@ -495,7 +495,7 @@ p { color: var(--c-muted); font-size: var(--fs-md); }
 }
 .btn-export:hover {
   background: rgba(255,255,255,.85);
-  border-color: rgba(15,23,42,.12);
+  border-color: rgba(var(--theme-shadow-rgb),.12);
   transform: translateY(-1px);
 }
 
@@ -524,7 +524,7 @@ p { color: var(--c-muted); font-size: var(--fs-md); }
 .btn-view {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 5px 14px;
-  border: 1px solid rgba(15,23,42,.08); border-radius: var(--r-full);
+  border: 1px solid rgba(var(--theme-shadow-rgb),.08); border-radius: var(--r-full);
   background: rgba(255,255,255,.55);
   color: var(--c-blue);
   font-family: var(--font);
@@ -558,10 +558,10 @@ p { color: var(--c-muted); font-size: var(--fs-md); }
   color: #fff;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.25), var(--shadow-btn);
 }
-.chart-tab:not(.active):hover { background: rgba(11,4,77,.06); }
+.chart-tab:not(.active):hover { background: rgba(var(--theme-primary-rgb),.06); }
 .chart-tab.active:hover {
   transform: translateY(-1px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 10px 26px rgba(11,4,77,.42);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 10px 26px rgba(var(--theme-primary-rgb),.42);
 }
 
 .chart-tabs { display: flex; gap: 6px; }
@@ -603,7 +603,7 @@ input[type="search"]:focus,
 select:focus,
 textarea:focus {
   border-color: var(--c-blue);
-  box-shadow: 0 0 0 3px rgba(11,4,77,.08);
+  box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb),.08);
   background: #fff;
 }
 
@@ -642,11 +642,10 @@ textarea:focus {
   content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
   background: currentColor;
 }
-.badge-status.processed,
-.badge-status.active   { background: var(--c-green-bg); color: var(--c-green); border-color: rgba(21,128,61,.22); }
-.badge-status.pending  { background: var(--c-amber-bg); color: var(--c-amber); border-color: rgba(201,162,39,.3); }
-.badge-status.rejected,
-.badge-status.inactive { background: var(--c-red-bg);   color: var(--c-red);   border-color: rgba(142,30,24,.22); }
+/* Status badges now live in resources/css/shared/statusBadge.css — one
+   definition covering every variant, themed. Removed from here so the two
+   cannot disagree. */
+
 
 .dept-tag {
   display: inline-flex; align-items: center;
@@ -724,7 +723,7 @@ textarea:focus {
 ══════════════════════════════════════════════════════ */
 .modal-overlay {
   display: none; position: fixed; inset: 0;
-  background: rgba(11,4,77,.55);
+  background: rgba(var(--theme-primary-rgb),.55);
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
   z-index: 2000; align-items: center; justify-content: center; padding: 20px;
@@ -740,7 +739,7 @@ textarea:focus {
   border-radius: 24px;
   width: 100%; max-width: 560px;
   max-height: 90vh; overflow-y: auto;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 30px 70px rgba(11,4,77,.28), 0 8px 24px rgba(15,23,42,.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 30px 70px rgba(var(--theme-primary-rgb),.28), 0 8px 24px rgba(var(--theme-shadow-rgb),.1);
 }
 
 .modal-header {
@@ -766,13 +765,13 @@ textarea:focus {
 .modal-sub { font-size: var(--fs-sm); color: var(--c-muted); margin: 0; }
 
 .modal-close {
-  background: rgba(15,23,42,.05); border: 1px solid rgba(15,23,42,.06);
+  background: rgba(var(--theme-shadow-rgb),.05); border: 1px solid rgba(var(--theme-shadow-rgb),.06);
   color: var(--c-muted); cursor: pointer;
   width: 32px; height: 32px; border-radius: var(--r-full);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; transition: all .2s;
 }
-.modal-close:hover { background: rgba(11,4,77,.1); color: var(--c-blue); }
+.modal-close:hover { background: rgba(var(--theme-primary-rgb),.1); color: var(--c-blue); }
 
 .modal-body { padding: 20px 24px; }
 .modal-footer {
@@ -791,7 +790,7 @@ textarea:focus {
   border: 1px solid var(--c-line);
   border-radius: var(--r-md);
   background: var(--c-card);
-  box-shadow: 0 2px 8px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.03);
+  box-shadow: 0 2px 8px rgba(var(--theme-shadow-rgb),.04), 0 1px 3px rgba(var(--theme-shadow-rgb),.03);
 }
 .page-kicker {
   display: inline-flex; margin-bottom: 7px;

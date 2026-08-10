@@ -9,7 +9,7 @@
     font-family: inherit;
     font-size: 12.5px;
     border-radius: 14px;
-    box-shadow: 0 12px 32px rgba(11, 4, 77, .18), 0 2px 8px rgba(11, 4, 77, .08);
+    box-shadow: 0 12px 32px rgba(var(--theme-primary-rgb), .18), 0 2px 8px rgba(var(--theme-primary-rgb), .08);
 }
 
 /* static:true (see busyDatesCalendar.js) wraps each input in .flatpickr-wrapper
@@ -41,7 +41,7 @@
 .flatpickr-months .flatpickr-month,
 .flatpickr-current-month .flatpickr-monthDropdown-months,
 .flatpickr-current-month input.cur-year {
-    color: #0b044d;
+    color: var(--gp-pri);
     font-weight: 700;
     font-size: 14px;
 }
@@ -52,14 +52,14 @@
 }
 .flatpickr-months .flatpickr-prev-month,
 .flatpickr-months .flatpickr-next-month {
-    fill: #0b044d;
+    fill: var(--gp-pri);
 }
 .flatpickr-months .flatpickr-prev-month:hover svg,
 .flatpickr-months .flatpickr-next-month:hover svg {
     fill: #8e1e18;
 }
 span.flatpickr-weekday {
-    color: #8f8daf;
+    color: var(--gp-text-soft);
     font-weight: 600;
     font-size: 10.5px;
     text-transform: uppercase;
@@ -68,13 +68,13 @@ span.flatpickr-weekday {
 
 /* Today: quiet brand outline instead of flatpickr's grey */
 .flatpickr-day.today {
-    border-color: #0b044d;
+    border-color: var(--gp-pri);
 }
 .flatpickr-day.today:hover,
 .flatpickr-day.today:focus {
     background: #eef2ff;
-    color: #0b044d;
-    border-color: #0b044d;
+    color: var(--gp-pri);
+    border-color: var(--gp-pri);
 }
 
 /* ── Range selection in brand colors ────────────────────────────────────── */
@@ -84,20 +84,20 @@ span.flatpickr-weekday {
 .flatpickr-day.selected:hover,
 .flatpickr-day.startRange:hover,
 .flatpickr-day.endRange:hover {
-    background: #0b044d;
-    border-color: #0b044d;
+    background: var(--gp-pri);
+    border-color: var(--gp-pri);
     color: #fff;
 }
 .flatpickr-day.inRange {
     background: #eef2ff;
     border-color: #eef2ff;
-    color: #0b044d;
+    color: var(--gp-pri);
     box-shadow: -5px 0 0 #eef2ff, 5px 0 0 #eef2ff;
 }
 .flatpickr-day.selected.startRange + .endRange:not(:nth-child(7n+1)),
 .flatpickr-day.startRange.startRange + .endRange:not(:nth-child(7n+1)),
 .flatpickr-day.endRange.startRange + .endRange:not(:nth-child(7n+1)) {
-    box-shadow: -10px 0 0 #0b044d;
+    box-shadow: -10px 0 0 var(--gp-pri);
 }
 
 /* Weekends in the leave calendar: excluded from business-day counts, so they
@@ -156,7 +156,7 @@ span.flatpickr-weekday {
     bottom: calc(100% + 6px);
     left: 50%;
     transform: translateX(-50%) scale(.96);
-    background: #0b044d;
+    background: var(--gp-pri);
     color: #fff;
     font-size: 11px;
     font-weight: 600;
@@ -195,7 +195,7 @@ span.flatpickr-weekday {
     gap: 6px 14px;
     margin-top: 10px;
     font-size: 11px;
-    color: #6b7280;
+    color: var(--theme-neutral-700);
 }
 .busy-cal-legend span {
     display: inline-flex;

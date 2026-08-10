@@ -109,7 +109,11 @@
                                     @endif
                                     @if($t->status === 'pending')
                                     @if($t->certificate_path)<div class="row-menu-sep"></div>@endif
-                                    <form method="POST" action="{{ route('employee.training.delete', $t->id) }}" class="row-menu-form" onsubmit="return confirm('Delete this training record? This cannot be undone.')">
+                                    <form method="POST" action="{{ route('employee.training.delete', $t->id) }}" class="row-menu-form"
+                                        data-confirm-title="Delete this training record?"
+                                        data-confirm="{{ Str::limit($t->title, 60) }} will be removed from your training history. This cannot be undone."
+                                        data-confirm-action="Delete record"
+                                        data-confirm-cancel="Keep it">
                                         @csrf @method('DELETE')
                                         <button type="submit" role="menuitem" class="row-menu-item is-danger">
                                             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -125,7 +129,7 @@
                             </tr>
                         @empty
                         <tr id="noTrainingRow">
-                            <td colspan="7" style="text-align:center;padding:40px;color:#9999bb;">
+                            <td colspan="7" style="text-align:center;padding:40px;color:var(--gp-text-soft);">
                                 No training records yet. Click “Add New Training” to submit your first record.
                                 </td>
                             </tr>

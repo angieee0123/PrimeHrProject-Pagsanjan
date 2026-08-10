@@ -139,7 +139,7 @@ window.viewTransactionDetails = function(employeeName, employeeId, leaveType, ty
     const amountEl = document.getElementById('transactionAmount');
     const sign = (type === 'Debit') ? '-' : '+';
     amountEl.textContent = sign + parseFloat(Math.abs(amount)).toFixed(2) + ' days';
-    amountEl.style.color = (type === 'Debit') ? '#d5433c' : '#15803d';
+    amountEl.style.color = (type === 'Debit') ? '#d5433c' : 'var(--theme-success)';
 
     document.getElementById('transactionBalanceBefore').textContent = parseFloat(balanceBefore).toFixed(2) + ' days';
     document.getElementById('transactionBalanceAfter').textContent = parseFloat(balanceAfter).toFixed(2) + ' days';

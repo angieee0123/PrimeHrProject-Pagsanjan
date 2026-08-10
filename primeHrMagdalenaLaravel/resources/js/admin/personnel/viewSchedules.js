@@ -19,7 +19,7 @@ function viewEmployeeSchedules(employeeId, employeeName) {
         .catch(error => {
             console.error('Error fetching schedules:', error);
             document.getElementById('schedulesListContainer').innerHTML = `
-                <div style="text-align:center; padding:40px; color:#8e1e18;">
+                <div style="text-align:center; padding:40px; color:var(--theme-danger);">
                     <p>Failed to load schedules. Please try again.</p>
                 </div>
             `;
@@ -31,7 +31,7 @@ function displaySchedules(schedules) {
 
     if (schedules.length === 0) {
         container.innerHTML = `
-            <div style="text-align:center; padding:40px; color:#56547a;">
+            <div style="text-align:center; padding:40px; color:var(--gp-text-mid);">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 16px; opacity:0.3;">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                     <line x1="16" y1="2" x2="16" y2="6"/>
@@ -58,17 +58,17 @@ function displaySchedules(schedules) {
 
         if (isActive) {
             statusBadge = 'Active';
-            statusColor = '#15803d';
+            statusColor = 'var(--theme-success)';
         } else if (isFuture) {
             statusBadge = 'Upcoming';
-            statusColor = '#c9a227';
+            statusColor = 'var(--theme-warning)';
         } else {
             statusBadge = 'Expired';
-            statusColor = '#56547a';
+            statusColor = 'var(--gp-text-mid)';
         }
 
         html += `
-            <div style="background:${isActive ? '#f0fdf4' : '#f7f6fc'}; border:1.5px solid ${isActive ? '#bbf7d0' : '#ecebf6'}; border-radius:10px; padding:16px; margin-bottom:12px;">
+            <div style="background:${isActive ? '#f0fdf4' : 'var(--gp-bg-tint)'}; border:1.5px solid ${isActive ? '#bbf7d0' : 'var(--gp-border)'}; border-radius:10px; padding:16px; margin-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:12px;">
                     <div style="flex:1;">
                         <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
@@ -76,15 +76,15 @@ function displaySchedules(schedules) {
                                 ${statusBadge}
                             </span>
                         </div>
-                        <p style="margin:0; font-size:13px; color:#56547a;">
-                            <strong style="color:#0b044d;">${formatDate(schedule.start_date)}</strong> to <strong style="color:#0b044d;">${formatDate(schedule.end_date)}</strong>
+                        <p style="margin:0; font-size:13px; color:var(--gp-text-mid);">
+                            <strong style="color:var(--gp-pri);">${formatDate(schedule.start_date)}</strong> to <strong style="color:var(--gp-pri);">${formatDate(schedule.end_date)}</strong>
                         </p>
                     </div>
                     <div style="display:flex; gap:6px;">
-                        <button onclick="editSchedule(${schedule.id})" style="padding:6px 12px; background:#fff; border:1.5px solid #ecebf6; border-radius:6px; font-size:12px; font-weight:600; color:#0b044d; cursor:pointer; font-family:'Poppins',sans-serif;">
+                        <button onclick="editSchedule(${schedule.id})" style="padding:6px 12px; background:#fff; border:1.5px solid var(--gp-border); border-radius:6px; font-size:12px; font-weight:600; color:var(--gp-pri); cursor:pointer; font-family:'Poppins',sans-serif;">
                             Edit
                         </button>
-                        <button onclick="confirmDeleteSchedule(${schedule.id}, '${formatDate(schedule.start_date)}', '${formatDate(schedule.end_date)}')" style="padding:6px 12px; background:#fee8e8; border:1.5px solid #f5d0ce; border-radius:6px; font-size:12px; font-weight:600; color:#8e1e18; cursor:pointer; font-family:'Poppins',sans-serif;">
+                        <button onclick="confirmDeleteSchedule(${schedule.id}, '${formatDate(schedule.start_date)}', '${formatDate(schedule.end_date)}')" style="padding:6px 12px; background:#fee8e8; border:1.5px solid #f5d0ce; border-radius:6px; font-size:12px; font-weight:600; color:var(--theme-danger); cursor:pointer; font-family:'Poppins',sans-serif;">
                             Delete
                         </button>
                     </div>
@@ -92,29 +92,29 @@ function displaySchedules(schedules) {
 
                 <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px;">
                     <div style="background:#fff; border-radius:8px; padding:12px;">
-                        <p style="margin:0 0 8px; font-size:10px; font-weight:700; letter-spacing:1px; color:#8f8daf;">MORNING SHIFT</p>
+                        <p style="margin:0 0 8px; font-size:10px; font-weight:700; letter-spacing:1px; color:var(--gp-text-soft);">MORNING SHIFT</p>
                         <div style="display:flex; gap:12px;">
                             <div style="flex:1;">
-                                <p style="margin:0 0 4px; font-size:11px; color:#56547a;">Time In</p>
-                                <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${formatTime12h(schedule.am_in)}</p>
+                                <p style="margin:0 0 4px; font-size:11px; color:var(--gp-text-mid);">Time In</p>
+                                <p style="margin:0; font-size:15px; font-weight:700; color:var(--gp-pri);">${formatTime12h(schedule.am_in)}</p>
                             </div>
                             <div style="flex:1;">
-                                <p style="margin:0 0 4px; font-size:11px; color:#56547a;">Time Out</p>
-                                <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${formatTime12h(schedule.am_out)}</p>
+                                <p style="margin:0 0 4px; font-size:11px; color:var(--gp-text-mid);">Time Out</p>
+                                <p style="margin:0; font-size:15px; font-weight:700; color:var(--gp-pri);">${formatTime12h(schedule.am_out)}</p>
                             </div>
                         </div>
                     </div>
 
                     <div style="background:#fff; border-radius:8px; padding:12px;">
-                        <p style="margin:0 0 8px; font-size:10px; font-weight:700; letter-spacing:1px; color:#8f8daf;">AFTERNOON SHIFT</p>
+                        <p style="margin:0 0 8px; font-size:10px; font-weight:700; letter-spacing:1px; color:var(--gp-text-soft);">AFTERNOON SHIFT</p>
                         <div style="display:flex; gap:12px;">
                             <div style="flex:1;">
-                                <p style="margin:0 0 4px; font-size:11px; color:#56547a;">Time In</p>
-                                <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${formatTime12h(schedule.pm_in)}</p>
+                                <p style="margin:0 0 4px; font-size:11px; color:var(--gp-text-mid);">Time In</p>
+                                <p style="margin:0; font-size:15px; font-weight:700; color:var(--gp-pri);">${formatTime12h(schedule.pm_in)}</p>
                             </div>
                             <div style="flex:1;">
-                                <p style="margin:0 0 4px; font-size:11px; color:#56547a;">Time Out</p>
-                                <p style="margin:0; font-size:15px; font-weight:700; color:#0b044d;">${formatTime12h(schedule.pm_out)}</p>
+                                <p style="margin:0 0 4px; font-size:11px; color:var(--gp-text-mid);">Time Out</p>
+                                <p style="margin:0; font-size:15px; font-weight:700; color:var(--gp-pri);">${formatTime12h(schedule.pm_out)}</p>
                             </div>
                         </div>
                     </div>

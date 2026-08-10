@@ -1,6 +1,6 @@
 {{-- Employee Directory table (full width) — expects: $employees (paginator). --}}
 <div class="table-section" id="employee-directory">
-    <div class="table-header" style="background:linear-gradient(135deg,#f2f1fb 0%,#fff 100%)">
+    <div class="table-header" style="background:linear-gradient(135deg,var(--gp-bg-tint-2) 0%,#fff 100%)">
         <div>
             <p class="table-title" style="display:flex;align-items:center;gap:8px">
                 Employee Directory
@@ -10,7 +10,7 @@
         <div class="table-actions">
             <div style="position:relative;margin-right:8px">
                 <svg width="14" height="14" fill="none" stroke="#8f8daf" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input type="text" id="searchEmployee" placeholder="Search employees..." style="font-size:11px;padding:6px 12px 6px 32px;border-radius:6px;border:1.5px solid #e5e4f0;width:200px;font-family:inherit" oninput="searchEmployees(this.value)">
+                <input type="text" id="searchEmployee" placeholder="Search employees..." style="font-size:11px;padding:6px 12px 6px 32px;border-radius:6px;border:1.5px solid var(--theme-neutral-300);width:200px;font-family:inherit" oninput="searchEmployees(this.value)">
             </div>
             <select class="filter-select" id="filterDept" onchange="applyFilters()" style="font-size:11px">
                 <option value="">All Departments</option>
@@ -56,9 +56,9 @@
                     <td>
                         <div class="emp-cell">
                             @if($emp['photo'])
-                                <img src="{{ $emp['photo'] }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #ecebf6;">
+                                <img src="{{ $emp['photo'] }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--gp-border);">
                             @else
-                                <div class="emp-avatar emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid #ecebf6;">{{ $emp['initials'] }}</div>
+                                <div class="emp-avatar emp-avatar-dynamic" data-bg="{{ $emp['color'] }}" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:13px; border:2px solid var(--gp-border);">{{ $emp['initials'] }}</div>
                             @endif
                             <div>
                                 <p class="emp-name">{{ $emp['name'] }}</p>
@@ -80,7 +80,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="text-align:center;padding:40px;color:#8f8daf;">No employees found</td>
+                    <td colspan="6" style="text-align:center;padding:40px;color:var(--gp-text-soft);">No employees found</td>
                 </tr>
                 @endforelse
             </tbody>

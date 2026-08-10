@@ -25,7 +25,7 @@
         @include('employee.topbar.trainingTopbar')
 
         @if(session('error'))
-        <div style="background:#fdf0ef;border:1px solid #f5c6c3;color:#8e1e18;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;">
+        <div style="background:#fdf0ef;border:1px solid #f5c6c3;color:var(--theme-danger);padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;">
             {{ session('error') }}
         </div>
         @endif

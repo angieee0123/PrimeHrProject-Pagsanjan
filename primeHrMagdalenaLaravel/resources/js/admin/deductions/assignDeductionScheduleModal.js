@@ -81,7 +81,7 @@ function loadEmployeeDeductions(employeeId) {
         })
         .catch(error => {
             console.error('Error loading deductions:', error);
-            deductionsList.innerHTML = '<p class="ded-sched-loading" style="color:#8e1e18;">Failed to load deductions. Please try again.</p>';
+            deductionsList.innerHTML = '<p class="ded-sched-loading" style="color:var(--theme-danger);">Failed to load deductions. Please try again.</p>';
         });
 }
 

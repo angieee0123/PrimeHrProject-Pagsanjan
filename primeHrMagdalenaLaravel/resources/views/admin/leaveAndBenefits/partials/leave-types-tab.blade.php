@@ -38,10 +38,10 @@
                         </div>
                     </td>
                     <td data-label="Annual Limit" style="font-weight: 600; color: var(--gp-pri); font-size: 13px;">
-                        {!! $type->annual_limit > 0 ? number_format($type->annual_limit, 0) . ' days' : '<span style="color: #9ca3af;">—</span>' !!}
+                        {!! $type->annual_limit > 0 ? number_format($type->annual_limit, 0) . ' days' : '<span style="color: var(--theme-neutral-600);">—</span>' !!}
                     </td>
                     <td data-label="Attachment" style="font-size: 13px; padding-left: 24px; padding-right: 24px;">
-                        <span style="color: {{ $type->attachment_info ? 'var(--gp-pri)' : '#9ca3af' }}; font-weight: {{ $type->attachment_info ? '500' : 'normal' }}; font-style: {{ $type->attachment_info ? 'normal' : 'italic' }};">
+                        <span style="color: {{ $type->attachment_info ? 'var(--gp-pri)' : 'var(--theme-neutral-600)' }}; font-weight: {{ $type->attachment_info ? '500' : 'normal' }}; font-style: {{ $type->attachment_info ? 'normal' : 'italic' }};">
                             {{ $type->attachment_info ?: 'Not required' }}
                         </span>
                     </td>
@@ -68,7 +68,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 40px; color: #56547a;">No leave types found</td>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: var(--gp-text-mid);">No leave types found</td>
                 </tr>
                 @endforelse
             </tbody>

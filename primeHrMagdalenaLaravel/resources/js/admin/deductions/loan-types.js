@@ -31,40 +31,67 @@ function filterLoanTypes() {
     }
 }
 
-function viewLoanTypeDetails(id) {
-    fetch(`/admin/deductions/types/${id}`)
-        .then(response => response.json())
-        .then(data => {
-            const provider = data.code.includes('GSIS') ? 'GSIS' : (data.code.includes('PAGIBIG') ? 'Pag-IBIG' : 'Other');
-            const maxLoanable = data.max_amount ? '₱' + parseFloat(data.max_amount).toFixed(2) : 'No limit';
-            const interestRate = data.percentage_rate ? data.percentage_rate + '%' : 'N/A';
+function closeViewLoanTypeModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('viewLoanTypeModal').classList.remove('active');
+}
 
-            alert(`
-╔════════════════════════════════════════════╗
-║          LOAN TYPE DETAILS                 ║
-╠════════════════════════════════════════════╣
-║ Code: ${data.code.padEnd(37)} ║
-║ Name: ${data.name.padEnd(37)} ║
-║ Provider: ${provider.padEnd(33)} ║
-╠════════════════════════════════════════════╣
-║ Max Loanable: ${maxLoanable.padEnd(29)} ║
-║ Interest Rate: ${interestRate.padEnd(28)} ║
-║ Category: ${data.category.padEnd(33)} ║
-║ Computation: ${data.computation_type.padEnd(30)} ║
-╠════════════════════════════════════════════╣
-║ Status: ${(data.is_active ? 'Active' : 'Inactive').padEnd(35)} ║
-╚════════════════════════════════════════════╝
-            `.trim());
+function viewLoanTypeDetails(id) {
+    // Was a window.alert() drawing a box out of ╔═╗ characters, padded with
+    // padEnd(37) — unthemeable, and it truncated any name longer than the pad.
+    fetch(`/admin/deductions/types/${encodeURIComponent(id)}`)
+        .then(response => {
+            if (!response.ok) throw new Error(`Request failed (${response.status})`);
+            return response.json();
+        })
+        .then(data => {
+            const set = (el, value) => { document.getElementById(el).textContent = value; };
+
+            const provider = data.code.includes('GSIS') ? 'GSIS'
+                : (data.code.includes('PAGIBIG') || data.code.includes('PAG-IBIG')) ? 'Pag-IBIG'
+                : 'Other';
+
+            set('viewLoanTypeName', data.name);
+            set('viewLoanTypeCode', data.code);
+            set('viewLoanTypeProvider', provider);
+            set('viewLoanTypeCategory', data.category.charAt(0) + data.category.slice(1).toLowerCase());
+
+            // Say where the figure lives rather than printing "N/A": for every
+            // loan type here the amount is agreed per employee.
+            set('viewLoanTypeMax', data.max_amount
+                ? '₱' + Number(data.max_amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })
+                : 'Set per employee');
+            set('viewLoanTypeRate', data.percentage_rate ? data.percentage_rate + '%' : 'Not set');
+            set('viewLoanTypeComputation', data.computation_type === 'PERCENTAGE'
+                ? 'Percentage of salary'
+                : 'Fixed amount');
+
+            const count = data.employees_count ?? 0;
+            set('viewLoanTypeUsage', count === 0
+                ? 'Not assigned to anyone'
+                : `${count} ${count === 1 ? 'employee' : 'employees'}`);
+
+            const status = document.getElementById('viewLoanTypeStatus');
+            status.className = 'badge-status ' + (data.is_active ? 'processed' : 'is-neutral');
+            status.textContent = data.is_active ? 'Active' : 'Inactive';
+
+            // Reading the details is usually the step before changing them.
+            document.getElementById('viewLoanTypeEditBtn').onclick = () => {
+                closeViewLoanTypeModal();
+                editLoanType(data.id);
+            };
+
+            document.getElementById('viewLoanTypeModal').classList.add('active');
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to load loan type details.');
+            console.error('Loan type details failed to load:', error);
+            alert('Could not load that loan type. Please refresh the page and try again.');
         });
 }
 
 function editLoanType(id) {
     // Fetch loan type data
-    fetch(`/admin/deductions/types/${id}`)
+    fetch(`/admin/deductions/types/${encodeURIComponent(id)}`)
         .then(response => response.json())
         .then(data => {
             // Determine provider from code
@@ -171,5 +198,6 @@ window.updateLoanCode = function() {
 
 window.filterLoanTypes = filterLoanTypes;
 window.viewLoanTypeDetails = viewLoanTypeDetails;
+window.closeViewLoanTypeModal = closeViewLoanTypeModal;
 window.editLoanType = editLoanType;
 window.deleteLoanType = deleteLoanType;

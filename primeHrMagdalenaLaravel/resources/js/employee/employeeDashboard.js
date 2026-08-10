@@ -1,3 +1,10 @@
+import { themeColor, themeRgba, chartChrome } from '../shared/themeColors.js';
+
+// Chart.js takes colour values, not CSS declarations, so the chart
+// chrome is resolved from the active theme rather than written as a
+// literal that would stay navy under every other palette.
+const chrome = chartChrome();
+
 /* ══════════ EMPLOYEE DASHBOARD ══════════
    Server data arrives on window.employeeDashboardData, set by an inline script
    in employeeDashboard.blade.php. This file is an ES module, so anything the
@@ -34,12 +41,12 @@ function initCharts() {
     const ctx2 = canvasSalary.getContext('2d');
 
     const gradientAtt = ctx1.createLinearGradient(0, 0, 0, 400);
-    gradientAtt.addColorStop(0, 'rgba(30, 64, 175, 0.3)');
-    gradientAtt.addColorStop(1, 'rgba(30, 64, 175, 0.01)');
+    gradientAtt.addColorStop(0, themeRgba('--theme-accent', 0.3));
+    gradientAtt.addColorStop(1, themeRgba('--theme-accent', 0.01));
 
     const gradientSalary = ctx2.createLinearGradient(0, 0, 0, 300);
-    gradientSalary.addColorStop(0, 'rgba(11, 4, 77, 0.25)');
-    gradientSalary.addColorStop(1, 'rgba(11, 4, 77, 0.01)');
+    gradientSalary.addColorStop(0, themeRgba('--theme-primary', 0.25));
+    gradientSalary.addColorStop(1, themeRgba('--theme-primary', 0.01));
 
     attendanceChart = new Chart(ctx1, {
         type: 'line',
@@ -49,14 +56,14 @@ function initCharts() {
                 {
                     label: 'Attendance Rate (%)',
                     data: attendanceData.month.data,
-                    borderColor: '#1e40af',
+                    borderColor: themeColor('--theme-accent', '#3121ca'),
                     backgroundColor: gradientAtt,
                     borderWidth: 2.5,
                     tension: 0.4,
                     fill: true,
                     pointRadius: 4,
                     pointHoverRadius: 6,
-                    pointBackgroundColor: '#1e40af',
+                    pointBackgroundColor: themeColor('--theme-accent', '#3121ca'),
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     order: 3
@@ -64,14 +71,14 @@ function initCharts() {
                 {
                     label: 'Late Arrivals (%)',
                     data: attendanceData.month.lateData,
-                    borderColor: '#8e1e18',
+                    borderColor: themeColor('--theme-danger', '#c33228'),
                     backgroundColor: 'rgba(142, 30, 24, 0.1)',
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true,
                     pointRadius: 3,
                     pointHoverRadius: 5,
-                    pointBackgroundColor: '#8e1e18',
+                    pointBackgroundColor: themeColor('--theme-danger', '#c33228'),
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     order: 2
@@ -79,14 +86,14 @@ function initCharts() {
                 {
                     label: 'Absent (%)',
                     data: attendanceData.month.absentData,
-                    borderColor: '#6d28d9',
+                    borderColor: themeColor('--theme-warning', '#916e18'),
                     backgroundColor: 'rgba(109, 40, 217, 0.1)',
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true,
                     pointRadius: 3,
                     pointHoverRadius: 5,
-                    pointBackgroundColor: '#6d28d9',
+                    pointBackgroundColor: themeColor('--theme-warning', '#916e18'),
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     order: 1
@@ -106,7 +113,7 @@ function initCharts() {
                         boxHeight: 12,
                         padding: 12,
                         font: { size: 11, family: 'Poppins', weight: '600' },
-                        color: '#64748b',
+                        color: chrome.tick,
                         usePointStyle: true,
                         pointStyle: 'circle'
                     }
@@ -115,9 +122,9 @@ function initCharts() {
                     mode: 'index',
                     intersect: false,
                     backgroundColor: '#fff',
-                    titleColor: '#0b044d',
+                    titleColor: chrome.ink,
                     bodyColor: '#5a5888',
-                    borderColor: '#eceaf8',
+                    borderColor: chrome.border,
                     borderWidth: 1.5,
                     padding: 12,
                     displayColors: true
@@ -128,12 +135,12 @@ function initCharts() {
                     beginAtZero: true,
                     max: 120,
                     grid: { color: '#f7f6ff', drawBorder: false },
-                    ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' }, padding: 8 }
+                    ticks: { color: 'var(--gp-text-soft)', font: { size: 11, family: 'Poppins' }, padding: 8 }
                 },
                 x: {
                     offset: false,
                     grid: { display: false, drawBorder: false, offset: false },
-                    ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' }, padding: 2, autoSkip: true, maxRotation: 0, minRotation: 0 }
+                    ticks: { color: 'var(--gp-text-soft)', font: { size: 11, family: 'Poppins' }, padding: 2, autoSkip: true, maxRotation: 0, minRotation: 0 }
                 }
             }
         }
@@ -146,14 +153,14 @@ function initCharts() {
             datasets: [{
                 label: 'Net Pay (₱)',
                 data: salaryData.month.data,
-                borderColor: '#0b044d',
+                borderColor: chrome.ink,
                 backgroundColor: gradientSalary,
                 borderWidth: 2.5,
                 tension: 0.4,
                 fill: true,
                 pointRadius: 4,
                 pointHoverRadius: 6,
-                pointBackgroundColor: '#0b044d',
+                pointBackgroundColor: chrome.ink,
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2
             }]
@@ -167,9 +174,9 @@ function initCharts() {
                     mode: 'index',
                     intersect: false,
                     backgroundColor: '#fff',
-                    titleColor: '#0b044d',
+                    titleColor: chrome.ink,
                     bodyColor: '#5a5888',
-                    borderColor: '#eceaf8',
+                    borderColor: chrome.border,
                     borderWidth: 1.5,
                     padding: 12,
                     displayColors: false,
@@ -181,14 +188,14 @@ function initCharts() {
                     beginAtZero: true,
                     grid: { color: '#f7f6ff', drawBorder: false },
                     ticks: {
-                        color: '#9999bb',
+                        color: 'var(--gp-text-soft)',
                         font: { size: 11, family: 'Poppins' },
                         callback: v => v >= 1000 ? '₱' + (v / 1000).toFixed(1) + 'k' : '₱' + v
                     }
                 },
                 x: {
                     grid: { display: false, drawBorder: false },
-                    ticks: { color: '#9999bb', font: { size: 11, family: 'Poppins' } }
+                    ticks: { color: 'var(--gp-text-soft)', font: { size: 11, family: 'Poppins' } }
                 }
             }
         }
@@ -356,7 +363,7 @@ function showDeductionModal(deductionId) {
     const badge = document.getElementById('deductionStatusBadge');
     badge.textContent = d.status ? d.status.charAt(0).toUpperCase() + d.status.slice(1) : 'Active';
     badge.className   = 'badge-status';
-    if (d.status === 'active')       badge.style.cssText = 'background:#e8f9ef;color:#15803d;border:1px solid #bbf7d0';
+    if (d.status === 'active')       badge.style.cssText = 'background:var(--theme-success-subtle);color:var(--theme-success);border:1px solid #bbf7d0';
     else if (d.status === 'pending') { badge.className = 'badge-status pending'; badge.style.cssText = ''; }
     else                             { badge.className = 'badge-status on-hold'; badge.style.cssText = ''; }
 

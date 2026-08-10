@@ -143,9 +143,24 @@ class DeductionController extends Controller
         return redirect()->route('admin.deductions')->with('success', 'Deduction type updated successfully.');
     }
 
-    public function showType($code)
+    /**
+     * One deduction type, looked up by code *or* id.
+     *
+     * Two tabs call this endpoint with different identifiers: Deduction Types
+     * passes the code (`editDeductionType('GSIS PS')`) and Loan Types passes
+     * the numeric id (`viewLoanTypeDetails(25)`). It only ever resolved codes,
+     * so every Loan Types row asked for a type whose *code* was "25", got a
+     * 404, and both "View details" and "Edit loan type" died in the fetch's
+     * catch with "Failed to load loan type details."
+     *
+     * Codes are non-numeric throughout (GSIS PS, LOAN_MPL, PAG-IBIG GS), so a
+     * numeric identifier is unambiguously an id.
+     */
+    public function showType($identifier)
     {
-        $deductionType = DeductionType::where('code', $code)->firstOrFail();
+        $deductionType = is_numeric($identifier)
+            ? DeductionType::findOrFail($identifier)
+            : DeductionType::where('code', $identifier)->firstOrFail();
 
         // Get employee count
         $employeesCount = EmployeeDeduction::where('deduction_type_id', $deductionType->id)

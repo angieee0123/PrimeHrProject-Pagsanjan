@@ -353,9 +353,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const length = this.value.length;
             purposeCounter.textContent = `${length} / 300`;
             if (length > 300) {
-                purposeCounter.style.color = '#dc2626';
+                purposeCounter.style.color = 'var(--theme-danger)';
             } else {
-                purposeCounter.style.color = '#9ca3af';
+                purposeCounter.style.color = 'var(--theme-neutral-600)';
             }
         });
     }
@@ -548,11 +548,11 @@ function renderTravelHistory(histories) {
     const dotColors = {
         filed: '#0369a1',
         companion_invited: '#6d28d9',
-        companion_accepted: '#15803d',
-        companion_rejected: '#dc2626',
-        forwarded_to_hr: '#a16207',
-        approved: '#15803d',
-        disapproved: '#dc2626'
+        companion_accepted: 'var(--theme-success)',
+        companion_rejected: 'var(--theme-danger)',
+        forwarded_to_hr: 'var(--theme-warning)',
+        approved: 'var(--theme-success)',
+        disapproved: 'var(--theme-danger)'
     };
 
     list.innerHTML = histories.map(entry => {
@@ -561,7 +561,7 @@ function renderTravelHistory(histories) {
         const remarks = entry.remarks ? `<p class="to-history-remarks">${entry.remarks}</p>` : '';
         return `<div class="to-history-item">
             <div class="to-history-rail">
-                <span class="to-history-dot" style="background: ${dotColors[entry.action] || '#9ca3af'};"></span>
+                <span class="to-history-dot" style="background: ${dotColors[entry.action] || 'var(--theme-neutral-600)'};"></span>
                 <span class="to-history-line"></span>
             </div>
             <div class="to-history-content">

@@ -206,12 +206,12 @@ function renderDetailedDTR(records) {
         let leaveDeductionDisplay = '—';
         if (isOnTravel && record.travel_order_info) {
             const t = record.travel_order_info;
-            leaveDeductionDisplay = `<span style="color:#0b044d;font-weight:600;">${t.order_number}</span><br><small style="color:#6b6a8a;font-size:10px;">${t.destination} (${t.duration} day${t.duration > 1 ? 's' : ''})</small>`;
+            leaveDeductionDisplay = `<span style="color:var(--gp-pri);font-weight:600;">${t.order_number}</span><br><small style="color:var(--theme-neutral-700);font-size:10px;">${t.destination} (${t.duration} day${t.duration > 1 ? 's' : ''})</small>`;
         } else if (isOnLeave && record.leave_info) {
             const l = record.leave_info;
-            leaveDeductionDisplay = `<span style="color:#0b044d;font-weight:600;">${l.leave_code}</span><br><small style="color:#6b6a8a;font-size:10px;">${l.leave_type} (${l.days} day${l.days > 1 ? 's' : ''})</small>`;
+            leaveDeductionDisplay = `<span style="color:var(--gp-pri);font-weight:600;">${l.leave_code}</span><br><small style="color:var(--theme-neutral-700);font-size:10px;">${l.leave_type} (${l.days} day${l.days > 1 ? 's' : ''})</small>`;
         } else if (record.leave_deduction && record.leave_deduction !== '-') {
-            leaveDeductionDisplay = `<span style="color:#0b044d;font-weight:600;">${record.leave_deduction}</span>`;
+            leaveDeductionDisplay = `<span style="color:var(--gp-pri);font-weight:600;">${record.leave_deduction}</span>`;
         }
 
         // ── Timeline date cell ──

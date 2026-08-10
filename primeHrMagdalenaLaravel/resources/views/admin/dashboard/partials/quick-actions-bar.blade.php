@@ -1,12 +1,12 @@
 {{-- Quick Actions Bar --}}
 <div class="enterprise-action-bar">
     <div style="display:flex;align-items:center;gap:10px" class="enterprise-action-spacer">
-        <div style="width:34px;height:34px;border-radius:10px;background:#eef2ff;display:flex;align-items:center;justify-content:center;color:#0b044d">
+        <div style="width:34px;height:34px;border-radius:10px;background:#eef2ff;display:flex;align-items:center;justify-content:center;color:var(--gp-pri)">
             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </div>
         <div>
-            <p style="font-size:13px;font-weight:800;color:#111827;margin:0">Quick Actions</p>
-            <p style="font-size:11px;color:#667085;margin:0">Frequently used HR workflows</p>
+            <p style="font-size:13px;font-weight:800;color:var(--theme-neutral-950);margin:0">Quick Actions</p>
+            <p style="font-size:11px;color:var(--theme-neutral-700);margin:0">Frequently used HR workflows</p>
         </div>
     </div>
     <x-modal-btn onclick="openEmployeeWizard()" style="font-size:11px;padding:0 14px;height:34px;display:flex;align-items:center;gap:6px">

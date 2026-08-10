@@ -10,6 +10,10 @@
          / btn-solid and the reused leave & travel modal styles all resolve. --}}
     @vite(['resources/css/app.css', 'resources/css/admin/admin.css', 'resources/css/admin/adminDashboard.css', 'resources/css/admin/adminLeaveAndBenefits.css', 'resources/css/travelOrder.css', 'resources/css/topbarTheme.css'])
     @stack('styles')
+    {{-- The embed renders inside the admin modal, so it has to carry the same
+         palette. It loads the themed stylesheets but is its own document, and
+         a <style> block in the parent page does not reach into an iframe. --}}
+    <style>{!! \App\Services\SystemTheme::activeCss() !!}</style>
     <style>
         /* The embed renders inside the modal iframe — flush, transparent, no page chrome.
            It fills the iframe height exactly and never scrolls: the calendar grid below

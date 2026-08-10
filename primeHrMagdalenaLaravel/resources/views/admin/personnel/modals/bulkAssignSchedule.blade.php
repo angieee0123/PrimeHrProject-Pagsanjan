@@ -58,10 +58,23 @@
                         @endphp
                         <label class="bulk-emp-item" data-department-id="{{ $departmentId }}" data-designation-id="{{ $designationId }}">
                             <input type="checkbox" name="employee_ids[]" value="{{ $employee->id }}" class="employee-checkbox bulk-checkbox">
+                            {{-- Photo where the employee has one, initials otherwise. Picking
+                                 people out of a list of twelve similar names is much easier by
+                                 face; `employees.photo` already holds a public URL. --}}
+                            @if($employee->photo)
+                                <img src="{{ $employee->photo }}" alt="" class="bulk-emp-avatar" loading="lazy">
+                            @else
+                                <span class="bulk-emp-avatar bulk-emp-avatar-initials"
+                                      style="background: {{ $avatarColors[$loop->index % count($avatarColors)] }}"
+                                      aria-hidden="true">{{ getInitials($fullName) }}</span>
+                            @endif
                             <div class="bulk-emp-info">
                                 <p class="bulk-emp-name">{{ $fullName }}</p>
                                 <p class="bulk-emp-meta">{{ $employee->employee_id }} · {{ $department }}</p>
                             </div>
+                            <span class="bulk-emp-tick" aria-hidden="true">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
                         </label>
                         @endforeach
                     </div>
@@ -115,7 +128,7 @@
                     </div>
 
                     <div class="bulk-info-note">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="bulk-info-icon"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                         <p>Schedule will be applied to all selected employees for the specified date range.</p>
                     </div>
 
@@ -162,7 +175,7 @@
 
 /* ── Header ── */
 .bulk-header {
-    background: linear-gradient(135deg, #150c63, #150c63);
+    background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri-2));
     padding: 16px 20px;
     display: flex;
     justify-content: space-between;
@@ -203,68 +216,114 @@
 .bulk-left {
     display: flex;
     flex-direction: column;
-    border-right: 1.5px solid #f2f1fb;
+    border-right: 1.5px solid var(--gp-bg-tint-2);
     overflow: hidden;
     min-height: 0;
 }
 .bulk-filters {
     padding: 14px 16px;
-    border-bottom: 1px solid #f2f1fb;
+    border-bottom: 1px solid var(--gp-bg-tint-2);
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     gap: 7px;
 }
-.bulk-section-label { margin: 0 0 8px; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #8f8daf; }
+.bulk-section-label { margin: 0 0 8px; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--gp-text-soft); }
 .bulk-select {
     width: 100%; padding: 7px 10px;
-    border: 1.5px solid #ecebf6; border-radius: 8px;
+    border: 1.5px solid var(--gp-border); border-radius: 8px;
     font-size: 12px; font-family: 'Poppins', sans-serif;
-    color: #0b044d; background: #fff; cursor: pointer;
+    color: var(--gp-pri); background: #fff; cursor: pointer;
 }
 .bulk-filter-btns { display: flex; gap: 6px; }
 .bulk-btn-primary {
     flex: 1; padding: 7px 10px;
-    background: #0b044d; color: #fff;
+    background: var(--gp-pri); color: #fff;
     border: none; border-radius: 6px;
     font-size: 11.5px; font-weight: 600;
     cursor: pointer; font-family: 'Poppins', sans-serif;
     transition: background 0.2s;
 }
-.bulk-btn-primary:hover { background: #150c63; }
+.bulk-btn-primary:hover { background: var(--gp-pri-2); }
 .bulk-btn-ghost {
     flex: 1; padding: 7px 10px;
-    background: #fff; color: #56547a;
-    border: 1.5px solid #ecebf6; border-radius: 6px;
+    background: #fff; color: var(--gp-text-mid);
+    border: 1.5px solid var(--gp-border); border-radius: 6px;
     font-size: 11.5px; font-weight: 600;
     cursor: pointer; font-family: 'Poppins', sans-serif;
     transition: all 0.2s;
 }
-.bulk-btn-ghost:hover { border-color: #0b044d; color: #0b044d; }
+.bulk-btn-ghost:hover { border-color: var(--gp-pri); color: var(--gp-pri); }
 .bulk-select-all-row {
     padding: 10px 16px;
-    border-bottom: 1px solid #f2f1fb;
+    border-bottom: 1px solid var(--gp-bg-tint-2);
     flex-shrink: 0;
 }
 .bulk-select-all-label {
     display: flex; align-items: center; gap: 8px;
-    cursor: pointer; font-size: 12px; font-weight: 600; color: #0b044d;
+    cursor: pointer; font-size: 12px; font-weight: 600; color: var(--gp-pri);
 }
-.bulk-checkbox { width: 14px; height: 14px; cursor: pointer; accent-color: #0b044d; flex-shrink: 0; }
+.bulk-checkbox { width: 14px; height: 14px; cursor: pointer; accent-color: var(--gp-pri); flex-shrink: 0; }
 .bulk-emp-list { flex: 1; overflow-y: auto; padding: 6px 10px; }
 .bulk-emp-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 7px 8px; border-radius: 7px;
-    cursor: pointer; transition: background 0.15s;
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 9px; border-radius: 9px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
     margin-bottom: 2px;
 }
-.bulk-emp-item:hover { background: #f2f1fb; }
-.bulk-emp-info { min-width: 0; }
-.bulk-emp-name { margin: 0; font-size: 12px; font-weight: 600; color: #0b044d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bulk-emp-meta { margin: 0; font-size: 10.5px; color: #8f8daf; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bulk-count-bar { padding: 9px 16px; border-top: 1px solid #f2f1fb; flex-shrink: 0; background: #f7f6fc; }
-.bulk-count-text { margin: 0; font-size: 11.5px; color: #56547a; }
-.bulk-count-num { font-weight: 700; color: #0b044d; }
+.bulk-emp-item:hover { background: var(--gp-bg-tint-2); }
+
+/* Selected rows are the whole point of this panel, so they read as chosen
+   rather than merely hovered. :has() lets the row respond to its own
+   checkbox without any JS bookkeeping. */
+.bulk-emp-item:has(.employee-checkbox:checked) {
+    background: var(--theme-primary-soft);
+    border-color: var(--theme-primary-border);
+}
+.bulk-emp-item:has(.employee-checkbox:focus-visible) {
+    border-color: var(--theme-accent);
+}
+
+.bulk-emp-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+    border: 1.5px solid var(--gp-border);
+}
+.bulk-emp-avatar-initials {
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.2px;
+    border-color: transparent;
+}
+
+/* Confirmation mark, revealed only once the row is selected. */
+.bulk-emp-tick {
+    margin-left: auto;
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--theme-success);
+    color: var(--theme-success-fg, #fff);
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.bulk-emp-item:has(.employee-checkbox:checked) .bulk-emp-tick {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.bulk-emp-info { min-width: 0; flex: 1; }
+.bulk-emp-name { margin: 0; font-size: 12px; font-weight: 600; color: var(--gp-pri); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bulk-emp-meta { margin: 0; font-size: 10.5px; color: var(--gp-text-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bulk-count-bar { padding: 9px 16px; border-top: 1px solid var(--gp-bg-tint-2); flex-shrink: 0; background: var(--gp-bg-tint); }
+.bulk-count-text { margin: 0; font-size: 11.5px; color: var(--gp-text-mid); }
+.bulk-count-num { font-weight: 700; color: var(--gp-pri); }
 
 /* ── RIGHT column ── */
 .bulk-right {
@@ -275,42 +334,46 @@
     gap: 14px;
 }
 .bulk-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.bulk-label { display: block; font-size: 11.5px; font-weight: 600; color: #0b044d; margin-bottom: 5px; }
-.bulk-req { color: #8e1e18; }
+.bulk-label { display: block; font-size: 11.5px; font-weight: 600; color: var(--gp-pri); margin-bottom: 5px; }
+.bulk-req { color: var(--theme-danger); }
 .bulk-input {
     width: 100%; padding: 8px 10px;
-    border: 1.5px solid #ecebf6; border-radius: 8px;
+    border: 1.5px solid var(--gp-border); border-radius: 8px;
     font-size: 12.5px; font-family: 'Poppins', sans-serif;
-    color: #0b044d; background: #fff; box-sizing: border-box;
+    color: var(--gp-pri); background: #fff; box-sizing: border-box;
     transition: border-color 0.2s;
 }
-.bulk-input:focus { outline: none; border-color: #0b044d; }
+.bulk-input:focus { outline: none; border-color: var(--gp-pri); }
 .bulk-shift-block {
-    background: #f7f6fc;
-    border: 1.5px solid #ecebf6;
+    background: var(--gp-bg-tint);
+    border: 1.5px solid var(--gp-border);
     border-radius: 10px;
     padding: 12px;
 }
+/* Informational, not a success report: it describes what Assign will do,
+   before anything has happened. Green here read as "done". */
 .bulk-info-note {
-    background: #e8f9ef;
-    border: 1.5px solid #bbf7d0;
+    background: var(--theme-info-subtle);
+    border: 1.5px solid var(--theme-info-border);
+    color: var(--theme-info-emphasis);
     border-radius: 8px;
     padding: 10px 12px;
     display: flex; gap: 8px; align-items: flex-start;
 }
-.bulk-info-note p { margin: 0; font-size: 11.5px; color: #15803d; line-height: 1.5; }
+.bulk-info-note p { margin: 0; font-size: 11.5px; color: inherit; line-height: 1.5; }
+.bulk-info-icon { flex-shrink: 0; margin-top: 1px; }
 
 /* ── Footer ── */
 .bulk-footer {
     padding: 12px 20px;
-    border-top: 1.5px solid #f2f1fb;
+    border-top: 1.5px solid var(--gp-bg-tint-2);
     display: flex; justify-content: flex-end; gap: 10px;
     flex-shrink: 0; background: #fff;
 }
 .bulk-footer-cancel { flex: none; padding: 9px 20px; }
 .bulk-btn-submit {
     padding: 9px 20px;
-    background: linear-gradient(135deg, #150c63, #150c63);
+    background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri-2));
     border: none; border-radius: 8px;
     font-size: 13px; font-weight: 600; color: #fff;
     cursor: pointer; font-family: 'Poppins', sans-serif;
@@ -334,7 +397,7 @@
     }
     .bulk-left {
         border-right: none;
-        border-bottom: 1.5px solid #f2f1fb;
+        border-bottom: 1.5px solid var(--gp-bg-tint-2);
         max-height: 280px;
         overflow: hidden;
     }

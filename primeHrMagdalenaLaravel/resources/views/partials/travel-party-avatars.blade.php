@@ -27,17 +27,17 @@
     font-size: 10.5px;
     font-weight: 700;
     box-sizing: border-box;
-    background: linear-gradient(135deg, #0b044d, #4338ca);
+    background: linear-gradient(135deg, var(--gp-pri), var(--theme-accent));
     transition: transform .25s cubic-bezier(.4,0,.2,1), filter .25s ease;
 }
 .tp-chip:hover .tp-avatar-img {
     transform: translateY(-14px) scale(2.6);
     filter: drop-shadow(0 14px 22px rgba(11,4,77,.35));
 }
-.tp-chip.tp-filer    .tp-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #0b044d; }
-.tp-chip.tp-accepted .tp-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #22c55e; }
-.tp-chip.tp-pending  .tp-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #f59e0b; }
-.tp-chip.tp-rejected .tp-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #ef4444; opacity: .7; }
+.tp-chip.tp-filer    .tp-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--gp-pri); }
+.tp-chip.tp-accepted .tp-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--theme-success); }
+.tp-chip.tp-pending  .tp-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--theme-warning); }
+.tp-chip.tp-rejected .tp-avatar-img { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--theme-danger); opacity: .7; }
 
 .tp-status-dot {
     position: absolute;
@@ -48,15 +48,15 @@
     border-radius: 50%;
     border: 1.5px solid #fff;
 }
-.tp-chip.tp-accepted .tp-status-dot { background: #22c55e; }
-.tp-chip.tp-pending  .tp-status-dot { background: #f59e0b; }
-.tp-chip.tp-rejected .tp-status-dot { background: #ef4444; }
+.tp-chip.tp-accepted .tp-status-dot { background: var(--theme-success); }
+.tp-chip.tp-pending  .tp-status-dot { background: var(--theme-warning); }
+.tp-chip.tp-rejected .tp-status-dot { background: var(--theme-danger); }
 
 /* custom tooltip, mirroring the .dtl-avatar-chip pattern */
 .tp-chip:hover::after {
     content: attr(data-tooltip);
     position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%);
-    background: #1a1f36; color: #fff; font-size: 11px; font-weight: 500;
+    background: var(--gp-ink); color: #fff; font-size: 11px; font-weight: 500;
     padding: 6px 10px; border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,.18); z-index: 40; pointer-events: none;
     max-width: 240px; width: max-content; white-space: normal; text-align: center; line-height: 1.4;
@@ -64,7 +64,7 @@
 .tp-chip:hover::before {
     content: '';
     position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-    border: 5px solid transparent; border-top-color: #1a1f36; z-index: 40; pointer-events: none;
+    border: 5px solid transparent; border-top-color: var(--gp-ink); z-index: 40; pointer-events: none;
 }
 </style>
 @endonce

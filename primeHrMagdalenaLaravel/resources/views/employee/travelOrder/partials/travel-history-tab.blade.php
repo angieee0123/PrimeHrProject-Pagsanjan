@@ -118,7 +118,12 @@
                                 View details
                             </button>
                             @if($order->status === 'awaiting_companions' && !$order->companions->where('status', 'pending')->count())
-                                <form method="POST" action="{{ route('travelorder.forward', $order->id) }}" class="row-menu-form" onsubmit="return confirm('Forward this travel order to HR for approval?');">
+                                <form method="POST" action="{{ route('travelorder.forward', $order->id) }}" class="row-menu-form"
+                                      data-confirm-title="Forward to HR?"
+                                      data-confirm="Your travel order to {{ $order->destination }} will be sent to HR for approval."
+                                      data-confirm-action="Forward to HR"
+                                      data-confirm-cancel="Not yet"
+                                      data-confirm-tone="question">
                                     @csrf
                                     <button type="submit" role="menuitem" class="row-menu-item is-accept">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -130,7 +135,11 @@
                             @endif
                             @if(in_array($order->status, ['pending', 'awaiting_companions']))
                                 <div class="row-menu-sep"></div>
-                                <form method="POST" action="{{ route('travelorder.delete', $order->id) }}" class="row-menu-form" onsubmit="return confirm('Cancel this travel order to {{ $order->destination }}? This cannot be undone.');">
+                                <form method="POST" action="{{ route('travelorder.delete', $order->id) }}" class="row-menu-form"
+                                      data-confirm-title="Cancel this travel order?"
+                                      data-confirm="Your travel order to {{ $order->destination }} will be withdrawn. This cannot be undone."
+                                      data-confirm-action="Cancel travel order"
+                                      data-confirm-cancel="Keep it">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" role="menuitem" class="row-menu-item is-danger">

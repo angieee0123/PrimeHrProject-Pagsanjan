@@ -110,6 +110,17 @@
 @include('employee.chatbot.employeeChatbot')
 
 @push('scripts')
+{{-- Endpoints come from the router, not from paths typed into the JS. The
+     detail modal used to fetch a hard-coded "/permanent/passslip/{id}" while
+     the route has always been "/employee/passslip/{id}", so every "View
+     details" 404'd and fell through to the failure alert. --}}
+<script>
+    window.passSlipData = {
+        showUrl:   @json(route('passslip.show', ['id' => '__ID__'])),
+        cancelUrl: @json(route('passslip.delete', ['id' => '__ID__'])),
+        csrfToken: @json(csrf_token()),
+    };
+</script>
     @vite('resources/js/employee/employeePassSlip.js')
 @endpush
 

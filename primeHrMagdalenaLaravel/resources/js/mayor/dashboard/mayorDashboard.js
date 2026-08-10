@@ -1,3 +1,10 @@
+import { themeColor, themeRgba, chartChrome } from '../../shared/themeColors.js';
+
+// Chart.js takes colour values, not CSS declarations, so the chart
+// chrome is resolved from the active theme rather than written as a
+// literal that would stay navy under every other palette.
+const chrome = chartChrome();
+
 // Mayor dashboard.
 //
 // The department, attendance and leave figures render server-side as ranked
@@ -14,9 +21,9 @@ const perfPeriodMonth = mayorDashboardData.perfPeriodMonth;
 const payrollAnchorLabel = mayorDashboardData.payrollAnchorLabel;
 const chartSeries = mayorDashboardData.chartSeries;
 
-const INK = '#0b044d';
+const INK = chrome.ink;
 const SURFACE = '#ffffff';
-const MUTED = '#8f8daf';
+const MUTED = chrome.tick;
 
 window.switchHighlights = function (tab) {
     const panels = { performers: 'panelHlPerformers', earners: 'panelHlEarners', leave: 'panelHlLeave' };
@@ -284,7 +291,7 @@ window.addEventListener('load', () => {
                     position: 'bottom',
                     labels: {
                         boxWidth: 10, boxHeight: 2, usePointStyle: false,
-                        color: '#56547a', font: { size: 10.5, family: 'Poppins' },
+                        color: chrome.tick, font: { size: 10.5, family: 'Poppins' },
                         padding: 12,
                     }
                 },
@@ -292,7 +299,7 @@ window.addEventListener('load', () => {
                     backgroundColor: SURFACE,
                     titleColor: MUTED,
                     bodyColor: INK,
-                    borderColor: '#ecebf6',
+                    borderColor: chrome.border,
                     borderWidth: 1.5,
                     padding: 10,
                     // One tooltip listing every series at that X — keyed by a
@@ -322,7 +329,7 @@ window.addEventListener('load', () => {
                 y: {
                     beginAtZero: true,
                     // Hairline, solid, one step off the surface — recessive.
-                    grid: { color: '#f1f0f9', drawTicks: false },
+                    grid: { color: chrome.grid, drawTicks: false },
                     border: { display: false },
                     ticks: {
                         color: MUTED, font: { size: 10, family: 'Poppins' }, padding: 8, maxTicksLimit: 5,

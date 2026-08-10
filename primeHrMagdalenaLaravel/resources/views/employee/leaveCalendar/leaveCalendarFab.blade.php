@@ -34,8 +34,7 @@
                 <span class="ecal-spinner"></span>
                 <p>Loading calendar…</p>
             </div>
-            <iframe id="ecalFrame" title="My Leave & Travel Calendar" src="about:blank" loading="lazy"
-                    onload="ecalFrameLoaded(this)"></iframe>
+            <iframe id="ecalFrame" title="My Leave & Travel Calendar" src="about:blank" loading="lazy"></iframe>
         </div>
     </div>
 </div>
@@ -61,6 +60,14 @@
     // The iframe renders whatever the server returns. If `auth` redirected the
     // request (expired session), that response is the full portal/login page —
     // send the whole window there instead of framing the portal inside the modal.
+    // Bound here rather than with an inline onload="": the iframe ships as
+    // about:blank, whose load event fires during parsing, before this script
+    // has run. Attaching after definition both fixes that error and skips the
+    // spurious placeholder event — the only load worth handling is the one
+    // that follows setting .src when the modal opens.
+    document.getElementById('ecalFrame')
+        .addEventListener('load', function () { ecalFrameLoaded(this); });
+
     function ecalFrameLoaded(frame) {
         var loc;
         try {
@@ -138,21 +145,21 @@
         color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 12px rgba(0, 0, 0, 0.2);
     }
     .ecal-modal-head-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-    .ecal-modal-head-h3 { font-size: 14px; font-weight: 700; color: #1a1f36; letter-spacing: -0.1px; line-height: 1.2; white-space: nowrap; }
-    .ecal-modal-head-sub { font-size: 10.5px; font-weight: 500; color: #9aa1b5; letter-spacing: 0.2px; line-height: 1.2; white-space: nowrap; }
+    .ecal-modal-head-h3 { font-size: 14px; font-weight: 700; color: var(--gp-ink); letter-spacing: -0.1px; line-height: 1.2; white-space: nowrap; }
+    .ecal-modal-head-sub { font-size: 10.5px; font-weight: 500; color: var(--theme-neutral-600); letter-spacing: 0.2px; line-height: 1.2; white-space: nowrap; }
     .ecal-modal-close {
         width: 32px; height: 32px; border-radius: 999px; flex-shrink: 0; border: 1px solid transparent;
-        background: rgba(15, 23, 42, 0.05); color: #9aa1b5;
+        background: rgba(15, 23, 42, 0.05); color: var(--theme-neutral-600);
         display: flex; align-items: center; justify-content: center; cursor: pointer;
         transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
     }
-    .ecal-modal-close:hover { background: rgba(11, 10, 77, 0.1); color: #1a1f36; }
+    .ecal-modal-close:hover { background: rgba(11, 10, 77, 0.1); color: var(--gp-ink); }
     .ecal-modal-close:active { transform: scale(0.9); }
     .ecal-modal-body { flex: 1; min-height: 0; position: relative; }
     .ecal-modal-body iframe { width: 100%; height: 100%; border: none; display: block; background: transparent; position: relative; z-index: 1; }
 
     .ecal-modal-loader { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: transparent; }
-    .ecal-modal-loader p { margin: 0; font-size: 12.5px; font-weight: 600; color: #7c839d; }
+    .ecal-modal-loader p { margin: 0; font-size: 12.5px; font-weight: 600; color: var(--gp-muted); }
     .ecal-spinner { width: 36px; height: 36px; border-radius: 50%; border: 3px solid rgba(15, 23, 42, 0.1); border-top-color: var(--theme-primary); animation: ecalSpin 0.7s linear infinite; }
 
     @media (prefers-reduced-motion: reduce) { .ecal-modal-overlay, .ecal-modal-panel { animation: none; } }

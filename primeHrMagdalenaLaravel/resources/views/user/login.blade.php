@@ -7,11 +7,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @php
-        $__s = \App\Models\SystemAiSetting::current();
-        $activeTheme = $__s->theme ?? 'default';
-    @endphp
-    <style>{!! \App\Services\SystemTheme::toCss($activeTheme, $__s->custom_theme_primary, $__s->theme_secondary, $__s->theme_accent, $__s->theme_muted) !!}</style>
+    {{-- The active palette. Organisation-wide: the theme lives on
+         system_ai_settings and there is no per-user theme, so this is
+         the same block for every viewer. Resolved in one place so the
+         layouts cannot drift on how it is assembled. --}}
+    <style>{!! \App\Services\SystemTheme::activeCss() !!}</style>
 </head>
 <body>
 
@@ -74,7 +74,7 @@
                         autocomplete="email"
                     >
                     @error('email')
-                        <span style="font-size:11.5px;color:#8e1e18;">{{ $message }}</span>
+                        <span style="font-size:11.5px;color:var(--theme-danger);">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -100,7 +100,7 @@
                         </button>
                     </div>
                     @error('password')
-                        <span style="font-size:11.5px;color:#8e1e18;">{{ $message }}</span>
+                        <span style="font-size:11.5px;color:var(--theme-danger);">{{ $message }}</span>
                     @enderror
                 </div>
 
