@@ -70,15 +70,13 @@ function exportPayslips() {
     window.location.href = `${window.payrollRoutes.payslipsExport}?status=${status}`;
 }
 
-function printPayslipDirect(id) {
-    viewPayslipDetail(id);
-    setTimeout(() => {
-        window.print();
-    }, 500);
-}
+// printPayslipDirect used to live here: it called viewPayslipDetail() and then
+// printed on a 500ms timer, so the modal opened in front of the user, raced the
+// fetch it depended on, and stayed open afterwards. It now lives in
+// payslip-detail-modal.js, which owns the modal and the print stylesheet's
+// contract, and waits for the data instead of guessing at it.
 
 window.filterPayslips = filterPayslips;
 window.approvePayslip = approvePayslip;
 window.rejectPayslip = rejectPayslip;
 window.exportPayslips = exportPayslips;
-window.printPayslipDirect = printPayslipDirect;

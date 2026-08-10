@@ -1,50 +1,121 @@
+/*
+    Deduction breakdown modal for the payroll register.
+
+    Rebuilt from a string of inline styles carrying literal hexes (#fef8f8,
+    #fdd, #d0c9ff) — colours that could never follow the theme — into classed
+    markup. Three behaviour changes came with it:
+
+      · the total now includes late and undertime, so it equals the "Total Ded."
+        badge the modal was opened from. It previously summed only the
+        contribution columns while wearing the same "Total Deductions" label;
+      · zero lines are dropped rather than listed, so a clean payroll period
+        shows the empty state instead of six ₱0.00 rows;
+      · the header names the employee and the period, which the modal never did
+        even though it is opened from one specific row.
+*/
+
+// The sign belongs outside the symbol: "₱-145.45" reads as a currency code,
+// "−₱145.45" reads as money owed.
+const peso = (n) => {
+    const abs = Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return (n < 0 ? '−₱' : '₱') + abs;
+};
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+}[c]));
+
+// A time-based charge (late, undertime) and a contribution (GSIS, Pag-IBIG)
+// are different kinds of money leaving the pay, so they carry different marks.
+const ICONS = {
+    time: '<path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="10"/>',
+    contribution: '<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
+};
+
 function showDeductionsModal(index) {
     const dataContainer = document.querySelector(`.deductions-data[data-index="${index}"]`);
     const modal = document.getElementById('deductionsModal');
     const modalBody = document.getElementById('deductionsModalBody');
+    const who = document.getElementById('deductionsModalWho');
 
     if (!dataContainer) return;
 
-    const deductions = dataContainer.querySelectorAll('span[data-type]');
-    let html = '<p class="vdm-section-label">BREAKDOWN</p>';
+    const name = dataContainer.dataset.employee || '';
+    const empId = dataContainer.dataset.employeeId || '';
+    const period = dataContainer.dataset.period || '';
+    const gross = parseFloat(dataContainer.dataset.gross) || 0;
+    const net = parseFloat(dataContainer.dataset.net) || 0;
 
-    let totalAmount = 0;
-    deductions.forEach(deduction => {
-        const type = deduction.getAttribute('data-type');
-        const amountStr = deduction.getAttribute('data-amount');
-        const amount = parseFloat(amountStr.replace(/[₱,]/g, '')) || 0;
-        totalAmount += amount;
+    if (who) {
+        who.textContent = [name, empId && `· ${empId}`, period && `· ${period}`]
+            .filter(Boolean).join(' ');
+    }
 
+    const lines = [...dataContainer.querySelectorAll('span[data-type]')]
+        .map((el) => ({
+            type: el.dataset.type,
+            kind: el.dataset.kind || 'contribution',
+            amount: parseFloat(el.dataset.amount) || 0,
+        }))
+        .filter((l) => l.amount > 0);
+
+    const total = lines.reduce((sum, l) => sum + l.amount, 0);
+
+    let html = `
+        <div class="pr-ded-summary">
+            <div class="pr-ded-summary-item">
+                <span>Gross Pay</span>
+                <strong>${peso(gross)}</strong>
+            </div>
+            <div class="pr-ded-summary-item is-deduction">
+                <span>Deductions</span>
+                <strong>${total > 0 ? '−' : ''}${peso(total)}</strong>
+            </div>
+            <!-- A net pay below zero is not good news, so it does not wear the
+                 success colour. It happens when the period's deductions exceed
+                 what was earned in it. -->
+            <div class="pr-ded-summary-item is-net${net < 0 ? ' is-negative' : ''}">
+                <span>Net Pay</span>
+                <strong>${peso(net)}</strong>
+            </div>
+        </div>
+    `;
+
+    if (lines.length === 0) {
         html += `
-            <div class="vdm-row">
-                <span class="vdm-row-label">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--theme-danger)" stroke-width="2.5">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="8" y1="12" x2="16" y2="12"/>
-                    </svg>
-                    ${type}
-                </span>
-                <strong class="vdm-row-amount">${amountStr}</strong>
+            <div class="pr-ded-empty">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="pr-ded-empty-icon">
+                    <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+                </svg>
+                <p class="pr-ded-empty-title">No deductions this period</p>
+                <p class="pr-ded-empty-sub">Gross pay was released in full.</p>
             </div>
         `;
-    });
-
-    if (deductions.length === 0) {
-        html = '<div style="text-align: center; padding: 40px 20px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d0c9ff" stroke-width="1.5" style="margin-bottom: 12px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p style="color: var(--gp-text-soft); font-size: 14px; margin: 0;">No deductions found</p></div>';
     } else {
-        // Add total row
-        html += `
-            <div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid var(--gp-bg-tint-2);">
-                <div class="vdm-row" style="background: linear-gradient(135deg, #fef8f8, #fff); border: 2px solid #fdd;">
-                    <span class="vdm-row-label" style="font-weight: 700; color: var(--gp-pri) !important;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--theme-danger)" stroke-width="2.5">
-                            <rect x="3" y="3" width="18" height="18" rx="2"/>
-                            <line x1="3" y1="9" x2="21" y2="9"/>
-                        </svg>
-                        Total Deductions
+        html += '<p class="vdm-section-label">BREAKDOWN</p>';
+
+        lines.forEach((line) => {
+            // How much of the total this one line accounts for — the reason a
+            // breakdown is opened is usually "which of these is the big one".
+            const share = total > 0 ? Math.round((line.amount / total) * 100) : 0;
+            html += `
+                <div class="vdm-row">
+                    <span class="vdm-row-label">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="pr-ded-icon is-${esc(line.kind)}">${ICONS[line.kind] || ICONS.contribution}</svg>
+                        ${esc(line.type)}
                     </span>
-                    <strong class="vdm-row-amount" style="font-size: 16px;">₱${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
+                    <span class="pr-ded-figures">
+                        <span class="pr-ded-share" title="${share}% of total deductions">${share}%</span>
+                        <strong class="vdm-row-amount">${peso(line.amount)}</strong>
+                    </span>
                 </div>
+            `;
+        });
+
+        html += `
+            <div class="pr-ded-total">
+                <span class="pr-ded-total-label">Total Deductions</span>
+                <strong class="pr-ded-total-amount">${peso(total)}</strong>
             </div>
         `;
     }
@@ -59,7 +130,7 @@ function closeDeductionsModal() {
 }
 
 // Close modal on ESC key
-document.addEventListener('keydown', function(e) {
+document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
         closeDeductionsModal();
     }

@@ -250,7 +250,7 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
 .pay-cell { font-weight: 600; color: var(--gp-pri); }
 .deduction { color: var(--gp-bad); font-weight: 600; }
 .net-pay { color: var(--gp-good); font-weight: 700; font-size: 14px; }
-.btn-view { padding: 6px 16px; background: var(--gp-bg-tint-2); color: var(--gp-pri); border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
+.btn-view { padding: 6px 16px; background: var(--gp-bg-tint-2); color: var(--gp-pri); border: none; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
 .btn-view:hover { background: var(--gp-border); }
 .btn-edit { padding: 6px 16px; background: var(--gp-bg-tint); color: var(--gp-pri); border: 1px solid var(--gp-border); border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
 .btn-edit:hover { background: var(--gp-border); }
@@ -1233,8 +1233,9 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
 .settings-message.success { background: #f0fdf4; color: var(--gp-good); }
 .settings-message.error { background: #fef2f2; color: #dc2626; }
 .settings-save-bar { display: flex; justify-content: flex-end; gap: 10px; padding-top: 16px; border-top: 1px solid var(--gp-bg-tint-2); margin-top: 16px; }
+/* Oblong action buttons — same pill the admin side uses. */
 .settings-btn-reset, .settings-btn-save, .settings-btn-primary {
-    padding: 10px 20px; border-radius: 10px; font-size: 12.5px; font-weight: 600;
+    padding: 10px 22px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
     cursor: pointer; font-family: 'Poppins', sans-serif;
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
@@ -1330,7 +1331,7 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
 .profile-banner .banner-badge { color: rgba(var(--theme-topbar-fg-rgb), 0.9); background: rgba(var(--theme-topbar-fg-rgb), 0.12); border-color: rgba(var(--theme-topbar-fg-rgb), 0.25); }
 .profile-banner .banner-badge.outline { color: rgba(var(--theme-topbar-fg-rgb), 0.88); border-color: rgba(var(--theme-topbar-fg-rgb), 0.32); background: transparent; }
 .profile-banner .banner-badge-dot { background: #22c55e; }
-.btn-edit-profile { padding: 9px 20px; border-radius: 9px; border: none; background: #fff; color: var(--gp-pri); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; font-family: 'Poppins', sans-serif; transition: background 0.2s, color 0.2s; }
+.btn-edit-profile { padding: 9px 22px; border-radius: 999px; border: none; background: #fff; color: var(--gp-pri); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; font-family: 'Poppins', sans-serif; transition: background 0.2s, color 0.2s; }
 .btn-edit-profile:hover { background: var(--theme-primary-soft); color: var(--gp-pri); }
 .profile-stats-grid { grid-template-columns: repeat(4, 1fr); }
 .profile-stats-grid .stat-icon-wrap-primary { background: rgba(var(--theme-primary-rgb),0.08); }
@@ -1781,20 +1782,74 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
     color: var(--gp-text-mid);
 }
 
-.permanent-training .training-modal-sm { max-width: 400px; }
-.permanent-training .training-modal-md { max-width: 480px; }
-.permanent-training .training-modal-center { text-align: center; padding-top: 28px; }
-.permanent-training .training-modal-icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
-.permanent-training .training-modal-icon-success { background: #e8f9ef; }
-.permanent-training .training-modal-title-gap { margin-bottom: 6px; }
-.permanent-training .training-modal-text { font-size: 13px; color: var(--gp-text-mid); margin-bottom: 18px; }
-.permanent-training .training-modal-meta { text-align: left; background: var(--gp-bg-tint); border-radius: 12px; padding: 14px 16px; }
-.permanent-training .training-modal-row-last { border: none; }
-.permanent-training .training-pending-strong { color: var(--gp-accent-gold); }
-.permanent-training .training-modal-footer-center { justify-content: center; }
-.permanent-training .training-modal-btn-full { width: 100%; justify-content: center; }
-.permanent-training .training-modal-btn-half { flex: 1; justify-content: center; }
-.permanent-training .training-hero-icon { background: linear-gradient(135deg,var(--gp-pri),var(--gp-pri-2)); }
+/* ── Training modal internals ──────────────────────────────────────
+   Scoped by overlay id, not by `.permanent-training`.
+
+   The modals are @include-d after </main>, so they are siblings of
+   <main class="permanent-training"> and never its descendants. Every rule
+   here used to be written `.permanent-training .training-*` and therefore
+   matched nothing at all. The hero icon was the visible symptom: a white
+   SVG on a background that was never painted, i.e. a blank 48px gap in the
+   "Add New Training" header. The comment further down already recorded this
+   scoping rule for two of the boxes; these eleven had not been moved over.
+
+   The twelfth, .training-hero-icon, lives in employeeTraining.css instead,
+   beside the centred-header rules that reshape the same block. */
+#addTrainingModal .training-modal-sm,
+#trainingSubmitModal .training-modal-sm,
+#trainingFlashSuccessModal .training-modal-sm,
+#viewCertModal .training-modal-sm,
+#pdsExportModal .training-modal-sm { max-width: 400px; }
+#addTrainingModal .training-modal-center,
+#trainingSubmitModal .training-modal-center,
+#trainingFlashSuccessModal .training-modal-center,
+#viewCertModal .training-modal-center,
+#pdsExportModal .training-modal-center { text-align: center; padding-top: 28px; }
+#addTrainingModal .training-modal-icon,
+#trainingSubmitModal .training-modal-icon,
+#trainingFlashSuccessModal .training-modal-icon,
+#viewCertModal .training-modal-icon,
+#pdsExportModal .training-modal-icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+#addTrainingModal .training-modal-icon-success,
+#trainingSubmitModal .training-modal-icon-success,
+#trainingFlashSuccessModal .training-modal-icon-success,
+#viewCertModal .training-modal-icon-success,
+#pdsExportModal .training-modal-icon-success { background: var(--theme-success-subtle); }
+#addTrainingModal .training-modal-title-gap,
+#trainingSubmitModal .training-modal-title-gap,
+#trainingFlashSuccessModal .training-modal-title-gap,
+#viewCertModal .training-modal-title-gap,
+#pdsExportModal .training-modal-title-gap { margin-bottom: 6px; }
+#addTrainingModal .training-modal-text,
+#trainingSubmitModal .training-modal-text,
+#trainingFlashSuccessModal .training-modal-text,
+#viewCertModal .training-modal-text,
+#pdsExportModal .training-modal-text { font-size: 13px; color: var(--gp-text-mid); margin-bottom: 18px; }
+#addTrainingModal .training-modal-row-last,
+#trainingSubmitModal .training-modal-row-last,
+#trainingFlashSuccessModal .training-modal-row-last,
+#viewCertModal .training-modal-row-last,
+#pdsExportModal .training-modal-row-last { border: none; }
+#addTrainingModal .training-pending-strong,
+#trainingSubmitModal .training-pending-strong,
+#trainingFlashSuccessModal .training-pending-strong,
+#viewCertModal .training-pending-strong,
+#pdsExportModal .training-pending-strong { color: var(--gp-accent-gold); }
+#addTrainingModal .training-modal-footer-center,
+#trainingSubmitModal .training-modal-footer-center,
+#trainingFlashSuccessModal .training-modal-footer-center,
+#viewCertModal .training-modal-footer-center,
+#pdsExportModal .training-modal-footer-center { justify-content: center; }
+#addTrainingModal .training-modal-btn-full,
+#trainingSubmitModal .training-modal-btn-full,
+#trainingFlashSuccessModal .training-modal-btn-full,
+#viewCertModal .training-modal-btn-full,
+#pdsExportModal .training-modal-btn-full { width: 100%; justify-content: center; }
+#addTrainingModal .training-modal-btn-half,
+#trainingSubmitModal .training-modal-btn-half,
+#trainingFlashSuccessModal .training-modal-btn-half,
+#viewCertModal .training-modal-btn-half,
+#pdsExportModal .training-modal-btn-half { flex: 1; justify-content: center; }
 .permanent-training .training-enroll-note { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: #fbf6e3; border-radius: 10px; border: 1px solid #fde68a; margin-top: 16px; }
 .permanent-training .training-enroll-note-icon { flex-shrink: 0; margin-top: 1px; }
 .permanent-training .training-enroll-note-text { font-size: 12.5px; color: var(--gp-accent-gold); margin: 0; line-height: 1.5; }
@@ -1894,6 +1949,22 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
     background: transparent;
     font-family: 'Poppins', sans-serif;
     padding: 0;
+}
+/* Tailwind's preflight sets `svg { display: block }`, and a block element
+   ignores the `text-align: center` that centres the label's text — so the
+   upload arrow sat hard against the left edge while the wording under it was
+   centred. Same fix as .ded-empty-icon and .pr-empty-icon.
+
+   `currentColor` replaces a hard-coded #9ca3af on the markup, so the icon
+   follows the theme like everything else in this modal. */
+#addTrainingModal .training-dropzone-label > svg {
+    display: block;
+    margin: 0 auto;
+    color: var(--theme-neutral-400);
+}
+#addTrainingModal .training-dropzone.dragover .training-dropzone-label > svg,
+#addTrainingModal .training-dropzone.has-file .training-dropzone-label > svg {
+    color: var(--gp-pri);
 }
 #addTrainingModal .training-dropzone-title {
     font-size: 13px;

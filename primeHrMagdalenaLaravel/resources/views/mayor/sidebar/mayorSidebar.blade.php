@@ -15,7 +15,7 @@ $currentRoute = Route::currentRouteName();
     <div class="sidebar-header">
         <div class="logo">
             <div class="logo-mark">
-                <img src="/municipal-of-pagsanjan-logo.jpg" alt="Pagsanjan Logo"
+                <img src="{{ \App\Services\SiteContentService::logoUrl() }}" alt="Pagsanjan Logo"
                      style="width:32px;height:32px;border-radius:50%;object-fit:cover"
                      onerror="this.style.display='none'">
             </div>

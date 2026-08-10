@@ -10,7 +10,7 @@
             <!-- Employee Info -->
             <div class="payslip-header">
                 <div class="payslip-logo">
-                    <img src="{{ asset('municipal-of-pagsanjan-logo.jpg') }}" alt="Pagsanjan Logo" class="logo-image">
+                    <img src="{{ \App\Services\SiteContentService::logoUrl() }}" alt="Pagsanjan Logo" class="logo-image">
                     <h2>MUNICIPAL GOVERNMENT OF PAGSANJAN</h2>
                     <p>Province of Laguna</p>
                     <h3 class="payslip-title">PAYSLIP</h3>

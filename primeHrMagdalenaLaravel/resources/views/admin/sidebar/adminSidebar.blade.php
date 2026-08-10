@@ -38,6 +38,11 @@ $navGroups = [
     ],
     'System' => [
         ['id' => 'admin.reports',  'label' => 'Reports',  'icon' => 'reports',  'route' => route('admin.reports')],
+        // Administrators only — WebsiteContentController 403s anyone else, so
+        // hiding the row here is tidiness, not the permission.
+        ...(auth()->user()?->hasRole('admin')
+            ? [['id' => 'admin.website', 'label' => 'Website Content', 'icon' => 'website', 'route' => route('admin.website')]]
+            : []),
         ['id' => 'admin.settings', 'label' => 'Settings', 'icon' => 'settings', 'route' => route('admin.settings')],
     ],
 ];
@@ -99,7 +104,7 @@ while (count($openGroups) > 3) {
     <div class="sidebar-header">
         <div class="logo">
             <div class="logo-mark">
-                <img src="/municipal-of-pagsanjan-logo.jpg" alt="Pagsanjan Logo"
+                <img src="{{ \App\Services\SiteContentService::logoUrl() }}" alt="Pagsanjan Logo"
                      style="width:32px;height:32px;border-radius:50%;object-fit:cover"
                      onerror="this.style.display='none'">
             </div>

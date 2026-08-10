@@ -368,9 +368,9 @@
     align-items: center;
     gap: 6px;
     margin-top: 14px;
-    padding: 7px 14px;
+    padding: 7px 16px;
     border: 1px solid var(--theme-border);
-    border-radius: 9px;
+    border-radius: 999px;
     background: #fff;
     font-family: 'Poppins', sans-serif;
     font-size: 11.5px;

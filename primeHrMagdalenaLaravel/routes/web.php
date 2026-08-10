@@ -437,6 +437,21 @@ Route::post('/admin/departments', [\App\Http\Controllers\DepartmentController::c
 
 Route::get('/admin/reports', [\App\Http\Controllers\AdminReportsController::class, 'index'])->middleware('auth')->name('admin.reports');
 
+// Website Content — the editor for the public welcome page. Administrators
+// only; WebsiteContentController re-checks the role on every endpoint rather
+// than trusting the hidden nav entry, because this writes the one page an
+// unauthenticated visitor can read.
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/website', [\App\Http\Controllers\WebsiteContentController::class, 'index'])->name('admin.website');
+    // The logo routes are declared before the {section} wildcard: Laravel
+    // matches in declaration order, so `/admin/website/logo` would otherwise
+    // be swallowed as a section named "logo" and 404.
+    Route::post('/admin/website/logo', [\App\Http\Controllers\WebsiteContentController::class, 'updateLogo'])->name('admin.website.logo');
+    Route::delete('/admin/website/logo', [\App\Http\Controllers\WebsiteContentController::class, 'resetLogo'])->name('admin.website.logo.reset');
+    Route::post('/admin/website/{section}', [\App\Http\Controllers\WebsiteContentController::class, 'update'])->name('admin.website.update');
+    Route::delete('/admin/website/{section}', [\App\Http\Controllers\WebsiteContentController::class, 'reset'])->name('admin.website.reset');
+});
+
 Route::get('/admin/settings', [\App\Http\Controllers\AdminSettingsController::class, 'index'])->middleware('auth')->name('admin.settings');
 Route::post('/admin/settings/profile', [\App\Http\Controllers\AdminSettingsController::class, 'updateProfile'])->middleware('auth')->name('admin.settings.profile');
 Route::post('/admin/settings/password', [\App\Http\Controllers\AdminSettingsController::class, 'updatePassword'])->middleware('auth')->name('admin.settings.password');

@@ -159,7 +159,7 @@
 }
 
 .ps-btn-reject { background: #dc2626; border-color: #dc2626; }
-.ps-btn-empty-cta { margin-top: 12px; padding: 8px 16px; background: var(--gp-pri); color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
+.ps-btn-empty-cta { margin-top: 12px; padding: 8px 18px; background: var(--gp-pri); color: #fff; border: none; border-radius: 999px; font-size: 13px; cursor: pointer; }
 .ps-select-inline { width: auto; padding: 6px 10px; font-size: 13px; }
 
 .ps-badge-cancelled { background: #f3f4f6; color: var(--theme-neutral-700); }

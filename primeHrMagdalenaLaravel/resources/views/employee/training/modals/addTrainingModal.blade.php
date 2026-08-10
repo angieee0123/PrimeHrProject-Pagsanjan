@@ -40,7 +40,7 @@
                             <div class="training-dropzone" id="trainingDropZone">
                                 <input type="file" id="trainingCertificate" name="certificate" accept=".pdf,.jpg,.jpeg,.png" hidden onchange="handleTrainingFile(this)">
                                 <button type="button" class="training-dropzone-label" id="dropzoneBtn" onclick="document.getElementById('trainingCertificate').click()">
-                                    <svg width="40" height="40" fill="none" stroke="#9ca3af" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                                     <p class="training-dropzone-title">Click to upload or drag and drop</p>
                                     <p class="training-dropzone-sub">PDF, JPEG, or PNG · Max 5 MB</p>
                                     <p class="training-dropzone-sub" style="margin-top:6px; color:var(--gp-pri); font-weight:600;">Certificate details will be auto-extracted</p>

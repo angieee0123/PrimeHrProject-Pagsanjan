@@ -94,11 +94,18 @@
                 </div>
             </div>
 
+            {{-- The same pill pair the table headers use ("Add Deduction Type",
+                 "File Travel Order"): .btn-export supplies the full-round shape,
+                 .adm-btn-primary-solid takes over the colours, so the two differ
+                 by weight rather than by silhouette. Reusing those classes rather
+                 than restyling .btn-primary/.btn-secondary, which the payroll
+                 modals share. --}}
             <div class="form-actions">
-                <button type="button" class="btn-secondary" onclick="document.getElementById('generatePayrollForm').reset(); updatePreview();">
+                <button type="button" class="btn-export" onclick="document.getElementById('generatePayrollForm').reset(); updatePreview();">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 8"/></svg>
                     Reset
                 </button>
-                <button type="submit" class="btn-primary" id="generateBtn">
+                <button type="submit" class="btn-export adm-btn-primary-solid" id="generateBtn">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     Generate Payroll
                 </button>

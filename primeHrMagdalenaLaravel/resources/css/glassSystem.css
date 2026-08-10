@@ -334,6 +334,9 @@
    rule would never reach them on compliant pages. glassSystem.css is
    @import-ed at the top of app.css, and app.css is loaded by every layout,
    so this reaches admin, employee, mayor, and joborder pages alike. */
+/* Buttons inside a modal keep the rounded-rect. The pill is the shape for a
+   page's own action buttons — toolbars, form save bars, empty-state CTAs — not
+   for a dialog footer. */
 .modal-btn-primary,
 .modal-btn-ghost,
 .modal-btn-danger,

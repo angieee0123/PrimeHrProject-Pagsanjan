@@ -82,8 +82,8 @@
 }
 .permanent-leavebenefits .lb-toggle-btn { padding: 6px 14px; border: 1px solid var(--theme-neutral-300); border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; background: #fff; color: var(--theme-neutral-700); transition: all 0.2s; }
 .permanent-leavebenefits .lb-toggle-btn.active { background: #0284c7; color: #fff; }
-.permanent-leavebenefits .lb-btn-apply { background: #0284c7; color: #fff; padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
-.permanent-leavebenefits .lb-btn-clear { background: #f3f4f6; color: var(--theme-neutral-700); padding: 6px 14px; border: 1px solid var(--theme-neutral-300); border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
+.permanent-leavebenefits .lb-btn-apply { background: #0284c7; color: #fff; padding: 6px 16px; border: none; border-radius: 999px; cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.permanent-leavebenefits .lb-btn-clear { background: #f3f4f6; color: var(--theme-neutral-700); padding: 6px 16px; border: 1px solid var(--theme-neutral-300); border-radius: 999px; cursor: pointer; font-size: 13px; font-weight: 500; }
 .permanent-leavebenefits .lb-btn-clear:hover { background: var(--theme-neutral-300) !important; border-color: var(--theme-neutral-400) !important; }
 .permanent-leavebenefits .lb-btn-filter:hover { background: #0369a1 !important; }
 

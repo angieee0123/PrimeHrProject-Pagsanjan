@@ -1,0 +1,509 @@
+/* ══════════════════════════════════════════════════════════════════
+   Website Content — the editor for the public welcome page.
+
+   Layout deliberately mirrors Settings (section rail left, one panel
+   right) so an administrator who has used that page already knows how
+   to drive this one.
+
+   Every colour is a theme token. This page is admin chrome, so it must
+   follow the palette like the rest of the admin area.
+══════════════════════════════════════════════════════════════════ */
+
+.wc-container {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+    /* Clearance for the chat and calendar FABs, which are fixed to the
+       bottom-right. Without it, scrolling to the end of a long panel parks
+       "Save changes" underneath them — the two overlap by ~31px at 1500px
+       wide, and the button is the one thing on this page that must stay
+       clickable. */
+    padding-bottom: 96px;
+}
+
+/* ── Section rail ───────────────────────────────────────────────── */
+
+.wc-rail {
+    background: #fff;
+    border: 1px solid var(--gp-bg-tint-2);
+    border-radius: 16px;
+    padding: 18px 14px;
+    position: sticky;
+    top: 20px;
+}
+
+.wc-rail-head { padding: 0 6px 12px; border-bottom: 1px solid var(--gp-bg-tint-2); margin-bottom: 10px; }
+.wc-rail-title { margin: 0 0 3px; font-size: 13px; font-weight: 700; color: var(--gp-pri); }
+.wc-rail-sub { margin: 0; font-size: 11.5px; color: var(--gp-text-soft); line-height: 1.45; }
+
+.wc-nav { display: flex; flex-direction: column; gap: 2px; }
+
+/* Two groups, split by why something changes. The header earns its keep only
+   if it reads as a header and not as another row, hence the rule beside it. */
+.wc-nav-group + .wc-nav-group { margin-top: 14px; }
+.wc-nav-group-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0 0 6px;
+    padding: 0 10px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gp-text-soft);
+}
+.wc-nav-group-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--gp-bg-tint-2);
+}
+/* The pencil marks the group that carries rules — icon choices, link formats,
+   image sizes — so the distinction is visible, not just implied by the name. */
+/* No `order` needed — ::after is the last child, so the pencil already lands
+   between the label and the rule. */
+.wc-nav-group-hint { display: inline-flex; color: var(--theme-warning-emphasis); }
+.wc-nav-group-hint svg { display: block; }
+
+/* ── "Advanced" disclosure ──────────────────────────────────────────
+   Used only where an everyday section holds something structural (the hero's
+   compliance tags, About's profile facts). A section already under Page setup
+   does not get one — the whole section is the advanced case.
+
+   <details> rather than a JS toggle: it is keyboard- and screen-reader-native,
+   and — the part that matters — collapsing does not remove its fields from the
+   form, so a closed block still saves what is inside it. */
+.wc-advanced {
+    border: 1px solid var(--gp-bg-tint-2);
+    border-radius: 12px;
+    background: var(--theme-neutral-50);
+}
+.wc-advanced > summary {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    list-style: none;
+    border-radius: 12px;
+    transition: background .18s ease;
+}
+.wc-advanced > summary::-webkit-details-marker { display: none; }
+.wc-advanced > summary:hover { background: var(--gp-bg-tint); }
+.wc-advanced > summary:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: -2px; }
+
+/* Own marker, so it can rotate and sit on the left where it is scanned. */
+.wc-advanced > summary::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    flex-shrink: 0;
+    align-self: center;
+    border-right: 2px solid var(--gp-text-soft);
+    border-bottom: 2px solid var(--gp-text-soft);
+    transform: rotate(-45deg);
+    transition: transform .18s ease;
+}
+.wc-advanced[open] > summary::before { transform: rotate(45deg); }
+
+.wc-advanced-title { font-size: 12.5px; font-weight: 700; color: var(--gp-pri); }
+.wc-advanced-hint { font-size: 11.5px; color: var(--gp-text-soft); }
+
+.wc-advanced > .wc-repeat {
+    border: none;
+    border-top: 1px solid var(--gp-bg-tint-2);
+    border-radius: 0 0 12px 12px;
+    background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wc-advanced > summary,
+    .wc-advanced > summary::before { transition: none; }
+}
+
+.wc-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--gp-text-mid);
+    font-family: 'Poppins', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background .18s ease, color .18s ease;
+}
+.wc-nav-item:hover { background: var(--gp-bg-tint); color: var(--gp-pri); }
+.wc-nav-item.active { background: var(--theme-primary-light); color: var(--gp-pri); }
+.wc-nav-item:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: -2px; }
+
+.wc-nav-icon { display: flex; flex-shrink: 0; color: currentColor; }
+.wc-nav-icon svg { display: block; }
+.wc-nav-label { flex: 1; min-width: 0; }
+
+/* A section that differs from the shipped wording. */
+.wc-nav-dot,
+.wc-nav-item.is-edited::after {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--theme-warning);
+    flex-shrink: 0;
+}
+.wc-nav-item.is-edited::after { content: ''; }
+.wc-nav-item.is-edited .wc-nav-dot { display: none; }   /* never two dots */
+
+.wc-rail-note {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    background: var(--gp-bg-tint);
+    color: var(--gp-text-soft);
+}
+.wc-rail-note svg { flex-shrink: 0; margin-top: 1px; color: var(--gp-pri); }
+.wc-rail-note p { margin: 0; font-size: 11.5px; line-height: 1.5; }
+
+/* ── Panels ─────────────────────────────────────────────────────── */
+
+.wc-panel {
+    display: none;
+    background: #fff;
+    border: 1px solid var(--gp-bg-tint-2);
+    border-radius: 16px;
+    padding: 22px 24px;
+}
+.wc-panel.active { display: block; }
+
+.wc-panel-head { padding-bottom: 16px; border-bottom: 1px solid var(--gp-bg-tint-2); margin-bottom: 18px; }
+.wc-panel-title { margin: 0 0 3px; font-size: 15px; font-weight: 700; color: var(--gp-pri); }
+.wc-panel-sub { margin: 0; font-size: 12px; color: var(--gp-text-soft); }
+
+.wc-fields { display: flex; flex-direction: column; gap: 22px; }
+.wc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
+
+/* ── Field groups ───────────────────────────────────────────────────
+   A panel used to be one undifferentiated stack — Contact was fourteen
+   identical fields in a column, About twenty-seven. Grouping them under a
+   quiet heading is what turns "a wall of inputs" into "three short forms",
+   and it costs a heading and a hairline rather than another nested box. */
+.wc-group { border: none; margin: 0; padding: 0; min-width: 0; }
+.wc-group + .wc-group { padding-top: 20px; border-top: 1px solid var(--gp-bg-tint-2); }
+.wc-group-head { margin-bottom: 14px; }
+.wc-group-title {
+    margin: 0;
+    padding: 0;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+}
+.wc-group-sub { margin: 2px 0 0; font-size: 11.5px; color: var(--gp-text-soft); line-height: 1.5; }
+.wc-group-body { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── Fields ─────────────────────────────────────────────────────── */
+
+/* Sentence case, not uppercase. Fourteen shouting micro-labels down one
+   column was most of what made this page feel loud — the label competed with
+   the value it describes, and the value is the thing being edited. */
+.wc-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.wc-label { font-size: 12px; font-weight: 600; color: var(--gp-text-mid); line-height: 1.3; }
+.wc-sublabel { font-size: 11.5px; font-weight: 600; color: var(--gp-text-soft); }
+.wc-hint { font-size: 11.5px; color: var(--gp-text-soft); line-height: 1.5; }
+.wc-hint code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    background: var(--gp-bg-tint-2);
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+.wc-input {
+    width: 100%;
+    min-width: 0;
+    padding: 9px 12px;
+    border: 1.5px solid var(--theme-neutral-200);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--gp-pri);
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+.wc-input:focus {
+    outline: none;
+    border-color: var(--gp-pri);
+    box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), .12);
+}
+.wc-area { resize: vertical; line-height: 1.55; }
+.wc-select { cursor: pointer; }
+.wc-date { max-width: 170px; }
+
+/* ── Repeaters ──────────────────────────────────────────────────── */
+
+/* No filled box. Services nested three deep — category card inside a
+   "services in this category" panel inside the outer repeater — and read as
+   boxes rather than as content. The list now sits on the page with a heading
+   row above it; only the individual rows keep a card. */
+.wc-repeat { padding: 0; border: none; border-radius: 0; background: transparent; }
+.wc-repeat.is-nested { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--theme-neutral-200); }
+
+.wc-repeat-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+
+.wc-add {
+    padding: 5px 14px;
+    border: 1px solid var(--theme-primary-border);
+    border-radius: 999px;
+    background: var(--theme-primary-light);
+    color: var(--gp-pri);
+    font-family: 'Poppins', sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .18s ease, opacity .18s ease;
+}
+.wc-add:hover:not(:disabled) { background: var(--theme-primary-muted); }
+.wc-add:disabled { opacity: .45; cursor: not-allowed; }
+
+.wc-rows { display: flex; flex-direction: column; gap: 8px; }
+.wc-rows.is-stacked { gap: 12px; }
+
+.wc-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: start; }
+/* A single-value row (tags, features) has no second column to fill. */
+.wc-row:has(> .wc-input:only-of-type) { grid-template-columns: 1fr auto; }
+.wc-row.is-wide { grid-template-columns: 1fr auto; }
+
+/* One card style, one depth. The variants used to tint each nesting level a
+   different grey, which is what made Services read as boxes inside boxes. A
+   nested card is set apart by an indent and a rule instead of another fill. */
+.wc-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 12px;
+    background: #fff;
+}
+.wc-card.is-group { background: var(--theme-neutral-50); }
+.wc-card.is-sub {
+    background: #fff;
+    border-left: 3px solid var(--theme-primary-border);
+}
+.wc-card-top { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; }
+/* Where the card header carries its own field labels, centring puts the
+   remove button halfway up the label. Push it down to the input line. */
+.wc-card-top:has(.wc-field) { align-items: end; }
+.wc-remove.is-aligned { margin-bottom: 0; }
+
+/* A category card that collapses. The summary is what you scan — name on the
+   left, service count on the right — so the fields only unfold when you mean
+   to edit that one. */
+details.wc-card { padding: 0; overflow: hidden; }
+details.wc-card > .wc-card-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 14px;
+    cursor: pointer;
+    list-style: none;
+    transition: background .18s ease;
+}
+details.wc-card > .wc-card-summary::-webkit-details-marker { display: none; }
+details.wc-card > .wc-card-summary:hover { background: var(--gp-bg-tint); }
+details.wc-card > .wc-card-summary:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: -2px; }
+details.wc-card > .wc-card-summary::before {
+    content: '';
+    width: 7px; height: 7px;
+    flex-shrink: 0;
+    border-right: 2px solid var(--gp-text-soft);
+    border-bottom: 2px solid var(--gp-text-soft);
+    transform: rotate(-45deg);
+    transition: transform .18s ease;
+}
+details.wc-card[open] > .wc-card-summary::before { transform: rotate(45deg); }
+.wc-card-summary-title { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; color: var(--gp-pri); }
+.wc-card-summary-meta { font-size: 11.5px; color: var(--gp-text-soft); }
+
+/* The body only gets padding once it is showing. */
+details.wc-card[open] > .wc-card-summary { border-bottom: 1px solid var(--theme-neutral-200); }
+details.wc-card > .wc-card-top { padding: 14px 14px 0; }
+details.wc-card > .wc-repeat.is-nested { margin: 14px; margin-top: 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+    details.wc-card > .wc-card-summary,
+    details.wc-card > .wc-card-summary::before { transition: none; }
+}
+
+/* Column headings for a repeater's rows. Without them every field in a list
+   is placeholder-only, and the placeholder disappears the moment it is
+   filled in — so a saved row gave no clue which box was which. */
+.wc-col-labels {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 6px;
+    padding: 0 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gp-text-soft);
+}
+.wc-col-labels.is-pair { grid-template-columns: 1fr 1fr 32px; }
+.wc-col-labels.is-single { grid-template-columns: 1fr 32px; }
+
+.wc-remove {
+    width: 32px; height: 32px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--gp-text-soft);
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+.wc-remove:hover {
+    background: var(--theme-danger-subtle);
+    border-color: var(--theme-danger-border);
+    color: var(--theme-danger-emphasis);
+}
+
+/* ── Logo ───────────────────────────────────────────────────────── */
+
+.wc-logo {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--gp-bg-tint-2);
+    border-radius: 12px;
+    background: var(--theme-neutral-50);
+}
+
+.wc-logo-preview {
+    width: 84px;
+    height: 84px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    border: 1px solid var(--theme-neutral-200);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+/* contain, not cover: a seal is a whole mark, and cropping one to fill a
+   square is how the municipal arms lose their edge. */
+.wc-logo-preview img { width: 100%; height: 100%; object-fit: contain; }
+
+.wc-logo-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.wc-logo-state { margin: 0; font-size: 12.5px; font-weight: 600; color: var(--gp-pri); }
+.wc-logo-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+
+/* A <label> wrapping the file input — it has to look and behave like the
+   other pill buttons on this page. */
+.wc-logo-pick { display: inline-flex; align-items: center; cursor: pointer; }
+.wc-logo-pick:focus-within { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
+
+.wc-logo-reset {
+    padding: 5px 14px;
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--gp-text-mid);
+    font-family: 'Poppins', sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, color .18s ease, opacity .18s ease;
+}
+.wc-logo-reset:hover:not(:disabled) {
+    background: var(--theme-danger-subtle);
+    border-color: var(--theme-danger-border);
+    color: var(--theme-danger-emphasis);
+}
+.wc-logo-reset:disabled { opacity: .45; cursor: not-allowed; }
+
+.wc-logo .wc-msg { margin-top: 4px; }
+
+@media (max-width: 560px) {
+    .wc-logo { flex-direction: column; }
+}
+
+/* ── Callouts ───────────────────────────────────────────────────── */
+
+.wc-callout {
+    display: flex;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--theme-primary-light);
+    border: 1px solid var(--theme-primary-border);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--gp-text-mid);
+}
+.wc-callout svg { flex-shrink: 0; margin-top: 2px; color: var(--gp-pri); }
+.wc-callout strong { color: var(--gp-pri); }
+.wc-callout.is-warn {
+    background: var(--theme-warning-subtle);
+    border-color: var(--theme-warning-border);
+}
+.wc-callout.is-warn svg,
+.wc-callout.is-warn strong { color: var(--theme-warning-emphasis); }
+.wc-callout code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11.5px;
+    background: rgba(var(--theme-shadow-rgb), .06);
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+/* ── Footer of a panel ──────────────────────────────────────────── */
+
+.wc-msg { margin: 16px 0 0; font-size: 12.5px; font-weight: 600; }
+.wc-msg.is-ok  { color: var(--theme-success-emphasis); }
+.wc-msg.is-err { color: var(--theme-danger-emphasis); }
+
+/* Sticky: the Services panel is ~2,000px tall, so Save used to be two
+   screens below the field you had just edited. `padding-right` keeps the
+   buttons clear of the chat and calendar FABs fixed at the bottom-right. */
+.wc-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin: 22px -24px 0;
+    padding: 14px 24px;
+    padding-right: 96px;
+    border-top: 1px solid var(--gp-bg-tint-2);
+    background: rgba(255, 255, 255, .92);
+    backdrop-filter: blur(8px) saturate(160%);
+    -webkit-backdrop-filter: blur(8px) saturate(160%);
+    border-radius: 0 0 16px 16px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+    .wc-container { grid-template-columns: 1fr; }
+    .wc-rail { position: static; }
+    .wc-nav { flex-direction: row; flex-wrap: wrap; }
+    .wc-nav-item { width: auto; }
+}
+
+@media (max-width: 700px) {
+    .wc-grid { grid-template-columns: 1fr; }
+    .wc-row { grid-template-columns: 1fr auto; }
+    .wc-card-top { grid-template-columns: 1fr auto; }
+    .wc-panel { padding: 18px 16px; }
+    .wc-actions { flex-direction: column-reverse; }
+    .wc-actions .btn-export { width: 100%; justify-content: center; }
+}

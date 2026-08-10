@@ -520,6 +520,103 @@ build the few they touch with `Schema::create` in `setUp()` — see
 
 ---
 
+## The public welcome page is editable
+
+`welcome.blade.php` is the only page an unauthenticated visitor can read, and
+every word of it used to be a literal in that file — the announcements, the
+service catalogue, the vision and mission, the phone numbers. Changing one
+advisory meant editing Blade and redeploying, so nobody did: the shipped page
+carried June 2025 announcements, a hard-coded `© 2025`, and hero figures of
+"17 Offices" and "348 Personnel" against a database holding 26 and 12.
+
+`SiteContentService` now owns that copy, edited at **Admin → Website Content**
+(`/admin/website`). Three rules hold:
+
+- **Defaults are the old page, verbatim.** A section that has never been saved
+  renders exactly what the hard-coded version did, so installing this changed
+  nothing until somebody edited something.
+- **A saved section is merged over its defaults, never swapped for them** — but
+  *lists are replaced wholesale*. Adding a field must not blank it out on an
+  install that saved the section earlier; deleting the fourth announcement must
+  not let the default's fourth reappear underneath.
+- **Counts are read, not typed.** The hero's departments and personnel figures
+  come from the tables that own them, the same reasoning as
+  `HrPolicyFactsService`. A figure whose table cannot be read is *omitted*, not
+  shown as `0` — "0 Government Personnel" on the municipality's homepage is
+  worse than one fewer statistic.
+
+### The rail is split by *why* something changes
+
+`SECTION_GROUPS` is the source of truth for the editor's navigation, and
+`sections()` derives the flat allow-list from it — a section cannot be added to
+one and forgotten in the other. Two groups:
+
+- **Everyday updates** — it changed because the world changed. Announcements,
+  contact details, hero text, about, the gov bar. Nothing to learn.
+- **Page setup** — it changed because the site is being redesigned. Logo,
+  services, the HRIS call-to-action, footer, chatbot. These carry rules: icons
+  from a fixed list, links matching a pattern, files with size limits.
+
+Announcements leads the whole rail and opens by default. It is a repeatable
+list, which by the rule above would read as setup — but posting an advisory is
+the reason this editor exists, and it is the only content that goes stale on
+its own.
+
+Where an *everyday* section holds something structural, that part folds into a
+`<details class="wc-advanced">`: the hero's compliance tags and About's profile
+facts. About's **paragraphs stay in the open** — rewording prose is an everyday
+job. A section already under Page setup gets no disclosure; the whole section
+is the advanced case.
+
+`<details>` rather than a JS toggle because **collapsing must not drop the
+fields on save** — a closed block still submits everything inside it, which is
+the one way this could have silently broken saving. `WebsiteContentTest` guards
+the grouping (no section listed twice, none missing a partial or defaults,
+announcements first); the submit-while-collapsed property was verified in a
+browser.
+
+**The editor never accepts markup.** Every field is a length-capped plain
+string; icons and announcement tags must be members of a fixed vocabulary
+(`ICONS`, `CHIP_ICONS`, `ANNOUNCEMENT_TAGS`); links match `#anchor` or
+`https?://` and nothing else, which is what keeps `javascript:` and `data:`
+URIs out. Names become SVG only inside the `x-public-icon` component. There is
+deliberately no rich-text field: a public page rendering admin-supplied HTML is
+a stored-XSS surface aimed at every visitor to the municipality's website.
+`WebsiteContentController` re-checks `hasRole('admin')` on every endpoint —
+the hidden sidebar row is tidiness, not the permission.
+
+Note `x-public-icon` is a **component**, not an `@include`: variables defined
+inside an include do not escape back to the including view, and the first
+version of this 500'd the homepage for exactly that reason.
+
+### The municipal seal is uploadable
+
+`SiteContentService::logoUrl()` is the only way any view should reference the
+logo. It was `/municipal-of-pagsanjan-logo.jpg` in **18 places** — the welcome
+page, all three sidebars, the three sign-in screens, both payslip modals — plus
+two `public_path()` reads in the PDF services. Replacing it meant replacing a
+file on the server.
+
+- **The upload lives under its own key (`LOGO_KEY`), not inside `brand`.**
+  `put()` replaces a section wholesale — that is what lets an admin delete the
+  last row of a list — so a logo stored in `brand` would be dropped every time
+  somebody saved the brand *text* form, which has no file input to resubmit it.
+- **The filename is generated, never taken from the upload** (`logo-<random>.<ext>`
+  on the public disk). `image` + an extension allow-list + a dimension check
+  mean the file has to decode as one of four raster formats. **SVG is refused**
+  — it can carry script, and this renders on a page anonymous visitors read.
+- **`logoPath()` re-checks the disk on every read.** If the file is gone, callers
+  fall back to the shipped logo rather than emit a broken image on the homepage.
+- **`logoDataUri()` derives the MIME type.** `LeaveFormDataService` and
+  `PassSlipFormDataService` embed the bytes for dompdf and both hard-coded
+  `image/jpeg`, which would have broken the printed forms the first time anyone
+  uploaded a PNG.
+- Replacing the logo deletes the file it replaced; "Use the original" deletes
+  the upload and drops back to `DEFAULT_LOGO`.
+
+`tests/Feature/WebsiteContentTest.php` pins the authorisation, the vocabularies,
+the URL scheme filter, and that markup saved into a field comes back escaped.
+
 ## Theming
 
 The whole UI's colour comes from one seed colour, generated by

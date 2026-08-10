@@ -147,6 +147,24 @@ window.resetToStep1 = resetToStep1;
 window.handleTrainingFile = handleTrainingFile;
 window.showTrainingToast = showTrainingToast;
 
+/*
+    The five close wrappers, which were defined above but never exported.
+
+    This file is an ES module, so its top-level declarations are module-scoped.
+    The modals call their close handler from an inline `onclick="closeX()"`
+    attribute, and inline handlers resolve against the global scope — so every
+    one of them threw ReferenceError and did nothing. That broke the X and the
+    click-outside on all five training modals, not just "Add New Training":
+    once opened, the only way out was a page reload.
+
+    Anything an inline handler names has to be assigned here.
+*/
+window.closeAddTrainingModal = closeAddTrainingModal;
+window.closeFlashSuccessModal = closeFlashSuccessModal;
+window.closeTrainingSubmitModal = closeTrainingSubmitModal;
+window.closePdsExportModal = closePdsExportModal;
+window.closeViewCertModal = closeViewCertModal;
+
 function setStatusFilter(status, btn) {
     activeStatusFilter = status;
     document.querySelectorAll('.training-filter-chip').forEach(c => {

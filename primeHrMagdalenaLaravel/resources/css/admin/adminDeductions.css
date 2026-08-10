@@ -912,8 +912,14 @@ textarea.form-input {
 .ded-code { color: var(--gp-text-soft); margin-left: 6px; font-size: 10.5px; }
 
 /* Money reads as money: right-aligned, tabular figures so digits line up
-   down the column. */
+   down the column.
+
+   The header needs the qualified selector: `.payroll-table thead th
+   { text-align: left }` in admin.css is (0,1,2) and beats a lone class
+   (0,1,0) whatever the load order, so "In use" and "Amount" rendered left
+   above right-aligned cells. The bare selector stays for the <td>. */
 .ded-num-col { text-align: right; }
+.payroll-table thead th.ded-num-col { text-align: right; }
 .ded-amount {
     margin: 0;
     font-size: 13px;

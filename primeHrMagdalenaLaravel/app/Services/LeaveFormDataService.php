@@ -46,10 +46,11 @@ class LeaveFormDataService
         $vlBalance = $this->getBalance($employee->id, 'VL', $year);
         $slBalance = $this->getBalance($employee->id, 'SL', $year);
 
-        $logoPath = public_path(config('cs_form.logo_path', 'municipal-of-pagsanjan-logo.jpg'));
-        $logoBase64 = file_exists($logoPath)
-            ? 'data:image/jpeg;base64,' . base64_encode(file_get_contents($logoPath))
-            : '';
+        // dompdf cannot fetch a URL, so the seal is embedded. Via the service
+        // so an uploaded logo reaches the printed forms too, and so the MIME
+        // type is derived — this used to hard-code image/jpeg, which would
+        // have produced a broken image the moment somebody uploaded a PNG.
+        $logoBase64 = \App\Services\SiteContentService::logoDataUri();
 
         $monthlyRate = $employment?->designationRelation?->monthly_rate;
         $salaryDisplay = $monthlyRate

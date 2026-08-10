@@ -9,7 +9,11 @@
                         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                         Export to PDS
                     </a>
-                    <button type="button" class="modal-btn-primary" onclick="openAddTrainingModal()">
+                    {{-- .btn-export supplies the pill shape its neighbour uses;
+                         .tr-btn-primary-solid only takes over the colours. It
+                         was .modal-btn-primary — a modal-footer class on a
+                         toolbar button, which is why it rendered square. --}}
+                    <button type="button" class="btn-export tr-btn-primary-solid" onclick="openAddTrainingModal()">
                         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         Add New Training
                     </button>

@@ -32,7 +32,7 @@
     <nav class="pub-nav">
         <div class="pub-logo">
             <div class="pub-logo-seal">
-                <img src="/municipal-of-pagsanjan-logo.jpg" alt="Pagsanjan Logo"
+                <img src="{{ \App\Services\SiteContentService::logoUrl() }}" alt="Pagsanjan Logo"
                      onerror="this.style.display='none'"
                      style="width:36px;height:36px;border-radius:50%;object-fit:cover">
             </div>
@@ -158,7 +158,7 @@
         <div class="pub-footer-inner">
             <div class="pub-footer-brand">
                 <div class="pub-logo-seal sm">
-                    <img src="/municipal-of-pagsanjan-logo.jpg" alt="Pagsanjan Logo"
+                    <img src="{{ \App\Services\SiteContentService::logoUrl() }}" alt="Pagsanjan Logo"
                          onerror="this.style.display='none'"
                          style="width:28px;height:28px;border-radius:50%;object-fit:cover">
                 </div>

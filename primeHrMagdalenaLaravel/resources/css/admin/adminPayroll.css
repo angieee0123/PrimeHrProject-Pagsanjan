@@ -116,8 +116,8 @@
 .tab-link.active { color: #fff; background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri)); box-shadow: 0 4px 12px rgba(var(--theme-primary-rgb),.25); }
 .tab-link svg { width: 16px; height: 16px; }
 .badge-emptype { font-size: 11px; color: var(--gp-pri); background: var(--gp-bg-tint-2); padding: 3px 10px; border-radius: 20px; font-weight: 600; border: 1px solid var(--theme-neutral-300); }
-.ot-pay { font-size: 13px; color: #15803d; font-weight: 600; }
-.daily-rate { font-size: 13px; color: #a52820; font-weight: 600; }
+.ot-pay { font-size: 13px; color: var(--theme-success-emphasis); font-weight: 600; }
+.daily-rate { font-size: 13px; color: var(--gp-text-mid); font-weight: 600; }
 .work-date { font-size: 12.5px; color: var(--gp-text-mid); font-weight: 500; }
 .days-count { font-size: 12.5px; color: var(--gp-pri); font-weight: 600; background: var(--gp-bg-tint-2); padding: 4px 10px; border-radius: 4px; }
 .btn-filter-main { padding: 7px 16px; background: var(--gp-pri); color: #fff; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
@@ -149,17 +149,17 @@
 .adm-overlay.active { display: flex; align-items: center; justify-content: center; }
 .adm-box { background: white; border-radius: 16px; width: 90%; box-shadow: 0 20px 60px rgba(var(--theme-primary-rgb), 0.3); animation: modalSlideIn 0.3s ease; overflow: hidden; }
 @keyframes modalSlideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.adm-header { padding: 24px; border-bottom: 1px solid #e8e6f5; display: flex; justify-content: space-between; align-items: center; }
+.adm-header { padding: 24px; border-bottom: 1px solid var(--gp-bg-tint-2); display: flex; justify-content: space-between; align-items: center; }
 .adm-header-left { display: flex; align-items: center; gap: 12px; }
 .vdm-avatar { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .adm-eyebrow { font-size: 10px; font-weight: 700; color: #ffffff !important; letter-spacing: 0.5px; display: block; margin-bottom: 2px; }
 .adm-title { margin: 0; color: #ffffff !important; font-size: 19px; font-weight: 600; line-height: 1.2; }
 .adm-close { background: none; border: none; color: var(--gp-text-soft); cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.2s; }
-.adm-close:hover { background: #f0eeff; color: var(--gp-pri); }
+.adm-close:hover { background: var(--theme-primary-light); color: var(--gp-pri); }
 .vdm-body { padding: 20px 24px; }
-.adm-footer { padding: 20px 24px; border-top: 1px solid #e8e6f5; display: flex; justify-content: flex-end; gap: 10px; }
+.adm-footer { padding: 20px 24px; border-top: 1px solid var(--gp-bg-tint-2); display: flex; justify-content: flex-end; gap: 10px; }
 .adm-btn-ghost { padding: 10px 20px; background: transparent; color: var(--gp-text-mid); border: 1px solid var(--gp-border); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
-.adm-btn-ghost:hover { background: var(--gp-bg-tint); color: var(--gp-pri); border-color: #d0c9ff; }
+.adm-btn-ghost:hover { background: var(--gp-bg-tint); color: var(--gp-pri); border-color: var(--theme-primary-border); }
 .adm-btn-primary { padding: 10px 24px; background: linear-gradient(135deg, var(--gp-pri), var(--gp-pri-2)); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(var(--theme-primary-rgb), 0.2); }
 .adm-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(var(--theme-primary-rgb), 0.3); }
 .adm-btn-primary:active { transform: translateY(0); }
@@ -169,24 +169,100 @@
     .deduction-col-hide { display: none !important; }
     .deduction-col-show { display: table-cell !important; }
 }
-.btn-deductions-modal { background: #f0eeff; border: 1px solid #d0c9ff; border-radius: 6px; padding: 6px 10px; cursor: pointer; color: var(--gp-pri); transition: all 0.2s; }
-.btn-deductions-modal:hover { background: #e0d9ff; border-color: var(--gp-pri); }
-.vdm-section-label { font-size: 11px; font-weight: 700; color: var(--gp-text-soft); letter-spacing: 0.8px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-.vdm-section-label::before { content: ''; width: 3px; height: 14px; background: linear-gradient(135deg, #8e1e18, #dc2626); border-radius: 2px; }
-.vdm-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: #ffffff; border: 1px solid var(--gp-bg-tint-2); border-radius: 10px; margin-bottom: 10px; transition: all 0.2s; }
-.vdm-row:hover { background: #fef8f8; border-color: #fdd; transform: translateX(2px); }
-.vdm-row:last-child { margin-bottom: 0; }
-.vdm-row-label { display: flex; align-items: center; gap: 10px; color: #5a5a7a !important; font-size: 13.5px; font-weight: 500; }
-.vdm-row-label svg { flex-shrink: 0; }
-.vdm-row-amount { color: #8e1e18 !important; font-size: 15px; font-weight: 700; font-family: 'Poppins', monospace; }
-.badge-deduction { display: inline-block; padding: 5px 12px; background: #fee; color: #8e1e18; border: 1px solid #fcc; border-radius: 6px; font-size: 12px; font-weight: 700; }
-.badge-netpay { display: inline-block; padding: 5px 12px; background: #e7f5e9; color: #15803d; border: 1px solid #b7e4c7; border-radius: 6px; font-size: 12px; font-weight: 700; }
+.btn-deductions-modal { background: var(--theme-primary-light); border: 1px solid var(--theme-primary-border); border-radius: 8px; padding: 6px 10px; cursor: pointer; color: var(--gp-pri); transition: background .2s, border-color .2s, transform .15s ease; }
+.btn-deductions-modal:hover { background: var(--theme-primary-muted); border-color: var(--gp-pri); }
+.btn-deductions-modal:active { transform: scale(.94); }
+.btn-deductions-modal:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
+
+/* The deduction rows and their labels are scoped to #deductionsModal (1,0,0)
+   rather than left as bare .vdm-* classes: adminDepartment.css styles the same
+   class names for its own view modal, and with both at (0,1,0) whichever file
+   the build emits last was winning for both pages. That is also what the
+   `!important` on the label colour was papering over — it is gone now. */
+#deductionsModal .vdm-section-label { font-size: 10.5px; font-weight: 800; color: var(--gp-text-soft); letter-spacing: 1.2px; margin: 4px 0 12px; display: flex; align-items: center; gap: 8px; }
+#deductionsModal .vdm-section-label::before { content: ''; width: 3px; height: 13px; background: var(--theme-danger); border-radius: 2px; }
+#deductionsModal .vdm-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; background: var(--theme-neutral-50); border: 1px solid var(--theme-neutral-200); border-radius: 10px; margin-bottom: 8px; transition: background .2s, border-color .2s; }
+#deductionsModal .vdm-row:hover { background: var(--theme-danger-subtle); border-color: var(--theme-danger-border); }
+#deductionsModal .vdm-row:last-child { margin-bottom: 0; }
+#deductionsModal .vdm-row-label { display: flex; align-items: center; gap: 10px; color: var(--gp-text-mid); font-size: 13px; font-weight: 600; min-width: 0; }
+#deductionsModal .vdm-row-label svg { flex-shrink: 0; }
+#deductionsModal .vdm-row-amount { color: var(--theme-danger-emphasis); font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* A time charge and a contribution are different kinds of money leaving the
+   pay, so the marks differ; both stay inside the danger family. */
+.pr-ded-icon.is-time { color: var(--theme-warning); }
+.pr-ded-icon.is-contribution { color: var(--theme-danger); }
+
+.pr-ded-figures { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.pr-ded-share { font-size: 10.5px; font-weight: 700; color: var(--gp-text-soft); background: var(--theme-neutral-100); border-radius: 999px; padding: 2px 7px; font-variant-numeric: tabular-nums; }
+
+/* Gross → deductions → net, the three figures the breakdown exists to
+   reconcile, above the lines that produce the middle one. */
+.pr-ded-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--theme-neutral-200); border: 1px solid var(--theme-neutral-200); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+.pr-ded-summary-item { background: var(--theme-neutral-50); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.pr-ded-summary-item span { font-size: 10px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--gp-text-soft); }
+.pr-ded-summary-item strong { font-size: 14.5px; font-weight: 800; color: var(--gp-pri); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pr-ded-summary-item.is-deduction strong { color: var(--theme-danger-emphasis); }
+.pr-ded-summary-item.is-net { background: var(--theme-success-subtle); }
+.pr-ded-summary-item.is-net strong { color: var(--theme-success-emphasis); }
+.pr-ded-summary-item.is-net.is-negative { background: var(--theme-danger-subtle); }
+.pr-ded-summary-item.is-net.is-negative strong { color: var(--theme-danger-emphasis); }
+
+.pr-ded-total { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; padding: 14px 16px; background: var(--theme-danger-subtle); border: 1px solid var(--theme-danger-border); border-radius: 12px; }
+.pr-ded-total-label { font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: var(--theme-danger-emphasis); }
+.pr-ded-total-amount { font-size: 18px; font-weight: 800; color: var(--theme-danger-emphasis); font-variant-numeric: tabular-nums; }
+
+.pr-ded-empty { text-align: center; padding: 28px 20px 12px; }
+.pr-ded-empty-icon { color: var(--theme-success); display: block; margin: 0 auto 10px; }
+.pr-ded-empty-title { font-size: 14px; font-weight: 700; color: var(--gp-pri); margin: 0 0 4px; }
+.pr-ded-empty-sub { font-size: 12.5px; color: var(--gp-text-soft); margin: 0; }
+
+.pr-modal-who { margin: 3px 0 0; font-size: 11.5px; font-weight: 500; color: rgba(255,255,255,.82); }
+
+.badge-deduction { display: inline-block; padding: 5px 12px; background: var(--theme-danger-subtle); color: var(--theme-danger-emphasis); border: 1px solid var(--theme-danger-border); border-radius: 8px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+/* Nothing was deducted — a red badge on a zero says a charge was made. */
+.badge-deduction.is-nil { background: var(--theme-neutral-100); color: var(--gp-text-soft); border-color: var(--theme-neutral-200); font-weight: 600; }
+.badge-netpay { display: inline-block; padding: 5px 12px; background: var(--theme-success-subtle); color: var(--theme-success-emphasis); border: 1px solid var(--theme-success-border); border-radius: 8px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.badge-netpay.is-negative { background: var(--theme-danger-subtle); color: var(--theme-danger-emphasis); border-color: var(--theme-danger-border); }
+
+/* ── Register table: currency reads as currency ──
+   Every money column is tabular so the digits stack down the column, and a
+   ₱0.00 recedes instead of shouting in deduction red — with ten numeric
+   columns the zeros are most of the ink, and they are the least of the news. */
+.payroll-register-table td,
+.payroll-register-table th { min-width: 0; }
+.payroll-register-table .pay-cell,
+.payroll-register-table .ot-pay,
+.payroll-register-table .deduction,
+.payroll-register-table .daily-rate,
+.payroll-register-table .pr-zero { font-variant-numeric: tabular-nums; }
+.payroll-register-table .pr-zero { color: var(--gp-text-soft); font-weight: 500; opacity: .55; }
+/* `.payroll-table td { color: var(--gp-pri) }` is (0,1,1) and outranks a lone
+   `.deduction` (0,1,0), so every late/UT/contribution cell in this table has
+   been rendering in navy rather than deduction red — the class was set on the
+   cell and silently did nothing. Qualified to (0,2,0). */
+.payroll-register-table td.deduction { color: var(--gp-bad); font-weight: 600; }
+.payroll-register-table td.ot-pay { color: var(--theme-success-emphasis); font-weight: 600; }
+.payroll-register-table td.daily-rate { color: var(--gp-text-mid); font-weight: 600; }
+/* Muted zeros must still outrank the colour rules above, which are also
+   (0,2,0) — the extra `td` puts these at (0,2,1). */
+.payroll-register-table td.pr-zero { color: var(--gp-text-soft); font-weight: 500; }
+.payroll-register-table .work-date { color: var(--gp-text-mid); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.payroll-register-table .days-count { display: inline-block; min-width: 26px; padding: 2px 8px; border-radius: 999px; background: var(--theme-primary-light); color: var(--gp-pri); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.pr-empty-cell { text-align: center; padding: 44px 20px; }
+.pr-empty-icon { color: var(--theme-neutral-300); display: block; margin: 0 auto 10px; }
+.pr-empty-title { font-size: 14px; font-weight: 700; color: var(--gp-pri); margin: 0 0 4px; }
+.pr-empty-sub { font-size: 12.5px; color: var(--gp-text-soft); margin: 0; }
+/* The empty row must not read as data: no zebra, no hover lift. */
+.payroll-register-table tbody tr:has(.pr-empty-cell),
+.payroll-register-table tbody tr:has(.pr-empty-cell):hover { background: transparent; }
 .pr-ellipsis { padding: 0 8px; color: var(--gp-text-soft); }
 .pr-avatar-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gp-border); }
 .pr-footer-flex { display: flex; align-items: center; gap: 12px; }
 .pr-rows-select { width: auto; padding: 6px 10px; font-size: 13px; }
 .pr-modal-md { max-width: 480px; }
-.pr-header-red { background: linear-gradient(135deg, #8e1e18, #dc2626); border-bottom: none; }
+.pr-header-red { background: linear-gradient(135deg, var(--theme-danger-emphasis), var(--theme-danger)); border-bottom: none; }
 .pr-header-icon-frost { background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); }
 .pr-close-frost { color: rgba(255,255,255,0.8); }
 .pr-close-frost:hover { background: rgba(255,255,255,0.2); color: #fff; }
@@ -291,6 +367,24 @@
 .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gp-text-mid); cursor: pointer; }
 .checkbox-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
 .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+
+/* #generateBtn is disabled while the run is in flight and its label swapped to
+   "Generating…". .btn-export has no disabled state of its own, so without this
+   the button still lifts and recolours under the cursor while refusing the
+   click. Scoped to this form rather than added to .btn-export in admin.css,
+   which every table header shares.
+
+   The :hover pair carries .glass-shell so it is (0,5,0) and outranks
+   `.glass-shell .btn-export.adm-btn-primary-solid:hover` (0,4,0) on
+   specificity — a bare (0,4,0) would tie and depend on build order. */
+.generate-form-card .form-actions .btn-export:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+.glass-shell .generate-form-card .form-actions .btn-export:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
 .preview-card { height: fit-content; position: sticky; top: 20px; }
 .preview-title { font-size: 14px; font-weight: 600; color: var(--gp-pri); margin-bottom: 16px; }
 .preview-stats { display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px; }
@@ -368,6 +462,26 @@
 .signature-label { font-size: 12px; font-weight: 600; color: var(--gp-pri); margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.5px; }
 .signature-name { font-size: 13px; font-weight: 600; color: var(--gp-pri); margin: 0 0 4px 0; }
 .signature-date { font-size: 11px; color: var(--gp-text-mid); margin: 0; }
+
+/* "Print payslip" stages the modal without showing it.
+   The print stylesheet below isolates #payslipDetailModal and hides everything
+   else, so the payslip has to be in the DOM *and* laid out to appear on paper —
+   `display: none` would leave a blank sheet.
+
+   `visibility: hidden` gives exactly that: laid out, drawn nowhere. Shifting it
+   off-screen instead does not work — .modal-overlay stretches left-to-right, so
+   a `left: -10000px` moves the white box away but leaves its rgba(0,0,0,.5)
+   backdrop still covering the viewport, and the screen visibly darkens during
+   the print.
+
+   Screen-only. The print block re-declares visibility for this element, and
+   media rules do not leak across, so the payslip still prints. */
+@media screen {
+    #payslipDetailModal.is-print-staging {
+        visibility: hidden;
+        pointer-events: none;
+    }
+}
 
 @media print {
     /* Scoped with :has() on purpose. This file is loaded by layouts/app on EVERY

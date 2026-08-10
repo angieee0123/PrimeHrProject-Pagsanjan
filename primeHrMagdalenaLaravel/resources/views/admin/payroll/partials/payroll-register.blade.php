@@ -83,7 +83,7 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
             </tr>
         </thead>
         <tbody id="payrollRegisterBody">
-            @foreach($payrollRecords as $index => $record)
+            @forelse($payrollRecords as $index => $record)
             @php
                 $basicPay = $record['basic'];
                 $otPay = $record['ot_pay'];
@@ -126,34 +126,68 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
                     <td class="daily-rate pr-th-right">{{ peso($record['daily_rate']) }}</td>
                 @endif
                 <td class="pay-cell pr-th-right">{{ peso($basicPay) }}</td>
-                <td class="ot-pay pr-th-right">{{ peso($otPay) }}</td>
-                <td class="deduction pr-th-right">{{ peso($lateDeduction) }}</td>
-                <td class="deduction pr-th-right">{{ peso($undertimeDeduction) }}</td>
+                <td class="ot-pay pr-th-right {{ $otPay > 0 ? '' : 'pr-zero' }}">{{ peso($otPay) }}</td>
+                {{-- A ₱0.00 in alarm red reads as a deduction that is not there.
+                     Only a charge that was actually made is coloured; the zeros
+                     recede so a scan down the column finds the real ones. --}}
+                <td class="pr-th-right {{ $lateDeduction > 0 ? 'deduction' : 'pr-zero' }}">{{ peso($lateDeduction) }}</td>
+                <td class="pr-th-right {{ $undertimeDeduction > 0 ? 'deduction' : 'pr-zero' }}">{{ peso($undertimeDeduction) }}</td>
                 @if(isset($deductionTypes) && $deductionTypes->isNotEmpty())
                     @foreach($deductionTypes as $code)
-                        <td class="deduction deduction-col-hide pr-th-right">{{ peso($record['deductions'][$code] ?? 0) }}</td>
+                        @php $dedAmount = $record['deductions'][$code] ?? 0; @endphp
+                        <td class="deduction-col-hide pr-th-right {{ $dedAmount > 0 ? 'deduction' : 'pr-zero' }}">{{ peso($dedAmount) }}</td>
                     @endforeach
                 @endif
                 <td class="deduction-col-show pr-hidden pr-th-center">
-                    <button class="btn-deductions-modal" onclick="showDeductionsModal({{ $index }})">
+                    <button class="btn-deductions-modal" onclick="showDeductionsModal({{ $index }})"
+                            title="View deduction breakdown"
+                            aria-label="View deduction breakdown for {{ $record['name'] }}">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                     </button>
-                    <div class="deductions-data pr-hidden" data-index="{{ $index }}">
+                    {{-- The modal used to total only the rows below, while the
+                         "Total Ded." badge beside it also counts late and
+                         undertime — two different numbers under the same
+                         "Total Deductions" label. Late/UT are carried here so
+                         the breakdown adds up to the badge it was opened from,
+                         along with who and when, which the modal never said. --}}
+                    <div class="deductions-data pr-hidden" data-index="{{ $index }}"
+                         data-employee="{{ $record['name'] }}"
+                         data-employee-id="{{ $record['id'] }}"
+                         data-period="{{ $viewMode === 'daily' ? date('M d, Y', strtotime($record['work_date'])) : $periodDisplay }}"
+                         data-total="{{ $totalDeductionsRow }}"
+                         data-net="{{ $netPay }}"
+                         data-gross="{{ $grossPay }}">
+                        <span data-type="Late" data-amount="{{ $lateDeduction }}" data-kind="time"></span>
+                        <span data-type="Undertime" data-amount="{{ $undertimeDeduction }}" data-kind="time"></span>
                         @if(isset($deductionTypes) && $deductionTypes->isNotEmpty())
                             @foreach($deductionTypes as $code)
-                                <span data-type="{{ $deductionTypeNames[$code] ?? $code }}" data-amount="{{ peso($record['deductions'][$code] ?? 0) }}"></span>
+                                <span data-type="{{ $deductionTypeNames[$code] ?? $code }}" data-amount="{{ $record['deductions'][$code] ?? 0 }}" data-kind="contribution"></span>
                             @endforeach
                         @endif
                     </div>
                 </td>
                 <td class="pr-th-right">
-                    <span class="badge-deduction">{{ peso($totalDeductionsRow) }}</span>
+                    <span class="badge-deduction {{ $totalDeductionsRow > 0 ? '' : 'is-nil' }}">{{ peso($totalDeductionsRow) }}</span>
                 </td>
                 <td class="pr-th-right">
-                    <span class="badge-netpay">{{ peso($netPay) }}</span>
+                    {{-- Same rule as the breakdown modal: a net below zero does
+                         not wear the success colour, and the sign goes outside
+                         the peso sign so "−₱145.45" does not read as "₱-145". --}}
+                    <span class="badge-netpay {{ $netPay < 0 ? 'is-negative' : '' }}">{{ ($netPay < 0 ? '−' : '') . peso(abs($netPay)) }}</span>
                 </td>
             </tr>
-            @endforeach
+            @empty
+            {{-- The register is filter-driven, so an empty result is a normal
+                 outcome, not a fault. Without this the filters could leave a
+                 header row over nothing at all. --}}
+            <tr>
+                <td colspan="{{ 10 + (isset($deductionTypes) ? $deductionTypes->count() : 0) }}" class="pr-empty-cell">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="pr-empty-icon"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <p class="pr-empty-title">No payroll records for this selection</p>
+                    <p class="pr-empty-sub">Widen the date range or clear a filter, or use <strong>Generate Payroll</strong> to process this period.</p>
+                </td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 </div>
@@ -172,22 +206,26 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
 </div>
 
 <!-- Deductions Modal -->
-<div id="deductionsModal" class="adm-overlay" onclick="closeDeductionsModal()">
+<div id="deductionsModal" class="adm-overlay" onclick="closeDeductionsModal()"
+     role="dialog" aria-modal="true" aria-labelledby="deductionsModalTitle">
     <div class="adm-box pr-modal-md" onclick="event.stopPropagation()">
         <div class="adm-header pr-header-red">
             <div class="adm-header-left">
                 <div class="vdm-avatar pr-header-icon-frost">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="8" y1="12" x2="16" y2="12"/>
                     </svg>
                 </div>
                 <div>
                     <span class="adm-eyebrow">PAYROLL DEDUCTIONS</span>
-                    <h3 class="adm-title">Deduction Breakdown</h3>
+                    <h3 class="adm-title" id="deductionsModalTitle">Deduction Breakdown</h3>
+                    {{-- Filled per row. The modal is opened from one employee's
+                         line but never said whose it was. --}}
+                    <p class="pr-modal-who" id="deductionsModalWho"></p>
                 </div>
             </div>
-            <button class="adm-close pr-close-frost" onclick="closeDeductionsModal()">
+            <button class="adm-close pr-close-frost" onclick="closeDeductionsModal()" aria-label="Close">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>

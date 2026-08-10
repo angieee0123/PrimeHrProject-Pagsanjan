@@ -102,3 +102,40 @@
     border: 1.5px solid var(--theme-neutral-200);
     border-radius: 8px;
 }
+
+/* ── "Add New Training" hero icon ──────────────────────────────────
+   The header keeps its original layout — icon in the left gutter, eyebrow,
+   title and sub-line beside it. The one thing that was actually broken is
+   fixed here: the icon had no background.
+
+   `.permanent-training .training-hero-icon` in employee.css never matched,
+   because the training modals are @include-d after </main> and so are
+   siblings of <main class="permanent-training">, never its descendants. The
+   SVG inside is stroke="#fff", so it was a white drawing on an unpainted
+   box — a blank 48px square where the icon should be. Same declaration as
+   the dead rule intended, scoped by overlay id like the rest of this file. */
+#addTrainingModal .training-hero-icon {
+    background: linear-gradient(135deg, var(--gp-pri), var(--gp-pri-2));
+}
+
+/* ── Toolbar primary action ────────────────────────────────────────
+   "Add New Training" was .modal-btn-primary — a *modal footer* class, on a
+   toolbar button, sitting beside an oblong "Export to PDS". Modal buttons
+   are deliberately rounded rectangles; toolbar actions are pills. It now
+   uses the same .btn-export pill as its neighbour and only takes over the
+   colours, matching how pass slips and travel orders do it.
+
+   Both selectors name .btn-export as well: `.glass-shell .btn-export` is
+   (0,2,0) and would otherwise repaint this translucent white, leaving a
+   white label on a white pill. */
+.permanent-training .tr-btn-primary-solid.btn-export {
+    background: var(--gp-pri);
+    color: #fff;
+    border-color: var(--gp-pri);
+}
+.permanent-training .tr-btn-primary-solid.btn-export:hover {
+    background: var(--gp-pri-2);
+    color: #fff;
+    border-color: var(--gp-pri-2);
+    transform: translateY(-1px);
+}
