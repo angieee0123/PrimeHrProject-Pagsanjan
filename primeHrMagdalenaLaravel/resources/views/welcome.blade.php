@@ -19,7 +19,6 @@
 
     $c        = SiteContentService::all();
     $stats    = SiteContentService::liveStats();
-    $govbar   = $c['govbar'];
     $brand    = $c['brand'];
     $hero     = $c['hero'];
     $services = $c['services'];
@@ -48,30 +47,11 @@
 
 <div class="pub-root">
 
-    {{-- Gov Bar --}}
-    <div class="pub-govbar">
-        <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px">
-                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
-            </svg>
-            {{ $govbar['left'] }}
-        </span>
-        <span>{{ $govbar['right'] }}</span>
-    </div>
+    <x-public-govbar />
 
     {{-- Navbar --}}
     <nav class="pub-nav">
-        <div class="pub-logo">
-            <div class="pub-logo-seal">
-                <img src="{{ $logo }}" alt="Pagsanjan Logo"
-                     onerror="this.style.display='none'"
-                     style="width:36px;height:36px;border-radius:50%;object-fit:cover">
-            </div>
-            <div>
-                <span class="pub-logo-name">{{ $brand['name'] }}</span>
-                <span class="pub-logo-sub">{{ $brand['sub'] }}</span>
-            </div>
-        </div>
+        <x-public-brand />
         <div class="pub-nav-links">
             @foreach($brand['nav_links'] as $link)
                 <a href="{{ $link['anchor'] }}">{{ $link['label'] }}</a>
@@ -417,29 +397,7 @@
         </div>
     </section>
 
-    {{-- Footer --}}
-    <footer class="pub-footer">
-        <div class="pub-footer-inner">
-            <div class="pub-footer-brand">
-                <div class="pub-logo-seal sm">
-                    <img src="{{ $logo }}" alt="Pagsanjan Logo"
-                         onerror="this.style.display='none'"
-                         style="width:28px;height:28px;border-radius:50%;object-fit:cover">
-                </div>
-                <div>
-                    <span class="pub-footer-name">{{ $footer['name'] }}</span>
-                    <span class="pub-footer-sub">{{ $footer['sub'] }}</span>
-                </div>
-            </div>
-            <div class="pub-footer-links">
-                @foreach($footer['links'] as $link)
-                    <a href="{{ $link['anchor'] }}">{{ $link['label'] }}</a>
-                @endforeach
-            </div>
-            {{-- The year is rendered, not stored: the literal was "© 2025". --}}
-            <p class="pub-footer-copy">&copy; {{ date('Y') }} {{ $footer['copyright'] }}</p>
-        </div>
-    </footer>
+    <x-public-footer :links="true" />
 
     {{-- AI Chatbot FAB --}}
     <button class="chat-fab" id="chat-fab" onclick="toggleChat()" title="AI Assistant">

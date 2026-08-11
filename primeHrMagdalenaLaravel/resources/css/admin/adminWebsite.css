@@ -9,18 +9,152 @@
    follow the palette like the rest of the admin area.
 ══════════════════════════════════════════════════════════════════ */
 
-.wc-container {
+/* Clearance for the chat and calendar FABs, which are fixed to the
+   bottom-right. Without it, scrolling to the end of a long panel parks
+   "Save changes" underneath them — the two overlap by ~31px at 1500px wide,
+   and the button is the one thing on this page that must stay clickable. */
+.wc-root { padding-bottom: 96px; }
+
+/* ══ Overview — the landing state ═══════════════════════════════════
+   Cards, not a form. Landing straight in a twenty-field panel meant
+   recognising the section you wanted from ten abstract names while already
+   looking at somebody else's form; this asks the question first. */
+/* A header row: instruction left, status right. The two were one paragraph
+   capped at 68ch, which left a 555px ragged column of text under a 1204px
+   heading — and wrapped "goes live straight / away." mid-sentence. */
+.wc-overview-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 26px;
+    /* The notification bell is fixed to the top-right of the page; without
+       this the status block sits underneath it. */
+    padding-right: 64px;
+}
+.wc-overview-intro { min-width: 0; }
+.wc-overview-title { margin: 0 0 5px; font-size: 20px; font-weight: 700; color: var(--gp-pri); }
+.wc-overview-sub { margin: 0; font-size: 13px; line-height: 1.55; color: var(--gp-text-mid); }
+
+.wc-overview-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border: 1px solid var(--gp-bg-tint-2);
+    border-radius: 12px;
+    background: #fff;
+}
+.wc-overview-stat.is-edited { border-color: var(--theme-warning-border); background: var(--theme-warning-subtle); }
+.wc-overview-stat-value { font-size: 19px; font-weight: 800; line-height: 1.15; color: var(--gp-text-soft); }
+.wc-overview-stat.is-edited .wc-overview-stat-value { color: var(--theme-warning-emphasis); }
+.wc-overview-stat-of { font-size: 13px; font-weight: 700; opacity: .6; }
+.wc-overview-stat-label { font-size: 10.5px; font-weight: 600; color: var(--gp-text-soft); white-space: nowrap; }
+
+@media (max-width: 700px) {
+    .wc-overview-head { flex-direction: column; padding-right: 0; }
+    .wc-overview-stat { align-items: flex-start; }
+}
+
+.wc-ov-group + .wc-ov-group { margin-top: 26px; }
+.wc-ov-group-head { margin-bottom: 12px; }
+.wc-ov-group-title { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: .9px; text-transform: uppercase; color: var(--gp-text-soft); }
+/* No max-width. These are single short sentences; capping them at 72ch
+   wrapped an 84-character caption onto two lines in a 1,200px column,
+   which is the same ragged-narrow-column problem the header had. Short
+   text never overruns its natural length, so there is nothing to cap. */
+.wc-ov-group-sub { margin: 4px 0 0; font-size: 12px; line-height: 1.55; color: var(--gp-text-soft); }
+
+.wc-ov-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+}
+
+.wc-ov-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    padding: 16px;
+    border: 1px solid var(--gp-bg-tint-2);
+    border-radius: 14px;
+    background: #fff;
+    font-family: 'Poppins', sans-serif;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .15s ease;
+}
+.wc-ov-card:hover {
+    border-color: var(--theme-primary-border);
+    box-shadow: 0 6px 18px rgba(var(--theme-shadow-rgb), .07);
+    transform: translateY(-1px);
+}
+.wc-ov-card:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
+.wc-ov-card:active { transform: translateY(0); }
+
+.wc-ov-card-icon {
+    display: flex;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: var(--theme-primary-light);
+    color: var(--gp-pri);
+}
+.wc-ov-card-icon svg { display: block; }
+
+.wc-ov-card-body { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.wc-ov-card-title { font-size: 13.5px; font-weight: 700; color: var(--gp-pri); }
+.wc-ov-card-blurb { font-size: 12px; line-height: 1.5; color: var(--gp-text-soft); }
+
+.wc-ov-card-state { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.wc-ov-badge {
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--theme-neutral-100);
+    color: var(--gp-text-soft);
+    font-size: 10.5px;
+    font-weight: 700;
+}
+.wc-ov-badge.is-edited { background: var(--theme-warning-subtle); color: var(--theme-warning-emphasis); }
+.wc-ov-when { font-size: 10.5px; color: var(--gp-text-soft); white-space: nowrap; }
+
+/* ══ Editor ═════════════════════════════════════════════════════════ */
+
+.wc-editor {
     display: grid;
     grid-template-columns: 260px minmax(0, 1fr);
     gap: 20px;
     align-items: start;
-    /* Clearance for the chat and calendar FABs, which are fixed to the
-       bottom-right. Without it, scrolling to the end of a long panel parks
-       "Save changes" underneath them — the two overlap by ~31px at 1500px
-       wide, and the button is the one thing on this page that must stay
-       clickable. */
-    padding-bottom: 96px;
 }
+.wc-editor[hidden] { display: none; }
+
+.wc-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--gp-text-mid);
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color .18s ease, color .18s ease, background .18s ease;
+}
+.wc-back:hover { border-color: var(--gp-pri); color: var(--gp-pri); background: var(--gp-bg-tint); }
+.wc-back:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
+.wc-back svg { flex-shrink: 0; }
+/* The rail carries the only one on wide screens; the panel keeps a copy for
+   narrow layouts, where the rail drops below the form. */
+.wc-back.is-inline { display: none; margin-bottom: 12px; }
 
 /* ── Section rail ───────────────────────────────────────────────── */
 
@@ -33,9 +167,7 @@
     top: 20px;
 }
 
-.wc-rail-head { padding: 0 6px 12px; border-bottom: 1px solid var(--gp-bg-tint-2); margin-bottom: 10px; }
-.wc-rail-title { margin: 0 0 3px; font-size: 13px; font-weight: 700; color: var(--gp-pri); }
-.wc-rail-sub { margin: 0; font-size: 11.5px; color: var(--gp-text-soft); line-height: 1.45; }
+.wc-rail > .wc-back { width: 100%; justify-content: center; margin-bottom: 14px; }
 
 .wc-nav { display: flex; flex-direction: column; gap: 2px; }
 
@@ -181,9 +313,10 @@
 }
 .wc-panel.active { display: block; }
 
-.wc-panel-head { padding-bottom: 16px; border-bottom: 1px solid var(--gp-bg-tint-2); margin-bottom: 18px; }
-.wc-panel-title { margin: 0 0 3px; font-size: 15px; font-weight: 700; color: var(--gp-pri); }
-.wc-panel-sub { margin: 0; font-size: 12px; color: var(--gp-text-soft); }
+.wc-panel-head { padding-bottom: 16px; border-bottom: 1px solid var(--gp-bg-tint-2); margin-bottom: 20px; }
+.wc-panel-title { margin: 0 0 4px; font-size: 17px; font-weight: 700; color: var(--gp-pri); }
+.wc-panel-blurb { margin: 0 0 6px; max-width: 68ch; font-size: 12.5px; line-height: 1.55; color: var(--gp-text-mid); }
+.wc-panel-sub { margin: 0; font-size: 11.5px; color: var(--gp-text-soft); }
 
 .wc-fields { display: flex; flex-direction: column; gap: 22px; }
 .wc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
@@ -470,31 +603,31 @@ details.wc-card > .wc-repeat.is-nested { margin: 14px; margin-top: 14px; }
 .wc-msg.is-ok  { color: var(--theme-success-emphasis); }
 .wc-msg.is-err { color: var(--theme-danger-emphasis); }
 
-/* Sticky: the Services panel is ~2,000px tall, so Save used to be two
-   screens below the field you had just edited. `padding-right` keeps the
-   buttons clear of the chat and calendar FABs fixed at the bottom-right. */
+/* A plain footer, not sticky. Sticky was added when the Services panel ran to
+   ~2,000px and Save sat two screens below the field you had just edited;
+   collapsing the categories cut that panel to ~700px, so the problem it solved
+   is gone. The FAB clearance lives on .wc-root instead, which is the
+   arrangement already verified not to trap the button under the chat and
+   calendar buttons. */
 .wc-actions {
-    position: sticky;
-    bottom: 0;
-    z-index: 2;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    margin: 22px -24px 0;
-    padding: 14px 24px;
-    padding-right: 96px;
+    margin-top: 22px;
+    padding-top: 18px;
     border-top: 1px solid var(--gp-bg-tint-2);
-    background: rgba(255, 255, 255, .92);
-    backdrop-filter: blur(8px) saturate(160%);
-    -webkit-backdrop-filter: blur(8px) saturate(160%);
-    border-radius: 0 0 16px 16px;
 }
 
 /* ── Responsive ─────────────────────────────────────────────────── */
 
 @media (max-width: 1100px) {
-    .wc-container { grid-template-columns: 1fr; }
-    .wc-rail { position: static; }
+    .wc-editor { grid-template-columns: 1fr; }
+    /* Form first, section switcher after it — on a narrow screen the rail
+       above the form is a wall you scroll past every time. */
+    .wc-rail { position: static; order: 2; }
+    .wc-panels { order: 1; }
+    .wc-rail > .wc-back { display: none; }
+    .wc-back.is-inline { display: inline-flex; }
     .wc-nav { flex-direction: row; flex-wrap: wrap; }
     .wc-nav-item { width: auto; }
 }

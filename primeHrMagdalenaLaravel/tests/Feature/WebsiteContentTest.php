@@ -49,6 +49,34 @@ class WebsiteContentTest extends TestCase
             $table->timestamps();
         });
 
+        // Touched while rendering a public page: the theme block, and the two
+        // hero counts SiteContentService reads from the HR tables.
+        Schema::create('system_ai_settings', function (Blueprint $t) {
+            $t->id();
+            $t->string('provider')->nullable(); $t->text('api_key')->nullable(); $t->string('model')->nullable();
+            $t->string('theme')->default('default');
+            $t->string('custom_theme_primary', 7)->nullable(); $t->string('theme_secondary', 7)->nullable();
+            $t->string('theme_accent', 7)->nullable(); $t->string('theme_muted', 7)->nullable();
+            $t->string('sidebar_style')->nullable(); $t->string('topbar_style')->nullable();
+            $t->timestamps();
+        });
+        Schema::create('user_theme_settings', function (Blueprint $t) {
+            $t->id(); $t->unsignedBigInteger('user_id');
+            $t->string('theme')->default('default');
+            $t->string('custom_theme_primary', 7)->nullable(); $t->string('theme_secondary', 7)->nullable();
+            $t->string('theme_accent', 7)->nullable(); $t->string('theme_muted', 7)->nullable();
+            $t->string('sidebar_style')->nullable(); $t->string('topbar_style')->nullable();
+            $t->timestamps();
+        });
+        Schema::create('employees', function (Blueprint $t) {
+            $t->id(); $t->unsignedBigInteger('user_id')->nullable();
+            $t->string('employee_id')->nullable(); $t->string('first_name')->nullable();
+            $t->string('last_name')->nullable(); $t->string('photo')->nullable();
+        });
+        Schema::create('departments', function (Blueprint $t) {
+            $t->id(); $t->string('name')->nullable();
+        });
+
         SiteContentService::flushCache();
     }
 
@@ -162,6 +190,27 @@ class WebsiteContentTest extends TestCase
             array_values($expected),
             $grouped,
             'a section has defaults but no rail entry, so nobody can edit it',
+        );
+    }
+
+    #[Test]
+    public function every_section_has_a_plain_english_blurb(): void
+    {
+        // The overview shows one card per section, and the card is useless
+        // without the sentence saying which part of the page it is.
+        foreach (array_keys(SiteContentService::sections()) as $key) {
+            $this->assertArrayHasKey(
+                $key,
+                SiteContentService::SECTION_BLURBS,
+                "'$key' has no blurb, so its overview card would be a bare title",
+            );
+            $this->assertNotSame('', trim(SiteContentService::SECTION_BLURBS[$key]));
+        }
+
+        $this->assertEqualsCanonicalizing(
+            array_keys(SiteContentService::sections()),
+            array_keys(SiteContentService::SECTION_BLURBS),
+            'a blurb exists for a section that is not in the rail',
         );
     }
 
@@ -335,6 +384,47 @@ class WebsiteContentTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee(SiteContentService::defaults()['hero']['title_highlight']);
+    }
+
+    // ── Shared chrome across every public page ──────────────────────
+
+    #[Test]
+    public function the_shared_header_and_footer_follow_an_edit_on_every_public_page(): void
+    {
+        // The gov bar, the brand block and the footer were hard-coded four
+        // times over. Editing them changed the welcome page only, so the
+        // sign-in screens kept the old municipality name and "© 2025".
+        SiteContentService::put('govbar', ['left' => 'GOVBAR-LEFT-X', 'right' => 'GOVBAR-RIGHT-X']);
+        SiteContentService::put('brand', ['name' => 'BRAND-NAME-X', 'sub' => 'BRAND-SUB-X']);
+        SiteContentService::put('footer', [
+            'name' => 'FOOTER-NAME-X', 'sub' => 'FOOTER-SUB-X', 'copyright' => 'COPYRIGHT-X',
+        ]);
+        SiteContentService::flushCache();
+
+        $probes = [
+            'GOVBAR-LEFT-X', 'GOVBAR-RIGHT-X',
+            'BRAND-NAME-X', 'BRAND-SUB-X',
+            'FOOTER-NAME-X', 'FOOTER-SUB-X', 'COPYRIGHT-X',
+        ];
+
+        $pages = [
+            'welcome'         => $this->get('/')->assertOk()->getContent(),
+            'login'           => $this->get('/login')->assertOk()->getContent(),
+            'forgot-password' => $this->get('/password/forgot')->assertOk()->getContent(),
+            // Reached only mid-login, so a plain GET redirects; the view is
+            // rendered directly to exercise the same components.
+            'select-role'     => view('user.select-role', [
+                'options' => [['role' => 'admin'], ['role' => 'hr']],
+            ])->render(),
+        ];
+
+        foreach ($pages as $name => $html) {
+            foreach ($probes as $probe) {
+                $this->assertStringContainsString($probe, $html, "$name did not pick up $probe");
+            }
+            // The year is rendered, never stored — all four said "© 2025".
+            $this->assertStringContainsString('&copy; ' . date('Y'), $html, "$name is not rendering the current year");
+        }
     }
 
     // ── Logo ────────────────────────────────────────────────────────

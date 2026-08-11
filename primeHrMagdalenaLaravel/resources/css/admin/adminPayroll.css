@@ -165,10 +165,6 @@
 .adm-btn-primary:active { transform: translateY(0); }
 
 /* ══════════ payroll-register.blade.php — deductions breakdown modal ══════════ */
-@media screen and (max-width: 1920px) {
-    .deduction-col-hide { display: none !important; }
-    .deduction-col-show { display: table-cell !important; }
-}
 .btn-deductions-modal { background: var(--theme-primary-light); border: 1px solid var(--theme-primary-border); border-radius: 8px; padding: 6px 10px; cursor: pointer; color: var(--gp-pri); transition: background .2s, border-color .2s, transform .15s ease; }
 .btn-deductions-modal:hover { background: var(--theme-primary-muted); border-color: var(--gp-pri); }
 .btn-deductions-modal:active { transform: scale(.94); }
@@ -536,4 +532,174 @@
     .signature-name { font-size: 10px; font-weight: 600; color: #000; margin: 0 0 3px 0; }
     .signature-date { font-size: 8px; color: #000; margin: 0; }
     @page { margin: 15mm; size: A4 portrait; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Payroll Register — totals row
+   ══════════════════════════════════════════════════════════════════
+   The register closes with the totals a printed one is expected to
+   carry. The grouped two-tier header that used to sit above this block
+   is gone: the table is seven columns now, so there is nothing left to
+   group, and its sticky offsets left the column names floating 30px
+   down over the first record. */
+.pr-totals td {
+    padding: 13px 16px;
+    background: var(--gp-bg-tint);
+    border-top: 2px solid var(--gp-accent-gold);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gp-pri);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.pr-totals-label {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--gp-text-mid);
+}
+.pr-totals-count {
+    margin-left: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--gp-text-soft);
+}
+.pr-totals-strong { font-size: 13.5px; font-weight: 800; }
+.pr-totals-strong.is-net { color: var(--theme-success-emphasis); }
+.payroll-register-table tfoot tr:hover { background: transparent; }
+
+/* ══════════════════════════════════════════════════════════════════
+   Payroll Register — expandable rows
+   ══════════════════════════════════════════════════════════════════
+   Seven columns instead of twelve. The breakdown lives under the record
+   it belongs to rather than beside it, so nothing is hidden by viewport
+   width and no dialog is needed to reach a figure. */
+
+.pr-sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.pr-w-toggle { width: 44px; }
+.pr-w-12 { width: 12%; }
+.pr-w-13 { width: 13%; }
+.pr-w-14 { width: 14%; }
+.pr-w-16 { width: 16%; }
+.pr-w-24 { width: 24%; }
+
+.payroll-register-table .pr-toggle-cell { padding-left: 16px; padding-right: 0; }
+
+.pr-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--gp-text-soft);
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+.pr-toggle:hover { background: var(--theme-primary-light); border-color: var(--theme-primary-border); color: var(--gp-pri); }
+.pr-toggle:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
+.pr-toggle svg { transition: transform .18s ease; }
+.pr-row.is-open .pr-toggle { background: var(--gp-pri); border-color: var(--gp-pri); color: #fff; }
+.pr-row.is-open .pr-toggle svg { transform: rotate(90deg); }
+
+/* An open record and its breakdown read as one block: the record loses its
+   bottom rule so the two are not separated by a line the eye reads as an end. */
+.payroll-register-table tbody tr.pr-row.is-open > td { border-bottom-color: transparent; background: var(--theme-primary-light); }
+
+/* ── The breakdown ── */
+.pr-detail-row > .pr-detail-cell {
+    padding: 0 16px 16px 60px;
+    background: var(--theme-primary-light);
+    border-bottom: 1px solid var(--gp-border);
+}
+
+.pr-detail {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(200px, .8fr);
+    gap: 16px;
+    padding: 16px 18px;
+    border: 1px solid var(--theme-primary-border);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.pr-detail-title {
+    margin: 0 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--gp-bg-tint-2);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.pr-detail-title.is-earnings { color: var(--theme-success-emphasis); }
+.pr-detail-title.is-deductions { color: var(--theme-danger-emphasis); }
+
+.pr-detail-list { margin: 0; display: flex; flex-direction: column; gap: 7px; }
+.pr-detail-list > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.pr-detail-list dt { font-size: 12.5px; color: var(--gp-text-mid); }
+.pr-detail-list dd {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gp-pri);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+/* A ₱0.00 recedes rather than shouting — in a breakdown most lines are zero,
+   and the ones that are not are the whole point of opening it. */
+.pr-detail-list dd.is-nil { color: var(--gp-text-soft); font-weight: 500; opacity: .6; }
+.pr-detail-list dd.is-charge { color: var(--gp-bad); }
+.pr-detail-list dd.is-positive { color: var(--theme-success-emphasis); }
+
+.pr-detail-list > div.is-sum {
+    margin-top: 3px;
+    padding-top: 8px;
+    border-top: 1px solid var(--gp-bg-tint-2);
+}
+.pr-detail-list > div.is-sum dt { font-weight: 700; color: var(--gp-pri); }
+.pr-detail-list > div.is-sum dd { font-weight: 800; }
+
+/* The figure the two columns resolve to. */
+.pr-detail-net {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: var(--theme-success-subtle);
+    border: 1px solid var(--theme-success-border);
+}
+.pr-detail-net-label { font-size: 10.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--theme-success-emphasis); }
+.pr-detail-net-value { font-size: 22px; font-weight: 800; color: var(--theme-success-emphasis); font-variant-numeric: tabular-nums; }
+.pr-detail-net-value.is-negative { color: var(--theme-danger-emphasis); }
+.pr-detail-net-sub { font-size: 11.5px; color: var(--gp-text-mid); }
+/* A net below zero is not good news, so the panel drops the success colour. */
+.pr-detail-net:has(.is-negative) { background: var(--theme-danger-subtle); border-color: var(--theme-danger-border); }
+.pr-detail-net:has(.is-negative) .pr-detail-net-label { color: var(--theme-danger-emphasis); }
+
+/* Expand-all mirrors the row toggles. */
+[data-role="expand-all"] svg { transition: transform .18s ease; }
+[data-role="expand-all"].is-open svg { transform: rotate(180deg); }
+
+@media (max-width: 900px) {
+    .pr-detail { grid-template-columns: 1fr; }
+    .pr-detail-row > .pr-detail-cell { padding-left: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pr-toggle svg,
+    [data-role="expand-all"] svg { transition: none; }
 }

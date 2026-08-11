@@ -44,6 +44,7 @@ class WebsiteContentController extends Controller
             'defaults'   => SiteContentService::defaults(),
             'groups'     => SiteContentService::SECTION_GROUPS,
             'sections'   => SiteContentService::sections(),
+            'blurbs'     => SiteContentService::SECTION_BLURBS,
             'icons'      => SiteContentService::ICONS,
             'chipIcons'  => SiteContentService::CHIP_ICONS,
             'tags'       => SiteContentService::ANNOUNCEMENT_TAGS,

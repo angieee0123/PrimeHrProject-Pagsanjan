@@ -79,6 +79,27 @@ class SiteContentService
         return array_merge(...array_values(self::SECTION_GROUPS));
     }
 
+    /**
+     * What each section is, in terms of the page rather than the code.
+     *
+     * The section names are the editor's vocabulary, not the visitor's: an
+     * administrator looking to change a phone number does not think "gov bar"
+     * or "hero". These sentences are what the overview screen shows on each
+     * card so the right one can be picked without opening four of them.
+     */
+    public const SECTION_BLURBS = [
+        'announcements' => 'Advisories, events and notices. The newest one is featured.',
+        'contact'       => 'Address, phone, email and office hours.',
+        'hero'          => 'The big banner at the very top, with the headline and statistics.',
+        'about'         => 'The municipal profile, vision and mission.',
+        'govbar'        => 'The thin strip above everything, naming the Republic and Province.',
+        'brand'         => 'The municipal seal, the name beside it, and the menu links.',
+        'services'      => 'The tabbed list of services residents can request.',
+        'cta'           => 'The panel inviting employees into PRIME HRIS.',
+        'footer'        => 'The bottom strip: links and the copyright line.',
+        'chatbot'       => 'The wording of the chat assistant in the corner.',
+    ];
+
     /** The only icons a service row may name. Keys match $svgs in the Blade. */
     public const ICONS = ['building', 'clipboard', 'heart', 'users', 'leaf', 'tool'];
 

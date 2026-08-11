@@ -27,15 +27,64 @@ editors.forEach((root) => {
     const updateUrl = root.dataset.updateUrl;
     const csrf = root.dataset.csrf;
 
-    // ── section rail ────────────────────────────────────────────────
-    root.querySelectorAll('.wc-nav-item').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            root.querySelectorAll('.wc-nav-item').forEach((b) => b.classList.remove('active'));
-            root.querySelectorAll('.wc-panel').forEach((p) => p.classList.remove('active'));
-            btn.classList.add('active');
-            root.querySelector(`.wc-panel[data-panel="${btn.dataset.target}"]`)?.classList.add('active');
-        });
+    // ── overview ⇄ editor ───────────────────────────────────────────
+    /*
+        Two states rather than one crowded screen. The overview is where you
+        land: ten cards saying which part of the page each section is. Picking
+        one swaps in that section's form.
+
+        The chosen section goes in the URL hash, so a refresh — or the reload
+        after "Reset to original" — puts you back where you were instead of
+        dropping you at the overview with your place lost.
+    */
+    const overview = root.querySelector('[data-overview]');
+    const editor = root.querySelector('[data-editor]');
+
+    function openSection(key, { push = true } = {}) {
+        const panel = root.querySelector(`.wc-panel[data-panel="${key}"]`);
+        if (!panel) return false;
+
+        root.querySelectorAll('.wc-nav-item').forEach((b) => b.classList.toggle('active', b.dataset.target === key));
+        root.querySelectorAll('.wc-panel').forEach((p) => p.classList.remove('active'));
+        panel.classList.add('active');
+
+        overview.hidden = true;
+        editor.hidden = false;
+
+        if (push && location.hash !== `#${key}`) {
+            history.replaceState(null, '', `#${key}`);
+        }
+        // Land at the top of the form, not wherever the overview was scrolled.
+        panel.scrollIntoView({ block: 'start' });
+        return true;
+    }
+
+    function showOverview({ push = true } = {}) {
+        editor.hidden = true;
+        overview.hidden = false;
+        if (push && location.hash) {
+            history.replaceState(null, '', location.pathname + location.search);
+        }
+        overview.scrollIntoView({ block: 'start' });
+    }
+
+    root.querySelectorAll('[data-open]').forEach((card) => {
+        card.addEventListener('click', () => openSection(card.dataset.open));
     });
+
+    root.querySelectorAll('[data-back]').forEach((btn) => {
+        btn.addEventListener('click', () => showOverview());
+    });
+
+    root.querySelectorAll('.wc-nav-item').forEach((btn) => {
+        btn.addEventListener('click', () => openSection(btn.dataset.target));
+    });
+
+    // Deep link: /admin/website#contact opens that section directly.
+    const initial = location.hash.replace('#', '');
+    if (!initial || !openSection(initial, { push: false })) {
+        showOverview({ push: false });
+    }
 
     // ── repeaters ───────────────────────────────────────────────────
 

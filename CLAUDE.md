@@ -545,6 +545,26 @@ carried June 2025 announcements, a hard-coded `© 2025`, and hero figures of
   shown as `0` — "0 Government Personnel" on the municipality's homepage is
   worse than one fewer statistic.
 
+### You choose before you edit
+
+The editor has two states and never shows both. **Overview** is the landing
+screen: one card per section, each carrying a `SECTION_BLURBS` sentence saying
+which part of the site it is ("the thin strip above everything", "the big
+banner at the very top") plus an Edited/Original badge. **Editor** is one
+section's form, with the rail alongside for hopping between sections.
+
+Landing straight in a twenty-field form was what made this overwhelming — you
+had to recognise the section you wanted from ten abstract names *while* looking
+at somebody else's form. The section names are the editor's vocabulary, not the
+visitor's; the blurbs are what let somebody find "where the phone number lives"
+without opening four panels.
+
+The chosen section lives in the URL hash, so `/admin/website#contact` deep-links
+and a refresh — including the reload after "Reset to original" — keeps your
+place. An unrecognised hash falls back to the overview rather than a blank
+screen. `WebsiteContentTest` asserts every section has a blurb and that no blurb
+exists for a section that is not in the rail.
+
 ### The rail is split by *why* something changes
 
 `SECTION_GROUPS` is the source of truth for the editor's navigation, and
@@ -588,6 +608,30 @@ the hidden sidebar row is tidiness, not the permission.
 Note `x-public-icon` is a **component**, not an `@include`: variables defined
 inside an include do not escape back to the including view, and the first
 version of this 500'd the homepage for exactly that reason.
+
+### The sign-in screens share the welcome page's chrome
+
+The gov bar, the navbar brand block and the footer were the *same markup*
+pasted into four files — `welcome`, `login`, `forgot-password`, `select-role`.
+Only the welcome copy read from `SiteContentService`, so renaming the
+municipality changed the homepage and left the three sign-in screens saying
+whatever it used to be, under a hard-coded `© 2025`.
+
+They are now three components — `x-public-govbar`, `x-public-brand`,
+`x-public-footer` — each reading the section it renders. `x-public-footer`
+takes `:links` because the welcome page carries the Privacy / Terms / Sitemap
+row and the auth screens do not; that is the only difference between them.
+The year is rendered from `date('Y')`, never stored.
+
+`WebsiteContentTest` saves a sentinel into `govbar`, `brand` and `footer` and
+asserts all four pages render it, so a fifth public page cannot quietly paste
+the strings again.
+
+The **compliance tag rows are deliberately not shared**. They look alike but
+say different things: the hero advertises BIR / GSIS / CSC / ARTA, login adds
+RA 10173 (Data Privacy Act), and forgot-password's are about recovery
+("Secure Recovery", "Encrypted"). Wiring them to one list would silently drop
+the privacy claim from the sign-in form.
 
 ### The municipal seal is uploadable
 

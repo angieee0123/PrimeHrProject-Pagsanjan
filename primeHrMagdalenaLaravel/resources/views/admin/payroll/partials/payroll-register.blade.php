@@ -19,6 +19,28 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
         $deductionTypeNames[$dt->code] = $dt->name;
     }
 }
+
+/*
+    Column totals for the footer row.
+
+    A payroll register without a totals line is not a register — the summary
+    bar above carries gross / deductions / net, but nothing tied each column
+    to a figure you could check a printout against. Computed here rather than
+    inside the loop so the row cannot disagree with the cells above it.
+*/
+$colTotals = ['gross' => 0.0, 'deduction' => 0.0, 'net' => 0.0];
+
+foreach ($payrollRecords as $r) {
+    $rowDeductions = $r['late_deduction'] + $r['undertime_deduction'];
+    foreach (($deductionTypes ?? []) as $code) {
+        $rowDeductions += $r['deductions'][$code] ?? 0;
+    }
+
+    $gross = $r['basic'] + $r['ot_pay'];
+    $colTotals['gross']     += $gross;
+    $colTotals['deduction'] += $rowDeductions;
+    $colTotals['net']       += $gross - $rowDeductions;
+}
 @endphp
 
 <div class="table-header">
@@ -26,6 +48,14 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
         <h3 class="table-title">Payroll Register — {{ $periodDisplay }}</h3>
         <p class="table-sub">Municipal Government of Pagsanjan · Pay Date: {{ date('M d, Y', strtotime($endDateDisplay)) }} · {{ $payrollRecords->count() }} records</p>
     </div>
+    @if($payrollRecords->count())
+    <div class="table-actions">
+        <button type="button" class="btn-export" data-role="expand-all" aria-expanded="false">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            <span data-label>Expand all</span>
+        </button>
+    </div>
+    @endif
 </div>
 
 <div class="payroll-summary-bar pr-summary-bar-tight">
@@ -56,30 +86,32 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
 </div>
 
 <div class="table-wrapper">
-    <table class="payroll-table payroll-register-table">
+    {{--
+        Seven columns, not twelve.
+
+        The register used to carry every earning and every contribution side by
+        side, which is why it needed a `deduction-col-hide` / `-show` swap at
+        1920px and a modal to reach the figures that swap took away. That whole
+        mechanism existed only because the table was too wide to fit.
+
+        The row now answers what a register is usually opened for — who, when,
+        gross, deductions, net — and the working behind those figures unfolds
+        under the row that owns it. Nothing depends on viewport width any more.
+    --}}
+    <table class="payroll-table payroll-register-table is-expandable">
         <thead>
             <tr>
-                <th class="pr-w-20">Employee</th>
-                <th class="pr-w-13">Department</th>
+                <th class="pr-w-toggle"><span class="pr-sr-only">Expand</span></th>
+                <th class="pr-w-24">Employee</th>
+                <th class="pr-w-16">Department</th>
                 @if($viewMode === 'daily')
-                    <th class="pr-w-10 pr-th-center">Date</th>
-                    <th class="pr-w-8 pr-th-right">Rate</th>
+                    <th class="pr-w-12 pr-th-center">Date</th>
                 @else
-                    <th class="pr-w-8 pr-th-center">Days</th>
-                    <th class="pr-w-8 pr-th-right">Rate</th>
+                    <th class="pr-w-12 pr-th-center">Days</th>
                 @endif
-                <th class="pr-w-9 pr-th-right">Basic</th>
-                <th class="pr-w-7 pr-th-right">OT</th>
-                <th class="pr-w-7 pr-th-right">Late</th>
-                <th class="pr-w-7 pr-th-right">UT</th>
-                @if(isset($deductionTypes) && $deductionTypes->isNotEmpty())
-                    @foreach($deductionTypes as $code)
-                        <th class="deduction-col-hide pr-w-7 pr-th-right">{{ $deductionTypeNames[$code] ?? $code }}</th>
-                    @endforeach
-                @endif
-                <th class="deduction-col-show pr-hidden pr-w-5 pr-th-center">Ded.</th>
-                <th class="pr-w-9 pr-th-right">Total Ded.</th>
-                <th class="pr-w-10 pr-th-right">Net Pay</th>
+                <th class="pr-w-13 pr-th-right">Gross</th>
+                <th class="pr-w-13 pr-th-right">Deductions</th>
+                <th class="pr-w-14 pr-th-right">Net Pay</th>
             </tr>
         </thead>
         <tbody id="payrollRegisterBody">
@@ -90,18 +122,26 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
                 $lateDeduction = $record['late_deduction'];
                 $undertimeDeduction = $record['undertime_deduction'];
                 $grossPay = $basicPay + $otPay;
-                
-                // Calculate total deductions from all sources
+
                 $totalDeductionsRow = $lateDeduction + $undertimeDeduction;
                 if (isset($record['deductions'])) {
                     foreach ($record['deductions'] as $deductionAmount) {
                         $totalDeductionsRow += $deductionAmount;
                     }
                 }
-                
+
                 $netPay = $grossPay - $totalDeductionsRow;
+                $rowKey = 'prrow' . $index;
             @endphp
-            <tr data-name="{{ $record['name'] }}" data-id="{{ $record['id'] }}" data-dept="{{ $record['dept'] }}" data-status="{{ $record['status'] }}">
+            <tr data-name="{{ $record['name'] }}" data-id="{{ $record['id'] }}" data-dept="{{ $record['dept'] }}"
+                data-status="{{ $record['status'] }}" data-row-key="{{ $rowKey }}" class="pr-row">
+                <td class="pr-toggle-cell">
+                    <button type="button" class="pr-toggle" data-toggle-row="{{ $rowKey }}"
+                            aria-expanded="false" aria-controls="{{ $rowKey }}-detail"
+                            aria-label="Show the breakdown for {{ $record['name'] }}">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </td>
                 <td>
                     <div class="emp-cell">
                         @if($record['photo'] ?? false)
@@ -120,68 +160,66 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
                 <td><span class="dept-tag">{{ $record['dept'] }}</span></td>
                 @if($viewMode === 'daily')
                     <td class="work-date pr-th-center">{{ date('M d, Y', strtotime($record['work_date'])) }}</td>
-                    <td class="daily-rate pr-th-right">{{ peso($record['daily_rate']) }}</td>
                 @else
                     <td class="pr-th-center"><span class="days-count">{{ $record['days_count'] }}</span></td>
-                    <td class="daily-rate pr-th-right">{{ peso($record['daily_rate']) }}</td>
                 @endif
-                <td class="pay-cell pr-th-right">{{ peso($basicPay) }}</td>
-                <td class="ot-pay pr-th-right {{ $otPay > 0 ? '' : 'pr-zero' }}">{{ peso($otPay) }}</td>
-                {{-- A ₱0.00 in alarm red reads as a deduction that is not there.
-                     Only a charge that was actually made is coloured; the zeros
-                     recede so a scan down the column finds the real ones. --}}
-                <td class="pr-th-right {{ $lateDeduction > 0 ? 'deduction' : 'pr-zero' }}">{{ peso($lateDeduction) }}</td>
-                <td class="pr-th-right {{ $undertimeDeduction > 0 ? 'deduction' : 'pr-zero' }}">{{ peso($undertimeDeduction) }}</td>
-                @if(isset($deductionTypes) && $deductionTypes->isNotEmpty())
-                    @foreach($deductionTypes as $code)
-                        @php $dedAmount = $record['deductions'][$code] ?? 0; @endphp
-                        <td class="deduction-col-hide pr-th-right {{ $dedAmount > 0 ? 'deduction' : 'pr-zero' }}">{{ peso($dedAmount) }}</td>
-                    @endforeach
-                @endif
-                <td class="deduction-col-show pr-hidden pr-th-center">
-                    <button class="btn-deductions-modal" onclick="showDeductionsModal({{ $index }})"
-                            title="View deduction breakdown"
-                            aria-label="View deduction breakdown for {{ $record['name'] }}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
-                    </button>
-                    {{-- The modal used to total only the rows below, while the
-                         "Total Ded." badge beside it also counts late and
-                         undertime — two different numbers under the same
-                         "Total Deductions" label. Late/UT are carried here so
-                         the breakdown adds up to the badge it was opened from,
-                         along with who and when, which the modal never said. --}}
-                    <div class="deductions-data pr-hidden" data-index="{{ $index }}"
-                         data-employee="{{ $record['name'] }}"
-                         data-employee-id="{{ $record['id'] }}"
-                         data-period="{{ $viewMode === 'daily' ? date('M d, Y', strtotime($record['work_date'])) : $periodDisplay }}"
-                         data-total="{{ $totalDeductionsRow }}"
-                         data-net="{{ $netPay }}"
-                         data-gross="{{ $grossPay }}">
-                        <span data-type="Late" data-amount="{{ $lateDeduction }}" data-kind="time"></span>
-                        <span data-type="Undertime" data-amount="{{ $undertimeDeduction }}" data-kind="time"></span>
-                        @if(isset($deductionTypes) && $deductionTypes->isNotEmpty())
-                            @foreach($deductionTypes as $code)
-                                <span data-type="{{ $deductionTypeNames[$code] ?? $code }}" data-amount="{{ $record['deductions'][$code] ?? 0 }}" data-kind="contribution"></span>
-                            @endforeach
-                        @endif
-                    </div>
-                </td>
+                <td class="pay-cell pr-th-right">{{ peso($grossPay) }}</td>
                 <td class="pr-th-right">
                     <span class="badge-deduction {{ $totalDeductionsRow > 0 ? '' : 'is-nil' }}">{{ peso($totalDeductionsRow) }}</span>
                 </td>
                 <td class="pr-th-right">
-                    {{-- Same rule as the breakdown modal: a net below zero does
-                         not wear the success colour, and the sign goes outside
-                         the peso sign so "−₱145.45" does not read as "₱-145". --}}
+                    {{-- A net below zero does not wear the success colour, and
+                         the sign goes outside the peso sign so "−₱145.45" does
+                         not read as "₱-145". --}}
                     <span class="badge-netpay {{ $netPay < 0 ? 'is-negative' : '' }}">{{ ($netPay < 0 ? '−' : '') . peso(abs($netPay)) }}</span>
+                </td>
+            </tr>
+
+            {{-- The working behind the row above. Hidden until asked for, and
+                 kept in the same <tbody> so pagination can move the pair
+                 together. --}}
+            <tr class="pr-detail-row" id="{{ $rowKey }}-detail" data-detail-for="{{ $rowKey }}" hidden>
+                <td colspan="7" class="pr-detail-cell">
+                    <div class="pr-detail">
+                        <div class="pr-detail-block">
+                            <p class="pr-detail-title is-earnings">Earnings</p>
+                            <dl class="pr-detail-list">
+                                <div><dt>Daily rate</dt><dd>{{ peso($record['daily_rate']) }}</dd></div>
+                                @if($viewMode !== 'daily')
+                                    <div><dt>Days worked</dt><dd>{{ $record['days_count'] }}</dd></div>
+                                @endif
+                                <div><dt>Basic pay</dt><dd>{{ peso($basicPay) }}</dd></div>
+                                <div><dt>Overtime</dt><dd class="{{ $otPay > 0 ? 'is-positive' : 'is-nil' }}">{{ peso($otPay) }}</dd></div>
+                                <div class="is-sum"><dt>Gross</dt><dd>{{ peso($grossPay) }}</dd></div>
+                            </dl>
+                        </div>
+
+                        <div class="pr-detail-block">
+                            <p class="pr-detail-title is-deductions">Deductions</p>
+                            <dl class="pr-detail-list">
+                                <div><dt>Late</dt><dd class="{{ $lateDeduction > 0 ? 'is-charge' : 'is-nil' }}">{{ peso($lateDeduction) }}</dd></div>
+                                <div><dt>Undertime</dt><dd class="{{ $undertimeDeduction > 0 ? 'is-charge' : 'is-nil' }}">{{ peso($undertimeDeduction) }}</dd></div>
+                                @foreach(($deductionTypes ?? []) as $code)
+                                    @php $amount = $record['deductions'][$code] ?? 0; @endphp
+                                    <div><dt>{{ $deductionTypeNames[$code] ?? $code }}</dt><dd class="{{ $amount > 0 ? 'is-charge' : 'is-nil' }}">{{ peso($amount) }}</dd></div>
+                                @endforeach
+                                <div class="is-sum"><dt>Total</dt><dd class="is-charge">{{ peso($totalDeductionsRow) }}</dd></div>
+                            </dl>
+                        </div>
+
+                        <div class="pr-detail-net">
+                            <span class="pr-detail-net-label">Net pay</span>
+                            <strong class="pr-detail-net-value {{ $netPay < 0 ? 'is-negative' : '' }}">{{ ($netPay < 0 ? '−' : '') . peso(abs($netPay)) }}</strong>
+                            <span class="pr-detail-net-sub">{{ peso($grossPay) }} earned, less {{ peso($totalDeductionsRow) }} deducted</span>
+                        </div>
+                    </div>
                 </td>
             </tr>
             @empty
             {{-- The register is filter-driven, so an empty result is a normal
-                 outcome, not a fault. Without this the filters could leave a
-                 header row over nothing at all. --}}
+                 outcome, not a fault. --}}
             <tr>
-                <td colspan="{{ 10 + (isset($deductionTypes) ? $deductionTypes->count() : 0) }}" class="pr-empty-cell">
+                <td colspan="7" class="pr-empty-cell">
                     <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="pr-empty-icon"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     <p class="pr-empty-title">No payroll records for this selection</p>
                     <p class="pr-empty-sub">Widen the date range or clear a filter, or use <strong>Generate Payroll</strong> to process this period.</p>
@@ -189,6 +227,20 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
             </tr>
             @endforelse
         </tbody>
+
+        @if($payrollRecords->count())
+        <tfoot class="pr-totals">
+            <tr>
+                <td colspan="4" class="pr-totals-label">
+                    Totals
+                    <span class="pr-totals-count">{{ $payrollRecords->count() }} {{ Str::plural('record', $payrollRecords->count()) }}</span>
+                </td>
+                <td class="pr-th-right">{{ peso($colTotals['gross']) }}</td>
+                <td class="pr-th-right pr-totals-strong">{{ peso($colTotals['deduction']) }}</td>
+                <td class="pr-th-right pr-totals-strong is-net">{{ ($colTotals['net'] < 0 ? '−' : '') . peso(abs($colTotals['net'])) }}</td>
+            </tr>
+        </tfoot>
+        @endif
     </table>
 </div>
 
@@ -203,40 +255,6 @@ if (isset($deductionTypes) && $deductionTypes->isNotEmpty()) {
         </select>
     </div>
     <div class="pagination" id="payrollPaginationControls"></div>
-</div>
-
-<!-- Deductions Modal -->
-<div id="deductionsModal" class="adm-overlay" onclick="closeDeductionsModal()"
-     role="dialog" aria-modal="true" aria-labelledby="deductionsModalTitle">
-    <div class="adm-box pr-modal-md" onclick="event.stopPropagation()">
-        <div class="adm-header pr-header-red">
-            <div class="adm-header-left">
-                <div class="vdm-avatar pr-header-icon-frost">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="8" y1="12" x2="16" y2="12"/>
-                    </svg>
-                </div>
-                <div>
-                    <span class="adm-eyebrow">PAYROLL DEDUCTIONS</span>
-                    <h3 class="adm-title" id="deductionsModalTitle">Deduction Breakdown</h3>
-                    {{-- Filled per row. The modal is opened from one employee's
-                         line but never said whose it was. --}}
-                    <p class="pr-modal-who" id="deductionsModalWho"></p>
-                </div>
-            </div>
-            <button class="adm-close pr-close-frost" onclick="closeDeductionsModal()" aria-label="Close">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-        </div>
-        <div class="vdm-body pr-body-pad24" id="deductionsModalBody"></div>
-        <div class="adm-footer pr-footer-tint">
-            <button class="adm-btn-primary" onclick="closeDeductionsModal()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                Got it
-            </button>
-        </div>
-    </div>
 </div>
 
 @push('scripts')

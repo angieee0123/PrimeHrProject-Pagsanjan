@@ -17,30 +17,11 @@
 
 <div class="auth-root">
 
-    {{-- Gov Bar --}}
-    <div class="pub-govbar">
-        <span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px">
-                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
-            </svg>
-            Republic of the Philippines &nbsp;·&nbsp; Province of Laguna
-        </span>
-        <span>Official Website of the Municipal Government of Pagsanjan</span>
-    </div>
+    <x-public-govbar />
 
     {{-- Navbar --}}
     <nav class="pub-nav">
-        <div class="pub-logo">
-            <div class="pub-logo-seal">
-                <img src="{{ \App\Services\SiteContentService::logoUrl() }}" alt="Pagsanjan Logo"
-                     onerror="this.style.display='none'"
-                     style="width:36px;height:36px;border-radius:50%;object-fit:cover">
-            </div>
-            <div>
-                <span class="pub-logo-name">Pagsanjan, Laguna</span>
-                <span class="pub-logo-sub">Municipal Government</span>
-            </div>
-        </div>
+        <x-public-brand />
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="auth-nav-back" style="background:none;border:none;cursor:pointer;">
@@ -117,23 +98,7 @@
 
     </div>
 
-    {{-- Footer --}}
-    <footer class="pub-footer auth-footer">
-        <div class="pub-footer-inner">
-            <div class="pub-footer-brand">
-                <div class="pub-logo-seal sm">
-                    <img src="{{ \App\Services\SiteContentService::logoUrl() }}" alt="Pagsanjan Logo"
-                         onerror="this.style.display='none'"
-                         style="width:28px;height:28px;border-radius:50%;object-fit:cover">
-                </div>
-                <div>
-                    <span class="pub-footer-name">Municipal Government of Pagsanjan</span>
-                    <span class="pub-footer-sub">Province of Laguna · Republic of the Philippines</span>
-                </div>
-            </div>
-            <p class="pub-footer-copy">© 2025 Municipal Government of Pagsanjan, Laguna. All rights reserved.</p>
-        </div>
-    </footer>
+    <x-public-footer class="auth-footer" />
 
 </div>
 

@@ -26,8 +26,30 @@ window.updatePayrollPagination = function () {
     const start = (page - 1) * perPage;
     const end = Math.min(start + perPage, total);
 
-    document.querySelectorAll('#payrollRegisterBody tr[data-id]').forEach(row => row.style.display = 'none');
-    rows.forEach((row, i) => { if (i >= start && i < end) row.style.display = ''; });
+    /*
+        Each record is two rows: the record itself and the breakdown that
+        unfolds beneath it. They have to be paged together — hiding only
+        `tr[data-id]` would leave an expanded breakdown stranded on a page
+        whose record is no longer shown.
+    */
+    const detailOf = (row) => row.dataset.rowKey
+        ? document.querySelector(`.pr-detail-row[data-detail-for="${row.dataset.rowKey}"]`)
+        : null;
+
+    document.querySelectorAll('#payrollRegisterBody tr[data-id]').forEach(row => {
+        row.style.display = 'none';
+        const detail = detailOf(row);
+        if (detail) detail.style.display = 'none';
+    });
+
+    rows.forEach((row, i) => {
+        if (i < start || i >= end) return;
+        row.style.display = '';
+        const detail = detailOf(row);
+        // `hidden` stays the record of whether it is expanded; display only
+        // decides whether this page shows it at all.
+        if (detail) detail.style.display = '';
+    });
 
     document.getElementById('payrollRowStart').textContent = total ? start + 1 : 0;
     document.getElementById('payrollRowEnd').textContent = end;
