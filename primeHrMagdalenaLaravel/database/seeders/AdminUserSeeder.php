@@ -15,6 +15,8 @@ class AdminUserSeeder extends Seeder
             [
                 'name' => 'System Administrator',
                 'password' => Hash::make('asdf'),
+                'roles' => ['admin'],
+                'status' => 'Active',
             ]
         );
     }

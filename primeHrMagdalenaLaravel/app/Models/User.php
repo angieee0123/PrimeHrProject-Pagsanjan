@@ -61,11 +61,6 @@ class User extends Authenticatable
         return $this->hasOne(UserAiSetting::class);
     }
 
-    public function aiConversations()
-    {
-        return $this->hasMany(AiConversation::class);
-    }
-
     /**
      * Whether this user wants to receive the given notification category.
      * Opt-out model: a user with no preference row yet (the common case,
@@ -83,7 +78,7 @@ class User extends Authenticatable
      */
     public function hasRole(string $role): bool
     {
-        return in_array($role, $this->roles ?? [], true);
+        return in_array($role, $this->normalizedRoles(), true);
     }
 
     /**
@@ -91,7 +86,41 @@ class User extends Authenticatable
      */
     public function hasAnyRole(array $roles): bool
     {
-        return count(array_intersect($roles, $this->roles ?? [])) > 0;
+        return count(array_intersect($roles, $this->normalizedRoles())) > 0;
+    }
+
+    /**
+     * Roles from the current JSON column with a safe fallback to legacy `role`.
+     *
+     * @return array<int, string>
+     */
+    public function normalizedRoles(): array
+    {
+        $roles = $this->getAttribute('roles');
+
+        if (is_string($roles)) {
+            $decoded = json_decode($roles, true);
+            $roles = is_array($decoded) ? $decoded : [];
+        }
+
+        if (is_array($roles) && count($roles) > 0) {
+            return array_values(array_unique(array_filter(
+                $roles,
+                fn ($value) => is_string($value) && $value !== ''
+            )));
+        }
+
+        $legacyRole = $this->getAttribute('role');
+        if (is_string($legacyRole) && $legacyRole !== '') {
+            return [$legacyRole];
+        }
+
+        return [];
+    }
+
+    public function primaryRole(): ?string
+    {
+        return $this->normalizedRoles()[0] ?? null;
     }
 
     /**
@@ -116,7 +145,7 @@ class User extends Authenticatable
     {
         $routes = array_map(
             fn (string $role) => static::dashboardRouteForRole($role),
-            $this->roles ?? []
+            $this->normalizedRoles()
         );
 
         return array_values(array_unique(array_filter($routes)));

@@ -56,7 +56,7 @@ class AuthController extends Controller
             }
 
             if (count($dashboardRoutes) === 1) {
-                session(['active_role' => $user->roles[0] ?? null]);
+                session(['active_role' => $user->primaryRole()]);
                 return redirect()->route($dashboardRoutes[0]);
             }
 
@@ -93,7 +93,7 @@ class AuthController extends Controller
             return redirect()->route($dashboardRoutes[0] ?? 'employee.dashboard');
         }
 
-        $options = collect($user->roles ?? [])
+        $options = collect($user->normalizedRoles())
             ->unique()
             ->map(fn ($role) => ['role' => $role, 'route' => User::dashboardRouteForRole($role)])
             ->filter(fn ($option) => $option['route'] !== null)

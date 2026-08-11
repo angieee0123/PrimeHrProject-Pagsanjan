@@ -40,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
 
                 $activeRole = session('active_role');
                 if (!$activeRole || !$user->hasRole($activeRole)) {
-                    $activeRole = $user->roles[0] ?? 'employee';
+                    $activeRole = $user->primaryRole() ?? 'employee';
                 }
 
                 $userData = [
@@ -50,7 +50,7 @@ class AppServiceProvider extends ServiceProvider
                     'authInitials' => $employee ? strtoupper(substr($employee->first_name, 0, 1) . substr($employee->last_name, 0, 1)) : 'U',
                     'authEmployeeId' => $employee->employee_id ?? 'N/A',
                     'authRole' => ucfirst($activeRole),
-                    'authRoles' => $user->roles ?? [],
+                    'authRoles' => $user->normalizedRoles(),
                     // Permanent, Temporary, Coterminous, Casual, and Contractual all get the
                     // full leave-and-benefits experience; only Job Order does not.
                     'isPermanent' => $employmentStatus !== null && $employmentStatus !== 'Job Order',

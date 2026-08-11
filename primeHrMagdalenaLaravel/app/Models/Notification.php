@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class Notification extends Model
 {
@@ -24,6 +25,26 @@ class Notification extends Model
         'read_at' => 'datetime',
         'created_at' => 'datetime',
     ];
+
+    protected static ?bool $hasAudienceColumn = null;
+
+    protected static function booted()
+    {
+        static::saving(function (self $notification) {
+            if (!static::hasAudienceColumn()) {
+                unset($notification->attributes['audience']);
+            }
+        });
+    }
+
+    protected static function hasAudienceColumn(): bool
+    {
+        if (static::$hasAudienceColumn === null) {
+            static::$hasAudienceColumn = Schema::hasColumn('notifications', 'audience');
+        }
+
+        return static::$hasAudienceColumn;
+    }
 
     public function user()
     {
@@ -55,6 +76,10 @@ class Notification extends Model
 
     public function scopeForAdmin($query)
     {
+        if (!static::hasAudienceColumn()) {
+            return $query;
+        }
+
         return $query->whereIn('audience', ['admin', 'system']);
     }
 
@@ -64,6 +89,10 @@ class Notification extends Model
      */
     public function scopeForEmployee($query)
     {
+        if (!static::hasAudienceColumn()) {
+            return $query;
+        }
+
         return $query->whereIn('audience', ['employee', 'system']);
     }
 
