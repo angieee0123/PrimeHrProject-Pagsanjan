@@ -675,10 +675,10 @@
                 'X-CSRF-TOKEN': csrfToken,
                 Accept: 'application/json',
             },
-            body: JSON.stringify({
-                message: text,
-                conversation_id: activeConversationId,
-            }),
+            body: JSON.stringify(Object.assign(
+                { message: text },
+                activeConversationId != null ? { conversation_id: activeConversationId } : { reset: true }
+            )),
         })
             .then(function (r) { return r.json(); })
             .then(function (data) {

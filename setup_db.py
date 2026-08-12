@@ -5,11 +5,11 @@ import sys
 HOST = "localhost"
 USER = "root"
 PASSWORD = "admin"
-DATABASE = "primehrismagdalena"
+DATABASE = "primehris"
 
 SQL_FOLDER = os.path.join(os.path.dirname(__file__), "database")
 LARAVEL_APP_DIR = os.path.join(os.path.dirname(__file__), "primeHrMagdalenaLaravel")
-MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe" if sys.platform == "win32" else "mysql"
+MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 26.7\bin\mysql.exe" if sys.platform == "win32" else "mysql"
 
 ORDER = [
     "primehrismagdalena_migrations.sql",
