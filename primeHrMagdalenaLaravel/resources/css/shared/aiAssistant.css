@@ -10,9 +10,23 @@
    page it's dropped into. */
 
 .ai-page-outer {
+    /* `.main-content`'s vertical padding, which this panel sits inside: 24px top
+       and bottom in all three layouts. Overridden at the mobile breakpoint,
+       where the layouts add room for the fixed menu button. */
+    --ai-page-inset: 48px;
+
     display: flex;
     flex-direction: column;
+    /* `height: 100%` alone was not enough to bound this panel. `.app-layout` is
+       `min-height: 100vh`, not `height`, so the percentage has no definite
+       parent height to resolve against and falls back to auto — the panel then
+       grew to fit its tallest column instead of capping, which is why a long
+       conversation list never got its own scrollbar and dragged the whole page
+       down with it. The cap makes the height definite either way, so the two
+       inner panes below can scroll independently. */
     height: 100%;
+    max-height: calc(100vh - var(--ai-page-inset));
+    min-height: 0;
 }
 
 .ai-page {
@@ -28,11 +42,17 @@
 }
 
 /* ── Conversation list ── */
+/* The header and the search box are outside the scrolling list on purpose:
+   "New Chat" and search stay put while only the conversations move. `min-height:
+   0` is what lets the list below actually shrink — a flex item defaults to
+   `min-height: auto`, which refuses to go below its content height and so
+   silently cancels the `overflow-y: auto` on its child. */
 .ai-page-sidebar {
     width: 300px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
+    min-height: 0;
     border-right: 1px solid var(--gp-border);
     background: var(--gp-bg-tint);
 }
@@ -95,9 +115,14 @@
     border-color: var(--gp-pri);
 }
 
+/* The conversation list is the only part of the sidebar that scrolls, and it
+   scrolls independently of the message thread. `overscroll-behavior: contain`
+   stops a flick at the end of the list from chaining into the page behind it. */
 .ai-page-conversations {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 0 8px 12px;
 }
 
@@ -170,14 +195,19 @@
 .ai-page-main {
     flex: 1;
     min-width: 0;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     background: #fff;
 }
 
+/* Scrolls on its own, so the composer stays pinned at the bottom and the
+   conversation list beside it does not move with the thread. */
 .ai-page-messages {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 24px;
     display: flex;
     flex-direction: column;
@@ -337,7 +367,32 @@
     cursor: pointer;
 }
 
+/* Both panes scroll now, so give the bars a light treatment rather than the
+   platform default sitting on the tinted sidebar. */
+.ai-page-conversations,
+.ai-page-messages {
+    scrollbar-width: thin;
+    scrollbar-color: var(--theme-neutral-400) transparent;
+}
+.ai-page-conversations::-webkit-scrollbar,
+.ai-page-messages::-webkit-scrollbar { width: 8px; }
+.ai-page-conversations::-webkit-scrollbar-track,
+.ai-page-messages::-webkit-scrollbar-track { background: transparent; }
+.ai-page-conversations::-webkit-scrollbar-thumb,
+.ai-page-messages::-webkit-scrollbar-thumb {
+    background: var(--theme-neutral-400);
+    border-radius: 999px;
+    /* Inset the thumb off the edge without a second element. */
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+.ai-page-conversations::-webkit-scrollbar-thumb:hover,
+.ai-page-messages::-webkit-scrollbar-thumb:hover { background: var(--theme-neutral-500); background-clip: content-box; }
+
 @media (max-width: 860px) {
+    /* The layouts swap to a fixed menu button here and pad the top to clear it
+       (70–74px), so the panel has to give that room back. */
+    .ai-page-outer { --ai-page-inset: 98px; }
     .ai-page { position: relative; flex-direction: column; }
     .ai-page-mobile-list-toggle { display: flex; }
     .ai-page-sidebar {
@@ -791,4 +846,111 @@
 @media (max-width: 860px) {
     .ai-msg.assistant:has(.ai-files) { max-width: 100%; }
     .ai-files { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}
+
+/* ── Delete confirmation ──
+   The admin chathead's `.chat-confirm` sheet, restyled for the full page. That
+   one is `position: absolute` because it only has to cover a floating panel;
+   this page fills the viewport, so the overlay is fixed and centres there. */
+.ai-confirm {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(var(--theme-primary-rgb), .28);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+.ai-confirm.is-open {
+    display: flex;
+    animation: aiConfirmIn .16s ease;
+}
+
+@keyframes aiConfirmIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.ai-confirm-card {
+    width: 100%;
+    max-width: 360px;
+    padding: 20px 20px 16px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(var(--theme-shadow-rgb), .26);
+    text-align: center;
+}
+
+.ai-confirm-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 10px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--theme-danger-subtle);
+    color: var(--gp-bad);
+}
+
+.ai-confirm-title {
+    margin: 0 0 5px;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+}
+
+.ai-confirm-text {
+    margin: 0 0 16px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--gp-text-mid);
+}
+
+.ai-confirm-actions { display: flex; gap: 8px; }
+
+.ai-confirm-btn {
+    flex: 1;
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.ai-confirm-btn.is-cancel {
+    border: 1.5px solid var(--theme-neutral-300);
+    background: #fff;
+    color: var(--gp-text-mid);
+}
+.ai-confirm-btn.is-cancel:hover {
+    border-color: var(--gp-pri);
+    color: var(--gp-pri);
+    background: var(--gp-bg-tint);
+}
+
+.ai-confirm-btn.is-danger {
+    border: 1.5px solid var(--gp-bad);
+    background: var(--gp-bad);
+    color: var(--theme-danger-fg);
+}
+.ai-confirm-btn.is-danger:hover {
+    background: var(--theme-danger-emphasis);
+    border-color: var(--theme-danger-emphasis);
+}
+
+.ai-confirm-btn:focus-visible {
+    outline: 2px solid rgba(var(--theme-primary-rgb), .4);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ai-confirm.is-open { animation: none; }
+    .ai-confirm-btn { transition: none; }
 }

@@ -33,10 +33,44 @@ class AdminLeaveCalendarController extends Controller
             $cursor = Carbon::today()->startOfMonth();
         }
 
-        // The visible grid spans whole weeks (Sun–Sat) so leading/trailing days
-        // of adjacent months fill the 7-column rows.
-        $gridStart = $cursor->copy()->startOfMonth()->startOfWeek(Carbon::SUNDAY);
-        $gridEnd   = $cursor->copy()->endOfMonth()->endOfWeek(Carbon::SATURDAY);
+        // ---- View mode ---------------------------------------------------
+        // Month, week or day, the way a calendar app offers them. Leave and
+        // travel are whole-day records, so week and day show *more of each
+        // record* rather than an hour grid — an hour axis would imply a
+        // precision these dates do not carry.
+        $view = in_array(request('view'), ['month', 'week', 'day'], true) ? request('view') : 'month';
+
+        // Week and day are anchored by ?date=YYYY-MM-DD; month keeps ?month=
+        // so existing links and the jump-to picker still work.
+        try {
+            $anchor = request('date')
+                ? Carbon::createFromFormat('Y-m-d', request('date'))->startOfDay()
+                : null;
+        } catch (\Exception $e) {
+            $anchor = null;
+        }
+
+        if (!$anchor) {
+            // Switching month → week with no date lands on today when today is
+            // in the month being viewed, and on the 1st otherwise. Jumping to
+            // "this week" of a month you are not looking at would be a surprise.
+            $anchor = Carbon::today()->between($cursor->copy()->startOfMonth(), $cursor->copy()->endOfMonth())
+                ? Carbon::today()
+                : $cursor->copy()->startOfMonth();
+        }
+
+        // A day the anchor belongs to is what the header and the summary
+        // describe; the grid may be wider (month view pads to whole weeks).
+        [$periodStart, $periodEnd] = match ($view) {
+            'day'   => [$anchor->copy()->startOfDay(), $anchor->copy()->endOfDay()],
+            'week'  => [$anchor->copy()->startOfWeek(Carbon::SUNDAY), $anchor->copy()->endOfWeek(Carbon::SATURDAY)],
+            default => [$cursor->copy()->startOfMonth(), $cursor->copy()->endOfMonth()],
+        };
+
+        // Month spans whole weeks (Sun–Sat) so leading/trailing days of adjacent
+        // months fill the 7-column rows. Week and day show exactly their period.
+        $gridStart = $view === 'month' ? $periodStart->copy()->startOfWeek(Carbon::SUNDAY) : $periodStart->copy();
+        $gridEnd   = $view === 'month' ? $periodEnd->copy()->endOfWeek(Carbon::SATURDAY)   : $periodEnd->copy();
 
         // ---- Filters ----------------------------------------------------
         // Unknown values fall back to "no filter" rather than an empty calendar,
@@ -196,7 +230,8 @@ class AdminLeaveCalendarController extends Controller
             $days[] = [
                 'date'       => $d->copy(),
                 'key'        => $key,
-                'in_month'   => $d->month === $cursor->month,
+                // Only month view pads with adjacent-month days to dim.
+                'in_month'   => $view !== 'month' || $d->month === $cursor->month,
                 'is_today'   => $d->isToday(),
                 'is_weekend' => in_array($d->dayOfWeek, [Carbon::SATURDAY, Carbon::SUNDAY]),
                 'events'     => $eventsByDate[$key] ?? [],
@@ -211,21 +246,76 @@ class AdminLeaveCalendarController extends Controller
         $embed = request()->boolean('embed');
         $q = array_merge($embed ? ['embed' => 1] : [], $filters);
 
-        $monthLabel   = $cursor->format('F Y');
-        $currentMonth = $cursor->format('Y-m');   // feeds the <input type="month"> jump-to picker
-        $prevUrl  = route('admin.leaveCalendar', array_merge($q, ['month' => $cursor->copy()->subMonth()->format('Y-m')]));
-        $nextUrl  = route('admin.leaveCalendar', array_merge($q, ['month' => $cursor->copy()->addMonth()->format('Y-m')]));
-        $todayUrl = route('admin.leaveCalendar', $q);
+        // Every cell links to its own day view. Clicking a date is how you get
+        // from "something is happening here" to what it actually is, so the
+        // link is built for all days, not only the ones carrying events — an
+        // empty day answers "is anyone out?" with the same click.
+        //
+        // The filters ride along for the same reason paging carries them:
+        // the day is being opened out of a filtered month and should not
+        // silently widen the answer on arrival.
+        foreach ($days as $i => $cell) {
+            $days[$i]['day_url'] = route('admin.leaveCalendar', array_merge($q, [
+                'view' => 'day',
+                'date' => $cell['key'],
+            ]));
+        }
+
+        // Each view names its own period and steps by its own unit — a week
+        // view whose arrows jumped a month would be a calendar you cannot walk.
+        $monthLabel = match ($view) {
+            'day'  => $periodStart->format('l, F j, Y'),
+            'week' => $periodStart->isSameMonth($periodEnd)
+                        ? $periodStart->format('M j') . ' – ' . $periodEnd->format('j, Y')
+                        : $periodStart->format('M j') . ' – ' . $periodEnd->format('M j, Y'),
+            default => $cursor->format('F Y'),
+        };
+
+        $currentMonth = $cursor->format('Y-m');           // <input type="month"> in month view
+        $currentDate  = $periodStart->format('Y-m-d');    // <input type="date"> in week/day view
+
+        // Keep the view on every link, or paging would silently drop you back
+        // into month view.
+        $qv = array_merge($q, $view !== 'month' ? ['view' => $view] : []);
+
+        $step = fn (Carbon $d) => route('admin.leaveCalendar', $view === 'month'
+            ? array_merge($qv, ['month' => $d->format('Y-m')])
+            : array_merge($qv, ['date' => $d->format('Y-m-d')]));
+
+        [$prevAnchor, $nextAnchor] = match ($view) {
+            'day'   => [$periodStart->copy()->subDay(),   $periodStart->copy()->addDay()],
+            'week'  => [$periodStart->copy()->subWeek(),  $periodStart->copy()->addWeek()],
+            default => [$cursor->copy()->subMonth(),      $cursor->copy()->addMonth()],
+        };
+
+        $prevUrl  = $step($prevAnchor);
+        $nextUrl  = $step($nextAnchor);
+        $todayUrl = $view === 'month'
+            ? route('admin.leaveCalendar', $qv)
+            : route('admin.leaveCalendar', array_merge($qv, ['date' => Carbon::today()->format('Y-m-d')]));
+
+        // The Month / Week / Day switcher. Each keeps the day you are looking
+        // at, so switching re-frames the same date rather than jumping to now.
+        // Week and day carry the *anchor*, not the period start. From August's
+        // month view the period starts on the 1st, so anchoring the switch
+        // there dropped you into the week of Jul 26 while today was Aug 11 —
+        // the anchor is already "today when today is in view", which is the
+        // day somebody switching views means.
+        $viewUrls = [
+            'month' => route('admin.leaveCalendar', array_merge($q, ['month' => $periodStart->format('Y-m')])),
+            'week'  => route('admin.leaveCalendar', array_merge($q, ['view' => 'week', 'date' => $anchor->format('Y-m-d')])),
+            'day'   => route('admin.leaveCalendar', array_merge($q, ['view' => 'day',  'date' => $anchor->format('Y-m-d')])),
+        ];
 
         // Month-level summary for the stat strip. Counts records that actually
         // touch the displayed month (not the adjacent-month spillover days), each
         // record once regardless of how many days it spans.
-        $monthStart = $cursor->copy()->startOfMonth();
-        $monthEnd   = $cursor->copy()->endOfMonth();
-        $touchesMonth = fn($s, $e) => Carbon::parse($s)->lte($monthEnd) && Carbon::parse($e)->gte($monthStart);
+        // Counts describe the period on screen — the week or the day when one of
+        // those is showing, not the month it happens to sit in.
+        $touchesPeriod = fn($s, $e) => Carbon::parse($s)->lte($periodEnd) && Carbon::parse($e)->gte($periodStart);
 
-        $leaveInMonth  = $leaves->filter(fn($l) => $touchesMonth($l->start_date, $l->end_date));
-        $travelInMonth = $travelOrders->filter(fn($t) => $touchesMonth($t->travel_date, $t->return_date));
+        $leaveInMonth  = $leaves->filter(fn($l) => $touchesPeriod($l->start_date, $l->end_date));
+        $travelInMonth = $travelOrders->filter(fn($t) => $touchesPeriod($t->travel_date, $t->return_date));
 
         $summary = [
             'people'  => $leaveInMonth->pluck('employee_id')->merge($travelInMonth->pluck('employee_id'))->unique()->count(),
@@ -242,14 +332,16 @@ class AdminLeaveCalendarController extends Controller
 
         // Base for the <input type="month"> jump-to picker, which appends
         // &month=YYYY-MM client-side; carries embed + filters like the arrows do.
-        $monthNavBase = route('admin.leaveCalendar', $q);
+        $monthNavBase = route('admin.leaveCalendar', $qv);
 
         // The filter form posts month as a hidden field, so its action carries
         // only the embed flag — the selects themselves supply the rest.
         $filterAction = route('admin.leaveCalendar', $embed ? ['embed' => 1] : []);
         $clearUrl     = route('admin.leaveCalendar', array_merge(
             $embed ? ['embed' => 1] : [],
-            ['month' => $cursor->format('Y-m')]
+            $view === 'month'
+                ? ['month' => $cursor->format('Y-m')]
+                : ['view' => $view, 'date' => $periodStart->format('Y-m-d')]
         ));
 
         // Note: the per-day avatar cap (5) lives in the view/CSS — markers past
@@ -259,7 +351,8 @@ class AdminLeaveCalendarController extends Controller
         return view('admin.leaveCalendar.leaveCalendar', compact(
             'days', 'monthLabel', 'currentMonth', 'prevUrl', 'nextUrl', 'todayUrl', 'peopleOut', 'summary', 'embed',
             'departments', 'leaveTypes', 'filterType', 'filterStatus', 'filterDept', 'filterLeave',
-            'hasFilters', 'filterAction', 'clearUrl', 'monthNavBase'
+            'hasFilters', 'filterAction', 'clearUrl', 'monthNavBase',
+            'view', 'viewUrls', 'currentDate'
         ));
     }
 

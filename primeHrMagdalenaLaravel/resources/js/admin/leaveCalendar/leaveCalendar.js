@@ -77,47 +77,6 @@ function calHideTooltip() {
     if (tip) tip.style.display = 'none';
 }
 
-// ---------- Day-detail popover ("+X more") ----------
-window.closeCalDayModal = function (event) {
-    if (event && event.target !== event.currentTarget) return;
-    const modal = document.getElementById('calDayModal');
-    if (modal) modal.style.display = 'none';
-};
-
-function calOpenDayModal(cell, label) {
-    const modal = document.getElementById('calDayModal');
-    const list = document.getElementById('calDayModalList');
-    const title = document.getElementById('calDayModalTitle');
-    if (!modal || !list) return;
-
-    title.textContent = label || 'Day';
-    list.innerHTML = '';
-
-    cell.querySelectorAll('.cal-marker').forEach(marker => {
-        const s = calParse(marker, 'data-summary');
-        const payload = calParse(marker, 'data-payload');
-
-        const row = document.createElement('button');
-        row.type = 'button';
-        row.className = 'cal-day-row type-' + s.type + ' status-' + (s.status_label || '').toLowerCase();
-        row.innerHTML = `
-            <span class="cal-day-row-avatar">${marker.innerHTML}</span>
-            <span class="cal-day-row-info">
-                <span class="cal-day-row-name">${s.name}</span>
-                <span class="cal-day-row-sub"><span class="cal-tip-tag type-${s.type}">${s.type_label}</span> ${s.sub || ''} · ${s.range_label || ''}</span>
-            </span>
-            <span class="cal-day-row-status ${(s.status_label || '').toLowerCase() === 'approved' ? 'is-approved' : 'is-pending'}">${s.status_label}</span>
-        `;
-        row.addEventListener('click', () => {
-            window.closeCalDayModal();
-            calOpenDetail(payload);
-        });
-        list.appendChild(row);
-    });
-
-    modal.style.display = 'flex';
-}
-
 // ---------- Filter bar ----------
 // Travel orders carry no leave type, so "Travel orders only" makes the leave-type
 // select meaningless. Disabling it says so immediately and keeps it out of the
@@ -139,21 +98,31 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('lcType')?.addEventListener('change', calSyncLeaveTypeField);
     calSyncLeaveTypeField();
 
+    // A marker is a record, and the cell behind it is a date. Clicking the
+    // marker must not do both, so it stops there.
     document.querySelectorAll('.cal-marker').forEach(marker => {
-        marker.addEventListener('click', () => calOpenDetail(calParse(marker, 'data-payload')));
+        marker.addEventListener('click', e => {
+            e.stopPropagation();
+            calOpenDetail(calParse(marker, 'data-payload'));
+        });
         marker.addEventListener('mouseenter', () => calShowTooltip(marker));
         marker.addEventListener('mousemove', calMoveTooltip);
         marker.addEventListener('mouseleave', calHideTooltip);
     });
 
-    document.querySelectorAll('.cal-more').forEach(more => {
-        more.addEventListener('click', () => {
-            const cell = more.closest('.cal-day');
-            calOpenDayModal(cell, more.getAttribute('data-day-label'));
-        });
+    // Day view lists each record as a full row rather than an avatar, but a
+    // click means the same thing: open that record.
+    document.querySelectorAll('.lc-dayview-row').forEach(row => {
+        row.addEventListener('click', () => calOpenDetail(calParse(row, 'data-payload')));
     });
 
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') window.closeCalDayModal();
+    // Clicking anywhere on a date opens that date in day view. The date
+    // number and "+X more" are real links inside the cell and navigate on
+    // their own, so this only has to cover the empty space around them.
+    document.querySelectorAll('.lc-day[data-day-url]').forEach(cell => {
+        cell.addEventListener('click', e => {
+            if (e.target.closest('a, button')) return;
+            window.location.href = cell.getAttribute('data-day-url');
+        });
     });
 });

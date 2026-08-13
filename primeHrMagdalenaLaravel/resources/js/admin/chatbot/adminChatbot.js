@@ -366,10 +366,8 @@ document.addEventListener('keydown', function (e) {
     if (chatWindow && chatWindow.classList.contains('open')) toggleChatbot();
 });
 
-let isFullscreen = false;
-
-// Widget open/closed and fullscreen state survive page navigations (this
-// partial is re-rendered fresh on every admin page load) via localStorage.
+// Widget open/closed state survives page navigations (this partial is
+// re-rendered fresh on every admin page load) via localStorage.
 function restoreChatbotUiState() {
     if (localStorage.getItem('chatbotOpen') === 'true') {
         const chatWindow = document.getElementById('chatbotWindow');
@@ -384,11 +382,10 @@ function restoreChatbotUiState() {
         fab.setAttribute('aria-label', 'Close HRIS assistant');
     }
 
-    if (localStorage.getItem('chatbotFullscreen') === 'true') {
-        isFullscreen = true;
-        document.getElementById('chatbotWindow').classList.add('fullscreen-mode');
-        applyFullscreenChrome(true);
-    }
+    // `chatbotFullscreen` was the old in-panel expand state. Expand is now a
+    // link to the full page, so a stale key from before must not resurrect a
+    // 560px panel with no CSS left to size it.
+    localStorage.removeItem('chatbotFullscreen');
 }
 
 // The conversation is stored in `ai_conversations` (see ChatbotController), so
@@ -419,25 +416,6 @@ function restoreChatbotHistory() {
             }
         })
         .catch(error => console.error('Error restoring chatbot history:', error));
-}
-
-function applyFullscreenChrome(expanded) {
-    const button = document.getElementById('fullscreenButton');
-    document.getElementById('fullscreenIcon').classList.toggle('cb-hidden', expanded);
-    document.getElementById('fullscreenExitIcon').classList.toggle('cb-hidden', !expanded);
-    button.setAttribute('aria-pressed', String(expanded));
-    button.setAttribute('aria-label', expanded ? 'Shrink panel' : 'Expand panel');
-    button.title = expanded ? 'Shrink panel' : 'Expand panel';
-}
-
-function toggleFullscreen() {
-    const chatWindow = document.getElementById('chatbotWindow');
-
-    isFullscreen = !isFullscreen;
-    localStorage.setItem('chatbotFullscreen', isFullscreen ? 'true' : 'false');
-
-    chatWindow.classList.toggle('fullscreen-mode', isFullscreen);
-    applyFullscreenChrome(isFullscreen);
 }
 
 function toggleChatbot() {
@@ -749,7 +727,6 @@ window.toggleChatbot = toggleChatbot;
 window.clearChatbotConversation = clearChatbotConversation;
 window.confirmClearChatbotConversation = confirmClearChatbotConversation;
 window.closeClearConfirm = closeClearConfirm;
-window.toggleFullscreen = toggleFullscreen;
 window.sendPredefinedMessage = sendPredefinedMessage;
 window.toggleSpeaker = toggleSpeaker;
 window.toggleVoiceInput = toggleVoiceInput;

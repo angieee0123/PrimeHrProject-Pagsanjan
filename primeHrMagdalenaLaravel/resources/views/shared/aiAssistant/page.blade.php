@@ -52,4 +52,25 @@
         </form>
     </section>
 </div>
+
+{{-- In-panel confirmation for deleting a conversation, in place of the browser's
+     confirm() dialog — the same sheet the admin chathead uses for "Clear
+     conversation". The copy differs because the action does: the chathead only
+     starts a new thread, this one destroys the conversation and its messages. --}}
+<div class="ai-confirm" id="ai-delete-confirm">
+    <div class="ai-confirm-card" role="alertdialog" aria-modal="true"
+         aria-labelledby="ai-delete-confirm-title" aria-describedby="ai-delete-confirm-text">
+        <div class="ai-confirm-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+            </svg>
+        </div>
+        <p class="ai-confirm-title" id="ai-delete-confirm-title">Delete this conversation?</p>
+        <p class="ai-confirm-text" id="ai-delete-confirm-text"></p>
+        <div class="ai-confirm-actions">
+            <button type="button" class="ai-confirm-btn is-cancel" id="ai-delete-confirm-cancel">Keep it</button>
+            <button type="button" class="ai-confirm-btn is-danger" id="ai-delete-confirm-ok">Delete</button>
+        </div>
+    </div>
+</div>
 </div>

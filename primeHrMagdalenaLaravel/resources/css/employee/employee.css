@@ -436,17 +436,23 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
 }
 
 .chatbot-header-actions { display: flex; align-items: center; gap: 6px; }
+/* `.chatbot-fullscreen` is an <a> to the full AI Assistant page, not a button,
+   so it also needs the anchor underline removed to match its two neighbours. */
 .chatbot-clear,
+.chatbot-fullscreen,
 .chatbot-close {
     width: 28px; height: 28px; flex-shrink: 0;
     border: 1px solid rgba(255, 255, 255, .22);
     background: rgba(255, 255, 255, .1); color: #fff; border-radius: 8px;
     display: inline-flex; align-items: center; justify-content: center;
+    text-decoration: none;
     cursor: pointer; transition: background .2s ease, border-color .2s ease;
 }
 .chatbot-clear:hover,
+.chatbot-fullscreen:hover,
 .chatbot-close:hover { background: rgba(255, 255, 255, .2); border-color: rgba(255, 255, 255, .4); }
 .chatbot-clear:focus-visible,
+.chatbot-fullscreen:focus-visible,
 .chatbot-close:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
 
 /* Starter prompts, shown inside the conversation until the first question.

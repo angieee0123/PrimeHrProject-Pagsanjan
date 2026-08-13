@@ -17,25 +17,57 @@
 @php $weekCount = intdiv(count($days), 7); @endphp
 <main class="lc-calendar glass-shell lc-weeks-{{ $weekCount }}">
 
-    {{-- Control bar — same filter-card language as the Attendance page --}}
-    <div class="filter-card lc-toolbar">
+    {{--
+        One control card, two rows.
+
+        The month navigator and the filter form used to be two separate
+        `.filter-card`s stacked on top of each other, close enough that the
+        second needed `margin-top: -26px` to claw back the first's bottom
+        margin. Two bordered cards for one band of controls read as two
+        unrelated toolbars; the rows keep their own layout, they just share
+        a card now — and the negative margin is gone with the gap it was
+        cancelling.
+    --}}
+    <div class="filter-card lc-controls">
+    <div class="lc-toolbar">
         <div class="filter-card-fields lc-nav">
-            <span class="lc-toolbar-label">Month</span>
-            @php $monthNavSep = str_contains($monthNavBase, '?') ? '&' : '?'; @endphp
-            <a href="{{ $prevUrl }}" class="btn-ghost lc-nav-btn" aria-label="Previous month">
+            @php
+                $unit = ['month' => 'month', 'week' => 'week', 'day' => 'day'][$view];
+                $monthNavSep = str_contains($monthNavBase, '?') ? '&' : '?';
+            @endphp
+            <a href="{{ $prevUrl }}" class="btn-ghost lc-nav-btn" aria-label="Previous {{ $unit }}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             </a>
-            {{-- Type or pick an exact month & year to jump straight to it. --}}
-            <input type="month" class="lc-month-input" value="{{ $currentMonth }}"
-                   aria-label="Jump to month and year"
-                   onchange="if(this.value){window.location.href='{{ $monthNavBase }}{{ $monthNavSep }}month=' + this.value;}">
-            <a href="{{ $nextUrl }}" class="btn-ghost lc-nav-btn" aria-label="Next month">
+
+            {{-- The picker matches the unit being paged: a month input cannot
+                 name the week or day the other two views are anchored to. --}}
+            @if($view === 'month')
+                <input type="month" class="lc-month-input" value="{{ $currentMonth }}"
+                       aria-label="Jump to month and year"
+                       onchange="if(this.value){window.location.href='{{ $monthNavBase }}{{ $monthNavSep }}month=' + this.value;}">
+            @else
+                <input type="date" class="lc-month-input" value="{{ $currentDate }}"
+                       aria-label="Jump to a date"
+                       onchange="if(this.value){window.location.href='{{ $monthNavBase }}{{ $monthNavSep }}date=' + this.value;}">
+            @endif
+
+            <a href="{{ $nextUrl }}" class="btn-ghost lc-nav-btn" aria-label="Next {{ $unit }}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
             <a href="{{ $todayUrl }}" class="btn-solid lc-today-btn">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 Today
             </a>
+
+            {{-- Month / Week / Day. Each link keeps the date on screen, so
+                 switching re-frames the same day instead of jumping to now. --}}
+            <div class="lc-viewswitch" role="group" aria-label="Calendar view">
+                @foreach(['month' => 'Month', 'week' => 'Week', 'day' => 'Day'] as $key => $label)
+                    <a href="{{ $viewUrls[$key] }}"
+                       class="lc-viewswitch-btn {{ $view === $key ? 'is-active' : '' }}"
+                       @if($view === $key) aria-current="true" @endif>{{ $label }}</a>
+                @endforeach
+            </div>
         </div>
         <div class="filter-card-actions lc-legend">
             <span class="lc-legend-item"><span class="lc-legend-dot is-leave-approved"></span>Approved leave</span>
@@ -49,7 +81,7 @@
          Filtering happens in the query, so the stat strip and the "+X more"
          counts below describe the filtered month, not the whole one. The month
          travels as a hidden field so filtering keeps you where you are. --}}
-    <form method="GET" action="{{ $filterAction }}" class="filter-card lc-filterbar" id="lcFilterForm">
+    <form method="GET" action="{{ $filterAction }}" class="lc-filterbar" id="lcFilterForm">
         <input type="hidden" name="month" value="{{ $currentMonth }}">
         @if($embed)<input type="hidden" name="embed" value="1">@endif
 
@@ -117,6 +149,7 @@
             @endif
         </div>
     </form>
+    </div>
 
     @if($hasFilters && $filterLeave !== '' && $filterType !== 'leave')
         <p class="lc-filter-note">
@@ -160,30 +193,103 @@
         </div>
     @endif
 
-    <div class="lc-card">
-        {{-- Weekday header --}}
-        <div class="lc-grid lc-weekdays">
-            @foreach(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as $i => $wd)
-                <div class="lc-weekday {{ in_array($i, [0, 6]) ? 'is-weekend' : '' }}">{{ $wd }}</div>
-            @endforeach
-        </div>
+    @if($view === 'day')
+    {{--
+        Day view is a list, not a one-cell grid.
 
-        {{-- Day cells --}}
-        <div class="lc-grid lc-days">
+        Leave and travel are whole-day records, so an hour axis would imply a
+        precision these dates do not carry — a leave application says "the 3rd
+        to the 5th", never "09:00". What a day is actually asked is *who is
+        out and why*, so the day shows each person in full instead.
+    --}}
+    @php $dayCell = $days[0] ?? null; @endphp
+    <div class="lc-card lc-dayview">
+        @if($dayCell && count($dayCell['events']))
+            <div class="lc-dayview-list">
+                @foreach($dayCell['events'] as $ev)
+                    <button type="button"
+                            class="lc-dayview-row type-{{ $ev['type'] }} status-{{ $ev['status'] }}"
+                            data-payload='@json($ev['payload'])'
+                            aria-label="Open {{ $ev['name'] }} — {{ $ev['type_label'] }}">
+                        <span class="lc-dayview-avatar">
+                            @if($ev['photo'])
+                                <img src="{{ $ev['photo'] }}" alt="">
+                            @else
+                                <span class="cal-marker-initials" style="background:{{ $ev['color'] }}">{{ $ev['initials'] }}</span>
+                            @endif
+                        </span>
+                        <span class="lc-dayview-body">
+                            <span class="lc-dayview-name">{{ $ev['name'] }}</span>
+                            <span class="lc-dayview-meta">
+                                <span class="cal-tip-tag type-{{ $ev['type'] }}">{{ $ev['type_label'] }}</span>
+                                <span class="lc-dayview-sub">{{ $ev['sub'] }}</span>
+                            </span>
+                            <span class="lc-dayview-range">{{ $ev['range_label'] }}</span>
+                        </span>
+                        <span class="lc-dayview-status {{ $ev['status'] === 'approved' ? 'is-approved' : 'is-pending' }}">{{ $ev['status_label'] }}</span>
+                    </button>
+                @endforeach
+            </div>
+        @else
+            <div class="lc-dayview-empty">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <p class="lc-dayview-empty-title">Nobody is out on {{ $monthLabel }}</p>
+                <p class="lc-dayview-empty-sub">No leave or travel {{ $hasFilters ? 'matches these filters' : 'is recorded' }} for this day.</p>
+            </div>
+        @endif
+    </div>
+    @else
+    <div class="lc-card">
+        {{-- Weekday header. Week view names the actual dates, because in a
+             seven-day view "Wed" alone does not say which Wednesday. --}}
+        @if($view !== 'day')
+        <div class="lc-grid lc-weekdays">
+            @if($view === 'week')
+                @foreach($days as $day)
+                    <div class="lc-weekday {{ $day['is_weekend'] ? 'is-weekend' : '' }} {{ $day['is_today'] ? 'is-today' : '' }}">
+                        {{ $day['date']->format('D') }} <span class="lc-weekday-num">{{ $day['date']->format('j') }}</span>
+                    </div>
+                @endforeach
+            @else
+                @foreach(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as $i => $wd)
+                    <div class="lc-weekday {{ in_array($i, [0, 6]) ? 'is-weekend' : '' }}">{{ $wd }}</div>
+                @endforeach
+            @endif
+        </div>
+        @endif
+
+        {{-- Day cells. Month keeps the compact avatar row; week has the height
+             to name people, so it does. Day is a list, handled below. --}}
+        <div class="lc-grid lc-days is-{{ $view }}">
             @foreach($days as $day)
-                @php $count = count($day['events']); @endphp
-                <div class="lc-day {{ $day['in_month'] ? '' : 'is-muted' }} {{ $day['is_today'] ? 'is-today' : '' }} {{ $day['is_weekend'] ? 'is-weekend' : '' }}">
-                    <div class="lc-day-head">
+                @php
+                    $count = count($day['events']);
+                    $dayLabel = $day['date']->format('l, F j, Y');
+                    // Counts for the day list's subtitle, so the header says what
+                    // kind of day it is before you read the rows.
+                    $dayLeave  = collect($day['events'])->where('type', 'leave')->count();
+                    $dayTravel = $count - $dayLeave;
+                @endphp
+                {{-- Clicking a date opens that date in day view. The whole cell
+                     is the target for a mouse; the date itself is a real <a> so
+                     the same thing is reachable by keyboard and by middle-click,
+                     since wrapping the cell in a link would nest it around the
+                     marker buttons. --}}
+                <div class="lc-day {{ $day['in_month'] ? '' : 'is-muted' }} {{ $day['is_today'] ? 'is-today' : '' }} {{ $day['is_weekend'] ? 'is-weekend' : '' }} {{ $count > 0 ? 'has-events' : '' }}"
+                     data-day-url="{{ $day['day_url'] }}">
+                    <a href="{{ $day['day_url'] }}" class="lc-day-head lc-day-open"
+                       aria-label="Open {{ $dayLabel }}{{ $count > 0 ? ' — ' . $count . ' out (' . $dayLeave . ' on leave, ' . $dayTravel . ' travelling)' : ' — nobody out' }}">
                         <span class="lc-day-num">{{ $day['date']->format('j') }}</span>
                         @if($count > 0)
                             <span class="lc-day-count">{{ $count }}</span>
                         @endif
-                    </div>
+                    </a>
 
                     @if($count > 0)
                         <div class="cal-stack">
-                        <div class="cal-markers" data-day-label="{{ $day['date']->format('l, F j, Y') }}">
+                        <div class="cal-markers">
                             @foreach($day['events'] as $ev)
+                                @php $evName = $ev['name']; @endphp
                                 @php
                                     // Named apart from the month-level $summary above — this
                                     // loop runs after the stat strip, but reusing the name
@@ -207,12 +313,23 @@
                                     @else
                                         <span class="cal-marker-initials" style="background:{{ $ev['color'] }}">{{ $ev['initials'] }}</span>
                                     @endif
+                                    {{-- Week view has the room for a name; month
+                                         does not, and CSS hides this there. --}}
+                                    <span class="cal-marker-name">
+                                        <span class="cal-marker-name-main">{{ $evName }}</span>
+                                        <span class="cal-marker-name-sub">{{ $ev['sub'] }}</span>
+                                    </span>
                                 </button>
                             @endforeach
                         </div>
 
-                        @if($count > 4)
-                            <button type="button" class="cal-more" data-day-label="{{ $day['date']->format('l, F j, Y') }}">+{{ $count - 4 }}</button>
+                        {{-- Only month truncates: week has the height to list
+                             everyone, so a "+X more" there would hide rows that
+                             already fit. It opens the day, which is where the
+                             hidden ones are. --}}
+                        @if($view === 'month' && $count > 4)
+                            <a href="{{ $day['day_url'] }}" class="cal-more"
+                               aria-label="Open {{ $dayLabel }} to see all {{ $count }}">+{{ $count - 4 }}</a>
                         @endif
                         </div>
                     @endif
@@ -220,19 +337,10 @@
             @endforeach
         </div>
     </div>
+    @endif
 
 </main>
 
-{{-- Day-detail popover: lists everyone out on a clicked day (opened by "+X more"). --}}
-<div id="calDayModal" class="cal-day-modal" style="display:none" onclick="closeCalDayModal(event)">
-    <div class="cal-day-modal-panel" onclick="event.stopPropagation()">
-        <div class="cal-day-modal-head">
-            <h3 id="calDayModalTitle">Day</h3>
-            <button type="button" class="cal-day-modal-close" onclick="closeCalDayModal()" aria-label="Close">✕</button>
-        </div>
-        <div id="calDayModalList" class="cal-day-modal-list"></div>
-    </div>
-</div>
 
 {{-- Hover summary tooltip --}}
 <div id="calTooltip" class="cal-tooltip" style="display:none"></div>

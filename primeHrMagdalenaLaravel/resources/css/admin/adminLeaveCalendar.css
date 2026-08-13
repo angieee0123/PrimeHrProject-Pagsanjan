@@ -34,8 +34,8 @@
 .lc-embed-wrap .lc-weeks-6 .lc-stat { padding: 12px 15px; }
 /* The filter bar is a second control row inside a fixed-height modal, so it
    pays for itself out of its own padding rather than the week rows'. */
-.lc-embed-wrap .lc-filterbar { padding: 7px 12px; margin-top: -28px; }
-.lc-embed-wrap .lc-weeks-6 .lc-toolbar { padding: 7px 12px; }
+.lc-embed-wrap .lc-controls { padding: 7px 12px; }
+.lc-embed-wrap .lc-weeks-6 .lc-controls { padding: 7px 12px; }
 .lc-embed-wrap .lc-weeks-6 .lc-filter-actions .btn-solid,
 .lc-embed-wrap .lc-weeks-6 .lc-filter-actions .btn-ghost { height: 34px; }
 .lc-embed-wrap .lc-weeks-6 .lc-card { padding: 13px; }
@@ -50,7 +50,32 @@
 .lc-embed-wrap .lc-weeks-6 .cal-more { height: 29px; font-size: 11px; padding: 0 9px; }
 
 /* ---------- Toolbar (uses .filter-card from the glass system) ---------- */
-.lc-toolbar { flex-wrap: wrap; row-gap: 10px; }
+/* ── One card, two rows ───────────────────────────────────────────
+   .lc-controls is the card; .lc-toolbar and .lc-filterbar are rows inside
+   it. Each row keeps exactly the layout it had when it was its own card —
+   fields left, actions right — so only the container changed. */
+.glass-shell .filter-card.lc-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+}
+.lc-toolbar,
+.lc-filterbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    row-gap: 10px;
+    padding: 4px 0;
+}
+/* A hairline instead of a second border: the rows are related, and a full
+   card outline around each said they were not. */
+.lc-filterbar {
+    border-top: 1px solid var(--gp-glass-border);
+    padding-top: 10px;
+    margin-top: 6px;
+}
 .lc-nav { align-items: center; gap: 10px !important; flex: 0 1 auto !important; }
 .lc-toolbar-label {
     font-size: 10.5px; font-weight: 600; color: var(--theme-neutral-600);
@@ -119,7 +144,7 @@
    A second .filter-card directly under the month toolbar. The two read as one
    control block, so the pull-up cancels most of the gap the flex column and
    .filter-card's own margin-bottom would otherwise leave between them. */
-.lc-filterbar { flex-wrap: wrap; row-gap: 10px; margin-top: -26px; }
+
 .lc-filter-fields { flex-wrap: wrap; row-gap: 8px; }
 .lc-filter-actions { gap: 8px !important; }
 .lc-filter-actions .btn-solid,
@@ -407,4 +432,164 @@
     .lc-weekday { font-size: 9.5px; }
     .lc-month-title { font-size: 15px; min-width: 116px; }
     .lc-grid { gap: 5px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Month / Week / Day views
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── View switcher ── */
+.lc-viewswitch {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 6px;
+    padding: 3px;
+    border: 1px solid var(--gp-glass-border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .55);
+}
+.lc-viewswitch-btn {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gp-text-mid);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .18s ease, color .18s ease;
+}
+.lc-viewswitch-btn:hover { background: var(--gp-bg-tint); color: var(--gp-pri); }
+.lc-viewswitch-btn.is-active { background: var(--gp-pri); color: #fff; }
+.lc-viewswitch-btn:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
+
+/* ── Week view ──
+   Seven columns like the month, but one row instead of five or six — so each
+   cell inherits the height the month had to share, and can name people
+   instead of reducing them to an avatar. */
+.lc-weekday-num { margin-left: 4px; font-weight: 800; color: var(--gp-pri); }
+.lc-weekday.is-today .lc-weekday-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--gp-pri);
+    color: #fff;
+    margin-left: 5px;
+}
+
+.lc-days.is-week .lc-day { min-height: 340px; align-content: start; }
+
+/* The month stack sits at the bottom of a short cell (`margin-top: auto`) and
+   overlaps its avatars into a pile (`margin-left: -14px`). Neither survives
+   the move to a tall column: events start at the top and stack downwards. */
+.lc-days.is-week .cal-stack { margin-top: 0; align-items: stretch; }
+.lc-days.is-week .cal-markers { flex-direction: column; align-items: stretch; gap: 4px; }
+.lc-days.is-week .cal-marker { margin-left: 0; box-shadow: none; }
+
+/* A 44px avatar eats half a week column. Shrinking it is what buys the name
+   enough room to read as a name rather than "Jere…". */
+.lc-days.is-week .cal-marker,
+.lc-days.is-week .cal-marker img,
+.lc-days.is-week .cal-marker .cal-marker-initials { height: auto; }
+.lc-days.is-week .cal-marker img,
+.lc-days.is-week .cal-marker .cal-marker-initials {
+    width: 26px; height: 26px; flex-shrink: 0; font-size: 10px;
+}
+
+/* In week view the marker becomes a labelled row. The avatar keeps its size
+   so the two views read as the same object at different zoom levels. */
+.lc-days.is-week .cal-marker {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    padding: 4px 6px;
+    border-radius: 8px;
+    text-align: left;
+}
+.lc-days.is-week .cal-marker:hover { background: var(--gp-bg-tint); }
+.lc-days.is-week .cal-marker-name { display: flex; flex-direction: column; min-width: 0; }
+.cal-marker-name { display: none; }          /* month view: avatar only */
+.cal-marker-name-main {
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--gp-pri);
+    /* Wrap to two lines rather than cutting a name off — the column is 340px
+       tall and there is nothing below competing for the space. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.cal-marker-name-sub {
+    font-size: 10.5px;
+    color: var(--gp-text-soft);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* The month cap is a month-view rule; week shows everyone. */
+.lc-days.is-week .cal-markers .cal-marker:nth-child(n+6) { display: flex; }
+
+/* ── Day view ──
+   A list, not a one-cell grid: these are whole-day records, so an hour axis
+   would imply a precision the dates do not carry. */
+.lc-dayview { padding: 14px; }
+.lc-dayview-list { display: flex; flex-direction: column; gap: 8px; }
+
+.lc-dayview-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--gp-border);
+    border-left: 4px solid var(--gp-border);
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .15s ease;
+}
+.lc-dayview-row:hover { box-shadow: 0 6px 18px rgba(var(--theme-shadow-rgb), .07); transform: translateY(-1px); }
+.lc-dayview-row:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
+/* Same colour language as the markers and the legend. */
+.lc-dayview-row.type-leave  { border-left-color: var(--theme-success); }
+.lc-dayview-row.type-travel { border-left-color: var(--theme-info, #3b82f6); }
+.lc-dayview-row.status-pending { border-left-style: dashed; }
+
+.lc-dayview-avatar { flex-shrink: 0; width: 40px; height: 40px; }
+.lc-dayview-avatar img,
+.lc-dayview-avatar .cal-marker-initials {
+    width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 13px; font-weight: 700;
+}
+
+.lc-dayview-body { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.lc-dayview-name { font-size: 14px; font-weight: 700; color: var(--gp-pri); }
+.lc-dayview-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lc-dayview-sub { font-size: 12.5px; color: var(--gp-text-mid); }
+.lc-dayview-range { font-size: 11.5px; color: var(--gp-text-soft); }
+
+.lc-dayview-status {
+    flex-shrink: 0;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+.lc-dayview-status.is-approved { background: var(--theme-success-subtle); color: var(--theme-success-emphasis); }
+.lc-dayview-status.is-pending  { background: var(--theme-warning-subtle); color: var(--theme-warning-emphasis); }
+
+.lc-dayview-empty { text-align: center; padding: 44px 20px; }
+.lc-dayview-empty svg { display: block; margin: 0 auto 10px; color: var(--theme-neutral-300); }
+.lc-dayview-empty-title { margin: 0 0 4px; font-size: 14px; font-weight: 700; color: var(--gp-pri); }
+.lc-dayview-empty-sub { margin: 0; font-size: 12.5px; color: var(--gp-text-soft); }
+
+@media (max-width: 900px) {
+    .lc-days.is-week { grid-template-columns: 1fr; }
+    .lc-days.is-week .lc-day { min-height: 0; }
+    .lc-viewswitch { margin-left: 0; }
 }

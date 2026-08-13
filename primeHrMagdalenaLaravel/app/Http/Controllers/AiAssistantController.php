@@ -34,8 +34,14 @@ class AiAssistantController extends Controller
     {
         $area = $request->segment(1); // admin | employee | mayor
 
+        // Same ordering as AiConversationStore::latestFor(), tie-break included.
+        // The page opens conversations[0] on load and the chathead continues
+        // latestFor(), so the two must name the same row — two threads touched
+        // in the same second would otherwise put the widget in one and the page
+        // in the other, which is the split this shared store exists to prevent.
         $conversations = AiConversation::where('user_id', Auth::id())
             ->orderByDesc('updated_at')
+            ->orderByDesc('id')
             ->get();
 
         return view(self::AREA_VIEWS[$area], [

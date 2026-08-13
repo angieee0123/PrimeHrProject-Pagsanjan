@@ -21,6 +21,10 @@
     const newChatBtn = document.getElementById('ai-new-chat-btn');
     const sidebarEl = document.getElementById('ai-page-sidebar');
     const mobileToggle = document.getElementById('ai-mobile-list-toggle');
+    const confirmEl = document.getElementById('ai-delete-confirm');
+    const confirmTextEl = document.getElementById('ai-delete-confirm-text');
+    const confirmCancelBtn = document.getElementById('ai-delete-confirm-cancel');
+    const confirmOkBtn = document.getElementById('ai-delete-confirm-ok');
 
     let conversations = [];
     try {
@@ -33,6 +37,7 @@
     let isSearching = false;
     let searchDebounce = null;
     let renderedItems = conversations;
+    let pendingDeleteId = null;
 
     function timeAgo(iso) {
         if (!iso) return '';
@@ -102,7 +107,7 @@
                 del.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
                 del.addEventListener('click', function (e) {
                     e.stopPropagation();
-                    deleteConversation(conv.id);
+                    askDeleteConversation(conv.id, conv.title);
                 });
                 btn.appendChild(del);
             }
@@ -641,9 +646,33 @@
         inputEl.focus();
     }
 
-    function deleteConversation(id) {
-        if (!confirm('Delete this conversation? This cannot be undone.')) return;
+    /* Opens the in-panel sheet rather than a browser confirm(), matching the
+       chathead's "Clear conversation" alert. The wording is not the chathead's,
+       because the action is not: that one keeps the thread and only stops using
+       it as context, while this destroys the conversation and every message in
+       it — so the sheet names the thread and says the loss is permanent. */
+    function askDeleteConversation(id, title) {
+        pendingDeleteId = id;
 
+        const name = (title || '').trim();
+        confirmTextEl.textContent = (name ? '“' + name + '”' : 'This conversation')
+            + ' and every message in it will be permanently deleted, including the '
+            + 'tables and files those answers carried. This cannot be undone.';
+
+        confirmEl.classList.add('is-open');
+        confirmCancelBtn.focus();
+    }
+
+    function closeDeleteConfirm() {
+        pendingDeleteId = null;
+        confirmEl.classList.remove('is-open');
+    }
+
+    function isDeleteConfirmOpen() {
+        return confirmEl.classList.contains('is-open');
+    }
+
+    function deleteConversation(id) {
         fetch(conversationsUrl + '/' + id, {
             method: 'DELETE',
             headers: { 'X-CSRF-TOKEN': csrfToken, Accept: 'application/json' },
@@ -750,9 +779,43 @@
         sidebarEl.classList.toggle('open');
     });
 
+    confirmCancelBtn.addEventListener('click', closeDeleteConfirm);
+
+    confirmOkBtn.addEventListener('click', function () {
+        const id = pendingDeleteId;
+        closeDeleteConfirm();
+        if (id !== null) deleteConversation(id);
+    });
+
+    // Clicking the dimmed backdrop cancels; clicking the card must not.
+    confirmEl.addEventListener('click', function (e) {
+        if (e.target === confirmEl) closeDeleteConfirm();
+    });
+
+    // Escape backs out of the confirmation first, then the mobile sidebar.
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') sidebarEl.classList.remove('open');
+        if (e.key !== 'Escape') return;
+        if (isDeleteConfirmOpen()) { closeDeleteConfirm(); return; }
+        sidebarEl.classList.remove('open');
     });
 
     renderConversationList(conversations, {});
+
+    /* Open the newest conversation rather than the welcome screen.
+
+       The page used to boot with activeConversationId = null and nothing
+       selected, so arriving here showed none of the thread you were just in —
+       including anything asked in the floating chathead, which appends to your
+       newest conversation (AiConversationStore::continueLatestOrStart). Those
+       turns were saved and the thread was listed in the sidebar, but under a
+       title taken from its *first* message, so there was no way to tell which
+       row held them. Expanding the widget landed on a blank welcome screen.
+
+       `index()` orders by updated_at desc, so [0] is the same thread
+       latestFor() picks — the page and the widget now resume the same one.
+       "New Chat" is still how you deliberately start a fresh thread, and a user
+       with no conversations yet keeps the welcome screen. */
+    if (conversations.length) {
+        selectConversation(conversations[0].id);
+    }
 })();

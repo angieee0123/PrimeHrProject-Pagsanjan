@@ -33,8 +33,37 @@ class EmployeeLeaveCalendarController extends Controller
             $cursor = Carbon::today()->startOfMonth();
         }
 
-        $gridStart = $cursor->copy()->startOfMonth()->startOfWeek(Carbon::SUNDAY);
-        $gridEnd   = $cursor->copy()->endOfMonth()->endOfWeek(Carbon::SATURDAY);
+        // ---- View mode ---------------------------------------------------
+        // Month, week or day, matching the admin calendar. Leave and travel are
+        // whole-day records, so week and day show more of each record rather
+        // than an hour grid — an hour axis would imply a precision these dates
+        // do not carry.
+        $view = in_array(request('view'), ['month', 'week', 'day'], true) ? request('view') : 'month';
+
+        try {
+            $anchor = request('date')
+                ? Carbon::createFromFormat('Y-m-d', request('date'))->startOfDay()
+                : null;
+        } catch (\Exception $e) {
+            $anchor = null;
+        }
+
+        if (!$anchor) {
+            // Switching month → week with no date lands on today when today is
+            // in the month being viewed, and on the 1st otherwise.
+            $anchor = Carbon::today()->between($cursor->copy()->startOfMonth(), $cursor->copy()->endOfMonth())
+                ? Carbon::today()
+                : $cursor->copy()->startOfMonth();
+        }
+
+        [$periodStart, $periodEnd] = match ($view) {
+            'day'   => [$anchor->copy()->startOfDay(), $anchor->copy()->endOfDay()],
+            'week'  => [$anchor->copy()->startOfWeek(Carbon::SUNDAY), $anchor->copy()->endOfWeek(Carbon::SATURDAY)],
+            default => [$cursor->copy()->startOfMonth(), $cursor->copy()->endOfMonth()],
+        };
+
+        $gridStart = $view === 'month' ? $periodStart->copy()->startOfWeek(Carbon::SUNDAY) : $periodStart->copy();
+        $gridEnd   = $view === 'month' ? $periodEnd->copy()->endOfWeek(Carbon::SATURDAY)   : $periodEnd->copy();
 
         $eventsByDate = [];
         $leaves = collect();
@@ -102,7 +131,8 @@ class EmployeeLeaveCalendarController extends Controller
             $days[] = [
                 'date'         => $d->copy(),
                 'key'          => $key,
-                'in_month'     => $d->month === $cursor->month,
+                // Only month view pads with adjacent-month days to dim.
+                'in_month'     => $view !== 'month' || $d->month === $cursor->month,
                 'is_today'     => $d->isToday(),
                 'is_weekend'   => in_array($d->dayOfWeek, [Carbon::SATURDAY, Carbon::SUNDAY]),
                 'events'       => $events,
@@ -113,23 +143,70 @@ class EmployeeLeaveCalendarController extends Controller
         // Navigation.
         $embed = request()->boolean('embed');
         $q = $embed ? ['embed' => 1] : [];
-        $monthLabel   = $cursor->format('F Y');
+
+        // Every cell links to its own day view — clicking a date is how you get
+        // from "something is happening here" to what it actually is. Built for
+        // every day, not only the ones carrying events, so an empty date still
+        // answers the question rather than doing nothing.
+        foreach ($days as $i => $cell) {
+            $days[$i]['day_url'] = route('employee.leaveCalendar', array_merge($q, [
+                'view' => 'day',
+                'date' => $cell['key'],
+            ]));
+        }
+        // Each view names its own period and steps by its own unit.
+        $monthLabel = match ($view) {
+            'day'  => $periodStart->format('l, F j, Y'),
+            'week' => $periodStart->isSameMonth($periodEnd)
+                        ? $periodStart->format('M j') . ' – ' . $periodEnd->format('j, Y')
+                        : $periodStart->format('M j') . ' – ' . $periodEnd->format('M j, Y'),
+            default => $cursor->format('F Y'),
+        };
+
         $currentMonth = $cursor->format('Y-m');
-        $prevUrl  = route('employee.leaveCalendar', array_merge($q, ['month' => $cursor->copy()->subMonth()->format('Y-m')]));
-        $nextUrl  = route('employee.leaveCalendar', array_merge($q, ['month' => $cursor->copy()->addMonth()->format('Y-m')]));
-        $todayUrl = route('employee.leaveCalendar', $q);
+        $currentDate  = $periodStart->format('Y-m-d');
+
+        // Keep the view on every link, or paging would drop back to month view.
+        $qv = array_merge($q, $view !== 'month' ? ['view' => $view] : []);
+
+        $step = fn (Carbon $d) => route('employee.leaveCalendar', $view === 'month'
+            ? array_merge($qv, ['month' => $d->format('Y-m')])
+            : array_merge($qv, ['date' => $d->format('Y-m-d')]));
+
+        [$prevAnchor, $nextAnchor] = match ($view) {
+            'day'   => [$periodStart->copy()->subDay(),  $periodStart->copy()->addDay()],
+            'week'  => [$periodStart->copy()->subWeek(), $periodStart->copy()->addWeek()],
+            default => [$cursor->copy()->subMonth(),     $cursor->copy()->addMonth()],
+        };
+
+        $prevUrl  = $step($prevAnchor);
+        $nextUrl  = $step($nextAnchor);
+        $todayUrl = $view === 'month'
+            ? route('employee.leaveCalendar', $qv)
+            : route('employee.leaveCalendar', array_merge($qv, ['date' => Carbon::today()->format('Y-m-d')]));
+
+        // Week and day carry the anchor, not the period start: from August's
+        // month view the period starts on the 1st, and switching there would
+        // drop you into the week of Jul 26 while today is Aug 13.
+        $viewUrls = [
+            'month' => route('employee.leaveCalendar', array_merge($q, ['month' => $periodStart->format('Y-m')])),
+            'week'  => route('employee.leaveCalendar', array_merge($q, ['view' => 'week', 'date' => $anchor->format('Y-m-d')])),
+            'day'   => route('employee.leaveCalendar', array_merge($q, ['view' => 'day',  'date' => $anchor->format('Y-m-d')])),
+        ];
+
+        $monthNavBase = route('employee.leaveCalendar', $qv);
 
         // Month summary.
-        $monthStart = $cursor->copy()->startOfMonth();
-        $monthEnd   = $cursor->copy()->endOfMonth();
-        $touchesMonth = fn ($s, $e) => Carbon::parse($s)->lte($monthEnd) && Carbon::parse($e)->gte($monthStart);
+        // Counts describe the period on screen — the week or the day when one of
+        // those is showing, not the month it happens to sit in.
+        $touchesPeriod = fn ($s, $e) => Carbon::parse($s)->lte($periodEnd) && Carbon::parse($e)->gte($periodStart);
 
-        $leaveInMonth  = $leaves->filter(fn ($l) => $touchesMonth($l->start_date, $l->end_date));
-        $travelInMonth = $travelOrders->filter(fn ($t) => $touchesMonth($t->travel_date, $t->return_date));
+        $leaveInMonth  = $leaves->filter(fn ($l) => $touchesPeriod($l->start_date, $l->end_date));
+        $travelInMonth = $travelOrders->filter(fn ($t) => $touchesPeriod($t->travel_date, $t->return_date));
 
-        // Distinct in-month days that carry any event.
+        // Distinct days inside the period that carry any event.
         $daysOff = collect($eventsByDate)->keys()
-            ->filter(fn ($d) => Carbon::parse($d)->between($monthStart, $monthEnd))
+            ->filter(fn ($d) => Carbon::parse($d)->between($periodStart, $periodEnd))
             ->count();
 
         $summary = [
@@ -142,7 +219,8 @@ class EmployeeLeaveCalendarController extends Controller
 
         return view('employee.leaveCalendar.leaveCalendar', compact(
             'days', 'monthLabel', 'currentMonth', 'prevUrl', 'nextUrl', 'todayUrl',
-            'summary', 'embed', 'employee'
+            'summary', 'embed', 'employee',
+            'view', 'viewUrls', 'currentDate', 'monthNavBase'
         ));
     }
 

@@ -20,14 +20,18 @@
                 <path d="M9 6V4h6v2"/>
             </svg>
         </button>
-        <button class="chatbot-fullscreen" id="fullscreenButton" onclick="toggleFullscreen()" title="Expand panel" aria-label="Expand panel" aria-pressed="false">
-            <svg id="fullscreenIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        {{-- Expand opens the full AI Assistant page, not a taller floating panel.
+             It used to toggle `.fullscreen-mode`, which only stretched the widget
+             to 560px — still the cut-down surface, with no conversation list, no
+             search and no history, which is exactly what someone reaching for
+             "expand" is after. The thread carries over: the page and the chathead
+             are one conversation (AiConversationStore::continueLatestOrStart). --}}
+        <a class="chatbot-fullscreen" id="fullscreenButton" href="{{ route('admin.ai-assistant') }}"
+           title="Open full AI Assistant" aria-label="Open the full AI Assistant page">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
             </svg>
-            <svg id="fullscreenExitIcon" class="cb-hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
-            </svg>
-        </button>
+        </a>
         <button class="chatbot-close" onclick="toggleChatbot()" title="Close" aria-label="Close assistant">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                 <line x1="18" y1="6" x2="6" y2="18"/>

@@ -176,3 +176,92 @@
     .ec-weekday { font-size: 9.5px; }
     .ec-grid { gap: 5px; }
 }
+
+/* ---------- Month / Week / Day ----------
+   The switcher, and the two views that are not the month grid.
+
+   Week and day reuse the month grid's markup, so the month rules reach them
+   and have to be undone deliberately — `.ec-events { margin-top: auto }` pins
+   a week column's items to the floor of a 340px cell, and the pill's
+   `nowrap` + ellipsis truncates a leave type that now has room to be read.
+   Every override below is qualified with `.ec-days.is-week` (0,3,0) so it
+   outranks the month rule it is correcting. */
+.ec-viewswitch {
+    display: inline-flex; align-items: center; flex: 0 0 auto;
+    background: rgba(var(--theme-primary-rgb), 0.05);
+    border: 1px solid rgba(var(--theme-primary-rgb), 0.1);
+    border-radius: 999px; padding: 3px; gap: 2px; margin-left: 4px;
+}
+.ec-viewswitch-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 58px; padding: 6px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.01em;
+    color: var(--theme-neutral-600); text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.ec-viewswitch-btn:hover { color: var(--gp-pri); background: rgba(var(--theme-primary-rgb), 0.07); }
+.ec-viewswitch-btn.is-active {
+    background: #fff; color: var(--gp-pri);
+    box-shadow: 0 1px 3px rgba(var(--theme-shadow-rgb), 0.12);
+}
+
+/* Week header carries the date under the weekday name. */
+.ec-weekday-num {
+    display: inline-block; margin-left: 4px; font-size: 12.5px;
+    font-weight: 800; color: #334155; letter-spacing: 0;
+}
+.ec-weekday.is-today { color: var(--gp-pri); }
+.ec-weekday.is-today .ec-weekday-num { color: var(--gp-pri); }
+
+/* Week: seven tall columns. */
+.ec-days.is-week .ec-day { min-height: 320px; }
+.ec-days.is-week .ec-events { margin-top: 0; gap: 5px; }
+.ec-days.is-week .ec-pill { padding: 5px 9px; font-size: 11.5px; align-items: flex-start; }
+.ec-days.is-week .ec-pill-dot { margin-top: 4px; }
+.ec-days.is-week .ec-pill-text {
+    white-space: normal; overflow: hidden; text-overflow: clip;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    line-height: 1.35; text-align: left;
+}
+
+/* Day: a list of the day's records in full, not a one-column grid. */
+.ec-dayview { padding: 14px; }
+.ec-dayview-list { display: flex; flex-direction: column; gap: 8px; }
+.ec-dayview-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 15px; border-radius: 12px;
+    background: var(--theme-neutral-50); border: 1px solid #eef0f5;
+    border-left: 3px solid var(--theme-neutral-300);
+}
+.ec-dayview-row.kind-leave-approved { border-left-color: #16a34a; }
+.ec-dayview-row.kind-leave-pending  { border-left-color: #f59e0b; }
+.ec-dayview-row.kind-travel-approved,
+.ec-dayview-row.kind-travel-pending { border-left-color: #3b82f6; }
+.ec-dayview-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--theme-neutral-300); }
+.ec-dayview-row.kind-leave-approved .ec-dayview-dot { background: #16a34a; }
+.ec-dayview-row.kind-leave-pending .ec-dayview-dot  { background: #f59e0b; }
+.ec-dayview-row.kind-travel-approved .ec-dayview-dot,
+.ec-dayview-row.kind-travel-pending .ec-dayview-dot { background: #3b82f6; }
+.ec-dayview-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.ec-dayview-name { font-size: 13.5px; font-weight: 700; color: #334155; }
+.ec-dayview-meta { font-size: 11.5px; font-weight: 600; color: var(--theme-neutral-600); }
+.ec-dayview-range { margin-left: 6px; color: #94a3b8; font-weight: 500; }
+.ec-dayview-status { flex-shrink: 0; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.04em; }
+.ec-dayview-status.is-approved { background: #dcfce7; color: #15803d; }
+.ec-dayview-status.is-pending  { background: #fef3c7; color: #92400e; }
+
+.ec-dayview-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 46px 20px; color: #94a3b8; }
+.ec-dayview-empty svg { display: block; margin: 0 auto 12px; opacity: 0.5; }
+.ec-dayview-empty-title { margin: 0 0 4px; font-size: 14px; font-weight: 700; color: var(--theme-neutral-600); }
+.ec-dayview-empty-sub { margin: 0; font-size: 12px; }
+
+@media (max-width: 720px) {
+    .ec-days.is-week .ec-day { min-height: 190px; }
+    .ec-viewswitch-btn { min-width: 46px; padding: 6px 10px; font-size: 11px; }
+}
+
+/* Week/day period name, beside the picker. */
+.ec-period-label {
+    flex: 0 0 auto; font-size: 13px; font-weight: 700;
+    color: var(--gp-pri); white-space: nowrap; padding: 0 2px;
+}

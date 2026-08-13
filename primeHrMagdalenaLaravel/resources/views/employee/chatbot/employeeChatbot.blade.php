@@ -30,6 +30,16 @@
                     <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
                 </svg>
             </button>
+            {{-- Expand leaves the widget for the full AI Assistant page, which is
+                 the same assistant with the conversation list, search and history
+                 the panel has no room for. The thread continues there: both go
+                 through AiConversationStore::continueLatestOrStart(). --}}
+            <a class="chatbot-fullscreen" href="{{ route('employee.ai-assistant') }}"
+               title="Open full AI Assistant" aria-label="Open the full AI Assistant page">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+            </a>
             <button class="chatbot-close" onclick="togglePermanentChat()" title="Close" aria-label="Close assistant">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
