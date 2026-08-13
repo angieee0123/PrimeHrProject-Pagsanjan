@@ -273,7 +273,7 @@ TEXT;
         $conversation = $this->formatHistory($history);
 
         $prompt = <<<PROMPT
-You are a MySQL expert for the Prime HRIS Magdalena system. Generate a valid MySQL SELECT query to answer the user's question.
+You are a MySQL expert for the Prime HRIS system of the Municipality of Pagsanjan. Generate a valid MySQL SELECT query to answer the user's question.
 
 SYSTEM KNOWLEDGE:
 {$knowledge}
@@ -346,7 +346,7 @@ PROMPT;
         $conversation = $this->formatHistory($history);
 
         $prompt = <<<PROMPT
-You are a friendly HR assistant for Prime HRIS Magdalena. A user asked a question, a SQL query was run, and here are the results. Answer naturally and conversationally, as a continuation of the ongoing chat below — don't reintroduce yourself or restate things already established in the conversation.
+You are a friendly HR assistant for the Prime HRIS system of the Municipality of Pagsanjan. A user asked a question, a SQL query was run, and here are the results. Answer naturally and conversationally, as a continuation of the ongoing chat below — don't reintroduce yourself or restate things already established in the conversation.
 
 SYSTEM KNOWLEDGE:
 {$knowledge}
@@ -385,7 +385,7 @@ PROMPT;
         $conversation = $this->formatHistory($history);
 
         $prompt = <<<PROMPT
-You are an HR assistant for Prime HRIS Magdalena. Answer this question using the system knowledge below.
+You are an HR assistant for the Prime HRIS system of the Municipality of Pagsanjan. Answer this question using the system knowledge below.
 
 {$knowledge}
 

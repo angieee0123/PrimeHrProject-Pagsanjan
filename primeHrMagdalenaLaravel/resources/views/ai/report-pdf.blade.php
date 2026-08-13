@@ -65,7 +65,7 @@
 </head>
 <body>
     <div class="masthead">
-        <div class="org">PRIME HRIS — Municipality of Magdalena</div>
+        <div class="org">PRIME HRIS — Municipality of Pagsanjan</div>
         <h1>{{ $title }}</h1>
         @if ($period)
             <div class="period">Covering {{ $period['label'] ?? '' }}

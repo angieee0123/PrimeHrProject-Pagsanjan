@@ -32,6 +32,15 @@ Route::get('/health', function () {
     ]);
 });
 
+// Public AI assistant for the welcome page's chat widget. No user, so it can
+// only answer policy/how-to/general questions — HrChatbotAnswerer never runs
+// generated SQL for a null caller, and no data capability is reachable without
+// a user. Throttled harder than the authenticated endpoints because there is
+// no login to slow down an abuser spending the shared org API key.
+Route::post('/public/chatbot/chat', [\App\Http\Controllers\PublicChatbotController::class, 'chat'])
+    ->middleware('throttle:10,1')
+    ->name('public.chatbot.chat');
+
 // Authentication routes
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);

@@ -468,7 +468,7 @@
 </div>
 
 <script>
-const CHAT_API = 'http://127.0.0.1:5000/chat';
+const CHAT_API = '{{ route('public.chatbot.chat') }}';
 // The greeting is editable copy, so the "clear chat" reset reads it from the
 // page rather than keeping a second copy in this script that would drift.
 const CHAT_GREETING = @json($bot['greeting']);

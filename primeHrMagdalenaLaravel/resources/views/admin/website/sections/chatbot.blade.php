@@ -54,10 +54,12 @@
     </template>
 </div>
 
-{{-- The public widget talks to a separate service, not the in-app AI
-     Assistant. Worth stating here: the copy is editable, the answers are not
-     coming from anything this editor controls. --}}
-<div class="wc-callout is-warn">
+{{-- The public widget is answered by the PRIME HRIS AI Assistant, limited to
+     public information — no user, so no employee, attendance, payroll, or file
+     data can ever come back to a visitor. Worth stating here: the copy is
+     editable, the answers are policy/how-to only and are not controlled by
+     this editor. --}}
+<div class="wc-callout">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-    <div><strong>Answers come from a separate chatbot service.</strong> This widget posts to <code>127.0.0.1:5000</code>, not to the PRIME HRIS AI Assistant. If that service is not running, visitors are told the assistant could not be reached. Only the wording above is controlled here.</div>
+    <div><strong>Answers come from the PRIME HRIS AI Assistant, limited to public information.</strong> Visitors can ask how-to and HR policy questions — grace periods, leave types, how to file a leave — and general questions. They cannot see any employee records, attendance, payroll, or uploaded files. Only the wording above is controlled here.</div>
 </div>
