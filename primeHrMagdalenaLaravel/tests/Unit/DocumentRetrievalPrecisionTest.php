@@ -42,6 +42,17 @@ class DocumentRetrievalPrecisionTest extends TestCase
         $this->createSchema();
         $this->seedCorpus();
 
+        // The schema above deliberately leaves the AI settings empty so the
+        // provider resolution falls back to the curated map. That fallback only
+        // works if the .env GROQ key does not leak into the test — force it
+        // off everywhere (config, $_ENV, $_SERVER, getenv), otherwise every
+        // unrecognised-term query makes a live API call (which is also exactly
+        // what a spent daily budget would break).
+        config(['services.groq.api_key' => '']);
+        $_ENV['GROQ_API_KEY'] = '';
+        $_SERVER['GROQ_API_KEY'] = '';
+        putenv('GROQ_API_KEY=');
+
         $this->search = new DocumentSearchService(
             new AiAccessPolicy(),
             new SemanticSearchService(),

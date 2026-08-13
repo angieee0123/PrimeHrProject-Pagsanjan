@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\AiRateLimitException;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -151,8 +152,13 @@ TEXT;
      */
     public function explain(?User $user, string $message, array $history = []): string
     {
-        return $this->getPolicyAnswer(trim($message))
-            ?? $this->askDirectly($user, $message, $history);
+        try {
+            return $this->getPolicyAnswer(trim($message))
+                ?? $this->askDirectly($user, $message, $history);
+        } catch (AiRateLimitException $e) {
+            Log::warning('HR chatbot rate limited (explain)');
+            return $e->friendlyMessage();
+        }
     }
 
     /**
@@ -161,6 +167,19 @@ TEXT;
      * @param array<int, array{role: string, content: string}> $history
      */
     public function answer(?User $user, string $message, array $history = []): string
+    {
+        try {
+            return $this->answerInternal($user, $message, $history);
+        } catch (AiRateLimitException $e) {
+            Log::warning('HR chatbot rate limited');
+            return $e->friendlyMessage();
+        }
+    }
+
+    /**
+     * @param array<int, array{role: string, content: string}> $history
+     */
+    private function answerInternal(?User $user, string $message, array $history = []): string
     {
         $message = trim($message);
 

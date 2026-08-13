@@ -96,6 +96,17 @@ class ChatbotControllerTest extends TestCase
             'status' => 'Active',
         ]);
         $this->actingAs($user);
+
+        // Force no provider: the greeting/how-to paths are deterministic, and
+        // without this the resolveConfig fallback reads the real GROQ_API_KEY
+        // from the environment (config, $_ENV, $_SERVER, getenv) and every
+        // greeting makes a live API call — which must not happen in a test,
+        // and now surfaces as a rate-limit exception when the real key's daily
+        // budget is spent.
+        config(['services.groq.api_key' => '']);
+        $_ENV['GROQ_API_KEY'] = '';
+        $_SERVER['GROQ_API_KEY'] = '';
+        putenv('GROQ_API_KEY=');
     }
 
     protected function tearDown(): void

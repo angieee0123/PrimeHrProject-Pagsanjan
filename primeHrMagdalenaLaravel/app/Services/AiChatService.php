@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\AiRateLimitException;
 use App\Models\SystemAiSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
@@ -116,6 +117,8 @@ class AiChatService
             array_unshift($messages, ['role' => 'system', 'content' => $system]);
         }
 
+        $response = null;
+
         try {
             $response = Http::timeout(30)->withHeaders([
                 'Authorization' => 'Bearer ' . $config['api_key'],
@@ -126,15 +129,21 @@ class AiChatService
                 'temperature' => $temperature,
                 'max_tokens' => $maxTokens,
             ]);
-
-            if ($response->successful()) {
-                return $response->json('choices.0.message.content');
-            }
-
-            Log::error("AI chat provider ({$config['provider']}) error: " . $response->status() . ' ' . $response->body());
         } catch (\Throwable $e) {
             Log::error("AI chat provider ({$config['provider']}) exception: " . $e->getMessage());
+            return null;
         }
+
+        if ($response->successful()) {
+            return $response->json('choices.0.message.content');
+        }
+
+        if ($response->status() === 429) {
+            Log::warning("AI chat provider ({$config['provider']}) rate limited: " . $response->body());
+            throw new AiRateLimitException($config['provider'], $response->body());
+        }
+
+        Log::error("AI chat provider ({$config['provider']}) error: " . $response->status() . ' ' . $response->body());
 
         return null;
     }
@@ -155,21 +164,29 @@ class AiChatService
             $payload['system'] = $system;
         }
 
+        $response = null;
+
         try {
             $response = Http::timeout(30)->withHeaders([
                 'x-api-key' => $config['api_key'],
                 'anthropic-version' => '2023-06-01',
                 'Content-Type' => 'application/json',
             ])->post('https://api.anthropic.com/v1/messages', $payload);
-
-            if ($response->successful()) {
-                return $response->json('content.0.text');
-            }
-
-            Log::error('AI chat provider (anthropic) error: ' . $response->status() . ' ' . $response->body());
         } catch (\Throwable $e) {
             Log::error('AI chat provider (anthropic) exception: ' . $e->getMessage());
+            return null;
         }
+
+        if ($response->successful()) {
+            return $response->json('content.0.text');
+        }
+
+        if ($response->status() === 429) {
+            Log::warning('AI chat provider (anthropic) rate limited: ' . $response->body());
+            throw new AiRateLimitException('anthropic', $response->body());
+        }
+
+        Log::error('AI chat provider (anthropic) error: ' . $response->status() . ' ' . $response->body());
 
         return null;
     }

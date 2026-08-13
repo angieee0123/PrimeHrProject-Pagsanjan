@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\AiRateLimitException;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
@@ -53,15 +54,30 @@ class AiQueryService
             ];
         }
 
-        // Resolve "generate a report for that" against the previous turns
-        // before we classify — the pronoun changes what the intent is.
-        $resolved = $this->memory->resolve($message, $history);
-        $intent = $this->detectIntent($resolved, $user, $history);
-
         $started = microtime(true);
 
+        $resolved = $message;
+        $intent = 'general';
+
         try {
+            // Resolve "generate a report for that" against the previous turns
+            // before we classify — the pronoun changes what the intent is.
+            $resolved = $this->memory->resolve($message, $history);
+            $intent = $this->detectIntent($resolved, $user, $history);
+
             $result = $this->dispatch($intent, $user, $resolved, $message, $history);
+        } catch (AiRateLimitException $e) {
+            Log::warning('AI Assistant rate limited', [
+                'user_id' => $user->id,
+                'intent' => $intent,
+            ]);
+
+            $this->audit($user, $intent, $message, 'rate_limited');
+
+            return [
+                'answer' => $e->friendlyMessage(),
+                'intent' => $intent,
+            ];
         } catch (\Throwable $e) {
             Log::error('AI Assistant failure', [
                 'user_id' => $user->id,
