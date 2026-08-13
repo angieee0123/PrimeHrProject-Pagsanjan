@@ -29,6 +29,22 @@ class EmployeeSearchService
     public function search(User $user, string $query, array $history = []): array
     {
         $params = $this->parseSearchQuery($query);
+
+        // Office-holder lookups ("who is the mayor") answer a single person,
+        // not a department roster. They take a separate path because the
+        // general search would otherwise match "Mayor's Office" as a department
+        // and list everyone assigned there.
+        if (!empty($params['role'])) {
+            $employees = $this->runRoleSearch($user, $params['role']);
+            $rows = $this->formatEmployeeResults($employees);
+
+            return [
+                'answer' => $this->narrateRole($user, $params['role'], $rows),
+                'data' => $rows,
+                'count' => $rows->count(),
+            ];
+        }
+
         $employees = $this->runSearch($user, $params);
         $rows = $this->formatEmployeeResults($employees);
 
@@ -64,6 +80,20 @@ class EmployeeSearchService
                 $params['department_id'] = $department->id;
                 break;
             }
+        }
+
+        // Office-holder lookup: "who is the mayor" means the employee linked to
+        // a user account holding that role, not everyone in the Mayor's Office.
+        // "vice mayor" is deliberately excluded — no `vice_mayor` role exists,
+        // and matching the "mayor" inside it would answer with the wrong person.
+        if (preg_match('/\bvice\s+mayor\b/i', $query)) {
+            // Leave to the department/designation search.
+        } elseif (preg_match('/\bmayor\b/i', $query)) {
+            $params['role'] = 'mayor';
+        } elseif (preg_match('/\b(?:system\s+|municipal\s+)?administrator\b/i', $query) || preg_match('/\badmin\b/i', $query)) {
+            $params['role'] = 'admin';
+        } elseif (preg_match('/\b(?:hr\s*(?:officer|head|personnel)?|human\s+resources)\b/i', $query)) {
+            $params['role'] = 'hr';
         }
 
         // Hire-date windows: "hired in 2024", "hired after 2023".
@@ -182,6 +212,78 @@ class EmployeeSearchService
         $this->policy->scopeEmployeeQuery($query, $user);
 
         return $query->limit(self::MAX_RESULTS)->get();
+    }
+
+    /**
+     * The employee(s) linked to a user account holding the given role.
+     *
+     * `users` is deliberately excluded from generated SQL, but that ban is on
+     * arbitrary model-generated statements in SafeSqlService, not on scoped
+     * application code: this lookup goes through Eloquent and is re-scoped
+     * through AiAccessPolicy like every other retrieval, so it cannot leak a
+     * record the caller may not see.
+     */
+    private function runRoleSearch(User $user, string $role): Collection
+    {
+        $employeeIds = User::query()
+            ->where('roles', 'like', '%"' . $role . '"%')
+            ->get()
+            ->filter(fn (User $u) => $u->hasRole($role))
+            ->pluck('employee_id')
+            ->filter(fn ($id) => $id !== null)
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        // No account holds the role: return nothing rather than let the
+        // scoping below fall through to an unscoped full listing.
+        if ($employeeIds->isEmpty()) {
+            return collect();
+        }
+
+        $query = Employee::query()->with([
+            'employmentDetail.departmentRelation',
+            'employmentDetail.designationRelation',
+        ])->whereIn('id', $employeeIds);
+
+        $this->policy->scopeEmployeeQuery($query, $user);
+
+        return $query->limit(self::MAX_RESULTS)->get();
+    }
+
+    /**
+     * @param Collection<int, array<string, mixed>> $rows
+     */
+    private function narrateRole(User $user, string $role, Collection $rows): string
+    {
+        $label = match ($role) {
+            'mayor' => 'Mayor',
+            'admin' => 'system administrator',
+            'hr' => 'HR officer',
+            default => $role,
+        };
+
+        $notice = $this->policy->scopeNotice($user);
+
+        if ($rows->isEmpty()) {
+            return "No employee account is currently linked to the {$label} role."
+                . ($notice ? "\n\n{$notice}" : '');
+        }
+
+        $lines = $rows->map(function (array $row) {
+            return '- ' . implode(' · ', array_filter([
+                $row['name'],
+                $row['employee_id'] ? "({$row['employee_id']})" : null,
+                $row['designation'],
+                $row['department'],
+            ]));
+        })->implode("\n");
+
+        $opening = $rows->count() === 1
+            ? "The {$label} is:"
+            : "Employees holding the {$label} role:";
+
+        return $opening . "\n" . $lines . ($notice ? "\n\n{$notice}" : '');
     }
 
     /**

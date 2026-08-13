@@ -398,7 +398,10 @@ Provide a clear, friendly answer in 2-4 sentences. Match the user's language (Ta
 PROMPT;
 
         return $this->callAi($user, $prompt, 0.7, 500)
-            ?? "I'm not sure how to answer that. Could you rephrase or ask about employees, attendance, leave balances, or HR policies?";
+            ?? "I couldn't form a confident answer to that right now. That question needs the AI "
+                . 'chat provider, which appears to be unavailable or not configured (Settings → '
+                . 'AI/Chatbot). I can still answer directly from the system — try asking about '
+                . 'employees, attendance, leave balances, payroll, or HR policy.';
     }
 
     /**

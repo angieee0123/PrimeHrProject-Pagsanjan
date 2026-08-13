@@ -1,0 +1,2441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="bomAemQMqX9JAqAi17dPPMm1PAsRIwwL9DMC0nPl">
+    <title>PRIME HRIS - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script type="module" src="http://127.0.0.1:5173/@vite/client"></script><link rel="stylesheet" href="http://127.0.0.1:5173/resources/css/app.css" /><link rel="stylesheet" href="http://127.0.0.1:5173/resources/css/admin/admin.css" /><link rel="stylesheet" href="http://127.0.0.1:5173/resources/css/admin/adminDashboard.css" /><link rel="stylesheet" href="http://127.0.0.1:5173/resources/css/admin/adminAttendance.css" /><link rel="stylesheet" href="http://127.0.0.1:5173/resources/css/admin/adminRecruitment.css" /><link rel="stylesheet" href="http://127.0.0.1:5173/resources/css/admin/adminTraining.css" /><link rel="stylesheet" href="http://127.0.0.1:5173/resources/css/admin/adminPerformance.css" /><link rel="stylesheet" href="http://127.0.0.1:5173/resources/css/admin/adminDepartment.css" /><link rel="stylesheet" href="http://127.0.0.1:5173/resources/css/admin/employeeWizard.css" /><link rel="stylesheet" href="http://127.0.0.1:5173/resources/css/admin/adminChatbot.css" /><link rel="stylesheet" href="http://127.0.0.1:5173/resources/css/admin/adminPayroll.css" /><link rel="stylesheet" href="http://127.0.0.1:5173/resources/css/topbarTheme.css" />        <script type="module" src="http://127.0.0.1:5173/@vite/client"></script><link rel="stylesheet" href="http://127.0.0.1:5173/resources/css/admin/adminWebsite.css" />    
+    <style>:root {
+    --theme-primary: #0b044d;
+    --theme-primary-2: #150a75;
+    --theme-primary-light: #eceafd;
+    --theme-primary-border: #cbc7f5;
+    --theme-primary-muted: #948dd8;
+    --theme-primary-soft: #f3f2fe;
+    --theme-accent: #3121ca;
+    --theme-link: #3121ca;
+    --theme-on-primary: #ffffff;
+    --theme-on-primary-rgb: 255, 255, 255;
+    --theme-sidebar-bg: #0b044d;
+    --theme-sidebar-text: #b5b0de;
+    --theme-sidebar-active: #ffffff;
+    --theme-btn-primary-bg: #3121ca;
+    --theme-btn-primary-fg: #ffffff;
+    --theme-stat-icon-bg: #eceafd;
+    --theme-stat-icon-fg: #0b044d;
+    --theme-focus-ring: rgba(49, 33, 202, 0.18);
+    --theme-ink: #221e48;
+    --theme-text-mid: #575478;
+    --theme-text-soft: #918eae;
+    --theme-muted: #807d9c;
+    --theme-bg: #f6f6fb;
+    --theme-bg-tint: #f5f4fb;
+    --theme-bg-tint-2: #f0eefa;
+    --theme-border: #e8e7f6;
+    --theme-primary-50: #f8f7fc;
+    --theme-neutral-50: #f9f9fb;
+    --theme-primary-100: #f1f0fa;
+    --theme-neutral-100: #f3f3f6;
+    --theme-primary-200: #e8e6f7;
+    --theme-neutral-200: #ececf1;
+    --theme-primary-300: #dddbf3;
+    --theme-neutral-300: #e4e3eb;
+    --theme-primary-400: #beb9f4;
+    --theme-neutral-400: #d1d0dd;
+    --theme-primary-500: #8e84eb;
+    --theme-neutral-500: #aeacc3;
+    --theme-primary-600: #5c4cf0;
+    --theme-neutral-600: #918eae;
+    --theme-primary-700: #2612de;
+    --theme-neutral-700: #68648b;
+    --theme-primary-800: #1c0da5;
+    --theme-neutral-800: #4e4b68;
+    --theme-primary-900: #120868;
+    --theme-neutral-900: #312f41;
+    --theme-primary-950: #0c0647;
+    --theme-neutral-950: #21202c;
+    --theme-success: #1f8444;
+    --theme-success-fg: #ffffff;
+    --theme-success-subtle: #f0f7f2;
+    --theme-success-border: #d0e9d9;
+    --theme-success-emphasis: #1b743c;
+    --theme-danger: #c33228;
+    --theme-danger-fg: #ffffff;
+    --theme-danger-subtle: #f8f0ef;
+    --theme-danger-border: #ead1cf;
+    --theme-danger-emphasis: #771f18;
+    --theme-warning: #916e18;
+    --theme-warning-fg: #ffffff;
+    --theme-warning-subtle: #f8f5ef;
+    --theme-warning-border: #ebe3ce;
+    --theme-warning-emphasis: #7b5e14;
+    --theme-info: #217bab;
+    --theme-info-fg: #ffffff;
+    --theme-info-subtle: #eff5f8;
+    --theme-info-border: #cfe1eb;
+    --theme-info-emphasis: #175678;
+    --theme-primary-rgb: 11, 4, 77;
+    --theme-accent-rgb: 49, 33, 202;
+    --theme-ink-rgb: 34, 30, 72;
+    --theme-shadow-rgb: 18, 15, 46;
+    --gp-pri: #0b044d;
+    --gp-pri-2: #150a75;
+    --gp-ink: #221e48;
+    --gp-muted: #807d9c;
+    --gp-text-mid: #575478;
+    --gp-text-soft: #918eae;
+    --gp-bg: #f6f6fb;
+    --gp-bg-tint: #f5f4fb;
+    --gp-bg-tint-2: #f0eefa;
+    --gp-border: #e8e7f6;
+    --c-blue: #3121ca;
+    --c-blue-2: #150a75;
+    --gp-good: #1f8444;
+    --gp-bad: #c33228;
+    --gp-accent-gold: #916e18;
+    --set-blue: #3121ca;
+    --set-blue-hover: #241895;
+    --set-blue-tint: #f3f2fe;
+    --set-blue-tint-2: #eceafd;
+    --set-ring: rgba(49, 33, 202, 0.18);
+    --set-line: #e8e7f6;
+    --set-line-soft: #f5f4fb;
+}</style>
+</head>
+<body>
+    <div class="app-layout">
+        
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </button>
+
+        
+        <div class="mobile-overlay" id="mobile-overlay"></div>
+
+        <aside class="sidebar " id="sidebar">
+
+    <div class="sidebar-header">
+        <div class="logo">
+            <div class="logo-mark">
+                <img src="http://localhost/municipal-of-pagsanjan-logo.jpg" alt="Pagsanjan Logo"
+                     style="width:32px;height:32px;border-radius:50%;object-fit:cover"
+                     onerror="this.style.display='none'">
+            </div>
+            <div class="logo-text-wrap" id="logo-text">
+                <span class="logo-text">PRIME HRIS</span>
+                <span class="logo-sub">Pagsanjan, Laguna</span>
+            </div>
+        </div>
+        <button class="toggle-btn" id="toggle-btn" aria-label="Toggle sidebar">‹</button>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebar-nav">
+        
+        <a href="http://localhost/admin/dashboard"
+           class="nav-item "
+           title="Dashboard">
+            <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+</span>
+            <span class="nav-label">Dashboard</span>
+                    </a>
+
+        <a href="http://localhost/admin/ai-assistant"
+           class="nav-item "
+           title="AI Assistant">
+            <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                
+            <path d="M12 3l1.6 4.6L18 9l-4.4 1.4L12 15l-1.6-4.6L6 9l4.4-1.4z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>
+            </svg>
+</span>
+            <span class="nav-label">AI Assistant</span>
+                    </a>
+
+                        <div class="nav-group  is-collapsed " data-nav-group="organization" >
+            <button type="button" class="nav-section-toggle"
+                    aria-expanded="false" aria-controls="nav-group-organization">
+                <span class="nav-section-label">ORGANIZATION</span>
+                
+                <span class="nav-section-count">5</span>
+                <svg class="nav-section-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div class="nav-group-items" id="nav-group-organization">
+                                <a href="http://localhost/admin/personnel"
+                   class="nav-item "
+                   title="Personnel">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+</span>
+                    <span class="nav-label">Personnel</span>
+                                    </a>
+                                <a href="http://localhost/admin/departments"
+                   class="nav-item "
+                   title="Departments">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+</span>
+                    <span class="nav-label">Departments</span>
+                                    </a>
+                                <a href="http://localhost/admin/recruitment"
+                   class="nav-item "
+                   title="Recruitment">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+            </svg>
+</span>
+                    <span class="nav-label">Recruitment</span>
+                                    </a>
+                                <a href="http://localhost/admin/training"
+                   class="nav-item "
+                   title="Training &amp; Development">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+</span>
+                    <span class="nav-label">Training &amp; Development</span>
+                                    </a>
+                                <a href="http://localhost/admin/performance"
+                   class="nav-item "
+                   title="Performance Management">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+</span>
+                    <span class="nav-label">Performance Management</span>
+                                    </a>
+                            </div>
+        </div>
+                        <div class="nav-group  is-collapsed " data-nav-group="time-absence" >
+            <button type="button" class="nav-section-toggle"
+                    aria-expanded="false" aria-controls="nav-group-time-absence">
+                <span class="nav-section-label">TIME &amp; ABSENCE</span>
+                
+                <span class="nav-section-count">5</span>
+                <svg class="nav-section-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div class="nav-group-items" id="nav-group-time-absence">
+                                <a href="http://localhost/admin/attendance"
+                   class="nav-item "
+                   title="Attendance">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/>
+            </svg>
+</span>
+                    <span class="nav-label">Attendance</span>
+                                    </a>
+                                <a href="http://localhost/admin/attendance/scanner"
+                   class="nav-item "
+                   title="Attendance Scanner">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><line x1="14" y1="14" x2="14" y2="21"/><line x1="18" y1="14" x2="21" y2="14"/><line x1="18" y1="18" x2="21" y2="21"/>
+            </svg>
+</span>
+                    <span class="nav-label">Attendance Scanner</span>
+                                    </a>
+                                <a href="http://localhost/admin/leave"
+                   class="nav-item "
+                   title="Leave &amp; Benefits">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+</span>
+                    <span class="nav-label">Leave &amp; Benefits</span>
+                                    </a>
+                                <a href="http://localhost/admin/travelorder"
+                   class="nav-item "
+                   title="Travel Orders">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+            </svg>
+</span>
+                    <span class="nav-label">Travel Orders</span>
+                                    </a>
+                                <a href="http://localhost/admin/passslip"
+                   class="nav-item "
+                   title="Pass Slips">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                
+            <path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/><line x1="13" y1="7" x2="13" y2="9"/><line x1="13" y1="12" x2="13" y2="14"/><line x1="13" y1="16" x2="13" y2="18"/>
+            </svg>
+</span>
+                    <span class="nav-label">Pass Slips</span>
+                                    </a>
+                            </div>
+        </div>
+                        <div class="nav-group  is-collapsed " data-nav-group="compensation" >
+            <button type="button" class="nav-section-toggle"
+                    aria-expanded="false" aria-controls="nav-group-compensation">
+                <span class="nav-section-label">COMPENSATION</span>
+                
+                <span class="nav-section-count">2</span>
+                <svg class="nav-section-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div class="nav-group-items" id="nav-group-compensation">
+                                <a href="http://localhost/admin/payroll"
+                   class="nav-item "
+                   title="Payroll">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" stroke="none"><text x="3" y="19" font-size="17" font-weight="bold" font-family="Arial, sans-serif">₱</text></svg>
+</span>
+                    <span class="nav-label">Payroll</span>
+                                    </a>
+                                <a href="http://localhost/admin/deductions"
+                   class="nav-item "
+                   title="Deductions">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+</span>
+                    <span class="nav-label">Deductions</span>
+                                    </a>
+                            </div>
+        </div>
+                        <div class="nav-group " data-nav-group="system"  data-holds-current >
+            <button type="button" class="nav-section-toggle"
+                    aria-expanded="true" aria-controls="nav-group-system">
+                <span class="nav-section-label">SYSTEM</span>
+                
+                <span class="nav-section-count">3</span>
+                <svg class="nav-section-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div class="nav-group-items" id="nav-group-system">
+                                <a href="http://localhost/admin/reports"
+                   class="nav-item "
+                   title="Reports">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+</span>
+                    <span class="nav-label">Reports</span>
+                                    </a>
+                                <a href="http://localhost/admin/website"
+                   class="nav-item active"
+                   title="Website Content">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+</span>
+                    <span class="nav-label">Website Content</span>
+                                        <span class="nav-active-bar"></span>
+                                    </a>
+                                <a href="http://localhost/admin/settings"
+                   class="nav-item "
+                   title="Settings">
+                    <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+</span>
+                    <span class="nav-label">Settings</span>
+                                    </a>
+                            </div>
+        </div>
+        
+        
+        <div class="nav-divider"></div>
+
+        
+        <button type="button" class="nav-item nav-logout" onclick="openLogoutModal()" title="Logout">
+            <span class="nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+</span>
+            <span class="nav-label">Log Out</span>
+        </button>
+    </nav>
+
+    <div class="sidebar-footer " id="sidebar-footer">
+        
+        <div class="user-avatar-wrap">
+                                        <div class="user-avatar">AD</div>
+                        <span class="user-status-dot"></span>
+        </div>
+        <div class="user-info" id="user-info">
+            <p class="user-name">Admin User</p>
+            <p class="user-role">Administrator</p>
+        </div>
+            </div>
+</aside>
+
+<div class="logout-modal" id="logoutModal" aria-hidden="true">
+    <div class="logout-modal-backdrop" onclick="closeLogoutModal()"></div>
+    <div class="logout-modal-card" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle">
+        <div class="logout-modal-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+        </div>
+        <h3 class="logout-modal-title" id="logoutModalTitle">Sign out, Admin?</h3>
+        <p class="logout-modal-text">You're about to end your PRIME HRIS session. You'll need to sign in again to pick up where you left off.</p>
+        <div class="logout-modal-actions">
+            <button type="button" class="logout-modal-btn logout-modal-cancel" onclick="closeLogoutModal()">Stay signed in</button>
+            <button type="button" class="logout-modal-btn logout-modal-confirm" onclick="confirmLogout()">Yes, log me out</button>
+        </div>
+    </div>
+</div>
+
+<form action="http://localhost/logout" method="POST" id="logout-form" class="logout-hidden-form">
+    <input type="hidden" name="_token" value="bomAemQMqX9JAqAi17dPPMm1PAsRIwwL9DMC0nPl" autocomplete="off"></form>
+        <main class="main-content">
+
+            
+
+
+<div class="welcome-banner">
+    <div class="banner-left">
+        <div class="banner-icon">
+            <svg width="22" height="22" fill="none" stroke="var(--theme-topbar-icon)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div>
+            <h2>Website Content</h2>
+                            <p>Edit the text on the public welcome page</p>
+                    </div>
+    </div>
+            <div class="banner-right">
+            <a href="http://localhost" target="_blank" rel="noopener" class="btn-export adm-btn-primary-solid">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            View live page
+        </a>
+        </div>
+    </div>
+<div class="notif-wrap">
+    <button class="notif-btn" id="notifBtn" onclick="toggleNotif()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <span class="notif-badge " id="notifDot">0</span>
+    </button>
+    <div class="notif-panel" id="notifPanel">
+        <div class="notif-head">
+            <div>
+                <h3>Notifications</h3>
+                <p>You have <span id="unreadCount">0</span> unread message</p>
+            </div>
+            <button class="notif-clear" onclick="markAllAsRead()" title="Mark all as read">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+        </div>
+        <div class="notif-body" id="notifBody">
+                                    <div class="notif-empty">
+                <svg width="40" height="40" fill="none" stroke="#d9d9ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <p>No notifications</p>
+            </div>
+                    </div>
+    </div>
+</div>
+
+
+<style>
+.notif-wrap { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+/* adminDashboard.css also styles .notif-btn on admin pages with !important-
+   free rules of the same values — kept in sync here so non-dashboard admin
+   pages (which don't load adminDashboard.css) still match. */
+.notif-btn { width: 46px; height: 46px; border-radius: 11px; background: #fff; border: 1px solid var(--theme-neutral-300); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.2s; position: relative; }
+.notif-btn:hover { border-color: var(--gp-pri); box-shadow: 0 4px 12px rgba(11,4,77,0.15); transform: translateY(-1px); }
+.notif-btn svg { color: var(--gp-pri); width: 22px; height: 22px; }
+.notif-badge { position: absolute; top: -6px; right: -6px; min-width: 19px; height: 19px; padding: 0 5px; background: var(--theme-danger); color: #fff; font-size: 10px; font-weight: 700; line-height: 1; border-radius: 999px; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(239,68,68,.4); display: none; align-items: center; justify-content: center; }
+.notif-badge.active { display: inline-flex; animation: notifPulse 2s infinite; }
+@keyframes notifPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+.notif-panel { position: absolute; top: 56px; right: 0; width: 420px; background: #fff; border-radius: 16px; box-shadow: 0 12px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05); display: none; flex-direction: column; overflow: hidden; }
+.notif-panel.open { display: flex; animation: notifFadeIn 0.25s ease; }
+@keyframes notifFadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+.notif-head { padding: 12px 16px; border-bottom: 1px solid var(--theme-primary-light); display: flex; justify-content: space-between; align-items: flex-start; }
+.notif-head h3 { font-size: 13px; font-weight: 700; color: var(--gp-pri); margin: 0 0 2px; }
+.notif-head p { font-size: 11px; color: var(--theme-neutral-700); margin: 0; }
+.notif-head p span { font-weight: 600; color: var(--gp-pri); }
+.notif-clear { width: 28px; height: 28px; border-radius: 8px; background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: var(--theme-neutral-700); }
+.notif-clear:hover { background: var(--theme-primary-soft); color: var(--theme-danger); }
+.notif-body { max-height: 420px; overflow-y: auto; padding: 8px; }
+.notif-card { background: var(--theme-neutral-50); border: 1px solid var(--theme-primary-light); border-radius: 10px; padding: 10px 12px; display: flex; gap: 10px; margin-bottom: 8px; transition: all 0.2s; cursor: pointer; }
+.notif-card:last-child { margin-bottom: 0; }
+.notif-card:hover { background: var(--theme-primary-soft); border-color: var(--theme-neutral-300); }
+.notif-card.new { background: linear-gradient(135deg, var(--theme-primary-soft) 0%, var(--theme-neutral-50) 100%); border-color: var(--theme-neutral-400); }
+.notif-left { flex-shrink: 0; }
+.notif-avatar { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+.notif-avatar svg { width: 16px; height: 16px; }
+.notif-right { flex: 1; min-width: 0; }
+.notif-right h4 { font-size: 12px; font-weight: 700; color: var(--gp-pri); margin: 0 0 3px; }
+.notif-msg { font-size: 11px; color: var(--gp-text-mid); line-height: 1.4; margin: 0 0 6px; }
+.notif-time { font-size: 10px; color: var(--gp-text-soft); display: flex; align-items: center; gap: 4px; }
+.notif-time svg { opacity: 0.7; }
+.notif-empty { padding: 40px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.notif-empty svg { width: 40px; height: 40px; stroke: var(--theme-neutral-400); margin-bottom: 10px; display: block; }
+.notif-empty p { font-size: 12px; color: var(--gp-text-soft); margin: 0; }
+@media (max-width: 768px) {
+    .notif-wrap { top: 12px; right: 12px; }
+    .notif-panel {
+        position: fixed;
+        top: 64px;
+        right: 12px;
+        left: 12px;
+        width: auto;
+        max-height: calc(100vh - 84px);
+        border-radius: 14px;
+    }
+    .notif-body { max-height: calc(100vh - 190px); }
+}
+@media (max-width: 480px) {
+    .notif-wrap { top: 12px; right: 12px; }
+    .notif-panel { position: fixed; top: 68px; right: 12px; left: 12px; width: auto; border-radius: 14px; max-height: calc(100vh - 90px); }
+    .notif-body { max-height: calc(100vh - 200px); }
+    .notif-head { padding: 16px; }
+    .notif-card { padding: 12px; gap: 10px; }
+    .notif-avatar { width: 38px; height: 38px; }
+    .notif-right h4 { font-size: 13px; }
+    .notif-msg { font-size: 12px; margin-bottom: 8px; }
+}
+</style>
+
+<script>
+function toggleNotif() {
+    const panel = document.getElementById('notifPanel');
+    panel.classList.toggle('open');
+}
+
+function markAllAsRead() {
+    fetch('/api/notifications/mark-all-read', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ audience: 'admin' })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.querySelectorAll('.notif-card.new').forEach(card => {
+                card.classList.remove('new');
+            });
+            document.getElementById('unreadCount').textContent = '0';
+            document.getElementById('notifDot').classList.remove('active');
+        }
+    });
+}
+
+function markAsReadAndRedirect(notificationId, link) {
+    fetch(`/api/notifications/${notificationId}/read`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(() => {
+        if (link && link !== '#') {
+            window.location.href = link;
+        }
+    });
+}
+
+document.addEventListener('click', (e) => {
+    const wrap = document.querySelector('.notif-wrap');
+    const panel = document.getElementById('notifPanel');
+    if (wrap && panel && !wrap.contains(e.target)) {
+        panel.classList.remove('open');
+    }
+});
+</script>
+
+
+<div class="glass-shell">
+<div class="wc-container" data-website-editor
+     data-update-url="http://localhost/admin/website"
+     data-csrf="bomAemQMqX9JAqAi17dPPMm1PAsRIwwL9DMC0nPl">
+
+    
+    <aside class="wc-rail">
+        <div class="wc-rail-head">
+            <p class="wc-rail-title">Page sections</p>
+            <p class="wc-rail-sub">Pick a part of the welcome page to edit</p>
+        </div>
+
+        
+                        <div class="wc-nav-group">
+            <p class="wc-nav-group-title">
+                Everyday updates
+                            </p>
+            <nav class="wc-nav">
+                                <button type="button" class="wc-nav-item active" data-target="announcements">
+                    <span class="wc-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+                    <span class="wc-nav-label">Announcements &amp; advisories</span>
+                                    </button>
+                                                <button type="button" class="wc-nav-item" data-target="contact">
+                    <span class="wc-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+                    <span class="wc-nav-label">Contact details</span>
+                                    </button>
+                                                <button type="button" class="wc-nav-item" data-target="hero">
+                    <span class="wc-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><line x1="7" y1="20" x2="17" y2="20"/></svg></span>
+                    <span class="wc-nav-label">Hero banner</span>
+                                    </button>
+                                                <button type="button" class="wc-nav-item" data-target="about">
+                    <span class="wc-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+                    <span class="wc-nav-label">About the municipality</span>
+                                    </button>
+                                                <button type="button" class="wc-nav-item" data-target="govbar">
+                    <span class="wc-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="4" rx="1"/><line x1="2" y1="14" x2="22" y2="14"/><line x1="2" y1="19" x2="14" y2="19"/></svg></span>
+                    <span class="wc-nav-label">Top government bar</span>
+                                    </button>
+                                            </nav>
+        </div>
+                <div class="wc-nav-group">
+            <p class="wc-nav-group-title">
+                Page setup
+                                    <span class="wc-nav-group-hint" title="These have rules to follow — icon choices, link formats, image sizes">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                    </span>
+                            </p>
+            <nav class="wc-nav">
+                                <button type="button" class="wc-nav-item" data-target="brand">
+                    <span class="wc-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/></svg></span>
+                    <span class="wc-nav-label">Logo &amp; branding</span>
+                                    </button>
+                                                <button type="button" class="wc-nav-item" data-target="services">
+                    <span class="wc-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+                    <span class="wc-nav-label">Municipal services</span>
+                                    </button>
+                                                <button type="button" class="wc-nav-item" data-target="cta">
+                    <span class="wc-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                    <span class="wc-nav-label">PRIME HRIS call-to-action</span>
+                                    </button>
+                                                <button type="button" class="wc-nav-item" data-target="footer">
+                    <span class="wc-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="5" x2="22" y2="5"/><line x1="2" y1="10" x2="14" y2="10"/><rect x="2" y="16" width="20" height="4" rx="1"/></svg></span>
+                    <span class="wc-nav-label">Footer</span>
+                                    </button>
+                                                <button type="button" class="wc-nav-item" data-target="chatbot">
+                    <span class="wc-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                    <span class="wc-nav-label">Public chatbot</span>
+                                    </button>
+                                            </nav>
+        </div>
+                <div class="wc-rail-note">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <p>Changes go live on the public page as soon as you save. A dot marks a section that has been edited; <strong>Reset</strong> puts it back to the original wording.</p>
+        </div>
+    </aside>
+
+    
+    <div class="wc-panels">
+
+                <form class="wc-panel active" data-section="announcements" data-panel="announcements">
+            <div class="wc-panel-head">
+                <div>
+                    <h3 class="wc-panel-title">Announcements &amp; advisories</h3>
+                    <p class="wc-panel-sub" data-role="meta">
+                                                    Showing the original wording — not edited yet
+                                            </p>
+                </div>
+            </div>
+
+            <div class="wc-fields">
+                <div class="wc-grid">
+    <label class="wc-field">
+        <span class="wc-label">Small label above the heading</span>
+        <input type="text" class="wc-input" name="eyebrow" value="LATEST UPDATES">
+    </label>
+    <label class="wc-field">
+        <span class="wc-label">Heading</span>
+        <input type="text" class="wc-input" name="heading" value="Announcements &amp; Advisories">
+    </label>
+</div>
+
+<label class="wc-field">
+    <span class="wc-label">Intro sentence</span>
+    <input type="text" class="wc-input" name="sub" value="Stay informed with the latest news from the Municipal Government.">
+</label>
+
+<label class="wc-field">
+    <span class="wc-label">Heading above the smaller updates</span>
+    <input type="text" class="wc-input" name="side_heading" value="More Updates">
+</label>
+
+
+<div class="wc-callout">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <div><strong>The newest date is featured.</strong> Whichever entry has the latest date gets the large panel; the rest fall into the “More Updates” list. You do not need to reorder them.</div>
+</div>
+
+<div class="wc-repeat" data-repeat="items" data-max="20">
+    <div class="wc-repeat-head">
+        <span class="wc-label">Announcements</span>
+        <button type="button" class="wc-add" data-add>+ Add announcement</button>
+    </div>
+    <div class="wc-rows is-stacked" data-rows>
+                <div class="wc-card" data-row>
+            <div class="wc-card-top">
+                <input type="date" class="wc-input wc-date" data-name="date" value="2025-06-20">
+                <select class="wc-input wc-select" data-name="tag">
+                                            <option value="Advisory" selected>Advisory</option>
+                                            <option value="Event" >Event</option>
+                                            <option value="Program" >Program</option>
+                                            <option value="Notice" >Notice</option>
+                                    </select>
+                <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+            </div>
+            <input type="text" class="wc-input" data-name="title" value="Schedule of Payment for Real Property Tax — 2nd Quarter 2025" placeholder="Title">
+            <textarea class="wc-input wc-area" rows="2" data-name="excerpt" placeholder="Short summary shown on the page">Property owners are reminded to settle 2nd quarter real property tax payments on or before the deadline to avoid penalties.</textarea>
+        </div>
+                <div class="wc-card" data-row>
+            <div class="wc-card-top">
+                <input type="date" class="wc-input wc-date" data-name="date" value="2025-06-18">
+                <select class="wc-input wc-select" data-name="tag">
+                                            <option value="Advisory" >Advisory</option>
+                                            <option value="Event" selected>Event</option>
+                                            <option value="Program" >Program</option>
+                                            <option value="Notice" >Notice</option>
+                                    </select>
+                <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+            </div>
+            <input type="text" class="wc-input" data-name="title" value="Pagsanjan Founding Anniversary Celebration — June 25, 2025" placeholder="Title">
+            <textarea class="wc-input wc-area" rows="2" data-name="excerpt" placeholder="Short summary shown on the page">Join the community celebration marking the founding anniversary of Pagsanjan with a parade, cultural shows, and local exhibits.</textarea>
+        </div>
+                <div class="wc-card" data-row>
+            <div class="wc-card-top">
+                <input type="date" class="wc-input wc-date" data-name="date" value="2025-06-15">
+                <select class="wc-input wc-select" data-name="tag">
+                                            <option value="Advisory" >Advisory</option>
+                                            <option value="Event" >Event</option>
+                                            <option value="Program" selected>Program</option>
+                                            <option value="Notice" >Notice</option>
+                                    </select>
+                <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+            </div>
+            <input type="text" class="wc-input" data-name="title" value="MSWD Livelihood Training Program — Open for Registration" placeholder="Title">
+            <textarea class="wc-input wc-area" rows="2" data-name="excerpt" placeholder="Short summary shown on the page">Residents may now register for the MSWD livelihood training program offering skills development and starter kits.</textarea>
+        </div>
+                <div class="wc-card" data-row>
+            <div class="wc-card-top">
+                <input type="date" class="wc-input wc-date" data-name="date" value="2025-06-10">
+                <select class="wc-input wc-select" data-name="tag">
+                                            <option value="Advisory" >Advisory</option>
+                                            <option value="Event" >Event</option>
+                                            <option value="Program" >Program</option>
+                                            <option value="Notice" selected>Notice</option>
+                                    </select>
+                <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+            </div>
+            <input type="text" class="wc-input" data-name="title" value="Water Interruption Advisory — Barangay Pinagsanjan Area" placeholder="Title">
+            <textarea class="wc-input wc-area" rows="2" data-name="excerpt" placeholder="Short summary shown on the page">A scheduled water service interruption will affect Barangay Pinagsanjan Area residents; please store water in advance.</textarea>
+        </div>
+            </div>
+    <template data-template>
+        <div class="wc-card" data-row>
+            <div class="wc-card-top">
+                <input type="date" class="wc-input wc-date" data-name="date" value="2026-08-13">
+                <select class="wc-input wc-select" data-name="tag">
+                                            <option value="Advisory">Advisory</option>
+                                            <option value="Event">Event</option>
+                                            <option value="Program">Program</option>
+                                            <option value="Notice">Notice</option>
+                                    </select>
+                <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+            </div>
+            <input type="text" class="wc-input" data-name="title" value="" placeholder="Title">
+            <textarea class="wc-input wc-area" rows="2" data-name="excerpt" placeholder="Short summary shown on the page"></textarea>
+        </div>
+    </template>
+</div>
+            </div>
+
+            <p class="wc-msg" data-role="msg" hidden></p>
+
+            <div class="wc-actions">
+                <button type="button" class="btn-export" data-role="reset">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 8"/></svg>
+                    Reset to original
+                </button>
+                <button type="submit" class="btn-export adm-btn-primary-solid" data-role="save">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save changes
+                </button>
+            </div>
+        </form>
+                <form class="wc-panel" data-section="contact" data-panel="contact">
+            <div class="wc-panel-head">
+                <div>
+                    <h3 class="wc-panel-title">Contact details</h3>
+                    <p class="wc-panel-sub" data-role="meta">
+                                                    Showing the original wording — not edited yet
+                                            </p>
+                </div>
+            </div>
+
+            <div class="wc-fields">
+                <fieldset class="wc-group">
+    <div class="wc-group-head">
+        <h4 class="wc-group-title">Section heading</h4>
+        <p class="wc-group-sub">The wording at the top of the Contact section.</p>
+    </div>
+    <div class="wc-group-body">
+        <div class="wc-grid">
+            <label class="wc-field">
+                <span class="wc-label">Small label above the heading</span>
+                <input type="text" class="wc-input" name="eyebrow" value="GET IN TOUCH">
+            </label>
+            <label class="wc-field">
+                <span class="wc-label">Heading</span>
+                <input type="text" class="wc-input" name="heading" value="Contact Us">
+            </label>
+        </div>
+        <label class="wc-field">
+            <span class="wc-label">Intro sentence</span>
+            <input type="text" class="wc-input" name="sub" value="Reach out to the Municipal Government of Pagsanjan for inquiries, concerns, or assistance.">
+        </label>
+    </div>
+</fieldset>
+
+<fieldset class="wc-group">
+    <div class="wc-group-head">
+        <h4 class="wc-group-title">Office details</h4>
+        <p class="wc-group-sub">Leave any line blank to hide it from the page.</p>
+    </div>
+    <div class="wc-group-body">
+        <div class="wc-grid">
+            <label class="wc-field">
+                <span class="wc-label">Office name</span>
+                <input type="text" class="wc-input" name="office_title" value="Municipal Hall">
+            </label>
+            <label class="wc-field">
+                <span class="wc-label">Location line</span>
+                <input type="text" class="wc-input" name="office_sub" value="Pagsanjan, Laguna">
+            </label>
+        </div>
+        <label class="wc-field">
+            <span class="wc-label">Address</span>
+            <input type="text" class="wc-input" name="address" value="Poblacion, Pagsanjan, Laguna 4008">
+        </label>
+        <div class="wc-grid">
+            <label class="wc-field">
+                <span class="wc-label">Phone</span>
+                <input type="text" class="wc-input" name="phone" value="(049) 501-0000 · (049) 501-0001">
+            </label>
+            <label class="wc-field">
+                <span class="wc-label">Email</span>
+                <input type="text" class="wc-input" name="email" value="info@pagsanjan.gov.ph">
+            </label>
+            <label class="wc-field">
+                <span class="wc-label">Office hours</span>
+                <input type="text" class="wc-input" name="hours" value="Mon – Fri, 8:00 AM – 5:00 PM">
+            </label>
+            <label class="wc-field">
+                <span class="wc-label">Closing note</span>
+                <input type="text" class="wc-input" name="closed_note" value="Closed on weekends &amp; public holidays">
+            </label>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset class="wc-group">
+    <div class="wc-group-head">
+        <h4 class="wc-group-title">The message form</h4>
+        <p class="wc-group-sub">Wording around the form visitors fill in.</p>
+    </div>
+    <div class="wc-group-body">
+        <div class="wc-grid">
+            <label class="wc-field">
+                <span class="wc-label">Form title</span>
+                <input type="text" class="wc-input" name="form_title" value="Send us a Message">
+            </label>
+            <label class="wc-field">
+                <span class="wc-label">Reply-time badge</span>
+                <input type="text" class="wc-input" name="form_badge" value="1–2 business days">
+            </label>
+        </div>
+        <label class="wc-field">
+            <span class="wc-label">Line under the form title</span>
+            <input type="text" class="wc-input" name="form_sub" value="Fill out the form and our office will get back to you.">
+        </label>
+        <label class="wc-field">
+            <span class="wc-label">Privacy note below the send button</span>
+            <textarea class="wc-input wc-area" rows="2" name="form_privacy">Your information is kept confidential and used only to respond to your inquiry.</textarea>
+        </label>
+
+        
+        <div class="wc-callout is-warn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div><strong>This form does not send anything yet.</strong> Submitting it shows a confirmation and clears the fields &mdash; no message is stored or emailed. The wording above is editable, but the form needs wiring up before it can be relied on.</div>
+        </div>
+    </div>
+</fieldset>
+            </div>
+
+            <p class="wc-msg" data-role="msg" hidden></p>
+
+            <div class="wc-actions">
+                <button type="button" class="btn-export" data-role="reset">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 8"/></svg>
+                    Reset to original
+                </button>
+                <button type="submit" class="btn-export adm-btn-primary-solid" data-role="save">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save changes
+                </button>
+            </div>
+        </form>
+                <form class="wc-panel" data-section="hero" data-panel="hero">
+            <div class="wc-panel-head">
+                <div>
+                    <h3 class="wc-panel-title">Hero banner</h3>
+                    <p class="wc-panel-sub" data-role="meta">
+                                                    Showing the original wording — not edited yet
+                                            </p>
+                </div>
+            </div>
+
+            <div class="wc-fields">
+                <label class="wc-field">
+    <span class="wc-label">Small badge above the headline</span>
+    <input type="text" class="wc-input" name="badge" value="Official Municipal Government Portal">
+</label>
+
+<div class="wc-grid">
+    <label class="wc-field">
+        <span class="wc-label">Headline</span>
+        <input type="text" class="wc-input" name="title" value="Serving the People of">
+    </label>
+    <label class="wc-field">
+        <span class="wc-label">Second line, shown in colour</span>
+        <input type="text" class="wc-input" name="title_highlight" value="Pagsanjan, Laguna">
+    </label>
+</div>
+
+<label class="wc-field">
+    <span class="wc-label">Intro sentence</span>
+    <textarea class="wc-input wc-area" rows="3" name="subtitle">Access municipal services, announcements, and government information from the Municipal Government of Pagsanjan, Province of Laguna.</textarea>
+</label>
+
+<div class="wc-grid">
+    <label class="wc-field">
+        <span class="wc-label">Primary button</span>
+        <input type="text" class="wc-input" name="primary_label" value="Explore Services">
+    </label>
+    <label class="wc-field">
+        <span class="wc-label">Secondary button</span>
+        <input type="text" class="wc-input" name="secondary_label" value="Ask Our AI Assistant">
+    </label>
+</div>
+
+<label class="wc-field">
+    <span class="wc-label">Title on the statistics card</span>
+    <input type="text" class="wc-input" name="card_title" value="Municipal Services Portal">
+</label>
+
+
+<div class="wc-callout">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+    <div>
+        <strong>Two figures are counted automatically.</strong>
+        The page currently shows
+        <strong>unavailable</strong> departments and
+        <strong>unavailable</strong> personnel,
+        read from the system as you load this page. You can reword the labels below; the numbers update themselves
+        so the public page can never disagree with your records.
+    </div>
+</div>
+
+<div class="wc-grid">
+    <label class="wc-field">
+        <span class="wc-label">Caption under the departments count</span>
+        <input type="text" class="wc-input" name="stat_departments_label" value="Offices &amp; Departments">
+    </label>
+    <label class="wc-field">
+        <span class="wc-label">Caption under the personnel count</span>
+        <input type="text" class="wc-input" name="stat_personnel_label" value="Government Personnel">
+    </label>
+</div>
+
+<div class="wc-grid">
+    <label class="wc-field">
+        <span class="wc-label">Third statistic — number</span>
+        <input type="text" class="wc-input" name="stat_extra_value" value="24/7">
+        <span class="wc-hint">Leave blank to hide this stat.</span>
+    </label>
+    <label class="wc-field">
+        <span class="wc-label">Third statistic — caption</span>
+        <input type="text" class="wc-input" name="stat_extra_label" value="AI Chatbot Support">
+    </label>
+</div>
+
+
+<details class="wc-advanced">
+<summary>
+    <span class="wc-advanced-title">Compliance tags</span>
+    <span class="wc-advanced-hint">4 shown on the hero card &middot; rarely change</span>
+</summary>
+
+<div class="wc-repeat" data-repeat="tags" data-max="8">
+    <div class="wc-repeat-head">
+        <span class="wc-hint">Small ticked badges beside the hero statistics.</span>
+        <button type="button" class="wc-add" data-add>+ Add tag</button>
+    </div>
+    <div class="wc-rows" data-rows>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="" value="BIR Compliant" placeholder="e.g. BIR Compliant">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="" value="GSIS Ready" placeholder="e.g. BIR Compliant">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="" value="CSC Accredited" placeholder="e.g. BIR Compliant">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="" value="ARTA Compliant" placeholder="e.g. BIR Compliant">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+            </div>
+    <template data-template>
+        <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="" value="" placeholder="e.g. BIR Compliant">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+    </template>
+</div>
+</details>
+            </div>
+
+            <p class="wc-msg" data-role="msg" hidden></p>
+
+            <div class="wc-actions">
+                <button type="button" class="btn-export" data-role="reset">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 8"/></svg>
+                    Reset to original
+                </button>
+                <button type="submit" class="btn-export adm-btn-primary-solid" data-role="save">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save changes
+                </button>
+            </div>
+        </form>
+                <form class="wc-panel" data-section="about" data-panel="about">
+            <div class="wc-panel-head">
+                <div>
+                    <h3 class="wc-panel-title">About the municipality</h3>
+                    <p class="wc-panel-sub" data-role="meta">
+                                                    Showing the original wording — not edited yet
+                                            </p>
+                </div>
+            </div>
+
+            <div class="wc-fields">
+                <fieldset class="wc-group">
+    <div class="wc-group-head">
+        <h4 class="wc-group-title">Section heading</h4>
+        <p class="wc-group-sub">The wording at the top of the About section.</p>
+    </div>
+    <div class="wc-group-body">
+        <div class="wc-grid">
+            <label class="wc-field">
+                <span class="wc-label">Small label above the heading</span>
+                <input type="text" class="wc-input" name="eyebrow" value="ABOUT THE MUNICIPALITY">
+            </label>
+            <label class="wc-field">
+                <span class="wc-label">Heading</span>
+                <input type="text" class="wc-input" name="heading" value="Municipal Government of Pagsanjan">
+            </label>
+        </div>
+        <label class="wc-field">
+            <span class="wc-label">Intro sentence</span>
+            <input type="text" class="wc-input" name="sub" value="A brief overview of the municipality, its leadership, and its commitment to public service.">
+        </label>
+    </div>
+</fieldset>
+
+<fieldset class="wc-group">
+    <div class="wc-group-head">
+        <h4 class="wc-group-title">Profile card</h4>
+        <p class="wc-group-sub">The panel beside the municipal seal.</p>
+    </div>
+    <div class="wc-group-body">
+        <div class="wc-grid">
+            <label class="wc-field">
+                <span class="wc-label">Card title</span>
+                <input type="text" class="wc-input" name="frame_tag" value="Official Municipal Profile">
+            </label>
+            <label class="wc-field">
+                <span class="wc-label">Card sub-line</span>
+                <input type="text" class="wc-input" name="frame_meta" value="Local Government Unit · Province of Laguna">
+            </label>
+            <label class="wc-field">
+                <span class="wc-label">Municipality name</span>
+                <input type="text" class="wc-input" name="profile_name" value="Pagsanjan, Laguna">
+            </label>
+            <label class="wc-field">
+                <span class="wc-label">Classification badge</span>
+                <input type="text" class="wc-input" name="profile_badge" value="1st Class Municipality">
+            </label>
+        </div>
+
+        
+        <details class="wc-advanced">
+        <summary>
+            <span class="wc-advanced-title">Profile facts</span>
+            <span class="wc-advanced-hint">6 rows &middot; rarely change</span>
+        </summary>
+
+        <div class="wc-repeat" data-repeat="facts" data-max="12">
+            <div class="wc-repeat-head">
+                <span class="wc-hint">Departments and Personnel here are plain text &mdash; the hero banner counts those two from the system instead.</span>
+                <button type="button" class="wc-add" data-add>+ Add fact</button>
+            </div>
+            <div class="wc-col-labels is-pair"><span>Label</span><span>Value</span><span></span></div>
+            <div class="wc-rows" data-rows>
+                                <div class="wc-row" data-row>
+                    <input type="text" class="wc-input" data-name="label" value="Province" placeholder="Province">
+                    <input type="text" class="wc-input" data-name="value" value="Laguna" placeholder="Laguna">
+                    <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+                </div>
+                                <div class="wc-row" data-row>
+                    <input type="text" class="wc-input" data-name="label" value="Region" placeholder="Province">
+                    <input type="text" class="wc-input" data-name="value" value="IV-A (CALABARZON)" placeholder="Laguna">
+                    <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+                </div>
+                                <div class="wc-row" data-row>
+                    <input type="text" class="wc-input" data-name="label" value="Barangays" placeholder="Province">
+                    <input type="text" class="wc-input" data-name="value" value="16" placeholder="Laguna">
+                    <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+                </div>
+                                <div class="wc-row" data-row>
+                    <input type="text" class="wc-input" data-name="label" value="Departments" placeholder="Province">
+                    <input type="text" class="wc-input" data-name="value" value="17 Offices" placeholder="Laguna">
+                    <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+                </div>
+                                <div class="wc-row" data-row>
+                    <input type="text" class="wc-input" data-name="label" value="Personnel" placeholder="Province">
+                    <input type="text" class="wc-input" data-name="value" value="348 Employees" placeholder="Laguna">
+                    <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+                </div>
+                                <div class="wc-row" data-row>
+                    <input type="text" class="wc-input" data-name="label" value="Population" placeholder="Province">
+                    <input type="text" class="wc-input" data-name="value" value="40,000+" placeholder="Laguna">
+                    <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+                </div>
+                            </div>
+            <template data-template>
+                <div class="wc-row" data-row>
+                    <input type="text" class="wc-input" data-name="label" value="" placeholder="Province">
+                    <input type="text" class="wc-input" data-name="value" value="" placeholder="Laguna">
+                    <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+                </div>
+            </template>
+        </div>
+        </details>
+    </div>
+</fieldset>
+
+<fieldset class="wc-group">
+    <div class="wc-group-head">
+        <h4 class="wc-group-title">Description</h4>
+        <p class="wc-group-sub">The write-up about the municipality.</p>
+    </div>
+    <div class="wc-group-body">
+        <div class="wc-grid">
+            <label class="wc-field">
+                <span class="wc-label">Sub-heading</span>
+                <input type="text" class="wc-input" name="body_heading" value="Home of the Famous">
+            </label>
+            <label class="wc-field">
+                <span class="wc-label">Words shown in colour</span>
+                <input type="text" class="wc-input" name="body_highlight" value="Pagsanjan Falls">
+            </label>
+        </div>
+
+        <div class="wc-repeat" data-repeat="paragraphs" data-max="6">
+            <div class="wc-repeat-head">
+                <span class="wc-sublabel">Paragraphs</span>
+                <button type="button" class="wc-add" data-add>+ Add paragraph</button>
+            </div>
+            <div class="wc-rows is-stacked" data-rows>
+                                <div class="wc-row is-wide" data-row>
+                    <textarea class="wc-input wc-area" rows="3" data-name="">Pagsanjan is a first-class municipality in the Province of Laguna, Philippines — known as the &quot;Shooting the Rapids&quot; capital. Composed of 16 barangays, it serves a population of over 40,000 residents across Region IV-A (CALABARZON).</textarea>
+                    <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+                </div>
+                                <div class="wc-row is-wide" data-row>
+                    <textarea class="wc-input wc-area" rows="3" data-name="">The Municipal Government is committed to transparent, efficient, and responsive governance through its 17 offices and departments, serving every Pagsanjeño.</textarea>
+                    <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+                </div>
+                            </div>
+            <template data-template>
+                <div class="wc-row is-wide" data-row>
+                    <textarea class="wc-input wc-area" rows="3" data-name=""></textarea>
+                    <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+                </div>
+            </template>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset class="wc-group">
+    <div class="wc-group-head">
+        <h4 class="wc-group-title">Vision &amp; mission</h4>
+    </div>
+    <div class="wc-group-body">
+        <div class="wc-grid">
+            <label class="wc-field">
+                <span class="wc-label">Vision label</span>
+                <input type="text" class="wc-input" name="vision_label" value="Our Vision">
+            </label>
+            <label class="wc-field">
+                <span class="wc-label">Mission label</span>
+                <input type="text" class="wc-input" name="mission_label" value="Our Mission">
+            </label>
+        </div>
+        <label class="wc-field">
+            <span class="wc-label">Vision statement</span>
+            <textarea class="wc-input wc-area" rows="3" name="vision">A progressive, peaceful, and self-reliant municipality with empowered citizens enjoying a high quality of life under a transparent and accountable local government.</textarea>
+        </label>
+        <label class="wc-field">
+            <span class="wc-label">Mission statement</span>
+            <textarea class="wc-input wc-area" rows="3" name="mission">To deliver efficient, effective, and equitable public services through good governance, community participation, and sustainable development programs for all Pagsanjeños.</textarea>
+        </label>
+    </div>
+</fieldset>
+            </div>
+
+            <p class="wc-msg" data-role="msg" hidden></p>
+
+            <div class="wc-actions">
+                <button type="button" class="btn-export" data-role="reset">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 8"/></svg>
+                    Reset to original
+                </button>
+                <button type="submit" class="btn-export adm-btn-primary-solid" data-role="save">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save changes
+                </button>
+            </div>
+        </form>
+                <form class="wc-panel" data-section="govbar" data-panel="govbar">
+            <div class="wc-panel-head">
+                <div>
+                    <h3 class="wc-panel-title">Top government bar</h3>
+                    <p class="wc-panel-sub" data-role="meta">
+                                                    Showing the original wording — not edited yet
+                                            </p>
+                </div>
+            </div>
+
+            <div class="wc-fields">
+                <label class="wc-field">
+    <span class="wc-label">Left side</span>
+    <input type="text" class="wc-input" name="left" value="Republic of the Philippines  ·  Province of Laguna">
+    <span class="wc-hint">Appears beside the flag icon at the very top of the page.</span>
+</label>
+
+<label class="wc-field">
+    <span class="wc-label">Right side</span>
+    <input type="text" class="wc-input" name="right" value="Official Website of the Municipal Government of Pagsanjan">
+</label>
+            </div>
+
+            <p class="wc-msg" data-role="msg" hidden></p>
+
+            <div class="wc-actions">
+                <button type="button" class="btn-export" data-role="reset">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 8"/></svg>
+                    Reset to original
+                </button>
+                <button type="submit" class="btn-export adm-btn-primary-solid" data-role="save">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save changes
+                </button>
+            </div>
+        </form>
+                <form class="wc-panel" data-section="brand" data-panel="brand">
+            <div class="wc-panel-head">
+                <div>
+                    <h3 class="wc-panel-title">Logo &amp; branding</h3>
+                    <p class="wc-panel-sub" data-role="meta">
+                                                    Showing the original wording — not edited yet
+                                            </p>
+                </div>
+            </div>
+
+            <div class="wc-fields">
+                <div class="wc-logo" data-logo
+     data-upload-url="http://localhost/admin/website/logo"
+     data-default="1">
+    <div class="wc-logo-preview">
+        <img src="http://localhost/municipal-of-pagsanjan-logo.jpg" alt="Current logo" data-logo-img>
+    </div>
+    <div class="wc-logo-body">
+        <span class="wc-label">Municipal seal</span>
+        <p class="wc-logo-state" data-logo-state>
+            Currently using the logo shipped with the system.
+        </p>
+        <p class="wc-hint">
+            Shown on the public page, both sidebars, the sign-in screens, the payslip
+            modals and the printed leave and pass-slip forms &mdash; replacing it here
+            changes all of them. JPG, PNG or WEBP, at least 64&times;64, up to 2&nbsp;MB.
+            A square image works best.
+        </p>
+        <div class="wc-logo-actions">
+            <label class="wc-add wc-logo-pick">
+                Choose image&hellip;
+                <input type="file" accept="image/jpeg,image/png,image/webp" data-logo-input hidden>
+            </label>
+            <button type="button" class="wc-logo-reset" data-logo-reset disabled>
+                Use the original
+            </button>
+        </div>
+        <p class="wc-msg" data-logo-msg hidden></p>
+    </div>
+</div>
+
+<div class="wc-grid">
+    <label class="wc-field">
+        <span class="wc-label">Name beside the seal</span>
+        <input type="text" class="wc-input" name="name" value="Pagsanjan, Laguna">
+    </label>
+    <label class="wc-field">
+        <span class="wc-label">Line under the name</span>
+        <input type="text" class="wc-input" name="sub" value="Municipal Government">
+    </label>
+</div>
+
+<label class="wc-field">
+    <span class="wc-label">Sign-in button wording</span>
+    <input type="text" class="wc-input" name="portal_label" value="Employee Portal">
+    <span class="wc-hint">The button always links to the sign-in page; only the wording is editable.</span>
+</label>
+
+<div class="wc-repeat" data-repeat="nav_links" data-max="8">
+    <div class="wc-repeat-head">
+        <span class="wc-label">Navigation links</span>
+        <button type="button" class="wc-add" data-add>+ Add link</button>
+    </div>
+    <div class="wc-rows" data-rows>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="label" value="Services" placeholder="Label">
+            <input type="text" class="wc-input" data-name="anchor" value="#services" placeholder="#services">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="label" value="Announcements" placeholder="Label">
+            <input type="text" class="wc-input" data-name="anchor" value="#announcements" placeholder="#services">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="label" value="About" placeholder="Label">
+            <input type="text" class="wc-input" data-name="anchor" value="#about" placeholder="#services">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="label" value="Contact" placeholder="Label">
+            <input type="text" class="wc-input" data-name="anchor" value="#contact" placeholder="#services">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+            </div>
+    <span class="wc-hint">A link must be a same-page anchor such as <code>#services</code>, or a full <code>https://</code> address.</span>
+    <template data-template>
+        <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="label" value="" placeholder="Label">
+            <input type="text" class="wc-input" data-name="anchor" value="#" placeholder="#services">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+    </template>
+</div>
+            </div>
+
+            <p class="wc-msg" data-role="msg" hidden></p>
+
+            <div class="wc-actions">
+                <button type="button" class="btn-export" data-role="reset">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 8"/></svg>
+                    Reset to original
+                </button>
+                <button type="submit" class="btn-export adm-btn-primary-solid" data-role="save">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save changes
+                </button>
+            </div>
+        </form>
+                <form class="wc-panel" data-section="services" data-panel="services">
+            <div class="wc-panel-head">
+                <div>
+                    <h3 class="wc-panel-title">Municipal services</h3>
+                    <p class="wc-panel-sub" data-role="meta">
+                                                    Showing the original wording — not edited yet
+                                            </p>
+                </div>
+            </div>
+
+            <div class="wc-fields">
+                <fieldset class="wc-group">
+    <div class="wc-group-head">
+        <h4 class="wc-group-title">Section heading</h4>
+        <p class="wc-group-sub">The wording above the service tabs.</p>
+    </div>
+    <div class="wc-group-body">
+        <div class="wc-grid">
+            <label class="wc-field">
+                <span class="wc-label">Small label above the heading</span>
+                <input type="text" class="wc-input" name="eyebrow" value="MUNICIPAL SERVICES">
+            </label>
+            <label class="wc-field">
+                <span class="wc-label">Heading</span>
+                <input type="text" class="wc-input" name="heading" value="What can we help you with?">
+            </label>
+        </div>
+        <label class="wc-field">
+            <span class="wc-label">Intro sentence</span>
+            <input type="text" class="wc-input" name="sub" value="Access the services offered by the Municipal Government of Pagsanjan, Laguna.">
+        </label>
+    </div>
+</fieldset>
+
+
+<fieldset class="wc-group">
+    <div class="wc-group-head">
+        <h4 class="wc-group-title">Service categories</h4>
+        <p class="wc-group-sub">Each category becomes a tab on the page, holding the services listed under it.</p>
+    </div>
+
+    <div class="wc-repeat" data-repeat="categories" data-max="6">
+        <div class="wc-repeat-head">
+            <span class="wc-sublabel">3 categories</span>
+            <button type="button" class="wc-add" data-add>+ Add category</button>
+        </div>
+        <div class="wc-rows is-stacked" data-rows>
+                        
+            <details class="wc-card is-group" data-row>
+                <summary class="wc-card-summary">
+                    <span class="wc-card-summary-title">Permits &amp; Registration</span>
+                    <span class="wc-card-summary-meta">2 services</span>
+                </summary>
+                <div class="wc-card-top">
+                    <label class="wc-field">
+                        <span class="wc-label">Category name</span>
+                        <input type="text" class="wc-input" data-name="label" value="Permits &amp; Registration" placeholder="Permits &amp; Registration">
+                    </label>
+                    <label class="wc-field">
+                        <span class="wc-label">Tab icon</span>
+                        <select class="wc-input wc-select" data-name="icon">
+                                                            <option value="building" selected>Building</option>
+                                                            <option value="clipboard" >Clipboard</option>
+                                                            <option value="heart" >Heart</option>
+                                                            <option value="users" >Users</option>
+                                                            <option value="leaf" >Leaf</option>
+                                                            <option value="tool" >Tool</option>
+                                                    </select>
+                    </label>
+                    <button type="button" class="wc-remove is-aligned" data-remove title="Remove category">&times;</button>
+                </div>
+
+                <div class="wc-repeat is-nested" data-repeat="items" data-max="20">
+                    <div class="wc-repeat-head">
+                        <span class="wc-sublabel">Services in this category</span>
+                        <button type="button" class="wc-add" data-add>+ Add service</button>
+                    </div>
+                    <div class="wc-rows is-stacked" data-rows>
+                                                <div class="wc-card is-sub" data-row>
+                            <div class="wc-card-top">
+                                <input type="text" class="wc-input" data-name="title" value="Business Permits" placeholder="Service name">
+                                <select class="wc-input wc-select" data-name="icon">
+                                                                            <option value="building" selected>Building</option>
+                                                                            <option value="clipboard" >Clipboard</option>
+                                                                            <option value="heart" >Heart</option>
+                                                                            <option value="users" >Users</option>
+                                                                            <option value="leaf" >Leaf</option>
+                                                                            <option value="tool" >Tool</option>
+                                                                    </select>
+                                <button type="button" class="wc-remove" data-remove title="Remove service">&times;</button>
+                            </div>
+                            <textarea class="wc-input wc-area" rows="2" data-name="desc" placeholder="What this service is">Apply and renew business permits online through the Municipal Business Office.</textarea>
+                            <input type="text" class="wc-input" data-name="office" value="Municipal Business Office" placeholder="Responsible office">
+                        </div>
+                                                <div class="wc-card is-sub" data-row>
+                            <div class="wc-card-top">
+                                <input type="text" class="wc-input" data-name="title" value="Civil Registration" placeholder="Service name">
+                                <select class="wc-input wc-select" data-name="icon">
+                                                                            <option value="building" >Building</option>
+                                                                            <option value="clipboard" selected>Clipboard</option>
+                                                                            <option value="heart" >Heart</option>
+                                                                            <option value="users" >Users</option>
+                                                                            <option value="leaf" >Leaf</option>
+                                                                            <option value="tool" >Tool</option>
+                                                                    </select>
+                                <button type="button" class="wc-remove" data-remove title="Remove service">&times;</button>
+                            </div>
+                            <textarea class="wc-input wc-area" rows="2" data-name="desc" placeholder="What this service is">Request birth, marriage, and death certificates from the Civil Registrar.</textarea>
+                            <input type="text" class="wc-input" data-name="office" value="Office of the Civil Registrar" placeholder="Responsible office">
+                        </div>
+                                            </div>
+                    <template data-template>
+                        <div class="wc-card is-sub" data-row>
+                            <div class="wc-card-top">
+                                <input type="text" class="wc-input" data-name="title" value="" placeholder="Service name">
+                                <select class="wc-input wc-select" data-name="icon">
+                                                                            <option value="building">Building</option>
+                                                                            <option value="clipboard">Clipboard</option>
+                                                                            <option value="heart">Heart</option>
+                                                                            <option value="users">Users</option>
+                                                                            <option value="leaf">Leaf</option>
+                                                                            <option value="tool">Tool</option>
+                                                                    </select>
+                                <button type="button" class="wc-remove" data-remove title="Remove service">&times;</button>
+                            </div>
+                            <textarea class="wc-input wc-area" rows="2" data-name="desc" placeholder="What this service is"></textarea>
+                            <input type="text" class="wc-input" data-name="office" value="" placeholder="Responsible office">
+                        </div>
+                    </template>
+                </div>
+            </details>
+                        
+            <details class="wc-card is-group" data-row>
+                <summary class="wc-card-summary">
+                    <span class="wc-card-summary-title">Health &amp; Social Services</span>
+                    <span class="wc-card-summary-meta">2 services</span>
+                </summary>
+                <div class="wc-card-top">
+                    <label class="wc-field">
+                        <span class="wc-label">Category name</span>
+                        <input type="text" class="wc-input" data-name="label" value="Health &amp; Social Services" placeholder="Permits &amp; Registration">
+                    </label>
+                    <label class="wc-field">
+                        <span class="wc-label">Tab icon</span>
+                        <select class="wc-input wc-select" data-name="icon">
+                                                            <option value="building" >Building</option>
+                                                            <option value="clipboard" >Clipboard</option>
+                                                            <option value="heart" selected>Heart</option>
+                                                            <option value="users" >Users</option>
+                                                            <option value="leaf" >Leaf</option>
+                                                            <option value="tool" >Tool</option>
+                                                    </select>
+                    </label>
+                    <button type="button" class="wc-remove is-aligned" data-remove title="Remove category">&times;</button>
+                </div>
+
+                <div class="wc-repeat is-nested" data-repeat="items" data-max="20">
+                    <div class="wc-repeat-head">
+                        <span class="wc-sublabel">Services in this category</span>
+                        <button type="button" class="wc-add" data-add>+ Add service</button>
+                    </div>
+                    <div class="wc-rows is-stacked" data-rows>
+                                                <div class="wc-card is-sub" data-row>
+                            <div class="wc-card-top">
+                                <input type="text" class="wc-input" data-name="title" value="Health Services" placeholder="Service name">
+                                <select class="wc-input wc-select" data-name="icon">
+                                                                            <option value="building" >Building</option>
+                                                                            <option value="clipboard" >Clipboard</option>
+                                                                            <option value="heart" selected>Heart</option>
+                                                                            <option value="users" >Users</option>
+                                                                            <option value="leaf" >Leaf</option>
+                                                                            <option value="tool" >Tool</option>
+                                                                    </select>
+                                <button type="button" class="wc-remove" data-remove title="Remove service">&times;</button>
+                            </div>
+                            <textarea class="wc-input wc-area" rows="2" data-name="desc" placeholder="What this service is">Access municipal health programs, consultations, and medical assistance.</textarea>
+                            <input type="text" class="wc-input" data-name="office" value="Municipal Health Office" placeholder="Responsible office">
+                        </div>
+                                                <div class="wc-card is-sub" data-row>
+                            <div class="wc-card-top">
+                                <input type="text" class="wc-input" data-name="title" value="Social Welfare" placeholder="Service name">
+                                <select class="wc-input wc-select" data-name="icon">
+                                                                            <option value="building" >Building</option>
+                                                                            <option value="clipboard" >Clipboard</option>
+                                                                            <option value="heart" >Heart</option>
+                                                                            <option value="users" selected>Users</option>
+                                                                            <option value="leaf" >Leaf</option>
+                                                                            <option value="tool" >Tool</option>
+                                                                    </select>
+                                <button type="button" class="wc-remove" data-remove title="Remove service">&times;</button>
+                            </div>
+                            <textarea class="wc-input wc-area" rows="2" data-name="desc" placeholder="What this service is">MSWD programs for senior citizens, PWDs, and indigent families.</textarea>
+                            <input type="text" class="wc-input" data-name="office" value="Social Welfare &amp; Development Office" placeholder="Responsible office">
+                        </div>
+                                            </div>
+                    <template data-template>
+                        <div class="wc-card is-sub" data-row>
+                            <div class="wc-card-top">
+                                <input type="text" class="wc-input" data-name="title" value="" placeholder="Service name">
+                                <select class="wc-input wc-select" data-name="icon">
+                                                                            <option value="building">Building</option>
+                                                                            <option value="clipboard">Clipboard</option>
+                                                                            <option value="heart">Heart</option>
+                                                                            <option value="users">Users</option>
+                                                                            <option value="leaf">Leaf</option>
+                                                                            <option value="tool">Tool</option>
+                                                                    </select>
+                                <button type="button" class="wc-remove" data-remove title="Remove service">&times;</button>
+                            </div>
+                            <textarea class="wc-input wc-area" rows="2" data-name="desc" placeholder="What this service is"></textarea>
+                            <input type="text" class="wc-input" data-name="office" value="" placeholder="Responsible office">
+                        </div>
+                    </template>
+                </div>
+            </details>
+                        
+            <details class="wc-card is-group" data-row>
+                <summary class="wc-card-summary">
+                    <span class="wc-card-summary-title">Community Development</span>
+                    <span class="wc-card-summary-meta">2 services</span>
+                </summary>
+                <div class="wc-card-top">
+                    <label class="wc-field">
+                        <span class="wc-label">Category name</span>
+                        <input type="text" class="wc-input" data-name="label" value="Community Development" placeholder="Permits &amp; Registration">
+                    </label>
+                    <label class="wc-field">
+                        <span class="wc-label">Tab icon</span>
+                        <select class="wc-input wc-select" data-name="icon">
+                                                            <option value="building" >Building</option>
+                                                            <option value="clipboard" >Clipboard</option>
+                                                            <option value="heart" >Heart</option>
+                                                            <option value="users" >Users</option>
+                                                            <option value="leaf" selected>Leaf</option>
+                                                            <option value="tool" >Tool</option>
+                                                    </select>
+                    </label>
+                    <button type="button" class="wc-remove is-aligned" data-remove title="Remove category">&times;</button>
+                </div>
+
+                <div class="wc-repeat is-nested" data-repeat="items" data-max="20">
+                    <div class="wc-repeat-head">
+                        <span class="wc-sublabel">Services in this category</span>
+                        <button type="button" class="wc-add" data-add>+ Add service</button>
+                    </div>
+                    <div class="wc-rows is-stacked" data-rows>
+                                                <div class="wc-card is-sub" data-row>
+                            <div class="wc-card-top">
+                                <input type="text" class="wc-input" data-name="title" value="Agricultural Support" placeholder="Service name">
+                                <select class="wc-input wc-select" data-name="icon">
+                                                                            <option value="building" >Building</option>
+                                                                            <option value="clipboard" >Clipboard</option>
+                                                                            <option value="heart" >Heart</option>
+                                                                            <option value="users" >Users</option>
+                                                                            <option value="leaf" selected>Leaf</option>
+                                                                            <option value="tool" >Tool</option>
+                                                                    </select>
+                                <button type="button" class="wc-remove" data-remove title="Remove service">&times;</button>
+                            </div>
+                            <textarea class="wc-input wc-area" rows="2" data-name="desc" placeholder="What this service is">Livelihood programs and agricultural assistance for local farmers.</textarea>
+                            <input type="text" class="wc-input" data-name="office" value="Municipal Agriculture Office" placeholder="Responsible office">
+                        </div>
+                                                <div class="wc-card is-sub" data-row>
+                            <div class="wc-card-top">
+                                <input type="text" class="wc-input" data-name="title" value="Infrastructure Projects" placeholder="Service name">
+                                <select class="wc-input wc-select" data-name="icon">
+                                                                            <option value="building" >Building</option>
+                                                                            <option value="clipboard" >Clipboard</option>
+                                                                            <option value="heart" >Heart</option>
+                                                                            <option value="users" >Users</option>
+                                                                            <option value="leaf" >Leaf</option>
+                                                                            <option value="tool" selected>Tool</option>
+                                                                    </select>
+                                <button type="button" class="wc-remove" data-remove title="Remove service">&times;</button>
+                            </div>
+                            <textarea class="wc-input wc-area" rows="2" data-name="desc" placeholder="What this service is">Updates on public works, road projects, and community infrastructure.</textarea>
+                            <input type="text" class="wc-input" data-name="office" value="Municipal Engineering Office" placeholder="Responsible office">
+                        </div>
+                                            </div>
+                    <template data-template>
+                        <div class="wc-card is-sub" data-row>
+                            <div class="wc-card-top">
+                                <input type="text" class="wc-input" data-name="title" value="" placeholder="Service name">
+                                <select class="wc-input wc-select" data-name="icon">
+                                                                            <option value="building">Building</option>
+                                                                            <option value="clipboard">Clipboard</option>
+                                                                            <option value="heart">Heart</option>
+                                                                            <option value="users">Users</option>
+                                                                            <option value="leaf">Leaf</option>
+                                                                            <option value="tool">Tool</option>
+                                                                    </select>
+                                <button type="button" class="wc-remove" data-remove title="Remove service">&times;</button>
+                            </div>
+                            <textarea class="wc-input wc-area" rows="2" data-name="desc" placeholder="What this service is"></textarea>
+                            <input type="text" class="wc-input" data-name="office" value="" placeholder="Responsible office">
+                        </div>
+                    </template>
+                </div>
+            </details>
+                    </div>
+
+        <template data-template>
+            <details class="wc-card is-group" data-row open>
+                <summary class="wc-card-summary">
+                    <span class="wc-card-summary-title">New category</span>
+                    <span class="wc-card-summary-meta">0 services</span>
+                </summary>
+                <div class="wc-card-top">
+                    <label class="wc-field">
+                        <span class="wc-label">Category name</span>
+                        <input type="text" class="wc-input" data-name="label" value="" placeholder="Permits &amp; Registration">
+                    </label>
+                    <label class="wc-field">
+                        <span class="wc-label">Tab icon</span>
+                        <select class="wc-input wc-select" data-name="icon">
+                                                            <option value="building">Building</option>
+                                                            <option value="clipboard">Clipboard</option>
+                                                            <option value="heart">Heart</option>
+                                                            <option value="users">Users</option>
+                                                            <option value="leaf">Leaf</option>
+                                                            <option value="tool">Tool</option>
+                                                    </select>
+                    </label>
+                    <button type="button" class="wc-remove is-aligned" data-remove title="Remove category">&times;</button>
+                </div>
+                <div class="wc-repeat is-nested" data-repeat="items" data-max="20">
+                    <div class="wc-repeat-head">
+                        <span class="wc-sublabel">Services in this category</span>
+                        <button type="button" class="wc-add" data-add>+ Add service</button>
+                    </div>
+                    <div class="wc-rows is-stacked" data-rows></div>
+                    <template data-template>
+                        <div class="wc-card is-sub" data-row>
+                            <div class="wc-card-top">
+                                <input type="text" class="wc-input" data-name="title" value="" placeholder="Service name">
+                                <select class="wc-input wc-select" data-name="icon">
+                                                                            <option value="building">Building</option>
+                                                                            <option value="clipboard">Clipboard</option>
+                                                                            <option value="heart">Heart</option>
+                                                                            <option value="users">Users</option>
+                                                                            <option value="leaf">Leaf</option>
+                                                                            <option value="tool">Tool</option>
+                                                                    </select>
+                                <button type="button" class="wc-remove" data-remove title="Remove service">&times;</button>
+                            </div>
+                            <textarea class="wc-input wc-area" rows="2" data-name="desc" placeholder="What this service is"></textarea>
+                            <input type="text" class="wc-input" data-name="office" value="" placeholder="Responsible office">
+                        </div>
+                    </template>
+                </div>
+            </details>
+        </template>
+    </div>
+</fieldset>
+            </div>
+
+            <p class="wc-msg" data-role="msg" hidden></p>
+
+            <div class="wc-actions">
+                <button type="button" class="btn-export" data-role="reset">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 8"/></svg>
+                    Reset to original
+                </button>
+                <button type="submit" class="btn-export adm-btn-primary-solid" data-role="save">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save changes
+                </button>
+            </div>
+        </form>
+                <form class="wc-panel" data-section="cta" data-panel="cta">
+            <div class="wc-panel-head">
+                <div>
+                    <h3 class="wc-panel-title">PRIME HRIS call-to-action</h3>
+                    <p class="wc-panel-sub" data-role="meta">
+                                                    Showing the original wording — not edited yet
+                                            </p>
+                </div>
+            </div>
+
+            <div class="wc-fields">
+                <div class="wc-grid">
+    <label class="wc-field">
+        <span class="wc-label">Small label above the heading</span>
+        <input type="text" class="wc-input" name="eyebrow" value="PRIME HRIS">
+    </label>
+    <label class="wc-field">
+        <span class="wc-label">Heading</span>
+        <input type="text" class="wc-input" name="heading" value="Are you a Municipal Government Employee?">
+    </label>
+</div>
+
+<label class="wc-field">
+    <span class="wc-label">Paragraph</span>
+    <textarea class="wc-input wc-area" rows="3" name="text">The PRIME HRIS portal is exclusively for authorized employees of the Municipal Government of Pagsanjan, Laguna. Access your payroll, leave, and personnel records here.</textarea>
+</label>
+
+<div class="wc-grid">
+    <label class="wc-field">
+        <span class="wc-label">Button label</span>
+        <input type="text" class="wc-input" name="button_label" value="Sign In to PRIME HRIS">
+        <span class="wc-hint">Always links to the sign-in page.</span>
+    </label>
+    <label class="wc-field">
+        <span class="wc-label">Small print under the button</span>
+        <input type="text" class="wc-input" name="note" value="Municipal Government employees only · Contact your administrator for access">
+    </label>
+</div>
+
+<div class="wc-grid">
+    <label class="wc-field">
+        <span class="wc-label">Card title</span>
+        <input type="text" class="wc-input" name="card_label" value="PRIME HRIS">
+    </label>
+    <label class="wc-field">
+        <span class="wc-label">Line under the card title</span>
+        <input type="text" class="wc-input" name="card_sub" value="Personnel Records &amp; Information Management for Employees">
+    </label>
+</div>
+
+<div class="wc-repeat" data-repeat="features" data-max="12">
+    <div class="wc-repeat-head">
+        <span class="wc-label">Feature list</span>
+        <button type="button" class="wc-add" data-add>+ Add feature</button>
+    </div>
+    <div class="wc-rows" data-rows>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="" value="Payroll Processing" placeholder="e.g. Payroll Processing">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="" value="201 File Management" placeholder="e.g. Payroll Processing">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="" value="Leave &amp; Benefits" placeholder="e.g. Payroll Processing">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="" value="DTR Monitoring" placeholder="e.g. Payroll Processing">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="" value="BIR / GSIS / PhilHealth" placeholder="e.g. Payroll Processing">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="" value="Payroll Reports" placeholder="e.g. Payroll Processing">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+            </div>
+    <template data-template>
+        <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="" value="" placeholder="e.g. Payroll Processing">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+    </template>
+</div>
+            </div>
+
+            <p class="wc-msg" data-role="msg" hidden></p>
+
+            <div class="wc-actions">
+                <button type="button" class="btn-export" data-role="reset">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 8"/></svg>
+                    Reset to original
+                </button>
+                <button type="submit" class="btn-export adm-btn-primary-solid" data-role="save">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save changes
+                </button>
+            </div>
+        </form>
+                <form class="wc-panel" data-section="footer" data-panel="footer">
+            <div class="wc-panel-head">
+                <div>
+                    <h3 class="wc-panel-title">Footer</h3>
+                    <p class="wc-panel-sub" data-role="meta">
+                                                    Showing the original wording — not edited yet
+                                            </p>
+                </div>
+            </div>
+
+            <div class="wc-fields">
+                <div class="wc-grid">
+    <label class="wc-field">
+        <span class="wc-label">Organisation name</span>
+        <input type="text" class="wc-input" name="name" value="Municipal Government of Pagsanjan">
+        <span class="wc-hint">Also used as the browser tab title.</span>
+    </label>
+    <label class="wc-field">
+        <span class="wc-label">Line under the name</span>
+        <input type="text" class="wc-input" name="sub" value="Province of Laguna · Republic of the Philippines">
+    </label>
+</div>
+
+<div class="wc-repeat" data-repeat="links" data-max="8">
+    <div class="wc-repeat-head">
+        <span class="wc-label">Footer links</span>
+        <button type="button" class="wc-add" data-add>+ Add link</button>
+    </div>
+    <div class="wc-rows" data-rows>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="label" value="Privacy Policy" placeholder="Label">
+            <input type="text" class="wc-input" data-name="anchor" value="#privacy" placeholder="#privacy">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="label" value="Terms of Use" placeholder="Label">
+            <input type="text" class="wc-input" data-name="anchor" value="#terms" placeholder="#privacy">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="label" value="Contact Us" placeholder="Label">
+            <input type="text" class="wc-input" data-name="anchor" value="#contact" placeholder="#privacy">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+                <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="label" value="Sitemap" placeholder="Label">
+            <input type="text" class="wc-input" data-name="anchor" value="#sitemap" placeholder="#privacy">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+            </div>
+    <span class="wc-hint">A same-page anchor such as <code>#contact</code>, or a full <code>https://</code> address. The default Privacy, Terms and Sitemap anchors do not lead anywhere yet.</span>
+    <template data-template>
+        <div class="wc-row" data-row>
+            <input type="text" class="wc-input" data-name="label" value="" placeholder="Label">
+            <input type="text" class="wc-input" data-name="anchor" value="#" placeholder="#privacy">
+            <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+        </div>
+    </template>
+</div>
+
+<label class="wc-field">
+    <span class="wc-label">Copyright wording</span>
+    <input type="text" class="wc-input" name="copyright" value="Municipal Government of Pagsanjan, Laguna. All rights reserved.">
+    <span class="wc-hint">The year is added automatically &mdash; it currently renders as &ldquo;&copy; 2026 Municipal Government of Pagsanjan, Laguna. All rights reserved.&rdquo;.</span>
+</label>
+            </div>
+
+            <p class="wc-msg" data-role="msg" hidden></p>
+
+            <div class="wc-actions">
+                <button type="button" class="btn-export" data-role="reset">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 8"/></svg>
+                    Reset to original
+                </button>
+                <button type="submit" class="btn-export adm-btn-primary-solid" data-role="save">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save changes
+                </button>
+            </div>
+        </form>
+                <form class="wc-panel" data-section="chatbot" data-panel="chatbot">
+            <div class="wc-panel-head">
+                <div>
+                    <h3 class="wc-panel-title">Public chatbot</h3>
+                    <p class="wc-panel-sub" data-role="meta">
+                                                    Showing the original wording — not edited yet
+                                            </p>
+                </div>
+            </div>
+
+            <div class="wc-fields">
+                <div class="wc-grid">
+    <label class="wc-field">
+        <span class="wc-label">Name shown in the chat window</span>
+        <input type="text" class="wc-input" name="name" value="Pagsanjan LGU Assistant">
+    </label>
+    <label class="wc-field">
+        <span class="wc-label">Grey text in the message box</span>
+        <input type="text" class="wc-input" name="placeholder" value="Ask about our services...">
+    </label>
+</div>
+
+<label class="wc-field">
+    <span class="wc-label">First thing the assistant says</span>
+    <textarea class="wc-input wc-area" rows="3" name="greeting">Hello! I&#039;m the Pagsanjan LGU Assistant. I can help you with information about municipal services, requirements, fees, and procedures. How can I assist you today?</textarea>
+    <span class="wc-hint">Shown when the widget opens, and again after a visitor clears the conversation.</span>
+</label>
+
+<div class="wc-repeat" data-repeat="quick_actions" data-max="8">
+    <div class="wc-repeat-head">
+        <span class="wc-label">Quick question chips</span>
+        <button type="button" class="wc-add" data-add>+ Add chip</button>
+    </div>
+    <div class="wc-rows is-stacked" data-rows>
+                <div class="wc-card" data-row>
+            <div class="wc-card-top">
+                <input type="text" class="wc-input" data-name="label" value="Services" placeholder="Chip label">
+                <select class="wc-input wc-select" data-name="icon">
+                                            <option value="clipboard" selected>Clipboard</option>
+                                            <option value="clock" >Clock</option>
+                                            <option value="document" >Document</option>
+                                            <option value="phone" >Phone</option>
+                                            <option value="info" >Info</option>
+                                    </select>
+                <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+            </div>
+            <input type="text" class="wc-input" data-name="question" value="What services do you offer?" placeholder="The question this chip asks">
+        </div>
+                <div class="wc-card" data-row>
+            <div class="wc-card-top">
+                <input type="text" class="wc-input" data-name="label" value="Hours" placeholder="Chip label">
+                <select class="wc-input wc-select" data-name="icon">
+                                            <option value="clipboard" >Clipboard</option>
+                                            <option value="clock" selected>Clock</option>
+                                            <option value="document" >Document</option>
+                                            <option value="phone" >Phone</option>
+                                            <option value="info" >Info</option>
+                                    </select>
+                <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+            </div>
+            <input type="text" class="wc-input" data-name="question" value="What are your office hours?" placeholder="The question this chip asks">
+        </div>
+                <div class="wc-card" data-row>
+            <div class="wc-card-top">
+                <input type="text" class="wc-input" data-name="label" value="Permits" placeholder="Chip label">
+                <select class="wc-input wc-select" data-name="icon">
+                                            <option value="clipboard" >Clipboard</option>
+                                            <option value="clock" >Clock</option>
+                                            <option value="document" selected>Document</option>
+                                            <option value="phone" >Phone</option>
+                                            <option value="info" >Info</option>
+                                    </select>
+                <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+            </div>
+            <input type="text" class="wc-input" data-name="question" value="How do I get a permit?" placeholder="The question this chip asks">
+        </div>
+                <div class="wc-card" data-row>
+            <div class="wc-card-top">
+                <input type="text" class="wc-input" data-name="label" value="Contact" placeholder="Chip label">
+                <select class="wc-input wc-select" data-name="icon">
+                                            <option value="clipboard" >Clipboard</option>
+                                            <option value="clock" >Clock</option>
+                                            <option value="document" >Document</option>
+                                            <option value="phone" selected>Phone</option>
+                                            <option value="info" >Info</option>
+                                    </select>
+                <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+            </div>
+            <input type="text" class="wc-input" data-name="question" value="Contact information?" placeholder="The question this chip asks">
+        </div>
+            </div>
+    <template data-template>
+        <div class="wc-card" data-row>
+            <div class="wc-card-top">
+                <input type="text" class="wc-input" data-name="label" value="" placeholder="Chip label">
+                <select class="wc-input wc-select" data-name="icon">
+                                            <option value="clipboard">Clipboard</option>
+                                            <option value="clock">Clock</option>
+                                            <option value="document">Document</option>
+                                            <option value="phone">Phone</option>
+                                            <option value="info">Info</option>
+                                    </select>
+                <button type="button" class="wc-remove" data-remove title="Remove">&times;</button>
+            </div>
+            <input type="text" class="wc-input" data-name="question" value="" placeholder="The question this chip asks">
+        </div>
+    </template>
+</div>
+
+
+<div class="wc-callout is-warn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <div><strong>Answers come from a separate chatbot service.</strong> This widget posts to <code>127.0.0.1:5000</code>, not to the PRIME HRIS AI Assistant. If that service is not running, visitors are told the assistant could not be reached. Only the wording above is controlled here.</div>
+</div>
+            </div>
+
+            <p class="wc-msg" data-role="msg" hidden></p>
+
+            <div class="wc-actions">
+                <button type="button" class="btn-export" data-role="reset">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 8"/></svg>
+                    Reset to original
+                </button>
+                <button type="submit" class="btn-export adm-btn-primary-solid" data-role="save">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save changes
+                </button>
+            </div>
+        </form>
+        
+    </div>
+</div>
+</div>
+
+        </main>
+        
+                <div class="admin-chatbot-ui">
+<!-- AI Chatbot FAB Button -->
+<button class="chat-fab" onclick="toggleChatbot()" aria-label="Open HRIS assistant"
+        aria-expanded="false" aria-controls="chatbotWindow">
+    <svg class="chat-fab-ico is-chat" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <svg class="chat-fab-ico is-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+    <span class="chat-fab-badge">AI</span>
+</button>
+
+<!-- Chatbot Window -->
+<div class="chatbot-window" id="chatbotWindow" role="dialog" aria-labelledby="chatbotTitle" aria-hidden="true">
+    <div class="chatbot-header">
+    <div class="chatbot-header-left">
+        <div class="chatbot-avatar">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+        </div>
+        <div>
+            <p class="chatbot-name" id="chatbotTitle">PRIME HRIS Assistant</p>
+            <p class="chatbot-status"><span class="chatbot-status-dot" aria-hidden="true"></span>Online</p>
+        </div>
+    </div>
+    <div class="chatbot-header-right">
+        <button class="chatbot-clear" onclick="clearChatbotConversation()" title="Clear conversation" aria-label="Clear conversation">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                <path d="M10 11v6"/>
+                <path d="M14 11v6"/>
+                <path d="M9 6V4h6v2"/>
+            </svg>
+        </button>
+        <button class="chatbot-fullscreen" id="fullscreenButton" onclick="toggleFullscreen()" title="Expand panel" aria-label="Expand panel" aria-pressed="false">
+            <svg id="fullscreenIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+            <svg id="fullscreenExitIcon" class="cb-hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+            </svg>
+        </button>
+        <button class="chatbot-close" onclick="toggleChatbot()" title="Close" aria-label="Close assistant">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+    
+    <div class="chatbot-messages" id="chatbotMessages" role="log" aria-live="polite" aria-label="Conversation">
+    <div class="chat-msg bot">
+        <div class="chat-msg-avatar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+        </div>
+        <div class="chat-msg-bubble" id="chatbotGreeting"></div>
+    </div>
+
+    <div class="chat-suggest-wrap" id="chatSuggestions">
+    <p class="chat-suggest-label">Try asking</p>
+    <div class="chat-suggest" role="group" aria-label="Suggested questions">
+        <button class="chatbot-quick-btn" onclick="sendPredefinedMessage('How many people work here?')">Total employees</button>
+        <button class="chatbot-quick-btn" onclick="sendPredefinedMessage('Show me active employees')">Active staff</button>
+        <button class="chatbot-quick-btn" onclick="sendPredefinedMessage('Who works in Mayor office?')">Mayor's Office</button>
+        <button class="chatbot-quick-btn" onclick="sendPredefinedMessage('Find administrator')">Find employee</button>
+        <button class="chatbot-quick-btn" onclick="sendPredefinedMessage('Pending leave approvals')">Pending approvals</button>
+        <button class="chatbot-quick-btn" onclick="sendPredefinedMessage('How many are absent today?')">Absent today</button>
+    </div>
+</div>
+</div>
+
+    <div class="chatbot-composer">
+    <div class="chatbot-input-row">
+        <textarea id="chatInput" rows="1" maxlength="1000" aria-label="Message"
+                  placeholder="Type your question…"></textarea>
+        <div class="chatbot-input-tools">
+            <button class="chatbot-speaker" id="speakerButton" onclick="toggleSpeaker()" title="Stop speaking" aria-label="Stop speaking">
+                <svg id="speakerIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                </svg>
+                <svg id="speakerMutedIcon" class="cb-hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <line x1="23" y1="9" x2="17" y2="15"></line>
+                    <line x1="17" y1="9" x2="23" y2="15"></line>
+                </svg>
+            </button>
+            <button class="chatbot-mic" id="micButton" onclick="toggleVoiceInput()" title="Voice input" aria-label="Voice input" aria-pressed="false">
+                <svg id="micIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+                <svg id="micActiveIcon" class="cb-hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"></rect>
+                </svg>
+            </button>
+            <button class="chatbot-send" id="chatSendButton" onclick="sendChatMessage()" aria-label="Send message" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <p class="chatbot-hint"><kbd>Enter</kbd> to send · <kbd>Shift</kbd>+<kbd>Enter</kbd> for a new line</p>
+</div>
+
+    <div class="chat-confirm" id="chatClearConfirm">
+    <div class="chat-confirm-card" role="alertdialog" aria-modal="true"
+         aria-labelledby="chatClearConfirmTitle" aria-describedby="chatClearConfirmText">
+        <div class="chat-confirm-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+            </svg>
+        </div>
+        <p class="chat-confirm-title" id="chatClearConfirmTitle">Clear this conversation?</p>
+        <p class="chat-confirm-text" id="chatClearConfirmText"></p>
+        <div class="chat-confirm-actions">
+            <button type="button" class="chat-confirm-btn is-cancel" id="chatClearConfirmCancel" onclick="closeClearConfirm()">Keep it</button>
+            <button type="button" class="chat-confirm-btn is-danger" onclick="confirmClearChatbotConversation()">Clear chat</button>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+                <button type="button" class="leave-cal-fab" onclick="openLeaveCalModal()" title="Leave & Travel Calendar" aria-label="Open Leave & Travel Calendar">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+        <circle cx="8" cy="15" r="1.3" fill="currentColor" stroke="none"/>
+        <circle cx="12" cy="15" r="1.3" fill="currentColor" stroke="none"/>
+        <circle cx="16" cy="15" r="1.3" fill="currentColor" stroke="none"/>
+    </svg>
+</button>
+
+
+<div id="leaveCalModal" class="lc-modal-overlay" style="display:none" onclick="closeLeaveCalModal(event)">
+    <div class="lc-modal-panel" onclick="event.stopPropagation()">
+        <div class="lc-modal-head">
+            <div class="lc-modal-head-title">
+                <span class="lc-modal-head-icon">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </span>
+                <div class="lc-modal-head-text">
+                    <span class="lc-modal-head-h3">Leave &amp; Travel Calendar</span>
+                    <span class="lc-modal-head-sub">PRIME HRIS · Who is out on leave or travel</span>
+                </div>
+            </div>
+            <button type="button" class="lc-modal-close" onclick="closeLeaveCalModal()" aria-label="Close">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="lc-modal-body">
+            <div id="leaveCalLoader" class="lc-modal-loader">
+                <span class="lc-spinner"></span>
+                <p>Loading calendar…</p>
+            </div>
+            <iframe id="leaveCalFrame" title="Leave & Travel Calendar" src="about:blank" loading="lazy"></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Root-relative on purpose: an absolute URL built from APP_URL (127.0.0.1)
+    // is a different host than a browser sitting on localhost, so the session
+    // cookie would not be sent and every open would land on /login.
+    var LEAVE_CAL_PATH = "/admin/leave-calendar";
+    var LEAVE_CAL_SRC  = "/admin/leave-calendar?embed=1";
+
+    function openLeaveCalModal() {
+        var modal = document.getElementById('leaveCalModal');
+        var frame = document.getElementById('leaveCalFrame');
+        // Reload every time so the month is current and an expired session is
+        // caught on open rather than showing a stale calendar.
+        document.getElementById('leaveCalLoader').style.display = '';
+        frame.src = LEAVE_CAL_SRC;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    // The iframe renders whatever the server returns. If `auth` redirected the
+    // request (expired session), that response is the full portal/login page —
+    // send the whole window there instead of framing the portal inside the modal.
+    // Bound here rather than with an inline onload="": the iframe ships as
+    // about:blank, whose load event fires during parsing, before this script
+    // has run. Attaching after definition both fixes that error and skips the
+    // spurious placeholder event — the only load worth handling is the one
+    // that follows setting .src when the modal opens.
+    document.getElementById('leaveCalFrame')
+        .addEventListener('load', function () { leaveCalFrameLoaded(this); });
+
+    function leaveCalFrameLoaded(frame) {
+        var loc;
+        try {
+            loc = frame.contentWindow.location;
+        } catch (e) {
+            return;   // cross-origin: nothing we can inspect
+        }
+        if (loc.href === 'about:blank') return;
+
+        if (loc.pathname !== LEAVE_CAL_PATH) {
+            window.location.href = loc.href;
+            return;
+        }
+        document.getElementById('leaveCalLoader').style.display = 'none';
+    }
+    function closeLeaveCalModal(event) {
+        if (event && event.target !== event.currentTarget) return;
+        document.getElementById('leaveCalModal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeLeaveCalModal();
+    });
+</script>
+
+<style>
+    .leave-cal-fab {
+        position: fixed;
+        right: 28px;
+        bottom: 96px;              /* stacked above the chatbot FAB (bottom:28px) */
+        z-index: 997;              /* below chatbot toggle (999) / panel (998) */
+        width: 56px;
+        height: 56px;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--theme-primary);
+        color: #fff;
+        cursor: pointer;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+        transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .leave-cal-fab:hover {
+        background: var(--theme-primary-2);
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+    }
+
+    /* ---- Popup modal — matches the Detailed DTR modal's glass treatment ---- */
+    @keyframes lcOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes lcPanelIn {
+        from { opacity: 0; transform: translateY(14px) scale(0.98); }
+        to   { opacity: 1; transform: none; }
+    }
+    @keyframes lcSpin { to { transform: rotate(360deg); } }
+
+    .lc-modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 3000;             /* above sidebar (200) and chatbot (999) */
+        background: rgba(20, 20, 32, 0.45);
+        backdrop-filter: blur(12px) saturate(160%);
+        -webkit-backdrop-filter: blur(12px) saturate(160%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+        animation: lcOverlayIn 0.24s ease;
+    }
+    .lc-modal-panel {
+        width: 100%;
+        max-width: 1280px;
+        height: 90vh;
+        position: relative;
+        isolation: isolate;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.58));
+        backdrop-filter: blur(30px) saturate(180%);
+        -webkit-backdrop-filter: blur(30px) saturate(180%);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.8),
+            0 30px 70px rgba(11, 4, 77, 0.22),
+            0 8px 24px rgba(15, 23, 42, 0.1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: lcPanelIn 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    /* Decorative colour wash, same idea as the DTR modal */
+    .lc-modal-panel::before {
+        content: '';
+        position: absolute; inset: 0; z-index: -1;
+        background:
+            radial-gradient(480px 320px at 8% -12%, rgba(99, 102, 241, 0.12), transparent 60%),
+            radial-gradient(420px 300px at 100% 0%, rgba(56, 189, 248, 0.1), transparent 60%);
+    }
+    /* ── Header · light, minimal ── */
+    .lc-modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 0 24px;
+        height: 64px;
+        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: saturate(180%) blur(24px);
+        -webkit-backdrop-filter: saturate(180%) blur(24px);
+        border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+    .lc-modal-head-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .lc-modal-head-icon {
+        width: 36px; height: 36px; border-radius: 12px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, var(--theme-primary-2), var(--theme-primary));
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: #fff;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .lc-modal-head-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .lc-modal-head-h3 { font-size: 14px; font-weight: 700; color: var(--gp-ink); letter-spacing: -0.1px; line-height: 1.2; white-space: nowrap; }
+    .lc-modal-head-sub { font-size: 10.5px; font-weight: 500; color: var(--theme-neutral-600); letter-spacing: 0.2px; line-height: 1.2; white-space: nowrap; }
+    .lc-modal-close {
+        width: 32px; height: 32px; border-radius: 999px; flex-shrink: 0;
+        border: 1px solid transparent;
+        background: rgba(15, 23, 42, 0.05); color: var(--theme-neutral-600);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    }
+    .lc-modal-close:hover { background: rgba(11, 10, 77, 0.1); color: var(--gp-ink); }
+    .lc-modal-close:active { transform: scale(0.9); }
+    .lc-modal-body { flex: 1; min-height: 0; position: relative; }
+    .lc-modal-body iframe {
+        width: 100%; height: 100%;
+        border: none; display: block; background: transparent;
+        position: relative; z-index: 1;
+    }
+
+    /* Loading state shown until the iframe calendar finishes loading */
+    .lc-modal-loader {
+        position: absolute; inset: 0; z-index: 2;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 14px;
+        background: transparent;
+    }
+    .lc-modal-loader p { margin: 0; font-size: 12.5px; font-weight: 600; color: var(--gp-muted); }
+    .lc-spinner {
+        width: 36px; height: 36px; border-radius: 50%;
+        border: 3px solid rgba(15, 23, 42, 0.1);
+        border-top-color: var(--theme-primary);
+        animation: lcSpin 0.7s linear infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .lc-modal-overlay, .lc-modal-panel { animation: none; }
+    }
+    @media (max-width: 640px) {
+        .leave-cal-fab { right: 20px; bottom: 84px; }
+        .lc-modal-overlay { padding: 10px; }
+        .lc-modal-panel { height: 94vh; border-radius: 18px; }
+    }
+</style>
+            </div>
+    
+    <script type="module" src="http://127.0.0.1:5173/@vite/client"></script><script type="module" src="http://127.0.0.1:5173/resources/js/app.js"></script>        <script type="module" src="http://127.0.0.1:5173/@vite/client"></script><script type="module" src="http://127.0.0.1:5173/resources/js/admin/website/adminWebsite.js"></script>    <script type="module" src="http://127.0.0.1:5173/@vite/client"></script><script type="module" src="http://127.0.0.1:5173/resources/js/admin/chatbot/adminChatbot.js"></script></body>
+</html>

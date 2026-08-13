@@ -112,6 +112,13 @@ return [
     'show me employees in the treasury office' => 'employee_search',
     'employees appointed last year' => 'employee_search',
     'who is the department head of HR' => 'employee_search',
+    // Office-holder lookups must resolve to the person holding the role, not
+    // to a department roster or to a "who's" the classifier has to guess at.
+    'who is the mayor' => 'employee_search',
+    "who's the mayor" => 'employee_search',
+    'sino ang mayor' => 'employee_search',
+    'who is the hr officer' => 'employee_search',
+    'who is the system administrator' => 'employee_search',
 
     // ── data_query ──────────────────────────────────────────────────────────
     'list all employees with 2 or more absences' => 'data_query',

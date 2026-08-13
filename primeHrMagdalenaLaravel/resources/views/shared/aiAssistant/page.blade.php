@@ -9,7 +9,7 @@
 @include($area . '.topbar.aiAssistantTopbar')
 
 <div class="ai-page" id="ai-page"
-     data-send-url="{{ route($area . '.ai-assistant.send') }}"
+     data-send-url="{{ route('chatbot.chat') }}"
      data-search-url="{{ route($area . '.ai-assistant.search') }}"
      data-conversations-url="{{ url($area . '/ai-assistant/conversations') }}"
     data-export-url="{{ route($area . '.ai-assistant.export', ['token' => '__TOKEN__']) }}"

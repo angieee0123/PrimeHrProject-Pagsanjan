@@ -317,6 +317,16 @@ class AiQueryService
             // otherwise send an employee down a path they are not permitted to
             // use and get them refused for asking about themselves.
             $this->isSelfReferential($q) => 'self_service',
+            // Office-holder questions are always a person lookup — "who is the
+            // mayor", "sino ang mayor", "who's the HR officer". Checked here so
+            // the "who's" contraction and the Tagalog form, which the
+            // `\bwho\s+is\b` rule below cannot see, still route to
+            // employee_search instead of falling to the model or the generated
+            // SQL path (which used to answer "who's the mayor" with a roster).
+            (bool) preg_match(
+                '/\b(?:who\s+is|who\'s|sino)\b.{0,25}\b(vice\s+mayor|mayor|administrator|hr\s*(?:officer|head|personnel)?|human\s+resources)\b/',
+                $q
+            ) => 'employee_search',
             (bool) preg_match('/\b(how many|how much|count|total|number of|who has|which department|pending|missing|expir\w+|overview|dashboard)\b/', $q) => 'dashboard',
             // Transactional nouns beat the employee-lookup rule below, which
             // would otherwise claim "employees with more than 5 late arrivals"

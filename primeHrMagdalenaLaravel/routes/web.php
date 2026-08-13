@@ -480,10 +480,6 @@ foreach (['admin', 'employee', 'mayor'] as $aiArea) {
     Route::get("/{$aiArea}/ai-assistant", [\App\Http\Controllers\AiAssistantController::class, 'index'])->middleware('auth')->name("{$aiArea}.ai-assistant");
     Route::get("/{$aiArea}/ai-assistant/conversations/{conversation}", [\App\Http\Controllers\AiAssistantController::class, 'messages'])->middleware('auth')->name("{$aiArea}.ai-assistant.messages");
     Route::get("/{$aiArea}/ai-assistant/search", [\App\Http\Controllers\AiAssistantController::class, 'search'])->middleware('auth')->name("{$aiArea}.ai-assistant.search");
-    // Throttled: one question can spend several provider calls (memory rewrite,
-    // intent classification, SQL generation retries, narration) against a
-    // shared org API key, so an unbounded endpoint is a cost and quota risk.
-    Route::post("/{$aiArea}/ai-assistant/message", [\App\Http\Controllers\AiAssistantController::class, 'send'])->middleware(['auth', 'throttle:20,1'])->name("{$aiArea}.ai-assistant.send");
     Route::get("/{$aiArea}/ai-assistant/export/{token}", [\App\Http\Controllers\AiAssistantController::class, 'export'])->middleware('auth')->name("{$aiArea}.ai-assistant.export");
     Route::delete("/{$aiArea}/ai-assistant/conversations/{conversation}", [\App\Http\Controllers\AiAssistantController::class, 'destroy'])->middleware('auth')->name("{$aiArea}.ai-assistant.destroy");
 }

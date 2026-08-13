@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\Models\User;
+use App\Models\AiConversation;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -156,5 +157,64 @@ class ChatbotControllerTest extends TestCase
         $this->postJson('/chatbot/chat', ['message' => '', 'reset' => true])
             ->assertOk()
             ->assertJson(['status' => 'success']);
+    }
+
+    public function test_chathead_style_requests_continue_the_newest_thread(): void
+    {
+        // No conversation_id key: the widget picks up the user's newest thread.
+        $first = $this->postJson('/chatbot/chat', ['message' => 'Hello'])->assertOk();
+        $firstId = $first->json('conversation_id');
+        $this->assertNotNull($firstId);
+
+        $continued = $this->postJson('/chatbot/chat', ['message' => 'Hi there'])->assertOk();
+        $this->assertSame($firstId, $continued->json('conversation_id'));
+    }
+
+    public function test_explicit_null_conversation_starts_a_fresh_thread(): void
+    {
+        // The full-page assistant sends conversation_id: null when the user is
+        // starting a new chat; that must fork, never rejoin the newest thread.
+        $first = $this->postJson('/chatbot/chat', ['message' => 'Hello'])->assertOk();
+        $firstId = $first->json('conversation_id');
+
+        $fresh = $this->postJson('/chatbot/chat', ['message' => 'Hello', 'conversation_id' => null])
+            ->assertOk();
+
+        $this->assertNotNull($fresh->json('conversation_id'));
+        $this->assertNotSame($firstId, $fresh->json('conversation_id'));
+        // The new thread is titled from its first question so the sidebar can
+        // label it without a separate request.
+        $this->assertNotNull($fresh->json('title'));
+    }
+
+    public function test_explicit_conversation_id_rejoins_that_thread(): void
+    {
+        $created = $this->postJson('/chatbot/chat', ['message' => 'Hello'])->assertOk();
+        $id = $created->json('conversation_id');
+
+        // Selecting a sidebar conversation posts its id and must continue it,
+        // not the newest one.
+        $rejoin = $this->postJson('/chatbot/chat', ['message' => 'Hi', 'conversation_id' => $id])
+            ->assertOk();
+
+        $this->assertSame($id, $rejoin->json('conversation_id'));
+    }
+
+    public function test_a_conversation_belonging_to_another_user_starts_fresh(): void
+    {
+        $other = User::create([
+            'email'  => 'other-chatbot-test@example.test',
+            'roles'  => ['employee'],
+            'status' => 'Active',
+        ]);
+        $foreign = AiConversation::create(['user_id' => $other->id, 'title' => 'Someone else’s thread']);
+        $foreignId = $foreign->id;
+
+        // An explicit id the caller does not own must not be hijacked: it falls
+        // back to a fresh thread of the caller's own.
+        $response = $this->postJson('/chatbot/chat', ['message' => 'Hello', 'conversation_id' => $foreignId])
+            ->assertOk();
+
+        $this->assertNotSame($foreignId, $response->json('conversation_id'));
     }
 }
