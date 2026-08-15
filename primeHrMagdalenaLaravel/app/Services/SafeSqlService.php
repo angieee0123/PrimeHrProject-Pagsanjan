@@ -65,6 +65,16 @@ class SafeSqlService
         'contacts',
         'documents',
         'travel_orders',
+        // A travel order can be a group trip: `travel_orders.employee_id` is the
+        // principal, and every other traveller is a row in
+        // travel_order_companions with their own accept/reject. Without these
+        // two the assistant could describe a group trip as a solo one — it
+        // could read the order and not the people on it — and "sino ang kasama
+        // ni Juan" was unanswerable by construction rather than by policy.
+        // Neither table holds a credential: employee ids, a status enum, and a
+        // free-text response note.
+        'travel_order_companions',
+        'travel_order_histories',
         'pass_slips',
         'schedules',
         'employee_requests',
@@ -87,8 +97,16 @@ class SafeSqlService
 
     private const FORBIDDEN_SCHEMAS = ['information_schema', 'mysql', 'performance_schema', 'sys'];
 
-    public function __construct(private AiAccessPolicy $policy)
-    {
+    /**
+     * $relationships is optional so existing callers constructing this with the
+     * policy alone keep working; it is resolved to the real service when absent.
+     */
+    public function __construct(
+        private AiAccessPolicy $policy,
+        private ?SchemaRelationshipService $relationships = null,
+    ) {
+        $this->relationships ??= new SchemaRelationshipService();
+
     }
 
     /**
@@ -203,11 +221,22 @@ class SafeSqlService
         $schema = $this->describeSchema($question);
         $today = now()->toDateString();
 
+        // The database's declared foreign keys, so joins are read from the
+        // schema rather than guessed from column names. Empty on a connection
+        // that cannot report them (SQLite in tests), in which case the block is
+        // omitted entirely rather than left as an empty heading.
+        $joins = $this->relationships->describeFor($this->relevantTables($question));
+
+        $joinBlock = $joins === ''
+            ? ''
+            : "\nHOW THESE TABLES JOIN (declared foreign keys — use these, do not invent joins):\n{$joins}\n";
+
         $system = <<<PROMPT
 You write MySQL SELECT statements for the PRIME HRIS database. Today is {$today}.
 
 SCHEMA (these are the only tables you may reference):
 {$schema}
+{$joinBlock}
 
 RULES — a violation means the query is discarded:
 1. Output ONE SELECT statement and nothing else. No prose, no markdown fences,
@@ -232,6 +261,47 @@ DOMAIN RULES — these matter more than they look:
 10. attendance uses the column `date`, not `attendance_date`.
 11. leave_applications.status is one of: pending, approved, rejected, cancelled
     (lowercase). Its dates are start_date and end_date.
+12. `designations` is the plantilla: one row per POST, joined to its office by
+    designations.department_id, and carrying monthly_rate and salary_grade. To
+    list the posts an office has, filter designations.department_id directly.
+    Do NOT join employment_details for this — that restricts the answer to posts
+    which currently have someone sitting in them, and most posts are vacant, so
+    the query returns nothing for an office that plainly has positions.
+13. Job titles are stored ABBREVIATED: "Acctg. Clerk II", "Admin. Aide IV",
+    "Mun. Accountant", "Mgt. and Audit Analyst", "Bookkeeper III". A user types
+    them out in full ("accounting clerk", "municipal accountant"). Never compare
+    a title with `=`; always use LIKE '%keyword%' on the distinctive word
+    ("clerk", "accountant", "bookkeeper", "aide"). Returning several near
+    matches is correct and useful; returning zero rows because the exact string
+    did not match is not.
+14. Match department names with LIKE too, for the same reason — "accounting
+    office" against "Accounting Office" is fine, but do not rely on it.
+15. Words naming the ORGANISATION ITSELF are context, never a filter: "the
+    municipality", "munisipyo", "sa munisipyo natin", "our LGU", "the
+    municipal government", "dito sa atin". Everything in this database already
+    belongs to Pagsanjan. Never turn them into a WHERE clause — "anong mga
+    department meron sa munisipyo natin" asks for ALL departments, and matching
+    name LIKE '%Municipal%' answered it with the 8 whose title happens to start
+    that way, out of 26.
+16. To list the offices themselves, select from `departments` directly. Do not
+    join employees or employment_details for that — it silently drops every
+    department that currently has no staff assigned.
+17. A travel order can be a GROUP trip. travel_orders.employee_id is only the
+    principal traveller; every other person on the trip is a row in
+    travel_order_companions (travel_order_id, employee_id, status). So:
+    - "who is going WITH X" asks for the OTHER travellers, so select the
+      COMPANION's employee row, not X's. Joining travel_order_companions and
+      then selecting the principal's name returns X back to the user as their
+      own companion — check which alias you are selecting from.
+    - a person is on a trip if they are the principal OR a companion. Counting
+      only travel_orders.employee_id undercounts every group trip.
+    - travel_order_companions.status is pending/accepted/rejected and is the
+      companion's OWN answer, separate from travel_orders.status. A companion
+      who rejected is not travelling.
+    - travel_orders.status 'awaiting_companions' means the trip is waiting on
+      those replies; it is not an approval state.
+    - travel_orders.filed_by is the user who submitted the form, which may be
+      somebody other than the traveller. It is never "who travelled".
 
 Example:
 Question: employees with 2 or more absences
@@ -242,6 +312,18 @@ WHERE a.attendance_type = 'ABSENT'
 GROUP BY e.id, e.employee_id, e.first_name, e.last_name
 HAVING COUNT(*) >= 2
 ORDER BY total_absences DESC
+LIMIT 200
+
+Example — note which employees row is SELECTED. `principal` is who the
+question is about; `companion` is the answer:
+Question: sino ang kasama ni Basha Cuevas sa travel order niya
+SELECT companion.first_name, companion.last_name, c.status AS companion_status,
+       t.order_number, t.destination, t.travel_date
+FROM travel_orders t
+JOIN employees principal ON principal.id = t.employee_id
+JOIN travel_order_companions c ON c.travel_order_id = t.id
+JOIN employees companion ON companion.id = c.employee_id
+WHERE CONCAT_WS(' ', principal.first_name, principal.last_name) LIKE '%Basha%'
 LIMIT 200
 PROMPT;
 
@@ -432,7 +514,10 @@ PROMPT;
         'train' => ['trainings'],
         'seminar' => ['trainings'],
         'certificat' => ['trainings', 'documents'],
-        'travel' => ['travel_orders'],
+        'travel' => ['travel_orders', 'travel_order_companions', 'travel_order_histories'],
+        'kasama' => ['travel_orders', 'travel_order_companions'],
+        'companion' => ['travel_orders', 'travel_order_companions'],
+        'kasabay' => ['travel_orders', 'travel_order_companions'],
         'document' => ['documents'],
         'file' => ['documents'],
         'upload' => ['documents'],
@@ -541,20 +626,33 @@ PROMPT;
     private function narrate(User $user, string $question, string $sql, array $rows, array $history): string
     {
         if (empty($rows)) {
-            return 'That query ran successfully but returned no rows — there is no data matching those criteria.';
+            return $this->narrateEmpty($user, $question, $history);
         }
 
-        $system = <<<'PROMPT'
+        // The caller's audience, not a fixed one: this service answers
+        // employees as well as HR, and a hard-coded "an HR administrator" makes
+        // the narration address someone reading their own file as though it
+        // were somebody else's. AiAccessPolicy owns that distinction.
+        $audience = $this->policy->audienceLabel($user);
+
+        $system = <<<PROMPT
 You are the PRIME HRIS Assistant explaining the result of a database query to
-an HR administrator.
+{$audience}.
 
 The rows are ALREADY shown to the user as a table directly beneath your reply.
 So summarise them — do not transcribe them.
 
-- Lead with the headline number ("4 employees have 2 or more absences").
+- Say what the rows ACTUALLY ARE. Read the column names before writing a word:
+  a list of job titles is a list of posts, not of employees, and calling ten
+  designations "4 employees" describes a different result than the one returned.
+- Lead with the headline figure, phrased in the units of those rows
+  ("The Accounting Office has 10 designations", "3 employees were absent twice").
 - Add the insight the table does not show: the pattern, the outlier, what to do.
 - Do NOT list each row's field values; that is what the table is for.
 - Every figure you cite must come from the rows given. Never estimate or invent.
+- Answer in the language THIS question is written in: Tagalog for a Tagalog
+  question, English for an English one. Judge it from the question itself, not
+  from earlier turns.
 - Under 120 words. No SQL, no JSON, no markdown table.
 PROMPT;
 
@@ -570,6 +668,43 @@ PROMPT;
         $answer = AiChatService::chat($user, $system, $messages, 0.3, 800);
 
         return $answer ?: $this->fallbackNarration($rows);
+    }
+
+    /**
+     * "Nobody is on leave today" — not "that query returned no rows".
+     *
+     * A correct empty result is still an answer, and it was being reported as
+     * database mechanics: "That query ran successfully but returned no rows —
+     * there is no data matching those criteria." Asked "may naka leave ba
+     * ngayong araw?", the system knew the answer was *no* and said instead, in
+     * English, that a query the user never issued had come back empty. The
+     * finding is right; only the sentence was wrong.
+     *
+     * @param array<int, array{role: string, content: string}> $history
+     */
+    private function narrateEmpty(User $user, string $question, array $history): string
+    {
+        $system = <<<'PROMPT'
+You are the PRIME HRIS Assistant. A search of the HR records for the user's
+question completed correctly and found nothing.
+
+Answer the question directly in one or two sentences, saying plainly that there
+are none. Never mention SQL, queries, rows, tables, records "matching criteria",
+or the database — the user asked about the organisation, not about how it is
+stored.
+
+Match the user's language (Tagalog or English).
+Do not speculate about the cause and never state a number you were not given.
+PROMPT;
+
+        $messages = $history;
+        $messages[] = [
+            'role' => 'user',
+            'content' => "Question: {$question}\n\n(The search found no matching records at all.)",
+        ];
+
+        return AiChatService::chat($user, $system, $messages, 0.3, 200)
+            ?: 'I checked the records and found nothing matching that.';
     }
 
     /**

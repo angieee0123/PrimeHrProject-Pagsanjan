@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Department;
+use App\Models\Designation;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -74,20 +75,45 @@ class EmployeeSearchService
         }
 
         // Department by name, matched against what actually exists.
+        //
+        // Both sides are punctuation-normalised first. Four of these offices
+        // have an apostrophe in the name ("Mayor's Office") and the rows store
+        // the straight ASCII one, while phone keyboards and anything pasted out
+        // of Word produce the curly U+2019. A literal comparison therefore
+        // missed the department entirely, and the query fell through to the
+        // role rule below and answered about the office*holder* instead.
+        $haystack = $this->normalisePunctuation($query);
+
         foreach (Department::query()->get(['id', 'name', 'code']) as $department) {
-            $needle = trim((string) $department->name);
-            if ($needle !== '' && stripos($query, $needle) !== false) {
+            $needle = $this->normalisePunctuation((string) $department->name);
+
+            if ($needle !== '' && stripos($haystack, $needle) !== false) {
                 $params['department_id'] = $department->id;
                 break;
             }
         }
 
-        // Office-holder lookup: "who is the mayor" means the employee linked to
-        // a user account holding that role, not everyone in the Mayor's Office.
-        // "vice mayor" is deliberately excluded — no `vice_mayor` role exists,
-        // and matching the "mayor" inside it would answer with the wrong person.
-        if (preg_match('/\bvice\s+mayor\b/i', $query)) {
-            // Leave to the department/designation search.
+        // Office-holder lookup: "who is the mayor" means the employee holding
+        // that office, not everyone in the Mayor's Office. Resolved from a user
+        // account holding the role, and failing that from the designation title
+        // — the appointment is the fact being asked about; a login is not.
+        //
+        // Skipped entirely once the query has named a real department. The role
+        // words are all also *office* names here — "Mayor's Office", "Human
+        // Resources" — so "show me employees in the Mayor's Office" matched
+        // \bmayor\b and returned the single role-holder, or, when no account
+        // held the role, "No employee account is currently linked to the Mayor
+        // role" for a question about a department with staff in it. A named
+        // department is the more specific signal and wins.
+        if (isset($params['department_id'])) {
+            // The department filter below answers this; a role lookup would
+            // replace a roster with one person.
+        } elseif (preg_match('/\bvice\s+mayor\b/i', $query)) {
+            // No `vice_mayor` user role exists, so this resolves purely through
+            // the designation search. It used to be left to the general search,
+            // which — with no name and no department to filter on — answered
+            // "who is the vice mayor" with the entire roster.
+            $params['role'] = 'vice_mayor';
         } elseif (preg_match('/\bmayor\b/i', $query)) {
             $params['role'] = 'mayor';
         } elseif (preg_match('/\b(?:system\s+|municipal\s+)?administrator\b/i', $query) || preg_match('/\badmin\b/i', $query)) {
@@ -126,6 +152,21 @@ class EmployeeSearchService
         }
 
         return array_filter($params, fn ($value) => $value !== null);
+    }
+
+    /**
+     * Fold the quote characters a user's keyboard might produce onto the ASCII
+     * ones the database stores, and collapse runs of whitespace.
+     */
+    private function normalisePunctuation(string $value): string
+    {
+        $value = str_replace(
+            ["\u{2018}", "\u{2019}", "\u{201B}", '´', '`', "\u{201C}", "\u{201D}"],
+            ["'", "'", "'", "'", "'", '"', '"'],
+            $value
+        );
+
+        return trim(preg_replace('/\s+/u', ' ', $value) ?? $value);
     }
 
     /**
@@ -171,9 +212,33 @@ class EmployeeSearchService
             // Grouped so the OR branches cannot leak past the other filters.
             $query->where(function (Builder $q) use ($name) {
                 $q->whereRaw("CONCAT_WS(' ', first_name, middle_name, last_name) LIKE ?", ["%{$name}%"])
+                    // The same concatenation without the middle name. People are
+                    // addressed as "Jeremy Pogi", but the stored row is "Jeremy
+                    // Reyes Pogi", so the phrase match above needs the middle
+                    // name to be absent to succeed — and every employee in this
+                    // database has one. Searching any colleague by the name you
+                    // would actually call them therefore returned nothing at all.
+                    ->orWhereRaw("CONCAT_WS(' ', first_name, last_name) LIKE ?", ["%{$name}%"])
                     ->orWhere('first_name', 'like', "%{$name}%")
                     ->orWhere('last_name', 'like', "%{$name}%")
                     ->orWhere('employee_id', 'like', "%{$name}%");
+
+                // Every word present somewhere in the full name, in any order.
+                // Catches middle-name-in-the-middle ("Jeremy Pogi"), reversed
+                // order ("Pogi, Jeremy"), and a middle name the asker does know
+                // — none of which a single LIKE over one phrase can express.
+                $tokens = array_filter(preg_split('/\s+/', trim($name)) ?: []);
+
+                if (count($tokens) > 1) {
+                    $q->orWhere(function (Builder $all) use ($tokens) {
+                        foreach ($tokens as $token) {
+                            $all->whereRaw(
+                                "CONCAT_WS(' ', first_name, middle_name, last_name) LIKE ?",
+                                ["%{$token}%"]
+                            );
+                        }
+                    });
+                }
             });
         }
 
@@ -235,10 +300,16 @@ class EmployeeSearchService
             ->unique()
             ->values();
 
-        // No account holds the role: return nothing rather than let the
-        // scoping below fall through to an unscoped full listing.
+        // No account holds the role — but the office almost certainly still
+        // exists as a *job title*. "Sino ang mayor natin?" was answered "no
+        // employee account is currently linked to the Mayor role" while the
+        // designation "Municipal Mayor" sat one join away on
+        // employment_details.designation_id, held by an employee in the Mayor's
+        // Office. A user role is an access-control fact about a login; a
+        // designation is the appointment itself, and the appointment is what
+        // the question is about.
         if ($employeeIds->isEmpty()) {
-            return collect();
+            return $this->runDesignationRoleSearch($user, $role);
         }
 
         $query = Employee::query()->with([
@@ -252,12 +323,63 @@ class EmployeeSearchService
     }
 
     /**
+     * The office-holder by *appointment* rather than by login role.
+     *
+     * `designations.title` is the authoritative record of who holds an office —
+     * a user account is only how somebody signs in, and this municipality has
+     * offices whose holder has no account at all. Matched against the live
+     * titles so a renamed designation cannot leave a stale pattern behind.
+     *
+     * @return Collection<int, Employee>
+     */
+    private function runDesignationRoleSearch(User $user, string $role): Collection
+    {
+        // "Municipal Vice Mayor" contains "Mayor", and answering "who is the
+        // mayor" with the vice mayor is worse than answering with nothing.
+        [$include, $exclude] = match ($role) {
+            'mayor' => ['%mayor%', '%vice%'],
+            'vice_mayor' => ['%vice mayor%', null],
+            'admin' => ['%administrator%', null],
+            'hr' => ['%human resource%', null],
+            default => [null, null],
+        };
+
+        if ($include === null) {
+            return collect();
+        }
+
+        $titles = Designation::query()->where('title', 'like', $include);
+
+        if ($exclude !== null) {
+            $titles->where('title', 'not like', $exclude);
+        }
+
+        $designationIds = $titles->pluck('id');
+
+        if ($designationIds->isEmpty()) {
+            return collect();
+        }
+
+        $query = Employee::query()
+            ->with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation'])
+            ->whereHas(
+                'employmentDetail',
+                fn (Builder $q) => $q->whereIn('designation_id', $designationIds)
+            );
+
+        $this->policy->scopeEmployeeQuery($query, $user);
+
+        return $query->limit(self::MAX_RESULTS)->get();
+    }
+
+    /**
      * @param Collection<int, array<string, mixed>> $rows
      */
     private function narrateRole(User $user, string $role, Collection $rows): string
     {
         $label = match ($role) {
             'mayor' => 'Mayor',
+            'vice_mayor' => 'Vice Mayor',
             'admin' => 'system administrator',
             'hr' => 'HR officer',
             default => $role,
@@ -266,7 +388,13 @@ class EmployeeSearchService
         $notice = $this->policy->scopeNotice($user);
 
         if ($rows->isEmpty()) {
-            return "No employee account is currently linked to the {$label} role."
+            // Both routes were tried — a user account holding the role, and an
+            // employee holding the matching designation. Saying only "no
+            // account is linked" describes one of the two searches and reads as
+            // a system-configuration problem, when the actual finding is that
+            // the post is vacant in the records.
+            return "I could not find anyone recorded as the {$label}: no user account holds that role, "
+                . 'and no employee is currently assigned that designation.'
                 . ($notice ? "\n\n{$notice}" : '');
         }
 
@@ -281,7 +409,7 @@ class EmployeeSearchService
 
         $opening = $rows->count() === 1
             ? "The {$label} is:"
-            : "Employees holding the {$label} role:";
+            : "Employees recorded as {$label}:";
 
         return $opening . "\n" . $lines . ($notice ? "\n\n{$notice}" : '');
     }
@@ -379,12 +507,27 @@ PROMPT;
      */
     private function fallbackNarration(Collection $rows): string
     {
-        $lines = $rows->take(10)->map(function (array $row) {
+        // A single match is almost always a question *about that person* —
+        // "employment status of X", "salary grade of Y" — so the one field the
+        // asker wanted must be in the sentence. This used to print name,
+        // designation and department only, which answered a different question
+        // than the one asked and left the reader to hunt the attached table.
+        // Above one row it stays a roster: the extra fields turn ten matches
+        // into an unreadable wall.
+        $detailed = $rows->count() === 1;
+
+        $lines = $rows->take(10)->map(function (array $row) use ($detailed) {
             $parts = array_filter([
                 $row['name'],
                 $row['employee_id'] ? "({$row['employee_id']})" : null,
                 $row['designation'],
                 $row['department'],
+                $detailed && !empty($row['employment_status']) ? "Status: {$row['employment_status']}" : null,
+                $detailed && !empty($row['salary_grade']) ? "SG: {$row['salary_grade']}" : null,
+                $detailed && !empty($row['appointment_date'])
+                    ? 'Appointed: ' . $this->formatDate($row['appointment_date'])
+                    : null,
+                $detailed && !empty($row['email']) ? "Email: {$row['email']}" : null,
             ]);
 
             return '- ' . implode(' · ', $parts);
@@ -393,5 +536,25 @@ PROMPT;
         $more = $rows->count() > 10 ? "\n…and " . ($rows->count() - 10) . ' more.' : '';
 
         return "Found {$rows->count()} employee(s):\n{$lines}{$more}";
+    }
+
+    /**
+     * `employment_details` has no `updated_at` and its dates arrive as either a
+     * Carbon instance or a raw string depending on the model's casts, so this
+     * normalises both rather than assuming one.
+     */
+    private function formatDate(mixed $value): string
+    {
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('M d, Y');
+        }
+
+        $text = trim((string) $value);
+
+        try {
+            return \Carbon\Carbon::parse($text)->format('M d, Y');
+        } catch (\Throwable) {
+            return $text;
+        }
     }
 }

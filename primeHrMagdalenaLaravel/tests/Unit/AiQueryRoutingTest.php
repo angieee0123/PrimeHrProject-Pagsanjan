@@ -282,6 +282,45 @@ class AiQueryRoutingTest extends TestCase
     }
 
     /**
+     * Tagalog inserts particles between every part of the phrase, so the fixed
+     * sequence "ano ang pwede" does not survive contact with how the question
+     * is actually typed: "ano LANG BA ang MGA pwede NA itanong sayo".
+     *
+     * This is not a cosmetic misroute. An unrecognised question from an
+     * org-wide caller reaches HrChatbotAnswerer, which runs text-to-SQL — so
+     * "what can I ask you?" was answered with a table of absences and late
+     * deductions, narrated as though that were the answer.
+     */
+    #[Test]
+    public function tagalog_capability_questions_are_not_answered_with_data(): void
+    {
+        foreach ([
+            'ano lang ba ang mga pwede na itanong sayo?',
+            'Ano lang ba ang mga pwede na itanong sayo',
+            'ano ang mga tanong na pwede ko sayo',
+            'ano pa ang pwede kong itanong',
+            'anong pwede kong itanong sayo',
+            'ano ang magagawa mo',
+        ] as $question) {
+            $this->assertSame('capabilities', $this->intentOf($question, ['admin'], 1), "misrouted: {$question}");
+        }
+    }
+
+    /**
+     * The counterpart: the widened Tagalog patterns must not swallow questions
+     * that name a real subject. "Anong uri ng leave ang pwede kong i-file" is
+     * about the rulebook and "ilan ang pending" is a count — neither is a
+     * question about the assistant.
+     */
+    #[Test]
+    public function the_tagalog_capability_patterns_do_not_claim_real_questions(): void
+    {
+        $this->assertSame('how_to', $this->intentOf('anong mga uri ng leave ang pwede kong i-file?', ['employee'], 5));
+        $this->assertSame('self_service', $this->intentOf('ano ang mga leave credits na meron ako', ['employee'], 5));
+        $this->assertSame('dashboard', $this->intentOf('ilan ang leave applications na pending', ['hr'], 1));
+    }
+
+    /**
      * "help me find Juan" is a search. A bare "help" is the only form that
      * means the capability list.
      */
@@ -401,6 +440,207 @@ class AiQueryRoutingTest extends TestCase
             'how_to',
             $this->intentOf('how is late deduction calculated?', ['employee'], 5)
         );
+    }
+
+    /**
+     * A named person plus one of their personnel-record fields.
+     *
+     * These carry no interrogative ("employment status of Jeremy Pogi" is a
+     * noun phrase), no transactional noun, and no "who is", so every
+     * deterministic rule declined them and they fell through to the model
+     * classifier. That branch is the only one that stops working when the
+     * provider does — so during a 401 the commonest HR lookup in the system
+     * answered with a generic apology instead of the record.
+     */
+    #[Test]
+    public function a_named_person_plus_a_record_field_is_an_employee_search(): void
+    {
+        foreach ([
+            'Employment Status of Jeremy Pogi',
+            'Department of Ana Ramos',
+            "what is Juan Dela Cruz's position",
+            'salary grade of Pedro Santos',
+            'contact number of Rosa Bautista',
+        ] as $question) {
+            $this->assertSame('employee_search', $this->intentOf($question, ['hr'], 1), "misrouted: {$question}");
+        }
+    }
+
+    /**
+     * The counterpart: the attribute and the name are both required. An
+     * attribute with nobody named is an org-wide question, and a name attached
+     * to a transactional noun is about those records rather than the personnel
+     * file — EmployeeSearchService reads only the employees cluster and cannot
+     * total a leave credit.
+     */
+    #[Test]
+    public function the_record_field_rule_needs_both_halves(): void
+    {
+        $this->assertNotSame('employee_search', $this->intentOf('leave balance of Jeremy Pogi', ['hr'], 1));
+        $this->assertNotSame('employee_search', $this->intentOf('how many employees are in each department', ['hr'], 1));
+    }
+
+    /**
+     * Questions about the establishment itself — which posts an office holds,
+     * what a post pays — must reach a capability that reads `designations`.
+     *
+     * No rule claimed them, so they fell to the model classifier, which called
+     * "ano ano ang mga job designation sa accounting office" a how_to and sent
+     * it to the knowledge base. There the model answered "Accountant,
+     * Accounting Clerk, Bookkeeper, Auditor, Chief Accountant" — five titles,
+     * none of which exist in this municipality's plantilla, for an office whose
+     * real posts are Mun. Accountant, Bookkeeper III, Acctg. Clerk II and seven
+     * others carrying the monthly rates the question was really after.
+     */
+    #[Test]
+    public function questions_about_posts_and_their_pay_reach_the_data_capability(): void
+    {
+        foreach ([
+            'ano ano ang mga job designation sa accounting office?',
+            'what designations are in the accounting office',
+            'ano ang mga posisyon sa treasury office',
+            'magkano ang sinasahod ng isang accounting clerk?',
+            'how much does a bookkeeper earn',
+        ] as $question) {
+            $this->assertSame('data_query', $this->intentOf($question, ['admin'], 1), "misrouted: {$question}");
+        }
+    }
+
+    /**
+     * The counterpart: "magkano ang sahod ko" is the asker's own payslip, and
+     * the establishment rule sits after self-service precisely so the salary
+     * form cannot capture it.
+     */
+    #[Test]
+    public function ones_own_pay_is_not_an_establishment_question(): void
+    {
+        $this->assertSame('self_service', $this->intentOf('magkano ang sahod ko', ['employee'], 5));
+        $this->assertSame('self_service', $this->intentOf('how much is my salary', ['employee'], 5));
+        $this->assertSame('dashboard', $this->intentOf('how many employees are in my department', ['hr'], 1));
+    }
+
+    /**
+     * A travel order can be a group trip, and the other travellers live in
+     * `travel_order_companions`. A companion question names a person, which
+     * sent it to employee_search — a capability that reads only the employees
+     * cluster and cannot see a travel order at all, so it answered with a
+     * roster of everybody.
+     */
+    #[Test]
+    public function travel_companion_questions_reach_the_travel_data(): void
+    {
+        foreach ([
+            'sino ang kasama sa travel order ni Juan',
+            'who is travelling with Jeremy next week',
+            'who are the companions on that travel order',
+            'sinong sasama kay Ana sa byahe',
+        ] as $question) {
+            $this->assertSame('data_query', $this->intentOf($question, ['hr'], 1), "misrouted: {$question}");
+        }
+    }
+
+    /**
+     * The catch-all is the smart path, not the giving-up path.
+     *
+     * The deterministic rules are deliberately certain, so `general` is not a
+     * bucket of nonsense — it is the bucket of real HR questions nobody has
+     * written a rule for yet. A caller permitted to run generated SQL should
+     * therefore have the question put to the database, rather than answered
+     * from the model's general knowledge of how an LGU usually works.
+     */
+    #[Test]
+    public function an_unclassified_question_is_put_to_the_database(): void
+    {
+        $sql = $this->createMock(SafeSqlService::class);
+        $sql->expects($this->once())
+            ->method('query')
+            ->willReturn(['answer' => 'Answered from the records.', 'data' => [['x' => 1]]]);
+
+        $fallback = $this->createMock(HrChatbotAnswerer::class);
+        $fallback->expects($this->never())->method('answer');
+
+        $assistant = $this->assistant($sql, $fallback);
+
+        $result = $assistant->ask($this->user(['hr'], 1), 'the weather is nice today');
+
+        $this->assertSame('general', $result['intent']);
+        $this->assertSame('Answered from the records.', $result['answer']);
+    }
+
+    /**
+     * Conversation is not a query. A greeting and the curated policy shortcuts
+     * are answered without a model call and must never become a text-to-SQL
+     * attempt — one has nothing to query, the other is already exact.
+     */
+    #[Test]
+    public function a_greeting_never_becomes_a_generated_query(): void
+    {
+        $sql = $this->createMock(SafeSqlService::class);
+        $sql->expects($this->never())->method('query');
+
+        $fallback = $this->createMock(HrChatbotAnswerer::class);
+        $fallback->method('shortcutAnswer')->willReturn('Hello! I am your PRIME HRIS Assistant.');
+
+        $assistant = $this->assistant($sql, $fallback);
+
+        $result = $assistant->ask($this->user(['hr'], 1), 'hello');
+
+        $this->assertSame('Hello! I am your PRIME HRIS Assistant.', $result['answer']);
+    }
+
+    /**
+     * The refusal rule holds on the catch-all too. Widening `general` into a
+     * query path would be worthless if being blocked there fell through to the
+     * unscoped answerer — that is the original vulnerability, reintroduced at a
+     * different door.
+     */
+    #[Test]
+    public function a_blocked_general_question_is_not_rerouted(): void
+    {
+        $sql = $this->createMock(SafeSqlService::class);
+        $sql->method('query')->willReturn([
+            'answer' => 'Generated SQL is limited to HR, admin, and mayor accounts.',
+            'blocked' => true,
+            'data' => [],
+        ]);
+
+        $fallback = $this->createMock(HrChatbotAnswerer::class);
+        $fallback->expects($this->never())->method('answer');
+        $fallback->expects($this->never())->method('explain');
+
+        $assistant = $this->assistant($sql, $fallback);
+
+        $result = $assistant->ask($this->user(['hr'], 1), 'the weather is nice today');
+
+        $this->assertStringContainsString('limited to HR', $result['answer']);
+    }
+
+    /**
+     * A statement that errored is not an answer, and must not produce a second
+     * generated statement either — it falls through to `explain()`, which
+     * cannot run SQL, rather than to `answer()`, which can.
+     */
+    #[Test]
+    public function a_failed_general_query_falls_through_without_a_second_attempt(): void
+    {
+        $sql = $this->createMock(SafeSqlService::class);
+        $sql->method('query')->willReturn([
+            'answer' => 'I could not build a working query.',
+            'data' => [],
+            'error' => 'Unknown column x',
+        ]);
+
+        $fallback = $this->createMock(HrChatbotAnswerer::class);
+        $fallback->expects($this->never())->method('answer');
+        $fallback->expects($this->once())
+            ->method('explain')
+            ->willReturn('Here is what the handbook says instead.');
+
+        $assistant = $this->assistant($sql, $fallback);
+
+        $result = $assistant->ask($this->user(['hr'], 1), 'the weather is nice today');
+
+        $this->assertSame('Here is what the handbook says instead.', $result['answer']);
     }
 
     /**

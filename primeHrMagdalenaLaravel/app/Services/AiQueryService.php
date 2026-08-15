@@ -96,7 +96,24 @@ class AiQueryService
 
         $result = $this->attachTableSpec($result, $resolved);
 
-        $this->audit($user, $intent, $message, 'ok', null, (int) ((microtime(true) - $started) * 1000), $result);
+        // A provider that rejects every call still produces a 200 with an
+        // answer in it, because each capability degrades to a deterministic
+        // narration rather than failing. That is the right behaviour for the
+        // user and the wrong thing to log as a clean success: the audit read
+        // `outcome: ok` for every turn while the key was returning 401, so the
+        // one place an operator would look to find the outage was the one place
+        // it did not appear.
+        $degraded = AiChatService::lastFailure();
+
+        $this->audit(
+            $user,
+            $intent,
+            $message,
+            $degraded === null ? 'ok' : 'degraded',
+            $degraded === null ? null : "narration unavailable: {$degraded}",
+            (int) ((microtime(true) - $started) * 1000),
+            $result,
+        );
 
         return $result + ['intent' => $intent];
     }
@@ -183,8 +200,64 @@ class AiQueryService
             'self_service' => $this->ownRecords($user, $resolved),
             'how_to' => ['answer' => $this->fallback->explain($user, $resolved, $history)],
             'capabilities' => $this->capabilities($user),
-            default => ['answer' => $this->fallback->answer($user, $original, $history)],
+            default => $this->generalQuestion($user, $resolved, $original, $history),
         };
+    }
+
+    /**
+     * A question no rule and no classifier label claimed.
+     *
+     * This is where "I did not understand that" used to live, and it was the
+     * wrong instinct. The patterns above are deliberately certain — they claim
+     * only phrasings they cannot be wrong about — so `general` is not a bucket
+     * of nonsense, it is the bucket of *real HR questions nobody wrote a rule
+     * for yet*. Users will always outnumber the rules, so the catch-all has to
+     * be the smart path rather than the giving-up path.
+     *
+     * So: if the caller may run generated SQL, the question is put to the
+     * database through SafeSqlService — the same text-to-SQL that serves
+     * `data_query`, carrying the declared foreign keys and every domain rule.
+     * The knowledge base answers only what the database could not.
+     *
+     * Three properties this keeps:
+     *
+     *  - **Conversation is not a query.** A greeting and the policy shortcuts
+     *    are answered first, from HrChatbotAnswerer, with no model call at all.
+     *  - **A refusal still ends the request.** A blocked result is returned as
+     *    it is; falling through would make the denial the trigger for a second
+     *    attempt down another path.
+     *  - **A failed query is not an answer.** Only a statement that errored
+     *    falls through, and it falls through to `explain()`, which cannot run
+     *    SQL — so one question never produces two generated statements.
+     *
+     * @param array<int, array{role: string, content: string}> $history
+     * @return array{answer: string, data?: mixed, ...}
+     */
+    private function generalQuestion(User $user, string $resolved, string $original, array $history): array
+    {
+        $shortcut = $this->fallback->shortcutAnswer($original);
+
+        if ($shortcut !== null) {
+            return ['answer' => $shortcut];
+        }
+
+        if (!$this->policy->canRunGeneratedSql($user)) {
+            return ['answer' => $this->fallback->answer($user, $original, $history)];
+        }
+
+        $result = $this->sql->query($user, $resolved, $history);
+
+        if (!empty($result['blocked'])) {
+            return $result;
+        }
+
+        // No `error` key means the statement ran. Rows are the answer, and so
+        // is a correct empty result — narrateEmpty() states that plainly.
+        if (!isset($result['error'])) {
+            return $result;
+        }
+
+        return ['answer' => $this->fallback->explain($user, $original, $history)];
     }
 
     /**
@@ -333,6 +406,28 @@ class AiQueryService
             // otherwise send an employee down a path they are not permitted to
             // use and get them refused for asking about themselves.
             $this->isSelfReferential($q) => 'self_service',
+            // Questions about the municipality's own structure — which job
+            // designations exist in an office, what a plantilla position pays.
+            //
+            // Placed after self-service (so "magkano ang sahod ko" is still the
+            // asker's own payslip) and before the dashboard rule, whose
+            // "how much" would otherwise claim the salary form.
+            //
+            // These have to be routed somewhere that *reads a table*. No rule
+            // claimed them, so they fell to the model classifier, which called
+            // them how_to and handed them to the knowledge base — where the
+            // model answered "Accountant, Accounting Clerk, Bookkeeper,
+            // Auditor, Chief Accountant" for an office whose real designations
+            // are Mun. Accountant, Bookkeeper III, Acctg. Clerk II and seven
+            // others. Not one invented title existed in `designations`, and the
+            // rates the question was really after were sitting in the same row.
+            $this->wantsOrgStructure($q) => 'data_query',
+            // "Who is travelling with Jeremy", "sino ang kasama ni Juan sa
+            // travel order". A companion question names a person, which sent it
+            // to employee_search — a capability that reads only the employees
+            // cluster and cannot see a travel order at all, so it answered with
+            // a roster. The people on a trip live in travel_order_companions.
+            $this->wantsTravelCompanions($q) => 'data_query',
             // Office-holder questions are always a person lookup — "who is the
             // mayor", "sino ang mayor", "who's the HR officer". Checked here so
             // the "who's" contraction and the Tagalog form, which the
@@ -343,17 +438,72 @@ class AiQueryService
                 '/\b(?:who\s+is|who\'s|sino)\b.{0,25}\b(vice\s+mayor|mayor|administrator|hr\s*(?:officer|head|personnel)?|human\s+resources)\b/',
                 $q
             ) => 'employee_search',
-            (bool) preg_match('/\b(how many|how much|count|total|number of|who has|which department|pending|missing|expir\w+|overview|dashboard)\b/', $q) => 'dashboard',
+            // "number of" is a counting phrase — except when it is the tail of
+            // a noun naming a *kind* of number. "Contact number of Rosa
+            // Bautista" asks for a phone number and was answered as a count.
+            (bool) preg_match('/\b(how many|how much|count|total|(?<!contact )(?<!phone )(?<!mobile )(?<!cell )(?<!telephone )number of|who has|which department|pending|missing|expir\w+|overview|dashboard)\b/', $q) => 'dashboard',
             // Transactional nouns beat the employee-lookup rule below, which
             // would otherwise claim "employees with more than 5 late arrivals"
             // on its `employees?\s+with` branch — and EmployeeSearchService
             // only does name, department, and hire-date lookups, so it cannot
             // count anything. A question naming attendance, leave, or payroll
             // is about those records even when it also says "employees".
-            (bool) preg_match('/\b(leave|attendance|payroll|salary|deduction|absent|late|overtime|credits?|balance|dtr)\b/', $q) => 'data_query',
+            // "salary" is excluded when it is part of "salary grade": a salary
+            // grade is a band recorded on employment_details, a property of the
+            // appointment rather than of any payroll run. Left in the list, it
+            // routed "salary grade of Pedro Santos" to generated SQL — which no
+            // employee is permitted to run, for a field sitting in plain sight
+            // on the personnel record EmployeeSearchService already reads.
+            (bool) preg_match('/\b(leave|attendance|payroll|salary(?!\s+grade)|deduction|absent|late|overtime|credits?|balance|dtr)\b/', $q) => 'data_query',
             (bool) preg_match('/\bwhere\s+is\b|\bfind\b|\bshow\s+me\b.*\bemployees?\b|\bemployees?\s+(?:hired|appointed|in|from|with)\b|\bwho\s+is\b/', $q) => 'employee_search',
+            // "Employment status of Jeremy Pogi", "Maria Santos' department",
+            // "what is Juan's position" — a named person plus one of their
+            // personnel-record fields. None of the rules above claim these:
+            // there is no interrogative to match ("employment status of X" is a
+            // noun phrase), no transactional noun, and no "who is". They fell
+            // straight through to the model classifier, which is the one branch
+            // that stops working when the provider does — so the single most
+            // ordinary HR lookup in the system became the generic apology.
+            //
+            // Placed *after* the transactional-noun rule deliberately: "leave
+            // balance of Jeremy Pogi" names a person too, but EmployeeSearchService
+            // only reads the employees/employment_details cluster and cannot
+            // total a leave credit, so that question belongs to data_query.
+            $this->wantsEmployeeAttribute($q, $message) => 'employee_search',
             default => $this->classifyWithModel($message, $user, $history),
         };
+    }
+
+    /**
+     * Whether the question asks for a personnel-record field about a *named*
+     * person, as opposed to about the caller or about the organisation.
+     *
+     * Both halves are required. The attribute alone ("what is the department")
+     * is too vague to route, and a name alone is already handled by the
+     * "who is"/"find" rule above. Together they are unambiguous, which is what
+     * makes it safe to claim them without a model call.
+     */
+    private function wantsEmployeeAttribute(string $q, string $original): bool
+    {
+        $attributes = '(?:employment\s+status|employment\s+details?|position|designation|'
+            . 'job\s+title|department|office|assignment|division|'
+            . 'hire\s+date|date\s+hired|hiring\s+date|appointment\s+date|date\s+of\s+appointment|'
+            . 'salary\s+grade|civil\s+status|employment\s+type|'
+            . 'contact(?:\s+(?:number|details|info))?|email(?:\s+address)?|address|'
+            . 'birth\s*(?:day|date)|date\s+of\s+birth|employee\s+(?:id|number)|'
+            . 'profile|record|information|details)';
+
+        if (!preg_match('/\b' . $attributes . '\b/', $q)) {
+            return false;
+        }
+
+        // A capitalised multi-word name in the original casing ("Jeremy Pogi"),
+        // or a possessive/prepositional reference to one. Matched against the
+        // untouched message because $q has been lowercased, which destroys the
+        // only signal that separates a person from a common noun.
+        return (bool) preg_match('/\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/', $original)
+            || (bool) preg_match('/\b(?:of|for|ni|kay|para\s+kay)\s+[A-Z][a-z]+/', $original)
+            || (bool) preg_match('/\b[A-Z][a-z]+\'s\b/', $original);
     }
 
     /**
@@ -410,6 +560,20 @@ class AiQueryService
             . '|\bwhat\s+(?:do|are)\s+you\b|\bwho\s+are\s+you\b'
             . '|\bwhat\s+(?:questions|things)\s+can\b'
             . '|\bano(?:ng)?\s+(?:ang\s+)?(?:kaya|magagawa|pwede)\b'
+            // Tagalog places particles between every part of the phrase —
+            // "ano LANG BA ang MGA pwede NA itanong sayo" — so the fixed
+            // sequence above ("ano ang pwede") misses the form the question is
+            // actually typed in. These anchor on the two ends instead, the
+            // interrogative and the asking-verb, and tolerate anything between.
+            //
+            // Getting this wrong is not a cosmetic misroute: an unrecognised
+            // question from an org-wide caller reaches HrChatbotAnswerer, whose
+            // text-to-SQL then writes a query for a question that has no records
+            // in it. "What can I ask you?" came back as a table of absences and
+            // late deductions, narrated as though it were the answer.
+            . '|\bano(?:ng)?\b[^?]{0,40}\b(?:i?tanong|tanungin)\b'
+            . '|\b(?:i?tanong|tanungin)\b[^?]{0,25}\b(?:sa\s*i?yo|sayo|sa\s+inyo)\b'
+            . '|\bano(?:ng)?\b[^?]{0,40}\b(?:kaya|magagawa|maitutulong)\s+mo\b'
             . '|^\s*(?:help|tulong)\s*[?!.]*$/',
             $q
         );
@@ -488,6 +652,83 @@ class AiQueryService
     }
 
     /**
+     * Whether the question is about who else is on a trip.
+     *
+     * Two shapes: a companion noun outright ("kasama", "companions"), or a
+     * travel noun with an accompaniment verb ("who is going with", "sinong
+     * sasama"). Both are answered from travel_order_companions, never from the
+     * employee roster.
+     */
+    private function wantsTravelCompanions(string $q): bool
+    {
+        $travel = '(?:travel(?:\s*order)?|byahe|lakad|official\s+business)';
+
+        if (preg_match('/\b(?:kasama|kasamahan|kasabay|companions?|co-?travell?ers?)\b/', $q)
+            && preg_match('/\b' . $travel . '\b|\b(?:sino(?:ng)?|who|ilan)\b/', $q)) {
+            return true;
+        }
+
+        // "sino" takes the linker directly — "sinong sasama" — so the bare
+        // \bsino\b it was written with never matched the natural phrasing.
+        return (bool) preg_match(
+            '/\b(?:who|sino(?:ng)?)\b.{0,30}\b(?:travell?ing|going|sasama|sumama|nag-?travel)\b.{0,20}\b(?:with|kasama|kay|ni)\b/',
+            $q
+        ) || (bool) preg_match(
+            '/\b' . $travel . '\b.{0,30}\b(?:kasama|companions?|with\s+whom)\b/',
+            $q
+        );
+    }
+
+    /**
+     * Whether the question asks about the organisation's own establishment —
+     * the job designations an office holds, or what one of those posts pays.
+     *
+     * `designations` carries `title`, `department_id` and `monthly_rate`, so
+     * both forms are answerable from one table. The distinction from an
+     * employee search is that the subject is the *post*, not a person: "magkano
+     * ang sinasahod ng isang accounting clerk" names no one, and answering it
+     * with a roster of twelve employees — as this did — mistakes the question.
+     */
+    private function wantsOrgStructure(string $q): bool
+    {
+        $postNouns = '(?:designations?|job\s+designations?|positions?|job\s+titles?|'
+            . 'plantilla|posisyon|puwesto|trabaho|roles?\s+available)';
+
+        // "what designations are in the accounting office", "ano ang mga
+        // posisyon sa treasury", "list the positions under engineering".
+        if (preg_match('/\b' . $postNouns . '\b/', $q)
+            && preg_match('/\b(?:in|sa|under|for|of|ng|para)\b.{0,40}(?:office|department|dept\b|opisina|kagawaran|division)/', $q)) {
+            return true;
+        }
+
+        // "anong mga department meron sa munisipyo natin", "what departments do
+        // we have", "list all offices" — the org chart itself.
+        //
+        // Guarded on both sides. An employee noun means the question is about
+        // people grouped by office ("how many employees are in each
+        // department"), which the dashboard owns; a metric noun means it is
+        // about records ("which department has the most absences"). Only a
+        // question asking for the offices *themselves* belongs here — it was
+        // answered with a roster of twelve employees for a municipality that
+        // has twenty-six departments.
+        if (preg_match('/\b(?:departments?|offices?|opisina|kagawaran|divisions?)\b/', $q)
+            && !preg_match('/\b(?:employees?|empleyado|staff|personnel|tao|workers?|headcount|head\s*count)\b/', $q)
+            && !preg_match('/\b(?:absent\w*|leave|late|attendance|payroll|pending|approv\w+|most|highest|lowest|average)\b/', $q)
+            && preg_match('/\b(?:ano|anong|what|which|list|show|ilan|meron|mayroon|available|lahat|all)\b/', $q)) {
+            return true;
+        }
+
+        // "magkano ang sinasahod ng isang accounting clerk", "how much does a
+        // bookkeeper earn". Tagalog affixes the root, so `sahod` is matched
+        // without a leading boundary — "sinasahod" and "pasahod" are the same
+        // question as "sahod".
+        return (bool) preg_match(
+            '/\b(?:magkano|how\s+much)\b.{0,40}(?:sahod|sweldo|suweldo|salary|\bpay\b|\brate\b|\bearn)/',
+            $q
+        );
+    }
+
+    /**
      * Whether the question is about the caller's own HR records.
      *
      * Deliberately narrow: the self-reference has to attach to a personal HR
@@ -561,8 +802,20 @@ class AiQueryService
      */
     private function classifyWithModel(string $message, User $user, array $history): string
     {
-        if (!AiChatService::isConfigured($user)) {
-            return 'general';
+        // Resolving the provider reads the user's own AI setting and the
+        // org-wide `system_ai_settings` row. If either is unreachable — the
+        // table missing on this connection, the database briefly down — that is
+        // a reason to classify without the model, not to fail the question:
+        // the exception otherwise escapes to ask()'s handler and every
+        // unmatched question becomes "Something went wrong answering that."
+        try {
+            $configured = AiChatService::isConfigured($user);
+        } catch (\Throwable) {
+            return $this->guessIntent($message);
+        }
+
+        if (!$configured) {
+            return $this->guessIntent($message);
         }
 
         $system = <<<'PROMPT'
@@ -576,10 +829,23 @@ report           — asking for a generated report of records
 chart            — asking for a graph or visualisation
 workflow         — drafting a letter, checklist, summary, or preview document
 self_service     — the asker's OWN records ("my leave balance", "my payslip")
-how_to           — how to do something in the system, or what a policy says
+how_to           — a procedure or a written policy, and nothing else
 capabilities     — what the assistant itself can do
 data_query       — any other question answerable from HR records
-general          — conversational, or none of the above
+general          — small talk only
+
+Decide by WHERE THE ANSWER COMES FROM, not by how the question is phrased.
+
+- If answering it means reading rows — a name, a count, a date, an amount, a
+  "most/least/latest/usual", or a list of what exists — choose a data label:
+  data_query, dashboard, employee_search or self_service.
+- Choose how_to ONLY when the answer is a procedure or a stated rule that no
+  query could produce. "How do I file a leave" is how_to; "what transport do
+  our travel orders usually use" is data_query, because the answer is in the
+  records even though it is a question about the system.
+- Choose general only for greetings and small talk. If the question is about
+  this organisation at all, prefer data_query — a query that finds nothing is
+  recoverable, a made-up answer is not.
 PROMPT;
 
         $messages = array_slice($history, -4);
@@ -591,7 +857,48 @@ PROMPT;
         $known = ['employee_search', 'document_search', 'dashboard', 'report', 'chart', 'workflow',
             'self_service', 'how_to', 'capabilities', 'data_query', 'general'];
 
-        return in_array($label, $known, true) ? $label : 'general';
+        return in_array($label, $known, true) ? $label : $this->guessIntent($message);
+    }
+
+    /**
+     * Classify without a model, for when there is none to ask.
+     *
+     * The patterns in detectIntent() are written to be *certain* — each one
+     * claims only phrasings it cannot be wrong about, and everything else is
+     * handed to the model. That is the right split while a provider is
+     * answering, and the wrong one when it is not: `general` routes to a
+     * free-text answerer that also needs the model, so a provider outage turned
+     * every unmatched question into an apology rather than into a worse-but-real
+     * answer from the database.
+     *
+     * These rules are the weaker signals, applied only once the confident ones
+     * have declined. A merely *plausible* route still beats `general`, because
+     * every capability behind them degrades to a deterministic listing while
+     * `general` degrades to nothing at all.
+     */
+    private function guessIntent(string $message): string
+    {
+        $q = strtolower($message);
+
+        // A capitalised name with nothing else to go on is a person lookup.
+        if (preg_match('/\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/', $message)
+            && !preg_match('/\b(?:my|aking|akin)\b/', $q)) {
+            return 'employee_search';
+        }
+
+        if (preg_match('/\b(employee|empleyado|staff|personnel|department|office|designation|position)\b/', $q)) {
+            return 'employee_search';
+        }
+
+        if (preg_match('/\b(leave|attendance|payroll|salary|sweldo|sahod|deduction|absent|late|dtr|credits?|balance)\b/', $q)) {
+            return 'data_query';
+        }
+
+        if (preg_match('/\b(document|file|certificate|scan|photo|id)\b/', $q)) {
+            return 'document_search';
+        }
+
+        return 'general';
     }
 
     /**

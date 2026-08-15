@@ -29,7 +29,9 @@ class HrChatbotAnswerer
         private AiAccessPolicy $policy,
         private SafeSqlService $safeSql,
         private HrPolicyFactsService $facts,
+        private ?SchemaRelationshipService $relationships = null,
     ) {
+        $this->relationships ??= new SchemaRelationshipService();
     }
 
     /**
@@ -183,15 +185,10 @@ TEXT;
     {
         $message = trim($message);
 
-        // Greeting handler
-        if (preg_match('/^(hi|hello|hey|good\s+(morning|afternoon|evening)|kumusta|kamusta)\b/i', $message) && str_word_count($message) <= 6) {
-            return "Hello! I'm your PRIME HRIS Assistant. I can answer questions about employees, attendance, leave balances, government IDs, deductions, payroll, and HR policies. What would you like to know?";
-        }
+        $shortcut = $this->shortcutAnswer($message);
 
-        // Policy-only questions (no DB needed)
-        $policyAnswer = $this->getPolicyAnswer($message);
-        if ($policyAnswer) {
-            return $policyAnswer;
+        if ($shortcut !== null) {
+            return $shortcut;
         }
 
         // Generated SQL joins arbitrary tables, so it cannot be scoped to one
@@ -239,6 +236,29 @@ TEXT;
         return $this->narrateResults($user, $message, $sql, $results, $history);
     }
 
+    /**
+     * The answers that need neither a query nor a model: a greeting, and the
+     * curated policy shortcuts.
+     *
+     * Public because the orchestrator consults it before deciding to write SQL
+     * for an unclassified question. "Hello" and "what is the grace period" must
+     * not become a text-to-SQL attempt — one has nothing to query and the other
+     * is answered from HrPolicyFactsService, exactly, for free.
+     */
+    public function shortcutAnswer(string $message): ?string
+    {
+        $message = trim($message);
+
+        if (preg_match('/^(hi|hello|hey|good\s+(morning|afternoon|evening)|kumusta|kamusta)\b/i', $message)
+            && str_word_count($message) <= 6) {
+            return "Hello! I'm your PRIME HRIS Assistant. I can answer questions about employees, "
+                . 'attendance, leave balances, government IDs, deductions, payroll, and HR policies. '
+                . 'What would you like to know?';
+        }
+
+        return $this->getPolicyAnswer($message);
+    }
+
     private function formatHistory(array $history): string
     {
         if (empty($history)) {
@@ -277,6 +297,19 @@ TEXT;
 
             $cols = implode(', ', array_map(function ($c) { return "{$c->Field} ({$c->Type})"; }, $columns));
             $schema .= "Table `{$table}`: {$cols}\n";
+        }
+
+        // The declared foreign keys. This path is the assistant's catch-all, so
+        // it writes SQL for the questions no capability claimed — exactly the
+        // ones least likely to follow an obvious join. It had no relationship
+        // information at all: a column listing, and the model left to infer
+        // that `attendance.employee_id` points at `employees.id` rather than at
+        // `employees.employee_id`, which is a different column holding a
+        // different value.
+        $joins = $this->relationships->describeFor(SafeSqlService::allowedTables());
+
+        if ($joins !== '') {
+            $schema .= "\nDeclared foreign keys (use these for JOINs; do not invent one):\n{$joins}\n";
         }
 
         return $schema;
@@ -413,14 +446,75 @@ CONVERSATION SO FAR (continue naturally from this, resolving any pronouns or fol
 
 Latest User Question: {$question}
 
+NEVER INVENT THIS MUNICIPALITY'S OWN RECORDS. The department names, job
+designations, position titles, salary rates, employee names and office rosters
+of Pagsanjan exist only in its database, and none of them appear above. You do
+not know them. If the question asks for any of those, do not answer it from
+general knowledge of how Philippine LGUs are usually structured — say plainly
+that you need to look it up in the records, and invite the user to ask again so
+it can be retrieved. A plausible-sounding list of job titles that does not match
+the plantilla is worse than no answer: it is indistinguishable from a real one.
+
 Provide a clear, friendly answer in 2-4 sentences. Match the user's language (Tagalog or English) and don't repeat introductions already made earlier in the conversation.
 PROMPT;
 
         return $this->callAi($user, $prompt, 0.7, 500)
-            ?? "I couldn't form a confident answer to that right now. That question needs the AI "
-                . 'chat provider, which appears to be unavailable or not configured (Settings → '
-                . 'AI/Chatbot). I can still answer directly from the system — try asking about '
-                . 'employees, attendance, leave balances, payroll, or HR policy.';
+            ?? $this->degradedAnswer($user, $question);
+    }
+
+    /**
+     * What to say when the narration model is unreachable.
+     *
+     * The previous text — "the AI chat provider … appears to be unavailable or
+     * not configured (Settings → AI/Chatbot)" — was the assistant's single most
+     * common answer during a provider outage, and it had three faults. It
+     * conflated a rejected key with an absent one, so an admin looking at a
+     * populated Settings page had no reason to suspect the key. It showed
+     * plumbing to employees, who cannot act on it. And it answered *nothing*,
+     * even for questions the system can answer perfectly well on its own.
+     *
+     * So: answer from the facts first and only then explain the degradation,
+     * scaled to what the reader can do about it.
+     */
+    private function degradedAnswer(?User $user, string $question): string
+    {
+        // The rulebook does not need a model. getPolicyAnswer() is normally
+        // consulted before we ever reach a prompt, but explain() and the SQL
+        // paths can arrive here having skipped it.
+        $policy = $this->getPolicyAnswer($question);
+
+        if ($policy !== null) {
+            return $policy;
+        }
+
+        $isAdmin = $user?->hasRole('admin') ?? false;
+        $failure = AiChatService::lastFailure();
+
+        if ($isAdmin && $failure === AiChatService::FAILURE_REJECTED) {
+            return "I can't phrase a free-text answer right now: **the AI provider rejected the configured "
+                . "API key** (HTTP 401). The key is present but not valid — it has most likely been revoked, "
+                . "regenerated, or pasted incomplete.\n\n"
+                . "Fix it under **Settings → AI/Chatbot**, or in `GROQ_API_KEY` in `.env`. Until then I can "
+                . 'still answer anything that comes from the database or the HR rulebook — leave types, '
+                . 'accrual, grace period, LWOP, employee lookups, counts, reports, and charts all work '
+                . 'without the provider.';
+        }
+
+        if ($isAdmin && $failure === AiChatService::FAILURE_UNCONFIGURED) {
+            return "No AI provider is configured, so I can't phrase free-text answers. Add a provider and "
+                . 'key under **Settings → AI/Chatbot**. Everything that reads from the database or the HR '
+                . 'rulebook still works without it.';
+        }
+
+        // Everyone else gets the capability, not the cause. An employee can do
+        // nothing with an HTTP status, and naming the provider invites them to
+        // report an outage they cannot verify.
+        return "I can't put an answer to that in my own words at the moment, but I can still look things up "
+            . "directly.\n\n"
+            . "Try asking about your **leave balance**, **payslip**, **attendance**, **training**, or "
+            . '**travel orders**, or about how a process works — filing leave, the grace period, how late '
+            . 'deductions are computed, or what leave types exist. Those come straight from your records '
+            . 'and the HR rules, so they work regardless.';
     }
 
     /**
@@ -649,25 +743,45 @@ PROMPT;
         return AiChatService::complete($user, $prompt, $temperature, $maxTokens);
     }
 
+    /**
+     * Narrate query results without a model.
+     *
+     * This used to render the first row and drop the rest — "I found 24
+     * matching records — here's the first one". The query had already done the
+     * work and the rows were already in memory, so 23 answers were discarded to
+     * save nothing. During a provider outage this is the *only* thing standing
+     * between a correct query and a useless reply, so it lists what it found.
+     */
     private function buildFallbackNarration(array $results): string
     {
         if (empty($results)) {
             return "I couldn't find any matching records for that. Could you double-check the name or details and try again?";
         }
 
-        $first = (array) $results[0];
-        $parts = [];
-        foreach ($first as $key => $value) {
-            $label   = ucwords(str_replace('_', ' ', $key));
-            $parts[] = "{$label}: {$value}";
+        $total = count($results);
+        $shown = array_slice($results, 0, 15);
+
+        $lines = array_map(function ($row) {
+            $parts = [];
+
+            foreach ((array) $row as $key => $value) {
+                $label = ucwords(str_replace('_', ' ', $key));
+                $parts[] = "{$label}: " . ($value === null || $value === '' ? '—' : $value);
+            }
+
+            return '- ' . implode(' · ', $parts);
+        }, $shown);
+
+        $intro = $total === 1
+            ? "Here's what I found:"
+            : "I found **{$total}** matching record(s):";
+
+        $out = $intro . "\n\n" . implode("\n", $lines);
+
+        if ($total > count($shown)) {
+            $out .= "\n\n_Showing the first " . count($shown) . " of {$total}._";
         }
 
-        $summary = implode(', ', $parts);
-        $total   = count($results);
-        $intro   = $total > 1
-            ? "I found {$total} matching records — here's the first one:"
-            : "Here's what I found:";
-
-        return "{$intro} {$summary}.";
+        return $out;
     }
 }

@@ -113,7 +113,7 @@ TEXT;
 
         $intent = $this->detectIntent($message);
         $context = $this->buildEmployeeContext($employee, $intent, $message);
-        $response = $this->generateResponse($message, $context, $employee);
+        $response = $this->generateResponse($message, $context, $employee, $intent);
 
         return $this->result($response, $this->followUpsForIntent($intent));
     }
@@ -610,25 +610,54 @@ TEXT;
         return $out;
     }
 
+    /**
+     * The caller's travel orders — both the ones they filed and the ones they
+     * were invited on.
+     *
+     * A travel order is not necessarily a solo trip: `travel_orders.employee_id`
+     * is the principal, and everyone else is a row in travel_order_companions
+     * with their own accept/reject. Reading only the principal column meant an
+     * employee added to a colleague's trip saw "No travel orders on file", and
+     * anyone asking "sino ang kasama ko?" got their destination and dates back
+     * with the companions — the substance of the question — absent.
+     */
     private function travelContext(int $employeeId): string
     {
-        $orders = TravelOrder::where('employee_id', $employeeId)
+        $orders = TravelOrder::with(['companions.employee:id,first_name,last_name'])
+            ->where(function ($q) use ($employeeId) {
+                $q->where('employee_id', $employeeId)
+                    ->orWhereHas('companions', fn ($c) => $c->where('employee_id', $employeeId));
+            })
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();
 
-        $out = "\n=== YOUR TRAVEL ORDERS (latest 5) ===\n";
+        $out = "\n=== YOUR TRAVEL ORDERS (latest 5, including trips you were added to) ===\n";
+
         if ($orders->isEmpty()) {
             $out .= "No travel orders on file.\n";
-        } else {
-            foreach ($orders as $o) {
+
+            return $out;
+        }
+
+        foreach ($orders as $o) {
+            $out .= sprintf(
+                "- %s: %s to %s, %d day(s), status: %s%s\n",
+                $o->destination,
+                $o->travel_date->format('Y-m-d'),
+                $o->return_date->format('Y-m-d'),
+                $o->duration,
+                $o->status,
+                (int) $o->employee_id === $employeeId ? ' (you filed this)' : ' (you are a companion)'
+            );
+
+            foreach ($o->companions as $companion) {
+                $name = trim(($companion->employee->first_name ?? '') . ' ' . ($companion->employee->last_name ?? ''));
+
                 $out .= sprintf(
-                    "- %s: %s to %s, %d day(s), status: %s\n",
-                    $o->destination,
-                    $o->travel_date->format('Y-m-d'),
-                    $o->return_date->format('Y-m-d'),
-                    $o->duration,
-                    $o->status
+                    "    companion: %s — %s\n",
+                    $name !== '' ? $name : 'employee #' . $companion->employee_id,
+                    $companion->status
                 );
             }
         }
@@ -636,7 +665,7 @@ TEXT;
         return $out;
     }
 
-    private function generateResponse(string $message, string $context, Employee $employee): string
+    private function generateResponse(string $message, string $context, Employee $employee, string $intent = 'general'): string
     {
         $prompt = <<<PROMPT
 You are the PRIME HRIS assistant for a single municipal employee using the mobile app.
@@ -657,26 +686,69 @@ PROMPT;
 
         $content = AiChatService::complete($employee->user, $prompt, 0.5, 450);
 
-        return $content !== null ? trim($content) : $this->fallbackResponse($message, $context);
+        return $content !== null ? trim($content) : $this->fallbackResponse($context, $intent);
     }
 
-    private function fallbackResponse(string $message, string $context): string
+    /**
+     * The answer when the narration model is unreachable.
+     *
+     * buildEmployeeContext() has already run every query the question needs —
+     * the balances, the payslips, the DTR rows — and the old version of this
+     * threw all of it away for "try asking something like 'What is my leave
+     * balance?'", which is what the employee had just asked. Worse, it only
+     * looked for the leave section, so `payslip`, `attendance`, `training` and
+     * `travel` intents fell to that suggestion despite their rows sitting in
+     * $context unread.
+     *
+     * The prose is what was lost, not the data. So render the data.
+     */
+    private function fallbackResponse(string $context, string $intent): string
     {
-        if (str_contains($context, 'LEAVE BALANCES')) {
-            return "Here is a summary from your leave records:\n\n" . $this->extractSection($context, 'LEAVE BALANCES', 'RECENT LEAVE')
-                . "\n\nAsk me how to file leave or about late deduction policies.";
+        $sections = $this->ownRecordSections($context);
+
+        if ($sections === '') {
+            return 'I could not reach your records just now. Please try again in a moment — and if it keeps '
+                . 'happening, let HR know so they can check the system.';
         }
 
-        return "I can help with **your** leave balance, payslip, attendance, training, and travel records, or explain PRIME HRIS processes. Please try asking something like \"What is my leave balance?\" or \"How do I file leave?\"";
+        $lead = match ($intent) {
+            'leave' => 'Here is what your leave records show:',
+            'payslip' => 'Here is what your payroll records show:',
+            'attendance' => 'Here is what your attendance records show:',
+            'training' => 'Here is what your training records show:',
+            'travel' => 'Here is what your travel records show:',
+            'profile' => 'Here is what your employee record shows:',
+            default => 'Here is what your records show:',
+        };
+
+        return $lead . "\n\n" . $sections;
     }
 
-    private function extractSection(string $text, string $start, string $end): string
+    /**
+     * The "=== YOUR … ===" blocks of the context — the caller's own rows, and
+     * nothing else. The employee header and the system knowledge block are
+     * written for the model, not for a reader.
+     */
+    private function ownRecordSections(string $context): string
     {
-        $pattern = '/=== YOUR ' . preg_quote($start, '/') . '.*?(?==== YOUR ' . preg_quote($end, '/') . '|=== SYSTEM)/s';
-        if (preg_match($pattern, $text, $m)) {
-            return trim($m[0]);
+        if (!preg_match_all(
+            '/^=== YOUR .*?===$.*?(?=^=== |\z)/ms',
+            $context,
+            $matches
+        )) {
+            return '';
         }
-        return '';
+
+        $blocks = array_map(function (string $block) {
+            // "=== YOUR CURRENT LEAVE BALANCES ===" → "**Your current leave balances**"
+            return trim(preg_replace_callback(
+                '/^=== YOUR (.*?) ===$/m',
+                fn (array $m) => '**Your ' . strtolower(trim($m[1])) . '**',
+                trim($block)
+            ) ?? '');
+        }, $matches[0]);
+
+        return implode("\n\n", array_filter($blocks));
     }
 
     private function defaultFollowUps(): array

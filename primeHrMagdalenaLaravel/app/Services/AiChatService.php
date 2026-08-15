@@ -18,6 +18,38 @@ use Illuminate\Support\Facades\Log;
 class AiChatService
 {
     /**
+     * Why the most recent call in this request returned null.
+     *
+     * Every caller degrades to a deterministic answer when chat() returns null,
+     * and they all used to describe that the same way: "the provider is
+     * unavailable or not configured (Settings → AI/Chatbot)". That sentence was
+     * wrong in the case that actually happens. A configured key that the
+     * provider *rejects* fails identically to no key at all, so a live 401 —
+     * a revoked or mistyped key — was reported to every user, on every
+     * unmatched question, as though nobody had ever set the assistant up. The
+     * admin reading it goes to Settings, sees a key sitting there, and has no
+     * reason to suspect the key itself.
+     *
+     * Recorded rather than thrown because a failed narration is not a failed
+     * answer: the row data is still good, and the caller's job is to render it
+     * without prose, not to abort.
+     */
+    private static ?string $lastFailure = null;
+
+    public const FAILURE_UNCONFIGURED = 'unconfigured';
+    public const FAILURE_REJECTED = 'rejected';
+    public const FAILURE_UNAVAILABLE = 'unavailable';
+
+    /**
+     * The reason the last chat()/complete() returned null, or null if the last
+     * call succeeded. Valid only within the current request.
+     */
+    public static function lastFailure(): ?string
+    {
+        return self::$lastFailure;
+    }
+
+    /**
      * Single-prompt completion. Kept for callers that have no conversation
      * context to pass along.
      */
@@ -35,15 +67,19 @@ class AiChatService
      */
     public static function chat(?User $user, string $system, array $messages, float $temperature = 0.3, int $maxTokens = 900): ?string
     {
+        self::$lastFailure = null;
+
         $config = self::resolveConfig($user);
 
         if (!$config['api_key']) {
+            self::$lastFailure = self::FAILURE_UNCONFIGURED;
             return null;
         }
 
         $messages = self::normalizeMessages($messages);
 
         if (empty($messages)) {
+            self::$lastFailure = self::FAILURE_UNAVAILABLE;
             return null;
         }
 
@@ -52,6 +88,18 @@ class AiChatService
             'anthropic' => self::callAnthropic($config, $system, $messages, $temperature, $maxTokens),
             default => self::callOpenAiCompatible($config, 'https://api.groq.com/openai/v1/chat/completions', $system, $messages, $temperature, $maxTokens),
         };
+    }
+
+    /**
+     * A 401/403 means the key itself is bad — revoked, mistyped, or belonging
+     * to another provider. That is an operator problem with an exact fix, and
+     * it is worth distinguishing from a provider outage, which resolves itself.
+     */
+    private static function noteHttpFailure(int $status): void
+    {
+        self::$lastFailure = in_array($status, [401, 403], true)
+            ? self::FAILURE_REJECTED
+            : self::FAILURE_UNAVAILABLE;
     }
 
     public static function defaultModel(string $provider): string
@@ -131,6 +179,7 @@ class AiChatService
             ]);
         } catch (\Throwable $e) {
             Log::error("AI chat provider ({$config['provider']}) exception: " . $e->getMessage());
+            self::$lastFailure = self::FAILURE_UNAVAILABLE;
             return null;
         }
 
@@ -144,6 +193,7 @@ class AiChatService
         }
 
         Log::error("AI chat provider ({$config['provider']}) error: " . $response->status() . ' ' . $response->body());
+        self::noteHttpFailure($response->status());
 
         return null;
     }
@@ -174,6 +224,7 @@ class AiChatService
             ])->post('https://api.anthropic.com/v1/messages', $payload);
         } catch (\Throwable $e) {
             Log::error('AI chat provider (anthropic) exception: ' . $e->getMessage());
+            self::$lastFailure = self::FAILURE_UNAVAILABLE;
             return null;
         }
 
@@ -187,6 +238,7 @@ class AiChatService
         }
 
         Log::error('AI chat provider (anthropic) error: ' . $response->status() . ' ' . $response->body());
+        self::noteHttpFailure($response->status());
 
         return null;
     }

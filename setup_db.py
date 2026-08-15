@@ -2,7 +2,7 @@ import subprocess
 import os
 import sys
 
-HOST = "localhost"
+HOST = "127.0.0.1"
 USER = "root"
 PASSWORD = "admin"
 DATABASE = "primehrismagdalena"

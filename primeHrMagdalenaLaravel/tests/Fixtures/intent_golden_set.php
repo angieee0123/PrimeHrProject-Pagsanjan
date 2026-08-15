@@ -24,6 +24,13 @@ return [
     'what can you help me with' => 'capabilities',
     'who are you' => 'capabilities',
     'anong kaya mo' => 'capabilities',
+    // Tagalog particles between every part of the phrase — the form the
+    // question is actually typed in, which the fixed "ano ang pwede" sequence
+    // missed. It reached text-to-SQL and came back as a table of absences.
+    'ano lang ba ang mga pwede na itanong sayo?' => 'capabilities',
+    'ano ang mga tanong na pwede ko sayo' => 'capabilities',
+    'ano pa ang pwede kong itanong' => 'capabilities',
+    'ano ang magagawa mo' => 'capabilities',
     'help' => 'capabilities',
 
     // ── chart ───────────────────────────────────────────────────────────────
@@ -114,6 +121,14 @@ return [
     'who is the department head of HR' => 'employee_search',
     // Office-holder lookups must resolve to the person holding the role, not
     // to a department roster or to a "who's" the classifier has to guess at.
+    // A named person plus one of their personnel-record fields. These carry no
+    // interrogative and no transactional noun, so every rule declined them and
+    // they fell to the model classifier — the one branch that stops working
+    // when the provider does.
+    'Employment Status of Jeremy Pogi' => 'employee_search',
+    'Department of Ana Ramos' => 'employee_search',
+    "what is Juan Dela Cruz's position" => 'employee_search',
+    'salary grade of Pedro Santos' => 'employee_search',
     'who is the mayor' => 'employee_search',
     "who's the mayor" => 'employee_search',
     'sino ang mayor' => 'employee_search',
@@ -129,6 +144,21 @@ return [
     'leave applications approved in June' => 'data_query',
     // Naming a transactional record beats the employee-lookup rule: none of
     // these can be answered by a name/department/hire-date search.
+    // The establishment itself — which posts an office holds and what they pay.
+    // `designations` carries title, department_id and monthly_rate, so these are
+    // one table away; unrouted, they reached the knowledge base and were
+    // answered with invented job titles.
+    'ano ano ang mga job designation sa accounting office?' => 'data_query',
+    'what designations are in the accounting office' => 'data_query',
+    'ano ang mga posisyon sa treasury office' => 'data_query',
+    'magkano ang sinasahod ng isang accounting clerk?' => 'data_query',
+    'how much does a bookkeeper earn' => 'data_query',
+    // Group travel. The other travellers are rows in travel_order_companions,
+    // so a companion question is about that table — not about the employee
+    // roster, which is where naming a person used to send it.
+    'sino ang kasama sa travel order ni Juan' => 'data_query',
+    'who is travelling with Jeremy next week' => 'data_query',
+    'who are the companions on that travel order' => 'data_query',
     'employees with more than 5 late arrivals' => 'data_query',
     'who is on leave today' => 'data_query',
     'find employees with unused leave credits' => 'data_query',
