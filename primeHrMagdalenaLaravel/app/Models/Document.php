@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Document extends Model
+class Document extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     /** The documents table has only `uploaded_at` — no created_at/updated_at. */
     public $timestamps = false;
 
