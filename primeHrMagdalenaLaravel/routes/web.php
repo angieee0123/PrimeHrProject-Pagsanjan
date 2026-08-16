@@ -442,6 +442,7 @@ Route::get('/admin/reports', [\App\Http\Controllers\AdminReportsController::clas
 // than trusting the hidden nav entry, because this writes the one page an
 // unauthenticated visitor can read.
 Route::middleware('auth')->group(function () {
+    Route::get('/admin/audits', [\App\Http\Controllers\AuditController::class, 'index'])->name('admin.audit');
     Route::get('/admin/website', [\App\Http\Controllers\WebsiteContentController::class, 'index'])->name('admin.website');
     // The logo routes are declared before the {section} wildcard: Laravel
     // matches in declaration order, so `/admin/website/logo` would otherwise

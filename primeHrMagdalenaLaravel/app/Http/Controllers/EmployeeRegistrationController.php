@@ -11,6 +11,7 @@ use App\Models\GovernmentId;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class EmployeeRegistrationController extends Controller
 {
@@ -152,6 +153,35 @@ class EmployeeRegistrationController extends Controller
         }
     }
 
+    /**
+     * Derive a username from first + last name, matching the wizard's JS
+     * usernameSlug() logic: lowercase, strip diacritics, remove non-alphanumerics.
+     * Appends an incrementing suffix if the base is already taken.
+     */
+    private function generateUsername(string $firstName, string $lastName): string
+    {
+        $slug = function (string $value): string {
+            return Str::lower(
+                preg_replace('/[^a-z0-9]/i', '', Str::ascii($value))
+            );
+        };
+
+        $base = $slug($lastName) . $slug($firstName);
+
+        if (!$base) {
+            $base = 'user';
+        }
+
+        $username = $base;
+        $n = 1;
+        while (User::where('username', $username)->exists()) {
+            $n++;
+            $username = $base . $n;
+        }
+
+        return $username;
+    }
+
     private function handleFileUpload($file, string $folder = 'employees/photos')
     {
         if (!$file) {
@@ -217,11 +247,17 @@ class EmployeeRegistrationController extends Controller
                         'email' => $data['email'] ?? null,
                     ]);
 
-                    // Create User Account
+                    // Create User Account — derive username from name,
+                    // matching the wizard's auto-fill: last name + first name.
+                    $baseUsername = $this->generateUsername(
+                        $data['first_name'] ?? '',
+                        $data['last_name'] ?? ''
+                    );
+
                     User::create([
                         'employee_id' => $employee->id,
                         'email' => $data['email'] ?? $data['employee_id'] . '@lgu.gov.ph',
-                        'username' => $data['employee_id'],
+                        'username' => $baseUsername,
                         'password' => Hash::make('password123'),
                         'roles' => ['employee'],
                         'status' => 'Active',

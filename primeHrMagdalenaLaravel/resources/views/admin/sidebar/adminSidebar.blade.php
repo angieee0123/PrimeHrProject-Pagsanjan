@@ -43,6 +43,9 @@ $navGroups = [
         ...(auth()->user()?->hasRole('admin')
             ? [['id' => 'admin.website', 'label' => 'Website Content', 'icon' => 'website', 'route' => route('admin.website')]]
             : []),
+        ...(auth()->user()?->hasRole('admin')
+            ? [['id' => 'admin.audit', 'label' => 'Audit Trail', 'icon' => 'audit', 'route' => route('admin.audit')]]
+            : []),
         ['id' => 'admin.settings', 'label' => 'Settings', 'icon' => 'settings', 'route' => route('admin.settings')],
     ],
 ];
