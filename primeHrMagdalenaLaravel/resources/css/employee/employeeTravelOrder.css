@@ -181,6 +181,270 @@
    color here since it's just showing the filer's initials. */
 #viewTravelDetailModal .modal-emp-avatar { background: linear-gradient(135deg, var(--gp-pri), #4338ca); }
 
+/* ---------------------------------------------------------------------------
+   Companion invitation — accept / decline confirmation (#companionResponseModal).
+
+   One modal answers both questions. Everything that differs between them is a
+   token redefined under `.is-accept` / `.is-decline`, so the two states cannot
+   drift apart in spacing or structure — only in colour and wording. That is
+   also why the accent is a variable rather than two copies of the block: an
+   accept that looks like a decline is worse than either.
+   --------------------------------------------------------------------------- */
+#companionResponseModal {
+    --cr-accent: var(--theme-success);
+    --cr-accent-subtle: var(--theme-success-subtle);
+    --cr-accent-border: var(--theme-success-border);
+    --cr-accent-emphasis: var(--theme-success-emphasis);
+}
+#companionResponseModal.is-decline {
+    --cr-accent: var(--theme-danger);
+    --cr-accent-subtle: var(--theme-danger-subtle);
+    --cr-accent-border: var(--theme-danger-border);
+    --cr-accent-emphasis: var(--theme-danger-emphasis);
+}
+
+#companionResponseModal .modal-box {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+/* Header: the question, centred, with the action's own glyph above it. The
+   shared .modal-header is not used — this modal leads with an icon and has no
+   close button, because a confirmation should be answered, not dismissed by a
+   stray click on an X. (Escape and the overlay still close it.) */
+#companionResponseModal .cr-head {
+    padding: 26px 26px 18px;
+    text-align: center;
+    border-bottom: 1px solid var(--theme-neutral-200);
+}
+#companionResponseModal .cr-icon {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cr-accent-subtle);
+    border: 1px solid var(--cr-accent-border);
+    color: var(--cr-accent-emphasis);
+}
+#companionResponseModal .cr-eyebrow {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--cr-accent-emphasis);
+    margin-bottom: 6px;
+}
+#companionResponseModal .cr-title {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--gp-pri);
+}
+#companionResponseModal .cr-lede {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--theme-neutral-700);
+}
+
+#companionResponseModal .cr-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 18px 26px 20px;
+}
+
+/* Who is asking */
+#companionResponseModal .cr-filer {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 14px;
+}
+#companionResponseModal .cr-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--gp-pri), var(--theme-accent));
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+}
+#companionResponseModal .cr-avatar img { width: 100%; height: 100%; object-fit: cover; }
+#companionResponseModal .cr-filer-text { min-width: 0; text-align: left; }
+#companionResponseModal .cr-filer-name {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gp-pri);
+}
+#companionResponseModal .cr-filer-role {
+    margin: 2px 0 0;
+    font-size: 11.5px;
+    color: var(--theme-neutral-600);
+}
+
+/* What is being agreed to */
+#companionResponseModal .cr-trip {
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 12px;
+    background: var(--theme-neutral-50);
+    overflow: hidden;
+}
+#companionResponseModal .cr-trip-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--theme-neutral-200);
+}
+#companionResponseModal .cr-trip-row:last-child { border-bottom: none; }
+#companionResponseModal .cr-trip-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--theme-neutral-600);
+}
+#companionResponseModal .cr-trip-value {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+    text-align: right;
+    min-width: 0;
+}
+/* The dates are the commitment; they get the accent so the eye lands there
+   first, before the destination or the head-count. */
+#companionResponseModal .cr-trip-row:first-child .cr-trip-value { color: var(--cr-accent-emphasis); }
+
+/* Purpose is free text of any length, so it stacks and wraps instead of
+   fighting the label for one line. */
+#companionResponseModal .cr-trip-purpose {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+#companionResponseModal .cr-trip-purpose-text {
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--theme-neutral-800);
+    word-break: break-word;
+}
+
+/* Decline only: the reason */
+#companionResponseModal .cr-note { margin-top: 16px; }
+#companionResponseModal .cr-note-label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gp-pri);
+}
+#companionResponseModal .cr-optional {
+    margin-left: 5px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--theme-neutral-100);
+    border: 1px solid var(--theme-neutral-300);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    color: var(--theme-neutral-600);
+}
+#companionResponseModal .cr-note-input {
+    width: 100%;
+    padding: 11px 12px;
+    border: 2px solid var(--theme-neutral-300);
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.55;
+    resize: vertical;
+    transition: border-color .15s, box-shadow .15s;
+}
+/* The focus ring is deliberately NOT the accent. This field only ever appears
+   on the decline, where the accent is danger red — and a red border around a
+   textarea reads as "you typed something invalid", not as "this is the decline
+   dialog". It matches the page's other inputs instead. */
+#companionResponseModal .cr-note-input:focus {
+    outline: none;
+    border-color: var(--gp-pri);
+    box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), .10);
+}
+#companionResponseModal .cr-note-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--theme-neutral-600);
+}
+#companionResponseModal .cr-note-foot .is-full { color: var(--theme-danger); font-weight: 700; }
+
+/* What happens next. Stated before the button, not after it. */
+#companionResponseModal .cr-consequence {
+    margin: 16px 0 0;
+    padding: 11px 13px;
+    border-left: 3px solid var(--cr-accent-border);
+    border-radius: 0 8px 8px 0;
+    background: var(--cr-accent-subtle);
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: var(--cr-accent-emphasis);
+}
+
+#companionResponseModal .cr-footer { flex-shrink: 0; }
+#companionResponseModal .cr-footer .modal-btn-primary {
+    background: var(--cr-accent);
+    box-shadow: none;
+}
+#companionResponseModal .cr-footer .modal-btn-primary:hover {
+    background: var(--cr-accent-emphasis);
+    transform: translateY(-1px);
+}
+#companionResponseModal .cr-footer .modal-btn-primary:disabled {
+    opacity: .65;
+    cursor: progress;
+    transform: none;
+}
+
+@media (max-width: 640px) {
+    #companionResponseModal .modal-box { max-height: 94vh; }
+    #companionResponseModal .cr-head { padding: 22px 18px 16px; }
+    #companionResponseModal .cr-body { padding: 16px 18px; }
+    #companionResponseModal .cr-title { font-size: 16.5px; }
+    /* Stacking keeps a long destination or date range from squeezing its
+       label down to two characters. */
+    #companionResponseModal .cr-trip-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    #companionResponseModal .cr-trip-value { text-align: left; }
+    #companionResponseModal .cr-footer { flex-wrap: wrap; }
+    #companionResponseModal .cr-footer .modal-btn-ghost,
+    #companionResponseModal .cr-footer .modal-btn-primary {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
 @media (max-width: 640px) {
     #fileTravelOrderModal .modal-box,
     #viewTravelDetailModal .modal-box {

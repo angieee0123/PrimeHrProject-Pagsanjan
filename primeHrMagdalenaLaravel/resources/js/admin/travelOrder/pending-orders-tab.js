@@ -28,17 +28,10 @@ window.toggleTravelActionMenu = function(event, btn) {
     menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
 }
 
-window.disapproveOrder = function(id) {
-    const reason = prompt('Reason for disapproval:');
-    if (!reason) return;
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = `/admin/travelorder/${id}/disapprove`;
-    const token = document.querySelector('meta[name="csrf-token"]')?.content;
-    form.innerHTML = `<input type="hidden" name="_token" value="${token}"><input type="hidden" name="reason" value="${reason}">`;
-    document.body.appendChild(form);
-    form.submit();
-}
+// NOTE: disapproveOrder() lived here and asked for the reason with prompt() —
+// no label, no 500-character ceiling, and nothing naming the order being
+// refused. Both decisions now open #travelDecisionModal instead; see
+// travelDecisionModal.js.
 
 document.addEventListener('click', () => {
     document.querySelectorAll('.travel-action-menu').forEach(m => m.style.display = 'none');

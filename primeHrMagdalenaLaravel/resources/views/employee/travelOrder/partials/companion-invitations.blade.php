@@ -34,7 +34,21 @@
             </thead>
             <tbody>
                 @foreach($companionInvitations as $invitation)
-                @php $inviteOrder = $invitation->travelOrder; @endphp
+                @php
+                    $inviteOrder = $invitation->travelOrder;
+                    // Everything the accept/decline confirmation needs to name
+                    // *this* trip rather than ask about "a companion request".
+                    // Assembled once per row and handed to the buttons below as
+                    // data attributes, so the dialog never has to fetch it.
+                    $inviteFiler = $inviteOrder?->employee;
+                    $inviteFilerName = trim(($inviteFiler->first_name ?? '') . ' ' . ($inviteFiler->last_name ?? '')) ?: 'the filer';
+                    $inviteFirstName = $inviteFiler->first_name ?? 'the filer';
+                    $inviteInitials = strtoupper(substr($inviteFiler->first_name ?? 'E', 0, 1) . substr($inviteFiler->last_name ?? 'E', 0, 1));
+                    $invitePhoto = $inviteFiler?->photo
+                        ? (\Illuminate\Support\Str::startsWith($inviteFiler->photo, ['/', 'http']) ? $inviteFiler->photo : asset('storage/' . $inviteFiler->photo))
+                        : '';
+                    $inviteParty = 1 + ($inviteOrder?->companions->count() ?? 0);
+                @endphp
                 @if($inviteOrder)
                 <tr>
                     <td data-label="Order No." class="to-td-bold">{{ $inviteOrder->order_number }}</td>
@@ -73,15 +87,43 @@
                             </button>
                             @if($invitation->status === 'pending' && $inviteOrder->status === 'awaiting_companions')
                                 <div class="row-menu-sep"></div>
+                                {{-- Both buttons carry the same trip context. The
+                                     confirmation reads it off whichever one was
+                                     pressed, so it can say "Travel with Maria to
+                                     Lucena City?" instead of "Are you sure?" --}}
                                 <button type="button" role="menuitem" class="row-menu-item is-accept"
-                                        onclick="closeRowMenu(); respondToCompanionRequest({{ $inviteOrder->id }}, 'accepted')">
+                                        onclick="closeRowMenu(); openCompanionResponse(this)"
+                                        data-response="accepted"
+                                        data-order-id="{{ $inviteOrder->id }}"
+                                        data-order-number="{{ $inviteOrder->order_number }}"
+                                        data-filer="{{ $inviteFilerName }}"
+                                        data-filer-first="{{ $inviteFirstName }}"
+                                        data-filer-initials="{{ $inviteInitials }}"
+                                        data-filer-photo="{{ $invitePhoto }}"
+                                        data-destination="{{ $inviteOrder->destination }}"
+                                        data-dates="{{ $inviteOrder->formatted_dates }}"
+                                        data-duration="{{ $inviteOrder->duration }}"
+                                        data-party="{{ $inviteParty }}"
+                                        data-purpose="{{ $inviteOrder->purpose }}">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                         <polyline points="20 6 9 17 4 12"/>
                                     </svg>
                                     Accept invitation
                                 </button>
                                 <button type="button" role="menuitem" class="row-menu-item is-danger"
-                                        onclick="closeRowMenu(); respondToCompanionRequest({{ $inviteOrder->id }}, 'rejected')">
+                                        onclick="closeRowMenu(); openCompanionResponse(this)"
+                                        data-response="rejected"
+                                        data-order-id="{{ $inviteOrder->id }}"
+                                        data-order-number="{{ $inviteOrder->order_number }}"
+                                        data-filer="{{ $inviteFilerName }}"
+                                        data-filer-first="{{ $inviteFirstName }}"
+                                        data-filer-initials="{{ $inviteInitials }}"
+                                        data-filer-photo="{{ $invitePhoto }}"
+                                        data-destination="{{ $inviteOrder->destination }}"
+                                        data-dates="{{ $inviteOrder->formatted_dates }}"
+                                        data-duration="{{ $inviteOrder->duration }}"
+                                        data-party="{{ $inviteParty }}"
+                                        data-purpose="{{ $inviteOrder->purpose }}">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                                     </svg>

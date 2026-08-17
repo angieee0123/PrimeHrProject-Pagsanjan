@@ -1,3 +1,5 @@
+import { confirmDeleteDeduction } from './deleteDeduction.js';
+
 window._deductionCurrentPage = 1;
 window._deductionRowsPerPage = 10;
 
@@ -143,36 +145,11 @@ function editEmployeeDeduction(id) {
         });
 }
 
-function deleteEmployeeDeduction(id, employeeName, deductionType) {
-    if (confirm(`Are you sure you want to delete ${deductionType} for ${employeeName}?\n\nThis action cannot be undone.`)) {
-        // Create a form and submit
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/deductions/employee/${id}/delete`;
-
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = '_token';
-        csrfInput.value = csrfToken;
-
-        const methodInput = document.createElement('input');
-        methodInput.type = 'hidden';
-        methodInput.name = '_method';
-        methodInput.value = 'DELETE';
-
-        form.appendChild(csrfInput);
-        form.appendChild(methodInput);
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
 function exportEmployeeDeductions() {
     window.location.href = '/admin/deductions/employee/export';
 }
 
 window.filterEmployeeDeductions = filterEmployeeDeductions;
 window.editEmployeeDeduction = editEmployeeDeduction;
-window.deleteEmployeeDeduction = deleteEmployeeDeduction;
+window.deleteEmployeeDeduction = confirmDeleteDeduction;
 window.exportEmployeeDeductions = exportEmployeeDeductions;

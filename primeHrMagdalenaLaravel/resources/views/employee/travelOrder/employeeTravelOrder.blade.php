@@ -107,6 +107,7 @@
 
 @include('employee.travelOrder.modals.fileTravelOrderModal')
 @include('employee.travelOrder.modals.viewTravelOrderModal')
+@include('employee.travelOrder.modals.companionResponseModal')
 
 @include('employee.chatbot.employeeChatbot')
 

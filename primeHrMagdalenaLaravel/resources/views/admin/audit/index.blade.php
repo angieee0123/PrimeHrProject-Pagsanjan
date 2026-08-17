@@ -1,168 +1,223 @@
 @extends('layouts.app')
 
-@php use App\Models\User; @endphp
+@push('styles')
+    @vite('resources/css/admin/adminAudit.css')
+@endpush
+
+{{--
+    Audit Trail.
+
+    The design rule for this page is that **a row is one line tall, always**.
+    An audit row can carry twenty changed fields, a 150-character user agent
+    and a full URL; rendering all of that inline is what made the table
+    unreadable the moment there was real history in it — row heights varied
+    wildly, the eye had nothing to track down the page, and the technical
+    columns (URL / IP / agent) took up the width that the human-readable ones
+    needed.
+
+    So the table shows the five things that answer "who changed what, when",
+    each in a fixed-width column, and every row opens a drawer holding the
+    complete record: the full before/after diff, the URL, the IP, the agent
+    string and the exact timestamp. Nothing was dropped — it moved one click
+    away, which is the only way the list stays scannable at a thousand rows.
+--}}
 
 @section('content')
 @include('admin.topbar.auditTopbar')
 @include('admin.notification.adminNotification')
 
-<div class="glass-shell">
+<div class="glass-shell audit-page">
 
-    {{-- Filter Toolbar --}}
-    <div class="filter-card">
+    {{-- Filters. A GET form, so the filtered view is a shareable URL and the
+         browser's back button works through it. --}}
+    <form method="GET" action="{{ route('admin.audit') }}" id="auditFilterForm" class="filter-card">
+        <input type="hidden" name="q" id="auditSearchField" value="{{ $filters['q'] }}">
+        <input type="hidden" name="sort" value="{{ $sort }}">
+        <input type="hidden" name="dir" value="{{ $dir }}">
+        <input type="hidden" name="per_page" value="{{ $perPage }}" id="auditPerPageField">
+
         <div class="filter-card-fields">
             <div class="fld">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                <select class="fc-select" id="actionFilter" onchange="filterAudits()">
-                    <option value="">All Actions</option>
-                    <option value="created">Created</option>
-                    <option value="updated">Updated</option>
-                    <option value="deleted">Deleted</option>
-                </select>
-            </div>
-            <div class="fld">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <select class="fc-select" id="userFilter" onchange="filterAudits()">
-                    <option value="">All Users</option>
-                    @foreach($auditUsers as $auditUser)
-                        <option value="{{ $auditUser->username }}">{{ $auditUser->username }}</option>
+                <select class="fc-select" name="event" aria-label="Filter by action">
+                    <option value="">All actions</option>
+                    @foreach(\App\Services\AuditTrailPresenter::EVENTS as $key => $meta)
+                        <option value="{{ $key }}" @selected($filters['event'] === $key)>{{ $meta['label'] }}</option>
                     @endforeach
                 </select>
             </div>
+
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <select class="fc-select" name="type" aria-label="Filter by record type">
+                    <option value="">All records</option>
+                    @foreach($recordTypes as $class => $label)
+                        <option value="{{ $class }}" @selected($filters['type'] === $class)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <select class="fc-select" name="user" aria-label="Filter by user">
+                    <option value="">All users</option>
+                    @foreach($auditUsers as $auditUser)
+                        <option value="{{ $auditUser->id }}" @selected($filters['user'] === (string) $auditUser->id)>{{ $auditUser->username }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             <div class="fc-divider"></div>
+
             <div class="fld">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <input type="date" class="fc-input" id="dateFrom" title="Date from" onchange="filterAudits()">
+                <input type="date" class="fc-input" name="from" value="{{ $filters['from'] }}" aria-label="From date">
             </div>
             <span class="fc-sep">to</span>
             <div class="fld">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <input type="date" class="fc-input" id="dateTo" title="Date to" onchange="filterAudits()">
+                <input type="date" class="fc-input" name="to" value="{{ $filters['to'] }}" aria-label="To date">
             </div>
         </div>
+
         <div class="filter-card-actions">
-            <button class="btn-ghost" onclick="resetFilters()">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-                Reset
+            <button type="submit" class="btn-solid">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Apply
             </button>
+            @if($activeChips)
+                <a href="{{ route('admin.audit') }}" class="btn-ghost">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                    Reset
+                </a>
+            @endif
         </div>
-    </div>
+    </form>
+
+    {{-- What is currently narrowing the list. Only rendered when something is
+         — an always-present strip becomes furniture and stops being read. --}}
+    @if($activeChips)
+        <div class="au-chips" role="status">
+            <span class="au-chips-label">Filtered by</span>
+            @foreach($activeChips as $chip)
+                <a href="{{ $chip['url'] }}" class="au-chip" title="Remove this filter">
+                    {{ $chip['label'] }}
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </a>
+            @endforeach
+        </div>
+    @endif
 
     <div class="table-section">
-        <div class="table-header">
+        <div class="table-header au-header">
             <div>
-                <p class="table-title">Audit Trail</p>
-                <p class="table-sub">Keep Track of Changes Made to Records · {{ $audits->total() }} total records</p>
+                <p class="table-title">Activity log</p>
+                <p class="table-sub">
+                    {{ number_format($audits->total()) }} {{ \Illuminate\Support\Str::plural('record', $audits->total()) }}
+                    @if($activeChips) matching your filters @else recorded @endif
+                </p>
+            </div>
+
+            {{-- The same numbers the table is showing, split by action. Counted
+                 over the filtered set, so these and the total above always agree. --}}
+            <div class="au-tallies">
+                @foreach(\App\Services\AuditTrailPresenter::EVENTS as $key => $meta)
+                    @continue(($counts[$key] ?? 0) === 0)
+                    <span class="au-tally au-tally-{{ $key }}">
+                        <span class="au-tally-dot"></span>
+                        <strong>{{ number_format($counts[$key]) }}</strong> {{ $meta['label'] }}
+                    </span>
+                @endforeach
             </div>
         </div>
 
-        <div class="table-wrapper">
-            <table class="payroll-table" id="audits-table">
+        <div class="table-wrapper au-scroll">
+            <table class="payroll-table au-table" id="auditsTable">
+                {{-- Column widths ride on the <th>, not on a <colgroup>. A
+                     `<col>` keeps reserving its width even when the cells in
+                     that column are hidden at narrow widths, which left the
+                     table ending a third of the way short of its own card. --}}
                 <thead>
                     <tr>
-                        <th onclick="sortTable(0)" style="cursor: pointer; width: 6%;">
-                            #
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px; opacity: 0.3;"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                        </th>
-                        <th onclick="sortTable(1)" style="cursor: pointer; width: 15%;">
-                            User
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px; opacity: 0.3;"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                        </th>
-                        <th onclick="sortTable(2)" style="cursor: pointer; width: 12%;">
-                            Action
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px; opacity: 0.3;"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                        </th>
-                        <th onclick="sortTable(3)" style="cursor: pointer; width: 25%;">
-                            Changes
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px; opacity: 0.3;"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                        </th>
-                        <th style="width: 15%;">URL</th>
-                        <th style="width: 8%; text-align: center;">IP</th>
-                        <th style="width: 10%;">Agent</th>
-                        <th onclick="sortTable(7)" style="cursor: pointer; width: 9%; text-align: right;">
-                            Timestamp
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 4px; opacity: 0.3;"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                        </th>
+                        <th class="au-c-when">@include('admin.audit.partials.sort-link', ['column' => 'created_at', 'label' => 'When'])</th>
+                        <th class="au-c-action">@include('admin.audit.partials.sort-link', ['column' => 'event', 'label' => 'Action'])</th>
+                        <th class="au-c-record">@include('admin.audit.partials.sort-link', ['column' => 'auditable_type', 'label' => 'Record'])</th>
+                        <th class="au-c-user">@include('admin.audit.partials.sort-link', ['column' => 'user_id', 'label' => 'Performed by'])</th>
+                        <th class="au-c-changes">Changes</th>
+                        <th class="au-c-open au-th-end"><span class="au-sr">Details</span></th>
                     </tr>
                 </thead>
-                <tbody id="auditsTableBody">
-                    @forelse($audits as $audit)
-                        @php
-                            $user = User::find($audit->user_id);
-                            $actionClass = match($audit->event) {
-                                'created' => 'processed',
-                                'updated' => 'on-hold',
-                                'deleted' => 'declined',
-                                default => '',
-                            };
-                            $hasChanges = !empty($audit->old_values) || !empty($audit->new_values);
-                        @endphp
-                        <tr data-event="{{ $audit->event }}"
-                            data-user="{{ $user?->username ?? '' }}"
-                            data-date="{{ $audit->created_at?->format('Y-m-d') ?? '' }}">
-                            <td><span style="color: var(--gp-text-soft); font-size: 12px;">#{{ $audit->id }}</span></td>
+                <tbody>
+                    @forelse($rows as $row)
+                        <tr class="au-row" tabindex="0" role="button"
+                            data-audit="{{ $row['id'] }}"
+                            aria-label="View audit entry {{ $row['id'] }}">
+                            {{-- The exact timestamp is on the whole cell, so
+                                 "Today" never costs anyone precision. --}}
+                            <td class="au-when" title="{{ $row['full'] }}">
+                                <span class="au-when-date">{{ $row['date'] }}</span>
+                                <span class="au-when-time">{{ $row['time'] }}</span>
+                            </td>
                             <td>
-                                <div class="emp-cell">
-                                    <div class="emp-avatar" style="background: var(--gp-pri); width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:11px; flex-shrink:0;">
-                                        {{ strtoupper(substr($user?->username ?? '?', 0, 2)) }}
-                                    </div>
-                                    <div>
-                                        <p class="emp-name" style="font-size: 12.5px;">{{ $user?->username ?? 'Unknown' }}</p>
-                                    </div>
+                                <span class="badge-status {{ $row['badge'] }}">{{ $row['event_label'] }}</span>
+                            </td>
+                            <td class="au-record">
+                                <span class="au-record-type">{{ $row['record_type'] }}</span>
+                                <span class="au-record-id">#{{ $row['record_id'] }}</span>
+                            </td>
+                            <td>
+                                <div class="au-user">
+                                    {{-- The photo is the employee record's own, so a
+                                         face in the log matches the face on the
+                                         personnel page. The initials tile stays in the
+                                         markup underneath rather than being replaced:
+                                         `employees.photo` is a URL that can outlive the
+                                         file it points at, and `onerror` then drops back
+                                         to initials instead of leaving a broken-image
+                                         icon in every row that user touched. --}}
+                                    <span class="au-avatar @if($row['user_photo']) has-photo @endif">
+                                        @if($row['user_photo'])
+                                            <img src="{{ $row['user_photo'] }}" alt="" class="au-avatar-img" loading="lazy"
+                                                 onerror="this.parentElement.classList.remove('has-photo'); this.remove();">
+                                        @endif
+                                        <span class="au-avatar-initials">{{ $row['user_initials'] }}</span>
+                                    </span>
+                                    <span class="au-user-name">{{ $row['user_name'] }}</span>
                                 </div>
                             </td>
                             <td>
-                                <span class="badge-status {{ $actionClass }}">{{ ucfirst($audit->event) }}</span>
-                                <span style="font-size: 11px; color: var(--gp-text-soft); display: block; margin-top: 2px;">{{ class_basename($audit->auditable_type) }}</span>
+                                {{-- The flex lives on an inner div, not on the <td>: a
+                                     table cell set to `display: flex` stops being a table
+                                     cell, and the fixed column widths go with it. --}}
+                                <div class="au-changes">
+                                    @if($row['change_count'] > 0)
+                                        <span class="au-count">{{ $row['change_count'] }}</span>
+                                    @endif
+                                    <span class="au-summary" title="{{ $row['summary'] }}">{{ $row['summary'] }}</span>
+                                </div>
                             </td>
-                            <td>
-                                @if($hasChanges)
-                                    <div class="audit-changes" style="font-size: 11.5px; line-height: 1.6;">
-                                        @if(!empty($audit->old_values) && !empty($audit->new_values))
-                                            @foreach($audit->new_values as $key => $newVal)
-                                                @php $oldVal = $audit->old_values[$key] ?? null; @endphp
-                                                @if($oldVal != $newVal)
-                                                    <div style="margin-bottom: 2px;">
-                                                        <span style="color: var(--gp-text-soft);">{{ $key }}:</span>
-                                                        <span style="color: var(--theme-danger); text-decoration: line-through; margin-right: 4px;">{{ is_array($oldVal) ? json_encode($oldVal) : $oldVal }}</span>
-                                                        <span style="color: var(--theme-success);">{{ is_array($newVal) ? json_encode($newVal) : $newVal }}</span>
-                                                    </div>
-                                                @endif
-                                            @endforeach
-                                        @elseif(!empty($audit->new_values))
-                                            @foreach($audit->new_values as $key => $newVal)
-                                                <div style="margin-bottom: 2px;">
-                                                    <span style="color: var(--gp-text-soft);">{{ $key }}:</span>
-                                                    <span style="color: var(--theme-success);">{{ is_array($newVal) ? json_encode($newVal) : $newVal }}</span>
-                                                </div>
-                                            @endforeach
-                                        @elseif(!empty($audit->old_values))
-                                            @foreach($audit->old_values as $key => $oldVal)
-                                                <div style="margin-bottom: 2px;">
-                                                    <span style="color: var(--gp-text-soft);">{{ $key }}:</span>
-                                                    <span style="color: var(--theme-danger);">{{ is_array($oldVal) ? json_encode($oldVal) : $oldVal }}</span>
-                                                </div>
-                                            @endforeach
-                                        @endif
-                                    </div>
-                                @else
-                                    <span style="color: var(--gp-text-soft); font-size: 11.5px;">—</span>
-                                @endif
-                            </td>
-                            <td><span style="font-size: 12px; color: var(--gp-text-mid); word-break: break-all;">{{ $audit->url }}</span></td>
-                            <td style="text-align: center;"><span style="font-size: 12px; color: var(--gp-text-mid); font-family: monospace;">{{ $audit->ip_address }}</span></td>
-                            <td>
-                                <span style="font-size: 11px; color: var(--gp-text-soft); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;" title="{{ $audit->user_agent }}">{{ $audit->user_agent }}</span>
-                            </td>
-                            <td style="text-align: right; white-space: nowrap;">
-                                <span style="font-size: 12px; color: var(--gp-text-mid);">{{ $audit->created_at?->format('M d, Y') }}</span>
-                                <span style="font-size: 11px; color: var(--gp-text-soft); display: block;">{{ $audit->created_at?->format('h:i A') }}</span>
+                            <td class="au-th-end">
+                                <span class="au-open" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                                </span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" style="text-align: center; padding: 40px; color: var(--gp-text-mid);">
-                                No audit records found.
+                            <td colspan="6" class="au-empty-cell">
+                                <div class="au-empty">
+                                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/>
+                                    </svg>
+                                    @if($activeChips)
+                                        <p class="au-empty-title">No entries match these filters</p>
+                                        <p class="au-empty-sub">Try widening the date range or clearing a filter.</p>
+                                        <a href="{{ route('admin.audit') }}" class="btn-ghost">Clear all filters</a>
+                                    @else
+                                        <p class="au-empty-title">Nothing has been recorded yet</p>
+                                        <p class="au-empty-sub">Changes made to employee, leave, payroll and department records will appear here.</p>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @endforelse
@@ -170,232 +225,36 @@
             </table>
         </div>
 
-        <div class="table-footer">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <p>Showing <strong id="showingStart">{{ $audits->firstItem() ?? 0 }}</strong>–<strong id="showingEnd">{{ $audits->lastItem() ?? 0 }}</strong> of <strong id="totalRecords">{{ $audits->total() }}</strong> records</p>
-                <select id="rowsPerPageSelect" onchange="changeRowsPerPage(this.value)" style="padding: 6px 12px; border: 1.5px solid var(--gp-border); border-radius: 6px; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; color: var(--gp-pri); background: #fff; cursor: pointer;">
-                    <option value="15" selected>15 per page</option>
-                    <option value="25">25 per page</option>
-                    <option value="50">50 per page</option>
-                    <option value="100">100 per page</option>
+        <div class="table-footer au-footer">
+            <div class="au-footer-left">
+                <p>
+                    Showing <strong>{{ number_format($audits->firstItem() ?? 0) }}</strong>–<strong>{{ number_format($audits->lastItem() ?? 0) }}</strong>
+                    of <strong>{{ number_format($audits->total()) }}</strong>
+                </p>
+                <select id="auditPerPage" class="au-perpage" aria-label="Rows per page">
+                    @foreach($perPageSizes as $size)
+                        <option value="{{ $size }}" @selected($perPage === $size)>{{ $size }} per page</option>
+                    @endforeach
                 </select>
             </div>
-            <div class="pagination" id="paginationControls">
-                @if($audits->hasPages())
-                    @if($audits->onFirstPage())
-                        <button class="page-btn" disabled style="opacity:0.4; cursor:default;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-                        </button>
-                    @else
-                        <a href="{{ $audits->previousPageUrl() }}" class="page-btn">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-                        </a>
-                    @endif
 
-                    @foreach($audits->getUrlRange(max(1, $audits->currentPage() - 2), min($audits->lastPage(), $audits->currentPage() + 2)) as $page => $url)
-                        <a href="{{ $url }}" class="page-btn {{ $page == $audits->currentPage() ? 'active' : '' }}">{{ $page }}</a>
-                    @endforeach
-
-                    @if($audits->hasMorePages())
-                        <a href="{{ $audits->nextPageUrl() }}" class="page-btn">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                        </a>
-                    @else
-                        <button class="page-btn" disabled style="opacity:0.4; cursor:default;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                        </button>
-                    @endif
-                @endif
-            </div>
+            @if($audits->hasPages())
+                @include('admin.audit.partials.pagination', ['paginator' => $audits])
+            @endif
         </div>
     </div>
 
 </div>
 
+@include('admin.audit.partials.detail-modal')
+
+{{-- The rows the drawer reads, keyed by audit id. `@json` encodes with
+     JSON_HEX_TAG, so a `</script>` sitting in a logged URL or user agent
+     cannot close this tag. --}}
+<script type="application/json" id="auditData">@json($rows->keyBy('id'))</script>
+
 @endsection
 
 @push('scripts')
-<script>
-let allRows = [];
-let currentPage = 1;
-let rowsPerPage = 15;
-let sortColumn = -1;
-let sortAscending = true;
-
-document.addEventListener('DOMContentLoaded', function() {
-    const tbody = document.getElementById('auditsTableBody');
-    if (tbody) {
-        allRows = Array.from(tbody.querySelectorAll('tr[data-event]'));
-        updatePagination();
-    }
-});
-
-function filterAudits() {
-    const searchTerm = (document.getElementById('auditSearchInput')?.value || '').toLowerCase();
-    const actionFilter = document.getElementById('actionFilter')?.value || '';
-    const userFilter = document.getElementById('userFilter')?.value || '';
-    const dateFrom = document.getElementById('dateFrom')?.value || '';
-    const dateTo = document.getElementById('dateTo')?.value || '';
-
-    let visibleCount = 0;
-    const total = allRows.length;
-
-    allRows.forEach(row => {
-        const event = row.dataset.event || '';
-        const user = (row.dataset.user || '').toLowerCase();
-        const date = row.dataset.date || '';
-        const text = row.textContent.toLowerCase();
-
-        let show = true;
-        if (actionFilter && event !== actionFilter) show = false;
-        if (userFilter && user !== userFilter.toLowerCase()) show = false;
-        if (dateFrom && date < dateFrom) show = false;
-        if (dateTo && date > dateTo) show = false;
-        if (searchTerm && !text.includes(searchTerm)) show = false;
-
-        row.style.display = show ? '' : 'none';
-        if (show) visibleCount++;
-    });
-
-    document.getElementById('showingStart').textContent = visibleCount > 0 ? 1 : 0;
-    document.getElementById('showingEnd').textContent = visibleCount;
-    document.getElementById('totalRecords').textContent = visibleCount;
-}
-
-function resetFilters() {
-    const searchInput = document.getElementById('auditSearchInput');
-    if (searchInput) searchInput.value = '';
-    const actionFilter = document.getElementById('actionFilter');
-    if (actionFilter) actionFilter.value = '';
-    const userFilter = document.getElementById('userFilter');
-    if (userFilter) userFilter.value = '';
-    const dateFrom = document.getElementById('dateFrom');
-    if (dateFrom) dateFrom.value = '';
-    const dateTo = document.getElementById('dateTo');
-    if (dateTo) dateTo.value = '';
-    filterAudits();
-}
-
-function sortTable(columnIndex) {
-    const tbody = document.getElementById('auditsTableBody');
-    const rows = Array.from(tbody.querySelectorAll('tr[data-event]'));
-
-    if (sortColumn === columnIndex) {
-        sortAscending = !sortAscending;
-    } else {
-        sortColumn = columnIndex;
-        sortAscending = true;
-    }
-
-    rows.sort((a, b) => {
-        let aValue, bValue;
-
-        switch (columnIndex) {
-            case 0:
-                aValue = parseInt(a.cells[0].textContent.replace('#', '').trim()) || 0;
-                bValue = parseInt(b.cells[0].textContent.replace('#', '').trim()) || 0;
-                return sortAscending ? aValue - bValue : bValue - aValue;
-            case 1:
-                aValue = a.cells[1].textContent.trim().toLowerCase();
-                bValue = b.cells[1].textContent.trim().toLowerCase();
-                break;
-            case 2:
-                aValue = a.cells[2].textContent.trim().toLowerCase();
-                bValue = b.cells[2].textContent.trim().toLowerCase();
-                break;
-            case 3:
-                aValue = a.cells[3].textContent.trim().toLowerCase();
-                bValue = b.cells[3].textContent.trim().toLowerCase();
-                break;
-            case 7:
-                aValue = a.dataset.date || '';
-                bValue = b.dataset.date || '';
-                break;
-            default:
-                return 0;
-        }
-
-        if (aValue < bValue) return sortAscending ? -1 : 1;
-        if (aValue > bValue) return sortAscending ? 1 : -1;
-        return 0;
-    });
-
-    const headers = document.querySelectorAll('#audits-table th');
-    headers.forEach((header, index) => {
-        const svg = header.querySelector('svg');
-        if (svg) {
-            if (index === columnIndex) {
-                svg.style.transform = sortAscending ? 'rotate(0deg)' : 'rotate(180deg)';
-                svg.style.opacity = '1';
-            } else {
-                svg.style.transform = 'rotate(0deg)';
-                svg.style.opacity = '0.3';
-            }
-        }
-    });
-
-    rows.forEach(row => tbody.appendChild(row));
-}
-
-function changeRowsPerPage(value) {
-    rowsPerPage = value === 'all' ? 9999 : parseInt(value);
-    currentPage = 1;
-    updatePagination();
-}
-
-function updatePagination() {
-    const visibleRows = allRows.filter(r => r.style.display !== 'none');
-    const totalVisible = visibleRows.length;
-    const totalPages = Math.ceil(totalVisible / rowsPerPage);
-
-    const tbody = document.getElementById('auditsTableBody');
-    const emptyRow = tbody.querySelector('tr:not([data-event])');
-
-    visibleRows.forEach((row, index) => {
-        row.style.display = (index >= (currentPage - 1) * rowsPerPage && index < currentPage * rowsPerPage) ? '' : 'none';
-    });
-
-    if (emptyRow) emptyRow.style.display = 'none';
-
-    const start = totalVisible > 0 ? (currentPage - 1) * rowsPerPage + 1 : 0;
-    const end = Math.min(currentPage * rowsPerPage, totalVisible);
-    document.getElementById('showingStart').textContent = start;
-    document.getElementById('showingEnd').textContent = end;
-    document.getElementById('totalRecords').textContent = totalVisible;
-
-    updatePaginationButtons(totalPages);
-}
-
-function updatePaginationButtons(totalPages) {
-    const paginationControls = document.getElementById('paginationControls');
-    paginationControls.innerHTML = '';
-
-    if (currentPage > 1) {
-        const prevBtn = document.createElement('button');
-        prevBtn.className = 'page-btn';
-        prevBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>';
-        prevBtn.onclick = () => { currentPage--; updatePagination(); };
-        paginationControls.appendChild(prevBtn);
-    }
-
-    const startPage = Math.max(1, currentPage - 2);
-    const endPage = Math.min(totalPages, currentPage + 2);
-
-    for (let i = startPage; i <= endPage; i++) {
-        const btn = document.createElement('button');
-        btn.className = 'page-btn' + (i === currentPage ? ' active' : '');
-        btn.textContent = i;
-        btn.onclick = () => { currentPage = i; updatePagination(); };
-        paginationControls.appendChild(btn);
-    }
-
-    if (currentPage < totalPages) {
-        const nextBtn = document.createElement('button');
-        nextBtn.className = 'page-btn';
-        nextBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
-        nextBtn.onclick = () => { currentPage++; updatePagination(); };
-        paginationControls.appendChild(nextBtn);
-    }
-}
-</script>
+    @vite('resources/js/admin/audit/adminAudit.js')
 @endpush

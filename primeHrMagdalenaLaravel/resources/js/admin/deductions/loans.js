@@ -1,3 +1,5 @@
+import { confirmDeleteLoan } from './deleteDeduction.js';
+
 window._loanCurrentPage = 1;
 window._loanRowsPerPage = 10;
 
@@ -262,4 +264,7 @@ window.closeAddLoanModal = function(event) {
 
 window.filterLoans = filterLoans;
 window.viewLoanDetails = viewLoanDetails;
+// A loan deletion asks its own question — the row shares the deductions
+// endpoint, not the deductions wording.
+window.deleteEmployeeLoan = confirmDeleteLoan;
 window.exportLoans = exportLoans;

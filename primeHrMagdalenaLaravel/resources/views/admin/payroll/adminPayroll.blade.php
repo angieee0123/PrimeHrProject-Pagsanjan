@@ -142,6 +142,15 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
                 </select>
             </div>
             <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                <select class="fc-select" name="employment_status">
+                    <option value="">All Employment Types</option>
+                    @foreach($employmentStatuses as $empStatus)
+                        <option value="{{ $empStatus }}" {{ request('employment_status') == $empStatus ? 'selected' : '' }}>{{ $empStatus }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="fld">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 <select class="fc-select" name="status">
                     <option value="">All Status</option>
