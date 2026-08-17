@@ -83,6 +83,7 @@ export default defineConfig({
                 'resources/js/admin/leaveAndBenefits/add-manual-credit-modal.js',
                 'resources/js/admin/leaveAndBenefits/migrate-leave-records-modal.js',
                 'resources/js/admin/passSlip/passSlip.js',
+                'resources/js/admin/passSlip/passSlipDecisionModal.js',
                 'resources/js/admin/travelOrder/travelOrder.js',
                 'resources/js/admin/travelOrder/pending-orders-tab.js',
                 'resources/js/admin/travelOrder/approved-orders-tab.js',

@@ -138,7 +138,36 @@
             </thead>
             <tbody>
                 @forelse($pendingSlips as $slip)
-                <tr class="passslip-pending-row ps-row" data-department="{{ $slip->employee->employmentDetail->departmentRelation->name ?? '' }}" data-type="{{ $slip->type }}" data-slip-date="{{ $slip->date ? $slip->date->format('Y-m-d') : '' }}">
+                @php
+                    // Everything the approve/disapprove confirmation needs to name
+                    // *this* slip rather than ask about "a pass slip". Assembled
+                    // once per row and handed to both menu items as data
+                    // attributes, so the dialog never has to fetch it and the two
+                    // decisions cannot disagree about which slip they describe.
+                    $slipEmployee = $slip->employee;
+                    $slipEmployeeName = trim(($slipEmployee->first_name ?? '') . ' ' . ($slipEmployee->last_name ?? '')) ?: 'this employee';
+                    $slipFirstName = $slipEmployee->first_name ?? 'the employee';
+                    $slipInitials = strtoupper(substr($slipEmployee->first_name ?? 'E', 0, 1) . substr($slipEmployee->last_name ?? 'E', 0, 1));
+                    $slipPhoto = $slipEmployee?->photo
+                        ? (\Illuminate\Support\Str::startsWith($slipEmployee->photo, ['/', 'http']) ? $slipEmployee->photo : asset('storage/' . $slipEmployee->photo))
+                        : '';
+                    $slipDepartment = $slipEmployee->employmentDetail->departmentRelation->name ?? '';
+                    $slipOut = $slip->time_out ? \Carbon\Carbon::parse($slip->time_out) : null;
+                    $slipIn = $slip->time_in ? \Carbon\Carbon::parse($slip->time_in) : null;
+                    // Minutes between the two stated times. A slip with no return
+                    // time is left at 0 — PassSlipComplianceService treats it as
+                    // running to the end of the PM session, which is a schedule
+                    // this row cannot see, so the dialog states the window
+                    // without putting a figure on it.
+                    $slipMinutes = ($slipOut && $slipIn && $slipIn->greaterThan($slipOut)) ? $slipOut->diffInMinutes($slipIn) : 0;
+                    $slipWindow = $slipOut
+                        ? $slipOut->format('g:i A') . ' – ' . ($slipIn ? $slipIn->format('g:i A') : 'no return time stated')
+                        : 'No times stated';
+                    $slipDate = $slip->date ? $slip->date->format('M d, Y') : 'an unstated date';
+                    $slipTypeLabel = $slip->type === 'official_activity' ? 'Official activity' : 'Personal reason';
+                    $slipPurposeLabel = \App\Models\PassSlip::PURPOSE_LABELS[$slip->purpose_category] ?? '';
+                @endphp
+                <tr class="passslip-pending-row ps-row" data-department="{{ $slipDepartment }}" data-type="{{ $slip->type }}" data-slip-date="{{ $slip->date ? $slip->date->format('Y-m-d') : '' }}">
                     <td class="ps-td">
                         <div class="emp-cell ps-emp-cell">
                             @if($slip->employee->photo)
@@ -168,17 +197,53 @@
                             </svg>
                         </button>
                         <div class="row-menu" id="pendingSlipMenu{{ $slip->id }}" role="menu" aria-label="Pass slip actions">
-                            <form method="POST" action="{{ route('admin.passslip.approve', $slip->id) }}" class="row-menu-form">
-                                @csrf
-                                <button type="submit" role="menuitem" class="row-menu-item is-accept" onclick="return confirm('Approve this pass slip?')">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="20 6 9 17 4 12"/>
-                                    </svg>
-                                    Approve
-                                </button>
-                            </form>
+                            {{-- Both decisions carry the same slip context. The
+                                 confirmation reads it off whichever one was
+                                 pressed, so it can say "Approve Juan's pass slip
+                                 for Aug 17, 2026?" instead of "Are you sure?" --}}
+                            <button type="button" role="menuitem" class="row-menu-item is-accept"
+                                    onclick="closeRowMenu(); openPassSlipDecision(this)"
+                                    data-decision="approve"
+                                    data-action="{{ route('admin.passslip.approve', $slip->id) }}"
+                                    data-slip-number="{{ $slip->slip_number }}"
+                                    data-employee="{{ $slipEmployeeName }}"
+                                    data-employee-id="{{ $slip->employee->employee_id ?? 'N/A' }}"
+                                    data-first-name="{{ $slipFirstName }}"
+                                    data-initials="{{ $slipInitials }}"
+                                    data-photo="{{ $slipPhoto }}"
+                                    data-department="{{ $slipDepartment }}"
+                                    data-type="{{ $slip->type }}"
+                                    data-type-label="{{ $slipTypeLabel }}"
+                                    data-date="{{ $slipDate }}"
+                                    data-window="{{ $slipWindow }}"
+                                    data-minutes="{{ $slipMinutes }}"
+                                    data-destination="{{ $slip->destination }}"
+                                    data-purpose-label="{{ $slipPurposeLabel }}"
+                                    data-reason="{{ $slip->reason }}">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                Approve
+                            </button>
                             <button type="button" role="menuitem" class="row-menu-item is-danger"
-                                    onclick="closeRowMenu(); disapprovePassSlip({{ $slip->id }})">
+                                    onclick="closeRowMenu(); openPassSlipDecision(this)"
+                                    data-decision="disapprove"
+                                    data-action="{{ route('admin.passslip.disapprove', $slip->id) }}"
+                                    data-slip-number="{{ $slip->slip_number }}"
+                                    data-employee="{{ $slipEmployeeName }}"
+                                    data-employee-id="{{ $slip->employee->employee_id ?? 'N/A' }}"
+                                    data-first-name="{{ $slipFirstName }}"
+                                    data-initials="{{ $slipInitials }}"
+                                    data-photo="{{ $slipPhoto }}"
+                                    data-department="{{ $slipDepartment }}"
+                                    data-type="{{ $slip->type }}"
+                                    data-type-label="{{ $slipTypeLabel }}"
+                                    data-date="{{ $slipDate }}"
+                                    data-window="{{ $slipWindow }}"
+                                    data-minutes="{{ $slipMinutes }}"
+                                    data-destination="{{ $slip->destination }}"
+                                    data-purpose-label="{{ $slipPurposeLabel }}"
+                                    data-reason="{{ $slip->reason }}">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                                 </svg>
@@ -392,6 +457,9 @@
         </div>
     </div>
 </div>
+
+{{-- Approve / disapprove confirmation for the Pending tab's row menu. --}}
+@include('admin.passSlip.partials.pass-slip-decision-modal')
 
 @push('scripts')
     @vite('resources/js/admin/passSlip/passSlip.js')
