@@ -25,23 +25,48 @@
      data-global-theme="{{ $data['globalTheme'] }}"
      data-csrf="{{ csrf_token() }}">
 
-    <p class="settings-row-desc theme-intro">
-        @if($isGlobal)
-            This is the look everyone gets by default. Anyone who has chosen their own
-            appearance keeps it — changing this will not overwrite their choice.
-        @else
-            Pick a look for your own account. Only you see it, and you can go back to the
-            organisation's theme at any time.
-        @endif
-    </p>
+    {{-- Lede: what this panel changes, whose look it changes, and what is
+         live right now — one block rather than a loose sentence followed by
+         a loose status line.
 
-    {{-- Current-theme status, in plain words rather than a stored flag name. --}}
-    @unless($isGlobal)
-        <div class="theme-status" data-role="status">
-            <span class="theme-status-dot" aria-hidden="true"></span>
-            <span>Currently using: <strong data-role="statusText">{{ $data['usingPersonal'] ? 'Your own appearance' : 'The system theme' }}</strong></span>
+         Deliberately *not* classed .settings-row-desc. That class is defined
+         in adminSettings.css and nowhere else, so on the employee settings
+         page this sentence fell back to the browser's default size and ink
+         and sat two steps above every label around it. All of its type now
+         comes from themePicker.css, which app.css imports on every layout. --}}
+    <div class="theme-lede">
+        <span class="theme-lede-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10a1.7 1.7 0 0 0 1.7-1.7c0-.44-.18-.84-.44-1.13a1.63 1.63 0 0 1 1.23-2.72h2C19.54 16.45 22 13.99 22 10.9 22 6 17.5 2 12 2z"/>
+                <circle cx="6.6" cy="12.4" r="1.1" fill="currentColor" stroke="none"/>
+                <circle cx="9.3" cy="7.6" r="1.1" fill="currentColor" stroke="none"/>
+                <circle cx="14.7" cy="7.6" r="1.1" fill="currentColor" stroke="none"/>
+                <circle cx="17.4" cy="12.4" r="1.1" fill="currentColor" stroke="none"/>
+            </svg>
+        </span>
+        <div class="theme-lede-copy">
+            <p class="theme-lede-title">{{ $isGlobal ? "Everyone's default look" : 'Your personal look' }}</p>
+            <p class="theme-intro">
+                @if($isGlobal)
+                    This is the look everyone gets by default. Anyone who has chosen their own
+                    appearance keeps it &mdash; changing this will not overwrite their choice.
+                @else
+                    Pick a look for your own account. Only you see it, and you can go back to the
+                    organisation&rsquo;s theme at any time.
+                @endif
+            </p>
+
+            {{-- Current-theme status, in plain words rather than a stored flag
+                 name. Inside the lede so "what you may change" and "what is on
+                 right now" read as one thought. --}}
+            @unless($isGlobal)
+                <span class="theme-status" data-role="status">
+                    <span class="theme-status-dot" aria-hidden="true"></span>
+                    Currently using <strong data-role="statusText">{{ $data['usingPersonal'] ? 'your own appearance' : 'the system theme' }}</strong>
+                </span>
+            @endunless
         </div>
-    @endunless
+    </div>
 
     <div class="theme-grid" role="radiogroup" aria-label="{{ $isGlobal ? 'System colour palette' : 'Your colour palette' }}">
 

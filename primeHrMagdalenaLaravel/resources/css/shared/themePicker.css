@@ -19,7 +19,52 @@
    panel gets the full variable map set on .theme-preview itself.
    ══════════════════════════════════════════════════════════════════════ */
 
-.theme-intro { margin-bottom: 18px; max-width: 68ch; }
+/* ---------- Lede ----------
+   The panel's opening block: an icon, what this changes, and — for the
+   personal scope — what is live right now.
+
+   Every value here is stated rather than inherited. The intro used to be
+   classed .settings-row-desc, which only adminSettings.css defines, so the
+   employee settings page rendered it at the browser's default size and ink
+   while the admin page rendered it at 12.5px muted. A shared partial cannot
+   depend on a class that only one of the two pages carries. */
+.theme-lede {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 0 20px;
+    padding: 13px 15px;
+    border: 1px solid var(--theme-primary-border);
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--theme-primary-soft), var(--theme-bg-tint) 72%);
+}
+.theme-lede-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid var(--theme-primary-border);
+    background: var(--theme-stat-icon-bg);
+    color: var(--theme-stat-icon-fg);
+}
+.theme-lede-copy { min-width: 0; }
+.theme-lede-title {
+    margin: 0 0 3px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: -0.1px;
+    color: var(--theme-ink);
+}
+.theme-intro {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--theme-text-mid);
+}
 
 /* ---------- Palette cards ---------- */
 .theme-grid {
@@ -391,6 +436,10 @@
     .tpv-brand { margin-bottom: 0; }
     .tpv-stats { grid-template-columns: 1fr; }
     .theme-grid { grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); }
+    /* The icon is the first thing to go: at this width the sentence needs
+       the full measure more than the block needs a mark. */
+    .theme-lede { padding: 12px 13px; gap: 10px; }
+    .theme-lede-icon { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -455,18 +504,23 @@
 
 .theme-scope { display: block; }
 
-/* "Currently using: …" — plain words, deliberately not a stored flag name. */
+/* "Currently using …" — plain words, deliberately not a stored flag name.
+   A pill inside the lede rather than a full-width panel below it: it is one
+   short fact about the block it sits in, and at full width it read as a
+   second, competing banner. */
 .theme-status {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    margin: -6px 0 18px;
-    padding: 9px 12px;
+    gap: 7px;
+    margin: 11px 0 0;
+    padding: 5px 12px 5px 10px;
     border: 1px solid var(--theme-primary-border);
-    border-radius: 10px;
-    background: var(--theme-primary-soft);
-    font-size: 12px;
+    border-radius: 999px;
+    background: #fff;
+    font-size: 11px;
+    line-height: 1.45;
     color: var(--theme-text-mid);
+    box-shadow: 0 1px 2px rgba(var(--theme-shadow-rgb), 0.05);
 }
 .theme-status strong { color: var(--theme-ink); font-weight: 700; }
 .theme-status-dot {
