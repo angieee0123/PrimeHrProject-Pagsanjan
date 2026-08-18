@@ -124,6 +124,7 @@
 </div>
 
 @include('admin.travelOrder.modals.viewTravelOrderModal')
+@include('admin.travelOrder.modals.travelDecisionModal')
 
 @push('scripts')
     @vite('resources/js/admin/travelOrder/travelOrder.js')

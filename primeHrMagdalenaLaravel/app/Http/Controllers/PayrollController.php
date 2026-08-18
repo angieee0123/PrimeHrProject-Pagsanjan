@@ -9,6 +9,7 @@ use App\Models\SalaryComputation;
 use App\Models\Attendance;
 use App\Models\AccreditedHoursLog;
 use App\Models\Department;
+use App\Models\EmploymentDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -33,15 +34,17 @@ class PayrollController extends Controller
             $viewMode = 'employee';
             $deductionTypes = collect();
             $departments = collect();
+            $employmentStatuses = collect();
             $employees = collect();
 
-            return view('admin.payroll.adminPayroll', compact('salaryComputations', 'payrollRecords', 'viewMode', 'deductionTypes', 'departments', 'employees'));
+            return view('admin.payroll.adminPayroll', compact('salaryComputations', 'payrollRecords', 'viewMode', 'deductionTypes', 'departments', 'employmentStatuses', 'employees'));
         }
 
         // Handle Payroll Register Tab (existing code)
         $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
         $department = $request->input('department');
+        $employmentStatus = $request->input('employment_status');
         $employeeName = $request->input('employee_name');
         $status = $request->input('status');
         $viewMode = $request->input('view_mode', 'daily');
@@ -71,6 +74,12 @@ class PayrollController extends Controller
         if ($department) {
             $query->whereHas('employee.employmentDetail.departmentRelation', function($q) use ($department) {
                 $q->where('name', $department);
+            });
+        }
+
+        if ($employmentStatus) {
+            $query->whereHas('employee.employmentDetail', function($q) use ($employmentStatus) {
+                $q->where('employment_status', $employmentStatus);
             });
         }
 
@@ -272,6 +281,19 @@ class PayrollController extends Controller
         // Get unique departments for filter
         $departments = Department::where('status', 'Active')->pluck('name');
 
+        // Employment types for filter: always the six we employ, plus anything
+        // else the rows actually hold, so a legacy value stays filterable
+        $employmentStatuses = collect(EmploymentDetail::EMPLOYMENT_TYPES)
+            ->merge(
+                EmploymentDetail::whereNotNull('employment_status')
+                    ->where('employment_status', '!=', '')
+                    ->distinct()
+                    ->orderBy('employment_status')
+                    ->pluck('employment_status')
+            )
+            ->unique()
+            ->values();
+
         // Get unique employee names for filter
         $employees = Employee::orderBy('first_name')
             ->get()
@@ -281,7 +303,7 @@ class PayrollController extends Controller
             ->unique()
             ->values();
 
-        return view('admin.payroll.adminPayroll', compact('payrollRecords', 'departments', 'employees', 'viewMode', 'deductionTypes'));
+        return view('admin.payroll.adminPayroll', compact('payrollRecords', 'departments', 'employmentStatuses', 'employees', 'viewMode', 'deductionTypes'));
     }
 
     public function generate(Request $request)

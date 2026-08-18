@@ -1,220 +1,272 @@
-{{-- Official Pass Slip form (replicates PASS-SLIP.pdf layout) --}}
+{{-- The HRMO's printed sheet: PASS SLIP above, CERTIFICATE OF APPEARANCE below,
+     on one sheet of Philippine long bond (8.5 x 13 in = 612 x 936 pt).
+
+     THIS IS A TRACING, NOT A REDESIGN. Every coordinate, font, weight and size
+     below was read out of the office's own PASS SLIP (NEW).pdf — the two form
+     boxes are at 30,17 and 30,483.6 at 555 x 451.9 / 555 x 439.7; the labels are
+     Times Bold 14, and the ruled lines are runs of Times underscores at 12 or
+     14. Nothing here is a designer's choice, so do not "tidy" a number: change
+     it only if the source document changes.
+
+     The one deliberate departure: both titles are set in Berlin Sans FB Demi
+     18pt bold and centred on the box. The source has PASS SLIP at 16pt, but
+     the office specified 18 for both.
+
+     Everything is absolutely positioned in points, which is what makes the
+     printed sheet identical in the browser and in dompdf, and is why no amount
+     of entered text can push the certificate onto a second page.
+
+     Values come from PassSlipFormDataService and are sized to their rule by
+     TimesText::fit(), so a long entry steps down a half point at a time
+     instead of running past the end of the line. --}}
 @php
-  $chk = fn($on) => $on ? 'on' : '';
+  use App\Support\TimesText;
+
+  /* A baseline in the source document -> the CSS `top` of a line-height:1 box.
+     0.7925 em is where the baseline sits in such a box for Times; the two
+     display faces carry their own ratio. Verified by re-reading the generated
+     PDF's text positions back against the source. */
+  $t  = fn(float $base, float $size, float $asc = 0.7925) => round($base - $asc * $size, 2);
+
+  /* A run of underscores -> a rule. Times puts the underscore 0.109 em below
+     the baseline and draws it 0.049 em thick. */
+  $ry = fn(float $base, float $size) => round($base + 0.109 * $size, 2);
+  $rw = fn(float $size) => round(0.049 * $size, 2);
+
+  /* Berlin Sans FB Demi. Its own hhea metrics put the baseline at 0.8599 em in
+     a line-height:1 box; the renderer sits 0.045 em above that, the same
+     offset measured for Times above. Cross-checks against the value this was
+     first calibrated to empirically. */
+  $ASC_BERLIN = 0.8139;
+  $ASC_CALIBRI = 0.75;
+
+  /* --- values, fitted to the rule each one sits on --- */
+  $vDate = $date ?? '';
+  $vEtd  = $timeOut ?? '';
+  $vEta  = $timeIn ?? '';
+  $vDest = $destination ?? '';
+
+  // The purpose spans the form's two ruled lines (450pt then 504pt of usable rule).
+  $purposeWrapped = TimesText::wrap($purposeText ?? '', [450, 504], 12);
+
+  // Certificate rules are all 322pt wide.
+  $coaRows = [
+    ['NAME',        $employeeNameNatural ?? '', 182.35],
+    ['OFFICE',      $department ?? '',          206.35],
+    ['POSITION',    $designation ?? '',         230.55],
+    ['APPEARED AT', $destination ?? '',         254.75],
+    ['DATE',        $date ?? '',                278.97],
+    ['PURPOSE',     $purposeText ?? '',         302.98],
+  ];
 @endphp
 <style>
-  .ps-form {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 9pt;
-    color: #000;
-    line-height: 1.35;
+  .ps-sheet {
+    position: relative;
+    width: 612pt;
+    height: 936pt;
+    margin: 0;
+    padding: 0;
     background: #fff;
-    border: 1px solid #000;
-    padding: 10px 14px;
+    color: #000;
+    font-family: 'Times New Roman', Times, serif;
   }
-  .ps-form table { width: 100%; border-collapse: collapse; }
-  .ps-form .nb td, .ps-form .nb th { border: none; padding: 2px; vertical-align: top; }
-  .ps-form .lbl { font-weight: bold; }
-  .ps-form .val { border-bottom: 1px solid #000; display: inline-block; min-height: 13px; min-width: 60px; padding: 0 3px; }
-  .ps-form .val-wide { border-bottom: 1px solid #000; display: block; min-height: 13px; padding: 1px 3px; }
-  .ps-form .cb {
-    display: inline-block; width: 10px; height: 10px; border: 1px solid #000;
-    text-align: center; line-height: 10px; font-size: 8px; font-weight: bold;
-    margin-right: 3px; vertical-align: middle;
+
+  /* The two form boxes, at their page coordinates.
+     The box carries no border of its own: a border would inset the origin its
+     absolutely-positioned children measure from, throwing every coordinate
+     below off by its width. The frame is drawn as a child instead, offset by
+     half a stroke so the 1.5pt line straddles the source rectangle exactly. */
+  .ps-box { position: absolute; }
+  .ps-box-slip { left: 30pt; top: 17pt;    width: 555pt; height: 451.9pt; }
+  .ps-box-coa  { left: 30pt; top: 483.6pt; width: 555pt; height: 439.7pt; }
+
+  .ps-frame {
+    left: -0.75pt; top: -0.75pt;
+    width: 556.5pt;
+    border: 1.5pt solid #000;
   }
-  .ps-form .cb.on::after { content: 'X'; }
-  .ps-form .purpose-row { padding: 1px 0 1px 18px; }
-  .ps-form .sig { border-top: 1px solid #000; margin-top: 34px; padding-top: 2px; text-align: center; font-size: 8pt; }
-  .ps-form .sig-name { text-align: center; font-size: 8.5pt; font-weight: bold; margin-top: -14px; }
-  @media print { .ps-form { padding: 0; border: none; } }
+  .ps-frame-slip { height: 453.4pt; }
+  .ps-frame-coa  { height: 441.2pt; }
 
-  /* Header */
-  .ps-form .header-table { margin-bottom: 6px; }
-  .ps-form .col-logo { width: 60px; text-align: center; }
-  .ps-form .col-spacer { width: 60px; }
-  .ps-form .header-cell { text-align: center; }
-  .ps-form .header-country { font-size: 9pt; }
-  .ps-form .header-agency-name { font-size: 10pt; font-weight: bold; }
-  .ps-form .header-agency-address { font-size: 9pt; }
-  .ps-form .header-title { font-size: 13pt; font-weight: bold; margin-top: 6px; letter-spacing: 1px; }
-  .ps-form .logo-img { height: 48px; }
+  /* Every positioned item is measured from its box's inner top-left. */
+  .ps-box > * { position: absolute; margin: 0; padding: 0; }
 
-  /* Item 1 */
-  .ps-form .mb-2 { margin-bottom: 2px; }
-  .ps-form .col-18 { width: 18%; }
-  .ps-form .col-32 { width: 32%; }
+  /* Text: line-height 1 so the baseline lands where `top` puts it. */
+  .x  { line-height: 1; white-space: nowrap; }
+  .xc { line-height: 1; white-space: nowrap; text-align: center; }
 
-  /* Item 2 */
-  .ps-form .mb-4 { margin-bottom: 4px; }
-  .ps-form .col-10 { width: 10%; }
-  .ps-form .col-55 { width: 55%; }
-  .ps-form .col-10-right { width: 10%; text-align: right; }
+  .tb { font-weight: bold; }
+  .tr { font-weight: normal; }
 
-  /* Item 3 */
-  .ps-form .val-55 { width: 55%; }
-  .ps-form .purpose-intro { margin-bottom: 2px; padding-left: 14px; }
-  .ps-form .val-45 { width: 45%; }
-  .ps-form .val-35 { width: 35%; }
-  .ps-form .val-38 { width: 38%; }
-  .ps-form .val-48 { width: 48%; }
+  /* The two display lines: Berlin Sans FB Demi, 18pt, bold. The family is
+     present on the office's own workstations; public/fonts/BRLNSDB.TTF is
+     picked up by the PDF when it has been placed there (see the wrapper
+     views). Falls back to a bold sans rather than silently to Times. */
+  .disp {
+    font-family: 'Berlin Sans FB Demi', 'Berlin Sans FB', 'PassSlipDisplay',
+                 Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    font-size: 18pt;
+  }
 
-  /* Items 4 & 5 */
-  .ps-form .items-4-5-table { margin: 6px 0 2px; }
-  .ps-form .col-50 { width: 50%; }
-  .ps-form .val-90 { width: 90px; }
+  /* Both titles are centred on the form box. Centring them by rule rather than
+     by a measured left edge keeps them centred even where the display face
+     falls back and the string measures a different width. */
+  .title { left: 0; width: 555pt; text-align: center; }
 
-  /* Items 6 & 7 (signatures) */
-  .ps-form .mt-4 { margin-top: 4px; }
-  .ps-form .col-50-pr { width: 50%; padding-right: 16px; }
-  .ps-form .col-50-pl { width: 50%; padding-left: 16px; }
-  .ps-form .sig-caption { text-align: center; font-size: 7.5pt; }
+  /* A ruled line. Height 0 with a bottom border puts the stroke exactly at
+     `top`, which is where the underscore's bar sits. */
+  .r { height: 0; border-bottom-style: solid; border-bottom-color: #000; }
 
-  /* Item 8 */
-  .ps-form .item8 { margin-top: 10px; font-size: 8.5pt; }
-  .ps-form .approved-label { text-align: right; font-size: 8.5pt; margin-bottom: 2px; }
+  .ps-img { display: block; }
 
-  .ps-form .rejected-box { margin-top: 10px; padding: 6px 8px; border: 1px solid #000; font-size: 8pt; }
-  .ps-form .form-footer { font-size: 6.5pt; color: #666; text-align: center; margin-top: 8px; }
+  /* ---- Drawn letterhead, used only when the artwork is missing ---- */
+  .lh-drawn-table { width: 100%; height: 80.5pt; border-collapse: collapse; }
+  .lh-drawn-table td { padding: 0; vertical-align: middle; }
+  .lh-seal { width: 62pt; text-align: left; }
+  .lh-emblems { width: 108pt; text-align: right; }
+  .lh-text { text-align: center; }
+  .lh-seal-img { height: 56pt; }
+  .lh-emblem-img { height: 52pt; margin-left: 5pt; }
+  .lh-script {
+    font-family: 'Old English Text MT', 'PassSlipBlackletter', 'Times New Roman', serif;
+    line-height: 1.1;
+  }
+  .lh-republic { font-size: 9pt; }
+  .lh-municipality { font-size: 12.5pt; }
+  .lh-tagline { font-size: 9pt; }
+  .lh-rule { border-top: 0.75pt solid #000; width: 62%; margin: 1.5pt auto; }
+  .lh-office { font-size: 10.5pt; font-weight: bold; }
+  .lh-tel { font-size: 6pt; font-weight: bold; }
+
+  /* Disapproval note — system state the paper form has no box for. It sits in
+     the slip box's own dead space below the signatures, so it cannot disturb
+     anything above it. */
+  .note {
+    left: 16.62pt; top: 418pt; width: 521pt;
+    border: 0.75pt solid #000;
+    padding: 1.5pt 4pt;
+    font-size: 7.5pt;
+    line-height: 1.2;
+    white-space: normal;
+  }
 </style>
 
-<div class="ps-form">
+<div class="ps-sheet">
 
-  {{-- HEADER --}}
-  <table class="nb header-table">
-    <tr>
-      <td class="col-logo">
-        @if($logoBase64)
-          <img src="{{ $logoBase64 }}" alt="" class="logo-img">
-        @endif
-      </td>
-      <td class="header-cell">
-        <div class="header-country">Republic of the Philippines</div>
-        <div class="header-agency-name">{{ $agencyName }}</div>
-        <div class="header-agency-address">{{ $agencyAddress }}</div>
-        <div class="header-title">PASS SLIP</div>
-      </td>
-      <td class="col-spacer"></td>
-    </tr>
-  </table>
+  {{-- ═══════════════ PASS SLIP ═══════════════ --}}
+  <div class="ps-box ps-box-slip">
+    <div class="ps-frame ps-frame-slip"></div>
 
-  {{-- ITEM 1 --}}
-  <table class="nb mb-2">
-    <tr>
-      <td class="col-18"><span class="lbl">1. ISSUED FOR:</span></td>
-      <td class="col-32"><span class="cb {{ $chk($isOfficialActivity) }}"></span> OFFICIAL ACTIVITY</td>
-      <td><span class="cb {{ $chk($isPersonalReason) }}"></span> PERSONAL REASONS</td>
-    </tr>
-  </table>
+    {{-- Letterhead: masthead 459.8x80.5 at 26,10 and the mark 51.5x73 at 482.4,9.9 --}}
+    @include('admin.passSlip.partials.form-letterhead', [
+      'mhLeft' => 26, 'mhTop' => 10, 'mkLeft' => 482.4, 'mkTop' => 9.9,
+    ])
 
-  {{-- ITEM 2 --}}
-  <table class="nb mb-4">
-    <tr>
-      <td class="col-10"><span class="lbl">2. TO:</span></td>
-      <td class="col-55"><span class="val-wide">{{ $employeeName }}</span></td>
-      <td class="col-10-right"><span class="lbl">DATE:</span></td>
-      <td><span class="val-wide">{{ $date }}</span></td>
-    </tr>
-  </table>
+    {{-- Control number, on the short rule top right --}}
+    <div class="r" style="left:473.75pt; top:{{ $ry(108.22, 11) }}pt; width:61.35pt; border-bottom-width:{{ $rw(11) }}pt"></div>
+    <div class="xc tr" style="left:473.75pt; top:{{ $t(108.22, 8, $ASC_CALIBRI) }}pt; width:61.35pt; font-size:8pt">{{ $slipNumber }}</div>
 
-  {{-- ITEM 3 --}}
-  <div class="mb-4">
-    <span class="lbl">3.</span> You are hereby authorized to proceed to:
-    <span class="val val-55">{{ $destination }}</span>
-  </div>
-  <div class="purpose-intro">for the purpose as indicated: (Check appropriate purpose)</div>
+    <div class="xc disp title" style="top:{{ $t(126.22, 18, $ASC_BERLIN) }}pt">PASS SLIP</div>
 
-  <div class="purpose-row"><span class="lbl">A.</span></div>
-  <div class="purpose-row">
-    <span class="cb {{ $chk($purposeCategory === 'coordinate_with') }}"></span> to coordinate with
-    <span class="val val-45">{{ $purposeCategory === 'coordinate_with' ? $purposeDetail : '' }}</span>
-  </div>
-  <div class="purpose-row">
-    <span class="cb {{ $chk($purposeCategory === 'meeting_conference') }}"></span> to attend meeting/conference
-    <span class="val val-35">{{ $purposeCategory === 'meeting_conference' ? $purposeDetail : '' }}</span>
-  </div>
-  <div class="purpose-row">
-    <span class="cb {{ $chk($purposeCategory === 'secure_documents') }}"></span> to secure documents &amp; others
-    <span class="val val-38">{{ $purposeCategory === 'secure_documents' ? $purposeDetail : '' }}</span>
-  </div>
-  <div class="purpose-row">
-    <span class="cb {{ $chk($purposeCategory === 'follow_up') }}"></span> to follow up
-    <span class="val val-48">{{ $purposeCategory === 'follow_up' ? $purposeDetail : '' }}</span>
-  </div>
-  <div class="purpose-row"><span class="lbl">B.</span></div>
-  <div class="purpose-row">
-    <span class="cb {{ $chk($purposeCategory === 'personal_matter') }}"></span> to attend personal matter
-    <span class="val val-45">{{ $purposeCategory === 'personal_matter' ? $purposeDetail : '' }}</span>
+    {{-- Row 1 — Date / ETD / ETA, all on baseline 180.85 --}}
+    <div class="x tb" style="left:11.62pt;  top:{{ $t(180.85, 14) }}pt; font-size:14pt">Date:</div>
+    <div class="x tb" style="left:208.67pt; top:{{ $t(180.85, 14) }}pt; font-size:14pt">ETD:</div>
+    <div class="x tb" style="left:404.72pt; top:{{ $t(180.85, 14) }}pt; font-size:14pt">ETA:</div>
+
+    <div class="r" style="left:42.96pt;  top:{{ $ry(180.85, 12) }}pt; width:162pt; border-bottom-width:{{ $rw(12) }}pt"></div>
+    <div class="r" style="left:245.88pt; top:{{ $ry(180.85, 12) }}pt; width:156pt; border-bottom-width:{{ $rw(12) }}pt"></div>
+    <div class="r" style="left:441.95pt; top:{{ $ry(180.85, 12) }}pt; width:102pt; border-bottom-width:{{ $rw(12) }}pt"></div>
+
+    @php $s = TimesText::fit($vDate, 152, 12); @endphp
+    <div class="x tr" style="left:47.96pt;  top:{{ $t(180.85, $s) }}pt; font-size:{{ $s }}pt">{{ $vDate }}</div>
+    @php $s = TimesText::fit($vEtd, 146, 12); @endphp
+    <div class="x tr" style="left:250.88pt; top:{{ $t(180.85, $s) }}pt; font-size:{{ $s }}pt">{{ $vEtd }}</div>
+    @php $s = TimesText::fit($vEta, 92, 12); @endphp
+    <div class="x tr" style="left:446.95pt; top:{{ $t(180.85, $s) }}pt; font-size:{{ $s }}pt">{{ $vEta }}</div>
+
+    {{-- Row 2 — Destination, baseline 213.05 --}}
+    <div class="x tb" style="left:15.23pt; top:{{ $t(213.05, 14) }}pt; font-size:14pt">Destination:</div>
+    <div class="r" style="left:86.76pt; top:{{ $ry(213.05, 12) }}pt; width:450pt; border-bottom-width:{{ $rw(12) }}pt"></div>
+    @php $s = TimesText::fit($vDest, 440, 12); @endphp
+    <div class="x tr" style="left:91.76pt; top:{{ $t(213.05, $s) }}pt; font-size:{{ $s }}pt">{{ $vDest }}</div>
+
+    {{-- Row 3 — Purpose/s, baselines 245.25 and 275.47 --}}
+    <div class="x tb" style="left:14.02pt; top:{{ $t(245.25, 14) }}pt; font-size:14pt">Purpose/s:</div>
+    <div class="r" style="left:75.57pt; top:{{ $ry(245.25, 12) }}pt; width:456pt; border-bottom-width:{{ $rw(12) }}pt"></div>
+    <div class="r" style="left:8.02pt;  top:{{ $ry(275.47, 12) }}pt; width:510pt; border-bottom-width:{{ $rw(12) }}pt"></div>
+    <div class="x tr" style="left:78.57pt; top:{{ $t(245.25, 12) }}pt; font-size:12pt">{{ $purposeWrapped[0] }}</div>
+    <div class="x tr" style="left:11.02pt; top:{{ $t(275.47, 12) }}pt; font-size:12pt">{{ $purposeWrapped[1] }}</div>
+
+    {{-- Approval --}}
+    <div class="x tb" style="left:188.08pt; top:{{ $t(330.67, 12) }}pt; font-size:12pt">Approved:</div>
+
+    <div class="r" style="left:16.62pt;  top:{{ $ry(372.08, 12) }}pt; width:216pt; border-bottom-width:{{ $rw(12) }}pt"></div>
+    <div class="r" style="left:346.73pt; top:{{ $ry(372.08, 12) }}pt; width:192pt; border-bottom-width:{{ $rw(12) }}pt"></div>
+
+    {{-- Signed names sit on their rules, on the rule's own baseline --}}
+    @php $s = TimesText::fit($employeeNameNatural ?? '', 212, 12); @endphp
+    <div class="xc tr" style="left:16.62pt;  top:{{ $t(372.08, $s) }}pt; width:216pt; font-size:{{ $s }}pt">{{ $employeeNameNatural }}</div>
+    @php $s = TimesText::fit($departmentHeadName ?? '', 188, 12); @endphp
+    <div class="xc tr" style="left:346.73pt; top:{{ $t(372.08, $s) }}pt; width:192pt; font-size:{{ $s }}pt">{{ $departmentHeadName }}</div>
+
+    <div class="x tr" style="left:80.62pt;  top:{{ $t(392.70, 12) }}pt; font-size:12pt">Employee&rsquo;s Signature</div>
+    <div class="x tr" style="left:86.02pt;  top:{{ $t(406.50, 12) }}pt; font-size:12pt">Over Printed Name</div>
+    <div class="x tr" style="left:389.73pt; top:{{ $t(392.70, 12) }}pt; font-size:12pt">Department Head</div>
+
+    @if($isRejected)
+      <div class="note"><strong>DISAPPROVED.</strong> {{ $remarks }}</div>
+    @endif
   </div>
 
-  {{-- ITEMS 4 & 5 --}}
-  <table class="nb items-4-5-table">
-    <tr>
-      <td class="col-50">
-        <span class="lbl">4. Time of Departure from Office:</span>
-        <span class="val val-90">{{ $timeOut }}</span>
-        <span class="cb {{ $chk($timeOutPeriod === 'AM') }}"></span> AM
-        <span class="cb {{ $chk($timeOutPeriod === 'PM') }}"></span> PM
-      </td>
-      <td>
-        <span class="lbl">5. Time of Return:</span>
-        <span class="val val-90">{{ $timeIn }}</span>
-        <span class="cb {{ $chk($timeInPeriod === 'AM') }}"></span> AM
-        <span class="cb {{ $chk($timeInPeriod === 'PM') }}"></span> PM
-      </td>
-    </tr>
-  </table>
+  {{-- ═══════════ CERTIFICATE OF APPEARANCE ═══════════ --}}
+  <div class="ps-box ps-box-coa">
+    <div class="ps-frame ps-frame-coa"></div>
 
-  {{-- ITEMS 6 & 7 (SIGNATURES) --}}
-  <table class="nb mt-4">
-    <tr>
-      <td class="col-50-pr">
-        <span class="lbl">6. Requested by:</span>
-        <div class="sig"></div>
-        <div class="sig-name">{{ $employeeName }}</div>
-        <div class="sig-caption">Name and Signature of Employee</div>
-      </td>
-      <td class="col-50-pl">
-        <span class="lbl">7. Recommending Approval:</span>
-        <div class="sig"></div>
-        @if($recommendedByName)
-          <div class="sig-name">{{ $recommendedByName }}</div>
-        @endif
-        <div class="sig-caption">(Immediate Supervisor)</div>
-      </td>
-    </tr>
-  </table>
+    @include('admin.passSlip.partials.form-letterhead', [
+      'mhLeft' => 13.8, 'mhTop' => 4.6, 'mkLeft' => 473.9, 'mkTop' => 4.3,
+    ])
 
-  {{-- ITEM 8 --}}
-  <div class="item8">
-    <span class="lbl">8.</span> I Certify that the above mentioned personnel appeared on the date and purpose as indicated.
+    <div class="r" style="left:477.95pt; top:{{ $ry(89.73, 11) }}pt; width:61.35pt; border-bottom-width:{{ $rw(11) }}pt"></div>
+    <div class="xc tr" style="left:477.95pt; top:{{ $t(89.73, 8, $ASC_CALIBRI) }}pt; width:61.35pt; font-size:8pt">{{ $slipNumber }}</div>
+
+    <div class="xc disp title" style="top:{{ $t(104.13, 18, $ASC_BERLIN) }}pt">CERTIFICATE OF APPEARANCE</div>
+
+    <div class="x tr" style="left:15.23pt; top:{{ $t(149.95, 14) }}pt; font-size:14pt">This is to certify that :</div>
+
+    @foreach($coaRows as [$label, $value, $base])
+      <div class="x tb" style="left:19.62pt;  top:{{ $t($base, 14) }}pt; font-size:14pt">{{ $label }}</div>
+      <div class="x tb" style="left:127.65pt; top:{{ $t($base, 14) }}pt; font-size:14pt">:</div>
+      <div class="r" style="left:156.04pt; top:{{ $ry($base, 14) }}pt; width:322pt; border-bottom-width:{{ $rw(14) }}pt"></div>
+      {{-- A value too long for the rule drops to a second line in the gap
+           above the next row, the way it would be written by hand. Rows are
+           24pt apart, so the run-on sits clear of both rules. --}}
+      @php [$s, $lines] = TimesText::fitLines($value, 316, 2, 12); @endphp
+      <div class="x tr" style="left:159.04pt; top:{{ $t($base, $s) }}pt; font-size:{{ $s }}pt">{{ $lines[0] }}</div>
+      @if($lines[1] !== '')
+        <div class="x tr" style="left:159.04pt; top:{{ $t($base + $s + 1.5, $s) }}pt; font-size:{{ $s }}pt">{{ $lines[1] }}</div>
+      @endif
+    @endforeach
+
+    {{-- "Issued this __ day of ____ __ for whatever legal purpose it may serve."
+         Segment offsets are the source line's own, measured in Times 12. --}}
+    <div class="x tr" style="left:37.62pt;  top:{{ $t(343.78, 12) }}pt; font-size:12pt">Issued this</div>
+    <div class="x tr" style="left:133.62pt; top:{{ $t(343.78, 12) }}pt; font-size:12pt">day of</div>
+    <div class="x tr" style="left:292.94pt; top:{{ $t(343.78, 12) }}pt; font-size:12pt">for whatever legal purpose it may serve.</div>
+
+    <div class="r" style="left:91.62pt;  top:{{ $ry(343.78, 12) }}pt; width:42pt; border-bottom-width:{{ $rw(12) }}pt"></div>
+    <div class="r" style="left:169.94pt; top:{{ $ry(343.78, 12) }}pt; width:78pt; border-bottom-width:{{ $rw(12) }}pt"></div>
+    <div class="r" style="left:250.94pt; top:{{ $ry(343.78, 12) }}pt; width:42pt; border-bottom-width:{{ $rw(12) }}pt"></div>
+
+    <div class="xc tr" style="left:91.62pt;  top:{{ $t(343.78, 11) }}pt; width:42pt; font-size:11pt">{{ $issuedDay }}</div>
+    <div class="xc tr" style="left:169.94pt; top:{{ $t(343.78, 11) }}pt; width:78pt; font-size:11pt">{{ $issuedMonth }}</div>
+    <div class="xc tr" style="left:250.94pt; top:{{ $t(343.78, 11) }}pt; width:42pt; font-size:11pt">{{ $issuedYear }}</div>
+
+    {{-- Deliberately unsigned: the head of the office *visited* certifies the
+         appearance, and that office is not a record this system holds. --}}
+    <div class="r" style="left:19.62pt; top:{{ $ry(390.00, 10) }}pt; width:160pt; border-bottom-width:{{ $rw(10) }}pt"></div>
+    <div class="x tb" style="left:59.83pt; top:{{ $t(401.60, 10) }}pt; font-size:10pt">Head of the Office</div>
+    <div class="x tr" style="left:45.62pt; top:{{ $t(411.20, 8) }}pt; font-size:8pt">(Signature over printed name)</div>
   </div>
 
-  <table class="nb mt-4">
-    <tr>
-      <td class="col-50-pr">
-        @if($hasReturned)
-          <div class="sig"></div>
-          <div class="sig-caption">Name and Signature</div>
-        @endif
-      </td>
-      <td class="col-50-pl">
-        <div class="approved-label">Approved:</div>
-        <div class="sig"></div>
-        @if($isApproved && $approverName)
-          <div class="sig-name">{{ $approverName }}</div>
-        @endif
-        <div class="sig-caption">(Approving Officer)</div>
-      </td>
-    </tr>
-  </table>
-
-  @if($isRejected)
-    <div class="rejected-box">
-      <strong>Disapproved.</strong> {{ $remarks }}
-    </div>
-  @endif
-
-  <div class="form-footer">
-    Ref: {{ $slipNumber }} · Generated {{ $generatedDate }}
-  </div>
 </div>

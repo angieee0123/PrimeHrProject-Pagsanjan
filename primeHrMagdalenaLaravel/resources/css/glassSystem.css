@@ -419,6 +419,9 @@
     color: var(--theme-neutral-600);
     pointer-events: none;
     flex-shrink: 0;
+    /* the field's backdrop-filter makes it a stacking context, and it follows
+       the icon in the DOM — without this the translucent field paints over it */
+    z-index: 1;
 }
 .glass-shell .fc-input,
 .glass-shell .fc-select {

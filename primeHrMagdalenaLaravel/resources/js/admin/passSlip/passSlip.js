@@ -72,15 +72,7 @@ window.searchPassSlips = function() {
     filterPassSlipRows('disapproved');
 }
 
-window.disapprovePassSlip = function(id) {
-    const reason = prompt('Reason for disapproval:');
-    if (!reason) return;
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = `/admin/passslip/${id}/disapprove`;
-    const token = document.querySelector('meta[name="csrf-token"]')?.content
-        || document.querySelector('input[name="_token"]')?.value;
-    form.innerHTML = `<input type="hidden" name="_token" value="${token}"><input type="hidden" name="reason" value="${reason}">`;
-    document.body.appendChild(form);
-    form.submit();
-}
+// NOTE: disapprovePassSlip() lived here and asked for the reason with prompt() —
+// no label, no 500-character ceiling, and nothing naming the slip being refused.
+// Both decisions now open #passSlipDecisionModal instead; see
+// passSlipDecisionModal.js.

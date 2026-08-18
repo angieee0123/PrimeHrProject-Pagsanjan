@@ -574,7 +574,9 @@
    map set on .theme-preview itself.
    ══════════════════════════════════════════════════════════════════════ */
 
-.theme-intro { margin-bottom: 18px; max-width: 68ch; }
+/* .theme-intro and the lede around it live in shared/themePicker.css — the
+   employee settings page renders the same partial and does not load this
+   file, so a copy here would only ever drift. */
 
 /* ---------- Palette cards ---------- */
 .theme-grid {

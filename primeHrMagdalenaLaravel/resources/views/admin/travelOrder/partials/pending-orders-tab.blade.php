@@ -22,7 +22,24 @@
             </thead>
             <tbody id="pendingOrdersTableBody">
                 @forelse($pendingOrders as $order)
-                <tr class="pending-order-row to-row" data-department="{{ $order->employee->employmentDetail->departmentRelation->name ?? '' }}" data-mode="{{ $order->transportation_mode ?? '' }}" data-travel-date="{{ $order->travel_date->format('Y-m-d') }}">
+                @php
+                    // Everything the approve/disapprove confirmation needs to name
+                    // *this* order rather than ask about "a travel order".
+                    // Assembled once per row and handed to both menu items as data
+                    // attributes, so the dialog never has to fetch it and the two
+                    // decisions cannot disagree about which order they describe.
+                    $orderEmployee = $order->employee;
+                    $orderEmployeeName = trim(($orderEmployee->first_name ?? '') . ' ' . ($orderEmployee->last_name ?? '')) ?: 'this employee';
+                    $orderFirstName = $orderEmployee->first_name ?? 'the employee';
+                    $orderInitials = strtoupper(substr($orderEmployee->first_name ?? 'E', 0, 1) . substr($orderEmployee->last_name ?? 'E', 0, 1));
+                    $orderPhoto = $orderEmployee?->photo
+                        ? (\Illuminate\Support\Str::startsWith($orderEmployee->photo, ['/', 'http']) ? $orderEmployee->photo : asset('storage/' . $orderEmployee->photo))
+                        : '';
+                    $orderDepartment = $orderEmployee->employmentDetail->departmentRelation->name ?? '';
+                    $orderParty = 1 + $order->companions->count();
+                    $orderBudget = $order->estimated_budget ? '₱' . number_format((float) $order->estimated_budget, 2) : '';
+                @endphp
+                <tr class="pending-order-row to-row" data-department="{{ $orderDepartment }}" data-mode="{{ $order->transportation_mode ?? '' }}" data-travel-date="{{ $order->travel_date->format('Y-m-d') }}">
                     <td class="to-td">
                         <div class="emp-cell to-emp-cell">
                             @include('partials.travel-party-avatars', ['order' => $order])
@@ -48,14 +65,49 @@
                                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" class="to-menu-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                     View Details
                                 </button>
-                                <form method="POST" action="{{ route('admin.travelorder.approve', $order->id) }}" class="to-inline-form">
-                                    @csrf
-                                    <button type="submit" onclick="return confirm('Approve this travel order?')" class="to-menu-btn to-menu-approve">
-                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" class="to-menu-icon"><polyline points="20 6 9 17 4 12"/></svg>
-                                        Approve
-                                    </button>
-                                </form>
-                                <button onclick="disapproveOrder({{ $order->id }})" class="to-menu-btn to-menu-disapprove">
+                                {{-- Both decisions carry the same order context. The
+                                     confirmation reads it off whichever one was
+                                     pressed, so it can say "Approve Juan's travel to
+                                     Lucena City?" instead of "Are you sure?" --}}
+                                <button type="button" class="to-menu-btn to-menu-approve"
+                                        onclick="openTravelDecision(this)"
+                                        data-decision="approve"
+                                        data-action="{{ route('admin.travelorder.approve', $order->id) }}"
+                                        data-order-number="{{ $order->order_number }}"
+                                        data-employee="{{ $orderEmployeeName }}"
+                                        data-employee-id="{{ $order->employee->employee_id }}"
+                                        data-first-name="{{ $orderFirstName }}"
+                                        data-initials="{{ $orderInitials }}"
+                                        data-photo="{{ $orderPhoto }}"
+                                        data-department="{{ $orderDepartment }}"
+                                        data-destination="{{ $order->destination }}"
+                                        data-dates="{{ $order->formatted_dates }}"
+                                        data-duration="{{ $order->duration }}"
+                                        data-party="{{ $orderParty }}"
+                                        data-transport="{{ $order->transportation_mode }}"
+                                        data-budget="{{ $orderBudget }}"
+                                        data-purpose="{{ $order->purpose }}">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" class="to-menu-icon"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Approve
+                                </button>
+                                <button type="button" class="to-menu-btn to-menu-disapprove"
+                                        onclick="openTravelDecision(this)"
+                                        data-decision="disapprove"
+                                        data-action="{{ route('admin.travelorder.disapprove', $order->id) }}"
+                                        data-order-number="{{ $order->order_number }}"
+                                        data-employee="{{ $orderEmployeeName }}"
+                                        data-employee-id="{{ $order->employee->employee_id }}"
+                                        data-first-name="{{ $orderFirstName }}"
+                                        data-initials="{{ $orderInitials }}"
+                                        data-photo="{{ $orderPhoto }}"
+                                        data-department="{{ $orderDepartment }}"
+                                        data-destination="{{ $order->destination }}"
+                                        data-dates="{{ $order->formatted_dates }}"
+                                        data-duration="{{ $order->duration }}"
+                                        data-party="{{ $orderParty }}"
+                                        data-transport="{{ $order->transportation_mode }}"
+                                        data-budget="{{ $orderBudget }}"
+                                        data-purpose="{{ $order->purpose }}">
                                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" class="to-menu-icon"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                     Disapprove
                                 </button>

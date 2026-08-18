@@ -166,4 +166,26 @@
 .ps-sort-icon { display: inline-block; vertical-align: middle; margin-left: 4px; }
 .ps-th-sort { cursor: pointer; }
 .ps-td-semibold { font-size: 13px; color: var(--gp-pri); font-weight: 600; }
-.ps-td-muted-center { text-align: center; font-size: 13px; color: var(--theme-neutral-700); }
+/* Left-aligned like every other column: Time Out / Time In / Status used to be
+   centred while their headers carried the same centring, which read as
+   misaligned against the left-aligned table title and the Reason/Date columns.
+   Only Actions stays centred — it is an icon button, not a value. */
+.ps-td-muted { font-size: 13px; color: var(--theme-neutral-700); }
+
+/* The card's header ("My Pass Slips") and footer sit on 24px of padding while
+   .payroll-table cells sit on 16px, so every column read as inset from the
+   title above it. Pad only the edge cells out to the card's own gutter — the
+   inner columns keep the tighter 16px rhythm. */
+#passslip-history-tab .payroll-table th:first-child,
+#passslip-history-tab .payroll-table td:first-child { padding-left: 24px; }
+#passslip-history-tab .payroll-table th:last-child,
+#passslip-history-tab .payroll-table td:last-child { padding-right: 24px; }
+/* The empty state is one centred cell — it keeps its own roomier gutter. */
+#passslip-history-tab .payroll-table .ps-empty-cell { padding-left: 40px; padding-right: 40px; }
+
+@media (max-width: 640px) {
+    #passslip-history-tab .payroll-table th:first-child,
+    #passslip-history-tab .payroll-table td:first-child { padding-left: 16px; }
+    #passslip-history-tab .payroll-table th:last-child,
+    #passslip-history-tab .payroll-table td:last-child { padding-right: 16px; }
+}

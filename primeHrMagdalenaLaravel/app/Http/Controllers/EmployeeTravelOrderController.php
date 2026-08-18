@@ -176,7 +176,18 @@ class EmployeeTravelOrderController extends Controller
 
         NotificationService::travelOrderCompanionResponded($travelOrder, $companion->fresh('employee'));
 
-        return redirect()->route('employee.travelorder')->with('success', 'You have ' . $data['response'] . ' the companion request.');
+        // The confirmation dialog named the trip, so the message that lands
+        // after it should too — "You have accepted the companion request" tells
+        // somebody holding three invitations nothing about which one just moved.
+        $filer = trim(($travelOrder->employee->first_name ?? '') . ' ' . ($travelOrder->employee->last_name ?? '')) ?: 'the filer';
+        $trip = $travelOrder->destination . ' on ' . $travelOrder->formatted_dates;
+
+        $message = $data['response'] === 'accepted'
+            ? "You're confirmed as a companion on {$filer}'s travel order to {$trip}."
+                . ' It goes to HR once every companion has answered.'
+            : "You've declined {$filer}'s invitation to {$trip}. They have been notified.";
+
+        return redirect()->route('employee.travelorder')->with('success', $message);
     }
 
     public function forward($id)

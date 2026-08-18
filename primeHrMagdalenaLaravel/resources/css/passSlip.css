@@ -136,3 +136,284 @@
 .ps-modal-footer-actions { display: flex; gap: 8px; margin-left: auto; }
 .ps-btn-print { background: #6366f1; }
 .ps-btn-download { background: #10b981; }
+
+/* ---------------------------------------------------------------------------
+   Pass slip decision — approve / disapprove confirmation
+   (#passSlipDecisionModal).
+
+   One modal answers both questions. Everything that differs between them is a
+   token redefined under `.is-approve` / `.is-disapprove`, so the two states
+   cannot drift apart in spacing or structure — only in colour and wording.
+   An approval that looks like a refusal is worse than either.
+   --------------------------------------------------------------------------- */
+#passSlipDecisionModal {
+    --psd-accent: var(--theme-success);
+    --psd-accent-subtle: var(--theme-success-subtle);
+    --psd-accent-border: var(--theme-success-border);
+    --psd-accent-emphasis: var(--theme-success-emphasis);
+}
+#passSlipDecisionModal.is-disapprove {
+    --psd-accent: var(--theme-danger);
+    --psd-accent-subtle: var(--theme-danger-subtle);
+    --psd-accent-border: var(--theme-danger-border);
+    --psd-accent-emphasis: var(--theme-danger-emphasis);
+}
+
+#passSlipDecisionModal .modal-box {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+/* Header: the question, centred, with the decision's own glyph above it. The
+   shared .modal-header is not used — this modal leads with an icon and has no
+   close button, because a decision should be answered, not dismissed by a
+   stray click on an X. (Escape and the overlay still close it.) */
+#passSlipDecisionModal .psd-head {
+    padding: 26px 26px 18px;
+    text-align: center;
+    border-bottom: 1px solid var(--theme-neutral-200);
+}
+#passSlipDecisionModal .psd-icon {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--psd-accent-subtle);
+    border: 1px solid var(--psd-accent-border);
+    color: var(--psd-accent-emphasis);
+}
+#passSlipDecisionModal .psd-eyebrow {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--psd-accent-emphasis);
+    margin-bottom: 6px;
+}
+#passSlipDecisionModal .psd-title {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--gp-pri);
+}
+#passSlipDecisionModal .psd-lede {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--theme-neutral-700);
+}
+
+#passSlipDecisionModal .psd-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 18px 26px 20px;
+}
+
+/* Whose slip this is */
+#passSlipDecisionModal .psd-filer {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 14px;
+}
+#passSlipDecisionModal .psd-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--gp-pri), var(--theme-accent));
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+}
+#passSlipDecisionModal .psd-avatar img { width: 100%; height: 100%; object-fit: cover; }
+#passSlipDecisionModal .psd-filer-text { min-width: 0; text-align: left; flex: 1; }
+#passSlipDecisionModal .psd-filer-name {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gp-pri);
+}
+#passSlipDecisionModal .psd-filer-role {
+    margin: 2px 0 0;
+    font-size: 11.5px;
+    color: var(--theme-neutral-600);
+}
+/* The slip number is the reference the approver quotes afterwards, so it is
+   kept legible rather than folded into the meta line. */
+#passSlipDecisionModal .psd-slip-no {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--theme-neutral-100);
+    border: 1px solid var(--theme-neutral-300);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    color: var(--theme-neutral-700);
+}
+
+/* What is being decided */
+#passSlipDecisionModal .psd-slip {
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 12px;
+    background: var(--theme-neutral-50);
+    overflow: hidden;
+}
+#passSlipDecisionModal .psd-slip-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--theme-neutral-200);
+}
+#passSlipDecisionModal .psd-slip-row:last-child { border-bottom: none; }
+#passSlipDecisionModal .psd-slip-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--theme-neutral-600);
+}
+#passSlipDecisionModal .psd-slip-value {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+    text-align: right;
+    min-width: 0;
+}
+/* The date is the day whose accredited hours this decision changes; it gets
+   the accent so the eye lands there first. */
+#passSlipDecisionModal .psd-slip-row:first-child .psd-slip-value { color: var(--psd-accent-emphasis); }
+
+/* The reason is free text of any length, so it stacks and wraps instead of
+   fighting the label for one line. */
+#passSlipDecisionModal .psd-slip-reason {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+#passSlipDecisionModal .psd-slip-reason-text {
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--theme-neutral-800);
+    word-break: break-word;
+}
+
+/* Disapprove only: the reason */
+#passSlipDecisionModal .psd-note { margin-top: 16px; }
+#passSlipDecisionModal .psd-note[hidden] { display: none; }
+#passSlipDecisionModal .psd-note-label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gp-pri);
+}
+#passSlipDecisionModal .psd-required {
+    margin-left: 5px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--theme-danger-subtle);
+    border: 1px solid var(--theme-danger-border);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    color: var(--theme-danger-emphasis);
+}
+#passSlipDecisionModal .psd-note-input {
+    width: 100%;
+    padding: 11px 12px;
+    border: 2px solid var(--theme-neutral-300);
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.55;
+    resize: vertical;
+    transition: border-color .15s, box-shadow .15s;
+}
+/* The focus ring is deliberately NOT the accent. This field only appears on the
+   disapproval, where the accent is danger red — and a red border around a
+   textarea reads as "you typed something invalid", not as "this is the refusal
+   dialog". It matches the page's other inputs instead. */
+#passSlipDecisionModal .psd-note-input:focus {
+    outline: none;
+    border-color: var(--gp-pri);
+    box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), .10);
+}
+#passSlipDecisionModal .psd-note-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--theme-neutral-600);
+}
+#passSlipDecisionModal .psd-note-foot .is-full { color: var(--theme-danger); font-weight: 700; }
+
+/* What happens next. Stated before the button, not after it. */
+#passSlipDecisionModal .psd-consequence {
+    margin: 16px 0 0;
+    padding: 11px 13px;
+    border-left: 3px solid var(--psd-accent-border);
+    border-radius: 0 8px 8px 0;
+    background: var(--psd-accent-subtle);
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: var(--psd-accent-emphasis);
+}
+
+#passSlipDecisionModal .psd-footer { flex-shrink: 0; }
+#passSlipDecisionModal .psd-footer .modal-btn-primary {
+    background: var(--psd-accent);
+    box-shadow: none;
+}
+#passSlipDecisionModal .psd-footer .modal-btn-primary:hover:not(:disabled) {
+    background: var(--psd-accent-emphasis);
+    transform: translateY(-1px);
+}
+/* Disabled until a reason is typed — the controller requires one, and a 422
+   has nowhere to render on this page. */
+#passSlipDecisionModal .psd-footer .modal-btn-primary:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@media (max-width: 640px) {
+    #passSlipDecisionModal .modal-box { max-height: 94vh; }
+    #passSlipDecisionModal .psd-head { padding: 22px 18px 16px; }
+    #passSlipDecisionModal .psd-body { padding: 16px 18px; }
+    #passSlipDecisionModal .psd-title { font-size: 16.5px; }
+    /* Stacking keeps a long destination or time window from squeezing its
+       label down to two characters. */
+    #passSlipDecisionModal .psd-slip-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    #passSlipDecisionModal .psd-slip-value { text-align: left; }
+    #passSlipDecisionModal .psd-filer { flex-wrap: wrap; }
+    #passSlipDecisionModal .psd-footer { flex-wrap: wrap; }
+    #passSlipDecisionModal .psd-footer .modal-btn-ghost,
+    #passSlipDecisionModal .psd-footer .modal-btn-primary {
+        flex: 1;
+        justify-content: center;
+    }
+}

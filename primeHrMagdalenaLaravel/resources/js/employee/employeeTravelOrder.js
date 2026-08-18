@@ -50,49 +50,172 @@ if (overlay) {
 }
 
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeTravelOrderModal();
+    if (e.key !== 'Escape') return;
+
+    // The companion confirmation opens on top of everything else, so it is the
+    // one Escape should dismiss when it is up.
+    const companionModal = document.getElementById('companionResponseModal');
+    if (companionModal && companionModal.style.display === 'flex') {
+        closeCompanionResponse();
+        return;
     }
+
+    closeTravelOrderModal();
 });
 
-// ── Companion invitations tab: respond to a companion request ──
-function respondToCompanionRequest(travelOrderId, response) {
-    const verb = response === 'accepted' ? 'accept' : 'reject';
-    if (!confirm(`Are you sure you want to ${verb} this companion request?`)) return;
+// ── Companion invitations: accept / decline ──────────────────────────────────
+//
+// This used to be `confirm("...accept this companion request?")` followed, on a
+// decline, by `prompt()` for the reason. Neither one named the trip, so somebody
+// holding three invitations answered from memory; and `prompt()` could not
+// enforce the server's 300-character limit or be cancelled without silently
+// dropping a decline the employee had already agreed to.
+//
+// The dialog is now built from the row that was clicked, so it names the
+// colleague, the destination and the dates being committed to.
 
-    let note = null;
-    if (response === 'rejected') {
-        note = prompt('Optionally, tell the filer why you are rejecting (or leave blank):', '');
-        if (note === null) return; // prompt cancelled
+/** The invitation currently open in the modal — set by openCompanionResponse(). */
+let companionResponseContext = null;
+
+const CR_ICONS = {
+    accepted: '<polyline points="20 6 9 17 4 12"/>',
+    rejected: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+};
+
+/**
+ * Reads the trip off the button that was pressed. Both the accept and the
+ * decline menu items carry the same data attributes, so one handler serves
+ * both and the two answers cannot drift on which trip they describe.
+ */
+function openCompanionResponse(button) {
+    const data = button.dataset;
+    const accepting = data.response === 'accepted';
+
+    companionResponseContext = {
+        orderId: data.orderId,
+        response: data.response,
+        filer: data.filer,
+    };
+
+    const el = (id) => document.getElementById(id);
+    const set = (id, text) => { const node = el(id); if (node) node.textContent = text; };
+
+    // Filer identity. The photo goes in as an <img> with `src` set as a
+    // property rather than interpolated into a CSS `url(...)` string — a
+    // filename holding a quote would break out of the latter.
+    const avatar = el('crFilerAvatar');
+    avatar.textContent = '';
+    if (data.filerPhoto) {
+        const img = document.createElement('img');
+        img.src = data.filerPhoto;
+        img.alt = '';
+        avatar.appendChild(img);
+    } else {
+        avatar.textContent = data.filerInitials || '--';
     }
+    set('crFilerName', data.filer);
+    set('crOrderNumber', data.orderNumber);
+
+    // The trip
+    set('crDates', data.dates);
+    set('crDestination', data.destination);
+    const days = parseInt(data.duration, 10) || 0;
+    const party = parseInt(data.party, 10) || 1;
+    set('crParty', `${party} ${party === 1 ? 'traveller' : 'travellers'}${days ? ` · ${days} ${days === 1 ? 'day' : 'days'}` : ''}`);
+    set('crPurpose', data.purpose || 'Not specified');
+
+    // The question, in this trip's own words.
+    const modal = el('companionResponseModal');
+    modal.classList.toggle('is-accept', accepting);
+    modal.classList.toggle('is-decline', !accepting);
+
+    el('crIcon').innerHTML =
+        `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${CR_ICONS[data.response]}</svg>`;
+
+    if (accepting) {
+        set('crEyebrow', 'ACCEPT INVITATION');
+        set('crTitle', `Travel with ${data.filerFirst} to ${data.destination}?`);
+        set('crLede', `You'll be listed as a companion on this travel order for ${data.dates}.`);
+        set('crConsequence', `${data.filerFirst} can forward the order to HR once every companion has answered. Your name appears on the approved order.`);
+        set('crConfirmLabel', 'Yes, count me in');
+        set('crCancel', 'Go back');
+    } else {
+        set('crEyebrow', 'DECLINE INVITATION');
+        set('crTitle', `Decline ${data.filerFirst}'s invitation?`);
+        set('crLede', `You won't be included in the trip to ${data.destination} on ${data.dates}.`);
+        set('crConsequence', `${data.filerFirst} is notified straight away. You can't undo this yourself — they'd have to send a new invitation.`);
+        set('crConfirmLabel', 'Decline invitation');
+        set('crCancel', 'Keep invitation');
+        set('crNoteWho', data.filerFirst);
+    }
+
+    // The reason field belongs to the decline only; a note attached to an
+    // acceptance has nowhere to be read.
+    const noteBlock = el('crNoteBlock');
+    noteBlock.hidden = accepting;
+    el('crNote').value = '';
+    set('crNoteCount', '0 / 300');
+
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    el('crConfirm').focus();
+}
+
+function closeCompanionResponse() {
+    const modal = document.getElementById('companionResponseModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    companionResponseContext = null;
+}
+
+function submitCompanionResponse() {
+    if (!companionResponseContext) return;
+
+    const { orderId, response } = companionResponseContext;
+    const note = response === 'rejected'
+        ? document.getElementById('crNote').value.trim().substring(0, 300)
+        : '';
+
+    // Double submission on a slow connection would hit the controller's
+    // "you have already responded" guard and show an error for something that
+    // actually worked.
+    const confirmBtn = document.getElementById('crConfirm');
+    confirmBtn.disabled = true;
+    document.getElementById('crConfirmLabel').textContent = 'Sending…';
 
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = `/employee/travelorder/${travelOrderId}/companion-response`;
+    form.action = `/employee/travelorder/${orderId}/companion-response`;
 
-    const csrf = document.createElement('input');
-    csrf.type = 'hidden';
-    csrf.name = '_token';
-    csrf.value = document.querySelector('meta[name="csrf-token"]')?.content;
-    form.appendChild(csrf);
+    const field = (name, value) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    };
 
-    const responseInput = document.createElement('input');
-    responseInput.type = 'hidden';
-    responseInput.name = 'response';
-    responseInput.value = response;
-    form.appendChild(responseInput);
-
-    if (note) {
-        const noteInput = document.createElement('input');
-        noteInput.type = 'hidden';
-        noteInput.name = 'response_note';
-        noteInput.value = note.substring(0, 300);
-        form.appendChild(noteInput);
-    }
+    field('_token', document.querySelector('meta[name="csrf-token"]')?.content ?? '');
+    field('response', response);
+    if (note) field('response_note', note);
 
     document.body.appendChild(form);
     form.submit();
 }
+
+// Live counter, so the 300-character ceiling is visible rather than a silent
+// truncation at submit time.
+document.addEventListener('DOMContentLoaded', function () {
+    const note = document.getElementById('crNote');
+    const count = document.getElementById('crNoteCount');
+    if (!note || !count) return;
+
+    note.addEventListener('input', () => {
+        count.textContent = `${note.value.length} / 300`;
+        count.classList.toggle('is-full', note.value.length >= 300);
+    });
+});
 
 // ── Travel history tab: rows-per-page / status filter / (stub) sort ──
 function changeTravelRowsPerPage() {
@@ -600,7 +723,9 @@ function cancelTravelOrder() {
 }
 
 // Expose functions invoked from inline HTML attributes (onclick/onchange)
-window.respondToCompanionRequest = respondToCompanionRequest;
+window.openCompanionResponse = openCompanionResponse;
+window.closeCompanionResponse = closeCompanionResponse;
+window.submitCompanionResponse = submitCompanionResponse;
 window.changeTravelRowsPerPage = changeTravelRowsPerPage;
 window.filterTravelOrders = filterTravelOrders;
 window.sortTravelOrders = sortTravelOrders;

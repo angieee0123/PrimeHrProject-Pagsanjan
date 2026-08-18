@@ -233,12 +233,11 @@ class PassSlipController extends Controller
             $data = $formService->build($id);
             $slip = $data['slip'];
 
+            // Philippine long bond, 8.5 x 13 in — the sheet the HRMO's paper
+            // form is printed on, and the proportions the layout is built to.
+            // Margins come from the view's @page rule, which dompdf honours.
             $pdf = Pdf::loadView('admin.passSlip.pass-slip-pdf', $data)
-                ->setPaper('a4', 'portrait')
-                ->setOption('margin-top', 8)
-                ->setOption('margin-bottom', 8)
-                ->setOption('margin-left', 8)
-                ->setOption('margin-right', 8);
+                ->setPaper([0, 0, 612, 936], 'portrait');
 
             $filename = 'Pass-Slip-' . $slip->slip_number . '.pdf';
 

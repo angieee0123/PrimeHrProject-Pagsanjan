@@ -57,9 +57,9 @@
                 <tr>
                     <th onclick="sortPassSlips('reason')" class="ps-th-sort">Reason {!! $sortIcon !!}</th>
                     <th onclick="sortPassSlips('date')" class="ps-th-sort">Date {!! $sortIcon !!}</th>
-                    <th class="ps-ta-center">Time Out</th>
-                    <th class="ps-ta-center">Time In</th>
-                    <th onclick="sortPassSlips('status')" class="ps-th-sort ps-ta-center">Status {!! $sortIcon !!}</th>
+                    <th>Time Out</th>
+                    <th>Time In</th>
+                    <th onclick="sortPassSlips('status')" class="ps-th-sort">Status {!! $sortIcon !!}</th>
                     <th class="ps-ta-center row-menu-head">Actions</th>
                 </tr>
             </thead>
@@ -76,9 +76,9 @@
                         </div>
                     </td>
                     <td data-label="Date" class="ps-td-semibold">{{ $slip->date->format('M d, Y') }}</td>
-                    <td data-label="Time Out" class="ps-td-muted-center">{{ \Carbon\Carbon::parse($slip->time_out)->format('g:i A') }}</td>
-                    <td data-label="Time In" class="ps-td-muted-center">{{ $slip->time_in ? \Carbon\Carbon::parse($slip->time_in)->format('g:i A') : '—' }}</td>
-                    <td data-label="Status" class="ps-ta-center">
+                    <td data-label="Time Out" class="ps-td-muted">{{ \Carbon\Carbon::parse($slip->time_out)->format('g:i A') }}</td>
+                    <td data-label="Time In" class="ps-td-muted">{{ $slip->time_in ? \Carbon\Carbon::parse($slip->time_in)->format('g:i A') : '—' }}</td>
+                    <td data-label="Status">
                         @if($slip->status === 'pending')
                             <span class="badge-status pending">Pending</span>
                         @elseif($slip->status === 'approved')
