@@ -12,8 +12,6 @@ return new class extends Migration
             $table->foreignId('employee_id')->nullable()->constrained()->cascadeOnDelete()->after('id');
             $table->string('username')->unique()->nullable()->after('employee_id');
             $table->enum('role', ['employee', 'hr', 'admin'])->default('employee')->after('password');
-
-            $table->dropColumn(['name', 'email_verified_at', 'remember_token']);
         });
     }
 

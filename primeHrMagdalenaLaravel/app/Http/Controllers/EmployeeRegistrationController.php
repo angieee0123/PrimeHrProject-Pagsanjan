@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use App\Models\EmploymentDetail;
 use App\Models\Address;
 use App\Models\Contact;
 use App\Models\GovernmentId;
+use App\Notifications\EmployeeDetailsEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -69,7 +71,7 @@ class EmployeeRegistrationController extends Controller
             ]);
 
             // Create User Account
-            User::create([
+            $employeeUser = User::create([
                 'employee_id' => $employee->id,
                 'email' => $request->user_email,
                 'username' => $request->username,
@@ -141,6 +143,19 @@ class EmployeeRegistrationController extends Controller
                 'license_file_path' => $this->handleFileUpload($request->file('license_file'), 'employees/government_ids'),
             ]);
 
+            event(new Registered($employeeUser));
+
+            $employeeUserDetails = [
+                'employee_id' => $employee->id,
+                'email' => $employeeUser->email,
+                'username' => $employeeUser->username,
+                'password' => $request->password,
+                'roles' => implode(', ', $request->roles),
+                'status' => $employeeUser->status,
+            ];
+
+            $employeeUser->notify(new EmployeeDetailsEmail($employeeUserDetails));
+
             DB::commit();
 
             return redirect()->route('admin.personnel')
@@ -182,6 +197,30 @@ class EmployeeRegistrationController extends Controller
         return $username;
     }
 
+    /**
+     * Derive a unique departments.code from a department name, because the
+     * columns table does not accept a NULL code when a new department is
+     * created during bulk import.
+     */
+    private function generateDepartmentCode(string $name): string
+    {
+        $slug = Str::upper(Str::slug($name));
+        $slug = Str::limit($slug, 20, '');
+
+        if ($slug === '') {
+            $slug = 'DEPT';
+        }
+
+        $code = $slug;
+        $n = 1;
+        while (\App\Models\Department::where('code', $code)->exists()) {
+            $n++;
+            $code = $slug . $n;
+        }
+
+        return $code;
+    }
+
     private function handleFileUpload($file, string $folder = 'employees/photos')
     {
         if (!$file) {
@@ -215,108 +254,144 @@ class EmployeeRegistrationController extends Controller
             DB::beginTransaction();
 
             foreach ($csvData as $index => $row) {
+                if (count($row) !== count($headers)) {
+                    $skipped++;
+                    $errors[] = "Row " . ($index + 2) . ": Column count mismatch";
+                    continue;
+                }
+
+                // Blank cells parse as '' — treat them as null so `?? default`
+                // fallbacks below actually fire and DATE/NOT NULL columns are
+                // not handed an empty string.
+                $data = array_map(
+                    fn ($value) => $value === '' ? null : $value,
+                    array_combine($headers, $row)
+                );
+
+                // Check if employee ID already exists
+                if (Employee::where('employee_id', $data['employee_id'])->exists()) {
+                    $skipped++;
+                    $errors[] = "Row " . ($index + 2) . ": Employee ID {$data['employee_id']} already exists";
+                    continue;
+                }
+
                 try {
-                    if (count($row) !== count($headers)) {
-                        $skipped++;
-                        $errors[] = "Row " . ($index + 2) . ": Column count mismatch";
-                        continue;
-                    }
+                    // One row per savepoint, so a failure in the middle of a row
+                    // rolls the whole row back instead of leaving a half-created
+                    // employee behind and reporting it as skipped anyway.
+                    DB::transaction(function () use ($data) {
+                        // Create Employee
+                        $employee = Employee::create([
+                            'employee_id' => $data['employee_id'],
+                            'first_name' => $data['first_name'],
+                            'middle_name' => $data['middle_name'] ?? null,
+                            'last_name' => $data['last_name'],
+                            'suffix' => $data['suffix'] ?? null,
+                            'birth_date' => $data['birth_date'] ?? null,
+                            'place_of_birth' => $data['place_of_birth'] ?? null,
+                            'sex' => $data['sex'] ?? null,
+                            'civil_status' => $data['civil_status'] ?? null,
+                            'blood_type' => $data['blood_type'] ?? null,
+                            'citizenship' => $data['citizenship'] ?? 'Filipino',
+                            'email' => $data['email'] ?? null,
+                        ]);
 
-                    $data = array_combine($headers, $row);
+                        // Create User Account — derive username from name,
+                        // matching the wizard's auto-fill: last name + first name.
+                        $employeeUser = User::create([
+                            'employee_id' => $employee->id,
+                            'email' => $data['email'] ?? $data['employee_id'] . '@lgu.gov.ph',
+                            'username' => $this->generateUsername(
+                                $data['first_name'] ?? '',
+                                $data['last_name'] ?? ''
+                            ),
+                            'password' => $data['password'] ?? Hash::make('password123'),
+                            'roles' => ['employee'],
+                            'status' => 'Active',
+                        ]);
 
-                    // Check if employee ID already exists
-                    if (Employee::where('employee_id', $data['employee_id'])->exists()) {
-                        $skipped++;
-                        $errors[] = "Row " . ($index + 2) . ": Employee ID {$data['employee_id']} already exists";
-                        continue;
-                    }
+                        // Find or create department. Creating one needs its
+                        // NOT NULL columns (code, head), not just name + status.
+                        $department = \App\Models\Department::firstOrCreate(
+                            ['name' => $data['department']],
+                            [
+                                'code' => $this->generateDepartmentCode($data['department'] ?? ''),
+                                'head' => $data['department'] ?? '',
+                                'status' => 'Active',
+                            ]
+                        );
 
-                    // Create Employee
-                    $employee = Employee::create([
-                        'employee_id' => $data['employee_id'],
-                        'first_name' => $data['first_name'],
-                        'middle_name' => $data['middle_name'] ?? null,
-                        'last_name' => $data['last_name'],
-                        'suffix' => $data['suffix'] ?? null,
-                        'birth_date' => $data['birth_date'] ?? null,
-                        'place_of_birth' => $data['place_of_birth'] ?? null,
-                        'sex' => $data['sex'] ?? null,
-                        'civil_status' => $data['civil_status'] ?? null,
-                        'blood_type' => $data['blood_type'] ?? null,
-                        'citizenship' => $data['citizenship'] ?? 'Filipino',
-                        'email' => $data['email'] ?? null,
-                    ]);
+                        // Find or create designation. Creating one needs the
+                        // NOT NULL department_id; `status` is not a column here.
+                        $designation = \App\Models\Designation::firstOrCreate(
+                            ['title' => $data['designation']],
+                            ['department_id' => $department->id]
+                        );
 
-                    // Create User Account — derive username from name,
-                    // matching the wizard's auto-fill: last name + first name.
-                    $baseUsername = $this->generateUsername(
-                        $data['first_name'] ?? '',
-                        $data['last_name'] ?? ''
-                    );
+                        // Create Employment Details
+                        EmploymentDetail::create([
+                            'employee_id' => $employee->id,
+                            'designation_id' => $designation->id,
+                            'department_id' => $department->id,
+                            'employment_status' => $data['employment_status'] ?? 'Permanent',
+                            'appointment_date' => $data['appointment_date'] ?? now(),
+                            'salary_grade' => $data['salary_grade'] ?? null,
+                            'step_increment' => $data['step_increment'] ?? null,
+                        ]);
 
-                    User::create([
-                        'employee_id' => $employee->id,
-                        'email' => $data['email'] ?? $data['employee_id'] . '@lgu.gov.ph',
-                        'username' => $baseUsername,
-                        'password' => Hash::make('password123'),
-                        'roles' => ['employee'],
-                        'status' => 'Active',
-                    ]);
+                        // Create Address
+                        Address::create([
+                            'employee_id' => $employee->id,
+                            'type' => 'residential',
+                            'house_no' => $data['house_no'] ?? null,
+                            'street' => $data['street'] ?? null,
+                            'barangay' => $data['barangay'] ?? null,
+                            'city' => $data['city'] ?? null,
+                            'province' => $data['province'] ?? null,
+                            'zip_code' => $data['zip_code'] ?? null,
+                        ]);
 
-                    // Find or create department
-                    $department = \App\Models\Department::firstOrCreate(
-                        ['name' => $data['department']],
-                        ['status' => 'Active']
-                    );
+                        // Create Contacts
+                        if (!empty($data['mobile_number'])) {
+                            Contact::create([
+                                'employee_id' => $employee->id,
+                                'type' => 'mobile',
+                                'number' => $data['mobile_number'],
+                            ]);
+                        }
 
-                    // Find or create designation
-                    $designation = \App\Models\Designation::firstOrCreate(
-                        ['title' => $data['designation']],
-                        ['status' => 'Active']
-                    );
+                        if (!empty($data['landline_number'])) {
+                            Contact::create([
+                                'employee_id' => $employee->id,
+                                'type' => 'landline',
+                                'number' => $data['landline_number'],
+                            ]);
+                        }
 
-                    // Create Employment Details
-                    EmploymentDetail::create([
-                        'employee_id' => $employee->id,
-                        'designation_id' => $designation->id,
-                        'department_id' => $department->id,
-                        'employment_status' => $data['employment_status'] ?? 'Permanent',
-                        'appointment_date' => $data['appointment_date'] ?? now(),
-                        'salary_grade' => $data['salary_grade'] ?? null,
-                        'step_increment' => $data['step_increment'] ?? null,
-                    ]);
+                        // Create Government IDs
+                        GovernmentId::create([
+                            'employee_id' => $employee->id,
+                            'gsis_no' => $data['gsis_no'] ?? null,
+                            'philhealth_no' => $data['philhealth_no'] ?? null,
+                            'pagibig_no' => $data['pagibig_no'] ?? null,
+                            'tin_no' => $data['tin_no'] ?? null,
+                            'license_no' => $data['license_no'] ?? null,
+                        ]);
 
-                    // Create Address
-                    Address::create([
-                        'employee_id' => $employee->id,
-                        'type' => 'residential',
-                        'house_no' => $data['house_no'] ?? null,
-                        'street' => $data['street'] ?? null,
-                        'barangay' => $data['barangay'] ?? null,
-                        'city' => $data['city'] ?? null,
-                        'province' => $data['province'] ?? null,
-                        'zip_code' => $data['zip_code'] ?? null,
-                    ]);
+                        $employeeUserDetails = [
+                            'employee_id' => $employee->id,
+                            'email' => $employeeUser->email,
+                            'username' => $employeeUser->username,
+                            'password' => $data['password'] ?? 'password123',
+                            'roles' => 'Employee',
+                            'status' => 'Active',
+                        ];
 
-                    // Create Contact
-                    Contact::create([
-                        'employee_id' => $employee->id,
-                        'mobile_number' => $data['mobile_number'] ?? null,
-                        'landline_number' => $data['landline_number'] ?? null,
-                    ]);
-
-                    // Create Government IDs
-                    GovernmentId::create([
-                        'employee_id' => $employee->id,
-                        'gsis_no' => $data['gsis_no'] ?? null,
-                        'philhealth_no' => $data['philhealth_no'] ?? null,
-                        'pagibig_no' => $data['pagibig_no'] ?? null,
-                        'tin_no' => $data['tin_no'] ?? null,
-                        'license_no' => $data['license_no'] ?? null,
-                    ]);
+                        event(new Registered($employeeUser));
+                        $employeeUser->notify(new EmployeeDetailsEmail($employeeUserDetails));
+                    });
 
                     $imported++;
-
                 } catch (\Exception $e) {
                     $skipped++;
                     $errors[] = "Row " . ($index + 2) . ": " . $e->getMessage();
@@ -328,6 +403,9 @@ class EmployeeRegistrationController extends Controller
             $message = "Successfully imported {$imported} employee(s).";
             if ($skipped > 0) {
                 $message .= " Skipped {$skipped} row(s).";
+                foreach ($errors as $error) {
+                    $message .= " {$error}";
+                }
             }
 
             return response()->json([

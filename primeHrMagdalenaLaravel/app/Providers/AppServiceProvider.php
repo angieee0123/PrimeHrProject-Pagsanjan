@@ -5,6 +5,9 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use App\Models\AccreditedHoursLog;
 use App\Observers\AccreditedHoursLogObserver;
 use App\Models\LeaveApplication;
@@ -27,6 +30,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(
+            Registered::class,
+            SendEmailVerificationNotification::class,
+        );
+
         AccreditedHoursLog::observe(AccreditedHoursLogObserver::class);
         LeaveApplication::observe(LeaveApplicationObserver::class);
         TravelOrder::observe(TravelOrderObserver::class);
