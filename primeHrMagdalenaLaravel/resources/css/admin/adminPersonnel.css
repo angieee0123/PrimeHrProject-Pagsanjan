@@ -218,6 +218,108 @@
     line-height: 1.6;
 }
 
+/* "Verification email sent" panel inside the success modal.
+   Left-aligned inside a centred box on purpose: it holds an email address the
+   admin is meant to read back character by character, and centred text gives
+   the eye no fixed left edge to scan from.
+   Colours are tokens, never literals, so the panel follows the active palette
+   — `.is-failed` swaps the same panel to the danger set rather than being a
+   second component. */
+.personnel-modal-mail {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 0 24px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    text-align: left;
+    background: var(--theme-info-subtle);
+    border: 1px solid var(--theme-info-border);
+}
+
+.personnel-modal-mail.is-failed {
+    background: var(--theme-danger-subtle);
+    border-color: var(--theme-danger-border);
+}
+
+.personnel-modal-mail-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--theme-info-emphasis);
+}
+
+.personnel-modal-mail.is-failed .personnel-modal-mail-icon {
+    color: var(--theme-danger-emphasis);
+}
+
+.personnel-modal-mail-body {
+    min-width: 0;
+}
+
+.personnel-modal-mail-title {
+    margin: 0 0 2px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--theme-info-emphasis);
+}
+
+.personnel-modal-mail.is-failed .personnel-modal-mail-title {
+    color: var(--theme-danger-emphasis);
+}
+
+/* The address wraps rather than ellipsing: a truncated address is exactly as
+   useless as no address, and this is the one place a typo can still be caught. */
+.personnel-modal-mail-address {
+    margin: 0 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gp-ink);
+    overflow-wrap: anywhere;
+}
+
+.personnel-modal-mail-text {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--gp-text-mid);
+}
+
+/* Per-field validation breakdown inside the error modal. Scrolls rather than
+   growing the box: a wizard rejecting a dozen fields must not push the Close
+   button off-screen. */
+.personnel-modal-errors {
+    list-style: none;
+    margin: 0 0 24px;
+    padding: 0;
+    max-height: 240px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.personnel-modal-errors li {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border-left: 3px solid var(--theme-danger);
+    background: var(--theme-danger-subtle);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--gp-text-mid);
+}
+
+.personnel-modal-errors li:last-child { margin-bottom: 0; }
+
+.personnel-modal-error-step {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--theme-danger-emphasis);
+}
+
 .personnel-modal-btn {
     padding: 12px 32px;
     color: #fff;

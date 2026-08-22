@@ -230,11 +230,17 @@ class AttendanceScannerTest extends TestCase
 
     private function staff(): User
     {
-        return User::create([
+        $user = User::create([
             'email' => 'hr@example.test',
             'password' => bcrypt('secret'),
             'roles' => ['hr'],
             'status' => 'Active',
         ]);
+
+        // The kiosk lives under /admin, which is verified-gated. A real
+        // operator has clicked their link; this is the test's equivalent.
+        $user->forceFill(['email_verified_at' => now()])->save();
+
+        return $user;
     }
 }

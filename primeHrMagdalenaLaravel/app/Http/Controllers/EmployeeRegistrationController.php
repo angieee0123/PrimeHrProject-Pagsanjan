@@ -13,10 +13,45 @@ use App\Notifications\EmployeeDetailsEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class EmployeeRegistrationController extends Controller
 {
+    /**
+     * Which wizard panel each validated field sits on. A rejected field is
+     * reported as "Step 2 · Account" rather than a bare sentence the admin
+     * then has to hunt for across six collapsed panels — the wizard reopens
+     * from its draft after a failed submit, so the step number is the only
+     * thing that makes the message actionable.
+     *
+     * Keys must stay in step with the rules in store(); a field missing here
+     * still reports, just without a step label.
+     */
+    private const FIELD_STEPS = [
+        'employee_id'       => [1, 'Personal'],
+        'first_name'        => [1, 'Personal'],
+        'last_name'         => [1, 'Personal'],
+        'photo'             => [1, 'Personal'],
+        'birth_date'        => [1, 'Personal'],
+        'sex'               => [1, 'Personal'],
+        'civil_status'      => [1, 'Personal'],
+        'username'          => [2, 'Account'],
+        'user_email'        => [2, 'Account'],
+        'password'          => [2, 'Account'],
+        'password_confirm'  => [2, 'Account'],
+        'roles'             => [2, 'Account'],
+        'department'        => [3, 'Employment'],
+        'designation_id'    => [3, 'Employment'],
+        'employment_status' => [3, 'Employment'],
+        'appointment_date'  => [3, 'Employment'],
+        'gsis_file'         => [5, 'Gov IDs'],
+        'philhealth_file'   => [5, 'Gov IDs'],
+        'pagibig_file'      => [5, 'Gov IDs'],
+        'tin_file'          => [5, 'Gov IDs'],
+        'license_file'      => [5, 'Gov IDs'],
+    ];
+
     public function store(Request $request)
     {
         try {
@@ -43,9 +78,28 @@ class EmployeeRegistrationController extends Controller
                 'pagibig_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
                 'tin_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
                 'license_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+            ], [], [
+                // Without these, Laravel humanises the column name and the
+                // admin is told "the user email field is required" for a box
+                // labelled "Email Address".
+                'employee_id'       => 'employee ID',
+                'user_email'        => 'email address',
+                'password_confirm'  => 'password confirmation',
+                'department'        => 'department',
+                'designation_id'    => 'designation',
+                'roles'             => 'role',
+                'gsis_file'         => 'GSIS file',
+                'philhealth_file'   => 'PhilHealth file',
+                'pagibig_file'      => 'Pag-IBIG file',
+                'tin_file'          => 'TIN file',
+                'license_file'      => 'license file',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return back()->with('error', collect($e->errors())->flatten()->first())->withInput();
+            return back()
+                ->withErrors($e->validator)
+                ->withInput()
+                ->with('error', $this->validationSummary($e->errors()))
+                ->with('error_details', $this->describeValidationErrors($e->errors()));
         }
 
         try {
@@ -70,13 +124,24 @@ class EmployeeRegistrationController extends Controller
                 'email' => $request->user_email,
             ]);
 
-            // Create User Account
+            // Create User Account.
+            //
+            // `status` is set explicitly because `users.status` defaults to
+            // 'Inactive' and `AuthController::login()` refuses an inactive
+            // account. Left at the default, the employee cannot sign in — and
+            // the verification link is behind `auth`, so they cannot verify
+            // either. Both emails would arrive describing an account that
+            // nothing in the system can open, and there is no activation
+            // screen to unstick it. Bulk import already creates accounts
+            // Active; the wizard now matches it, which puts the gate where
+            // this feature wants it: email verification, not a manual flip.
             $employeeUser = User::create([
                 'employee_id' => $employee->id,
                 'email' => $request->user_email,
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
                 'roles' => array_values(array_unique($request->roles)),
+                'status' => 'Active',
             ]);
 
             // Create Employment Details
@@ -143,29 +208,174 @@ class EmployeeRegistrationController extends Controller
                 'license_file_path' => $this->handleFileUpload($request->file('license_file'), 'employees/government_ids'),
             ]);
 
-            event(new Registered($employeeUser));
-
-            $employeeUserDetails = [
-                'employee_id' => $employee->id,
-                'email' => $employeeUser->email,
-                'username' => $employeeUser->username,
-                'password' => $request->password,
-                'roles' => implode(', ', $request->roles),
-                'status' => $employeeUser->status,
-            ];
-
-            $employeeUser->notify(new EmployeeDetailsEmail($employeeUserDetails));
+            $employeeUserDetails = $this->credentialsFor(
+                $employee,
+                $employeeUser,
+                $request->password,
+                $request->roles
+            );
 
             DB::commit();
 
+            // Both emails go out only once the account is durably committed.
+            // Sent from inside the transaction, a later failure would roll the
+            // user row back while the credentials were already in somebody's
+            // inbox — an email cannot be recalled.
+            //
+            // Caught separately from the block below: past this point the
+            // employee exists, so a mail failure is a warning, not a failed
+            // registration. Reporting it as one would send the admin back to
+            // re-submit a form that can now only fail on a duplicate ID.
+            try {
+                event(new Registered($employeeUser));
+                $employeeUser->notify(new EmployeeDetailsEmail($employeeUserDetails));
+            } catch (\Exception $e) {
+                // The admin sees this on screen, but only until they navigate
+                // away. Mail failures are exactly what someone comes asking
+                // about days later ("nobody got their login"), so the reason
+                // has to outlive the flash message.
+                Log::error('Employee registered but account email failed', [
+                    'user_id' => $employeeUser->id,
+                    'employee_id' => $employee->id,
+                    'email' => $employeeUser->email,
+                    'exception' => $e,
+                ]);
+
+                return redirect()->route('admin.personnel')
+                    ->with('warning', "Employee {$employee->first_name} {$employee->last_name} was registered.")
+                    ->with('email_notice', [
+                        'status' => 'failed',
+                        'email'  => $employeeUser->email,
+                        'reason' => $e->getMessage(),
+                    ]);
+            }
+
+            // What went out is reported separately from *that* it worked. The
+            // admin's next action depends on it: the employee cannot sign in
+            // until they open the verification link, so an admin who does not
+            // know a link was sent has no reason to tell them to look for it —
+            // and the calls that follow ("it says my account isn't verified")
+            // land on somebody with no idea what the employee is describing.
+            //
+            // Structured rather than a sentence because the modal renders the
+            // address on its own line: it was typed by the admin one screen
+            // ago, and reading it back is the only chance to catch a typo
+            // before the employee is waiting on mail to nowhere.
             return redirect()->route('admin.personnel')
-                ->with('success', "Employee {$employee->first_name} {$employee->last_name} registered successfully!");
+                ->with('success', "Employee {$employee->first_name} {$employee->last_name} registered successfully!")
+                ->with('email_notice', [
+                    'status' => 'sent',
+                    'email'  => $employeeUser->email,
+                ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
+
+            // Without this the rollback is invisible: the transaction undoes
+            // every row, the admin gets a flash message they can dismiss, and
+            // nothing anywhere records why the registration failed.
+            Log::error('Employee registration failed and was rolled back', [
+                'employee_id' => $request->employee_id,
+                'email' => $request->user_email,
+                'exception' => $e,
+            ]);
+
             return back()->with('error', 'Error registering employee: ' . $e->getMessage())
                 ->withInput();
         }
+    }
+
+    /**
+     * Flatten a validator's errors into one ordered list, each tagged with the
+     * wizard step that owns the field.
+     *
+     * Every message is kept. The old handler flashed
+     * `collect($e->errors())->flatten()->first()` — one sentence — so an admin
+     * with a taken username *and* a taken email fixed the username, resubmitted,
+     * and only then learned about the email. Six steps of re-entry per round trip.
+     */
+    /**
+     * The rows of the credentials email, keyed by the label the employee reads.
+     *
+     * Built here rather than inline at each call site so the wizard and the
+     * bulk import cannot describe the same account differently. Three things
+     * this fixes:
+     *
+     * - it sent `employees.id` under the label "Employee id". That is the
+     *   internal primary key; the number on the employee's badge — the one
+     *   they are asked for everywhere else in this system — is
+     *   `employees.employee_id`.
+     * - it sent `$employeeUser->status`, which is **null**: `User::create()`
+     *   never set the attribute, the value came from the column default, and
+     *   the in-memory model was not refreshed. Every credentials email carried
+     *   a blank row. Status is not the employee's business anyway, so it is
+     *   gone rather than corrected.
+     * - keys were run through `ucfirst()` in the view, so the labels read
+     *   "Employee_id" and "Roles". They are written out here instead.
+     *
+     * @param  array<int, string>  $roles
+     * @return array<string, string>
+     */
+    private function credentialsFor(Employee $employee, User $user, string $password, array $roles): array
+    {
+        $name = trim(implode(' ', array_filter([
+            $employee->first_name,
+            $employee->middle_name,
+            $employee->last_name,
+            $employee->suffix,
+        ])));
+
+        return [
+            'Employee ID' => (string) $employee->employee_id,
+            'Name'        => $name,
+            'Username'    => (string) $user->username,
+            'Email'       => (string) $user->email,
+            'Password'    => $password,
+            'Role'        => implode(', ', array_map(
+                fn ($role) => ucfirst((string) $role),
+                array_values(array_unique($roles))
+            )),
+        ];
+    }
+
+    private function describeValidationErrors(array $errors): array
+    {
+        $details = [];
+
+        foreach ($errors as $field => $messages) {
+            // `roles.*` arrives keyed as `roles.0`; the step map holds the base.
+            $base = explode('.', $field)[0];
+            [$step, $stepName] = self::FIELD_STEPS[$base] ?? [null, null];
+
+            foreach ((array) $messages as $message) {
+                $details[] = [
+                    'field' => $base,
+                    'step' => $step,
+                    'step_name' => $stepName,
+                    'message' => $message,
+                ];
+            }
+        }
+
+        // Present them in the order the admin filled the form, so the list
+        // reads as a walk back through the wizard. Unmapped fields sort last
+        // rather than silently leading.
+        usort($details, fn ($a, $b) => ($a['step'] ?? PHP_INT_MAX) <=> ($b['step'] ?? PHP_INT_MAX));
+
+        return $details;
+    }
+
+    /**
+     * The headline above the list. Kept separate from the detail list because
+     * `error` is also set by non-validation failures, which have no fields.
+     */
+    private function validationSummary(array $errors): string
+    {
+        $count = collect($errors)->flatten()->count();
+
+        return $count === 1
+            ? 'One field needs attention before this employee can be registered.'
+            : "{$count} fields need attention before this employee can be registered.";
     }
 
     /**
@@ -251,6 +461,12 @@ class EmployeeRegistrationController extends Controller
             $skipped = 0;
             $errors = [];
 
+            // Accounts awaiting their verification + credentials emails. The
+            // per-row DB::transaction() below is only a savepoint inside the
+            // outer transaction, so a row "succeeding" is not yet durable —
+            // nothing is mailed until the outer commit lands.
+            $pendingAccounts = [];
+
             DB::beginTransaction();
 
             foreach ($csvData as $index => $row) {
@@ -279,7 +495,7 @@ class EmployeeRegistrationController extends Controller
                     // One row per savepoint, so a failure in the middle of a row
                     // rolls the whole row back instead of leaving a half-created
                     // employee behind and reporting it as skipped anyway.
-                    DB::transaction(function () use ($data) {
+                    DB::transaction(function () use ($data, &$pendingAccounts) {
                         // Create Employee
                         $employee = Employee::create([
                             'employee_id' => $data['employee_id'],
@@ -378,17 +594,15 @@ class EmployeeRegistrationController extends Controller
                             'license_no' => $data['license_no'] ?? null,
                         ]);
 
-                        $employeeUserDetails = [
-                            'employee_id' => $employee->id,
-                            'email' => $employeeUser->email,
-                            'username' => $employeeUser->username,
-                            'password' => $data['password'] ?? 'password123',
-                            'roles' => 'Employee',
-                            'status' => 'Active',
+                        $pendingAccounts[] = [
+                            'user' => $employeeUser,
+                            'details' => $this->credentialsFor(
+                                $employee,
+                                $employeeUser,
+                                $data['password'] ?? 'password123',
+                                ['employee']
+                            ),
                         ];
-
-                        event(new Registered($employeeUser));
-                        $employeeUser->notify(new EmployeeDetailsEmail($employeeUserDetails));
                     });
 
                     $imported++;
@@ -400,12 +614,30 @@ class EmployeeRegistrationController extends Controller
 
             DB::commit();
 
+            // Now that every imported row is durable, mail the accounts. A
+            // send that fails must not cost the import: the employees exist
+            // and an admin can resend, whereas throwing here would report a
+            // committed import as failed.
+            foreach ($pendingAccounts as $account) {
+                try {
+                    event(new Registered($account['user']));
+                    $account['user']->notify(new EmployeeDetailsEmail($account['details']));
+                } catch (\Exception $e) {
+                    $errors[] = "Account {$account['details']['email']}: created, but the "
+                        . "credentials email could not be sent ({$e->getMessage()})";
+                }
+            }
+
             $message = "Successfully imported {$imported} employee(s).";
             if ($skipped > 0) {
                 $message .= " Skipped {$skipped} row(s).";
-                foreach ($errors as $error) {
-                    $message .= " {$error}";
-                }
+            }
+
+            // Reported outside the `$skipped` branch: a row can import
+            // cleanly and still fail to mail, and that warning would
+            // otherwise never reach the admin who ran the import.
+            foreach ($errors as $error) {
+                $message .= " {$error}";
             }
 
             return response()->json([
@@ -418,6 +650,11 @@ class EmployeeRegistrationController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
+            Log::error('Bulk employee import failed and was rolled back', [
+                'exception' => $e,
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error importing employees: ' . $e->getMessage()

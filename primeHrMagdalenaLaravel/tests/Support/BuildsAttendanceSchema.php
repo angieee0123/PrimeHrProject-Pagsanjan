@@ -206,6 +206,13 @@ trait BuildsAttendanceSchema
             $table->string('password')->nullable();
             $table->text('roles')->nullable();
             $table->string('status')->nullable();
+            // EnsureEmailIsVerifiedForArea gates every admin/, mayor/ and
+            // employee/ path. Without this column `hasVerifiedEmail()` reads a
+            // missing attribute and is false forever, so a test caller is
+            // bounced to the verification notice before reaching a controller
+            // — the same drift the `restore_email_verified_at_on_users`
+            // migration repaired on the live database.
+            $table->timestamp('email_verified_at')->nullable();
             $table->unsignedBigInteger('employee_id')->nullable();
             $table->timestamps();
         });

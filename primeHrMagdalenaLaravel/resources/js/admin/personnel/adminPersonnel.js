@@ -1,12 +1,65 @@
 // Admin Personnel Page Scripts
 
+// Fill in (or hide) the "Verification email sent" panel in the success modal.
+//
+// Shared by the wizard's flash and the bulk import's JSON response so the two
+// cannot describe the same pair of emails differently — one of them going
+// quiet is how an admin ends up not knowing a link was sent at all.
+//
+// textContent throughout, for the same reason as the error list below: the
+// address is a value the admin typed into the wizard one screen ago, and
+// building this with innerHTML would make the registration form an XSS vector
+// against whoever submits it.
+function renderEmailNotice(notice) {
+    const box = document.getElementById('successEmailNotice');
+    if (!box) return;
+
+    if (!notice) {
+        box.hidden = true;
+        return;
+    }
+
+    const failed = notice.status === 'failed';
+    const address = document.getElementById('successEmailNoticeAddress');
+
+    box.classList.toggle('is-failed', failed);
+
+    document.getElementById('successEmailNoticeTitle').textContent = notice.title || (failed
+        ? 'Email could not be sent'
+        : 'Verification email sent');
+
+    // Bulk import has no single address to read back, so the line is dropped
+    // rather than filled with a stand-in.
+    address.textContent = notice.email || '';
+    address.hidden = !notice.email;
+
+    document.getElementById('successEmailNoticeText').textContent = notice.text || (failed
+        ? 'The account was created, but neither the verification link nor the credentials '
+          + 'reached this address. '
+          + (notice.reason || 'Check the mail settings, then have them use "Forgot password" to get in.')
+        // Both messages are named because two arriving together is what the
+        // employee will ask about, and the order matters: every area sits
+        // behind EnsureEmailIsVerifiedForArea, so the credentials do not work
+        // until the link is opened.
+        : 'A second email carries their username and password. They must open the '
+          + 'verification link before they can sign in.');
+
+    box.hidden = false;
+}
+
 // Session flash handling — window.personnelFlash is set by an inline script
-// in adminPersonnel.blade.php (@json(session('success' | 'error' | 'active_tab'))).
+// in adminPersonnel.blade.php
+// (@json(session('success' | 'warning' | 'error' | 'active_tab'))).
 document.addEventListener('DOMContentLoaded', function() {
     const flash = window.personnelFlash || {};
 
-    if (flash.success) {
-        document.getElementById('successMessage').textContent = flash.success;
+    // `warning` is the employee-was-created-but-the-email-failed case, so it
+    // takes the success path: the record exists, and only the wording differs.
+    // Routing it to the error modal would suggest nothing had been saved.
+    const created = flash.success || flash.warning;
+
+    if (created) {
+        document.getElementById('successMessage').textContent = created;
         document.getElementById('successModal').style.display = 'flex';
         if (document.getElementById('employeeWizardModal')) {
             document.getElementById('employeeWizardModal').style.display = 'none';
@@ -15,8 +68,43 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.clearWizardDraft) window.clearWizardDraft();
     }
 
+    // What was emailed to the new account. Only registration flashes this, so
+    // the panel stays hidden for the other actions that open this modal —
+    // schedule assignment sends nothing and must not claim to.
+    renderEmailNotice(flash.emailNotice);
+
     if (flash.error) {
         document.getElementById('errorMessage').textContent = flash.error;
+
+        // Every rejected field, grouped under the wizard step that owns it.
+        // textContent throughout: these strings carry values the admin typed,
+        // so building this with innerHTML would make the registration form an
+        // XSS vector against whoever submits it.
+        const list = document.getElementById('errorDetails');
+        if (list) {
+            list.textContent = '';
+            const details = flash.errorDetails || [];
+
+            details.forEach(function (detail) {
+                const item = document.createElement('li');
+
+                if (detail.step) {
+                    const badge = document.createElement('span');
+                    badge.className = 'personnel-modal-error-step';
+                    badge.textContent = 'Step ' + detail.step + ' \u00b7 ' + detail.step_name;
+                    item.appendChild(badge);
+                }
+
+                const text = document.createElement('span');
+                text.textContent = detail.message;
+                item.appendChild(text);
+
+                list.appendChild(item);
+            });
+
+            list.hidden = details.length === 0;
+        }
+
         document.getElementById('errorModal').style.display = 'flex';
     }
 
@@ -1229,6 +1317,13 @@ function submitBulkImport() {
         if (data.success) {
             closeBulkImportModal();
             document.getElementById('successMessage').textContent = data.message || 'Employees imported successfully!';
+            // Bulk import mails the same pair per row, so it says so too.
+            renderEmailNotice(data.imported > 0 ? {
+                status: 'sent',
+                title: 'Verification emails sent',
+                text: 'Each imported employee was emailed a verification link and, separately, '
+                    + 'their username and password. They must open the link before they can sign in.',
+            } : null);
             document.getElementById('successModal').style.display = 'flex';
             setTimeout(() => {
                 location.reload();

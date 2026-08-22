@@ -41,6 +41,15 @@ class AuthController extends Controller
 
             $request->session()->regenerate();
 
+            // Every dashboard now sits behind `EnsureEmailIsVerifiedForArea`,
+            // so send an unverified account straight to the notice rather than
+            // let it bounce off the page it was aimed at — or, for an account
+            // holding several roles, off the role picker and *then* the page.
+            // The gate is the middleware; this is only the shorter route to it.
+            if (! $user->hasVerifiedEmail()) {
+                return redirect()->route('verification.notice');
+            }
+
             // Eager load employee data with relationships
             $user->load('employee.employmentDetail.departmentRelation', 'employee.employmentDetail.designationRelation');
 

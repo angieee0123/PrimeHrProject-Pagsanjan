@@ -63,7 +63,10 @@
 <script>
     window.personnelFlash = {
         success: @json(session('success')),
+        warning: @json(session('warning')),
         error: @json(session('error')),
+        errorDetails: @json(session('error_details')),
+        emailNotice: @json(session('email_notice')),
         activeTab: @json(session('active_tab')),
     };
 </script>

@@ -38,6 +38,9 @@ class WebsiteContentTest extends TestCase
             // EnsureAccountActive 403s anyone whose status is not 'Active',
             // so a test user without this column can never reach a controller.
             $table->string('status')->default('Active');
+            // Same reasoning for EnsureEmailIsVerifiedForArea, which gates
+            // every /admin path: a missing column reads as "never verified".
+            $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();
         });
 
@@ -94,6 +97,7 @@ class WebsiteContentTest extends TestCase
         $u->username = $username;
         $u->roles = $roles;
         $u->status = 'Active';
+        $u->email_verified_at = now();
         $u->save();
 
         return $u;

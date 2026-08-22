@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureEmailIsVerifiedForArea;
 use App\Http\Middleware\EnsureRoleForArea;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Foundation\Application;
@@ -39,9 +40,15 @@ return Application::configure(basePath: dirname(__DIR__))
         // Account activation gate: ends access for a user who is deactivated
         // while holding a live session or API token. Runs before the role check
         // so an inactive admin is turned away rather than let into admin/.
+        //
+        // Verification runs last of the three, so the denial a user sees is the
+        // most specific one that applies: an employee wandering into admin/ is
+        // told they have no access to that area, not asked to verify an email
+        // that would not have got them in either way.
         $middleware->web(append: [
             EnsureUserIsActive::class,
             EnsureRoleForArea::class,
+            EnsureEmailIsVerifiedForArea::class,
         ]);
 
         $middleware->api(append: [

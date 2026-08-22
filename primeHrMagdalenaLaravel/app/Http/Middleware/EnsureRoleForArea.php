@@ -17,15 +17,21 @@ use Symfony\Component\HttpFoundation\Response;
  * navigating to /admin/payroll).
  *
  * Applied once on the web group, so it also covers any routes added later.
+ * {@see EnsureEmailIsVerifiedForArea}, which reads this class's area list, is
+ * the companion gate for an unverified email address.
  */
 class EnsureRoleForArea
 {
     /**
      * Path prefix => roles permitted in that area.
      *
+     * Public because {@see EnsureEmailIsVerifiedForArea} gates the same three
+     * prefixes and must not keep a second copy of the list — a fourth area
+     * added here has to pick up both gates, not just this one.
+     *
      * @var array<string, array<int, string>>
      */
-    private const AREA_ROLES = [
+    public const AREA_ROLES = [
         'admin'    => ['admin', 'hr'],
         'mayor'    => ['mayor'],
         'employee' => ['employee'],

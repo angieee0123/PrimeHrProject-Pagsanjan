@@ -46,11 +46,17 @@
             </div>
             @endif
 
-            <div style="background:#f7f6ff;border-radius:12px;padding:18px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px">
-                <svg width="22" height="22" fill="none" stroke="#0b044d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <div style="background:var(--gp-bg-tint);border-radius:12px;padding:18px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px">
+                <svg width="22" height="22" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="stroke:var(--gp-pri);flex-shrink:0;margin-top:1px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                 <div>
-                    <p style="font-size:13.5px;font-weight:600;color:#0b044d;margin:0 0 4px">Check your email</p>
-                    <p style="font-size:13px;color:#6b6a8a;margin:0;line-height:1.6">Before proceeding, please check your email for a verification link. If you did not receive the email, click the button below to request another.</p>
+                    <p style="font-size:13.5px;font-weight:600;color:var(--gp-pri);margin:0 0 4px">Check your email</p>
+                    <p style="font-size:13px;color:var(--gp-text-mid);margin:0;line-height:1.6">We sent a verification link to
+                        {{-- Naming the address is the point of this screen. A new account is
+                             created for the employee by HR, so the address is somebody else's
+                             typing — and a typo is indistinguishable from a slow mail server
+                             unless the employee can read back what was entered. --}}
+                        @auth<strong style="color:var(--gp-text)">{{ auth()->user()->email }}</strong>.@else your email address.@endauth
+                        Open it to activate your account. If it has not arrived, check your spam folder or request another below.</p>
                 </div>
             </div>
 

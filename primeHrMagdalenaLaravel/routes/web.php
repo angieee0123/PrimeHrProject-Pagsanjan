@@ -36,14 +36,31 @@ Route::get('/email/verify', function () {
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
- 
-    return redirect('/employee/dashboard');
+
+    // Land on the dashboard this user's roles actually reach. Hard-coding
+    // the employee dashboard dropped an admin or mayor onto a page that is
+    // not theirs. Mirrors AuthController::login()'s routing, including the
+    // role picker for an account holding more than one.
+    $user = $request->user();
+    $dashboards = $user instanceof User ? $user->dashboardRoutes() : [];
+
+    if (count($dashboards) > 1) {
+        return redirect()->route('select-role');
+    }
+
+    return redirect()->route($dashboards[0] ?? 'employee.dashboard');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
 Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
- 
-    return back()->with('message', 'Verification link sent!');
+
+    // Flashed as `resent` because that is the key `user/verify-email.blade.php`
+    // reads. It was flashed as `message`, which nothing on that page looks at,
+    // so "Resend Verification Email" reloaded the page unchanged — the one
+    // control on a screen whose whole job is waiting for an email gave no sign
+    // it had done anything, and the natural response is to press it until the
+    // 6-per-minute throttle answers with a 429.
+    return back()->with('resent', true);
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 // ── Admin Dashboard ──
@@ -57,17 +74,23 @@ Route::get('/mayor/travelorder/{id}', [\App\Http\Controllers\MayorTravelOrderCon
 Route::get('/mayor/passslip', [\App\Http\Controllers\MayorPassSlipController::class, 'index'])->middleware('auth')->name('mayor.passslip');
 
 // ── Permanent Employee Dashboard ──
-Route::middleware(['verified'])->group(function () {
-    Route::get('/employee/dashboard', [\App\Http\Controllers\EmployeeDashboardController::class, 'index'])->middleware('auth')->name('employee.dashboard');
+//
+// These six used to be wrapped in `Route::middleware(['verified'])`, which made
+// them the only verified-gated routes in the file — the other ~165, including
+// every admin, HR and mayor page, were not. `EnsureEmailIsVerifiedForArea` now
+// gates the admin/, mayor/ and employee/ prefixes wholesale from the web group,
+// so the wrapper here is redundant. Removing it also removes the wrong
+// impression it gave: that verification was something a route opted into, and
+// so something a new route could forget.
+Route::get('/employee/dashboard', [\App\Http\Controllers\EmployeeDashboardController::class, 'index'])->middleware('auth')->name('employee.dashboard');
 
-    Route::get('/employee/attendance', [EmployeeAttendanceController::class, 'index'])->middleware('auth')->name('employee.attendance');
-    Route::get('/employee/attendance/detailed', [EmployeeAttendanceController::class, 'detailedDTR'])->middleware('auth')->name('employee.attendance.detailed');
+Route::get('/employee/attendance', [EmployeeAttendanceController::class, 'index'])->middleware('auth')->name('employee.attendance');
+Route::get('/employee/attendance/detailed', [EmployeeAttendanceController::class, 'detailedDTR'])->middleware('auth')->name('employee.attendance.detailed');
 
-    Route::get('/employee/payslip', [\App\Http\Controllers\EmployeePayslipController::class, 'index'])->middleware('auth')->name('employee.payslip');
-    Route::get('/employee/payslip/{id}/details', [\App\Http\Controllers\EmployeePayslipController::class, 'getPayslipDetails'])->middleware('auth')->name('employee.payslip.details');
+Route::get('/employee/payslip', [\App\Http\Controllers\EmployeePayslipController::class, 'index'])->middleware('auth')->name('employee.payslip');
+Route::get('/employee/payslip/{id}/details', [\App\Http\Controllers\EmployeePayslipController::class, 'getPayslipDetails'])->middleware('auth')->name('employee.payslip.details');
 
-    Route::get('/employee/leave', [EmployeeLeaveBalanceController::class, 'show'])->middleware('auth')->name('employee.leave');
-});
+Route::get('/employee/leave', [EmployeeLeaveBalanceController::class, 'show'])->middleware('auth')->name('employee.leave');
 
 // Leave Application Routes
 Route::post('/leave/store', [LeaveController::class, 'store'])->middleware('auth')->name('leave.store');
