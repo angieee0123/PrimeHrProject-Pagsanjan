@@ -108,17 +108,36 @@
     </div>
 
     <div class="table-wrapper">
+        {{--
+            The column widths are declared once, here, and the table is
+            `table-layout: fixed` -- so a sponsor name of eighty characters
+            can no longer steal the width from the hours column and leave the
+            header labels sitting over the wrong content. Each column's
+            alignment is set on `th` and `td` together in adminTraining.css
+            (one `:is(th, td):nth-child(n)` rule per column), which is what
+            keeps a centred figure under a centred heading.
+        --}}
         <table class="payroll-table training-pds-table" id="adminTrainingTable">
+            <colgroup>
+                <col class="tcol-employee">
+                <col class="tcol-title">
+                <col class="tcol-dates">
+                <col class="tcol-hours">
+                <col class="tcol-position">
+                <col class="tcol-sponsor">
+                <col class="tcol-status">
+                <col class="tcol-actions">
+            </colgroup>
             <thead>
                 <tr>
-                    <th>Employee</th>
-                    <th>Title of Seminar / Conference / Training Program</th>
-                    <th>Inclusive Dates</th>
-                    <th>No. of Hours</th>
-                    <th>Type of Position</th>
-                    <th>Conducted / Sponsored By</th>
-                    <th>Status</th>
-                    <th class="row-menu-head">Actions</th>
+                    <th scope="col">Employee</th>
+                    <th scope="col">Title of Seminar / Conference / Training Program</th>
+                    <th scope="col">Inclusive Dates</th>
+                    <th scope="col">No. of Hours</th>
+                    <th scope="col">Type of Position</th>
+                    <th scope="col">Conducted / Sponsored By</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody id="adminTrainingBody">
@@ -133,14 +152,26 @@
                         'Clerical'    => 'clerical',
                         default       => 'technical',
                     };
+                    $initials = strtoupper(mb_substr($emp->first_name, 0, 1) . mb_substr($emp->last_name, 0, 1));
+                    $hasCert  = (bool) $t->certificate_path;
+                    // Inclusive of both ends -- a one-day seminar reads "1 day",
+                    // not "0". Null whenever either end was never recorded.
+                    $dayCount = ($t->date_from && $t->date_to)
+                        ? (int) abs($t->date_from->diffInDays($t->date_to)) + 1
+                        : null;
                 @endphp
-                <tr class="row-{{ $t->status }}"
+                <tr class="training-row-{{ $t->status }}"
                     data-id="{{ $t->id }}"
                     data-status="{{ $t->status }}"
                     data-hours="{{ $t->hours }}"
                     data-position="{{ $t->position_type }}"
                     data-ref="{{ $t->ref_doc_no }}"
                     data-employee="{{ $emp->first_name }} {{ $emp->last_name }}"
+                    data-first-name="{{ $emp->first_name }}"
+                    data-photo="{{ $emp->photo }}"
+                    data-initials="{{ $initials }}"
+                    data-approve-url="{{ route('admin.training.approve', $t->id) }}"
+                    data-reject-url="{{ route('admin.training.reject', $t->id) }}"
                     data-emp-id="{{ $emp->employee_id }}"
                     data-dept="{{ $dept }}"
                     data-title="{{ $t->title }}"
@@ -152,21 +183,53 @@
                     data-verified="{{ $t->verified_at ? $t->verified_at->format('M d, Y') : '' }}"
                     data-reject-note="{{ $t->rejected_reason }}">
                     <td>
+                        {{-- The face of whoever filed the certificate. The same
+                             photo the review dialog shows, so the row and the
+                             dialog opened from it read as one person. --}}
                         <div class="admin-employee-cell">
-                            <span class="admin-employee-name">{{ $emp->first_name }} {{ $emp->last_name }}</span>
-                            <span class="admin-employee-meta">{{ $emp->employee_id }} · {{ $dept }}</span>
+                            <span class="training-avatar" aria-hidden="true">
+                                @if($emp->photo)
+                                    <img src="{{ $emp->photo }}" alt="" loading="lazy">
+                                @else
+                                    {{ $initials }}
+                                @endif
+                            </span>
+                            <span class="admin-employee-text">
+                                <span class="admin-employee-name">{{ $emp->first_name }} {{ $emp->last_name }}</span>
+                                <span class="admin-employee-meta">{{ $emp->employee_id }} · {{ $dept }}</span>
+                            </span>
                         </div>
                     </td>
                     <td>
                         <div class="training-title-wrap">
-                            <span class="training-title-text">{{ $t->title }}</span>
-                            <span class="training-ref-doc">{{ $t->ref_doc_no }}</span>
+                            <span class="training-title-text" title="{{ $t->title }}">{{ $t->title }}</span>
+                            <span class="training-title-meta">
+                                <span class="training-ref-doc">{{ $t->ref_doc_no ?: 'No ref. no.' }}</span>
+                                {{-- Whether anything was attached is the first
+                                     thing a verifier checks, so it is on the row
+                                     rather than only inside the dialog. --}}
+                                @if($hasCert)
+                                    <span class="training-cert-flag" title="Certificate attached">
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                        Certificate
+                                    </span>
+                                @else
+                                    <span class="training-cert-flag is-missing" title="No certificate attached">No file</span>
+                                @endif
+                            </span>
                         </div>
                     </td>
-                    <td class="training-table-date">
-                        <span class="training-date-from">{{ $t->date_from ? $t->date_from->format('M d, Y') : '—' }}</span>
-                        <span class="training-date-sep">–</span>
-                        <span class="training-date-to">{{ $t->date_to ? $t->date_to->format('M d, Y') : '—' }}</span>
+                    <td>
+                        <div class="training-table-date">
+                            <span class="training-date-range">
+                                {{ $t->date_from ? $t->date_from->format('M d, Y') : '—' }}
+                                <span class="training-date-sep" aria-hidden="true">→</span>
+                                {{ $t->date_to ? $t->date_to->format('M d, Y') : '—' }}
+                            </span>
+                            @if($dayCount)
+                                <span class="training-date-span">{{ $dayCount }} {{ $dayCount === 1 ? 'day' : 'days' }}</span>
+                            @endif
+                        </div>
                     </td>
                     <td>
                         <span class="training-hours-pill {{ $t->status === 'rejected' ? 'training-hours-pill-muted' : ($t->status === 'pending' ? 'training-hours-pill-pending' : '') }}">
@@ -174,7 +237,7 @@
                         </span>
                     </td>
                     <td><span class="type-badge {{ $badgeClass }}">{{ $t->position_type }}</span></td>
-                    <td>{{ $t->conducted_by }}</td>
+                    <td><span class="training-sponsor" title="{{ $t->conducted_by }}">{{ $t->conducted_by }}</span></td>
                     <td>
                         @if($t->status === 'verified')
                             <span class="verify-badge verified">Verified</span>
@@ -199,14 +262,11 @@
                             </button>
                         @if($t->status === 'pending')
                             <div class="row-menu-sep"></div>
-                            <form method="POST" action="{{ route('admin.training.approve', $t->id) }}" class="row-menu-form" onsubmit="return confirm('Approve this training submission?')">
-                                @csrf
-                                <button type="submit" role="menuitem" class="row-menu-item is-accept">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                    Approve
-                                </button>
-                            </form>
-                            <button type="button" role="menuitem" class="row-menu-item is-danger" onclick="closeRowMenu(); openRejectModal({{ $t->id }})">
+                            <button type="button" role="menuitem" class="row-menu-item is-accept" onclick="closeRowMenu(); openTrainingDecision({{ $t->id }}, 'approve')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                Approve
+                            </button>
+                            <button type="button" role="menuitem" class="row-menu-item is-danger" onclick="closeRowMenu(); openTrainingDecision({{ $t->id }}, 'reject')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                 Reject
                             </button>
@@ -215,9 +275,15 @@
                     </td>
                 </tr>
                 @empty
-                <tr>
-                    <td colspan="8" style="text-align:center;padding:40px;color:var(--gp-text-soft);">
-                        No training submissions yet.
+                <tr class="training-empty-row">
+                    <td colspan="8">
+                        <div class="training-empty">
+                            <span class="training-empty-icon" aria-hidden="true">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>
+                            </span>
+                            <p class="training-empty-title">No training submissions yet</p>
+                            <p class="training-empty-text">Certificates employees file from their own Training page arrive here for verification.</p>
+                        </div>
                     </td>
                 </tr>
                 @endforelse
@@ -241,20 +307,33 @@
 
 </div>
 
-<div class="training-toast" id="adminTrainingToast" role="alert" aria-live="polite"></div>
+{{--
+    Submission review.
 
-{{-- Review Modal --}}
+    The reviewer's job here is a judgement: are these hours real, and does the
+    certificate back them up? The old layout put every field in one flat
+    nine-row list, so the three facts that answer that question -- how many
+    hours are claimed, over which days, and whether anything was uploaded --
+    read with exactly the same weight as the reference document number.
+
+    So the figures being judged lead, as three tiles; who filed it comes next
+    as a named face; and the PDS paperwork sits below as rows, with the
+    employee and the hours no longer repeated there. The certificate is a file
+    card with a real button, not a dashed empty-state box drawn around a file
+    that exists.
+--}}
 <div class="modal-overlay training-modal-overlay" id="reviewModal" onclick="closeAdminModal('reviewModal')">
-    <div class="modal-box training-view-cert-modal" onclick="event.stopPropagation()">
-        <div class="modal-header">
+    <div class="modal-box training-view-cert-modal" onclick="event.stopPropagation()"
+         role="dialog" aria-modal="true" aria-labelledby="rvTitle">
+        <div class="modal-header rv-header">
             <div class="pmodal-hero">
                 <div class="pmodal-hero-icon training-hero-icon">
-                    <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 </div>
-                <div>
+                <div class="rv-heading">
                     <span class="modal-eyebrow">SUBMISSION REVIEW</span>
-                    <h3 class="modal-title" id="rvTitle">—</h3>
-                    <p class="modal-sub" id="rvEmployee">—</p>
+                    {{-- The seminar title, which routinely runs past one line. --}}
+                    <h3 class="modal-title rv-title" id="rvTitle">-</h3>
                     <div class="pmodal-badges" id="rvBadges"></div>
                 </div>
             </div>
@@ -262,69 +341,195 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
-        <div class="modal-body">
-            <p class="modal-section-label">TRAINING DETAILS (CSC PDS)</p>
-            <div class="training-modal-meta" id="rvDetails"></div>
-            <div class="training-enroll-note admin-reject-note" id="rvRejectBanner" hidden>
-                <svg width="16" height="16" fill="none" stroke="#8e1e18" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" class="training-enroll-note-icon"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <p class="training-enroll-note-text" id="rvRejectText"></p>
-            </div>
-            <p class="modal-section-label modal-section-deductions">CERTIFICATE ON FILE</p>
-            <div class="training-cert-preview" id="rvPreview">
-                <div class="training-cert-preview-icon" id="rvFileIcon"></div>
-                <div>
-                    <p class="training-cert-preview-name" id="rvFile">—</p>
-                    <p class="training-cert-preview-note">Submitted by employee — verify against reference document</p>
+
+        <div class="modal-body rv-body">
+            {{-- The three facts the decision turns on. --}}
+            <div class="rv-figures">
+                <div class="rv-figure rv-figure-lead">
+                    <span class="rv-figure-label">Hours claimed</span>
+                    <strong class="rv-figure-value" id="rvHours">-</strong>
+                    <span class="rv-figure-note" id="rvHoursNote"></span>
                 </div>
-                <a id="rvCertLink" href="#" target="_blank" class="modal-btn-ghost" style="margin-left:auto;padding:6px 14px;font-size:12px;">View File</a>
+                <div class="rv-figure">
+                    <span class="rv-figure-label">Inclusive dates</span>
+                    <strong class="rv-figure-value rv-figure-value-sm" id="rvDates">-</strong>
+                    <span class="rv-figure-note" id="rvDatesNote"></span>
+                </div>
+                <div class="rv-figure" id="rvCertFigure">
+                    <span class="rv-figure-label">Certificate</span>
+                    <strong class="rv-figure-value rv-figure-value-sm" id="rvCertState">-</strong>
+                    <span class="rv-figure-note" id="rvCertNote"></span>
+                </div>
+            </div>
+
+            <p class="modal-section-label rv-section-label">Employee</p>
+            <div class="rv-employee">
+                <span class="rv-avatar" id="rvAvatar">--</span>
+                <div class="rv-employee-text">
+                    <p class="rv-employee-name" id="rvEmployee">-</p>
+                    <p class="rv-employee-meta" id="rvEmployeeMeta">-</p>
+                </div>
+            </div>
+
+            <p class="modal-section-label rv-section-label">Submission details · CSC PDS Section IV</p>
+            <div class="rv-details" id="rvDetails"></div>
+
+            {{-- Rejected submissions only: the reason already on record. --}}
+            <div class="rv-returned" id="rvRejectBanner" hidden>
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <div class="rv-returned-text-wrap">
+                    <p class="rv-returned-label">Returned for correction</p>
+                    <p class="rv-returned-text" id="rvRejectText"></p>
+                </div>
+            </div>
+
+            <p class="modal-section-label rv-section-label">Certificate on file</p>
+            <div class="rv-file" id="rvPreview">
+                <span class="rv-file-icon" id="rvFileIcon" aria-hidden="true"></span>
+                <div class="rv-file-text">
+                    <p class="rv-file-name" id="rvFile">-</p>
+                    <p class="rv-file-note" id="rvFileNote">-</p>
+                </div>
+                <a id="rvCertLink" href="#" target="_blank" rel="noopener" class="rv-file-btn">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    View file
+                </a>
             </div>
         </div>
-        <div class="modal-footer" id="rvFooterActions">
-            <button type="button" class="modal-btn-ghost" onclick="closeAdminModal('reviewModal')">Close</button>
-            <button type="button" class="modal-btn-danger-outline" id="rvRejectBtn" onclick="rejectFromReview()" style="display:none;">Reject</button>
-            <button type="button" class="modal-btn-primary" id="rvApproveBtn" onclick="approveFromReview()" style="display:none;">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+
+        {{-- Close sits apart from the two decisions, so a dismissal is never
+             one slip of the mouse away from an approval. --}}
+        <div class="modal-footer rv-footer" id="rvFooterActions">
+            <button type="button" class="modal-btn-ghost rv-close-btn" onclick="closeAdminModal('reviewModal')">Close</button>
+            <button type="button" class="modal-btn-danger-outline" id="rvRejectBtn" onclick="decideFromReview('reject')" hidden>
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Reject
+            </button>
+            <button type="button" class="modal-btn-primary" id="rvApproveBtn" onclick="decideFromReview('approve')" hidden>
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                 Approve
             </button>
         </div>
     </div>
 </div>
 
-{{-- Reject Modal --}}
-<div class="modal-overlay training-modal-overlay" id="rejectModal" onclick="closeAdminModal('rejectModal')">
-    <div class="modal-box training-add-modal" onclick="event.stopPropagation()">
-        <form id="rejectForm" method="POST" onsubmit="submitReject(event)">
-            @csrf
-            <input type="hidden" id="rejectTrainingId" name="training_id">
-            <div class="modal-header">
-                <div class="pmodal-hero">
-                    <div class="pmodal-hero-icon admin-reject-hero-icon">
-                        <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                    </div>
-                    <div>
-                        <span class="modal-eyebrow">REJECT SUBMISSION</span>
-                        <h3 class="modal-title">Send Back for Correction</h3>
-                        <p class="modal-sub" id="rejectModalSub">—</p>
-                    </div>
-                </div>
-                <button type="button" class="modal-close" onclick="closeAdminModal('rejectModal')" aria-label="Close">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="training-form-field training-form-full">
-                    <label for="rejectReason">Reason for rejection <span class="req">*</span></label>
-                    <textarea id="rejectReason" name="reason" rows="4" required placeholder="Explain what needs to be corrected (e.g. certificate date mismatch, illegible scan, missing reference number)..."></textarea>
-                    <p class="training-field-hint">The employee will see this message and can re-submit after correcting their documents.</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="modal-btn-ghost" onclick="closeAdminModal('rejectModal')">Cancel</button>
-                <button type="submit" class="modal-btn-danger">Confirm Rejection</button>
-            </div>
-        </form>
+{{--
+    Approve / reject decision.
+
+    The Approve item used to be `confirm('Approve this training submission?')`
+    and Reject a bare reason box titled only "Send Back for Correction". Both
+    sit behind the same ellipsis menu on a table that can hold dozens of
+    pending rows, so neither question named the submission being decided — the
+    reviewer answered it about whichever row they *believed* they had clicked.
+
+    One dialog answers both, built from the row that was pressed, because the
+    submission summary is identical either way; only the accent, the wording,
+    the reason field and the consequence differ. Splitting it into two copies
+    is how an approval starts describing a different submission than the
+    refusal beside it.
+
+    The consequence is written per decision because the two do opposite things
+    to the employee's record: verifying credits the hours to CSC PDS Section IV
+    (they are what `EmployeeTrainingController` sums into `total_hours` and the
+    L&D breakdown), while rejecting zeroes them and hands back a reason the
+    employee reads on their own copy.
+--}}
+<x-modal id="trainingDecisionModal" overlay-class="modal-overlay training-modal-overlay"
+         close="closeTrainingDecision" max-width="560px">
+    <div class="tdm-head">
+        <div class="tdm-icon" id="tdmIcon">
+            {{-- Swapped for the reject glyph by JS. --}}
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+        </div>
+        <span class="tdm-eyebrow" id="tdmEyebrow">TRAINING SUBMISSION</span>
+        <h3 class="tdm-title" id="tdmTitle">-</h3>
+        <p class="tdm-lede" id="tdmLede">-</p>
     </div>
-</div>
+
+    <div class="modal-body tdm-body">
+        {{-- Whose record this credits. --}}
+        <div class="tdm-filer">
+            <span class="tdm-avatar" id="tdmAvatar">--</span>
+            <div class="tdm-filer-text">
+                <p class="tdm-filer-name" id="tdmEmployee">-</p>
+                <p class="tdm-filer-role" id="tdmEmployeeMeta">-</p>
+            </div>
+            <span class="tdm-ref" id="tdmRefDoc">-</span>
+        </div>
+
+        {{-- What is being decided. The hours lead: they are the figure this
+             decision writes to, or withholds from, the PDS. --}}
+        <div class="tdm-slip">
+            <div class="tdm-slip-row">
+                <span class="tdm-slip-label">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Hours · position
+                </span>
+                <strong class="tdm-slip-value" id="tdmHours">-</strong>
+            </div>
+            <div class="tdm-slip-row">
+                <span class="tdm-slip-label">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Inclusive dates
+                </span>
+                <strong class="tdm-slip-value" id="tdmDates">-</strong>
+            </div>
+            <div class="tdm-slip-row">
+                <span class="tdm-slip-label">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+                    Conducted by
+                </span>
+                <strong class="tdm-slip-value" id="tdmConducted">-</strong>
+            </div>
+            <div class="tdm-slip-row">
+                <span class="tdm-slip-label">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Certificate
+                </span>
+                <strong class="tdm-slip-value" id="tdmCert">-</strong>
+            </div>
+            <div class="tdm-slip-row tdm-slip-training">
+                <span class="tdm-slip-label">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>
+                    Title of training
+                </span>
+                <span class="tdm-slip-training-text" id="tdmTraining">-</span>
+            </div>
+        </div>
+
+        {{-- Approve only, and only when nothing was uploaded: there is then
+             no document to have verified the hours against. --}}
+        <p class="tdm-warn" id="tdmWarn" hidden>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span id="tdmWarnText"></span>
+        </p>
+
+        {{-- Reject only: the reason, as a real field carrying the
+             controller's own `required|string|max:1000`. --}}
+        <div class="tdm-note" id="tdmNoteBlock" hidden>
+            <label class="tdm-note-label" for="tdmNote">
+                What needs to be corrected? <span class="tdm-required">Required</span>
+            </label>
+            <textarea id="tdmNote" class="tdm-note-input" rows="3" maxlength="1000"
+                      placeholder="e.g. The certificate dates do not match the inclusive dates declared — re-upload the certificate for these exact days."></textarea>
+            <div class="tdm-note-foot">
+                <span>The employee reads this on their own submission.</span>
+                <span id="tdmNoteCount">0 / 1000</span>
+            </div>
+        </div>
+
+        <p class="tdm-consequence" id="tdmConsequence">-</p>
+    </div>
+
+    <div class="modal-footer tdm-footer">
+        <button type="button" class="modal-btn-ghost" id="tdmCancel" onclick="closeTrainingDecision()">Go back</button>
+        <button type="button" class="modal-btn-primary" id="tdmConfirm" onclick="submitTrainingDecision()">
+            <span id="tdmConfirmLabel">Confirm</span>
+        </button>
+    </div>
+</x-modal>
 
 {{-- Flash success modal --}}
 @if(session('success'))
@@ -371,15 +576,6 @@
         if (!anyOpen) document.body.style.overflow = '';
     };
 
-    function showToast(msg) {
-        const t = document.getElementById('adminTrainingToast');
-        if (!t) return;
-        t.textContent = msg;
-        t.classList.add('show');
-        clearTimeout(showToast._t);
-        showToast._t = setTimeout(() => t.classList.remove('show'), 3200);
-    }
-
     window._currentPage = 1;
     window._rowsPerPage = 10;
 
@@ -415,13 +611,23 @@
         document.querySelectorAll('#adminTrainingBody tr[data-id]').forEach(row => row.style.display = 'none');
         rows.forEach((row, i) => { if (i >= start && i < end) row.style.display = ''; });
 
-        // No-results feedback — mirrors the "No records found matching your search." behavior on the Attendance page
+        // No-results feedback, wearing the same empty state the server-rendered
+        // "no submissions yet" row does -- a filter that matches nothing should
+        // not look like a different page from an empty queue.
         let emptyRow = document.getElementById('adminTrainingNoResults');
         if (total === 0) {
             if (!emptyRow) {
                 emptyRow = document.createElement('tr');
                 emptyRow.id = 'adminTrainingNoResults';
-                emptyRow.innerHTML = '<td colspan="8" style="text-align:center;padding:40px;color:var(--gp-text-mid);">No records found matching your search.</td>';
+                emptyRow.className = 'training-empty-row';
+                emptyRow.innerHTML =
+                    '<td colspan="8"><div class="training-empty">' +
+                    '<span class="training-empty-icon" aria-hidden="true">' +
+                    '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+                    '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>' +
+                    '<p class="training-empty-title">No matching submissions</p>' +
+                    '<p class="training-empty-text">No record matches the filters and search terms currently applied.</p>' +
+                    '</div></td>';
                 document.getElementById('adminTrainingBody').appendChild(emptyRow);
             }
         } else if (emptyRow) {
@@ -489,100 +695,320 @@
         return document.querySelector('#adminTrainingBody tr[data-id="' + ref + '"]');
     }
 
+    const RV_FILE_ICONS = {
+        pdf:   '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+        image: '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
+        none:  '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="14" x2="15" y2="20"/><line x1="15" y1="14" x2="9" y2="20"/></svg>',
+    };
+
+    const rvEl  = id => document.getElementById(id);
+    const rvSet = (id, text) => { const node = rvEl(id); if (node) node.textContent = text; };
+
+    /** "3 days" across an inclusive range; '' when either date is unparseable. */
+    function rvDaySpan(from, to) {
+        const a = Date.parse(from);
+        const b = Date.parse(to);
+        if (isNaN(a) || isNaN(b) || b < a) return '';
+        const days = Math.round((b - a) / 86400000) + 1;
+        return days === 1 ? '1 day' : days + ' days';
+    }
+
+    /**
+     * Every value below is written with textContent, never innerHTML. These
+     * come out of `dataset`, which hands back the *decoded* attribute -- so a
+     * seminar title containing markup would be re-parsed as HTML if it were
+     * interpolated into a string. Only the fixed icons above are innerHTML.
+     */
     window.reviewSubmission = function (ref) {
         const row = resolveTrainingRow(ref);
         if (!row) return;
         activeRow = row;
+
         const d = row.dataset;
-        document.getElementById('rvTitle').textContent = d.title;
-        document.getElementById('rvEmployee').textContent = d.employee + ' · ' + d.dept + ' · Submitted ' + (d.submitted || '—');
-
-        const badgeClass = (d.position || '').toLowerCase();
-        const statusMap  = { verified: 'verified', rejected: 'rejected', pending: 'pending' };
-        document.getElementById('rvBadges').innerHTML =
-            '<span class="verify-badge ' + (statusMap[d.status] || 'pending') + '">' + (d.status.charAt(0).toUpperCase() + d.status.slice(1)) + '</span>' +
-            '<span class="type-badge ' + badgeClass + '">' + d.position + '</span>';
-
-        document.getElementById('rvDetails').innerHTML = [
-            ['Employee',              d.employee + ' (' + d.empId + ')'],
-            ['Department',            d.dept],
-            ['Inclusive Dates',       d.dateFrom + ' – ' + d.dateTo],
-            ['Number of Hours',       d.status === 'rejected' ? '0 (not credited)' : d.hours],
-            ['Type of Position',      d.position],
-            ['Conducted / Sponsored By', d.conducted],
-            ['Reference Document',    d.ref],
-            ['Submitted',             d.submitted || '—'],
-            ['Verified',              d.verified  || '—'],
-        ].map(p => '<div class="modal-row"><span>' + p[0] + '</span><strong>' + p[1] + '</strong></div>').join('');
-
-        const rejectBanner = document.getElementById('rvRejectBanner');
-        if (d.status === 'rejected' && d.rejectNote) {
-            rejectBanner.hidden = false;
-            document.getElementById('rvRejectText').textContent = d.rejectNote;
-        } else {
-            rejectBanner.hidden = true;
-        }
-
+        const status = d.status || 'pending';
         const certUrl = d.certUrl || '';
-        document.getElementById('rvFile').textContent = certUrl ? 'Certificate on file' : 'No file uploaded';
-        const certLink = document.getElementById('rvCertLink');
-        if (certUrl) { certLink.href = certUrl; certLink.style.display = ''; }
-        else { certLink.style.display = 'none'; }
+        const rejected = status === 'rejected';
 
-        const isPdf = certUrl.toLowerCase().includes('.pdf') || !certUrl.match(/\.(jpg|jpeg|png)$/i);
-        document.getElementById('rvFileIcon').innerHTML = isPdf
-            ? '<svg width="40" height="40" fill="none" stroke="#8e1e18" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
-            : '<svg width="40" height="40" fill="none" stroke="#0369a1" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+        rvSet('rvTitle', d.title);
 
-        const isPending = d.status === 'pending';
-        document.getElementById('rvApproveBtn').style.display = isPending ? '' : 'none';
-        document.getElementById('rvRejectBtn').style.display  = isPending ? '' : 'none';
+        // Status and position type, as the same badges the table row wears.
+        const badges = rvEl('rvBadges');
+        badges.textContent = '';
+        const badge = (className, text) => {
+            const span = document.createElement('span');
+            span.className = className;
+            span.textContent = text;
+            badges.appendChild(span);
+        };
+        badge('verify-badge ' + status, status.charAt(0).toUpperCase() + status.slice(1));
+        if (d.position) badge('type-badge ' + d.position.toLowerCase(), d.position);
+
+        // The three figures the decision turns on.
+        // A rejected submission is credited 0 -- the table shows it that way,
+        // and so must the screen the reviewer reads before re-deciding.
+        rvSet('rvHours', rejected ? '0' : (d.hours || '0'));
+        rvSet('rvHoursNote', rejected
+            ? 'Not credited (' + (d.hours || '0') + ' claimed)'
+            : (status === 'verified' ? 'Credited to PDS Section IV' : 'Awaiting verification'));
+
+        rvSet('rvDates', d.dateFrom + ' – ' + d.dateTo);
+        rvSet('rvDatesNote', rvDaySpan(d.dateFrom, d.dateTo));
+
+        rvSet('rvCertState', certUrl ? 'On file' : 'None');
+        rvSet('rvCertNote', certUrl ? 'Attached by the employee' : 'Nothing to verify against');
+        rvEl('rvCertFigure').classList.toggle('is-missing', !certUrl);
+
+        // Who filed it.
+        const avatar = rvEl('rvAvatar');
+        avatar.textContent = '';
+        if (d.photo) {
+            const img = document.createElement('img');
+            img.src = d.photo;
+            img.alt = '';
+            avatar.appendChild(img);
+        } else {
+            avatar.textContent = d.initials || '--';
+        }
+        rvSet('rvEmployee', d.employee);
+        rvSet('rvEmployeeMeta', d.dept ? d.empId + ' · ' + d.dept : d.empId);
+
+        // The paperwork. The employee, the hours and the dates are deliberately
+        // absent -- they are above, and repeating them is what made this a wall.
+        const details = rvEl('rvDetails');
+        details.textContent = '';
+        [
+            ['Conducted / sponsored by', d.conducted || 'Not stated'],
+            ['Reference document',       d.ref || 'Not stated'],
+            ['Date submitted',           d.submitted || '—'],
+            ['Verified on',              d.verified || '—'],
+        ].forEach(pair => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'rv-detail-row';
+            const label = document.createElement('span');
+            label.textContent = pair[0];
+            const value = document.createElement('strong');
+            value.textContent = pair[1];
+            rowEl.append(label, value);
+            details.appendChild(rowEl);
+        });
+
+        const rejectBanner = rvEl('rvRejectBanner');
+        rejectBanner.hidden = !(rejected && d.rejectNote);
+        if (!rejectBanner.hidden) rvSet('rvRejectText', d.rejectNote);
+
+        // The certificate, as a file card rather than an empty-state box.
+        const isImage = /\.(jpg|jpeg|png|webp)(\?|$)/i.test(certUrl);
+        const kind = !certUrl ? 'none' : (isImage ? 'image' : 'pdf');
+        const fileIcon = rvEl('rvFileIcon');
+        fileIcon.className = 'rv-file-icon is-' + kind;
+        fileIcon.innerHTML = RV_FILE_ICONS[kind];
+
+        rvEl('rvPreview').classList.toggle('is-empty', !certUrl);
+        rvSet('rvFile', certUrl ? (isImage ? 'Scanned certificate (image)' : 'Certificate document (PDF)') : 'No certificate uploaded');
+        rvSet('rvFileNote', certUrl
+            ? 'Check the dates and hours against the reference document.'
+            : 'The employee submitted these hours without attaching proof.');
+        const certLink = rvEl('rvCertLink');
+        certLink.hidden = !certUrl;
+        if (certUrl) certLink.href = certUrl;
+
+        // Only a pending submission can still be decided.
+        const isPending = status === 'pending';
+        rvEl('rvApproveBtn').hidden = !isPending;
+        rvEl('rvRejectBtn').hidden  = !isPending;
 
         openAdminModal('reviewModal');
     };
 
-    window.approveFromReview = function () {
-        if (!activeRow || activeRow.dataset.status !== 'pending') return;
+    /* -- Approve / reject decision -----------------------------------------
+       Replaces confirm('Approve this training submission?') and a reject box
+       that named only the title. Both decisions are built from the row that
+       was pressed, so the question names the submission it is deciding, and
+       both post the same route the buttons always did. */
+
+    const TDM_ICONS = {
+        approve: '<polyline points="20 6 9 17 4 12"/>',
+        reject:  '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+    };
+    const TDM_MAX_REASON = 1000;
+
+    /** The submission currently open in the dialog. */
+    let decisionContext = null;
+
+    const tdmEl  = id => document.getElementById(id);
+    const tdmSet = (id, text) => { const node = tdmEl(id); if (node) node.textContent = text; };
+
+    const tdmHours = value => {
+        const h = parseFloat(value) || 0;
+        return h === 1 ? '1 hour' : h + ' hours';
+    };
+
+    /**
+     * @param {number|HTMLElement} ref  a row id, a <tr>, or an element inside one
+     * @param {'approve'|'reject'} decision
+     */
+    window.openTrainingDecision = function (ref, decision) {
+        const row = resolveTrainingRow(ref);
+        if (!row) return;
+        // Both actions are rendered only on pending rows, but the review modal
+        // can reach this from a row a second tab has already decided.
+        if (row.dataset.status !== 'pending') return;
+
+        activeRow = row;
+        const d = row.dataset;
+        const approving = decision === 'approve';
+        const first = d.firstName || d.employee;
+        const hours = tdmHours(d.hours);
+        const hasCert = !!d.certUrl;
+
+        decisionContext = { action: approving ? d.approveUrl : d.rejectUrl, decision };
+
+        // Who submitted it. The photo goes in as an <img> with `src` set as a
+        // property rather than interpolated into a CSS url(...) string -- a
+        // filename holding a quote would break out of the latter.
+        const avatar = tdmEl('tdmAvatar');
+        avatar.textContent = '';
+        if (d.photo) {
+            const img = document.createElement('img');
+            img.src = d.photo;
+            img.alt = '';
+            avatar.appendChild(img);
+        } else {
+            avatar.textContent = d.initials || '--';
+        }
+        tdmSet('tdmEmployee', d.employee);
+        tdmSet('tdmEmployeeMeta', d.dept ? d.empId + ' · ' + d.dept : d.empId);
+        tdmSet('tdmRefDoc', d.ref || 'No ref. no.');
+
+        // The submission
+        tdmSet('tdmHours', hours + ' · ' + d.position);
+        tdmSet('tdmDates', d.dateFrom + ' – ' + d.dateTo);
+        tdmSet('tdmConducted', d.conducted || 'Not specified');
+        tdmSet('tdmCert', hasCert ? 'On file' : 'None uploaded');
+        tdmSet('tdmTraining', d.title);
+
+        const modal = tdmEl('trainingDecisionModal');
+        modal.classList.toggle('is-approve', approving);
+        modal.classList.toggle('is-reject', !approving);
+
+        tdmEl('tdmIcon').innerHTML =
+            '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">'
+            + TDM_ICONS[decision] + '</svg>';
+
+        const fiscalYear = document.querySelector('.admin-training')?.dataset.fiscalYear || '';
+
+        if (approving) {
+            tdmSet('tdmEyebrow', 'APPROVE TRAINING SUBMISSION');
+            tdmSet('tdmTitle', 'Credit ' + hours + ' to ' + first + "'s record?");
+            tdmSet('tdmLede', d.title + ' — ' + d.dateFrom + ' – ' + d.dateTo + '.');
+            // Verified hours are what EmployeeTrainingController sums into the
+            // employee's total_hours and L&D breakdown, so approving changes
+            // their PDS -- it is not just a status flag.
+            tdmSet('tdmConsequence',
+                'Verifying this credits ' + hours + ' to ' + first
+                + "'s CSC PDS Section IV (Learning & Development) record and counts toward their "
+                + (fiscalYear ? fiscalYear + ' ' : '') + "L&D hours. The submission is stamped with your name and today's date. "
+                + 'Undoing it means rejecting the submission afterwards, which drops the hours back to 0.');
+            tdmSet('tdmConfirmLabel', 'Yes, approve');
+            tdmSet('tdmCancel', 'Go back');
+        } else {
+            tdmSet('tdmEyebrow', 'REJECT TRAINING SUBMISSION');
+            tdmSet('tdmTitle', 'Send ' + first + "'s submission back for correction?");
+            tdmSet('tdmLede', d.title + ' — ' + d.dateFrom + ' – ' + d.dateTo + '.');
+            tdmSet('tdmConsequence',
+                first + ' is credited 0 hours for this training and the submission is marked rejected. '
+                + 'Your reason is saved on it and is what ' + first + ' reads, so it needs to say what to fix '
+                + 'before they can correct their documents and submit again.');
+            tdmSet('tdmConfirmLabel', 'Reject submission');
+            tdmSet('tdmCancel', 'Keep pending');
+        }
+
+        // Approving with nothing uploaded credits hours against no document.
+        const warn = tdmEl('tdmWarn');
+        warn.hidden = !(approving && !hasCert);
+        if (!warn.hidden) {
+            tdmSet('tdmWarnText', 'No certificate was uploaded with this submission, so there is no file to check the '
+                + hours + ' against.');
+        }
+
+        // The reason belongs to the rejection only; approve() nulls
+        // rejected_reason, so a note attached to it has nowhere to be read.
+        tdmEl('tdmNoteBlock').hidden = approving;
+        tdmEl('tdmNote').value = '';
+        tdmSet('tdmNoteCount', '0 / ' + TDM_MAX_REASON);
+
+        // The server refuses an empty reason with a 422 this page has nowhere
+        // to show, so the button stays out of reach until there is one to send.
+        syncTrainingConfirmState();
+
         closeAdminModal('reviewModal');
-        // Submit approve form programmatically
-        const id = activeRow.dataset.id;
+        openAdminModal('trainingDecisionModal');
+        (approving ? tdmEl('tdmConfirm') : tdmEl('tdmNote')).focus();
+    };
+
+    window.closeTrainingDecision = function () {
+        decisionContext = null;
+        closeAdminModal('trainingDecisionModal');
+    };
+
+    /** Rejection needs a reason; approval needs nothing. */
+    function syncTrainingConfirmState() {
+        if (!decisionContext) return;
+        tdmEl('tdmConfirm').disabled =
+            decisionContext.decision === 'reject' && tdmEl('tdmNote').value.trim() === '';
+    }
+
+    window.submitTrainingDecision = function () {
+        if (!decisionContext) return;
+        const { action, decision } = decisionContext;
+        const reason = decision === 'approve' ? '' : tdmEl('tdmNote').value.trim().slice(0, TDM_MAX_REASON);
+        if (decision === 'reject' && !reason) return;
+
+        // Double submission on a slow connection would post the decision twice.
+        tdmEl('tdmConfirm').disabled = true;
+        tdmSet('tdmConfirmLabel', decision === 'approve' ? 'Approving…' : 'Rejecting…');
+
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '/admin/training/' + id + '/approve';
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden'; csrf.name = '_token';
-        csrf.value = document.querySelector('meta[name="csrf-token"]').content;
-        form.appendChild(csrf);
+        form.action = action;
+
+        const field = (name, value) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        };
+        field('_token', document.querySelector('meta[name="csrf-token"]')?.content ?? '');
+        if (reason) field('reason', reason);
+
         document.body.appendChild(form);
         form.submit();
     };
 
-    window.openRejectModal = function (ref) {
-        activeRow = resolveTrainingRow(ref);
-        if (!activeRow) return;
-        const id = activeRow.dataset.id;
-        if (!id) { showToast('Could not find training ID.'); return; }
-        document.getElementById('rejectTrainingId').value = id;
-        document.getElementById('rejectForm').action = '/admin/training/' + id + '/reject';
-        document.getElementById('rejectModalSub').textContent = activeRow.dataset.title + ' — ' + activeRow.dataset.employee;
-        document.getElementById('rejectReason').value = '';
-        closeAdminModal('reviewModal');
-        openAdminModal('rejectModal');
+    /** The review modal's own Approve / Reject -- same dialog, same row. */
+    window.decideFromReview = function (decision) {
+        if (activeRow) openTrainingDecision(activeRow, decision);
     };
 
-    window.rejectFromReview = function () {
-        if (activeRow) openRejectModal(activeRow);
-    };
+    // Live counter, so the 1000-character ceiling is visible rather than a
+    // silent truncation at submit time.
+    const tdmNote = tdmEl('tdmNote');
+    if (tdmNote) {
+        tdmNote.addEventListener('input', () => {
+            const count = tdmEl('tdmNoteCount');
+            count.textContent = tdmNote.value.length + ' / ' + TDM_MAX_REASON;
+            count.classList.toggle('is-full', tdmNote.value.length >= TDM_MAX_REASON);
+            syncTrainingConfirmState();
+        });
+    }
 
-    window.submitReject = function (e) {
-        e.preventDefault();
-        const reason = document.getElementById('rejectReason').value.trim();
-        if (!reason) { showToast('Please enter a rejection reason.'); return; }
-        // Remove onsubmit to prevent loop, then submit natively
-        const form = document.getElementById('rejectForm');
-        form.onsubmit = null;
-        form.submit();
-    };
+    // Escape is a "no" -- the safe answer for both decisions.
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        const modal = tdmEl('trainingDecisionModal');
+        if (modal && modal.style.display === 'flex') closeTrainingDecision();
+    });
 
     filterAdminTraining();
 

@@ -37,7 +37,7 @@ if (dataEl && drawer && scrim) {
     // ── Drawer ───────────────────────────────────────────────────────────
 
     function render(entry) {
-        set('auditDrawerId', `#${entry.id}`);
+        set('auditDrawerId', `Entry #${entry.id}`);
         set('auditDrawerSub', `${entry.change_count} ${entry.change_count === 1 ? 'field' : 'fields'} affected`);
         set('auditDrawerUser', entry.user_name);
         set('auditDrawerInitials', entry.user_initials);
@@ -53,19 +53,14 @@ if (dataEl && drawer && scrim) {
         set('auditDrawerDevice', entry.device);
         set('auditDrawerAgent', entry.user_agent);
 
-        // Title = the action badge plus the record it touched, which is the
-        // one sentence the whole entry comes down to.
-        const title = el('auditDrawerTitle');
-        title.textContent = '';
+        // The record the entry touched is the heading; the action is a status
+        // beside the reference chip. They used to share the <h3>, which made a
+        // badge part of a heading and left neither reading as what it is.
+        set('auditDrawerTitle', `${entry.record_type} #${entry.record_id}`);
 
-        const badge = document.createElement('span');
+        const badge = el('auditDrawerBadge');
         badge.className = `badge-status ${entry.badge}`;
         badge.textContent = entry.event_label;
-
-        const record = document.createElement('span');
-        record.textContent = `${entry.record_type} #${entry.record_id}`;
-
-        title.append(badge, record);
 
         renderDiff(entry.changes || []);
     }

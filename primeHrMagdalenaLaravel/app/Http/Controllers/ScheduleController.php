@@ -260,6 +260,7 @@ class ScheduleController extends Controller
 
             $rows = $employees->map(function (Employee $emp) use ($time) {
                 $schedule = $emp->currentSchedule();
+                $status = $emp->scheduleStatus();
 
                 $middle = $emp->middle_name ? substr($emp->middle_name, 0, 1) . '. ' : '';
                 $suffix = $emp->suffix ? ' ' . $emp->suffix : '';
@@ -272,13 +273,17 @@ class ScheduleController extends Controller
                     $time($schedule?->am_out),
                     $time($schedule?->pm_in),
                     $time($schedule?->pm_out),
-                    // The same three states the table shows, so the CSV and
-                    // the screen cannot disagree about who has a schedule.
-                    match (true) {
-                        (bool) $schedule            => 'Active',
-                        $emp->schedule->isNotEmpty() => 'Scheduled',
-                        default                      => 'Not Set',
-                    },
+                    // The same states the table shows, resolved by the same
+                    // method, so the CSV and the screen cannot disagree about
+                    // who is covered.
+                    $status['label'],
+                    // What the screen puts under the badge: the date the
+                    // state turns over. A CSV of statuses with no dates
+                    // cannot answer "whose schedule lapses this month",
+                    // which is the question the column exists for.
+                    $status['date']
+                        ? $status['note'] . ' ' . Carbon::parse($status['date'])->format('m/d/Y')
+                        : '',
                 ];
             })->all();
 
@@ -291,7 +296,7 @@ class ScheduleController extends Controller
                 $file = fopen('php://output', 'w');
                 // BOM so Excel reads the UTF-8 names correctly.
                 fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
-                fputcsv($file, ['Employee ID', 'Employee Name', 'Department', 'AM In', 'AM Out', 'PM In', 'PM Out', 'Status']);
+                fputcsv($file, ['Employee ID', 'Employee Name', 'Department', 'AM In', 'AM Out', 'PM In', 'PM Out', 'Status', 'Effective']);
 
                 foreach ($rows as $row) {
                     fputcsv($file, $row);

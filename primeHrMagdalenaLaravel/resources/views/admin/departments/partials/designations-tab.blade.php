@@ -21,15 +21,27 @@
         </div>
     </div>
     <div class="table-wrapper">
-        <table class="payroll-table">
+        {{-- Same rule as the Departments table: declared widths, and each
+             column's alignment stated once for `th` and `td` together. The
+             money column is the one that has to be right-aligned, so pesos
+             line up on the decimal down the page. --}}
+        <table class="payroll-table desig-table">
+            <colgroup>
+                <col class="gcol-title">
+                <col class="gcol-dept">
+                <col class="gcol-code">
+                <col class="gcol-grade">
+                <col class="gcol-rate">
+                <col class="gcol-type">
+            </colgroup>
             <thead>
                 <tr>
-                    <th class="sortable-th" onclick="sortDesig('title')" data-col="title">Designation Title <span class="sort-icon">⇅</span></th>
-                    <th class="sortable-th" onclick="sortDesig('department')" data-col="department">Department <span class="sort-icon">⇅</span></th>
-                    <th class="sortable-th" onclick="sortDesig('dept_code')" data-col="dept_code">Code <span class="sort-icon">⇅</span></th>
-                    <th class="sortable-th" onclick="sortDesig('salary_grade')" data-col="salary_grade">Salary Grade <span class="sort-icon">⇅</span></th>
-                    <th class="sortable-th" onclick="sortDesig('monthly_rate')" data-col="monthly_rate">Monthly Rate <span class="sort-icon">⇅</span></th>
-                    <th class="sortable-th" onclick="sortDesig('employment_type')" data-col="employment_type">Employment Type <span class="sort-icon">⇅</span></th>
+                    <th scope="col" class="sortable-th" onclick="sortDesig('title')" data-col="title">Designation Title <span class="sort-icon">⇅</span></th>
+                    <th scope="col" class="sortable-th" onclick="sortDesig('department')" data-col="department">Department <span class="sort-icon">⇅</span></th>
+                    <th scope="col" class="sortable-th" onclick="sortDesig('dept_code')" data-col="dept_code">Code <span class="sort-icon">⇅</span></th>
+                    <th scope="col" class="sortable-th" onclick="sortDesig('salary_grade')" data-col="salary_grade">Salary Grade <span class="sort-icon">⇅</span></th>
+                    <th scope="col" class="sortable-th" onclick="sortDesig('monthly_rate')" data-col="monthly_rate">Monthly Rate <span class="sort-icon">⇅</span></th>
+                    <th scope="col" class="sortable-th" onclick="sortDesig('employment_type')" data-col="employment_type">Employment Type <span class="sort-icon">⇅</span></th>
                 </tr>
             </thead>
             <tbody id="desig-tbody"></tbody>

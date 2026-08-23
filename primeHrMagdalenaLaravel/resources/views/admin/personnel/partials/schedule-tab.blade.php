@@ -3,7 +3,7 @@
     <div class="table-header">
         <div>
             <h3 class="table-title">Work Schedules</h3>
-            <p class="table-sub">Manage employee work schedules � {{ $employees->count() }} employees</p>
+            <p class="table-sub">Manage employee work schedules · <strong>{{ $employees->count() }}</strong> employees</p>
         </div>
         <div class="table-actions">
             <select class="filter-select" id="schedDepartmentFilter" onchange="applyScheduleFilters()">
@@ -38,17 +38,36 @@
     </div>
 
     <div class="table-wrapper">
-        <table class="payroll-table" id="scheduleTable">
+        {{--
+            Widths are declared here and the table is `table-layout: fixed`,
+            so the four time columns keep the same width whether they hold
+            "10:00 AM" or "--:--" -- they used to re-measure per page, which
+            left the AM/PM headings sitting over different columns depending
+            on who happened to be listed. Each column's alignment is set on
+            `th` and `td` together in adminPersonnel.css, which is what keeps
+            a centred time under a centred heading.
+        --}}
+        <table class="payroll-table sched-table" id="scheduleTable">
+            <colgroup>
+                <col class="scol-employee">
+                <col class="scol-dept">
+                <col class="scol-time">
+                <col class="scol-time">
+                <col class="scol-time">
+                <col class="scol-time">
+                <col class="scol-status">
+                <col class="scol-actions">
+            </colgroup>
             <thead>
                 <tr>
-                    <th>Employee</th>
-                    <th>Department</th>
-                    <th>AM In</th>
-                    <th>AM Out</th>
-                    <th>PM In</th>
-                    <th>PM Out</th>
-                    <th>Status</th>
-                    <th class="row-menu-head">Actions</th>
+                    <th scope="col">Employee</th>
+                    <th scope="col">Department</th>
+                    <th scope="col">AM In</th>
+                    <th scope="col">AM Out</th>
+                    <th scope="col">PM In</th>
+                    <th scope="col">PM Out</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="row-menu-head">Actions</th>
                 </tr>
             </thead>
             <tbody id="scheduleTableBody">
@@ -61,36 +80,74 @@
                     // One rule for "the schedule in force today", shared with
                     // the CSV export — see Employee::currentSchedule().
                     $currentSchedule = $employee->currentSchedule();
+                    // Rendered four times per row; formatting it here keeps the
+                    // Carbon call and the "never set" fallback in one place
+                    // rather than repeated down the row with the styling.
+                    $slot = fn ($value) => $value
+                        ? \Carbon\Carbon::parse($value)->format('g:i A')
+                        : null;
+
+                    // Four states, resolved on the model so the CSV export
+                    // reports the same ones -- see Employee::scheduleStatus().
+                    $scheduleStatus = $employee->scheduleStatus();
+                    $statusBadge = [
+                        'active'   => 'processed',
+                        'upcoming' => 'is-info',
+                        'expired'  => 'is-warning',
+                        'none'     => 'is-neutral',
+                    ];
+                    // A schedule lapsing inside a month is the row an HR
+                    // officer needs to act on before it does.
+                    $endsSoon = $scheduleStatus['state'] === 'active'
+                        && $scheduleStatus['date']
+                        && \Carbon\Carbon::parse($scheduleStatus['date'])->lessThanOrEqualTo(now()->addDays(30));
                 @endphp
-                <tr>
+                <tr class="sched-row @if(in_array($scheduleStatus['state'], ['expired', 'none'])) is-unscheduled @endif">
                     <td>
                         <div class="emp-cell">
                             @if($employee->photo)
-                                <img src="{{ $employee->photo }}" alt="{{ $fullName }}" class="emp-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--gp-border);">
+                                <img src="{{ $employee->photo }}" alt="" class="emp-avatar sched-avatar" loading="lazy">
                             @else
-                                <div class="emp-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:12px; border:2px solid var(--gp-border);">
+                                <div class="emp-avatar sched-avatar" style="background: {{ $avatarColors[$index % count($avatarColors)] }};">
                                     {{ getInitials($fullName) }}
                                 </div>
                             @endif
-                            <div>
+                            <div class="emp-cell-text">
                                 <p class="emp-name">{{ $fullName }}</p>
                                 <p class="emp-id">{{ $employee->employee_id }}</p>
                             </div>
                         </div>
                     </td>
-                    <td><span class="dept-tag">{{ $department }}</span></td>
-                    <td style="font-size: 13px; color: var(--gp-pri); font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->am_in)->format('g:i A') : '--:--' }}</td>
-                    <td style="font-size: 13px; color: var(--gp-pri); font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->am_out)->format('g:i A') : '--:--' }}</td>
-                    <td style="font-size: 13px; color: var(--gp-pri); font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->pm_in)->format('g:i A') : '--:--' }}</td>
-                    <td style="font-size: 13px; color: var(--gp-pri); font-weight: 600;">{{ $currentSchedule ? \Carbon\Carbon::parse($currentSchedule->pm_out)->format('g:i A') : '--:--' }}</td>
+                    <td><span class="dept-tag" title="{{ $department }}">{{ $department }}</span></td>
+                    @foreach(['am_in', 'am_out', 'pm_in', 'pm_out'] as $field)
+                        @php $time = $currentSchedule ? $slot($currentSchedule->{$field}) : null; @endphp
+                        <td class="sched-time">
+                            @if($time)
+                                <span class="sched-time-value">{{ $time }}</span>
+                            @else
+                                {{-- Muted, so a row with no schedule reads as
+                                     empty at a glance instead of as four
+                                     equally-weighted values. --}}
+                                <span class="sched-time-empty" title="No schedule set">--:--</span>
+                            @endif
+                        </td>
+                    @endforeach
                     <td>
-                        @if($currentSchedule)
-                            <span class="badge-status processed">Active</span>
-                        @elseif($employee->schedule->count() > 0)
-                            <span class="badge-status pending">Scheduled</span>
-                        @else
-                            <span class="badge-status is-neutral">Not Set</span>
-                        @endif
+                        {{-- The badge alone said whether a schedule was in
+                             force, never until when -- so an active row gave
+                             no warning that it lapses on Friday. The date the
+                             state turns over sits under it: when an active
+                             schedule ends, when an upcoming one starts, when
+                             a lapsed one ended. --}}
+                        <div class="sched-status">
+                            <span class="badge-status {{ $statusBadge[$scheduleStatus['state']] }}">{{ $scheduleStatus['label'] }}</span>
+                            @if($scheduleStatus['date'])
+                                <span class="sched-status-when @if($endsSoon) is-soon @endif"
+                                      title="{{ $scheduleStatus['note'] }} {{ \Carbon\Carbon::parse($scheduleStatus['date'])->format('l, j F Y') }}">
+                                    {{ $scheduleStatus['note'] }} {{ \Carbon\Carbon::parse($scheduleStatus['date'])->format('M j, Y') }}
+                                </span>
+                            @endif
+                        </div>
                     </td>
                     <td class="row-menu-cell">
                         <div class="row-actions">
@@ -146,9 +203,15 @@
                     </td>
                 </tr>
                 @empty
-                <tr>
-                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--gp-text-mid);">
-                        No employees found.
+                <tr class="sched-empty-row">
+                    <td colspan="8">
+                        <div class="sched-empty">
+                            <span class="sched-empty-icon" aria-hidden="true">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </span>
+                            <p class="sched-empty-title">No employees found</p>
+                            <p class="sched-empty-text">Employees added under the Employee Records tab appear here for scheduling.</p>
+                        </div>
                     </td>
                 </tr>
                 @endforelse
@@ -157,9 +220,9 @@
     </div>
 
     <div class="table-footer">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <p>Showing <strong id="schedShowingStart">1</strong>-<strong id="schedShowingEnd">10</strong> of <strong id="schedTotalRecords">{{ $employees->count() }}</strong> records</p>
-            <select id="schedRowsPerPageSelect" onchange="changeScheduleRowsPerPage(this.value)" style="padding: 6px 12px; border: 1.5px solid var(--gp-border); border-radius: 6px; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; color: var(--gp-pri); background: #fff; cursor: pointer;">
+        <div class="sched-footer-left">
+            <p>Showing <strong id="schedShowingStart">0</strong>-<strong id="schedShowingEnd">0</strong> of <strong id="schedTotalRecords">{{ $employees->count() }}</strong> records</p>
+            <select id="schedRowsPerPageSelect" class="filter-select sched-perpage" onchange="changeScheduleRowsPerPage(this.value)" aria-label="Rows per page">
                 <option value="10" selected>10 per page</option>
                 <option value="25">25 per page</option>
                 <option value="50">50 per page</option>

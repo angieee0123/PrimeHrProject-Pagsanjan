@@ -59,7 +59,8 @@ function updateSortHeaders(selector, activeCol, dir) {
         if (!icon) return;
         const col = th.dataset.col;
         icon.textContent = col === activeCol ? (dir === 'asc' ? '↑' : '↓') : '⇅';
-        icon.style.color = col === activeCol ? 'var(--gp-pri)' : '#bbb';
+        icon.style.color = col === activeCol ? 'var(--gp-pri)' : 'var(--theme-neutral-400)';
+        th.classList.toggle('is-sorted', col === activeCol);
     });
 }
 
@@ -123,6 +124,89 @@ window.clearDesigFilters = function() {
 // --- Departments pagination ---
 let deptPage = 1, deptRowsPerPage = 10, filteredDepartments = [...departments];
 
+/* ── Row building ─────────────────────────────────────────────────────────
+   Both tables build their rows as DOM nodes now, rather than concatenating
+   into `tbody.innerHTML`. Two reasons:
+
+   · A department name or designation title is admin-entered free text that
+     arrives here through `@json`. Interpolated into an HTML string it is
+     parsed as markup -- a name containing a tag would run as one. Text set
+     with `textContent` cannot.
+   · `innerHTML +=` re-parses and re-builds the entire tbody on every
+     iteration of the loop, which is quadratic in the number of rows.
+*/
+
+/** <td> with optional class and plain text. */
+function depCell(text, className) {
+    const td = document.createElement('td');
+    if (className) td.className = className;
+    if (text !== undefined && text !== null) td.textContent = text;
+    return td;
+}
+
+/** A pill (`.dept-tag`, `.badge-status`, …) inside its own <td>. */
+function depPillCell(text, pillClass, cellClass) {
+    const td = depCell(null, cellClass);
+    const pill = document.createElement('span');
+    pill.className = pillClass;
+    pill.textContent = text;
+    td.appendChild(pill);
+    return td;
+}
+
+/**
+ * The tile colour is derived from the department's own code, not from its
+ * position in the list. Indexing the palette by row number meant the same
+ * office was navy on page 1 and maroon on page 2, and changed colour again
+ * whenever the table was re-sorted -- so the tile read as decoration rather
+ * than as that department's mark. A hash of the code is stable across
+ * sorting, paging and filtering.
+ */
+function depAvatarColor(code) {
+    const key = String(code || '');
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+    return avatarColors[hash % avatarColors.length];
+}
+
+/** The department's identity tile: its two-letter code on its own colour. */
+function depAvatar(code) {
+    const tile = document.createElement('span');
+    tile.className = 'dep-avatar';
+    tile.style.background = depAvatarColor(code);
+    tile.textContent = String(code || '?').slice(0, 2).toUpperCase();
+    tile.setAttribute('aria-hidden', 'true');
+    return tile;
+}
+
+/** The shared "nothing to show" row, spanning the whole table. */
+function depEmptyRow(title, text) {
+    const tr = document.createElement('tr');
+    tr.className = 'dep-empty-row';
+    const td = document.createElement('td');
+    td.colSpan = 6;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'dep-empty';
+    wrap.innerHTML =
+        '<span class="dep-empty-icon" aria-hidden="true">' +
+        '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg></span>';
+
+    const h = document.createElement('p');
+    h.className = 'dep-empty-title';
+    h.textContent = title;
+
+    const p = document.createElement('p');
+    p.className = 'dep-empty-text';
+    p.textContent = text;
+
+    wrap.append(h, p);
+    td.appendChild(wrap);
+    tr.appendChild(td);
+    return tr;
+}
+
 function renderTable() {
     const total = filteredDepartments.length;
     const totalPages = Math.ceil(total / deptRowsPerPage) || 1;
@@ -130,28 +214,52 @@ function renderTable() {
     const start = (deptPage - 1) * deptRowsPerPage;
     const end   = Math.min(start + deptRowsPerPage, total);
     const tbody = document.getElementById('dept-tbody');
-    tbody.innerHTML = '';
+    tbody.textContent = '';
 
     if (total === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="dep-empty-td">No departments found.</td></tr>';
+        tbody.appendChild(depEmptyRow(
+            'No departments found',
+            'No office matches the filters and search terms currently applied.'
+        ));
     } else {
-        filteredDepartments.slice(start, end).forEach((dept, i) => {
-            const idx = start + i;
-            tbody.innerHTML += `
-                <tr>
-                    <td>
-                        <div class="emp-cell">
-                            <div class="emp-avatar dep-avatar-sm" style="background:${avatarColors[idx % avatarColors.length]};">${dept.code.slice(0,2)}</div>
-                            <p class="emp-name">${dept.name}</p>
-                        </div>
-                    </td>
-                    <td><span class="dept-tag">${dept.code}</span></td>
-                    <td class="position-cell">${dept.head}</td>
-                    <td class="pay-cell">${dept.personnel_count}</td>
-                    <td><span class="badge-status ${dept.status === 'Active' ? 'processed' : 'on-hold'}">${dept.status}</span></td>
-                    <td><button class="btn-view" onclick="showDeptModal(${departments.indexOf(dept)})">View</button></td>
-                </tr>`;
+        const frag = document.createDocumentFragment();
+
+        filteredDepartments.slice(start, end).forEach(dept => {
+            const tr = document.createElement('tr');
+
+            const nameTd = depCell(null);
+            const cell = document.createElement('div');
+            cell.className = 'emp-cell';
+            const name = document.createElement('p');
+            name.className = 'emp-name';
+            name.textContent = dept.name;
+            name.title = dept.name;
+            cell.append(depAvatar(dept.code), name);
+            nameTd.appendChild(cell);
+            tr.appendChild(nameTd);
+
+            tr.appendChild(depPillCell(dept.code, 'dept-tag'));
+            tr.appendChild(depCell(dept.head, 'position-cell'));
+            tr.appendChild(depCell(dept.personnel_count, 'dep-count-cell'));
+            tr.appendChild(depPillCell(
+                dept.status,
+                'badge-status ' + (dept.status === 'Active' ? 'processed' : 'on-hold')
+            ));
+
+            const actionTd = depCell(null);
+            const view = document.createElement('button');
+            view.type = 'button';
+            view.className = 'btn-view';
+            view.textContent = 'View';
+            const originalIndex = departments.indexOf(dept);
+            view.onclick = () => window.showDeptModal(originalIndex);
+            actionTd.appendChild(view);
+            tr.appendChild(actionTd);
+
+            frag.appendChild(tr);
         });
+
+        tbody.appendChild(frag);
     }
 
     document.getElementById('showing-start').textContent  = total ? start + 1 : 0;
@@ -173,25 +281,50 @@ function renderDesigTable() {
     const start = (desigPage - 1) * desigRowsPerPage;
     const end   = Math.min(start + desigRowsPerPage, total);
     const tbody = document.getElementById('desig-tbody');
-    tbody.innerHTML = '';
+    tbody.textContent = '';
 
     if (total === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="dep-empty-td">No designations added yet.</td></tr>';
+        tbody.appendChild(depEmptyRow(
+            'No designations yet',
+            'Designations added against a department appear here.'
+        ));
     } else {
+        const frag = document.createDocumentFragment();
+
         source.slice(start, end).forEach(d => {
-            const rate = d.monthly_rate ? '₱' + parseFloat(d.monthly_rate).toLocaleString('en-PH', {minimumFractionDigits:2}) : '—';
+            const rate = d.monthly_rate
+                ? '₱' + parseFloat(d.monthly_rate).toLocaleString('en-PH', { minimumFractionDigits: 2 })
+                : '—';
             const type = d.employment_type || '—';
             const deptCode = d.department?.code || '—';
-            tbody.innerHTML += `
-                <tr>
-                    <td><p class="emp-name">${d.title}</p></td>
-                    <td><span class="dept-tag">${d.department ? d.department.name : 'N/A'}</span></td>
-                    <td><span class="dept-tag dept-tag-purple">${deptCode}</span></td>
-                    <td class="dep-td-accent">${d.salary_grade || '—'}</td>
-                    <td class="dep-td-green">${rate}</td>
-                    <td><span class="badge-status ${type === 'Permanent' ? 'processed' : 'pending'}">${type}</span></td>
-                </tr>`;
+
+            const tr = document.createElement('tr');
+
+            const titleTd = depCell(null);
+            const title = document.createElement('p');
+            title.className = 'emp-name';
+            title.textContent = d.title;
+            title.title = d.title;
+            titleTd.appendChild(title);
+            tr.appendChild(titleTd);
+
+            const deptName = d.department ? d.department.name : 'N/A';
+            const deptTd = depPillCell(deptName, 'dept-tag');
+            deptTd.firstChild.title = deptName;
+            tr.appendChild(deptTd);
+
+            tr.appendChild(depPillCell(deptCode, 'dept-tag dept-tag-purple'));
+            tr.appendChild(depCell(d.salary_grade || '—', 'dep-td-accent'));
+            tr.appendChild(depCell(rate, 'dep-td-rate'));
+            tr.appendChild(depPillCell(
+                type,
+                'badge-status ' + (type === 'Permanent' ? 'processed' : 'pending')
+            ));
+
+            frag.appendChild(tr);
         });
+
+        tbody.appendChild(frag);
     }
 
     document.getElementById('desig-showing-start').textContent = total ? start + 1 : 0;

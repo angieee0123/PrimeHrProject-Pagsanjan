@@ -75,9 +75,10 @@
 .page-btn:hover  { background: var(--gp-bg-tint); }
 
 /* ── Sortable Table Headers ── */
-.sortable-th { cursor: pointer; user-select: none; white-space: nowrap; }
+.sortable-th { cursor: pointer; user-select: none; white-space: nowrap; transition: background .15s, color .15s; }
 .sortable-th:hover { background: var(--gp-bg-tint-2); }
-.sort-icon { font-size: 11px; color: #bbb; margin-left: 4px; transition: color 0.15s; }
+.sortable-th.is-sorted { color: var(--gp-pri); }
+.sort-icon { font-size: 11px; color: var(--theme-neutral-400); margin-left: 4px; transition: color 0.15s; }
 
 /* ── Filter Bar ── */
 .filter-bar { display: flex; align-items: center; gap: 10px; padding: 12px 24px; border-top: 1px solid var(--gp-bg-tint-2); flex-wrap: wrap; }
@@ -316,11 +317,190 @@
 .ism-skipped-item { font-size: 12px; color: #8e1e18; margin: 0 0 4px; padding-bottom: 4px; border-bottom: 1px solid #fecaca; }
 .ism-btn-mt { margin-top: 16px; }
 
-/* ── Client-rendered table rows (departments/designations) ── */
-.dep-avatar-sm { font-size: 11px; }
-.dept-tag-purple { background: var(--gp-bg-tint-2); color: var(--gp-pri-2); }
-.dep-td-accent { font-size: 13px; color: var(--gp-pri); }
-.dep-td-green { font-size: 13px; font-weight: 600; color: #15803d; }
-.dep-empty-td { text-align: center; color: var(--gp-text-soft); padding: 32px; font-size: 13px; }
+/* ---------------------------------------------------------------------------
+   Client-rendered table rows (departments / designations).
+
+   Both tables declare their widths on a <colgroup> and run
+   `table-layout: fixed`, so a long office name cannot take the width from
+   the personnel count and leave the headings sitting over the wrong content
+   -- and the columns stay put as you sort and page, rather than re-measuring
+   against whichever ten rows are on screen.
+
+   Each column's alignment is stated once, for `th` and `td` together: counts,
+   codes and badges centre; money is right-aligned so pesos line up on the
+   decimal; names stay left.
+   --------------------------------------------------------------------------- */
+.dep-table,
+.desig-table {
+    table-layout: fixed;
+    min-width: 980px;
+}
+
+.dep-table col.dcol-name   { width: 30%; }
+.dep-table col.dcol-code   { width: 10%; }
+.dep-table col.dcol-head   { width: 24%; }
+.dep-table col.dcol-count  { width: 12%; }
+.dep-table col.dcol-status { width: 12%; }
+.dep-table col.dcol-action { width: 108px; }
+
+.desig-table col.gcol-title { width: 27%; }
+.desig-table col.gcol-dept  { width: 23%; }
+.desig-table col.gcol-code  { width: 10%; }
+.desig-table col.gcol-grade { width: 12%; }
+.desig-table col.gcol-rate  { width: 14%; }
+.desig-table col.gcol-type  { width: 14%; }
+
+/* Heading and content, aligned together. */
+.dep-table :is(th, td):nth-child(2),
+.dep-table :is(th, td):nth-child(4),
+.dep-table :is(th, td):nth-child(5),
+.dep-table :is(th, td):nth-child(6),
+.desig-table :is(th, td):nth-child(3),
+.desig-table :is(th, td):nth-child(4),
+.desig-table :is(th, td):nth-child(6) { text-align: center; }
+.desig-table :is(th, td):nth-child(5) { text-align: right; }
+
+.dep-table thead th,
+.desig-table thead th {
+    padding: 10px 14px;
+    line-height: 1.35;
+    vertical-align: bottom;
+}
+.dep-table td,
+.desig-table td {
+    padding: 10px 14px;
+    height: 58px;
+    vertical-align: middle;
+}
+.dep-table :is(th, td):first-child,
+.desig-table :is(th, td):first-child { padding-left: 18px; }
+.dep-table :is(th, td):last-child,
+.desig-table :is(th, td):last-child { padding-right: 18px; }
+
+/* Long names truncate rather than being cut square by the cell. */
+.dep-table .emp-name,
+.desig-table .emp-name {
+    margin: 0;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dep-table .emp-cell { min-width: 0; }
+.dep-table .position-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dep-table .dept-tag,
+.desig-table .dept-tag {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* ── The department's identity tile ──────────────────────────────────────
+   It was a flat 38px square of colour keyed to the row's position in the
+   list, so an office changed colour when the table was sorted or paged. The
+   colour now comes from a hash of the office code (see depAvatarColor), and
+   the tile is built to read as a mark: a squircle, the code in tracked caps,
+   a soft ring so a dark tile still separates from a dark row, and an inner
+   top highlight so it has a light source instead of sitting flat. */
+.dep-avatar {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--theme-btn-primary-fg);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .28),
+        inset 0 0 0 1px rgba(255, 255, 255, .12),
+        0 2px 6px rgba(var(--theme-shadow-rgb), .18);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+.dep-table tbody tr:hover .dep-avatar {
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .28),
+        inset 0 0 0 1px rgba(255, 255, 255, .12),
+        0 4px 10px rgba(var(--theme-shadow-rgb), .26);
+}
+@media (prefers-reduced-motion: reduce) {
+    .dep-table tbody tr:hover .dep-avatar { transform: none; }
+}
+
+/* Personnel count: a quantity, so it is centred and set in figures that
+   align down the column. */
+.dep-count-cell {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+    font-variant-numeric: tabular-nums;
+}
+
+.dept-tag-purple { background: var(--theme-primary-100); color: var(--theme-primary-800); }
+.dep-td-accent {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--gp-pri);
+    font-variant-numeric: tabular-nums;
+}
+/* Money. Right-aligned under a right-aligned heading, tabular figures so the
+   decimal points form a straight edge down the page. */
+.dep-td-rate {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--theme-success-emphasis);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ── Empty state, shared by both tables ── */
+.dep-table tbody tr.dep-empty-row td,
+.desig-table tbody tr.dep-empty-row td { height: auto; }
+.glass-shell .payroll-table tbody tr.dep-empty-row:hover { background: transparent !important; }
+.dep-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 46px 20px;
+    text-align: center;
+}
+.dep-empty-icon {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 6px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--theme-neutral-100);
+    border: 1px solid var(--theme-neutral-200);
+    color: var(--theme-neutral-600);
+}
+.dep-empty-title {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+}
+.dep-empty-text {
+    margin: 0;
+    max-width: 400px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--gp-text-soft);
+}
 .dep-page-ellipsis { padding: 0 4px; color: var(--gp-text-soft); }
 .page-btn:disabled { opacity: .5; cursor: not-allowed; }

@@ -18,15 +18,30 @@
         </div>
     </div>
     <div class="table-wrapper">
-        <table class="payroll-table">
+        {{--
+            Widths are declared here and the table is `table-layout: fixed`,
+            so the columns stay put as you sort and page. Alignment is set on
+            `th` and `td` together in adminDepartment.css -- the counts and
+            badges are centred under centred headings rather than sitting
+            left under a left heading while the eye looks for a column.
+        --}}
+        <table class="payroll-table dep-table">
+            <colgroup>
+                <col class="dcol-name">
+                <col class="dcol-code">
+                <col class="dcol-head">
+                <col class="dcol-count">
+                <col class="dcol-status">
+                <col class="dcol-action">
+            </colgroup>
             <thead>
                 <tr>
-                    <th class="sortable-th" onclick="sortDept('name')" data-col="name">Department / Office <span class="sort-icon">⇅</span></th>
-                    <th class="sortable-th" onclick="sortDept('code')" data-col="code">Code <span class="sort-icon">⇅</span></th>
-                    <th class="sortable-th" onclick="sortDept('head')" data-col="head">Department Head <span class="sort-icon">⇅</span></th>
-                    <th class="sortable-th" onclick="sortDept('personnel_count')" data-col="personnel_count">Personnel <span class="sort-icon">⇅</span></th>
-                    <th class="sortable-th" onclick="sortDept('status')" data-col="status">Status <span class="sort-icon">⇅</span></th>
-                    <th>Action</th>
+                    <th scope="col" class="sortable-th" onclick="sortDept('name')" data-col="name">Department / Office <span class="sort-icon">⇅</span></th>
+                    <th scope="col" class="sortable-th" onclick="sortDept('code')" data-col="code">Code <span class="sort-icon">⇅</span></th>
+                    <th scope="col" class="sortable-th" onclick="sortDept('head')" data-col="head">Department Head <span class="sort-icon">⇅</span></th>
+                    <th scope="col" class="sortable-th" onclick="sortDept('personnel_count')" data-col="personnel_count">Personnel <span class="sort-icon">⇅</span></th>
+                    <th scope="col" class="sortable-th" onclick="sortDept('status')" data-col="status">Status <span class="sort-icon">⇅</span></th>
+                    <th scope="col">Action</th>
                 </tr>
             </thead>
             <tbody id="dept-tbody"></tbody>

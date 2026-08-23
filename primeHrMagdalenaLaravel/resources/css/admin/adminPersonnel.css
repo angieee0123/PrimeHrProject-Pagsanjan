@@ -457,3 +457,207 @@
 .personnel-table-section {
     box-shadow: 0 2px 12px rgba(var(--theme-shadow-rgb), 0.06);
 }
+
+/* ---------------------------------------------------------------------------
+   Work Schedules table (#scheduleTable).
+
+   Everything here used to be an inline `style=""` on the cell: the four time
+   columns each repeated `font-size: 13px; color: var(--gp-pri); font-weight:
+   600`, the avatar carried its own eight declarations twice, and the
+   rows-per-page select shipped a whole font stack and a hard-coded white.
+   None of it could follow the theme and none of it could be changed in one
+   place.
+
+   The layout rule is the same one the training queue uses: widths are
+   declared on a <colgroup>, the table is `table-layout: fixed`, and each
+   column's alignment is set on `th` and `td` in a single selector -- a
+   heading cannot end up over content aligned the other way.
+   --------------------------------------------------------------------------- */
+.sched-table {
+    table-layout: fixed;
+    min-width: 1080px;
+}
+.sched-table col.scol-employee { width: 23%; }
+.sched-table col.scol-dept     { width: 14%; }
+.sched-table col.scol-time     { width: 11%; }
+.sched-table col.scol-status   { width: 13%; }
+.sched-table col.scol-actions  { width: 172px; }
+
+/* Heading and content, aligned together. */
+.sched-table :is(th, td):nth-child(3),
+.sched-table :is(th, td):nth-child(4),
+.sched-table :is(th, td):nth-child(5),
+.sched-table :is(th, td):nth-child(6),
+.sched-table :is(th, td):nth-child(7),
+.sched-table :is(th, td):nth-child(8) { text-align: center; }
+
+.sched-table thead th {
+    padding: 10px 12px;
+    line-height: 1.35;
+    vertical-align: bottom;
+}
+.sched-table td {
+    padding: 10px 12px;
+    height: 62px;
+    vertical-align: middle;
+}
+.sched-table :is(th, td):first-child { padding-left: 18px; }
+.sched-table :is(th, td):last-child { padding-right: 16px; }
+
+/* The AM pair and the PM pair are two readings of one day, so a hairline
+   marks where one half ends and the other begins. Without it the four
+   near-identical time columns read as an undifferentiated block. */
+.sched-table :is(th, td):nth-child(3),
+.sched-table :is(th, td):nth-child(5),
+.sched-table :is(th, td):nth-child(7) { border-left: 1px solid var(--theme-neutral-200); }
+
+/* Employee */
+.sched-table .emp-cell { min-width: 0; }
+.sched-table .emp-cell-text { min-width: 0; }
+.sched-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    object-fit: cover;
+    border: 2px solid var(--theme-neutral-200);
+    color: var(--theme-btn-primary-fg);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .3px;
+}
+.sched-table .emp-name {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gp-pri);
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sched-table .emp-id {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: var(--gp-text-soft);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sched-table .dept-tag {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The times. Tabular numerals so the four columns line up as a grid rather
+   than as four independently-ragged strings. */
+.sched-time-value {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--gp-pri);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.sched-time-empty {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--theme-neutral-500);
+    font-variant-numeric: tabular-nums;
+    cursor: default;
+}
+/* A row with no schedule at all is the actionable one on this page, so it is
+   marked once on the left edge rather than four times across the middle. */
+.sched-row.is-unscheduled td:first-child { box-shadow: inset 3px 0 0 var(--theme-neutral-400); }
+
+/* Status, with the date the state turns over beneath it. Stacked and
+   centred so the badge stays the thing the eye lands on and the date reads
+   as its caption rather than as a second value. */
+.sched-status {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+.sched-status-when {
+    font-size: 10.5px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--theme-neutral-600);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    cursor: default;
+}
+/* An active schedule lapsing within thirty days: the row to act on before it
+   becomes an "Expired" one. */
+.sched-status-when.is-soon {
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--theme-warning-subtle);
+    border: 1px solid var(--theme-warning-border);
+    color: var(--theme-warning-emphasis);
+    font-weight: 700;
+}
+
+/* Actions: the two labelled buttons need to sit centred under the heading. */
+.sched-table .row-actions { justify-content: center; }
+.sched-table .action-buttons-desktop { justify-content: center; }
+
+/* Empty state */
+.sched-empty-row td { height: auto; }
+.sched-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 46px 20px;
+    text-align: center;
+}
+.sched-empty-icon {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 6px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--theme-neutral-100);
+    border: 1px solid var(--theme-neutral-200);
+    color: var(--theme-neutral-600);
+}
+.sched-empty-title {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+}
+.sched-empty-text {
+    margin: 0;
+    max-width: 400px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--gp-text-soft);
+}
+
+/* Footer */
+.sched-footer-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.sched-perpage {
+    width: auto;
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+@media (max-width: 768px) {
+    .sched-empty { padding: 34px 16px; }
+}

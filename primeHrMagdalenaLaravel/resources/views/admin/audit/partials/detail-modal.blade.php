@@ -19,9 +19,20 @@
 <aside class="au-drawer" id="auditDrawer" role="dialog" aria-modal="true"
        aria-labelledby="auditDrawerTitle" hidden>
 
+    {{--
+        Four separate facts used to stack as three grey lines -- the entry
+        reference, the action badge welded into the middle of the <h3>, the
+        record, and the field count -- all in soft grey on a translucent
+        panel. They are now a reference chip and a status badge on one line,
+        the record as the heading, and the field count as a plain sub, each
+        at its own weight.
+    --}}
     <header class="au-drawer-head">
-        <div>
-            <span class="au-drawer-eyebrow">Audit entry <span id="auditDrawerId"></span></span>
+        <div class="au-drawer-headline">
+            <div class="au-drawer-topline">
+                <span class="au-drawer-ref" id="auditDrawerId"></span>
+                <span class="badge-status" id="auditDrawerBadge"></span>
+            </div>
             <h3 class="au-drawer-title" id="auditDrawerTitle"></h3>
             <p class="au-drawer-sub" id="auditDrawerSub"></p>
         </div>

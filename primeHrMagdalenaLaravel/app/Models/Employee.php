@@ -108,6 +108,59 @@ class Employee extends Model implements Auditable
             ->first();
     }
 
+    /**
+     * Where this employee stands on scheduling today, and the date that state
+     * turns over.
+     *
+     * The Work Schedules table and the CSV export both read this, so the two
+     * cannot disagree about who is covered -- the same reason
+     * `currentSchedule()` exists. It resolves four states rather than the
+     * three the screen used to show: "Scheduled" previously covered both an
+     * employee whose schedule has not started yet and one whose last schedule
+     * lapsed months ago, which are opposite problems. The second is now
+     * "Expired", and it is the one that needs an HR officer.
+     *
+     * `start_date` / `end_date` are plain `Y-m-d` strings -- Schedule declares
+     * no casts -- so they are compared and sorted as strings, which is
+     * correct for that format and is what `currentSchedule()` already does.
+     *
+     * @return array{state: string, label: string, note: ?string, date: ?string}
+     */
+    public function scheduleStatus(): array
+    {
+        $today = now()->format('Y-m-d');
+
+        if ($current = $this->currentSchedule()) {
+            return ['state' => 'active', 'label' => 'Active', 'note' => 'Ends', 'date' => $current->end_date];
+        }
+
+        $upcoming = $this->schedule
+            ->filter(fn (Schedule $s) => $s->start_date && $s->start_date > $today)
+            ->sortBy('start_date')
+            ->first();
+
+        if ($upcoming) {
+            return ['state' => 'upcoming', 'label' => 'Scheduled', 'note' => 'Starts', 'date' => $upcoming->start_date];
+        }
+
+        // Both dates are nullable, so a row can exist with nothing to report.
+        // That still counts as lapsed -- it just has no date to name.
+        $lapsed = $this->schedule
+            ->filter(fn (Schedule $s) => (bool) $s->end_date)
+            ->sortByDesc('end_date')
+            ->first();
+
+        if ($lapsed) {
+            return ['state' => 'expired', 'label' => 'Expired', 'note' => 'Ended', 'date' => $lapsed->end_date];
+        }
+
+        if ($this->schedule->isNotEmpty()) {
+            return ['state' => 'expired', 'label' => 'Expired', 'note' => null, 'date' => null];
+        }
+
+        return ['state' => 'none', 'label' => 'Not Set', 'note' => null, 'date' => null];
+    }
+
     public function leaveBalances()
     {
         return $this->hasMany(LeaveBalance::class);

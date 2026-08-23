@@ -110,12 +110,18 @@
 
     <div class="table-section">
         <div class="table-header au-header">
-            <div>
-                <p class="table-title">Activity log</p>
-                <p class="table-sub">
-                    {{ number_format($audits->total()) }} {{ \Illuminate\Support\Str::plural('record', $audits->total()) }}
-                    @if($activeChips) matching your filters @else recorded @endif
-                </p>
+            <div class="au-header-lead">
+                <span class="au-header-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><path d="M3.05 11a9 9 0 1 1 .5 4"/><polyline points="3 21 3 15 9 15"/></svg>
+                </span>
+                <div>
+                    <p class="table-title">Activity log</p>
+                    <p class="table-sub">
+                        <strong>{{ number_format($audits->total()) }}</strong>
+                        {{ \Illuminate\Support\Str::plural('record', $audits->total()) }}
+                        @if($activeChips) matching your filters @else recorded @endif
+                    </p>
+                </div>
             </div>
 
             {{-- The same numbers the table is showing, split by action. Counted

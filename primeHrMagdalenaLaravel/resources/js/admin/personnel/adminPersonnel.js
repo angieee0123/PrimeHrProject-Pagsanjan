@@ -1030,23 +1030,121 @@ window.updateResponsivePagination = updateResponsivePagination;
 
 
 // Schedule Tab Functions
+/* ── Work Schedules: filtering and paging ────────────────────────────────
+   The footer has always read "Showing 1-10 of N" and the rows-per-page select
+   has always been on screen, but `changeScheduleRowsPerPage` was a
+   `console.log` stub and nothing ever hid a row -- so the table rendered all
+   N employees under a footer stating it was showing ten of them, and picking
+   "50 per page" did nothing at all.
+
+   Filtering and paging are one operation here: the page count has to be taken
+   from the rows that survive the department filter, or filtering to a
+   four-person department leaves the pager offering page 2 of an empty set. */
+
+let schedRowsPerPage = 10;
+let schedCurrentPage = 1;
+
+/** The rows matching the current department filter, in table order. */
+function schedVisibleRows() {
+    const dept = document.getElementById('schedDepartmentFilter')?.value || '';
+    return Array.from(document.querySelectorAll('#scheduleTableBody tr'))
+        .filter(row => row.querySelector('.dept-tag'))
+        .filter(row => !dept || row.querySelector('.dept-tag').textContent.trim() === dept);
+}
+
 function applyScheduleFilters() {
-    const deptFilter = document.getElementById('schedDepartmentFilter').value;
-    const rows = document.querySelectorAll('#scheduleTableBody tr');
-
-    rows.forEach(row => {
-        const deptCell = row.querySelector('.dept-tag');
-        if (!deptCell) return;
-
-        const deptMatch = !deptFilter || deptCell.textContent.trim() === deptFilter;
-        row.style.display = deptMatch ? '' : 'none';
-    });
+    schedCurrentPage = 1;
+    renderScheduleTable();
 }
 
 function changeScheduleRowsPerPage(value) {
-    // Implement pagination logic similar to main table
-    console.log('Change schedule rows per page:', value);
+    schedRowsPerPage = value === 'all' ? Infinity : parseInt(value, 10) || 10;
+    schedCurrentPage = 1;
+    renderScheduleTable();
 }
+
+function renderScheduleTable() {
+    const body = document.getElementById('scheduleTableBody');
+    if (!body) return;
+
+    const matching = schedVisibleRows();
+    const total = matching.length;
+    const totalPages = Math.max(1, Math.ceil(total / schedRowsPerPage));
+    // A filter can shrink the set under the page you were on.
+    schedCurrentPage = Math.min(schedCurrentPage, totalPages);
+
+    const start = total === 0 ? 0 : (schedCurrentPage - 1) * schedRowsPerPage;
+    const end = Math.min(start + schedRowsPerPage, total);
+
+    body.querySelectorAll('tr').forEach(row => { row.style.display = 'none'; });
+    matching.slice(start, end).forEach(row => { row.style.display = ''; });
+
+    // The "no employees at all" row is server-rendered and has no .dept-tag,
+    // so it never reaches the slice above; it is shown whenever the table
+    // genuinely holds nothing.
+    const emptyRow = body.querySelector('.sched-empty-row');
+    if (emptyRow) emptyRow.style.display = '';
+
+    let noMatch = document.getElementById('schedNoMatchRow');
+    if (total === 0 && !emptyRow) {
+        if (!noMatch) {
+            noMatch = document.createElement('tr');
+            noMatch.id = 'schedNoMatchRow';
+            noMatch.className = 'sched-empty-row';
+            noMatch.innerHTML =
+                '<td colspan="8"><div class="sched-empty">' +
+                '<span class="sched-empty-icon" aria-hidden="true">' +
+                '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+                '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>' +
+                '<p class="sched-empty-title">No employees in this department</p>' +
+                '<p class="sched-empty-text">Clear the department filter to see every employee again.</p>' +
+                '</div></td>';
+            body.appendChild(noMatch);
+        }
+        noMatch.style.display = '';
+    } else if (noMatch) {
+        noMatch.remove();
+    }
+
+    const setText = (id, value) => {
+        const node = document.getElementById(id);
+        if (node) node.textContent = value;
+    };
+    setText('schedShowingStart', total === 0 ? 0 : start + 1);
+    setText('schedShowingEnd', end);
+    setText('schedTotalRecords', total);
+
+    renderSchedulePagination(totalPages);
+}
+
+function renderSchedulePagination(totalPages) {
+    const controls = document.getElementById('schedulePaginationControls');
+    if (!controls) return;
+    controls.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    const button = (label, page, active) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'page-btn' + (active ? ' active' : '');
+        btn.textContent = label;
+        btn.onclick = () => { schedCurrentPage = page; renderScheduleTable(); };
+        controls.appendChild(btn);
+    };
+
+    if (schedCurrentPage > 1) button('‹', schedCurrentPage - 1, false);
+
+    const maxButtons = 5;
+    let startPage = Math.max(1, schedCurrentPage - Math.floor(maxButtons / 2));
+    const endPage = Math.min(totalPages, startPage + maxButtons - 1);
+    if (endPage - startPage < maxButtons - 1) startPage = Math.max(1, endPage - maxButtons + 1);
+
+    for (let i = startPage; i <= endPage; i++) button(String(i), i, i === schedCurrentPage);
+
+    if (schedCurrentPage < totalPages) button('›', schedCurrentPage + 1, false);
+}
+
+document.addEventListener('DOMContentLoaded', renderScheduleTable);
 
 function exportSchedules(btn) {
     window.location.href = btn.dataset.exportUrl;
@@ -1116,6 +1214,7 @@ function confirmRemoveSchedule(employeeId, employeeName) {
 }
 
 window.applyScheduleFilters = applyScheduleFilters;
+window.renderScheduleTable = renderScheduleTable;
 window.changeScheduleRowsPerPage = changeScheduleRowsPerPage;
 window.exportSchedules = exportSchedules;
 window.openBulkScheduleModal = openBulkScheduleModal;

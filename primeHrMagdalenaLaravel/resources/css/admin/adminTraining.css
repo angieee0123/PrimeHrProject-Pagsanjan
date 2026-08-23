@@ -115,13 +115,6 @@
     margin: 0;
     line-height: 1.5;
 }
-.admin-training .admin-reject-note {
-    background: #fdf0ef;
-    border-color: #fecaca;
-    margin: 14px 0;
-}
-.admin-training .admin-reject-note .training-enroll-note-text { color: var(--gp-bad); }
-
 /* Filter bar */
 .admin-training .training-filter-bar {
     display: flex;
@@ -154,61 +147,274 @@
 }
 .admin-training .training-position-filter { min-width: 180px; }
 
-/* Table */
-.admin-training .training-pds-table th:nth-child(2) { min-width: 220px; }
-.admin-training .admin-employee-cell { display: flex; flex-direction: column; gap: 3px; min-width: 140px; }
-.admin-training .admin-employee-name { font-size: 13.5px; font-weight: 600; color: var(--gp-pri); line-height: 1.35; }
-.admin-training .admin-employee-meta { font-size: 11px; color: var(--gp-text-soft); font-weight: 500; }
+/* ---------------------------------------------------------------------------
+   Training verification queue -- the table.
 
-.admin-training .training-title-wrap { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.admin-training .training-title-text { font-size: 13.5px; font-weight: 600; color: var(--gp-pri); line-height: 1.35; }
-.admin-training .training-ref-doc { font-size: 11px; color: var(--gp-text-soft); font-weight: 500; }
-.admin-training .training-table-date { font-size: 12.5px; color: var(--gp-text-mid); white-space: nowrap; }
-.admin-training .training-date-sep { margin: 0 4px; color: var(--theme-neutral-500); }
+   Two rules hold this together:
 
+   · **Column widths are declared, not negotiated.** `table-layout: fixed`
+     plus the <colgroup> in the Blade means a sponsor name of eighty
+     characters can no longer take the width from the hours column. The table
+     keeps a min-width and the wrapper scrolls, rather than crushing eight
+     columns into a phone.
+   · **A column's alignment is set on `th` and `td` in the same rule.** The
+     figure columns are centred, the prose columns are left -- and because one
+     selector does both halves, a heading cannot end up sitting over content
+     aligned the other way.
+   --------------------------------------------------------------------------- */
+.admin-training .training-pds-table {
+    table-layout: fixed;
+    min-width: 1090px;
+}
+.admin-training .training-pds-table col.tcol-employee { width: 19%; }
+.admin-training .training-pds-table col.tcol-title    { width: 25%; }
+.admin-training .training-pds-table col.tcol-dates    { width: 14%; }
+.admin-training .training-pds-table col.tcol-hours    { width: 8%; }
+.admin-training .training-pds-table col.tcol-position { width: 11%; }
+.admin-training .training-pds-table col.tcol-sponsor  { width: 15%; }
+.admin-training .training-pds-table col.tcol-status   { width: 8%; }
+/* Wide enough for the word, not just the button. "ACTIONS" sets at roughly
+   52px in the header's 10px extrabold uppercase, and 64px minus the cell's
+   own 28px of horizontal padding left 36px of content box -- a single word
+   with nowhere to wrap, so it simply overflowed the last column and printed
+   past the edge of the table. The column carries tighter padding than the
+   rest for the same reason. */
+.admin-training .training-pds-table col.tcol-actions  { width: 92px; }
+.admin-training .training-pds-table :is(th, td):nth-child(8) { padding-left: 8px; padding-right: 8px; }
+
+/* Heading and content, aligned together. */
+.admin-training .training-pds-table :is(th, td):nth-child(4),
+.admin-training .training-pds-table :is(th, td):nth-child(5),
+.admin-training .training-pds-table :is(th, td):nth-child(7),
+.admin-training .training-pds-table :is(th, td):nth-child(8) { text-align: center; }
+
+.admin-training .training-pds-table thead th {
+    padding: 11px 14px;
+    line-height: 1.35;
+    vertical-align: bottom;
+}
+.admin-training .training-pds-table td {
+    padding: 11px 14px;
+    vertical-align: middle;
+}
+
+/* Zebra striping is removed rather than restyled: the rows are paginated by
+   hiding them, and `:nth-child(even)` counts the hidden ones, so the stripes
+   fell in an arbitrary pattern on every page but the first. Row separation
+   comes from the cell border and the hover tint, both of which are honest. */
+.admin-training.glass-shell .payroll-table tbody tr:nth-child(even) { background: transparent !important; }
+
+/* Status stripe. It rides on the first cell as an inset shadow: the table is
+   `border-collapse: separate`, where borders set on a <tr> are not painted at
+   all -- which is why the previous `tr { border-left: 3px solid }` rules never
+   appeared, quite apart from naming a class the markup did not carry. */
+.admin-training .payroll-table tbody tr.training-row-pending  td:first-child { box-shadow: inset 3px 0 0 var(--theme-warning); }
+.admin-training .payroll-table tbody tr.training-row-verified td:first-child { box-shadow: inset 3px 0 0 var(--theme-success); }
+.admin-training .payroll-table tbody tr.training-row-rejected td:first-child { box-shadow: inset 3px 0 0 var(--theme-danger); }
+
+/* Employee, with the face of whoever filed the certificate. */
+.admin-training .admin-employee-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+.admin-training .training-avatar {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--gp-pri), var(--theme-accent));
+    color: var(--theme-btn-primary-fg);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .3px;
+}
+.admin-training .training-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.admin-training .admin-employee-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.admin-training .admin-employee-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gp-pri);
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.admin-training .admin-employee-meta {
+    font-size: 11px;
+    color: var(--gp-text-soft);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Title of the training. */
+.admin-training .training-title-wrap { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.admin-training .training-title-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gp-pri);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.admin-training .training-title-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+.admin-training .training-ref-doc {
+    font-size: 11px;
+    color: var(--gp-text-soft);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* Whether a certificate is attached is the first thing a verifier checks. */
+.admin-training .training-cert-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid var(--theme-success-border);
+    background: var(--theme-success-subtle);
+    color: var(--theme-success-emphasis);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    cursor: default;
+}
+.admin-training .training-cert-flag.is-missing {
+    border-color: var(--theme-neutral-300);
+    background: var(--theme-neutral-100);
+    color: var(--theme-neutral-600);
+}
+
+/* Inclusive dates. */
+.admin-training .training-table-date { display: flex; flex-direction: column; gap: 2px; }
+.admin-training .training-date-range {
+    font-size: 12px;
+    color: var(--gp-text-mid);
+    line-height: 1.4;
+}
+.admin-training .training-date-sep { margin: 0 3px; color: var(--theme-neutral-500); }
+.admin-training .training-date-span {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--gp-text-soft);
+}
+
+/* Hours. */
 .admin-training .training-hours-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 36px;
-    padding: 4px 10px;
-    border-radius: 20px;
+    min-width: 38px;
+    padding: 5px 11px;
+    border-radius: 999px;
     font-size: 12.5px;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
     color: var(--gp-pri);
     background: var(--gp-bg-tint-2);
+    border: 1px solid var(--theme-neutral-200);
 }
-.admin-training .training-hours-pill-pending { background: #fbf6e3; color: var(--gp-accent-gold); }
-.admin-training .training-hours-pill-muted { background: var(--gp-bg-tint); color: var(--theme-neutral-500); }
+.admin-training .training-hours-pill-pending {
+    background: var(--theme-warning-subtle);
+    border-color: var(--theme-warning-border);
+    color: var(--theme-warning-emphasis);
+}
+.admin-training .training-hours-pill-muted {
+    background: var(--theme-neutral-100);
+    border-color: var(--theme-neutral-200);
+    color: var(--theme-neutral-500);
+}
 
-.admin-training .payroll-table tbody tr.training-row-verified { border-left: 3px solid #22c55e; }
-.admin-training .payroll-table tbody tr.training-row-pending { border-left: 3px solid var(--gp-accent-gold); }
-.admin-training .payroll-table tbody tr.training-row-rejected { border-left: 3px solid #ef4444; }
-.admin-training .payroll-table tbody tr.training-row-verified:hover { background: #f8fdf9; }
-.admin-training .payroll-table tbody tr.training-row-pending:hover { background: #fffef5; }
-.admin-training .payroll-table tbody tr.training-row-rejected:hover { background: #fffafa; }
+/* Conducted / sponsored by. */
+.admin-training .training-sponsor {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: var(--gp-text-mid);
+}
+
+/* Empty state -- shared by the server-rendered "nothing yet" row and the
+   client-rendered "nothing matches your filters" one. */
+.admin-training.glass-shell .payroll-table tbody tr.training-empty-row:hover { background: transparent !important; }
+.admin-training.glass-shell .payroll-table tbody tr.training-empty-row td { border-bottom: none !important; }
+.admin-training .training-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 46px 20px;
+    text-align: center;
+}
+.admin-training .training-empty-icon {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 6px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--theme-neutral-100);
+    border: 1px solid var(--theme-neutral-200);
+    color: var(--theme-neutral-600);
+}
+.admin-training .training-empty-title {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+}
+.admin-training .training-empty-text {
+    margin: 0;
+    max-width: 380px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--gp-text-soft);
+}
 
 .admin-training .type-badge {
     font-size: 10px;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: .2px;
     padding: 4px 10px;
-    border-radius: 20px;
+    border-radius: 999px;
     display: inline-block;
     white-space: nowrap;
 }
-.admin-training .type-badge.managerial { background: var(--gp-bg-tint-2); color: var(--gp-text-mid); }
-.admin-training .type-badge.supervisory { background: #e8f4fd; color: #0369a1; }
-.admin-training .type-badge.technical { background: #e8f9ef; color: var(--gp-good); }
-.admin-training .type-badge.clerical { background: #fbf6e3; color: var(--gp-accent-gold); }
+.admin-training .type-badge.managerial { background: var(--theme-primary-100); color: var(--theme-primary-800); }
+.admin-training .type-badge.supervisory { background: var(--theme-info-subtle); color: var(--theme-info-emphasis); }
+.admin-training .type-badge.technical { background: var(--theme-success-subtle); color: var(--theme-success-emphasis); }
+.admin-training .type-badge.clerical { background: var(--theme-warning-subtle); color: var(--theme-warning-emphasis); }
 
 .admin-training .verify-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 700;
     padding: 4px 10px;
-    border-radius: 20px;
+    border-radius: 999px;
+    white-space: nowrap;
     cursor: default;
 }
 .admin-training .verify-badge::before {
@@ -218,12 +424,12 @@
     border-radius: 50%;
     flex-shrink: 0;
 }
-.admin-training .verify-badge.pending { background: #fbf6e3; color: var(--gp-accent-gold); }
-.admin-training .verify-badge.pending::before { background: var(--gp-accent-gold); }
-.admin-training .verify-badge.verified { background: #e8f9ef; color: var(--gp-good); }
-.admin-training .verify-badge.verified::before { background: #22c55e; }
-.admin-training .verify-badge.rejected { background: #fdf0ef; color: var(--gp-bad); cursor: help; }
-.admin-training .verify-badge.rejected::before { background: #ef4444; }
+.admin-training .verify-badge.pending { background: var(--theme-warning-subtle); color: var(--theme-warning-emphasis); }
+.admin-training .verify-badge.pending::before { background: var(--theme-warning); }
+.admin-training .verify-badge.verified { background: var(--theme-success-subtle); color: var(--theme-success-emphasis); }
+.admin-training .verify-badge.verified::before { background: var(--theme-success); }
+.admin-training .verify-badge.rejected { background: var(--theme-danger-subtle); color: var(--theme-danger-emphasis); cursor: help; }
+.admin-training .verify-badge.rejected::before { background: var(--theme-danger); }
 
 /* Action buttons — same footprint as permanent btn-view-cert */
 .admin-training .admin-action-group {
@@ -367,7 +573,6 @@
 .training-pending-strong { color: var(--gp-accent-gold); }
 
 #reviewModal,
-#rejectModal,
 #approveModal,
 #adminFlashSuccessModal {
     display: none;
@@ -466,8 +671,16 @@
     box-shadow: 0 6px 20px rgba(var(--theme-primary-rgb), 0.3);
 }
 
-#reviewModal .modal-box.training-view-cert-modal,
-#rejectModal .modal-box.training-add-modal {
+/* ---------------------------------------------------------------------------
+   Submission review (#reviewModal).
+
+   The reviewer is answering one question -- are these hours real, and does the
+   certificate back them up -- so the screen is ordered by that: the figures
+   being judged, then the person, then the paperwork, then the file. Section
+   labels rather than one undifferentiated list, because a nine-row block gives
+   the reference document number the same weight as the hours being credited.
+   --------------------------------------------------------------------------- */
+#reviewModal .modal-box.training-view-cert-modal {
     max-width: 620px;
     max-height: 92vh;
     display: flex;
@@ -475,72 +688,306 @@
     overflow: hidden;
 }
 
-#reviewModal .training-modal-meta,
+/* Header ------------------------------------------------------------------ */
+#reviewModal .rv-header {
+    gap: 14px;
+    padding: 22px 24px 18px;
+    border-bottom: 1px solid var(--theme-neutral-200);
+}
+#reviewModal .pmodal-hero { align-items: flex-start; }
+#reviewModal .training-hero-icon { color: var(--theme-btn-primary-fg); }
+#reviewModal .rv-heading { min-width: 0; }
+/* A seminar title routinely runs past one line; it wraps to two and then
+   truncates, rather than pushing the badges out of the header. */
+#reviewModal .rv-title {
+    font-size: 17px;
+    line-height: 1.35;
+    margin: 0 0 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+#reviewModal .pmodal-badges { margin-top: 0; }
+
+/* Body -------------------------------------------------------------------- */
+#reviewModal .rv-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 18px 24px 22px;
+}
+#reviewModal .rv-section-label {
+    display: block;
+    margin: 20px 0 9px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gp-text-soft);
+}
+
+/* The three figures the decision turns on -------------------------------- */
+#reviewModal .rv-figures {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--theme-neutral-200);
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 12px;
+    overflow: hidden;
+}
+#reviewModal .rv-figure {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 13px 15px;
+    background: var(--theme-neutral-50);
+    min-width: 0;
+}
+#reviewModal .rv-figure-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+    color: var(--gp-text-soft);
+}
+#reviewModal .rv-figure-value {
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--gp-pri);
+    word-break: break-word;
+}
+/* Dates and the certificate state are words, not a magnitude, so they do not
+   get the numeral's size -- only the hours figure earns that. */
+#reviewModal .rv-figure-value-sm { font-size: 13px; font-weight: 700; line-height: 1.35; }
+#reviewModal .rv-figure-note {
+    font-size: 10.5px;
+    line-height: 1.45;
+    color: var(--gp-text-mid);
+}
+/* Nothing uploaded is the one state that should stop the eye. */
+#reviewModal .rv-figure.is-missing { background: var(--theme-warning-subtle); }
+#reviewModal .rv-figure.is-missing .rv-figure-value,
+#reviewModal .rv-figure.is-missing .rv-figure-note { color: var(--theme-warning-emphasis); }
+
+/* Who filed it ------------------------------------------------------------ */
+#reviewModal .rv-employee {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 11px 14px;
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 12px;
+    background: var(--theme-neutral-50);
+}
+#reviewModal .rv-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--gp-pri), var(--theme-accent));
+    color: var(--theme-btn-primary-fg);
+    font-size: 12.5px;
+    font-weight: 700;
+}
+#reviewModal .rv-avatar img { width: 100%; height: 100%; object-fit: cover; }
+#reviewModal .rv-employee-text { min-width: 0; }
+#reviewModal .rv-employee-name {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+}
+#reviewModal .rv-employee-meta {
+    margin: 2px 0 0;
+    font-size: 11.5px;
+    color: var(--theme-neutral-600);
+}
+
+/* The PDS paperwork ------------------------------------------------------- */
+#reviewModal .rv-details {
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 12px;
+    overflow: hidden;
+}
+#reviewModal .rv-detail-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--theme-neutral-200);
+}
+#reviewModal .rv-detail-row:last-child { border-bottom: none; }
+#reviewModal .rv-detail-row:nth-child(odd) { background: var(--theme-neutral-50); }
+#reviewModal .rv-detail-row span {
+    flex-shrink: 0;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--theme-neutral-600);
+}
+#reviewModal .rv-detail-row strong {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+    text-align: right;
+    min-width: 0;
+    word-break: break-word;
+}
+
+/* Already rejected: the reason on record ---------------------------------- */
+#reviewModal .rv-returned {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin-top: 14px;
+    padding: 11px 13px;
+    border: 1px solid var(--theme-danger-border);
+    border-left-width: 3px;
+    border-radius: 0 10px 10px 0;
+    background: var(--theme-danger-subtle);
+    color: var(--theme-danger-emphasis);
+}
+#reviewModal .rv-returned[hidden] { display: none; }
+#reviewModal .rv-returned svg { flex-shrink: 0; margin-top: 2px; }
+#reviewModal .rv-returned-text-wrap { min-width: 0; }
+#reviewModal .rv-returned-label {
+    margin: 0 0 2px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+}
+#reviewModal .rv-returned-text {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.55;
+    word-break: break-word;
+}
+
+/* The certificate --------------------------------------------------------- */
+#reviewModal .rv-file {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px;
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 12px;
+    background: var(--theme-neutral-50);
+}
+/* The dashed treatment belongs to the state where nothing was uploaded. It
+   used to be drawn around every certificate, including the ones on file. */
+#reviewModal .rv-file.is-empty {
+    border-style: dashed;
+    border-color: var(--theme-neutral-300);
+    background: transparent;
+}
+#reviewModal .rv-file-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--theme-neutral-200);
+    background: var(--theme-neutral-100);
+    color: var(--theme-neutral-600);
+}
+#reviewModal .rv-file-icon.is-pdf {
+    border-color: var(--theme-danger-border);
+    background: var(--theme-danger-subtle);
+    color: var(--theme-danger-emphasis);
+}
+#reviewModal .rv-file-icon.is-image {
+    border-color: var(--theme-info-border);
+    background: var(--theme-info-subtle);
+    color: var(--theme-info-emphasis);
+}
+#reviewModal .rv-file-text { flex: 1; min-width: 0; }
+#reviewModal .rv-file-name {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gp-pri);
+}
+#reviewModal .rv-file-note {
+    margin: 3px 0 0;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--gp-text-mid);
+}
+#reviewModal .rv-file-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--gp-border);
+    border-radius: 9px;
+    background: var(--theme-neutral-100);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gp-text-mid);
+    text-decoration: none;
+    transition: background .15s, border-color .15s, color .15s, transform .15s;
+}
+#reviewModal .rv-file-btn:hover {
+    background: var(--gp-bg-tint);
+    border-color: var(--gp-pri);
+    color: var(--gp-pri);
+    transform: translateY(-1px);
+}
+#reviewModal .rv-file-btn[hidden] { display: none; }
+
+/* Footer ------------------------------------------------------------------ */
+/* .modal-footer is redefined in four of the globally-loaded stylesheets and
+   which one wins depends on their order in the layout, so the parts this
+   layout depends on -- the row, and the rule the header's border pairs with --
+   are stated here rather than inherited. */
+#reviewModal .rv-footer {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px 18px;
+    border-top: 1px solid var(--theme-neutral-200);
+}
+/* Close is pushed away from the two decisions, so dismissing the dialog is
+   never one slip of the mouse away from approving it. */
+#reviewModal .rv-close-btn { margin-right: auto; }
+#reviewModal .rv-footer button[hidden] { display: none; }
+
+@media (max-width: 640px) {
+    #reviewModal .rv-header { padding: 18px 18px 14px; }
+    #reviewModal .rv-body { padding: 16px 18px 18px; }
+    #reviewModal .rv-footer { padding: 12px 18px 16px; flex-wrap: wrap; }
+    #reviewModal .rv-title { font-size: 15.5px; }
+    /* Three tiles across a phone leaves each one about ten characters wide. */
+    #reviewModal .rv-figures { grid-template-columns: 1fr; }
+    #reviewModal .rv-detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+    }
+    #reviewModal .rv-detail-row strong { text-align: left; }
+    #reviewModal .rv-file { flex-wrap: wrap; }
+    #reviewModal .rv-file-btn { width: 100%; justify-content: center; }
+    #reviewModal .rv-close-btn { margin-right: 0; width: 100%; justify-content: center; }
+}
+
 #approveModal .training-modal-meta {
     text-align: left;
     background: var(--gp-bg-tint);
     border-radius: 12px;
     padding: 14px 16px;
-}
-
-#reviewModal .training-cert-preview {
-    text-align: center;
-    padding: 24px 20px;
-    background: var(--gp-bg-tint);
-    border-radius: 12px;
-    border: 1.5px dashed var(--theme-neutral-300);
-}
-#reviewModal .training-cert-preview-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 8px;
-}
-#reviewModal .training-cert-preview-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--gp-pri);
-    margin: 0 0 6px;
-    word-break: break-all;
-}
-#reviewModal .training-cert-preview-note {
-    font-size: 12px;
-    color: var(--gp-text-mid);
-    margin: 0;
-}
-#reviewModal .pmodal-badges { margin-top: 8px; }
-
-#rejectModal .training-form-field label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--gp-pri);
-    margin-bottom: 6px;
-}
-#rejectModal .training-form-field .req { color: var(--gp-bad); }
-#rejectModal .training-form-field textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1.5px solid var(--theme-neutral-300);
-    border-radius: 8px;
-    font-size: 13px;
-    color: var(--gp-pri);
-    font-family: 'Poppins', sans-serif;
-    background: #fff;
-    box-sizing: border-box;
-    resize: vertical;
-    min-height: 100px;
-}
-#rejectModal .training-form-field textarea:focus {
-    outline: none;
-    border-color: var(--gp-pri);
-    box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), 0.08);
-}
-#rejectModal .training-field-hint {
-    font-size: 11px;
-    color: var(--gp-text-soft);
-    margin: 6px 0 0;
-    line-height: 1.4;
 }
 
 #approveModal .modal-box { max-width: 420px; }
@@ -565,6 +1012,307 @@
 #approveModal .training-modal-footer-center { justify-content: center; }
 #approveModal .training-modal-btn-full { width: 100%; justify-content: center; }
 
+/* ---------------------------------------------------------------------------
+   Training decision -- approve / reject confirmation
+   (#trainingDecisionModal).
+
+   One modal answers both questions, sharing the pass slip decision dialog's
+   shape so the two approval surfaces of this app read as one thing. Everything
+   that differs between the decisions is a token redefined under
+   `.is-approve` / `.is-reject`: the two states cannot drift apart in spacing
+   or structure, only in colour and wording. An approval that looks like a
+   refusal is worse than either.
+   --------------------------------------------------------------------------- */
+#trainingDecisionModal {
+    --tdm-accent: var(--theme-success);
+    --tdm-accent-subtle: var(--theme-success-subtle);
+    --tdm-accent-border: var(--theme-success-border);
+    --tdm-accent-emphasis: var(--theme-success-emphasis);
+}
+#trainingDecisionModal.is-reject {
+    --tdm-accent: var(--theme-danger);
+    --tdm-accent-subtle: var(--theme-danger-subtle);
+    --tdm-accent-border: var(--theme-danger-border);
+    --tdm-accent-emphasis: var(--theme-danger-emphasis);
+}
+
+#trainingDecisionModal .modal-box {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+/* Header: the question, centred, under the decision's own glyph. The shared
+   .modal-header is not used -- this modal has no close button, because a
+   decision should be answered, not dismissed by a stray click on an X.
+   (Escape and the overlay still close it.) */
+#trainingDecisionModal .tdm-head {
+    padding: 26px 26px 18px;
+    text-align: center;
+    border-bottom: 1px solid var(--theme-neutral-200);
+}
+#trainingDecisionModal .tdm-icon {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--tdm-accent-subtle);
+    border: 1px solid var(--tdm-accent-border);
+    color: var(--tdm-accent-emphasis);
+}
+#trainingDecisionModal .tdm-eyebrow {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--tdm-accent-emphasis);
+    margin-bottom: 6px;
+}
+#trainingDecisionModal .tdm-title {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--gp-pri);
+}
+#trainingDecisionModal .tdm-lede {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--theme-neutral-700);
+}
+
+#trainingDecisionModal .tdm-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 18px 26px 20px;
+}
+
+/* Whose record this credits */
+#trainingDecisionModal .tdm-filer {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 14px;
+}
+#trainingDecisionModal .tdm-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--gp-pri), var(--theme-accent));
+    color: var(--theme-btn-primary-fg);
+    font-size: 13px;
+    font-weight: 700;
+}
+#trainingDecisionModal .tdm-avatar img { width: 100%; height: 100%; object-fit: cover; }
+#trainingDecisionModal .tdm-filer-text { min-width: 0; text-align: left; flex: 1; }
+#trainingDecisionModal .tdm-filer-name {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gp-pri);
+}
+#trainingDecisionModal .tdm-filer-role {
+    margin: 2px 0 0;
+    font-size: 11.5px;
+    color: var(--theme-neutral-600);
+}
+/* The reference document number is what the reviewer quotes afterwards, so it
+   stays legible rather than folded into the meta line. */
+#trainingDecisionModal .tdm-ref {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--theme-neutral-100);
+    border: 1px solid var(--theme-neutral-300);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    color: var(--theme-neutral-700);
+}
+
+/* What is being decided */
+#trainingDecisionModal .tdm-slip {
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 12px;
+    background: var(--theme-neutral-50);
+    overflow: hidden;
+}
+#trainingDecisionModal .tdm-slip-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--theme-neutral-200);
+}
+#trainingDecisionModal .tdm-slip-row:last-child { border-bottom: none; }
+#trainingDecisionModal .tdm-slip-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--theme-neutral-600);
+}
+#trainingDecisionModal .tdm-slip-value {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+    text-align: right;
+    min-width: 0;
+}
+/* The hours are the figure this decision writes to the PDS, or withholds from
+   it, so the eye lands there first. */
+#trainingDecisionModal .tdm-slip-row:first-child .tdm-slip-value { color: var(--tdm-accent-emphasis); }
+
+/* A seminar title runs long, so it stacks and wraps instead of fighting its
+   label for one line. */
+#trainingDecisionModal .tdm-slip-training {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+#trainingDecisionModal .tdm-slip-training-text {
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--theme-neutral-800);
+    word-break: break-word;
+}
+
+/* Approve with no certificate uploaded */
+#trainingDecisionModal .tdm-warn {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 14px 0 0;
+    padding: 10px 12px;
+    border: 1px solid var(--theme-warning-border);
+    border-radius: 9px;
+    background: var(--theme-warning-subtle);
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--theme-warning-emphasis);
+}
+#trainingDecisionModal .tdm-warn[hidden] { display: none; }
+#trainingDecisionModal .tdm-warn svg { flex-shrink: 0; margin-top: 1px; }
+
+/* Reject only: the reason */
+#trainingDecisionModal .tdm-note { margin-top: 16px; }
+#trainingDecisionModal .tdm-note[hidden] { display: none; }
+#trainingDecisionModal .tdm-note-label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gp-pri);
+}
+#trainingDecisionModal .tdm-required {
+    margin-left: 5px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--theme-danger-subtle);
+    border: 1px solid var(--theme-danger-border);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    color: var(--theme-danger-emphasis);
+}
+#trainingDecisionModal .tdm-note-input {
+    width: 100%;
+    padding: 11px 12px;
+    border: 2px solid var(--theme-neutral-300);
+    border-radius: 9px;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.55;
+    resize: vertical;
+    transition: border-color .15s, box-shadow .15s;
+}
+/* The focus ring is deliberately NOT the accent. This field only appears on
+   the rejection, where the accent is danger red -- and a red border around a
+   textarea reads as "you typed something invalid", not as "this is the refusal
+   dialog". It matches the page's other inputs instead. */
+#trainingDecisionModal .tdm-note-input:focus {
+    outline: none;
+    border-color: var(--gp-pri);
+    box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), .10);
+}
+#trainingDecisionModal .tdm-note-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--theme-neutral-600);
+}
+#trainingDecisionModal .tdm-note-foot .is-full { color: var(--theme-danger); font-weight: 700; }
+
+/* What happens next. Stated before the button, not after it. */
+#trainingDecisionModal .tdm-consequence {
+    margin: 16px 0 0;
+    padding: 11px 13px;
+    border-left: 3px solid var(--tdm-accent-border);
+    border-radius: 0 8px 8px 0;
+    background: var(--tdm-accent-subtle);
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: var(--tdm-accent-emphasis);
+}
+
+#trainingDecisionModal .tdm-footer { flex-shrink: 0; }
+#trainingDecisionModal .tdm-footer .modal-btn-primary {
+    background: var(--tdm-accent);
+    box-shadow: none;
+}
+#trainingDecisionModal .tdm-footer .modal-btn-primary:hover:not(:disabled) {
+    background: var(--tdm-accent-emphasis);
+    transform: translateY(-1px);
+}
+/* Disabled until a reason is typed -- the controller requires one, and a 422
+   has nowhere to render on this page. */
+#trainingDecisionModal .tdm-footer .modal-btn-primary:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@media (max-width: 640px) {
+    #trainingDecisionModal .modal-box { max-height: 94vh; }
+    #trainingDecisionModal .tdm-head { padding: 22px 18px 16px; }
+    #trainingDecisionModal .tdm-body { padding: 16px 18px; }
+    #trainingDecisionModal .tdm-title { font-size: 16.5px; }
+    /* Stacking keeps a long sponsor name from squeezing its label down to two
+       characters. */
+    #trainingDecisionModal .tdm-slip-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    #trainingDecisionModal .tdm-slip-value { text-align: left; }
+    #trainingDecisionModal .tdm-filer { flex-wrap: wrap; }
+    #trainingDecisionModal .tdm-footer { flex-wrap: wrap; }
+    #trainingDecisionModal .tdm-footer .modal-btn-ghost,
+    #trainingDecisionModal .tdm-footer .modal-btn-primary {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
 @media (max-width: 900px) {
     .admin-training .training-breakdown-grid { grid-template-columns: 1fr; }
     .training-topbar-search-input { width: 180px; }
@@ -572,5 +1320,6 @@
 
 @media (max-width: 768px) {
     .admin-training .training-filter-bar { flex-direction: column; align-items: stretch; }
+    .admin-training .training-empty { padding: 34px 16px; }
     .training-topbar-search-input { width: 100%; }
 }
