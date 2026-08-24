@@ -160,7 +160,8 @@
 .dep-dot-red { background: #8e1e18; }
 
 /* ── Tab table headers/footers ── */
-.btn-export-green { color: #15803d; border-color: #15803d; }
+/* .btn-export-green lives in glassSystem.css now, so Personnel's Bulk Import
+   pill and this one are the same rule rather than two copies of a colour. */
 .dep-footer-inner { display: flex; align-items: center; gap: 8px; }
 .dep-rows-select {
     font-size: 13px;

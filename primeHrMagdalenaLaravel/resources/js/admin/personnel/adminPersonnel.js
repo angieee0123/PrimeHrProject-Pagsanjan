@@ -205,6 +205,24 @@ function sortTable(columnIndex) {
     displayPage(currentPage);
 }
 
+// The empty state uses the same shell the Blade partial renders when there are
+// no employees at all, so a filter that matches nobody does not drop to a bare
+// line of text in the middle of an otherwise styled table.
+function emptyRow(title, text) {
+    return '<tr class="prs-empty-row"><td colspan="7"><div class="prs-empty">'
+        + '<p class="prs-empty-title">' + title + '</p>'
+        + '<p class="prs-empty-text">' + text + '</p>'
+        + '</div></td></tr>';
+}
+
+// "Showing 1-10 of 14" in the footer and "N of 14 records" in the heading are
+// the same figure; the heading used to print the untouched total, so a search
+// left it claiming the whole roster was still on screen.
+function setShownCount(count) {
+    const shown = document.getElementById('recordsShown');
+    if (shown) shown.textContent = count;
+}
+
 function displayPage(page) {
     const tbody = document.getElementById('personnelTableBody');
     tbody.innerHTML = '';
@@ -214,7 +232,7 @@ function displayPage(page) {
     const pageRows = allRows.slice(start, end);
 
     if (pageRows.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--theme-neutral-700);">No employees found.</td></tr>';
+        tbody.innerHTML = emptyRow('No employees on record', 'Use “Add Employee” to register new personnel, or Bulk Import to bring in an existing roster.');
     } else {
         pageRows.forEach(row => tbody.appendChild(row));
     }
@@ -222,6 +240,7 @@ function displayPage(page) {
     document.getElementById('showingStart').textContent = start + 1;
     document.getElementById('showingEnd').textContent = Math.min(end, allRows.length);
     document.getElementById('totalRecords').textContent = allRows.length;
+    setShownCount(allRows.length);
 
     updatePaginationButtons();
 }
@@ -333,7 +352,7 @@ function displayFilteredPage(visibleRows) {
     const pageRows = visibleRows.slice(start, end);
 
     if (pageRows.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--theme-neutral-700);">No employees found matching the filters.</td></tr>';
+        tbody.innerHTML = emptyRow('No matching employees', 'No record matches the current search and filters. Clear them to see the full roster.');
     } else {
         pageRows.forEach(row => tbody.appendChild(row));
     }
@@ -341,6 +360,7 @@ function displayFilteredPage(visibleRows) {
     document.getElementById('showingStart').textContent = visibleRows.length > 0 ? start + 1 : 0;
     document.getElementById('showingEnd').textContent = Math.min(end, visibleRows.length);
     document.getElementById('totalRecords').textContent = visibleRows.length;
+    setShownCount(visibleRows.length);
 
     updateFilteredPaginationButtons(visibleRows);
 }

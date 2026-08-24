@@ -457,6 +457,292 @@
 .personnel-table-section {
     box-shadow: 0 2px 12px rgba(var(--theme-shadow-rgb), 0.06);
 }
+/* ---------------------------------------------------------------------------
+   Employee Records table (#personnelTable).
+
+   Same layout rule as the Work Schedules table below: widths are declared on
+   a <colgroup>, the table is `table-layout: fixed`, and each column's
+   alignment is set on `th` and `td` in a single selector -- a heading cannot
+   end up over content aligned the other way.
+
+   Everything here used to be an inline `style=""` in the partial: six
+   `width:%` on the headings, `text-align: center` on three headings but on
+   only two of the matching cells, the avatar's eight declarations repeated on
+   both branches of the photo `@if`, and a whole font stack plus a hard-coded
+   white on the rows-per-page select. None of it could follow the theme and
+   none of it could be changed in one place.
+   --------------------------------------------------------------------------- */
+/* Bulk Import's green lives in glassSystem.css beside the other .btn-export
+   variants — it has to name .btn-export to outrank `.glass-shell .btn-export`,
+   and that rule is the one it is outranking. */
+
+.personnel-records-table {
+    table-layout: fixed;
+    min-width: 1080px;
+}
+.personnel-records-table col.pcol-employee { width: 24%; }
+.personnel-records-table col.pcol-position { width: 17%; }
+.personnel-records-table col.pcol-dept     { width: 15%; }
+.personnel-records-table col.pcol-type     { width: 10%; }
+.personnel-records-table col.pcol-date     { width: 11%; }
+.personnel-records-table col.pcol-status   { width: 9%; }
+/* Four 30px icon buttons and the gaps between them: the one column whose
+   width is set by its content rather than by a share of the table. */
+.personnel-records-table col.pcol-actions  { width: 168px; }
+
+/* Heading and content, aligned together. The first three columns are prose
+   and read from the left; the last four each hold a single token -- a badge,
+   a date, a status, a control cluster -- and centre under their headings. */
+.personnel-records-table :is(th, td):nth-child(4),
+.personnel-records-table :is(th, td):nth-child(5),
+.personnel-records-table :is(th, td):nth-child(6),
+.personnel-records-table :is(th, td):nth-child(7) { text-align: center; }
+
+/* The admin dashboard card's gold-underlined micro-caps header. Declared here
+   because admin.css and adminDashboard.css each style `.payroll-table`
+   headings differently, so which one applied depended on their load order. */
+.personnel-records-table thead th {
+    height: 42px;
+    padding: 0 14px;
+    background: var(--gp-bg-tint-2);
+    color: var(--gp-pri);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    vertical-align: middle;
+    white-space: nowrap;
+    border-bottom: 2px solid var(--gp-accent-gold);
+}
+.personnel-records-table :is(th, td):first-child { padding-left: 18px; }
+.personnel-records-table :is(th, td):last-child  { padding-right: 16px; }
+
+/* The sort control. Padding with an equal negative margin, so the hit area
+   grows to something clickable without moving where the label sits. */
+.th-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: -8px;
+    padding: 8px;
+    border: 0;
+    border-radius: 7px;
+    background: none;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+    cursor: pointer;
+    transition: background .18s cubic-bezier(.4,0,.2,1);
+}
+.th-sort:hover { background: rgba(var(--theme-primary-rgb), .08); }
+.th-sort:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 1px; }
+/* Dimmed until this is the sorted column; sortTable() writes the opacity and
+   the rotation inline from the first click on. */
+.th-sort-icon {
+    flex-shrink: 0;
+    opacity: .3;
+    transition: transform .18s cubic-bezier(.4,0,.2,1), opacity .18s cubic-bezier(.4,0,.2,1);
+}
+
+/* Rows. A fixed height keeps the two-line employee cell from making its row
+   taller than the rest, which is what made the columns read as ragged. */
+.personnel-records-table td {
+    height: 64px;
+    padding: 10px 14px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--gp-border);
+}
+.personnel-records-table tbody tr { transition: background .15s ease; }
+.personnel-records-table tbody tr:nth-child(even) { background: var(--gp-bg-tint); }
+.personnel-records-table tbody tr:hover { background: var(--theme-primary-soft); }
+.personnel-records-table tbody tr:last-child td { border-bottom: none; }
+
+/* Employee */
+.personnel-records-table .emp-cell { gap: 11px; min-width: 0; }
+.personnel-records-table .emp-cell-text { min-width: 0; }
+.personnel-records-table .emp-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    object-fit: cover;
+    border: 2px solid var(--theme-neutral-200);
+    color: var(--theme-btn-primary-fg);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .3px;
+}
+.personnel-records-table .emp-name {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gp-pri);
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.personnel-records-table .emp-id {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: var(--gp-text-soft);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Position. Two lines rather than an ellipsis: designation titles are long
+   ("Administrative Officer IV") and the tail is what tells two of them
+   apart. */
+.personnel-records-table .position-cell {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 100%;
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--theme-neutral-700);
+}
+.personnel-records-table .dept-tag {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.personnel-records-table .badge-emptype,
+.personnel-records-table .badge-status { white-space: nowrap; }
+
+/* Tabular numerals, so the dates read as one column rather than as fourteen
+   independently-ragged strings. */
+.personnel-records-table .prs-date {
+    font-size: 12px;
+    color: var(--gp-text-mid);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* Actions.
+
+   One square per action, centred under the heading. `.btn-view`/`.btn-edit`
+   are defined in both adminDashboard.css and adminAttendance.css with
+   different metrics -- attendance's `.btn-edit` is not even a flex box, so
+   Edit's icon and label sat differently from View's on the same row. Sizing
+   them here means the four buttons match each other whichever of those files
+   wins. */
+.personnel-records-table .row-actions { justify-content: center; }
+.personnel-records-table .action-buttons-desktop { gap: 6px; justify-content: center; }
+.personnel-records-table .action-buttons-desktop > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 8px;
+    background: var(--theme-neutral-50);
+    border: 1px solid var(--gp-border);
+    color: var(--gp-text-mid);
+    cursor: pointer;
+    transition: background .18s cubic-bezier(.4,0,.2,1), border-color .18s cubic-bezier(.4,0,.2,1), color .18s cubic-bezier(.4,0,.2,1), transform .15s ease;
+}
+.personnel-records-table .action-buttons-desktop > button:hover {
+    background: var(--theme-primary-soft);
+    border-color: var(--gp-pri);
+    color: var(--gp-pri);
+}
+.personnel-records-table .action-buttons-desktop > button:active { transform: scale(.92); }
+.personnel-records-table .action-buttons-desktop > button:focus-visible {
+    outline: 2px solid var(--gp-pri);
+    outline-offset: 2px;
+}
+/* The two that change an account's state keep their meaning at rest, not
+   only on hover -- deactivating is the one irreversible-looking thing on
+   this row and it should not read as another neutral square. */
+.personnel-records-table .btn-deactivate {
+    background: var(--theme-danger-subtle);
+    border-color: var(--theme-danger-border);
+    color: var(--theme-danger);
+}
+.personnel-records-table .btn-deactivate:hover {
+    background: var(--theme-danger-subtle);
+    border-color: var(--theme-danger);
+    color: var(--theme-danger-emphasis);
+}
+.personnel-records-table .btn-activate {
+    background: var(--theme-success-subtle);
+    border-color: var(--theme-success-border);
+    color: var(--theme-success);
+}
+.personnel-records-table .btn-activate:hover {
+    background: var(--theme-success-subtle);
+    border-color: var(--theme-success);
+    color: var(--theme-success-emphasis);
+}
+
+/* Empty state */
+.personnel-records-table .prs-empty-row td { height: auto; }
+/* The row-hover tint would read as a selectable row where there is nothing
+   to select. */
+.personnel-records-table .prs-empty-row:hover { background: none; }
+.prs-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 46px 20px;
+    text-align: center;
+}
+.prs-empty-icon {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 6px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--theme-neutral-100);
+    border: 1px solid var(--theme-neutral-200);
+    color: var(--theme-neutral-600);
+}
+.prs-empty-title {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+}
+.prs-empty-text {
+    margin: 0;
+    max-width: 420px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--gp-text-soft);
+}
+
+/* Footer */
+.prs-footer-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.prs-perpage {
+    width: auto;
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+/* Below this width the four buttons are replaced by the 3-dot menu, so the
+   column no longer needs room for them. */
+@media (max-width: 1024px) {
+    .personnel-records-table col.pcol-actions { width: 80px; }
+}
 
 /* ---------------------------------------------------------------------------
    Work Schedules table (#scheduleTable).

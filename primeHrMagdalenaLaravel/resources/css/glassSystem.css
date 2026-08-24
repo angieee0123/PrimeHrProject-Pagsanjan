@@ -288,8 +288,8 @@
    ship no stylesheet of their own (the payslip page is one) and glassSystem is
    @import-ed into app.css, which every layout loads.
 
-   Naming follows .btn-export-green, the other .btn-export variant in the
-   codebase. This is the canonical version; employeePassSlip.css,
+   Naming follows .btn-export-green, the other .btn-export variant, which now
+   sits directly below. This is the canonical version; employeePassSlip.css,
    employeeLeaveAndBenefits.css, employeeTravelOrder.css and admin.css each
    carry a private copy under their own prefix that could collapse into it.
 
@@ -308,6 +308,30 @@
     border-color: var(--gp-pri-2);
     transform: translateY(-1px);
 }
+/* Same pill, in the semantic green — the "Bulk Import" action that sits beside
+   a primary in a .table-header, on Personnel and on Departments. It stays an
+   outline rather than a fill: both pages put a solid navy "Add …" next to it,
+   and the pair has to differ by weight so only one of the two reads as the
+   primary.
+
+   One rule now serves both pages. Departments spelled it as a bare
+   `.btn-export-green` in adminDepartment.css — a stylesheet Personnel does not
+   load, so the two could only ever have matched by being retyped, and at
+   (0,1,0) its border-color was in any case losing to `.glass-shell .btn-export`
+   (0,2,0). The green comes from the semantic ramp rather than the #15803d
+   literal that rule carried, so the label follows the active palette.
+
+   Specificity and the :hover pair matter here for the same reason as the solid
+   variant above: at (0,1,0) a variant keeps its own label colour while losing
+   the pill it was recolouring, and `.glass-shell .btn-export:hover` (0,3,0)
+   takes the resting state back the moment the pointer lands on it. */
+.glass-shell .btn-export.btn-export-green {
+    color: var(--theme-success);
+}
+.glass-shell .btn-export.btn-export-green:hover {
+    color: var(--theme-success-emphasis);
+}
+
 .glass-shell .btn-solid,
 .glass-shell .btn-primary,
 .glass-shell .btn-filter-main {
