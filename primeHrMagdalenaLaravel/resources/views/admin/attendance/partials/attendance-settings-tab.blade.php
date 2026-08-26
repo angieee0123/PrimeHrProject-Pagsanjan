@@ -6,8 +6,13 @@
                 <p class="table-sub">Configure which time punches are not required, with optional effectivity dates</p>
             </div>
             <div class="table-actions">
-                <button class="btn-primary" onclick="openAddExemptionModal()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                {{-- The same navy pill as "Add Employee" on the Personnel page:
+                     .btn-export supplies the shape and metrics,
+                     .adm-btn-primary-solid takes over only the colours. Both
+                     rules key off .glass-shell, which this page's <main>
+                     carries, so nothing page-specific is needed here. --}}
+                <button class="btn-export adm-btn-primary-solid" onclick="openAddExemptionModal()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <line x1="12" y1="5" x2="12" y2="19"/>
                         <line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
@@ -18,15 +23,33 @@
 
         <div class="table-wrapper">
             <table class="payroll-table exemptions-table">
+                {{--
+                    Widths on the <colgroup>, alignment stated on the <th> -- the
+                    same rule the Attendance Summary table follows. Without widths
+                    this table is `table-layout: fixed` with eight equal columns
+                    and `white-space: nowrap` headings, so a heading wider than
+                    its share overflows sideways instead of the column growing,
+                    and "ACTIONS" drifts off the button below it.
+                --}}
+                <colgroup>
+                    <col class="excol-type">
+                    <col class="excol-name">
+                    <col class="excol-effectivity">
+                    <col class="excol-required">
+                    <col class="excol-legacy">
+                    <col class="excol-reason">
+                    <col class="excol-creator">
+                    <col class="excol-actions">
+                </colgroup>
                 <thead>
                     <tr>
-                        <th>Type</th>
+                        <th class="th-center">Type</th>
                         <th>Name</th>
-                        <th>Effectivity</th>
+                        <th class="th-center">Effectivity</th>
                         <th class="th-center">Not Required</th>
                         <th class="th-center">Legacy Flags</th>
                         <th>Reason</th>
-                        <th>Created By</th>
+                        <th class="th-center">Created By</th>
                         <th class="row-menu-head">Actions</th>
                     </tr>
                 </thead>

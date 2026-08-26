@@ -7,7 +7,33 @@
     </div>
 
     <div class="table-wrapper">
+        {{--
+            Same layout rule as the Personnel records table: widths live on the
+            <colgroup>, the table is `table-layout: fixed` with a `min-width`,
+            and each column's alignment is set on `th` and `td` together in
+            adminAttendance.css.
+
+            The widths used to be `nth-child` rules totalling 100% with no
+            min-width, so on anything narrower than ~1180px the six count
+            columns were squeezed below the width of their own `white-space:
+            nowrap` headings. The headings then overflowed their cells and bled
+            sideways into their neighbours -- which is why "Actions" stopped
+            sitting over the button underneath it.
+        --}}
         <table class="payroll-table attendance-summary-table">
+            <colgroup>
+                <col class="acol-employee">
+                <col class="acol-dept">
+                <col class="acol-num">
+                <col class="acol-num">
+                <col class="acol-num">
+                <col class="acol-num">
+                <col class="acol-num">
+                <col class="acol-num">
+                <col class="acol-rate">
+                <col class="acol-status">
+                <col class="acol-actions">
+            </colgroup>
             <thead>
                 <tr>
                     <th>Employee</th>
@@ -19,7 +45,7 @@
                     <th class="th-center">½ Day</th>
                     <th class="th-center">OT</th>
                     <th>Rate</th>
-                    <th>Status</th>
+                    <th class="th-center">Status</th>
                     <th class="row-menu-head">Actions</th>
                 </tr>
             </thead>
@@ -62,11 +88,15 @@
                             <span class="rate-pct">{{ $record['rate'] }}%</span>
                         </div>
                     </td>
-                    <td><span class="badge-status {{ $record['status'] === 'Complete' ? 'processed' : 'pending' }}">{{ $record['status'] }}</span></td>
+                    <td class="td-center"><span class="badge-status {{ $record['status'] === 'Complete' ? 'processed' : 'pending' }}">{{ $record['status'] }}</span></td>
                     <td class="row-menu-cell">
                         <div class="row-actions">
                             <button class="act-btn" title="Actions" onclick="toggleActionMenu(event, 'action-menu-{{ $index }}')">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="1"/>
+                                    <circle cx="12" cy="5" r="1"/>
+                                    <circle cx="12" cy="19" r="1"/>
+                                </svg>
                             </button>
                             <div id="action-menu-{{ $index }}" class="action-dropdown">
                                 <button class="action-dropdown-item" onclick='openDTRModal(@json($record), {{ $index }}); closeAllActionMenus()'>

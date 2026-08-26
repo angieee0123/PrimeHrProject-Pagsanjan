@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\DeductionType;
 use App\Models\EmployeeDeduction;
 use App\Models\Employee;
-use Carbon\Carbon;
 
 class DeductionController extends Controller
 {
@@ -309,69 +308,18 @@ class DeductionController extends Controller
         }
     }
 
-    public function exportEmployeeDeductions()
-    {
-        $deductions = EmployeeDeduction::with([
-            'employee.employmentDetail.departmentRelation',
-            'deductionType'
-        ])->orderBy('created_at', 'desc')->get();
+    /*
+        `exportEmployeeDeductions()`, `exportLoans()` and `exportSchedules()`
+        used to live here. All three now sit on `DeductionExportController`
+        alongside the Deduction Types and Loan Types exports, which had no
+        endpoint at all — one controller per page, one method per tab, the same
+        rule the Departments and Leave & Benefits exports follow.
 
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename=employee_deductions_' . now()->format('Y-m-d') . '.csv',
-        ];
-
-        $callback = function () use ($deductions) {
-            $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
-
-            fputcsv($file, [
-                'Employee ID',
-                'Employee Name',
-                'Department',
-                'Deduction Type',
-                'Category',
-                'Amount/Balance',
-                'Total Amount',
-                'Start Date',
-                'End Date',
-                'Status',
-                'Remarks'
-            ]);
-
-            foreach ($deductions as $d) {
-                $employeeName = $d->employee->first_name . ' ' . $d->employee->last_name;
-                $department = $d->employee->employmentDetail->departmentRelation->name ?? 'N/A';
-
-                $amount = '';
-                if ($d->deductionType->category === 'LOAN') {
-                    $amount = number_format($d->remaining_balance ?? 0, 2);
-                } elseif ($d->deductionType->computation_type === 'PERCENTAGE') {
-                    $amount = $d->deductionType->percentage_rate . '%';
-                } elseif ($d->amount) {
-                    $amount = number_format($d->amount, 2);
-                }
-
-                fputcsv($file, [
-                    $d->employee->employee_id,
-                    $employeeName,
-                    $department,
-                    $d->deductionType->name,
-                    $d->deductionType->category,
-                    $amount,
-                    $d->total_amount ? number_format($d->total_amount, 2) : '',
-                    Carbon::parse($d->start_date)->format('Y-m-d'),
-                    $d->end_date ? Carbon::parse($d->end_date)->format('Y-m-d') : '',
-                    $d->status,
-                    $d->remarks ?? ''
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
+        They also wear `CsvReportWriter`'s letterhead now, and they read the
+        toolbar's filters. Previously all three ignored the toolbar entirely,
+        so a file exported from a filtered screen silently contained every row
+        in the system.
+    */
 
     public function showEmployeeDeduction($id)
     {
@@ -406,113 +354,6 @@ class DeductionController extends Controller
 
         return redirect()->route('admin.deductions')
             ->with('success', "Deduction '{$deductionName}' removed from {$employeeName} successfully.");
-    }
-
-    public function exportLoans()
-    {
-        $loans = EmployeeDeduction::with([
-            'employee.employmentDetail.departmentRelation',
-            'deductionType.schedules'
-        ])
-        ->whereHas('deductionType', function($q) {
-            $q->where('category', 'LOAN');
-        })
-        ->orderBy('created_at', 'desc')
-        ->get();
-
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename=employee_loans_' . now()->format('Y-m-d') . '.csv',
-        ];
-
-        $callback = function () use ($loans) {
-            $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
-
-            fputcsv($file, [
-                'Employee ID',
-                'Employee Name',
-                'Department',
-                'Loan Type',
-                'Provider',
-                'Total Amount',
-                'Amount Paid',
-                'Remaining Balance',
-                'Progress %',
-                'Monthly Installment',
-                'Schedule',
-                '1st Cutoff Amount',
-                '2nd Cutoff Amount',
-                'Months Remaining',
-                'Start Date',
-                'End Date',
-                'Status',
-                'Remarks'
-            ]);
-
-            foreach ($loans as $loan) {
-                $employeeName = $loan->employee->first_name . ' ' . $loan->employee->last_name;
-                $department = $loan->employee->employmentDetail->departmentRelation->name ?? 'N/A';
-
-                // Determine provider
-                $provider = 'Other';
-                if (str_contains($loan->deductionType->code, 'GSIS')) {
-                    $provider = 'GSIS';
-                } elseif (str_contains($loan->deductionType->code, 'PAGIBIG')) {
-                    $provider = 'Pag-IBIG';
-                }
-
-                $totalAmount = $loan->total_amount ?? 0;
-                $remainingBalance = $loan->remaining_balance ?? 0;
-                $amountPaid = $totalAmount - $remainingBalance;
-                $progress = $totalAmount > 0 ? (($amountPaid / $totalAmount) * 100) : 0;
-                $installment = $loan->installment_amount ?? 0;
-                $monthsRemaining = $installment > 0 ? ceil($remainingBalance / $installment) : 0;
-
-                // Get schedule and calculate per-cutoff
-                $schedule = $loan->deductionType->schedules->first();
-                $cutoffSchedule = $schedule ? $schedule->cutoff_schedule : 'BOTH_SPLIT';
-
-                if ($cutoffSchedule === '1ST_ONLY') {
-                    $perCutoff1st = $installment;
-                    $perCutoff2nd = 0;
-                } elseif ($cutoffSchedule === '2ND_ONLY') {
-                    $perCutoff1st = 0;
-                    $perCutoff2nd = $installment;
-                } elseif ($cutoffSchedule === 'BOTH_FULL') {
-                    $perCutoff1st = $installment;
-                    $perCutoff2nd = $installment;
-                } else { // BOTH_SPLIT
-                    $perCutoff1st = $installment / 2;
-                    $perCutoff2nd = $installment / 2;
-                }
-
-                fputcsv($file, [
-                    $loan->employee->employee_id,
-                    $employeeName,
-                    $department,
-                    $loan->deductionType->name,
-                    $provider,
-                    number_format($totalAmount, 2),
-                    number_format($amountPaid, 2),
-                    number_format($remainingBalance, 2),
-                    number_format($progress, 2),
-                    number_format($installment, 2),
-                    $cutoffSchedule,
-                    number_format($perCutoff1st, 2),
-                    number_format($perCutoff2nd, 2),
-                    $monthsRemaining,
-                    Carbon::parse($loan->start_date)->format('Y-m-d'),
-                    $loan->end_date ? Carbon::parse($loan->end_date)->format('Y-m-d') : '',
-                    $loan->status,
-                    $loan->remarks ?? ''
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
     }
 
     public function deductionsForEmployee($employeeId)
@@ -553,86 +394,6 @@ class DeductionController extends Controller
             });
 
         return response()->json(['deductions' => $deductions]);
-    }
-
-    public function exportSchedules()
-    {
-        $employees = Employee::with([
-            'employmentDetail.departmentRelation',
-            'deductions' => function($q) {
-                $q->where('status', 'ACTIVE')->with('deductionType.schedules');
-            }
-        ])
-        ->whereHas('deductions', function($q) {
-            $q->where('status', 'ACTIVE');
-        })
-        ->orderBy('last_name')
-        ->get();
-
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename=deduction_schedules_' . now()->format('Y-m-d') . '.csv',
-        ];
-
-        $callback = function () use ($employees) {
-            $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
-
-            fputcsv($file, [
-                'Employee ID',
-                'Employee Name',
-                'Department',
-                'Deduction Type',
-                'Category',
-                'Amount',
-                'Cutoff Schedule',
-                'Schedule Type',
-                'Status'
-            ]);
-
-            foreach ($employees as $employee) {
-                $employeeName = $employee->first_name . ' ' . $employee->last_name;
-                $department = $employee->employmentDetail->departmentRelation->name ?? 'N/A';
-
-                foreach ($employee->deductions as $deduction) {
-                    if (!$deduction->deductionType->deducted_from_employee) {
-                        continue;
-                    }
-
-                    $schedule = $deduction->deductionType->schedules->first();
-                    $defaultSchedule = $schedule ? $schedule->cutoff_schedule : 'N/A';
-
-                    // Use custom schedule if set, otherwise use default
-                    $cutoffSchedule = $deduction->custom_cutoff_schedule ?? $defaultSchedule;
-                    $scheduleType = $deduction->custom_cutoff_schedule ? 'Custom' : 'Default';
-
-                    $amount = '';
-                    if ($deduction->deductionType->category === 'LOAN') {
-                        $amount = '₱' . number_format($deduction->installment_amount ?? 0, 2) . '/month';
-                    } elseif ($deduction->deductionType->computation_type === 'PERCENTAGE') {
-                        $amount = $deduction->deductionType->percentage_rate . '%';
-                    } elseif ($deduction->amount) {
-                        $amount = '₱' . number_format($deduction->amount, 2);
-                    }
-
-                    fputcsv($file, [
-                        $employee->employee_id,
-                        $employeeName,
-                        $department,
-                        $deduction->deductionType->name,
-                        $deduction->deductionType->category,
-                        $amount,
-                        $cutoffSchedule,
-                        $scheduleType,
-                        $deduction->status
-                    ]);
-                }
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
     }
 
     public function updateSchedules(Request $request)

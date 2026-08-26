@@ -431,6 +431,18 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
     white-space: nowrap;
 }
 
+/* `text-align: left` above is (0,2,2) and adminAttendance.css loads after
+   app.css, so it was silently beating app.css's equally-specific
+   `.payroll-table thead th.th-center` / `.row-menu-head` utilities. Every
+   centred column in this page -- the Summary tab's Present/Leave/Absent/Late/
+   OT/Status counts, the Attendance Config table's Type/Effectivity/Not
+   Required/Legacy/Created By/Actions -- therefore had a left-aligned heading
+   sitting over centred cell content. Re-state the utilities inside this scope
+   so a heading always announces the alignment of the column beneath it. */
+.attendance-dashboard .payroll-table thead th.th-center,
+.attendance-dashboard .payroll-table thead th.row-menu-head { text-align: center; }
+.attendance-dashboard .payroll-table thead th.th-right { text-align: right; }
+
 .attendance-dashboard .payroll-table td {
     padding: 8px 20px;
     border-bottom: 1px solid var(--line) !important;
@@ -523,48 +535,35 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
 
 /* icon action buttons */
 .attendance-dashboard .row-actions { display: flex; align-items: center; gap: 8px; }
+/* Deliberately the same metrics as `.action-menu-btn` on the Personnel page
+   (employeeWizard.css): the two tables show the same ⋮ control and should not
+   read as two different affordances. Keep them in step when either moves. */
 .attendance-dashboard .act-btn {
-    width: 38px;
-    height: 38px;
-    border: 1px solid var(--line);
-    background: #fff;
-    color: var(--gp-muted);
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid var(--gp-border);
+    border-radius: 9px;
+    background: var(--gp-bg-tint);
+    color: var(--gp-text-mid);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all .2s ease;
+    transition: background .2s cubic-bezier(.4,0,.2,1), border-color .2s cubic-bezier(.4,0,.2,1), color .2s cubic-bezier(.4,0,.2,1), transform .15s ease;
 }
 .attendance-dashboard .act-btn:hover {
+    background: var(--gp-bg-tint-2);
+    border-color: var(--gp-pri);
     color: var(--gp-pri);
-    border-color: #cdd4ea;
-    background: #f6f7fc;
-    transform: translateY(-2px);
 }
+.attendance-dashboard .act-btn:active { transform: scale(0.95); }
+.attendance-dashboard .act-btn svg { flex-shrink: 0; }
 
-/* Settings tab: primary action + icon buttons — this page's .btn-primary has
-   no styling anywhere else, so it needs a full override once glass-shell's
-   pill-shaped .btn-primary rule becomes active, to keep its original
-   rounded-rect solid look. */
-.attendance-dashboard .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 36px;
-    padding: 0 16px;
-    background: var(--gp-pri) !important;
-    color: #fff;
-    border: 1px solid var(--gp-pri) !important;
-    border-radius: 9px !important;
-    font-size: 12.5px;
-    font-weight: 600 !important;
-    font-family: 'Poppins', sans-serif;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(var(--theme-primary-rgb),.18) !important;
-    transition: background .2s cubic-bezier(.4,0,.2,1), transform .15s ease, box-shadow .2s cubic-bezier(.4,0,.2,1);
-}
-.attendance-dashboard .btn-primary:hover { background: var(--gp-pri-2) !important; }
-.attendance-dashboard .btn-primary:active { transform: scale(.97); }
+/* Settings tab: the "Add Exemption" primary action wears
+   `.btn-export.adm-btn-primary-solid` (admin.css + glassSystem.css) so it is
+   the same pill as "Add Employee" on Personnel. This page therefore carries no
+   .btn-primary rule of its own — the hand-rolled override that used to live
+   here was a second, drifting copy of that button. */
 
 .attendance-dashboard .btn-edit,
 .attendance-dashboard .btn-delete {
@@ -694,19 +693,24 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
    style="" attributes and its own <style> block)
 ══════════════════════════════════════════════════════ */
 
-.attendance-summary-table thead th:nth-child(1) { width: 22%; }
-.attendance-summary-table thead th:nth-child(2) { width: 15%; }
-.attendance-summary-table thead th:nth-child(3),
-.attendance-summary-table thead th:nth-child(4),
-.attendance-summary-table thead th:nth-child(5),
-.attendance-summary-table thead th:nth-child(6),
-.attendance-summary-table thead th:nth-child(7),
-.attendance-summary-table thead th:nth-child(8) { width: 5%; text-align: center; }
-.attendance-summary-table thead th:nth-child(9) { width: 12%; }
-.attendance-summary-table thead th:nth-child(10) { width: 8%; }
-.attendance-summary-table thead th:nth-child(11) { width: 13%; }
-.attendance-summary-table th:last-child,
-.attendance-summary-table td:last-child { text-align: center; }
+/* Widths on the <colgroup>, alignment on `th` and `td` together -- the same
+   rule the Personnel records table follows.
+
+   `min-width` is the load-bearing part. These were `nth-child` percentages
+   summing to 100% with no floor, and `.attendance-summary-table th` is
+   `white-space: nowrap`: under `table-layout: fixed` a 5% column narrower than
+   the word "PRESENT" does not grow, it lets the heading overflow. Six headings
+   spilling sideways pushed "ACTIONS" off the button below it. The wrapper
+   scrolls instead now. */
+.attendance-summary-table { min-width: 1180px; }
+.attendance-summary-table col.acol-employee { width: 21%; }
+.attendance-summary-table col.acol-dept     { width: 16%; }
+.attendance-summary-table col.acol-num      { width: 58px; }
+.attendance-summary-table col.acol-rate     { width: 13%; }
+.attendance-summary-table col.acol-status   { width: 110px; }
+/* One 36px button plus its cell padding: sized by its content, like the
+   Personnel table's action column, so the heading has nothing to drift from. */
+.attendance-summary-table col.acol-actions  { width: 76px; }
 
 #summary-tab .row-actions { justify-content: center; position: relative; }
 
@@ -811,22 +815,6 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
     -webkit-backdrop-filter: blur(6px);
 }
 
-#summary-tab .act-btn {
-    border-radius: 999px !important;
-    background: rgba(255,255,255,.65) !important;
-    backdrop-filter: blur(10px) saturate(180%);
-    -webkit-backdrop-filter: blur(10px) saturate(180%);
-    border: 1px solid rgba(var(--theme-shadow-rgb),.08) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
-}
-#summary-tab .act-btn:hover {
-    background: linear-gradient(135deg, var(--gp-pri-2), var(--gp-pri)) !important;
-    color: #fff !important;
-    border-color: transparent !important;
-    box-shadow: 0 6px 16px rgba(var(--theme-primary-rgb),.35);
-    transform: translateY(-1px);
-}
-
 #summary-tab .action-dropdown {
     background: rgba(255,255,255,.88) !important;
     backdrop-filter: blur(28px) saturate(200%);
@@ -923,6 +911,9 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
     border: none !important;
 }
 #detailed-tab .btn-export {
+    /* Export All is an <a> (it downloads via Content-Disposition), so the
+       default link underline has to be cleared for it to read as a button. */
+    text-decoration: none;
     border-radius: 999px !important;
     background: rgba(255,255,255,.6) !important;
     backdrop-filter: blur(10px);
@@ -1180,11 +1171,27 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
    style="" attributes)
 ══════════════════════════════════════════════════════ */
 
-/* Exemptions table column alignment */
-.exemptions-table th,
+/* Exemptions table column widths. `table-layout: fixed` with no widths gave
+   eight equal columns, which squeezed Name and Reason while leaving the pill
+   columns half empty; `min-width` means a narrow viewport scrolls the wrapper
+   instead of letting a nowrap heading overflow into its neighbour. */
+.exemptions-table { min-width: 1060px; }
+.exemptions-table col.excol-type        { width: 100px; }
+.exemptions-table col.excol-name        { width: 22%; }
+.exemptions-table col.excol-effectivity { width: 180px; }
+.exemptions-table col.excol-required    { width: 150px; }
+.exemptions-table col.excol-legacy      { width: 150px; }
+.exemptions-table col.excol-reason      { width: 20%; }
+.exemptions-table col.excol-creator     { width: 120px; }
+/* One 36px button plus its cell padding, with room for the ACTIONS heading. */
+.exemptions-table col.excol-actions     { width: 96px; }
+
+/* Cell alignment. The headings state their own alignment via `th-center` /
+   `row-menu-head` in the markup, so it is declared once per column instead of
+   here and in a competing `th` rule. */
 .exemptions-table td { text-align: center; }
-.exemptions-table th:nth-child(2), .exemptions-table td:nth-child(2),
-.exemptions-table th:nth-child(6), .exemptions-table td:nth-child(6) { text-align: left; }
+.exemptions-table td:nth-child(2),
+.exemptions-table td:nth-child(6) { text-align: left; }
 .exemptions-table td:nth-child(3) { font-size: 12px; white-space: nowrap; }
 .exemptions-table td:nth-child(4) { font-size: 11px; }
 .exemptions-table td:nth-child(5) { font-size: 11px; white-space: nowrap; }

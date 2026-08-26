@@ -52,6 +52,7 @@
         defaultStart: @json(now()->startOfMonth()->format('Y-m-d')),
         defaultEnd: @json(now()->endOfMonth()->format('Y-m-d')),
         detailedRoute: @json(route('employee.attendance.detailed')),
+        exportRoute: @json(route('employee.attendance.export')),
         employeeId: @json($employee->employee_id),
     };
 </script>

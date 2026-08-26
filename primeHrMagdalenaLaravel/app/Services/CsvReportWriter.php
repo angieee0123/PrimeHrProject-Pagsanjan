@@ -1,0 +1,280 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Auth;
+
+/**
+ * The letterhead every CSV this system hands out is expected to carry.
+ *
+ * `AttendanceController::exportDetailedRecords` and `PersonnelExportController`
+ * each grew their own copy of the same block — the republic line, the office
+ * name, the report title, which filters produced the file, when and by whom.
+ * The six Leave & Benefits exports would have made eight copies of it, so the
+ * block lives here instead: one office, one letterhead, whatever the report.
+ *
+ * The office identity is *read*, not typed — `SiteContentService` owns the
+ * municipality's name and address, so renaming it under
+ * Admin → Website Content renames it on every exported file too. The same
+ * reasoning as `HrPolicyFactsService`: a fact this system already stores does
+ * not get a second, drifting copy beside a report.
+ *
+ * Usage:
+ *
+ *     return CsvReportWriter::download('Leave_Requests.csv', function (CsvReportWriter $csv) {
+ *         $csv->letterhead('LEAVE REQUESTS');
+ *         $csv->parameters(['Department:' => 'All Departments']);
+ *         $csv->columns(['No.', 'Employee']);
+ *         $csv->row([1, 'Juan Dela Cruz']);
+ *         $csv->summary('SUMMARY', ['Total:' => 1]);
+ *     });
+ */
+class CsvReportWriter
+{
+    /**
+     * No backslash escaping — the RFC 4180 rule, quotes doubled and nothing
+     * else. PHP's default is a non-standard backslash escape that Excel does
+     * not undo, so an address like `Blk 1 \ Lot 2` came back with the
+     * backslash still in it. PHP 8.4 also deprecates leaving this argument
+     * out, and a deprecation notice raised mid-stream prints *into* the CSV,
+     * after the headers have gone out — a corrupted download rather than a
+     * logged warning.
+     */
+    private const ESCAPE = '';
+
+    /** @var resource */
+    private $file;
+
+    /** @param resource $file */
+    private function __construct($file)
+    {
+        $this->file = $file;
+    }
+
+    /**
+     * Stream a CSV as a download.
+     *
+     * A streamed response rather than a built string: an export of every
+     * transaction the municipality has ever recorded should not have to fit
+     * in memory first.
+     */
+    public static function download(string $fileName, callable $build): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control' => 'no-store, no-cache',
+        ];
+
+        return response()->stream(function () use ($build) {
+            $handle = fopen('php://output', 'w');
+
+            // UTF-8 BOM so Excel reads "Ñ" and "ñ" in a name correctly rather
+            // than as mojibake — these are Filipino personnel records.
+            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            $build(new self($handle));
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    /**
+     * The document head: who issued it, what it is, and what it covers.
+     *
+     * `$title` is the report's own name in caps; `$subtitle` says which part
+     * of the records it covers, so the file identifies itself to somebody who
+     * opens it a year later with no memory of clicking Export.
+     */
+    public function letterhead(string $title, string $subtitle = '', string $coverage = ''): self
+    {
+        $footer  = SiteContentService::section('footer');
+        $contact = SiteContentService::section('contact');
+
+        $this->row(['Republic of the Philippines']);
+        $this->row([mb_strtoupper($footer['name'] ?? 'Municipal Government')]);
+
+        foreach ([$footer['sub'] ?? '', $contact['address'] ?? ''] as $line) {
+            if (trim((string) $line) !== '') {
+                $this->row([$line]);
+            }
+        }
+
+        $this->blank();
+        $this->row([mb_strtoupper($title)]);
+        $this->row([$subtitle !== '' ? $subtitle : 'Human Resource Management Office · PRIME HRIS']);
+
+        if ($coverage !== '') {
+            $this->row([$coverage]);
+        }
+
+        $this->blank();
+
+        return $this;
+    }
+
+    /**
+     * "What produced this file" — the filters, the timestamp, the operator.
+     *
+     * Every filter is printed even when it was left alone, spelled as
+     * "All Departments" rather than an empty cell: a reader must be able to
+     * tell "this covers everything" from "this cell did not get written".
+     *
+     * @param array<string,scalar|null> $filters label => value
+     */
+    public function parameters(array $filters, ?int $recordCount = null): self
+    {
+        $this->row(['REPORT PARAMETERS']);
+
+        foreach ($filters as $label => $value) {
+            $this->row([$label, (string) ($value === null || $value === '' ? '—' : $value)]);
+        }
+
+        $this->row(['Generated:', now()->format('F d, Y g:i A')]);
+        $this->row(['Generated By:', $this->operator()]);
+
+        if ($recordCount !== null) {
+            $this->row(['Total Records:', $recordCount]);
+        }
+
+        $this->blank();
+
+        return $this;
+    }
+
+    /** The table's column header, preceded by a blank line for legibility. */
+    public function columns(array $columns): self
+    {
+        return $this->row($columns);
+    }
+
+    /**
+     * A date in a *table cell*.
+     *
+     * ISO 8601, and the reason is the spreadsheet rather than the reader.
+     * "Aug 26, 2026" is a string Excel sorts alphabetically — Apr before Aug
+     * before Dec — so a register sorted by date comes back in month-name
+     * order, which looks sorted and is not. `Y-m-d` sorts correctly as text
+     * *and* is the one spelling Excel parses as a date in every locale;
+     * `M d, Y` is parsed only under an English one, so the same file opened
+     * in a different regional setting silently degrades to text.
+     *
+     * These files were split between the two spellings — Payroll and
+     * Deductions wrote ISO, Leave, Travel Order and Pass Slip wrote
+     * `M d, Y` — with nothing recording a decision either way. The rule lives
+     * here now, the same reasoning as the letterhead above: one office, one
+     * date format, whatever the report.
+     *
+     * Prose keeps the long form; see `longDate()`.
+     */
+    public static function date($value, string $fallback = '—'): string
+    {
+        return $value ? $value->format('Y-m-d') : $fallback;
+    }
+
+    /**
+     * A timestamp in a table cell — a date the reader can sort, plus the time
+     * of day, which is the whole point of the column on a pass slip.
+     */
+    public static function dateTime($value, string $fallback = '—'): string
+    {
+        return $value ? $value->format('Y-m-d g:i A') : $fallback;
+    }
+
+    /**
+     * A date in a *sentence* — the letterhead's coverage line, a parameter
+     * block, a summary. Nothing sorts these, and "August 26, 2026" is what an
+     * official document says.
+     */
+    public static function longDate($value, string $fallback = '—'): string
+    {
+        return $value ? $value->format('F d, Y') : $fallback;
+    }
+
+    public function row(array $cells): self
+    {
+        fputcsv($this->file, $cells, ',', '"', self::ESCAPE);
+
+        return $this;
+    }
+
+    public function blank(): self
+    {
+        fputcsv($this->file, [], ',', '"', self::ESCAPE);
+
+        return $this;
+    }
+
+    /**
+     * A labelled block of totals under the table.
+     *
+     * @param array<string,scalar> $rows label => value
+     */
+    public function summary(string $heading, array $rows): self
+    {
+        if ($rows === []) {
+            return $this;
+        }
+
+        $this->blank();
+        $this->row([mb_strtoupper($heading)]);
+
+        foreach ($rows as $label => $value) {
+            $this->row([$label, $value]);
+        }
+
+        return $this;
+    }
+
+    /** Shown in place of the table when the filters matched nothing. */
+    public function emptyNotice(string $message): self
+    {
+        return $this->row([$message]);
+    }
+
+    /**
+     * The closing notes.
+     *
+     * The data-privacy line is not decoration: these files carry named
+     * personnel records off the system and onto somebody's laptop. It is
+     * conditional because a configuration export — leave types, accrual rates
+     * — names nobody, and a privacy warning printed on a file that carries no
+     * personal data is how a real one stops being read.
+     */
+    public function notes(array $extraLines = [], bool $containsPersonalData = true): self
+    {
+        $this->blank();
+        $this->row(['This is a system-generated report from PRIME HRIS. Figures reflect the records on file as of the generation date above.']);
+
+        foreach ($extraLines as $line) {
+            $this->row([$line]);
+        }
+
+        if ($containsPersonalData) {
+            $this->row(['Contains personnel information — handle in accordance with RA 10173 (Data Privacy Act of 2012).']);
+        }
+
+        return $this;
+    }
+
+    /** The signed-in user, named the way HR would recognise them. */
+    private function operator(): string
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return 'System';
+        }
+
+        $employee = $user->employee ?? null;
+
+        if ($employee) {
+            $name = trim($employee->first_name . ' ' . $employee->last_name);
+            if ($name !== '') {
+                return $name;
+            }
+        }
+
+        return trim((string) $user->name) ?: 'System';
+    }
+}

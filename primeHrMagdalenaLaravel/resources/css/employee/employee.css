@@ -214,6 +214,38 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
 .table-sub { font-size: 12px; color: var(--gp-text-soft); }
 .table-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .filter-select { padding: 7px 14px; border: 1.5px solid var(--gp-border); border-radius: 8px; font-size: 12.5px; font-family: 'Poppins', sans-serif; color: var(--gp-pri); background: #fff; cursor: pointer; }
+
+/* A labelled filter strip under a .table-header, sitting on the same tinted
+   band the Training page's chips already use — so a page that filters
+   server-side and one that filters in the browser still look like one system.
+   Every control is labelled: an unlabelled pair of date boxes cannot say
+   whether it means the pay period or the day the file was generated. */
+.emp-filter-bar {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    padding: 12px 24px;
+    border-bottom: 1.5px solid var(--gp-bg-tint-2);
+    background: var(--gp-bg-tint);
+}
+.emp-filter-group { display: flex; flex-direction: column; gap: 5px; }
+.emp-filter-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--gp-text-soft);
+}
+.emp-filter-bar .filter-select { min-width: 160px; }
+.emp-filter-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.emp-filter-actions .btn-export { text-decoration: none; }
+
+@media (max-width: 768px) {
+    .emp-filter-bar { flex-direction: column; align-items: stretch; }
+    .emp-filter-bar .filter-select { width: 100%; min-width: 0; }
+    .emp-filter-actions { margin-left: 0; }
+}
 .btn-filter-main {
     height: 34px;
     padding: 0 14px;
@@ -1557,6 +1589,17 @@ body { font-family: 'Poppins', sans-serif; background: var(--gp-bg-tint); color:
     color: #fff;
 }
 .permanent-training .training-position-filter { min-width: 180px; }
+.permanent-training .training-filter-controls {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+/* The date pair is labelled because "From / To" over two bare boxes is the
+   only thing that says these mean the training's inclusive dates rather than
+   when it was submitted. */
+.permanent-training .training-filter-inline { display: flex; flex-direction: column; gap: 5px; }
+.permanent-training .training-date-filter { min-width: 150px; }
 
 .permanent-training .training-pds-table th:first-child { min-width: 240px; }
 .permanent-training .training-title-wrap { display: flex; flex-direction: column; gap: 3px; min-width: 0; }

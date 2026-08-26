@@ -107,6 +107,8 @@ window.applyAdminLeaveFilters = function() {
     const department = document.getElementById('filterDepartment')?.value || '';
     const type = document.getElementById('filterLeaveType')?.value || '';
     const status = document.getElementById('filterLeaveStatus')?.value || '';
+    const dateFrom = document.getElementById('filterLeaveDateFrom')?.value || '';
+    const dateTo = document.getElementById('filterLeaveDateTo')?.value || '';
     const rows = document.querySelectorAll('#leaveRequestsTableBody tr');
     let visible = 0;
 
@@ -115,7 +117,14 @@ window.applyAdminLeaveFilters = function() {
             const matchDept = !department || row.dataset.department === department;
             const matchType = !type || row.dataset.type === type;
             const matchStatus = !status || row.dataset.status === status;
-            const show = matchDept && matchType && matchStatus;
+            // A leave that overlaps the window belongs in it: a request running
+            // Jun 28 -> Jul 3 is part of both months. Both dates are ISO
+            // (Y-m-d), so string comparison is date comparison. This mirrors
+            // the export endpoint exactly, so the CSV holds the rows the
+            // filtered table shows.
+            const matchFrom = !dateFrom || row.dataset.endDate >= dateFrom;
+            const matchTo = !dateTo || row.dataset.startDate <= dateTo;
+            const show = matchDept && matchType && matchStatus && matchFrom && matchTo;
             row.style.display = show ? '' : 'none';
             if (show) visible++;
         }

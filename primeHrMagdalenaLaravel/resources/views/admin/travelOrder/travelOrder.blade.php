@@ -101,9 +101,36 @@
         </div>
     </div>
     <div class="filter-card-actions">
-        <button class="btn-ghost">
+        {{-- Exports the tab this toolbar sits above. The button carried no
+             handler at all until now — rendered, styled, clickable, wired to
+             nothing, the same state the Attendance toolbar's Export was in.
+
+             It holds all three endpoints and picks the one for the open tab,
+             because the three tabs are three different reports: Pending has no
+             approver to name, Disapproved exists to carry the reason. The
+             label follows suit, so you can tell which file you are about to
+             download before you click. --}}
+        <button type="button" class="btn-ghost" id="travelOrderExportBtn"
+                data-export-url-pending="{{ route('admin.travelorder.export.pending') }}"
+                data-export-url-approved="{{ route('admin.travelorder.export.approved') }}"
+                data-export-url-disapproved="{{ route('admin.travelorder.export.disapproved') }}"
+                onclick="exportTravelOrders()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export
+            <span id="travelOrderExportLabel">Export Pending</span>
+        </button>
+        {{-- The whole register in one file, statuses mixed, with a Status
+             column and the approval columns filled only where they apply.
+             It sits beside the tab export rather than replacing it: a file
+             that mixes statuses has to leave those columns blank on most
+             rows, which is a fair trade once — in the file whose subject is
+             the entire record — and the wrong default for the file you asked
+             for while looking at one tab. --}}
+        <button type="button" class="btn-ghost" id="travelOrderExportAllBtn"
+                data-export-url="{{ route('admin.travelorder.export.all') }}"
+                title="Every travel order on file — pending, approved and disapproved — in one CSV"
+                onclick="exportAllTravelOrders()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Export All
         </button>
     </div>
 </div>

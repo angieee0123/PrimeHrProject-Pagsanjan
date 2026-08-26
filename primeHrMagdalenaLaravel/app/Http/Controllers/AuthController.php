@@ -135,10 +135,9 @@ class AuthController extends Controller
         return redirect()->route($routeName);
     }
 
-    public function showForgotPassword()
-    {
-        return view('user.forgot-password');
-    }
+    // The forgot-password screen and its three POST steps live on
+    // PasswordResetController, so the wizard's rules sit beside each other
+    // rather than one of them sitting here.
 
     public function logout(Request $request)
     {

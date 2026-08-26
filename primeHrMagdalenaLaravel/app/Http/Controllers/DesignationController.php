@@ -24,40 +24,6 @@ class DesignationController extends Controller
         return redirect()->route('admin.departments')->with('success', 'Designation added successfully.');
     }
 
-    public function export()
-    {
-        try {
-            $designations = Designation::with('department')->orderBy('title')->get();
-
-            $headers = [
-                'Content-Type'        => 'text/csv',
-                'Content-Disposition' => 'attachment; filename=designations_' . now()->format('Y-m-d') . '.csv',
-            ];
-
-            $callback = function () use ($designations) {
-                $file = fopen('php://output', 'w');
-                fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
-                fputcsv($file, ['Title', 'Department', 'Department Code', 'Salary Grade', 'Monthly Rate', 'Employment Type', 'Description']);
-                foreach ($designations as $d) {
-                    fputcsv($file, [
-                        $d->title,
-                        $d->department->name ?? 'N/A',
-                        $d->department->code ?? 'N/A',
-                        $d->salary_grade ?? '',
-                        $d->monthly_rate ?? '',
-                        $d->employment_type ?? '',
-                        $d->description ?? '',
-                    ]);
-                }
-                fclose($file);
-            };
-
-            return response()->stream($callback, 200, $headers);
-        } catch (\Exception $e) {
-            return redirect()->route('admin.departments')->with('export_error', $e->getMessage());
-        }
-    }
-
     public function template()
     {
         $headers = [

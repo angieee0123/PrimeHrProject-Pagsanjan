@@ -106,7 +106,7 @@
                 @forelse($employees as $index => $employee)
                 @php
                     $fullName = trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name . ($employee->suffix ? ' ' . $employee->suffix : ''));
-                    $status = $employee->user ? $employee->user->status : 'Inactive';
+                    $status = $employee->user ? ($employee->user->status ?: 'Inactive') : 'Inactive';
                     $empType  = $employee->employmentDetail ? $employee->employmentDetail->employment_status : 'N/A';
                     $position = $employee->employmentDetail && $employee->employmentDetail->designationRelation
                         ? $employee->employmentDetail->designationRelation->title

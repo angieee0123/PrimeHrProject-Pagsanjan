@@ -6,7 +6,12 @@
             <p class="table-sub">Recent payroll records</p>
         </div>
         <div class="table-actions">
-            <button class="btn-export">
+            {{-- The applied filters are baked into the link server-side, so the
+                 file matches what the table is showing rather than whatever is
+                 sitting un-applied in the toolbar. The search term is the one
+                 filter that never reaches the URL, so the handler appends it. --}}
+            <button type="button" class="btn-export" onclick="exportPayslips()"
+                    data-export-url="{{ route('employee.payslip.export', array_filter($filters ?? [])) }}">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
@@ -18,6 +23,40 @@
             </button>
         </div>
     </div>
+
+    {{-- A GET form rather than a JS filter: this table paginates server-side,
+         so filtering in the browser would only ever narrow the five rows on
+         the current page. --}}
+    <form method="GET" action="{{ route('employee.payslip') }}" class="emp-filter-bar">
+        <div class="emp-filter-group">
+            <label class="emp-filter-label" for="payslipStartDate">Period From</label>
+            <input type="date" id="payslipStartDate" name="start_date" class="filter-select"
+                   value="{{ $filters['start_date'] ?? '' }}">
+        </div>
+        <div class="emp-filter-group">
+            <label class="emp-filter-label" for="payslipEndDate">Period To</label>
+            <input type="date" id="payslipEndDate" name="end_date" class="filter-select"
+                   value="{{ $filters['end_date'] ?? '' }}">
+        </div>
+        <div class="emp-filter-group">
+            <label class="emp-filter-label" for="payslipStatusFilter">Status</label>
+            <select id="payslipStatusFilter" name="status" class="filter-select">
+                <option value="">All Status</option>
+                <option value="pending" @selected(($filters['status'] ?? '') === 'pending')>Pending</option>
+                <option value="processed" @selected(($filters['status'] ?? '') === 'processed')>Processed</option>
+            </select>
+        </div>
+        <div class="emp-filter-actions">
+            <button type="submit" class="btn-export btn-export-solid">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Apply
+            </button>
+            <a href="{{ route('employee.payslip') }}" class="btn-export">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Reset
+            </a>
+        </div>
+    </form>
 
     <div class="table-wrapper">
         <table class="payroll-table payslip-history-table">
@@ -41,7 +80,14 @@
                     <td class="net-pay">₱{{ number_format($payslip->net_pay, 2) }}</td>
                     <td class="table-cell-date">{{ $payslip->period_end->format('M d, Y') }}</td>
                     <td>
-                        @if($payslip->status === 'pending')
+                        {{-- `status` defaults to 'draft' on this table, and draft
+                             means the same thing pending does: payroll has not
+                             settled it. Testing for 'pending' alone badged an
+                             untouched draft as "Processed", which is a statement
+                             about somebody's pay that is not true — and the new
+                             Status filter and the export both group the two the
+                             way the rest of the system does. --}}
+                        @if(in_array($payslip->status, ['draft', 'pending'], true))
                             <span class="badge-status pending">Pending</span>
                         @else
                             <span class="badge-status processed">Processed</span>

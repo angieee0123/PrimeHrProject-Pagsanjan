@@ -141,3 +141,80 @@ document.addEventListener('DOMContentLoaded', function() {
         switchTab('leave-credits');
     }
 });
+
+// ── CSV export ────────────────────────────────────────────────────────────────
+//
+// One handler for all six tabs. The file itself is built by
+// LeaveBenefitsExportController from the records, not from the rendered table:
+// four of these tabs paginate, so scraping the DOM would export page 1 of 12.
+// This function's only job is to hand the endpoint the filters the toolbar is
+// currently showing — including the ones this page applies in the browser,
+// which the server would otherwise never hear about.
+//
+// Only filters that are actually set are sent, so the CSV's parameter block
+// reads "All Departments" rather than an empty cell.
+
+const LEAVE_EXPORT_FILTERS = {
+    'leave': {
+        date_from:  'filterLeaveDateFrom',
+        date_to:    'filterLeaveDateTo',
+        department: 'filterDepartment',
+        leave_type: 'filterLeaveType',
+        status:     'filterLeaveStatus',
+    },
+    'transactions': {
+        filter_transaction_date_from: 'filterTransactionDateFrom',
+        filter_transaction_date_to:   'filterTransactionDateTo',
+        filter_transaction_year:      'filterTransactionYear',
+        filter_employee:              'filterTransactionEmployee',
+        filter_type:                  'filterTransactionType',
+        filter_leave_code:            'filterTransactionLeaveType',
+    },
+    'leave-credits': {
+        filter_credits_date_from:  'filterCreditsDateFrom',
+        filter_credits_date_to:    'filterCreditsDateTo',
+        filter_credits_year:       'filterCreditsYear',
+        filter_credits_employee:   'filterCreditsEmployee',
+        filter_credits_leave_code: 'filterCreditsLeaveType',
+        filter_credits_type:       'filterCreditsType',
+    },
+    // The Benefits Summary toolbar has no filters; the export covers everyone.
+    'benefits': {},
+    'types': {
+        status:  'filterLeaveTypeStatus',
+        accrual: 'filterLeaveTypeAccrual',
+    },
+    'accrual': {
+        status:    'filterAccrualStatus',
+        frequency: 'filterAccrualFrequency',
+    },
+};
+
+window.exportLeaveTab = function(tab) {
+    const button = document.querySelector(`[data-export-tab="${tab}"][data-export-url]`);
+    const exportUrl = button?.dataset.exportUrl;
+
+    if (!exportUrl) {
+        window.openErrorModal('The export endpoint for this tab is unavailable. Please reload the page and try again.');
+        return;
+    }
+
+    const params = new URLSearchParams();
+
+    Object.entries(LEAVE_EXPORT_FILTERS[tab] || {}).forEach(([param, elementId]) => {
+        const value = document.getElementById(elementId)?.value || '';
+        // "all" is the Leave Types / Accrual selects' own word for "no filter",
+        // and sending it would print "All" where the report should say
+        // "All Status".
+        if (value && value !== 'all') {
+            params.set(param, value);
+        }
+    });
+
+    const query = params.toString();
+
+    // The endpoint answers with a Content-Disposition attachment, so this
+    // downloads the file without the page navigating away — which matters,
+    // because leaving the page would reset the tab and every filter on it.
+    window.location.href = query ? `${exportUrl}?${query}` : exportUrl;
+};

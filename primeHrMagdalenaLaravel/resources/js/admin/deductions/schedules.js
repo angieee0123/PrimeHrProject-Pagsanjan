@@ -1,3 +1,4 @@
+import { exportWithFilters } from './exportWithFilters.js';
 function filterSchedules() {
     const searchTerm = document.getElementById('searchSchedule').value.toLowerCase();
     const departmentFilter = document.getElementById('filterDepartment').value;
@@ -30,8 +31,11 @@ function filterSchedules() {
     }
 }
 
-function exportSchedules() {
-    window.location.href = '/admin/deductions/schedules/export';
+function exportSchedules(btn) {
+    exportWithFilters(btn, {
+        search:     'searchSchedule',
+        department: 'filterDepartment',
+    });
 }
 
 window.filterSchedules = filterSchedules;

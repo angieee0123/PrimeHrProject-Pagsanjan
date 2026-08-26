@@ -221,6 +221,76 @@ class NotificationService
     }
 
     /**
+     * Notify admin/HR that an employee filed a pass slip.
+     *
+     * A pass slip is an approval request like a leave or a travel order, but it
+     * was the one that reached the admin's queue without announcing itself —
+     * the row appeared on the Pass Slip page and nothing told anybody to look.
+     */
+    public static function passSlipSubmitted($passSlip)
+    {
+        $employee = $passSlip->employee;
+
+        if (!$employee) return;
+
+        $employeeName = $employee->first_name . ' ' . $employee->last_name;
+        $date = $passSlip->date ? $passSlip->date->format('M d, Y') : 'an unspecified date';
+
+        $admins = User::where(function ($q) {
+            $q->whereJsonContains('roles', 'admin')->orWhereJsonContains('roles', 'hr');
+        })->get();
+
+        foreach ($admins as $admin) {
+            if (!$admin->wantsNotification('employee_requests')) continue;
+
+            Notification::create([
+                'user_id' => $admin->id,
+                'type' => 'pass_slip',
+                'audience' => 'admin',
+                'title' => 'New Pass Slip Request',
+                'message' => "{$employeeName} filed pass slip {$passSlip->slip_number} for {$date}: {$passSlip->reason}",
+                'link' => route('admin.passslip', ['highlight' => $passSlip->id]),
+                'related_id' => $passSlip->id,
+                'related_type' => 'App\Models\PassSlip',
+            ]);
+        }
+    }
+
+    /**
+     * Notify the filer that HR approved or disapproved their pass slip.
+     *
+     * The other half of passSlipSubmitted(). A pass slip is time the employee
+     * intends to be out of the office, so the decision is the half they act
+     * on — leaving it to be discovered by reopening the page is how somebody
+     * leaves on a slip that was refused.
+     */
+    public static function passSlipStatusChanged($passSlip, $status)
+    {
+        $employee = $passSlip->employee;
+
+        if (!$employee || !$employee->user) return;
+
+        // The admin tab is labelled "Disapproved"; the column stores 'rejected'.
+        // The employee is told what the screen calls it.
+        $statusText = $status === 'approved' ? 'Approved' : 'Disapproved';
+        $date = $passSlip->date ? $passSlip->date->format('M d, Y') : 'an unspecified date';
+        $reason = ($status !== 'approved' && $passSlip->remarks)
+            ? " Reason: {$passSlip->remarks}"
+            : '';
+
+        Notification::create([
+            'user_id' => $employee->user->id,
+            'type' => 'pass_slip',
+            'audience' => 'employee',
+            'title' => "Pass Slip {$statusText}",
+            'message' => "Your pass slip {$passSlip->slip_number} for {$date} has been {$statusText}.{$reason}",
+            'link' => route('employee.passslip'),
+            'related_id' => $passSlip->id,
+            'related_type' => 'App\Models\PassSlip',
+        ]);
+    }
+
+    /**
      * Create a payslip request notification for admin
      */
     public static function payslipRequested($request)

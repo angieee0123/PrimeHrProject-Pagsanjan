@@ -24,6 +24,12 @@ class TravelOrder extends Model implements Auditable
         'estimated_budget',
         'attachment',
         'status',
+        // `remarks` is where TravelOrderController::disapprove() puts the reason
+        // and where the Disapproved tab and the CSV export read it back from.
+        // It was missing here, so mass assignment silently discarded every
+        // reason ever given and the table printed "No reason provided" against
+        // real refusals — the same class of bug as attendance_type was.
+        'remarks',
         'approved_by',
         'approved_at',
         'disapproved_by',

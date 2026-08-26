@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Department;
 use App\Models\PassSlip;
 use App\Models\User;
+use App\Services\NotificationService;
 use App\Services\PassSlipFormDataService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -65,7 +66,7 @@ class PassSlipController extends Controller
 
         $employee->loadMissing('employmentDetail.departmentRelation');
 
-        PassSlip::create([
+        $passSlip = PassSlip::create([
             'employee_id' => $employee->id,
             'type' => $data['type'],
             'purpose_category' => $data['purpose_category'],
@@ -79,6 +80,8 @@ class PassSlipController extends Controller
             'filed_by' => $user->id,
             'status' => 'pending',
         ]);
+
+        NotificationService::passSlipSubmitted($passSlip);
 
         return redirect()->route('employee.passslip')->with('success', 'Pass slip submitted successfully.');
     }
@@ -179,6 +182,8 @@ class PassSlipController extends Controller
             'remarks' => null,
         ]);
 
+        NotificationService::passSlipStatusChanged($passSlip, 'approved');
+
         return redirect()->route('admin.passslip', ['tab' => 'approved'])
             ->with('success', 'Pass slip approved successfully.');
     }
@@ -195,6 +200,8 @@ class PassSlipController extends Controller
             'approved_at' => now(),
             'remarks' => $request->reason,
         ]);
+
+        NotificationService::passSlipStatusChanged($passSlip, 'rejected');
 
         return redirect()->route('admin.passslip', ['tab' => 'disapproved'])
             ->with('success', 'Pass slip disapproved.');

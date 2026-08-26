@@ -84,10 +84,16 @@
             <p class="table-sub">Section IV — Learning &amp; Development (CSC PDS format)</p>
         </div>
         <div class="table-actions">
-            <a href="{{ route('admin.training.export') }}" class="btn-export">
+            {{-- A button rather than a bare link: the CSV is built by
+                 TrainingExportController from the records themselves, and the
+                 status chips, position filter and search box on this page are
+                 handed to it as query params so the file covers the queue the
+                 reviewer is actually looking at. --}}
+            <button type="button" class="btn-export" data-export-url="{{ route('admin.training.export') }}"
+                    onclick="exportTrainingReport(this)">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export Report
-            </a>
+            </button>
         </div>
     </div>
 
@@ -662,6 +668,34 @@
         if (page < totalPages) html += '<button class="page-btn" onclick="goToPage(' + (page + 1) + ')">›</button>';
         
         controls.innerHTML = html;
+    };
+
+    /**
+     * Export the verification queue as it is currently filtered.
+     *
+     * The three filters live in three different places on this page -- the
+     * chip row's state variable, the position <select>, and the topbar search
+     * box -- so they are read here rather than off the rendered rows: the
+     * export is built server-side from the records, and scraping the table
+     * would cap it at the columns the screen happens to show.
+     */
+    window.exportTrainingReport = function (btn) {
+        const url = btn?.dataset.exportUrl;
+        if (!url) return;
+
+        const params = new URLSearchParams();
+        const status   = window._adminStatusFilter;
+        const position = document.getElementById('adminPositionFilter')?.value || '';
+        const search   = (document.getElementById('adminTrainingSearch')?.value || '').trim();
+
+        // 'all' is the chip's word for no filter; sending it would print a
+        // status named "All" in the file's parameter block as though it were one.
+        if (status && status !== 'all') params.set('status', status);
+        if (position) params.set('position_type', position);
+        if (search) params.set('search', search);
+
+        const query = params.toString();
+        window.location.href = query ? url + '?' + query : url;
     };
 
     window.goToPage = function (page) {

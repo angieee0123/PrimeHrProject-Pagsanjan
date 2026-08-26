@@ -98,9 +98,29 @@
         </div>
     </div>
     <div class="filter-card-actions">
-        <button class="btn-ghost">
+        {{-- Exports the tab this toolbar sits above. The button carried no
+             handler at all until now, exactly like the Travel Order one.
+
+             It holds all three endpoints and picks the one for the open tab —
+             the three tabs are three different reports, and only an approved
+             slip has minutes that reach the Daily Time Record. --}}
+        <button type="button" class="btn-ghost" id="passSlipExportBtn"
+                data-export-url-pending="{{ route('admin.passslip.export.pending') }}"
+                data-export-url-approved="{{ route('admin.passslip.export.approved') }}"
+                data-export-url-disapproved="{{ route('admin.passslip.export.disapproved') }}"
+                onclick="exportPassSlips()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export
+            <span id="passSlipExportLabel">Export Pending</span>
+        </button>
+        {{-- The whole register in one file, statuses mixed, with a Status
+             column and the decision columns filled only where they apply.
+             It sits beside the tab export rather than replacing it. --}}
+        <button type="button" class="btn-ghost" id="passSlipExportAllBtn"
+                data-export-url="{{ route('admin.passslip.export.all') }}"
+                title="Every pass slip on file — pending, approved and disapproved — in one CSV"
+                onclick="exportAllPassSlips()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Export All
         </button>
     </div>
 </div>

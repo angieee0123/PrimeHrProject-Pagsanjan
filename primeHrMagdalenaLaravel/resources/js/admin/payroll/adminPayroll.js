@@ -98,3 +98,33 @@ document.addEventListener('DOMContentLoaded', function() {
         filterPayrollRegister();
     }
 });
+
+/*
+    Payroll Register export.
+
+    The toolbar's Export button used to be a `type="button"` with no handler —
+    it did nothing at all. It now sends the toolbar's own filters to the
+    endpoint, which recomputes every matching record server-side rather than
+    reading the rows this page happens to have rendered. Same pattern, and the
+    same reason, as `exportAttendanceSummary`.
+
+    Values are read from the filter form so the file always matches the filters
+    on screen, not the ones last submitted — a filter changed but not yet
+    applied would otherwise export the previous selection.
+*/
+window.exportPayrollRegister = function (btn) {
+    const url = btn?.dataset.exportUrl;
+    if (!url) return;
+
+    const form = document.getElementById('filterForm');
+    const params = new URLSearchParams();
+
+    ['start_date', 'end_date', 'employee_name', 'department', 'employment_status', 'status', 'view_mode']
+        .forEach(name => {
+            const value = form?.elements[name]?.value || '';
+            if (value) params.set(name, value);
+        });
+
+    const query = params.toString();
+    window.location.href = query ? url + '?' + query : url;
+};

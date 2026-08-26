@@ -20,6 +20,35 @@ class NotificationController extends Controller
         return response()->json($notifications);
     }
 
+    /**
+     * The notification panel's live feed. Returns the same rows the panel was
+     * server-rendered from, re-rendered through the same partial, so a polling
+     * refresh cannot drift from first paint. Scoped to the caller's own rows;
+     * `audience` only chooses between the admin and employee panels, it can
+     * never widen who the notifications belong to.
+     */
+    public function feed(Request $request)
+    {
+        $audience = $request->query('audience') === 'admin' ? 'admin' : 'employee';
+
+        $notifications = Notification::where('user_id', Auth::id())
+            ->forAudience($audience)
+            ->recent(10)
+            ->get();
+
+        $unreadCount = Notification::where('user_id', Auth::id())
+            ->forAudience($audience)
+            ->unread()
+            ->count();
+
+        return response()->json([
+            'unread_count' => $unreadCount,
+            'html' => view('partials.notificationItems', [
+                'notifications' => $notifications,
+            ])->render(),
+        ]);
+    }
+
     // Get unread count
     public function unreadCount()
     {
@@ -42,10 +71,21 @@ class NotificationController extends Controller
         return response()->json(['success' => true]);
     }
 
-    // Mark all as read
-    public function markAllAsRead()
+    /**
+     * Clear one panel's bell, not both. The audience the panel posts narrows
+     * within the caller's own rows, exactly as feed() does — it can never widen
+     * them. An unrecognised value falls to null (clear everything) rather than to
+     * the narrower panel the way feed() does: narrowing an unknown value shows a
+     * reader less, which is safe, but silently narrowing a *write* would leave a
+     * bell stuck at a count nothing can reset.
+     */
+    public function markAllAsRead(Request $request)
     {
-        NotificationService::markAllAsRead(Auth::id());
+        $audience = in_array($request->input('audience'), ['admin', 'employee'], true)
+            ? $request->input('audience')
+            : null;
+
+        NotificationService::markAllAsRead(Auth::id(), $audience);
 
         return response()->json(['success' => true]);
     }
@@ -73,8 +113,15 @@ class NotificationController extends Controller
             'status' => 'pending',
         ]);
 
-        // Send notification to admins
-        NotificationService::employeeRequestSubmitted($employeeRequest);
+        // Send notification to admins. Two request types have a writer of their
+        // own that names what was asked for ("requested a payslip", "has a
+        // question about deductions"); the rest fall to the generic one. They
+        // are alternatives, never both — a request must not arrive twice.
+        match ($employeeRequest->request_type) {
+            'payslip' => NotificationService::payslipRequested($employeeRequest),
+            'deduction_inquiry' => NotificationService::deductionInquiry($employeeRequest),
+            default => NotificationService::employeeRequestSubmitted($employeeRequest),
+        };
 
         return response()->json([
             'success' => true,

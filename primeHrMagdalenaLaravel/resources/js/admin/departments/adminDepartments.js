@@ -490,20 +490,48 @@ window.closeExportErrorModal = function() {
     document.body.style.overflow = '';
 }
 
-window.exportDepartments = function() {
+/**
+ * The two tabs export two different documents.
+ *
+ * Departments & Offices exports the office directory with its headcount;
+ * Designations exports the plantilla of positions with its salary grades.
+ * Both are built by DepartmentExportController so they carry the same
+ * letterhead as every other CSV this system hands out -- these functions only
+ * hand the endpoint whichever filters the tab currently has set, so the
+ * parameter block in the file describes the table the user was looking at
+ * rather than the whole database.
+ */
+function exportWithFilters(url, params, label, visibleCount) {
     try {
-        window.location.href = window.exportRoutes.departments;
-        setTimeout(() => openExportSuccessModal('Departments'), 1000);
+        if (!url) throw new Error('Export endpoint is unavailable');
+
+        if (visibleCount === 0) {
+            openExportErrorModal(`No ${label.toLowerCase()} match the current filters, so there is nothing to export.`);
+            return;
+        }
+
+        const query = new URLSearchParams(
+            Object.entries(params).filter(([, value]) => value)
+        ).toString();
+
+        window.location.href = query ? `${url}?${query}` : url;
+        setTimeout(() => openExportSuccessModal(label), 1000);
     } catch (e) {
         openExportErrorModal(e.message);
     }
 }
 
+window.exportDepartments = function() {
+    exportWithFilters(window.exportRoutes?.departments, {
+        status: document.getElementById('dept-filter-status')?.value || '',
+        search: document.getElementById('dept-search')?.value.trim() || '',
+    }, 'Departments', filteredDepartments.length);
+}
+
 window.exportDesignations = function() {
-    try {
-        window.location.href = window.exportRoutes.designations;
-        setTimeout(() => openExportSuccessModal('Designations'), 1000);
-    } catch (e) {
-        openExportErrorModal(e.message);
-    }
+    exportWithFilters(window.exportRoutes?.designations, {
+        department_id:   document.getElementById('desig-filter-dept')?.value || '',
+        employment_type: document.getElementById('desig-filter-type')?.value || '',
+        search:          document.getElementById('dept-search')?.value.trim() || '',
+    }, 'Designations', filteredDesignations.length);
 }

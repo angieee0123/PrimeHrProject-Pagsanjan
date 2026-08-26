@@ -5,10 +5,15 @@
                     <p class="table-sub">Section IV — Learning &amp; Development (CSC PDS format)</p>
                 </div>
                 <div class="table-actions">
-                    <a href="{{ route('employee.training.export') }}" class="btn-export">
+                    {{-- A button rather than a bare link: the filter bar's four
+                         controls live in the browser, so the download's query
+                         string has to be built at click time from what they
+                         currently hold. --}}
+                    <button type="button" class="btn-export" onclick="exportTrainingRecords()"
+                            data-export-url="{{ route('employee.training.export') }}">
                         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                        Export to PDS
-                    </a>
+                        Export CSV
+                    </button>
                     {{-- .btn-export supplies the pill shape its neighbour uses;
                          .tr-btn-primary-solid only takes over the colours. It
                          was .modal-btn-primary — a modal-footer class on a
@@ -27,13 +32,29 @@
                     <button type="button" class="training-filter-chip" data-status-filter="pending" onclick="setStatusFilter('pending', this)">Pending</button>
                     <button type="button" class="training-filter-chip" data-status-filter="rejected" onclick="setStatusFilter('rejected', this)">Rejected</button>
                 </div>
-                <select id="trainingPositionFilter" class="filter-select training-position-filter" onchange="filterPermanentTraining()" aria-label="Filter by position type">
-                    <option value="">All position types</option>
-                    <option value="Managerial">Managerial</option>
-                    <option value="Supervisory">Supervisory</option>
-                    <option value="Technical">Technical</option>
-                    <option value="Clerical">Clerical</option>
-                </select>
+                <div class="training-filter-controls">
+                    {{-- Filtered in the browser like the chips beside them: every
+                         training row is rendered, so there is no page 2 for a
+                         client-side filter to miss. --}}
+                    <label class="training-filter-inline" for="trainingDateFrom">
+                        <span class="emp-filter-label">Dates From</span>
+                        <input type="date" id="trainingDateFrom" class="filter-select training-date-filter"
+                               onchange="filterPermanentTraining()" aria-label="Filter by start of inclusive dates">
+                    </label>
+                    <label class="training-filter-inline" for="trainingDateTo">
+                        <span class="emp-filter-label">To</span>
+                        <input type="date" id="trainingDateTo" class="filter-select training-date-filter"
+                               onchange="filterPermanentTraining()" aria-label="Filter by end of inclusive dates">
+                    </label>
+                    <select id="trainingPositionFilter" class="filter-select training-position-filter" onchange="filterPermanentTraining()" aria-label="Filter by position type">
+                        <option value="">All position types</option>
+                        <option value="Managerial">Managerial</option>
+                        <option value="Supervisory">Supervisory</option>
+                        <option value="Technical">Technical</option>
+                        <option value="Clerical">Clerical</option>
+                    </select>
+                    <button type="button" class="training-filter-chip" onclick="resetTrainingFilters()">Reset</button>
+                </div>
             </div>
 
                 <div class="table-wrapper">
@@ -67,6 +88,10 @@
                             data-category="{{ $cat }}"
                             data-position="{{ $t->position_type }}"
                             data-ref="{{ $t->ref_doc_no }}"
+                            {{-- ISO, so the date filter can compare them as
+                                 strings against what the date inputs hold. --}}
+                            data-from="{{ $t->date_from?->format('Y-m-d') }}"
+                            data-to="{{ $t->date_to?->format('Y-m-d') }}"
                             @if($t->rejected_reason) data-reject-note="{{ $t->rejected_reason }}" @endif>
                             <td>
                                 <div class="training-title-wrap">

@@ -25,7 +25,18 @@ Route::get('/login', [\App\Http\Controllers\AuthController::class, 'showLogin'])
 Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])->name('login.post');
 Route::get('/select-role', [\App\Http\Controllers\AuthController::class, 'showSelectRole'])->middleware('auth')->name('select-role');
 Route::post('/select-role', [\App\Http\Controllers\AuthController::class, 'selectRole'])->middleware('auth')->name('select-role.post');
-Route::get('/password/forgot', [\App\Http\Controllers\AuthController::class, 'showForgotPassword'])->name('password.forgot');
+// Forgot password: email -> six-digit code -> new password.
+//
+// Throttled per IP on top of the per-address cooldown in
+// PasswordResetCodeService: these are the only unauthenticated POST endpoints
+// besides login, and the middle one guards a six-digit secret. `send` is the
+// tighter limit because each call spends an SMTP send against the shared
+// mailbox; `verify` is looser so a mistyped code is not answered with a 429,
+// and the per-code attempt counter is what actually stops guessing.
+Route::get('/password/forgot', [\App\Http\Controllers\PasswordResetController::class, 'show'])->name('password.forgot');
+Route::post('/password/forgot/send', [\App\Http\Controllers\PasswordResetController::class, 'send'])->middleware('throttle:6,1')->name('password.forgot.send');
+Route::post('/password/forgot/verify', [\App\Http\Controllers\PasswordResetController::class, 'verify'])->middleware('throttle:12,1')->name('password.forgot.verify');
+Route::post('/password/forgot/reset', [\App\Http\Controllers\PasswordResetController::class, 'reset'])->middleware('throttle:6,1')->name('password.forgot.reset');
 
 Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 
@@ -86,8 +97,10 @@ Route::get('/employee/dashboard', [\App\Http\Controllers\EmployeeDashboardContro
 
 Route::get('/employee/attendance', [EmployeeAttendanceController::class, 'index'])->middleware('auth')->name('employee.attendance');
 Route::get('/employee/attendance/detailed', [EmployeeAttendanceController::class, 'detailedDTR'])->middleware('auth')->name('employee.attendance.detailed');
+Route::get('/employee/attendance/export', [EmployeeAttendanceController::class, 'export'])->middleware('auth')->name('employee.attendance.export');
 
 Route::get('/employee/payslip', [\App\Http\Controllers\EmployeePayslipController::class, 'index'])->middleware('auth')->name('employee.payslip');
+Route::get('/employee/payslip/export', [\App\Http\Controllers\EmployeePayslipController::class, 'export'])->middleware('auth')->name('employee.payslip.export');
 Route::get('/employee/payslip/{id}/details', [\App\Http\Controllers\EmployeePayslipController::class, 'getPayslipDetails'])->middleware('auth')->name('employee.payslip.details');
 
 Route::get('/employee/leave', [EmployeeLeaveBalanceController::class, 'show'])->middleware('auth')->name('employee.leave');
@@ -197,6 +210,11 @@ Route::post('/admin/personnel', [EmployeeRegistrationController::class, 'store']
 Route::post('/admin/personnel/bulk-import', [EmployeeRegistrationController::class, 'bulkImport'])->middleware('auth')->name('admin.personnel.bulk-import');
 Route::post('/admin/personnel/government-ids/extract', [\App\Http\Controllers\GovernmentIdOcrController::class, 'extract'])->middleware('auth')->name('admin.personnel.government-ids.extract');
 
+// Declared above the parameterised `/admin/personnel/{id}` route below: routes
+// match in declaration order, so with `export` after it the URL would resolve
+// to show('export') -> Employee::findOrFail('export') -> 404.
+Route::get('/admin/personnel/export', [\App\Http\Controllers\PersonnelExportController::class, 'export'])->middleware('auth')->name('admin.personnel.export');
+
 // Schedule Routes
 Route::post('/admin/schedules/assign', [\App\Http\Controllers\ScheduleController::class, 'assign'])->middleware('auth')->name('admin.schedules.assign');
 Route::post('/admin/schedules/bulk-assign', [\App\Http\Controllers\ScheduleController::class, 'bulkAssign'])->middleware('auth')->name('admin.schedules.bulk-assign');
@@ -206,7 +224,10 @@ Route::get('/admin/schedules/employee/{employeeId}', [\App\Http\Controllers\Sche
 // matches in declaration order, so with `export` below it "/admin/schedules/
 // export" resolved to show('export') → Schedule::findOrFail('export') → 404,
 // which is what the Work Schedules Export button was hitting.
-Route::get('/admin/schedules/export', [\App\Http\Controllers\ScheduleController::class, 'export'])->middleware('auth')->name('admin.schedules.export');
+// The export itself lives on PersonnelExportController, beside the Employee
+// Records one: both are tabs of the Personnel page and both must carry the
+// same CsvReportWriter letterhead.
+Route::get('/admin/schedules/export', [\App\Http\Controllers\PersonnelExportController::class, 'schedules'])->middleware('auth')->name('admin.schedules.export');
 Route::get('/admin/schedules/{id}', [\App\Http\Controllers\ScheduleController::class, 'show'])->middleware('auth')->name('admin.schedules.show');
 Route::delete('/admin/schedules/{id}/delete', [\App\Http\Controllers\ScheduleController::class, 'destroy'])->middleware('auth')->name('admin.schedules.delete');
 Route::delete('/admin/schedules/{id}/remove', [\App\Http\Controllers\ScheduleController::class, 'remove'])->middleware('auth')->name('admin.schedules.remove');
@@ -348,7 +369,7 @@ Route::get('/admin/personnel/{id}', function ($id) {
 Route::get('/admin/training', [\App\Http\Controllers\TrainingController::class, 'index'])->middleware('auth')->name('admin.training');
 Route::post('/admin/training/{id}/approve', [\App\Http\Controllers\TrainingController::class, 'approve'])->middleware('auth')->name('admin.training.approve');
 Route::post('/admin/training/{id}/reject', [\App\Http\Controllers\TrainingController::class, 'reject'])->middleware('auth')->name('admin.training.reject');
-Route::get('/admin/training/export', [\App\Http\Controllers\TrainingController::class, 'export'])->middleware('auth')->name('admin.training.export');
+Route::get('/admin/training/export', [\App\Http\Controllers\TrainingExportController::class, 'export'])->middleware('auth')->name('admin.training.export');
 Route::get('/admin/training/{id}/certificate', [\App\Http\Controllers\TrainingController::class, 'certificate'])->middleware('auth')->name('admin.training.certificate');
 
 Route::get('/admin/performance', function () {
@@ -365,6 +386,13 @@ Route::post('/admin/attendance/scanner/suggest', [\App\Http\Controllers\Attendan
 Route::get('/admin/attendance/scanner/recent', [\App\Http\Controllers\AttendanceScannerController::class, 'recent'])->middleware('auth')->name('admin.attendance.scanner.recent');
 
 Route::get('/admin/attendance', [AttendanceController::class, 'index'])->middleware('auth')->name('admin.attendance');
+// "Export" on the Attendance page toolbar -> the Attendance Summary tab.
+// Same rule as the two below: a literal segment before any `{employeeId}`.
+Route::get('/admin/attendance/summary-export', [AttendanceController::class, 'exportSummary'])->middleware('auth')->name('admin.attendance.summary.export');
+// "Export All" on the Detailed Time Record tab. Registered before the
+// parameterised `detailed/{employeeId}` routes so `detailed-export` is never
+// read as an employee id.
+Route::get('/admin/attendance/detailed-export', [AttendanceController::class, 'exportDetailedRecords'])->middleware('auth')->name('admin.attendance.detailed.export-all');
 Route::get('/admin/attendance/detailed/{employeeId}', [AttendanceController::class, 'detailedDTR'])->middleware('auth')->name('admin.attendance.detailed');
 Route::get('/admin/attendance/detailed/{employeeId}/export', [AttendanceController::class, 'exportDetailedDTR'])->middleware('auth')->name('admin.attendance.detailed.export');
 Route::get('/admin/attendance/record/{attendanceId}', [AttendanceController::class, 'getAttendanceRecord'])->middleware('auth')->name('admin.attendance.record');
@@ -382,15 +410,59 @@ Route::delete('/admin/attendance/exemptions/{id}', [AttendanceController::class,
 
 Route::get('/admin/leave', [LeaveController::class, 'index'])->middleware('auth')->name('admin.leave');
 
+// Leave & Benefits CSV exports — one endpoint per tab, because each tab
+// reports a different thing and a shared endpoint would have to pick one of
+// them. Each answers with a Content-Disposition attachment, so the toolbar
+// button downloads the file without navigating the page away.
+Route::middleware('auth')->group(function () {
+    $export = \App\Http\Controllers\LeaveBenefitsExportController::class;
+
+    Route::get('/admin/leave/export/requests',     [$export, 'leaveRequests'])->name('admin.leave.export.requests');
+    Route::get('/admin/leave/export/transactions', [$export, 'transactions'])->name('admin.leave.export.transactions');
+    Route::get('/admin/leave/export/credits',      [$export, 'leaveCredits'])->name('admin.leave.export.credits');
+    Route::get('/admin/leave/export/benefits',     [$export, 'benefits'])->name('admin.leave.export.benefits');
+    Route::get('/admin/leave/export/types',        [$export, 'leaveTypes'])->name('admin.leave.export.types');
+    Route::get('/admin/leave/export/accrual',      [$export, 'accrualRates'])->name('admin.leave.export.accrual');
+});
+
 // Leave & Travel Calendar — read-only availability monitor for the admin.
 Route::get('/admin/leave-calendar', [\App\Http\Controllers\AdminLeaveCalendarController::class, 'index'])->middleware('auth')->name('admin.leaveCalendar');
 
 Route::get('/admin/travelorder', [\App\Http\Controllers\TravelOrderController::class, 'index'])->middleware('auth')->name('admin.travelorder');
+// Travel Order CSV exports — one endpoint per tab, for the same reason the six
+// Leave & Benefits ones exist: a Pending file has no approver to name and a
+// Disapproved one exists to carry the reason, so a single endpoint would print
+// empty columns on one tab or drop the reason from the other.
+//
+// Registered *before* `travelorder/{id}`, which matches in declaration order —
+// underneath it "/admin/travelorder/export-pending" would resolve to
+// show('export-pending') → TravelOrder::findOrFail('export-pending') → 404,
+// which is the trap `/admin/schedules/export` already fell into once.
+Route::middleware('auth')->group(function () {
+    $travelExport = \App\Http\Controllers\TravelOrderExportController::class;
+
+    Route::get('/admin/travelorder/export/pending',     [$travelExport, 'pending'])->name('admin.travelorder.export.pending');
+    Route::get('/admin/travelorder/export/approved',    [$travelExport, 'approved'])->name('admin.travelorder.export.approved');
+    Route::get('/admin/travelorder/export/disapproved', [$travelExport, 'disapproved'])->name('admin.travelorder.export.disapproved');
+    // The complete register — every status in one file, with a Status column.
+    Route::get('/admin/travelorder/export/all',         [$travelExport, 'all'])->name('admin.travelorder.export.all');
+});
 Route::post('/admin/travelorder/{id}/approve', [\App\Http\Controllers\TravelOrderController::class, 'approve'])->middleware('auth')->name('admin.travelorder.approve');
 Route::post('/admin/travelorder/{id}/disapprove', [\App\Http\Controllers\TravelOrderController::class, 'disapprove'])->middleware('auth')->name('admin.travelorder.disapprove');
 Route::get('/admin/travelorder/{id}', [\App\Http\Controllers\TravelOrderController::class, 'show'])->middleware('auth')->name('admin.travelorder.view');
 
 Route::get('/admin/passslip', [PassSlipController::class, 'indexAdmin'])->middleware('auth')->name('admin.passslip');
+// Pass Slip CSV exports — one per tab, and likewise declared above
+// `passslip/{id}` so the export paths are never read as a slip id.
+Route::middleware('auth')->group(function () {
+    $passSlipExport = \App\Http\Controllers\PassSlipExportController::class;
+
+    Route::get('/admin/passslip/export/pending',     [$passSlipExport, 'pending'])->name('admin.passslip.export.pending');
+    Route::get('/admin/passslip/export/approved',    [$passSlipExport, 'approved'])->name('admin.passslip.export.approved');
+    Route::get('/admin/passslip/export/disapproved', [$passSlipExport, 'disapproved'])->name('admin.passslip.export.disapproved');
+    // The complete register — every status in one file, with a Status column.
+    Route::get('/admin/passslip/export/all',         [$passSlipExport, 'all'])->name('admin.passslip.export.all');
+});
 Route::post('/admin/passslip/{id}/approve', [PassSlipController::class, 'approve'])->middleware('auth')->name('admin.passslip.approve');
 Route::post('/admin/passslip/{id}/disapprove', [PassSlipController::class, 'disapprove'])->middleware('auth')->name('admin.passslip.disapprove');
 Route::get('/admin/passslip/{id}', [PassSlipController::class, 'viewAdmin'])->middleware('auth')->name('admin.passslip.view');
@@ -430,12 +502,44 @@ Route::post('/admin/payroll/generate', [\App\Http\Controllers\PayrollController:
 Route::post('/admin/payroll/payslip/{id}/approve', [\App\Http\Controllers\PayrollController::class, 'approvePayslip'])->middleware('auth')->name('admin.payroll.payslip.approve');
 Route::get('/admin/payroll/payslip/{id}/details', [\App\Http\Controllers\PayrollController::class, 'payslipDetails'])->middleware('auth')->name('admin.payroll.payslip.details');
 Route::post('/admin/payroll/payslip/{id}/reject', [\App\Http\Controllers\PayrollController::class, 'rejectPayslip'])->middleware('auth')->name('admin.payroll.payslip.reject');
-Route::get('/admin/payroll/payslips/export', [\App\Http\Controllers\PayrollController::class, 'exportPayslips'])->middleware('auth')->name('admin.payroll.payslips.export');
 Route::get('/admin/payroll/preview', [\App\Http\Controllers\PayrollController::class, 'preview'])->middleware('auth')->name('admin.payroll.preview');
 Route::post('/admin/payroll/calculate', [\App\Http\Controllers\PayrollController::class, 'calculate'])->middleware('auth')->name('admin.payroll.calculate');
-Route::get('/admin/payroll/export', [\App\Http\Controllers\PayrollController::class, 'export'])->middleware('auth')->name('admin.payroll.export');
+// Payroll CSV exports — one endpoint per tab, because each tab reports a
+// different thing: the register reports a period's computation, Payslip
+// Management the approval queue built from it, and Generate Payroll the run
+// that was just produced. The register's button had no handler at all until
+// now. Route names are unchanged so nothing that already links here breaks.
+Route::middleware('auth')->group(function () {
+    $payrollExport = \App\Http\Controllers\PayrollExportController::class;
+
+    Route::get('/admin/payroll/register/export', [$payrollExport, 'register'])->name('admin.payroll.register.export');
+    Route::get('/admin/payroll/payslips/export', [$payrollExport, 'payslips'])->name('admin.payroll.payslips.export');
+    Route::get('/admin/payroll/export',          [$payrollExport, 'generated'])->name('admin.payroll.export');
+});
 
 Route::get('/admin/deductions', [\App\Http\Controllers\DeductionController::class, 'index'])->middleware('auth')->name('admin.deductions');
+
+// Deductions & Loans CSV exports — one endpoint per tab, the same rule the
+// Leave & Benefits and Travel Order exports follow.
+//
+// Declared *above* `/admin/deductions/employee/{id}`, which matches in
+// declaration order: underneath it, "/admin/deductions/employee/export" would
+// resolve to showEmployeeDeduction('export') -> findOrFail('export') -> 404.
+// That is the trap `/admin/schedules/export` already fell into once.
+//
+// There is deliberately no Transactions endpoint: nothing in this system
+// writes to `deduction_transactions`, so the file would be a letterhead over
+// an empty table — which reads as "no deductions were taken" rather than
+// "this is not built yet".
+Route::middleware('auth')->group(function () {
+    $deductionExport = \App\Http\Controllers\DeductionExportController::class;
+
+    Route::get('/admin/deductions/types/export',     [$deductionExport, 'deductionTypes'])->name('admin.deductions.types.export');
+    Route::get('/admin/deductions/employee/export',  [$deductionExport, 'employeeDeductions'])->name('admin.deductions.employee.export');
+    Route::get('/admin/deductions/loans/export',     [$deductionExport, 'loans'])->name('admin.deductions.loans.export');
+    Route::get('/admin/deductions/schedules/export', [$deductionExport, 'schedules'])->name('admin.deductions.schedules.export');
+    Route::get('/admin/deductions/loan-types/export', [$deductionExport, 'loanTypes'])->name('admin.deductions.loanTypes.export');
+});
 
 // Deduction Type Routes
 Route::post('/admin/deductions/types', [\App\Http\Controllers\DeductionController::class, 'storeType'])->middleware('auth')->name('admin.deductions.types.store');
@@ -448,9 +552,6 @@ Route::put('/admin/deductions/employee/{id}', [\App\Http\Controllers\DeductionCo
 // Bulk Assign Deductions Route
 Route::post('/admin/deductions/employee/bulk-assign', [\App\Http\Controllers\DeductionController::class, 'bulkAssignEmployeeDeduction'])->middleware('auth')->name('admin.deductions.employee.bulk-assign');
 
-// Export employee deductions
-Route::get('/admin/deductions/employee/export', [\App\Http\Controllers\DeductionController::class, 'exportEmployeeDeductions'])->middleware('auth')->name('admin.deductions.employee.export');
-
 Route::get('/admin/deductions/employee/{id}', [\App\Http\Controllers\DeductionController::class, 'showEmployeeDeduction'])->middleware('auth')->name('admin.deductions.employee.show');
 
 // Get active deductions for an employee
@@ -459,27 +560,44 @@ Route::get('/admin/deductions/employee/{employeeId}/active', [\App\Http\Controll
 // Delete employee deduction
 Route::delete('/admin/deductions/employee/{id}/delete', [\App\Http\Controllers\DeductionController::class, 'deleteEmployeeDeduction'])->middleware('auth')->name('admin.deductions.employee.delete');
 
-// Export loans
-Route::get('/admin/deductions/loans/export', [\App\Http\Controllers\DeductionController::class, 'exportLoans'])->middleware('auth')->name('admin.deductions.loans.export');
-
 // Get employee deductions for schedule modal
 Route::get('/admin/deductions/employee/{employeeId}/deductions', [\App\Http\Controllers\DeductionController::class, 'deductionsForEmployee'])->middleware('auth')->name('admin.deductions.employee.deductions');
-
-// Export schedules
-Route::get('/admin/deductions/schedules/export', [\App\Http\Controllers\DeductionController::class, 'exportSchedules'])->middleware('auth')->name('admin.deductions.schedules.export');
 
 Route::get('/admin/departments', [\App\Http\Controllers\DepartmentController::class, 'index'])->middleware('auth')->name('admin.departments');
 Route::get('/admin/designations/template', [\App\Http\Controllers\DesignationController::class, 'template'])->middleware('auth')->name('admin.designations.template');
 Route::post('/admin/designations/import', [\App\Http\Controllers\DesignationController::class, 'import'])->middleware('auth')->name('admin.designations.import');
 Route::post('/admin/designations', [\App\Http\Controllers\DesignationController::class, 'store'])->middleware('auth')->name('admin.designations.store');
 Route::get('/admin/departments/{id}/designations', [\App\Http\Controllers\DepartmentController::class, 'designationsForDepartment'])->middleware('auth')->name('admin.departments.designations');
-Route::get('/admin/departments/export', [\App\Http\Controllers\DepartmentController::class, 'export'])->middleware('auth')->name('admin.departments.export');
-Route::get('/admin/designations/export', [\App\Http\Controllers\DesignationController::class, 'export'])->middleware('auth')->name('admin.designations.export');
+// Both Departments-page tabs export from DepartmentExportController, for the
+// same reason the Personnel ones share theirs — one letterhead, one office.
+Route::get('/admin/departments/export', [\App\Http\Controllers\DepartmentExportController::class, 'departments'])->middleware('auth')->name('admin.departments.export');
+Route::get('/admin/designations/export', [\App\Http\Controllers\DepartmentExportController::class, 'designations'])->middleware('auth')->name('admin.designations.export');
 Route::get('/admin/departments/template', [\App\Http\Controllers\DepartmentController::class, 'template'])->middleware('auth')->name('admin.departments.template');
 Route::post('/admin/departments/import', [\App\Http\Controllers\DepartmentController::class, 'import'])->middleware('auth')->name('admin.departments.import');
 Route::post('/admin/departments', [\App\Http\Controllers\DepartmentController::class, 'store'])->middleware('auth')->name('admin.departments.store');
 
 Route::get('/admin/reports', [\App\Http\Controllers\AdminReportsController::class, 'index'])->middleware('auth')->name('admin.reports');
+
+// Admin Reports CSV exports — one endpoint per tab, the same rule the Leave &
+// Benefits, Travel Order, Pass Slip and Payroll exports follow: each tab
+// reports a different thing, so a shared endpoint would have to print a Gross
+// Pay column on the Headcount file. The page's only button was
+// `window.print()` until now.
+//
+// Recruitment and Performance are registered too, and answer with a file that
+// states in its own words that no data is being recorded for them — a dead
+// button on those two tabs is what would need explaining.
+Route::middleware('auth')->group(function () {
+    $reportExport = \App\Http\Controllers\AdminReportsExportController::class;
+
+    Route::get('/admin/reports/export/payroll',     [$reportExport, 'payroll'])->name('admin.reports.export.payroll');
+    Route::get('/admin/reports/export/department',  [$reportExport, 'department'])->name('admin.reports.export.department');
+    Route::get('/admin/reports/export/deductions',  [$reportExport, 'deductions'])->name('admin.reports.export.deductions');
+    Route::get('/admin/reports/export/headcount',   [$reportExport, 'headcount'])->name('admin.reports.export.headcount');
+    Route::get('/admin/reports/export/recruitment', [$reportExport, 'recruitment'])->name('admin.reports.export.recruitment');
+    Route::get('/admin/reports/export/training',    [$reportExport, 'training'])->name('admin.reports.export.training');
+    Route::get('/admin/reports/export/performance', [$reportExport, 'performance'])->name('admin.reports.export.performance');
+});
 
 // Website Content — the editor for the public welcome page. Administrators
 // only; WebsiteContentController re-checks the role on every endpoint rather
@@ -538,26 +656,17 @@ Route::get('/ai-assistant/file/{source}/{ref}', [\App\Http\Controllers\AiFileCon
     ->where('ref', '[A-Za-z0-9_\-]+')
     ->name('ai-assistant.file');
 
-// Notification API Routes
-Route::post('/api/notifications/mark-all-read', function (\Illuminate\Http\Request $request) {
-    \App\Services\NotificationService::markAllAsRead(Auth::id(), $request->input('audience'));
-    return response()->json(['success' => true]);
-})->middleware('auth');
-
-Route::post('/api/notifications/{id}/read', function ($id) {
-    $notification = \App\Models\Notification::where('id', $id)
-        ->where('user_id', Auth::id())
-        ->firstOrFail();
-    
-    $notification->markAsRead();
-    
-    return response()->json(['success' => true]);
-})->middleware('auth');
-
-// Employee Request Routes
+// Notification and employee-request API. Every notification endpoint lives on
+// NotificationController: two of these used to be closures registered above
+// this group under the same method+URI, which Laravel's route collection keys
+// by — so the group silently overwrote them and the closure that honoured the
+// panel's audience parameter never ran.
 Route::prefix('api')->middleware('auth')->group(function () {
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
     Route::get('/notifications/unread-count', [\App\Http\Controllers\NotificationController::class, 'unreadCount']);
+    // Polled by the notification panels so a new notification appears without a
+    // page reload. Static segment, so it must stay above /notifications/{id}/*.
+    Route::get('/notifications/feed', [\App\Http\Controllers\NotificationController::class, 'feed']);
     Route::post('/notifications/{id}/mark-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
     Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
     

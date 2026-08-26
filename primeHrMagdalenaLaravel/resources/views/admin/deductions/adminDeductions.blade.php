@@ -113,7 +113,10 @@ function getInitials($name) {
             </div>
         </div>
         <div class="filter-card-actions">
-            <button class="btn-ghost">
+            {{-- This button was rendered, styled, clickable and wired to nothing. --}}
+            <button type="button" class="btn-ghost"
+                    data-export-url="{{ route('admin.deductions.types.export') }}"
+                    onclick="exportDeductionTypes(this)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
@@ -146,7 +149,9 @@ function getInitials($name) {
             </div>
         </div>
         <div class="filter-card-actions">
-            <button class="btn-ghost" onclick="exportEmployeeDeductions()">
+            <button type="button" class="btn-ghost"
+                    data-export-url="{{ route('admin.deductions.employee.export') }}"
+                    onclick="exportEmployeeDeductions(this)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
@@ -179,7 +184,9 @@ function getInitials($name) {
             </div>
         </div>
         <div class="filter-card-actions">
-            <button class="btn-ghost" onclick="exportLoans()">
+            <button type="button" class="btn-ghost"
+                    data-export-url="{{ route('admin.deductions.loans.export') }}"
+                    onclick="exportLoans(this)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
@@ -203,7 +210,9 @@ function getInitials($name) {
             </div>
         </div>
         <div class="filter-card-actions">
-            <button class="btn-ghost" onclick="exportSchedules()">
+            <button type="button" class="btn-ghost"
+                    data-export-url="{{ route('admin.deductions.schedules.export') }}"
+                    onclick="exportSchedules(this)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
@@ -234,7 +243,16 @@ function getInitials($name) {
                 </select>
             </div>
         </div>
-        <div class="filter-card-actions"></div>
+        <div class="filter-card-actions">
+            {{-- The registry had no Export at all, though its three sibling
+                 config tabs all offer one. --}}
+            <button type="button" class="btn-ghost"
+                    data-export-url="{{ route('admin.deductions.loanTypes.export') }}"
+                    onclick="exportLoanTypes(this)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export
+            </button>
+        </div>
     </div>
 
     <div class="filter-group ded-hidden" id="transactions-filter-group">
@@ -272,12 +290,13 @@ function getInitials($name) {
                 </select>
             </div>
         </div>
-        <div class="filter-card-actions">
-            <button class="btn-ghost">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export
-            </button>
-        </div>
+        {{-- No Export here on purpose. Nothing in this system writes to
+             `deduction_transactions` — DeductionController hard-codes
+             `transactions_this_month => 0` for the same reason — so the button
+             could only ever hand out a letterhead over an empty table, which
+             reads as "no deductions were taken" rather than "not built yet".
+             It comes back when a payroll run populates that table. --}}
+        <div class="filter-card-actions"></div>
     </div>
 </div>
 

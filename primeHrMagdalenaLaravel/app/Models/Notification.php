@@ -96,6 +96,16 @@ class Notification extends Model
         return $query->whereIn('audience', ['employee', 'system']);
     }
 
+    /**
+     * Pick the audience scope by name. The panels and the polling feed that
+     * refreshes them must select the same rows, so the choice lives here rather
+     * than being re-spelled in each caller.
+     */
+    public function scopeForAudience($query, ?string $audience)
+    {
+        return $audience === 'admin' ? $query->forAdmin() : $query->forEmployee();
+    }
+
     public function getTimeAgoAttribute()
     {
         // (int) cast: Carbon 3 returns fractional minutes, which otherwise

@@ -1,3 +1,4 @@
+import { exportWithFilters } from './exportWithFilters.js';
 function filterLoanTypes() {
     const searchTerm = document.getElementById('searchLoanType').value.toLowerCase();
     const providerFilter = document.getElementById('filterLoanTypeProvider').value;
@@ -201,3 +202,11 @@ window.viewLoanTypeDetails = viewLoanTypeDetails;
 window.closeViewLoanTypeModal = closeViewLoanTypeModal;
 window.editLoanType = editLoanType;
 window.deleteLoanType = deleteLoanType;
+
+// The Loan Type Registry had no Export at all, though its sibling config tabs
+// all offer one.
+window.exportLoanTypes = (btn) => exportWithFilters(btn, {
+    search:   'searchLoanType',
+    provider: 'filterLoanTypeProvider',
+    status:   'filterLoanTypeStatus',
+});

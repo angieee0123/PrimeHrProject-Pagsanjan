@@ -55,7 +55,7 @@
             <div class="bim-columns-box">
                 <p class="bim-columns-label">Expected columns</p>
                 <div class="bim-columns-grid">
-                    @foreach(['code','name','head','personnel_count','status','description'] as $col)
+                    @foreach(['code','name','head','status','description'] as $col)
                     <code class="bim-column-chip">{{ $col }}</code>
                     @endforeach
                 </div>

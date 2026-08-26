@@ -2,7 +2,7 @@
     <button class="notif-btn" id="notifBtn" onclick="toggleNotif()">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         @php
-            $unreadCount = \App\Models\Notification::where('user_id', Auth::id())->forEmployee()->unread()->count();
+            $unreadCount = \App\Models\Notification::where('user_id', Auth::id())->forAudience('employee')->unread()->count();
         @endphp
         <span class="notif-badge {{ $unreadCount > 0 ? 'active' : '' }}" id="notifDot">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
     </button>
@@ -19,48 +19,11 @@
         <div class="notif-body" id="notifBody">
             @php
                 $notifications = \App\Models\Notification::where('user_id', Auth::id())
-                    ->forEmployee()
-                    ->orderBy('created_at', 'desc')
-                    ->limit(10)
+                    ->forAudience('employee')
+                    ->recent(10)
                     ->get();
             @endphp
-            @forelse($notifications as $notif)
-            <div class="notif-card {{ !$notif->is_read ? 'new' : '' }}" onclick="markAsReadAndRedirect({{ $notif->id }}, '{{ $notif->link ?? '#' }}')">
-                <div class="notif-left">
-                    <div class="notif-avatar" style="background:{{ 
-                        $notif->type === 'leave_request' ? 'linear-gradient(135deg,#15803d,#22c55e)' : 
-                        ($notif->type === 'payroll' ? 'linear-gradient(135deg,#0369a1,#0ea5e9)' : 
-                        ($notif->type === 'attendance' ? 'linear-gradient(135deg,#b91c1c,#ef4444)' : 
-                        ($notif->type === 'training' ? 'linear-gradient(135deg,#7c3aed,#a78bfa)' : 
-                        'linear-gradient(135deg,#ea580c,#fb923c)'))) }}">
-                        @if($notif->type === 'leave_request')
-                            <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        @elseif($notif->type === 'payroll')
-                            <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                        @elseif($notif->type === 'attendance')
-                            <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        @elseif($notif->type === 'training')
-                            <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        @else
-                            <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        @endif
-                    </div>
-                </div>
-                <div class="notif-right">
-                    <h4>{{ $notif->title }}</h4>
-                    <p class="notif-msg">{{ $notif->message }}</p>
-                    <span class="notif-time">
-                        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        {{ $notif->time_ago }}
-                    </span>
-                </div>
-            </div>
-            @empty
-            <div class="notif-empty">
-                <svg width="40" height="40" fill="none" stroke="#d9d9ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                <p>No notifications</p>
-            </div>
-            @endforelse
+            @include('partials.notificationItems', ['notifications' => $notifications])
         </div>
     </div>
 </div>
@@ -123,53 +86,4 @@
 }
 </style>
 
-<script>
-function toggleNotif() {
-    const panel = document.getElementById('notifPanel');
-    panel.classList.toggle('open');
-}
-
-function markAllAsRead() {
-    fetch('/api/notifications/mark-all-read', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({ audience: 'employee' })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.querySelectorAll('.notif-card.new').forEach(card => {
-                card.classList.remove('new');
-            });
-            document.getElementById('unreadCount').textContent = '0';
-            document.getElementById('notifDot').classList.remove('active');
-        }
-    });
-}
-
-function markAsReadAndRedirect(notificationId, link) {
-    fetch(`/api/notifications/${notificationId}/read`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        }
-    })
-    .then(() => {
-        if (link && link !== '#') {
-            window.location.href = link;
-        }
-    });
-}
-
-document.addEventListener('click', (e) => {
-    const wrap = document.querySelector('.notif-wrap');
-    const panel = document.getElementById('notifPanel');
-    if (!wrap.contains(e.target)) {
-        panel.classList.remove('open');
-    }
-});
-</script>
+@include('partials.notificationPanelScript', ['audience' => 'employee'])

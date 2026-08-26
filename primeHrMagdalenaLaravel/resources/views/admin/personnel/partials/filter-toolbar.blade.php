@@ -1,5 +1,10 @@
 {{-- Filter Toolbar --}}
-<div class="filter-card">
+{{-- Employee Records only. It sits outside .tab-content (the two tabs are
+     siblings below it), so the tab handler hides it by id when Work Schedules
+     is showing: its filters describe employee records, and leaving its Export
+     button on screen beside the Work Schedules one meant two buttons that
+     download different files with nothing to tell them apart. --}}
+<div class="filter-card" id="personnelFilterToolbar">
     <div class="filter-card-fields">
         <div class="fld">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
@@ -30,7 +35,11 @@
         </div>
     </div>
     <div class="filter-card-actions">
-        <button class="btn-ghost" onclick="exportTableData()">
+        {{-- The CSV is built server-side (PersonnelExportController) so it can
+             carry the letterhead block, the 201-file columns the table has no
+             room for, and every matching record rather than the page on screen.
+             The filters are read off this toolbar and sent as query params. --}}
+        <button class="btn-ghost" onclick="exportTableData(this)" data-export-url="{{ route('admin.personnel.export') }}">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Export
         </button>

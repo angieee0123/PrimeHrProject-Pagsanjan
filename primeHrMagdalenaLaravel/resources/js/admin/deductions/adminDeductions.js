@@ -1,3 +1,5 @@
+import { exportWithFilters } from './exportWithFilters.js';
+
 function switchTab(tabName) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('[id$="-tab"]').forEach(tab => tab.style.display = 'none');
@@ -42,3 +44,9 @@ function filterDeductionTypes() {
 });
 
 window.filterDeductionTypes = filterDeductionTypes;
+
+// Deduction Types — this button had no handler at all until now.
+window.exportDeductionTypes = (btn) => exportWithFilters(btn, {
+    category: 'filterDeductionTypeCategory',
+    status:   'filterDeductionTypeStatus',
+});

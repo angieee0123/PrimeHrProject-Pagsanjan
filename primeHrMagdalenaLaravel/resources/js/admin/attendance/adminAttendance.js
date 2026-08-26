@@ -15,8 +15,57 @@ function switchTab(tabName) {
 
     event.target.closest('.tab-btn').classList.add('active');
     document.getElementById(tabName + '-tab').style.display = 'block';
+    syncAttendanceExportButton(tabName);
 }
 window.switchTab = switchTab;
+
+/**
+ * The toolbar's Export button belongs to the Attendance Summary tab.
+ *
+ * It sits above all three tabs, but it exports the summary roll-up: the
+ * Detailed Time Record tab has its own "Export All" for the day-by-day log,
+ * and Attendance Config holds settings, not records. Left visible on those
+ * two it meant either a second button downloading a different file with
+ * nothing to tell them apart, or a button that exports a tab you are not
+ * looking at.
+ */
+function syncAttendanceExportButton(tabName) {
+    const btn = document.getElementById('attendanceExportBtn');
+    if (btn) btn.style.display = tabName === 'summary' ? '' : 'none';
+}
+
+/**
+ * Export the Attendance Summary for the filters currently in force.
+ *
+ * The filters are read out of the controls themselves rather than off the
+ * rendered table, because the table is paginated -- the endpoint recomputes
+ * every matching employee, not the ten currently on screen.
+ *
+ * "Every filter" is the point, and the toolbar form is not all of them: the
+ * search box lives in the topbar, outside this form, and narrows the table
+ * by name, employee ID or department. Sending only the form's four fields
+ * meant a searched-down table of one employee exported the whole department
+ * -- a file that contradicts the screen it was downloaded from.
+ */
+function exportAttendanceSummary(btn) {
+    const url = btn?.dataset.exportUrl;
+    if (!url) return;
+
+    const form = document.getElementById('attendanceFilterForm');
+    const params = new URLSearchParams();
+
+    ['start_date', 'end_date', 'department', 'status'].forEach(name => {
+        const value = form?.elements[name]?.value || '';
+        if (value) params.set(name, value);
+    });
+
+    const search = document.getElementById('attendanceSearchInput')?.value.trim() || '';
+    if (search) params.set('search', search);
+
+    const query = params.toString();
+    window.location.href = query ? url + '?' + query : url;
+}
+window.exportAttendanceSummary = exportAttendanceSummary;
 
 // Check URL parameter and switch to correct tab on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -30,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.querySelectorAll('.tab-btn')[1].classList.add('active');
         document.getElementById('detailed-tab').style.display = 'block';
+        syncAttendanceExportButton('detailed');
     } else if (activeTab === 'settings') {
         // Switch to settings tab
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -37,6 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.querySelectorAll('.tab-btn')[2].classList.add('active');
         document.getElementById('settings-tab').style.display = 'block';
+        syncAttendanceExportButton('settings');
     }
 });
 

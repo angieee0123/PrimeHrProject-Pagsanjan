@@ -54,6 +54,33 @@ function filterPermanentPayslip(query) {
     });
 }
 
+/*
+    Export the payslip register the table is showing.
+
+    The button had no handler at all — it rendered, it hovered, and clicking it
+    did nothing. The period and status filters are already in the link the
+    server rendered, because those are the ones that produced the table; the
+    search box is the only filter that never reaches the URL, so it is appended
+    here.
+*/
+function exportPayslips() {
+    const btn = document.querySelector('[data-export-url]');
+    if (!btn) return;
+
+    const url = new URL(btn.dataset.exportUrl, window.location.origin);
+    const search = document.getElementById('employeePayslipSearch')?.value.trim() || '';
+
+    if (search) {
+        url.searchParams.set('search', search);
+    } else {
+        url.searchParams.delete('search');
+    }
+
+    // A plain navigation: the response is a streamed attachment, so the
+    // browser's own download handling is what should receive it.
+    window.location.href = url.toString();
+}
+
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
@@ -200,6 +227,7 @@ window.openModal = openModal;
 window.closeModal = closeModal;
 window.closePayslipModal = closePayslipModal;
 window.filterPermanentPayslip = filterPermanentPayslip;
+window.exportPayslips = exportPayslips;
 window.viewPayslipDetail = viewPayslipDetail;
 window.closePayslipDetailModal = closePayslipDetailModal;
 window.printPayslip = printPayslip;

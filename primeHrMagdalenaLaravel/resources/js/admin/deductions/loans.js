@@ -1,3 +1,4 @@
+import { exportWithFilters } from './exportWithFilters.js';
 import { confirmDeleteLoan } from './deleteDeduction.js';
 
 window._loanCurrentPage = 1;
@@ -243,8 +244,12 @@ function viewLoanDetails(id) {
         });
 }
 
-function exportLoans() {
-    window.location.href = '/admin/deductions/loans/export';
+function exportLoans(btn) {
+    exportWithFilters(btn, {
+        search:    'searchLoan',
+        loan_type: 'filterLoanType',
+        status:    'filterLoanStatus',
+    });
 }
 
 // Ensure modal functions are in global scope

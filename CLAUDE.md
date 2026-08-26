@@ -500,6 +500,268 @@ from its stored spec, shipping the markup alone — still gets a card header.
 
 ---
 
+## CSV exports
+
+Every Export button in the admin area hands out a document, not a grid of
+values. `CsvReportWriter` owns the letterhead all of them wear — the republic
+line, the office name and address, the report title, which filters produced
+the file, when and by whom, the totals, and the RA 10173 notice — so a file
+found on somebody's laptop a year later still identifies itself.
+
+- **The office identity is read, not typed.** The name and address come from
+  `SiteContentService`, so renaming the municipality under Admin → Website
+  Content renames it on every exported file. Same rule as
+  `HrPolicyFactsService`.
+- **One controller per page, one method per tab**, because a tab exports what
+  that tab is about and never the neighbouring tab with columns hidden:
+  `PersonnelExportController` (Employee Records masterlist · Work Schedules),
+  `DepartmentExportController` (office directory · plantilla of positions),
+  `TrainingExportController` (the CSC PDS Section IV verification queue),
+  `LeaveBenefitsExportController` (six tabs),
+  `AdminReportsExportController` (seven tabs — see below),
+  `TravelOrderExportController` and `PassSlipExportController` (three tabs each
+  — Pending carries days-pending and no approver, Approved names who signed it,
+  Disapproved carries the reason in full — plus an `all()` register beside
+  them: every status in one file with a Status column and the decision columns
+  blank where nobody has decided. That file is the exception the per-tab rule
+  buys, not a replacement for it, and both buttons send the *same* toolbar
+  filters — "Export All" means every status, not every record, or the file
+  would contradict the parameter block it prints at the top of itself), plus
+  `AttendanceController`'s
+  three (`exportSummary` for the Attendance Summary tab, `exportDetailedRecords`
+  for the Detailed Time Record tab's Export All, `exportDetailedDTR` for one
+  employee's DTR). The attendance three keep their methods on
+  `AttendanceController` because they are built from `calculateEmployeeAttendance()`
+  and `buildDetailedRecords()`, which are private to it — moving the export out
+  would mean moving the day computation, which payroll reads.
+- **The filters on screen are sent as query params** and printed back in the
+  file's parameter block — every one of them, spelled "All Departments" rather
+  than left blank, so a reader can tell "this covers everything" from "this
+  cell did not get written". The endpoint re-runs the query server-side; it
+  never scrapes the rendered table, which is what used to cap these files at
+  the columns the screen happens to show.
+- **A file that names nobody gets no privacy warning.** `notes()` takes
+  `containsPersonalData: false` for the department and designation exports —
+  an office name and a plantilla item name no one, and a privacy warning
+  printed on a file that carries no personal data is how a real one stops
+  being read.
+- **`fputcsv()` is called with an explicit empty `$escape`** (`CsvReportWriter::ESCAPE`).
+  PHP 8.4 deprecates omitting it, and a deprecation notice raised mid-stream
+  prints *into* the CSV after the headers have gone out — a corrupted download
+  rather than a logged warning.
+- **Dates in a table cell are ISO; dates in a sentence are long form.**
+  `CsvReportWriter::date()` / `dateTime()` write `2026-08-26`; `longDate()`
+  writes "August 26, 2026" for the letterhead, the parameter block and
+  summaries. The exports were split between the two spellings with nothing
+  recording a decision — Payroll and Deductions wrote ISO, Leave & Benefits,
+  Travel Order and Pass Slip wrote `M d, Y` — so two tabs of the same system
+  handed out two different date columns. The tie-breaker is the spreadsheet,
+  not the reader: `M d, Y` is text Excel sorts **alphabetically** (Apr, Aug,
+  Dec), so a register sorted by date comes back in month-name order, which
+  looks sorted and is not, and it parses as a date only under an English
+  locale. Format through the helper, never inline —
+  `tests/Unit/CsvDateFormatTest.php` pins that, and lists the controllers it
+  covers. `PersonnelExportController` and `TrainingExportController` still
+  format inline and are deliberately excluded; fold them in when those pages
+  are next worked on.
+- **A filter option that covers two stored values must cover both in the
+  export.** `salary_computations.status` defaults to `draft`, and Payslip
+  Management's `filterPayslips()` normalises `draft` to `pending` — so the
+  option labelled "Pending/Draft" lists both on screen. The export ran
+  `where('status', 'pending')` and returned none of them, under a parameter
+  block that named itself "Pending / Draft": an empty register that reads as
+  "nothing is awaiting approval". `PayrollExportController::statusesFor()`
+  owns the mapping so the query and the label cannot disagree.
+
+- **A figure the report states must mean what the page means by it.** The
+  training export carries *Hours Claimed* and *Hours Credited* as separate
+  columns, because a rejected submission credits 0 to CSC PDS Section IV
+  however many hours it declared — one "Hours" column would make a rejected
+  submission read as credited in the one report whose subject is which hours
+  count.
+
+  The pass slip export separates *Time Away* from *Office Minutes Covered* for
+  the same reason: a 1 PM–9 PM slip is eight hours away but only four hours of
+  paid office time, and a single "duration" column would put the wrong figure
+  beside a deduction. The office figure is `PassSlipComplianceService`'s, read
+  against the schedule in force on the slip's own date — the same service the
+  DTR computes from, so the report and the time record cannot disagree.
+
+Figures a report states are derived where they are owned: department headcount
+is `withCount('employmentDetails')`, never a stored `personnel_count`, and a
+schedule's status comes from `Employee::scheduleStatus()` — the same method the
+table reads, so the file and the screen cannot disagree about who is
+unscheduled.
+
+### The employee's own three exports
+
+Attendance, Payslip and Training each have an Export button on the employee
+side, and all three used to ignore the toolbar directly above them.
+
+- **Attendance** serialised `detailedRecords` in the browser — the array as it
+  came back from the fetch, *before* the View dropdown or the topbar search
+  touched it. Filtering down to six late days still downloaded the whole month.
+- **Payslip** had no handler at all: the button rendered, it hovered, and
+  clicking it did nothing.
+- **Training** linked to an endpoint taking no parameters that always returned
+  every *verified* record, so narrowing to the rejected submissions downloaded
+  the verified ones.
+
+All three are now server-side endpoints wearing the `CsvReportWriter`
+letterhead, and each **re-runs the query its own page renders from** rather
+than re-deriving one: `EmployeeAttendanceController::export()` calls
+`fetchDetailedRecords()`, and `EmployeePayslipController::export()` calls
+`filtered()`, the same method `index()` paginates. The export methods stay on
+the page controllers for that reason — the same argument that keeps the
+admin DTR exports on `AttendanceController`.
+
+- **The filters are split by where the page's own filtering happens, and the
+  export follows.** Payslip paginates server-side, so its period and status
+  filters are a GET form (a browser-side filter would only ever narrow the five
+  rows on the current page) and reach the export in the URL the server already
+  rendered. Training renders every row, so its date range joins the chips and
+  the position select in `filterPermanentTraining()`, and the button builds the
+  query string at click time. Attendance sends the date range, the View chip
+  and the search term.
+- **A filter written twice has to be pinned twice.** The page decides in
+  JavaScript and the file decides in PHP — both halves keep working when they
+  drift, and only their *agreement* breaks. `EmployeeAttendanceController::recordState()`
+  mirrors `renderDetailedDTR()`'s row classification (leave outranks the
+  weekend; Incomplete outranks Late), `matchesView()` mirrors `applyDtrChip()`,
+  and `inDateRange()` mirrors `trainingInDateRange()`.
+  `tests/Unit/EmployeeExportFilterTest.php` pins each pair.
+- **Date ranges are overlap tests, not containment.** A pay period running
+  16 July – 15 August belongs in an August register and a seminar running
+  30 July – 1 August belongs in an August filter; testing only the start date
+  drops them under a parameter block that says August is covered.
+- **The search box is applied across the whole filtered set, not the page.**
+  Payslip's box narrows only the rows currently paginated onto the screen; the
+  export applies the same term to every matching payslip, because "export what
+  I filtered to" stops meaning the visible rows the moment the filter outlives
+  page 1. Matched against the fields each row is *built* from, not its rendered
+  text.
+- **`salary_computations.status` defaults to `draft`, and draft means what
+  pending means.** The employee's badge tested for `'pending'` alone and
+  labelled an untouched draft "Processed" — a false statement about somebody's
+  pay. `EmployeePayslipController::STATUS_GROUPS` now owns the mapping and the
+  badge, the Status filter and the export all read it, so the three cannot
+  disagree. Same grouping as `PayrollExportController::statusesFor()`.
+- **Totals are counted over the exported rows**, not the whole period, so the
+  file adds up to its own table. Attendance's "Days Present" is nonetheless the
+  Present KPI card's definition — any day with a punch — so the summary and the
+  card above the button agree.
+- **Training keeps Hours Claimed and Hours Credited as separate columns**, the
+  same rule as `TrainingExportController`: a rejected or pending submission
+  credits 0 to CSC PDS Section IV however many hours it declared. That is also
+  what lets one file serve both purposes now that the button honours the status
+  chips — the Hours Credited column is the PDS figure whatever the filter was
+  set to, which is why "Export to PDS" could become "Export CSV" without
+  losing the PDS.
+- Attendance drops the screen's **Total Hours** column: it is `accredited_minutes / 60`
+  on every branch, so beside Accredited Hours it was the same number twice.
+
+### Admin Reports exports
+
+The Reports page's only button was `onclick="window.print()"`, labelled
+"Export / Print". Printing the page is not an export: the rendered table carries
+percentage *bars* rather than numbers and status *chips* rather than words, and
+nothing on it says which municipality issued the file or what period it covers
+once it leaves the screen. It is now **Export CSV** (the open tab) beside a
+separate **Print**.
+
+- **`AdminReportService` was extracted so the file and the page are one
+  computation.** The seven reports used to be private methods on
+  `AdminReportsController`, which was fine while the page was their only
+  reader. An export that re-derives its own figures is an export that can
+  disagree with the cards above the button it was clicked from. Both
+  controllers now read the service; `one()` builds a single tab without paying
+  for the other six.
+- **The period is sent as query params and the report is re-run server-side**,
+  the same rule as every other export here. `resolvePeriod()` clamps
+  `year`/`month`/`semi` in one place for both surfaces.
+- **A filter that did not apply says so.** Headcount is a live snapshot and
+  Training is filtered by year, so their parameter blocks print
+  "Not applicable (live snapshot)" / "(filtered by year)" rather than a
+  pay period they did not honour — a reader has to be able to tell an
+  inapplicable filter from an unwritten one, and a Headcount file headed
+  "August 1–15" misdescribes itself.
+- **Recruitment and Performance export a stated absence, not an empty table.**
+  Neither has a backing table in this schema. A letterhead over a blank grid
+  reads as "nobody was hired this period", which is a false statement about the
+  municipality's records — so the file carries a `REPORT STATUS` block saying
+  the capability does not exist yet and why, and takes
+  `containsPersonalData: false`. This is the case the missing Deductions
+  *Transactions* endpoint avoided by not existing; here the button is on
+  screen, so a dead button is what would need explaining.
+- **Money is a plain number, hours drop trailing zeros**, matching
+  `PayrollExportController` — the column header carries "(PHP)" so a
+  spreadsheet totals the column instead of reading it as text.
+- Each file carries a totals line in the table's own columns *and* a summary
+  block, because a register is checked column-by-column against a printout and
+  a summary block cannot be read that way. The Deductions file reprints the
+  page's itemised-vs-gross-less-net reconciliation warning as a
+  `RECONCILIATION:` note, since a reader totalling that column against a
+  payslip needs to know why the two can differ.
+
+---
+
+## Forgot password
+
+`/password/forgot` is a three-step wizard — email address, six-digit code
+mailed to it, new password — and **all three steps used to be answered in the
+browser**. Step 2 compared the typed code against the literal `123456`
+compiled into `user/forgot-password.blade.php`, which anyone could read from
+View Source for any address. Step 3 showed "Password reset successfully!" and
+redirected to sign-in **without a request leaving the page**, so the password
+never changed and the user was sent to a form their old password still opened.
+There was no POST route, no mailable and no storage; `AuthController` only
+served the view. Same failure mode as the employee chathead, and worse in kind:
+a false confirmation that a credential changed.
+
+`PasswordResetController` (thin) + `PasswordResetCodeService` (every rule) now
+own it. What holds it up:
+
+- **The three steps are one rule set, not three endpoints.** The code step 1
+  mails is the code step 2 spends; the ticket step 2 mints is the *only* thing
+  step 3 accepts. Keeping them in one service is what stops a link in that
+  chain quietly going unchecked.
+- **The browser carries a ticket, never a "verified" flag.** A client-side
+  boolean is exactly what the mockup's step 3 trusted. The ticket is random,
+  stored hashed, and checked before any password is written.
+- **The screen never says whether an address is registered.**
+  `sendCode()` returns `void` on every path — unknown address, deactivated
+  account and real account are indistinguishable, because a public form that
+  answers "no such account" is an enumeration oracle aimed at the
+  municipality's staff directory. `ForgotPasswordFlowTest` asserts the two
+  replies are byte-identical.
+- **Codes are hashed at rest and spendable, not merely expiring.** Six digits
+  is a small space, so `MAX_ATTEMPTS` burns the code after five wrong guesses;
+  a correct guess clears it too, so the same digits cannot mint a second
+  ticket. Route throttles sit on top of a per-address resend cooldown — the
+  cooldown is what stops "Resend Code" being a mail-bomb aimed at one inbox
+  from a form needing no login.
+- **A failed send deletes the code it just issued** rather than leaving a live
+  credential on a row nobody can read.
+- **Inactive accounts get nothing**, because `AuthController::login()` refuses
+  them a session anyway — a recovery ending at the same refusal.
+- **A completed reset rotates `remember_token`**, so a stolen "remember me"
+  cookie dies with the old password.
+- Storage is a dedicated `password_reset_codes`, **not** Laravel's
+  `password_reset_tokens`: the framework's broker table is one signed link with
+  no attempt counter, and sharing it would collide on its `email` primary key
+  the first time anyone calls `Password::sendResetLink()`.
+- Server-side the password rule is `min:8` — matching registration and
+  Settings → Change Password, since a password this system already accepts must
+  not be one it refuses to restore. The on-screen list now separates *Required*
+  from *Recommended* rather than stating four rules and enforcing one.
+
+```bash
+php artisan test tests/Unit/PasswordResetCodeServiceTest.php \
+  tests/Feature/ForgotPasswordFlowTest.php
+```
+
+---
+
 ## Testing
 
 ```bash

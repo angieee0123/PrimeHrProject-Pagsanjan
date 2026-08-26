@@ -173,7 +173,17 @@ $pendingCount = $payrollRecords->where('status', 'Pending')->count();
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                 Filter
             </button>
-            <button type="button" class="btn-ghost">
+            {{-- Exports the Payroll Register this toolbar sits above.
+                 It carried no handler at all until now — rendered, styled,
+                 clickable, wired to nothing, the same state the Attendance
+                 Summary button was in. Every filter in this form is sent to
+                 the endpoint, which re-runs the register server-side through
+                 `PayrollRegisterService` rather than reading the table on
+                 screen — the file carries the full deduction breakdown behind
+                 each of the seven columns the register shows. --}}
+            <button type="button" class="btn-ghost" id="payrollRegisterExportBtn"
+                    data-export-url="{{ route('admin.payroll.register.export') }}"
+                    onclick="exportPayrollRegister(this)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>

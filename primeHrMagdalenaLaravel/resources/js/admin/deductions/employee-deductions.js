@@ -1,3 +1,4 @@
+import { exportWithFilters } from './exportWithFilters.js';
 import { confirmDeleteDeduction } from './deleteDeduction.js';
 
 window._deductionCurrentPage = 1;
@@ -145,8 +146,12 @@ function editEmployeeDeduction(id) {
         });
 }
 
-function exportEmployeeDeductions() {
-    window.location.href = '/admin/deductions/employee/export';
+function exportEmployeeDeductions(btn) {
+    exportWithFilters(btn, {
+        search: 'searchEmployee',
+        type:   'filterType',
+        status: 'filterStatus',
+    });
 }
 
 window.filterEmployeeDeductions = filterEmployeeDeductions;

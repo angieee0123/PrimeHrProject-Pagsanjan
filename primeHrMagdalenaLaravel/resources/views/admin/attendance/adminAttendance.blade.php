@@ -193,7 +193,14 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                 Filter
             </button>
-            <button type="button" class="btn-ghost" id="attendanceExportBtn">
+            {{-- Exports the Attendance Summary tab this toolbar sits above.
+                 It carried no handler at all until now -- rendered, styled,
+                 clickable, wired to nothing. The filters in this form are sent
+                 to the endpoint, which recomputes every matching employee
+                 rather than the page on screen. --}}
+            <button type="button" class="btn-ghost" id="attendanceExportBtn"
+                    data-export-url="{{ route('admin.attendance.summary.export') }}"
+                    onclick="exportAttendanceSummary(this)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>

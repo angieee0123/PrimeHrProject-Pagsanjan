@@ -121,13 +121,20 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
                     <option value="">All Status</option>
                     <option value="Approved">Approved</option>
                     <option value="Pending">Pending</option>
-                    <option value="Disapproved">Disapproved</option>
+                    {{-- The column stores "rejected"; only the label says
+                         "Disapproved". Filtering on the label matched no row
+                         at all, and the export would have inherited that. --}}
+                    <option value="Rejected">Disapproved</option>
                     <option value="Cancelled">Cancelled</option>
                 </select>
             </div>
         </div>
         <div class="filter-card-actions">
-            <button class="btn-ghost">
+            <button type="button" class="btn-ghost"
+                    onclick="exportLeaveTab('leave')"
+                    data-export-tab="leave"
+                    data-export-url="{{ route('admin.leave.export.requests') }}"
+                    title="Download the leave requests as a CSV file">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
@@ -189,7 +196,11 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
             @endif
         </div>
         <div class="filter-card-actions">
-            <button class="btn-ghost">
+            <button type="button" class="btn-ghost"
+                    onclick="exportLeaveTab('transactions')"
+                    data-export-tab="transactions"
+                    data-export-url="{{ route('admin.leave.export.transactions') }}"
+                    title="Download the transaction history as a CSV file">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
@@ -245,7 +256,11 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
             </div>
         </div>
         <div class="filter-card-actions">
-            <button class="btn-ghost">
+            <button type="button" class="btn-ghost"
+                    onclick="exportLeaveTab('leave-credits')"
+                    data-export-tab="leave-credits"
+                    data-export-url="{{ route('admin.leave.export.credits') }}"
+                    title="Download the leave credits as a CSV file">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
@@ -255,7 +270,11 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
     <div class="filter-group" id="benefits-filter-group" style="display: none;">
         <div class="filter-card-fields"></div>
         <div class="filter-card-actions">
-            <button class="btn-ghost">
+            <button type="button" class="btn-ghost"
+                    onclick="exportLeaveTab('benefits')"
+                    data-export-tab="benefits"
+                    data-export-url="{{ route('admin.leave.export.benefits') }}"
+                    title="Download the benefits summary as a CSV file">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
@@ -282,7 +301,11 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
             </div>
         </div>
         <div class="filter-card-actions">
-            <button class="btn-ghost">
+            <button type="button" class="btn-ghost"
+                    onclick="exportLeaveTab('types')"
+                    data-export-tab="types"
+                    data-export-url="{{ route('admin.leave.export.types') }}"
+                    title="Download the leave types as a CSV file">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>
@@ -310,7 +333,11 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
             </div>
         </div>
         <div class="filter-card-actions">
-            <button class="btn-ghost">
+            <button type="button" class="btn-ghost"
+                    onclick="exportLeaveTab('accrual')"
+                    data-export-tab="accrual"
+                    data-export-url="{{ route('admin.leave.export.accrual') }}"
+                    title="Download the CSC daily accrual rates as a CSV file">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export
             </button>

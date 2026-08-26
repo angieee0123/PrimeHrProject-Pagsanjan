@@ -15,4 +15,10 @@ class Designation extends Model implements Auditable
     {
         return $this->belongsTo(Department::class);
     }
+
+    /** Who currently holds this position — counted by the CSV export. */
+    public function employmentDetails()
+    {
+        return $this->hasMany(EmploymentDetail::class, 'designation_id');
+    }
 }

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Reset Password · PRIME HRIS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -144,11 +145,15 @@
                             </button>
                         </div>
                     </div>
+                    {{-- Required is what the server actually enforces (min:8, the
+                         same rule registration and Settings use). The rest are
+                         listed as advice rather than requirements because a
+                         screen that states a rule the system does not apply is
+                         how the two drift. --}}
                     <div class="fp-pw-hint">
-                        <strong>Password Requirements:</strong><br>
-                        • At least 8 characters long<br>
-                        • Mix of uppercase and lowercase letters<br>
-                        • Include numbers and special characters
+                        <strong>Required:</strong> at least 8 characters<br>
+                        <strong>Recommended:</strong> mix of uppercase and lowercase letters,
+                        numbers and special characters
                     </div>
                     <div id="fp-error-3" class="auth-error" style="display:none"></div>
                     <div id="fp-success-3" class="fp-success" style="display:none"></div>
@@ -212,32 +217,116 @@ function showSuccess(step, msg) {
     setTimeout(() => { el.style.display = 'none'; }, 2000);
 }
 
-function sendCode(e) {
+/*
+ * Every step below talks to the server. None of them may decide anything.
+ *
+ * All three used to be answered here in the page, against a code compiled into
+ * this file, and the last one announced success without a request going
+ * anywhere — so the password never changed. Same rule as the chatbot widgets:
+ * this page must never answer from a local string, because a false "Password
+ * reset successfully!" is worse than an error message. See
+ * PasswordResetController and PasswordResetCodeService for the real rules.
+ */
+
+// What survives between steps. The ticket is minted server-side once the code
+// is accepted and is the only thing the reset endpoint takes; there is
+// deliberately no client-side "verified" flag to flip.
+const fpState = { email: '', ticket: '' };
+
+const CSRF = document.querySelector('meta[name="csrf-token"]').content;
+
+async function postJson(url, body) {
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': CSRF,
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify(body),
+    });
+
+    let data = {};
+    try { data = await res.json(); } catch (_) { /* non-JSON error page */ }
+
+    if (res.status === 429) {
+        return { ok: false, message: 'Too many attempts. Please wait a minute and try again.' };
+    }
+    if (res.status === 422 && data.errors) {
+        return { ok: false, message: Object.values(data.errors)[0][0] };
+    }
+    if (!res.ok && !data.message) {
+        return { ok: false, message: 'Something went wrong. Please try again.' };
+    }
+    return { ok: res.ok && data.ok !== false, message: data.message, ticket: data.ticket };
+}
+
+// A submit that is in flight must not be submittable again - a second "Send
+// Code" would spend another SMTP send, and a second "Reset" races the first.
+function busy(step, on, label) {
+    const btn = document.querySelector('#step-' + step + ' .auth-submit');
+    if (!btn) return;
+    if (on) {
+        btn.dataset.label = btn.innerHTML;
+        btn.disabled = true;
+        btn.textContent = label;
+    } else {
+        btn.disabled = false;
+        if (btn.dataset.label) btn.innerHTML = btn.dataset.label;
+    }
+}
+
+async function sendCode(e) {
     e.preventDefault();
     hideError(1);
     const email = document.getElementById('fp-email').value.trim();
     if (!email) { showError(1, 'Please enter your email address.'); return; }
-    showSuccess(1, 'Verification code sent to your email!');
+
+    busy(1, true, 'Sending…');
+    const res = await postJson('{{ route('password.forgot.send') }}', { email });
+    busy(1, false);
+
+    if (!res.ok) { showError(1, res.message); return; }
+
+    // The reply is the same whether or not that address has an account, so this
+    // screen cannot be used to find out which staff addresses are registered.
+    fpState.email = email;
+    showSuccess(1, res.message);
     document.getElementById('fp-email-display').innerHTML =
         `<svg class="fp-email-info-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         <div><p class="fp-email-info-label">Code sent to:</p><p class="fp-email-info-value">${email}</p></div>`;
     setTimeout(() => goStep(2), 1500);
 }
 
-function verifyCode(e) {
+async function verifyCode(e) {
     e.preventDefault();
     hideError(2);
     const code = document.getElementById('fp-code').value.trim();
     if (!code) { showError(2, 'Please enter the verification code.'); return; }
-    if (code !== '123456') { showError(2, 'Invalid verification code. Please try again.'); return; }
+
+    busy(2, true, 'Verifying…');
+    const res = await postJson('{{ route('password.forgot.verify') }}', { email: fpState.email, code });
+    busy(2, false);
+
+    if (!res.ok) { showError(2, res.message); return; }
+
+    fpState.ticket = res.ticket;
     goStep(3);
 }
 
-function resendCode() {
-    showSuccess(2, 'Verification code resent to your email!');
+async function resendCode() {
+    hideError(2);
+    const res = await postJson('{{ route('password.forgot.send') }}', { email: fpState.email });
+    if (!res.ok) { showError(2, res.message); return; }
+
+    // The server's wording, not "Code resent!" — a request inside the
+    // per-address cooldown is deliberately a no-op, and announcing a send that
+    // did not happen sets someone watching an inbox for a mail never sent.
+    showSuccess(2, res.message);
 }
 
-function resetPassword(e) {
+async function resetPassword(e) {
     e.preventDefault();
     hideError(3);
     const pw1 = document.getElementById('fp-pw1').value;
@@ -245,7 +334,20 @@ function resetPassword(e) {
     if (!pw1 || !pw2)    { showError(3, 'Please fill in all password fields.'); return; }
     if (pw1.length < 8)  { showError(3, 'Password must be at least 8 characters long.'); return; }
     if (pw1 !== pw2)     { showError(3, 'Passwords do not match.'); return; }
-    showSuccess(3, 'Password reset successfully!');
+
+    busy(3, true, 'Saving…');
+    const res = await postJson('{{ route('password.forgot.reset') }}', {
+        email: fpState.email,
+        ticket: fpState.ticket,
+        password: pw1,
+        password_confirmation: pw2,
+    });
+    busy(3, false);
+
+    // Only claim the password changed once the server says it wrote it.
+    if (!res.ok) { showError(3, res.message); return; }
+
+    showSuccess(3, res.message);
     setTimeout(() => { window.location.href = '{{ route("login") }}'; }, 2000);
 }
 

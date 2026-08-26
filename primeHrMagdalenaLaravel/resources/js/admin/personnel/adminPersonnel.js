@@ -109,27 +109,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (flash.activeTab === 'schedules') {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-        const schedulesTabBtn = document.querySelector('.tab-btn[data-tab="schedules"]');
-        const schedulesTabContent = document.getElementById('schedules');
-
-        if (schedulesTabBtn && schedulesTabContent) {
-            schedulesTabBtn.classList.add('active');
-            schedulesTabContent.classList.add('active');
-        }
+        showPersonnelTab('schedules');
     }
 });
+
+/**
+ * Show one tab of the Personnel page.
+ *
+ * The filter toolbar is hidden on Work Schedules: its fields filter employee
+ * records, and its Export button downloads the masterlist. Left on screen it
+ * sat next to the Work Schedules Export button -- two buttons, two different
+ * files, nothing on either saying which.
+ */
+function showPersonnelTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+    const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+    const content = document.getElementById(tab);
+    if (!btn || !content) return;
+
+    btn.classList.add('active');
+    content.classList.add('active');
+
+    const toolbar = document.getElementById('personnelFilterToolbar');
+    if (toolbar) toolbar.style.display = tab === 'employees' ? '' : 'none';
+}
 
 // Tab switching functionality
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', function () {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            this.classList.add('active');
-            document.getElementById(this.dataset.tab).classList.add('active');
+            showPersonnelTab(this.dataset.tab);
         });
     });
 });
@@ -140,6 +151,12 @@ let rowsPerPage = 10;
 let sortColumn = -1;
 let sortAscending = true;
 let allRows = [];
+
+// Column index -> the sort key PersonnelExportController understands, so the
+// CSV comes back in the order the table is being read in. Indexes match the
+// <th> order in employee-records-tab.blade.php; the Actions column is not
+// sortable and has no key.
+const SORT_KEYS = ['name', 'position', 'department', 'type', 'appointed', 'status'];
 
 document.addEventListener('DOMContentLoaded', function() {
     const tbody = document.getElementById('personnelTableBody');
@@ -201,8 +218,11 @@ function sortTable(columnIndex) {
         }
     });
 
-    currentPage = 1;
-    displayPage(currentPage);
+    // Re-applies the filters rather than paging the whole roster: sorting used
+    // to fall through to displayPage(), which slices allRows and so put the
+    // hidden rows back into the page's slice -- a filtered table came back
+    // showing four of its ten rows and a footer counting all fourteen.
+    refreshPersonnelRows();
 }
 
 // The empty state uses the same shell the Blade partial renders when there are
@@ -302,45 +322,81 @@ function changeRowsPerPage(value) {
     displayPage(currentPage);
 }
 
-function applyFilters() {
-    const departmentFilter = document.getElementById('departmentFilter').value;
-    const statusFilter = document.getElementById('statusFilter').value;
-    const hiredFrom = document.getElementById('hiredDateFrom')?.value || '';
-    const hiredTo = document.getElementById('hiredDateTo')?.value || '';
+/**
+ * Everything the Personnel page is currently filtered by, read off the
+ * controls themselves.
+ *
+ * One reader for one set of criteria: the toolbar, the topbar search box and
+ * the Export button all describe the same view, and this is what keeps the
+ * downloaded file from being built from a different set of them than the
+ * table on screen.
+ */
+function personnelFilterState() {
+    return {
+        department: document.getElementById('departmentFilter')?.value || '',
+        status: document.getElementById('statusFilter')?.value || '',
+        hiredFrom: document.getElementById('hiredDateFrom')?.value || '',
+        hiredTo: document.getElementById('hiredDateTo')?.value || '',
+        search: (document.getElementById('personnelSearchInput')?.value || '').trim(),
+    };
+}
 
-    allRows.forEach(row => {
-        let showRow = true;
+/**
+ * The one predicate that decides whether a row is on screen.
+ *
+ * The toolbar filters and the search box used to each own a pass over the
+ * rows, and each pass wrote `row.style.display` from scratch -- so whichever
+ * ran last silently undid the other, and typing in the search box brought back
+ * rows the department filter had just hidden. The export then sent both sets
+ * of criteria to the server and got a narrower file than the screen showed.
+ * They compose here instead, which is both what the toolbar reads as and what
+ * PersonnelExportController applies.
+ *
+ * Department is compared exactly, not as a substring: the select's value is
+ * the department's name verbatim, and `includes()` let "Accounting" match
+ * "Accounting and Budget Office".
+ */
+function matchesPersonnelFilters(row, state) {
+    if (state.department) {
+        const deptText = row.querySelector('.dept-tag')?.textContent.trim() || '';
+        if (deptText !== state.department) return false;
+    }
 
-        if (departmentFilter) {
-            const deptTag = row.querySelector('.dept-tag');
-            const deptText = deptTag ? deptTag.textContent.trim() : '';
-            if (!deptText.includes(departmentFilter)) {
-                showRow = false;
-            }
-        }
+    if (state.status) {
+        const statusText = row.querySelector('.badge-status')?.textContent.trim() || '';
+        if (statusText !== state.status) return false;
+    }
 
-        if (statusFilter) {
-            const statusBadge = row.querySelector('.badge-status');
-            const statusText = statusBadge ? statusBadge.textContent.trim() : '';
-            if (statusText !== statusFilter) {
-                showRow = false;
-            }
-        }
+    // A row with no appointment date on file cannot satisfy a date window.
+    if (state.hiredFrom && (!row.dataset.hired || row.dataset.hired < state.hiredFrom)) return false;
+    if (state.hiredTo && (!row.dataset.hired || row.dataset.hired > state.hiredTo)) return false;
 
-        if (hiredFrom && (!row.dataset.hired || row.dataset.hired < hiredFrom)) {
-            showRow = false;
-        }
+    if (state.search) {
+        const term = state.search.toLowerCase();
+        const name = row.querySelector('.emp-name')?.textContent.toLowerCase() || '';
+        const id = row.querySelector('.emp-id')?.textContent.toLowerCase() || '';
+        const position = row.querySelector('.position-cell')?.textContent.toLowerCase() || '';
+        if (!name.includes(term) && !id.includes(term) && !position.includes(term)) return false;
+    }
 
-        if (hiredTo && (!row.dataset.hired || row.dataset.hired > hiredTo)) {
-            showRow = false;
-        }
+    return true;
+}
 
-        row.style.display = showRow ? '' : 'none';
+/** Re-run the predicate over every row and repaint the first page. */
+function refreshPersonnelRows() {
+    const state = personnelFilterState();
+    const rows = window.allRows || allRows;
+
+    rows.forEach(row => {
+        row.style.display = matchesPersonnelFilters(row, state) ? '' : 'none';
     });
 
-    const visibleRows = allRows.filter(row => row.style.display !== 'none');
     currentPage = 1;
-    displayFilteredPage(visibleRows);
+    displayFilteredPage(rows.filter(row => row.style.display !== 'none'));
+}
+
+function applyFilters() {
+    refreshPersonnelRows();
 }
 
 function displayFilteredPage(visibleRows) {
@@ -406,65 +462,73 @@ function updateFilteredPaginationButtons(visibleRows) {
     }
 }
 
-function searchPersonnel(query) {
-    const searchTerm = query.toLowerCase().trim();
-    const rows = window.allRows || allRows;
-
-    rows.forEach(row => {
-        const name = row.querySelector('.emp-name')?.textContent.toLowerCase() || '';
-        const id = row.querySelector('.emp-id')?.textContent.toLowerCase() || '';
-        const position = row.querySelector('.position-cell')?.textContent.toLowerCase() || '';
-        const matches = !searchTerm || name.includes(searchTerm) || id.includes(searchTerm) || position.includes(searchTerm);
-        row.style.display = matches ? '' : 'none';
-    });
-
-    const visibleRows = rows.filter(row => row.style.display !== 'none');
-    currentPage = 1;
-    displayFilteredPage(visibleRows);
+// The search box is one of the criteria in personnelFilterState(), which is
+// read fresh on every pass -- so searching narrows what the toolbar left on
+// screen rather than replacing it.
+function searchPersonnel() {
+    refreshPersonnelRows();
 }
 
-function exportTableData() {
+/**
+ * Export the roster as CSV.
+ *
+ * This used to build the file in the browser by reading the rendered table,
+ * which capped it at the seven columns the table shows and produced a bare
+ * grid with no title, no municipality and no record of which filters made it.
+ * The file is now built by PersonnelExportController, which reads the records
+ * themselves; this function's job is only to hand it the toolbar's filters.
+ */
+function exportTableData(btn) {
     try {
-        if (allRows.length === 0) {
-            document.getElementById('exportErrorMessage').textContent = 'No employee records available to export.';
+        // The button is passed in rather than looked up: the Work Schedules tab
+        // carries its own [data-export-url], and a bare querySelector would
+        // send the roster's filters to whichever of the two the DOM happens to
+        // list first.
+        const source = btn || document.querySelector('#personnelFilterToolbar [data-export-url]');
+        const exportUrl = source?.dataset.exportUrl;
+
+        if (!exportUrl) {
+            throw new Error('Export endpoint is unavailable');
+        }
+
+        const visibleRows = (window.allRows || allRows).filter(row => row.style.display !== 'none');
+
+        if (visibleRows.length === 0) {
+            document.getElementById('exportErrorMessage').textContent =
+                'No employee records match the current filters, so there is nothing to export.';
             document.getElementById('exportErrorModal').style.display = 'flex';
             return;
         }
 
-        const data = [];
-        data.push(['Employee Name', 'Employee ID', 'Position', 'Department', 'Type', 'Date Hired', 'Status']);
+        // The same state the rows on screen were filtered by, so the file the
+        // server builds is the view that is being looked at. Only a criterion
+        // that is actually set is sent, so the CSV's parameter block reads
+        // "All Departments" rather than an empty cell.
+        const state = personnelFilterState();
+        const params = new URLSearchParams();
 
-        allRows.forEach(row => {
-            const empName = row.querySelector('.emp-name')?.textContent.trim() || '';
-            const empId = row.querySelector('.emp-id')?.textContent.trim() || '';
-            const position = row.querySelector('.position-cell')?.textContent.trim() || '';
-            const department = row.querySelector('.dept-tag')?.textContent.trim() || '';
-            const type = row.querySelector('.badge-emptype')?.textContent.trim() || '';
-            const dateHired = row.cells[4]?.textContent.trim() || '';
-            const status = row.querySelector('.badge-status')?.textContent.trim() || '';
+        if (state.department) params.set('department', state.department);
+        if (state.status) params.set('status', state.status);
+        if (state.hiredFrom) params.set('hired_from', state.hiredFrom);
+        if (state.hiredTo) params.set('hired_to', state.hiredTo);
+        if (state.search) params.set('search', state.search);
 
-            data.push([empName, empId, position, department, type, dateHired, status]);
-        });
+        // The column the table is sorted on, so the file lists the records in
+        // the order they are being read in.
+        const sortKey = SORT_KEYS[sortColumn];
+        if (sortKey) {
+            params.set('sort', sortKey);
+            params.set('dir', sortAscending ? 'asc' : 'desc');
+        }
 
-        const csv = data.map(row =>
-            row.map(cell => `"${cell}"`).join(',')
-        ).join('\n');
+        const query = params.toString();
 
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
+        // The endpoint answers with a Content-Disposition attachment, so this
+        // downloads the file without the page navigating away.
+        window.location.href = query ? `${exportUrl}?${query}` : exportUrl;
 
-        const timestamp = new Date().toISOString().slice(0, 10);
-        const filename = `Employee_Records_${timestamp}.csv`;
-        link.setAttribute('href', url);
-        link.setAttribute('download', filename);
-        link.style.visibility = 'hidden';
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        document.getElementById('exportSuccessMessage').textContent = `Successfully exported ${allRows.length} employee records to ${filename}`;
+        document.getElementById('exportSuccessMessage').textContent =
+            `Exporting ${visibleRows.length} employee record${visibleRows.length === 1 ? '' : 's'}. The CSV will download shortly.`;
         document.getElementById('exportSuccessModal').style.display = 'flex';
 
     } catch (error) {
@@ -1166,8 +1230,51 @@ function renderSchedulePagination(totalPages) {
 
 document.addEventListener('DOMContentLoaded', renderScheduleTable);
 
+/**
+ * Export the Work Schedules tab.
+ *
+ * A different file from the Employee Records export, not the same one with
+ * columns hidden: it is built by PersonnelExportController::schedules() and
+ * carries the shift slots, the schedule status and the date that status turns
+ * over. This function's only job is to hand it the tab's department filter --
+ * the toolbar above belongs to the Employee Records tab and does not apply
+ * here.
+ */
 function exportSchedules(btn) {
-    window.location.href = btn.dataset.exportUrl;
+    try {
+        const exportUrl = btn?.dataset.exportUrl;
+
+        if (!exportUrl) {
+            throw new Error('Export endpoint is unavailable');
+        }
+
+        const rows = schedVisibleRows();
+
+        if (rows.length === 0) {
+            document.getElementById('exportErrorMessage').textContent =
+                'No employees match the current department filter, so there is nothing to export.';
+            document.getElementById('exportErrorModal').style.display = 'flex';
+            return;
+        }
+
+        // Only a filter that is actually set is sent, so the CSV's parameter
+        // block reads "All Departments" rather than an empty cell.
+        const params = new URLSearchParams();
+        const department = document.getElementById('schedDepartmentFilter')?.value || '';
+        if (department) params.set('department', department);
+
+        const query = params.toString();
+        window.location.href = query ? `${exportUrl}?${query}` : exportUrl;
+
+        document.getElementById('exportSuccessMessage').textContent =
+            `Exporting ${rows.length} work schedule${rows.length === 1 ? '' : 's'}. The CSV will download shortly.`;
+        document.getElementById('exportSuccessModal').style.display = 'flex';
+    } catch (error) {
+        console.error('Schedule export error:', error);
+        document.getElementById('exportErrorMessage').textContent =
+            `An error occurred while exporting: ${error.message || 'Unknown error'}. Please try again.`;
+        document.getElementById('exportErrorModal').style.display = 'flex';
+    }
 }
 
 function openBulkScheduleModal() {

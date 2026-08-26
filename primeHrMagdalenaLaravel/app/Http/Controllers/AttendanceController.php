@@ -9,9 +9,11 @@ use App\Models\AccreditedHoursLog;
 use App\Models\DailySalaryComputation;
 use App\Models\PassSlip;
 use App\Services\AttendanceComputationService;
+use App\Services\CsvReportWriter;
 use App\Services\LateDeductionService;
 use App\Services\UndertimeDeductionService;
 use App\Services\CscTimeConversionService;
+use App\Services\NotificationService;
 use App\Services\PassSlipComplianceService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -35,7 +37,7 @@ class AttendanceController extends Controller
         $endDate = Carbon::parse($endDate)->endOfDay();
 
         // Optimized: Use pagination from the start
-        $employeesQuery = Employee::with(['employmentDetail.departmentRelation', 'schedule'])
+        $employeesQuery = Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'schedule'])
             ->orderBy('first_name');
 
         if ($department && $department !== 'All Departments') {
@@ -74,7 +76,7 @@ class AttendanceController extends Controller
             ->values();
 
         // Build the flat, day-by-day log for the "Detailed Time Record" tab
-        $detailedEmployeesQuery = Employee::with(['employmentDetail.departmentRelation', 'schedule'])
+        $detailedEmployeesQuery = Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'schedule'])
             ->orderBy('first_name');
 
         if ($department && $department !== 'All Departments') {
@@ -280,7 +282,12 @@ class AttendanceController extends Controller
             'id' => $employee->employee_id,
             'employee_id' => $employee->id,
             'name' => trim($employee->first_name . ' ' . ($employee->middle_name ? substr($employee->middle_name, 0, 1) . '. ' : '') . $employee->last_name),
-            'position' => $employee->employmentDetail->position ?? 'N/A',
+            // `employment_details` has no `position` column -- the title lives on
+            // the designation, reached through designationRelation(). Reading
+            // `->position` returned null on every employee, so the DTR quick
+            // view, its PDF and this record's every consumer printed "N/A"
+            // for everybody.
+            'position' => $employee->employmentDetail->designationRelation->title ?? 'N/A',
             'dept' => $deptName,
             'dept_code' => $deptCode,
             'present' => $present,
@@ -395,6 +402,7 @@ class AttendanceController extends Controller
                     'employee_name' => $fullName,
                     'employee_id' => $employee->id,
                     'employee_code' => $employee->employee_id,
+                    'department' => $employee->employmentDetail->departmentRelation->name ?? null,
                     'photo' => $employee->photo,
                     'attendance_id' => $attendance->id ?? null,
                     'am_in' => $attendance && $attendance->am_in ? Carbon::parse($attendance->am_in)->format('H:i') : null,
@@ -540,6 +548,374 @@ class AttendanceController extends Controller
         ]);
     }
 
+    /**
+     * "Export All" on the Detailed Time Record tab.
+     *
+     * Exports every employee-day the tab's own filters select -- not just the
+     * page on screen -- by running buildDetailedRecords() with an unbounded
+     * page size, so the CSV and the timeline can never disagree about what a
+     * given day held.
+     */
+    public function exportDetailedRecords(Request $request)
+    {
+        $startDate = Carbon::parse($request->get('start_date', now()->startOfMonth()->format('Y-m-d')))->startOfDay();
+        $endDate = Carbon::parse($request->get('end_date', now()->endOfMonth()->format('Y-m-d')))->endOfDay();
+        $department = $request->get('department');
+        $employeeNameFilter = $request->get('employee_name');
+
+        $employeesQuery = Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'schedule'])
+            ->orderBy('first_name');
+
+        if ($department && $department !== 'All Departments') {
+            $employeesQuery->whereHas('employmentDetail.departmentRelation', function ($q) use ($department) {
+                $q->where('name', $department);
+            });
+        }
+
+        $employees = $employeesQuery->get();
+
+        if ($employeeNameFilter) {
+            $employees = $employees->filter(function ($employee) use ($employeeNameFilter) {
+                $fullName = trim($employee->first_name . ' ' . ($employee->middle_name ? $employee->middle_name . ' ' : '') . $employee->last_name);
+                return $fullName === $employeeNameFilter;
+            })->values();
+        }
+
+        // buildDetailedRecords paginates by distinct date, so an unbounded page
+        // size returns the whole filtered range as a single page.
+        $records = $this->buildDetailedRecords($employees, $startDate, $endDate, 1, PHP_INT_MAX)['records'];
+
+        $dateRange = $startDate->format('M_d_Y') . '_to_' . $endDate->format('M_d_Y');
+        $fileName = "Detailed_Time_Record_{$dateRange}.csv";
+
+        // The letterhead used to be written here by hand, with the
+        // municipality's name as a literal -- so renaming the office under
+        // Admin > Website Content renamed it everywhere except on the files
+        // leaving the building. CsvReportWriter reads it.
+        return CsvReportWriter::download($fileName, function (CsvReportWriter $csv) use (
+            $records, $startDate, $endDate, $department, $employeeNameFilter
+        ) {
+            $csv->letterhead(
+                'Detailed Time Record',
+                'Human Resource Management Office · PRIME HRIS',
+                $startDate->format('F d, Y') . ' to ' . $endDate->format('F d, Y')
+            );
+
+            $csv->parameters([
+                'Period Covered:'      => $startDate->format('F d, Y') . ' to ' . $endDate->format('F d, Y'),
+                'Department / Office:' => $department ?: 'All Departments',
+                'Employee:'            => $employeeNameFilter ?: 'All Employees',
+            ], count($records));
+
+            $csv->columns([
+                'Date', 'Day', 'Employee', 'Employee ID', 'Department / Office',
+                'AM In', 'AM Out', 'PM In', 'PM Out', 'OT In', 'OT Out',
+                'Late (min)', 'Undertime (min)', 'Total Hours', 'Accredited (min)',
+                'Status', 'Remarks',
+            ]);
+
+            $statusCounts = [];
+            $lateMinutes = 0;
+            $undertimeMinutes = 0;
+
+            foreach ($records as $record) {
+                $status = $this->detailedRecordStatus($record);
+                $statusCounts[$status] = ($statusCounts[$status] ?? 0) + 1;
+                $lateMinutes += (int) ($record['late_minutes'] ?: 0);
+                $undertimeMinutes += (int) ($record['undertime_minutes'] ?: 0);
+
+                $csv->row([
+                    $record['date'],
+                    $record['day'],
+                    $record['employee_name'],
+                    $record['employee_code'],
+                    $record['department'] ?? 'N/A',
+                    $record['am_in'] ?? '',
+                    $record['am_out'] ?? '',
+                    $record['pm_in'] ?? '',
+                    $record['pm_out'] ?? '',
+                    $record['ot_in'] ?? '',
+                    $record['ot_out'] ?? '',
+                    $record['late_minutes'] ?: '',
+                    $record['undertime_minutes'] ?: '',
+                    $record['total_hours'] ?: '',
+                    $record['accredited_hours'] ?: '',
+                    $status,
+                    $this->detailedRecordRemarks($record),
+                ]);
+            }
+
+            if ($records === []) {
+                $csv->emptyNotice('No time records were logged in this period for the filters above.');
+            }
+
+            $csv->summary('Summary', [
+                'Day Records:'           => count($records),
+                'Total Late (min):'      => $lateMinutes,
+                'Total Late:'            => CscTimeConversionService::formatMinutes($lateMinutes),
+                'Total Undertime (min):' => $undertimeMinutes,
+                'Total Undertime:'       => CscTimeConversionService::formatMinutes($undertimeMinutes),
+            ]);
+
+            arsort($statusCounts);
+            $csv->summary('Breakdown by Day Status', array_combine(
+                array_map(fn ($label) => $label . ':', array_keys($statusCounts)),
+                array_values($statusCounts)
+            ));
+
+            $csv->notes([
+                'One row per employee per day in the period, including days with no punches.',
+                'Accredited minutes are what payroll credits for the day; a blank means the day has not been computed yet.',
+                'Late is counted past a ' . AttendanceComputationService::GRACE_MINUTES . '-minute grace period on the schedule in force for that day.',
+            ]);
+        });
+    }
+
+    /**
+     * "Export" on the Attendance page toolbar -> the Attendance Summary tab.
+     *
+     * The button existed on the toolbar with no handler attached to it at all:
+     * rendered, styled, clickable, and wired to nothing. The tab it sits above
+     * is the per-employee roll-up of the period, so that is what it exports --
+     * the Detailed Time Record tab has its own Export All for the day-by-day
+     * log, and Attendance Config holds settings, not records.
+     *
+     * The figures are recomputed here through `calculateEmployeeAttendance()`,
+     * the same method the screen is built from, rather than read off the
+     * rendered table: the page paginates, and an export of "the attendance
+     * summary" covering only the ten employees on page one is worse than no
+     * export at all.
+     */
+    public function exportSummary(Request $request)
+    {
+        $startDate = Carbon::parse($request->get('start_date', now()->startOfMonth()->format('Y-m-d')))->startOfDay();
+        $endDate = Carbon::parse($request->get('end_date', now()->endOfMonth()->format('Y-m-d')))->endOfDay();
+        $department = $request->get('department');
+        $status = $request->get('status');
+        $search = trim((string) $request->get('search', ''));
+
+        try {
+            $employeesQuery = Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'schedule'])
+                ->orderBy('first_name');
+
+            if ($department && $department !== 'All Departments') {
+                $employeesQuery->whereHas('employmentDetail.departmentRelation', function ($q) use ($department) {
+                    $q->where('name', $department);
+                });
+            }
+
+            $records = $employeesQuery->get()
+                ->map(fn ($employee) => $this->calculateEmployeeAttendance($employee, $startDate, $endDate));
+
+            if ($status && $status !== 'All Status') {
+                $records = $records->where('status', $status);
+            }
+
+            // The topbar search box, applied to the same three fields it
+            // matches on screen -- employee name, employee ID, department --
+            // so the file and the table agree on who the search left visible.
+            if ($search !== '') {
+                $needle = mb_strtolower($search);
+
+                $records = $records->filter(function ($record) use ($needle) {
+                    foreach (['name', 'id', 'dept'] as $field) {
+                        if (str_contains(mb_strtolower((string) $record[$field]), $needle)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                });
+            }
+
+            // Ordered the way the page orders it (first name, the employee
+            // query's own sort), so a reader can follow the file down the
+            // screen row for row.
+            $records = $records->values();
+
+            $workingDays = count($this->getWorkingDays($startDate, $endDate));
+
+            $dateRange = $startDate->format('M_d_Y') . '_to_' . $endDate->format('M_d_Y');
+            $fileName = "Attendance_Summary_{$dateRange}.csv";
+
+            return CsvReportWriter::download($fileName, function (CsvReportWriter $csv) use (
+                $records, $startDate, $endDate, $department, $status, $search, $workingDays
+            ) {
+                $csv->letterhead(
+                    'Attendance Summary',
+                    'Human Resource Management Office · PRIME HRIS',
+                    $startDate->format('F d, Y') . ' to ' . $endDate->format('F d, Y')
+                );
+
+                $csv->parameters([
+                    'Period Covered:'         => $startDate->format('F d, Y') . ' to ' . $endDate->format('F d, Y'),
+                    'Working Days in Period:' => $workingDays,
+                    'Department / Office:'    => $department ?: 'All Departments',
+                    'Record Status:'          => $status ?: 'All Status',
+                    // Printed like every other filter, so a short file is
+                    // self-evidently a searched one rather than a department
+                    // that has lost most of its staff.
+                    'Search Filter:'          => $search !== '' ? $search : 'None (all employees)',
+                ], $records->count());
+
+                // Units on the headings: "Late" and "Half Day" are counts of
+                // occurrences while the columns beside them are days, and a
+                // reader totalling a column has to know which they have.
+                $csv->columns([
+                    'No.', 'Employee ID', 'Employee Name', 'Position', 'Department / Office',
+                    'Present (Days)', 'On Leave (Days)', 'Absent (Days)', 'Late (Count)',
+                    'Half Day (Count)', 'Overtime (Hours)', 'Attendance Rate (%)', 'Record Status',
+                ]);
+
+                foreach ($records as $index => $record) {
+                    $csv->row([
+                        $index + 1,
+                        $record['id'],
+                        $record['name'],
+                        $record['position'],
+                        $record['dept'],
+                        $record['present'],
+                        $record['on_leave'],
+                        $record['absent'],
+                        $record['late'],
+                        $record['halfday'],
+                        $this->attendanceHours($record['overtime']),
+                        number_format((float) $record['rate'], 2, '.', ''),
+                        $record['status'],
+                    ]);
+                }
+
+                $rates = $records->pluck('rate')->map(fn ($rate) => (float) $rate);
+
+                if ($records->isEmpty()) {
+                    $csv->emptyNotice('No employees matched the filters above.');
+                } else {
+                    // A totals line in the table's own columns as well as in
+                    // the summary block below: a register is checked column
+                    // by column against a printout, and a summary block
+                    // cannot be read that way.
+                    $csv->row([
+                        '', '', 'TOTAL (' . $records->count() . ' ' . str('employee')->plural($records->count()) . ')', '', '',
+                        $records->sum('present'),
+                        $records->sum('on_leave'),
+                        $records->sum('absent'),
+                        $records->sum('late'),
+                        $records->sum('halfday'),
+                        $this->attendanceHours($records->sum('overtime')),
+                        number_format($rates->avg(), 2, '.', ''),
+                        '',
+                    ]);
+                }
+
+                $csv->summary('Summary', [
+                    'Employees Covered:'       => $records->count(),
+                    'Working Days in Period:'  => $workingDays,
+                    'Total Present Days:'      => $records->sum('present'),
+                    'Total Leave Days:'        => $records->sum('on_leave'),
+                    'Total Absences:'          => $records->sum('absent'),
+                    'Total Late Arrivals:'     => $records->sum('late'),
+                    'Total Half Days:'         => $records->sum('halfday'),
+                    'Total Overtime (hrs):'    => $this->attendanceHours($records->sum('overtime')),
+                    'Complete Records:'        => $records->where('status', 'Complete')->count(),
+                    'Incomplete Records:'      => $records->where('status', 'Incomplete')->count(),
+                    'Average Attendance Rate:' => $rates->isNotEmpty()
+                        ? number_format($rates->avg(), 2) . '%'
+                        : '0.00%',
+                ]);
+
+                // Absences and lates by office: the two figures this report is
+                // opened to act on.
+                $csv->summary('Absences per Department / Office',
+                    $this->attendanceTotalsByDepartment($records, 'absent'));
+
+                $csv->summary('Late Arrivals per Department / Office',
+                    $this->attendanceTotalsByDepartment($records, 'late'));
+
+                $csv->notes([
+                    'Attendance Rate is present days over present + absent + half days, for this period only.',
+                    'Late is counted past a ' . AttendanceComputationService::GRACE_MINUTES . '-minute grace period on the schedule in force for that day.',
+                    'A record reads Complete when the employee has no absences and at most two late arrivals in the period.',
+                ]);
+            });
+        } catch (\Throwable $e) {
+            report($e);
+
+            return redirect()->route('admin.attendance')->with('error', 'Export failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Hours as a spreadsheet will total them: a plain number, trailing zeros
+     * dropped, matching `AdminReportsExportController::hours()`.
+     *
+     * "8" rather than "8.00" and "7.5" rather than "7.50" -- but never "8 hrs",
+     * because a unit inside the cell makes Excel read the whole column as text
+     * and the SUM at the bottom of it comes back 0.
+     */
+    private function attendanceHours($total): string
+    {
+        return rtrim(rtrim(number_format((float) $total, 2, '.', ''), '0'), '.') ?: '0';
+    }
+
+    /**
+     * office => total of one summary column, largest first, zeros dropped.
+     *
+     * An office with nothing to report is left out rather than listed as 0:
+     * these two blocks exist to name the offices that need attention, and a
+     * tail of zeros is what stops them being read.
+     *
+     * @return array<string,int>
+     */
+    private function attendanceTotalsByDepartment($records, string $key): array
+    {
+        return $records->groupBy(fn ($record) => $record['dept'] ?: 'Unassigned')
+            ->map(fn ($rows) => $rows->sum($key))
+            ->filter(fn ($total) => $total > 0)
+            ->sortDesc()
+            ->mapWithKeys(fn ($total, $label) => [$label . ':' => $total])
+            ->all();
+    }
+
+    /**
+     * The same classification the Detailed Time Record timeline paints on an
+     * avatar, so an exported row reads as the day it is shown as on screen.
+     */
+    private function detailedRecordStatus(array $record): string
+    {
+        $isWeekend = in_array($record['day'], ['Saturday', 'Sunday'], true);
+        $attended = $record['am_in'] || $record['am_out'] || $record['pm_in'] || $record['pm_out'];
+        $needsReview = !$record['is_on_pass_slip'] && (
+            ($record['am_in'] && !$record['am_out']) || ($record['pm_in'] && !$record['pm_out'])
+            || (!$record['am_in'] && $record['am_out']) || (!$record['pm_in'] && $record['pm_out'])
+        );
+
+        return match (true) {
+            $record['is_on_leave'] => 'On Leave',
+            $record['is_absent'] => 'Absent',
+            $needsReview => 'Needs Review',
+            $record['is_on_pass_slip'] => 'Pass Slip',
+            $isWeekend && !$attended => 'Weekend',
+            $record['late_minutes'] > 0 => 'Late',
+            default => 'Present',
+        };
+    }
+
+    private function detailedRecordRemarks(array $record): string
+    {
+        $notes = [];
+
+        if ($record['is_on_leave']) {
+            $notes[] = $record['leave_info']['leave_type'] ?? 'Leave';
+        }
+
+        foreach ($record['pass_slip_info'] ?? [] as $slip) {
+            $label = $slip['type'] === 'official_activity' ? 'Official Activity' : 'Personal Reason';
+            $notes[] = 'Pass Slip: ' . $label . ($slip['destination'] ? ' - ' . $slip['destination'] : '');
+        }
+
+        return implode(' | ', $notes);
+    }
+
     public function exportDetailedDTR(Request $request, $employeeId)
     {
         $startDate = $request->get('start_date');
@@ -553,7 +929,7 @@ class AttendanceController extends Controller
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
 
-        $employee = Employee::with(['employmentDetail.departmentRelation', 'schedule'])->findOrFail($employeeId);
+        $employee = Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'schedule'])->findOrFail($employeeId);
 
         // Fetch attendance records for the date range
         $attendances = Attendance::where('employee_id', $employeeId)
@@ -569,34 +945,45 @@ class AttendanceController extends Controller
         $dateRange = $startDate->format('M_d_Y') . '_to_' . $endDate->format('M_d_Y');
         $fileName = "Detailed_DTR_{$employee->employee_id}_{$dateRange}.csv";
 
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename={$fileName}",
-        ];
+        // One person's DTR, so the letterhead names them under the office
+        // rather than beside it -- and the office itself is read from
+        // SiteContentService like every other export, not written here.
+        return CsvReportWriter::download($fileName, function (CsvReportWriter $csv) use (
+            $records, $employee, $startDate, $endDate
+        ) {
+            $csv->letterhead(
+                'Daily Time Record',
+                'Human Resource Management Office · PRIME HRIS',
+                $startDate->format('F d, Y') . ' to ' . $endDate->format('F d, Y')
+            );
 
-        $callback = function() use ($records, $employee, $startDate, $endDate) {
-            $file = fopen('php://output', 'w');
+            $csv->parameters([
+                'Employee:'            => trim($employee->first_name . ' ' . $employee->last_name),
+                'Employee ID:'         => $employee->employee_id,
+                'Position:'            => $employee->employmentDetail->designationRelation->title ?? 'N/A',
+                'Department / Office:' => $employee->employmentDetail->departmentRelation->name ?? 'N/A',
+                'Period Covered:'      => $startDate->format('F d, Y') . ' to ' . $endDate->format('F d, Y'),
+            ], count($records));
 
-            // Add UTF-8 BOM for proper Excel encoding
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            $csv->columns([
+                'Date', 'Day', 'AM In', 'AM Out', 'PM In', 'PM Out', 'OT In', 'OT Out',
+                'Undertime (min)', 'Late (min)', 'Total Hours',
+            ]);
 
-            // Add header info
-            fputcsv($file, ['DETAILED DAILY TIME RECORD']);
-            fputcsv($file, ['Municipal Government of Pagsanjan']);
-            fputcsv($file, [$startDate->format('F d, Y') . ' to ' . $endDate->format('F d, Y')]);
-            fputcsv($file, []);
-            fputcsv($file, ['Employee:', $employee->first_name . ' ' . $employee->last_name]);
-            fputcsv($file, ['Employee ID:', $employee->employee_id]);
-            fputcsv($file, ['Position:', $employee->employmentDetail->position ?? 'N/A']);
-            fputcsv($file, ['Department:', $employee->employmentDetail->departmentRelation->name ?? 'N/A']);
-            fputcsv($file, []);
+            $lateMinutes = 0;
+            $undertimeMinutes = 0;
+            $daysLate = 0;
 
-            // Add column headers
-            fputcsv($file, ['Date', 'Day', 'AM In', 'AM Out', 'PM In', 'PM Out', 'OT In', 'OT Out', 'Undertime (min)', 'Late (min)', 'Total Hours']);
-
-            // Add data rows
             foreach ($records as $record) {
-                fputcsv($file, [
+                $late = (int) ($record['late_minutes'] ?? 0);
+                $undertime = (int) ($record['undertime'] ?? 0);
+                $lateMinutes += $late;
+                $undertimeMinutes += $undertime;
+                if ($late > 0) {
+                    $daysLate++;
+                }
+
+                $csv->row([
                     $record['date'],
                     $record['day'],
                     $record['am_in'] ?? 'Log Missing',
@@ -605,16 +992,30 @@ class AttendanceController extends Controller
                     $record['pm_out'] ?? 'Log Missing',
                     $record['ot_in'] ?? '-',
                     $record['ot_out'] ?? '-',
-                    $record['undertime'] > 0 ? $record['undertime'] : '-',
-                    $record['late_minutes'] > 0 ? $record['late_minutes'] : '-',
+                    $undertime > 0 ? $undertime : '-',
+                    $late > 0 ? $late : '-',
                     $record['total_hours'],
                 ]);
             }
 
-            fclose($file);
-        };
+            if ($records === []) {
+                $csv->emptyNotice('No time records were logged in this period.');
+            }
 
-        return response()->stream($callback, 200, $headers);
+            $csv->summary('Summary', [
+                'Days Covered:'          => count($records),
+                'Days Late:'             => $daysLate,
+                'Total Late (min):'      => $lateMinutes,
+                'Total Late:'            => CscTimeConversionService::formatMinutes($lateMinutes),
+                'Total Undertime (min):' => $undertimeMinutes,
+                'Total Undertime:'       => CscTimeConversionService::formatMinutes($undertimeMinutes),
+            ]);
+
+            $csv->notes([
+                '"Log Missing" means no punch was recorded for that slot.',
+                'Late is counted past a ' . AttendanceComputationService::GRACE_MINUTES . '-minute grace period on the schedule in force for that day.',
+            ]);
+        });
     }
 
     private function formatMinutes($minutes)
@@ -1706,6 +2107,10 @@ class AttendanceController extends Controller
                 $undertimeDeductionService->processUndertimeDeduction($accreditedLog);
             }
         }
+
+        // A correction changes a DTR the employee is measured and paid on, so
+        // it is told rather than left to be noticed.
+        NotificationService::attendanceCorrected($attendance);
 
         return response()->json([
             'success' => true,

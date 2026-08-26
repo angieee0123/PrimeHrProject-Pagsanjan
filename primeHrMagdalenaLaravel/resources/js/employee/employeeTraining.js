@@ -177,6 +177,8 @@ window.setStatusFilter = setStatusFilter;
 function filterPermanentTraining() {
     const q = (document.getElementById('employeeTrainingSearch')?.value || '').toLowerCase().trim();
     const posFilter = document.getElementById('trainingPositionFilter')?.value || '';
+    const dateFrom = document.getElementById('trainingDateFrom')?.value || '';
+    const dateTo = document.getElementById('trainingDateTo')?.value || '';
     const rows = document.querySelectorAll('#trainingHistoryBody tr[data-status]');
     let visible = 0;
     rows.forEach(row => {
@@ -186,6 +188,7 @@ function filterPermanentTraining() {
         let show = true;
         if (activeStatusFilter !== 'all' && status !== activeStatusFilter) show = false;
         if (posFilter && position !== posFilter) show = false;
+        if (!trainingInDateRange(row, dateFrom, dateTo)) show = false;
         if (q && !text.includes(q)) show = false;
         row.style.display = show ? '' : 'none';
         if (show) visible++;
@@ -194,6 +197,66 @@ function filterPermanentTraining() {
     if (rc) rc.textContent = visible;
 }
 window.filterPermanentTraining = filterPermanentTraining;
+
+/*
+    A training belongs in the range if its inclusive dates *overlap* it.
+
+    A three-day seminar running 30 July – 1 August belongs in an August filter,
+    and testing only its start date would drop it under a heading that says
+    August is covered. Both attributes are ISO, so string comparison is date
+    comparison — no Date parsing, no timezone to get wrong.
+*/
+function trainingInDateRange(row, from, to) {
+    const start = row.dataset.from || '';
+    const end = row.dataset.to || start;
+
+    if (from && end && end < from) return false;
+    if (to && start && start > to) return false;
+
+    return true;
+}
+
+function resetTrainingFilters() {
+    activeStatusFilter = 'all';
+    document.querySelectorAll('.training-filter-chip[data-status-filter]').forEach(c => {
+        c.classList.toggle('active', c.dataset.statusFilter === 'all');
+    });
+    const clear = id => { const el = document.getElementById(id); if (el) el.value = ''; };
+    clear('trainingPositionFilter');
+    clear('trainingDateFrom');
+    clear('trainingDateTo');
+    clear('employeeTrainingSearch');
+    filterPermanentTraining();
+}
+window.resetTrainingFilters = resetTrainingFilters;
+
+/*
+    Export the training record the table is showing.
+
+    The button was a bare link to `employee.training.export`, which took no
+    parameters and always returned every *verified* record. So the four
+    controls on this bar narrowed the table on screen and the download ignored
+    all of them — narrowing to the rejected submissions still downloaded the
+    verified ones. The endpoint now applies these same filters server-side.
+*/
+function exportTrainingRecords() {
+    const btn = document.querySelector('[data-export-url]');
+    if (!btn) return;
+
+    const url = new URL(btn.dataset.exportUrl, window.location.origin);
+    const value = id => document.getElementById(id)?.value.trim() || '';
+
+    url.searchParams.set('status', activeStatusFilter);
+    url.searchParams.set('position_type', value('trainingPositionFilter'));
+    url.searchParams.set('date_from', value('trainingDateFrom'));
+    url.searchParams.set('date_to', value('trainingDateTo'));
+    url.searchParams.set('search', value('employeeTrainingSearch'));
+
+    // A plain navigation: the response is a streamed attachment, so the
+    // browser's own download handling is what should receive it.
+    window.location.href = url.toString();
+}
+window.exportTrainingRecords = exportTrainingRecords;
 
 function recalcAnnualSummary() {
     const rows = document.querySelectorAll('#trainingHistoryBody tr[data-status]');

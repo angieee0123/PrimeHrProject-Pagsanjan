@@ -24,21 +24,69 @@ window.openDTRModal = function(record, index) {
     statusBadge.textContent = record.status;
     statusBadge.className = 'badge-status ' + (record.status === 'Complete' ? 'processed' : 'pending');
 
+    clearDTRSummary();
+    document.getElementById('dtrModal').style.display = 'flex';
+
+    // The date inputs ship empty and are only filled once this fetch resolves.
+    // Loading the summary here -- outside the promise -- read them while they
+    // were still blank, so every Quick View opened behind a "Please select both
+    // start and end dates" alert about a range the user had not been shown yet.
+    // The load now happens after the range is applied, and silently: an
+    // automatic load has nobody to warn.
     fetch(`/admin/attendance/employee-appointment/${currentDTREmployeeId}`)
         .then(response => response.json())
         .then(data => {
-            currentDTRAppointmentDate = data.appointment_date;
-            const today = new Date();
-
-            document.getElementById('dtrStartDate').min = data.appointment_date;
-            document.getElementById('dtrStartDate').value = data.appointment_date;
-            document.getElementById('dtrEndDate').min = data.appointment_date;
-            document.getElementById('dtrEndDate').value = today.toISOString().split('T')[0];
+            applyDTRRange(data.appointment_date);
+            loadDTRSummary({ silent: true });
         })
-        .catch(error => console.error('Error fetching appointment date:', error));
+        .catch(error => {
+            console.error('Error fetching appointment date:', error);
+            applyDTRRange(null);
+            loadDTRSummary({ silent: true });
+        });
+}
 
-    document.getElementById('dtrModal').style.display = 'flex';
-    loadDTRSummary();
+// Fall back to the range the page is already filtered to when the employee has
+// no appointment date on file, so the modal still opens on something real.
+function pageFilterDate(name) {
+    const input = document.querySelector(`#attendanceFilterForm input[name="${name}"]`);
+    return input && input.value ? input.value : '';
+}
+
+function applyDTRRange(rawAppointmentDate) {
+    const startInput = document.getElementById('dtrStartDate');
+    const endInput = document.getElementById('dtrEndDate');
+    const today = new Date().toISOString().split('T')[0];
+
+    // `<input type="date">` silently rejects anything but YYYY-MM-DD, and a
+    // rejected value reads back as '' -- which is the blank-range case again.
+    const appointmentDate = typeof rawAppointmentDate === 'string'
+        ? rawAppointmentDate.slice(0, 10)
+        : '';
+
+    currentDTRAppointmentDate = appointmentDate || null;
+
+    if (appointmentDate) {
+        startInput.min = appointmentDate;
+        endInput.min = appointmentDate;
+    } else {
+        startInput.removeAttribute('min');
+        endInput.removeAttribute('min');
+    }
+
+    startInput.value = appointmentDate || pageFilterDate('start_date') || today;
+    endInput.value = today;
+
+    // Someone appointed after today (a future assumption date) would otherwise
+    // open on an inverted range and trip the validation below.
+    if (new Date(endInput.value) < new Date(startInput.value)) {
+        endInput.value = startInput.value;
+    }
+}
+
+function clearDTRSummary() {
+    ['dtrWorkingDays', 'dtrPresent', 'dtrAbsent', 'dtrLate', 'dtrHalfday', 'dtrOT', 'dtrRate']
+        .forEach(id => { document.getElementById(id).textContent = '—'; });
 }
 
 window.closeDTRModal = function() {
@@ -48,24 +96,30 @@ window.closeDTRModal = function() {
     currentDTRAppointmentDate = null;
 }
 
-window.loadDTRSummary = function() {
+// `silent: true` suppresses the validation alerts -- used for the automatic load
+// when the modal opens. The "Load Data" button calls this with no argument, so
+// a range the user actually typed is still checked out loud.
+window.loadDTRSummary = function(options) {
     if (!currentDTRRecord || !currentDTREmployeeId) return;
+
+    const silent = !!(options && options.silent);
+    const warn = message => { if (!silent) alert(message); };
 
     const startDate = document.getElementById('dtrStartDate').value;
     const endDate = document.getElementById('dtrEndDate').value;
 
     if (!startDate || !endDate) {
-        alert('Please select both start and end dates');
+        warn('Please select both start and end dates');
         return;
     }
 
     if (new Date(startDate) > new Date(endDate)) {
-        alert('Start date must be before end date');
+        warn('Start date must be before end date');
         return;
     }
 
-    if (new Date(startDate) < new Date(currentDTRAppointmentDate)) {
-        alert('Start date cannot be before appointment date: ' + currentDTRAppointmentDate);
+    if (currentDTRAppointmentDate && new Date(startDate) < new Date(currentDTRAppointmentDate)) {
+        warn('Start date cannot be before appointment date: ' + currentDTRAppointmentDate);
         return;
     }
 
@@ -82,7 +136,7 @@ window.loadDTRSummary = function() {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error loading DTR summary');
+            warn('Error loading DTR summary');
         });
 }
 

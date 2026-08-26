@@ -36,10 +36,10 @@
                 @error('head')<span class="adm-field-err">{{ $message }}</span>@enderror
             </div>
 
-            <div class="adm-field">
-                <label>Personnel Count</label>
-                <input type="number" name="personnel_count" placeholder="e.g. 38" value="{{ old('personnel_count', 0) }}" min="0">
-            </div>
+            {{-- No Personnel Count field. It was a number an admin typed once
+                 and nothing ever corrected, so it began drifting the first
+                 time anyone was hired or transferred; the table now counts
+                 the office's employment_details rows instead. --}}
 
             <div class="adm-field">
                 <label>Description <span class="adm-opt">(optional)</span></label>

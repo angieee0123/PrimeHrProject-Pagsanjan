@@ -52,6 +52,11 @@ const DEFAULT_START = window.attendancePageData.defaultStart;
 const DEFAULT_END   = window.attendancePageData.defaultEnd;
 let detailedRecords = [];
 
+// The View dropdown's current selection. It was only ever expressed as a CSS
+// `display` on each row, which the export had no way to read back — so the
+// chip is tracked here too, and sent with the download.
+let activeDtrView = 'all';
+
 document.addEventListener('DOMContentLoaded', loadDetailedDTR);
 
 function loadDetailedDTR() {
@@ -308,6 +313,7 @@ function renderDetailedDTR(records) {
     }
 
     // Reset the view dropdown on every fresh load
+    activeDtrView = 'all';
     document.querySelectorAll('#ddtrDropdown .ddtr-dd-item').forEach(i => i.classList.remove('active'));
     document.querySelector('#ddtrDropdown [data-chip="all"]')?.classList.add('active');
     const lbl = document.getElementById('ddtrViewLabel');
@@ -342,6 +348,7 @@ document.addEventListener('click', function(e) {
 });
 
 function applyDtrChip(chip) {
+    activeDtrView = chip || 'all';
     const dayMap = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
     document.querySelectorAll('#detailedDTRBody tr:not(.week-sep)').forEach(tr => {
         const day   = tr.dataset.day   || '';
@@ -375,52 +382,43 @@ function syncWeekSeparators() {
 }
 
 // ── Export ──
+/*
+    The download is built by the server, from the same query the table is.
+
+    This used to serialise `detailedRecords` — the array as it came back from
+    the fetch, before the toolbar had touched it. So the View dropdown and the
+    topbar search narrowed the table on screen and the file ignored both:
+    filtering down to six late days still downloaded the whole month. It also
+    pasted values together with `+`, so a destination containing a comma broke
+    the row into two columns, and the file carried no letterhead at all.
+
+    `employee.attendance.export` re-runs `fetchDetailedRecords()` server-side
+    and applies these same three filters there, so the file and the screen
+    cannot disagree.
+*/
 function exportDetailedDTR() {
-    if (!detailedRecords.length) {
-        alert('No records to export');
+    const startDate = document.getElementById('detailedStartDate').value;
+    const endDate   = document.getElementById('detailedEndDate').value;
+
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates');
+        return;
+    }
+    if (new Date(startDate) > new Date(endDate)) {
+        alert('Start date must be before or equal to end date');
         return;
     }
 
-    const startDate = document.getElementById('detailedStartDate').value;
-    const endDate   = document.getElementById('detailedEndDate').value;
-    const dateRange = startDate === endDate ? startDate : `${startDate}_to_${endDate}`;
-
-    let csv = 'Date,Day,AM In,AM Out,PM In,PM Out,OT In,OT Out,Late,Undertime,Total Hours,Accredited Hours,Status\n';
-
-    detailedRecords.forEach(record => {
-        const isOnLeave  = !!record.is_on_leave;
-        const isOnTravel = !!record.is_on_travel_order;
-        const amIn  = fmt12(record.am_in)  ? record.am_in  : '';
-        const amOut = fmt12(record.am_out) ? record.am_out : '';
-        const pmIn  = fmt12(record.pm_in)  ? record.pm_in  : '';
-        const pmOut = fmt12(record.pm_out) ? record.pm_out : '';
-        const hasAnyLog  = amIn || amOut || pmIn || pmOut;
-        const isComplete = amIn && amOut && pmIn && pmOut;
-
-        let status = 'Present';
-        if (isOnTravel)      status = 'On Travel';
-        else if (isOnLeave)  status = 'On Leave';
-        else if (!hasAnyLog) status = 'Absent';
-        else if (!isComplete) status = 'Incomplete';
-        else if (record.late_minutes > 0) status = 'Late';
-
-        const accredited = ((record.accredited_minutes || 0) / 60).toFixed(1) + ' hrs';
-
-        csv += `${record.date},${record.day},${amIn},${amOut},${pmIn},${pmOut},`;
-        csv += `${fmt12(record.ot_in) ? record.ot_in : ''},${fmt12(record.ot_out) ? record.ot_out : ''},`;
-        csv += `${record.late_display || '-'},${record.undertime_display || '-'},`;
-        csv += `${record.total_hours},${accredited},${status}\n`;
+    const params = new URLSearchParams({
+        start_date: startDate,
+        end_date: endDate,
+        view: activeDtrView,
+        search: document.getElementById('employeeAttendanceSearch')?.value.trim() || '',
     });
 
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Detailed_DTR_${window.attendancePageData.employeeId}_${dateRange}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    // A plain navigation rather than fetch + Blob: the response is a streamed
+    // attachment, so the browser's own download handling is what should get it.
+    window.location.href = `${window.attendancePageData.exportRoute}?${params}`;
 }
 
 window.filterPermanentAttendanceTable = filterPermanentAttendanceTable;
