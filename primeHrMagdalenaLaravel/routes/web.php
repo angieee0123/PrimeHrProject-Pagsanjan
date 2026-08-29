@@ -263,16 +263,35 @@ Route::get('/admin/personnel/{id}/edit', function ($id) {
         'addresses',
         'contacts',
         'governmentIds',
+        'supportingDocuments',
         'user'
     ])->findOrFail($id);
 
     $data = $employee->toArray();
     $data['roles'] = $employee->user?->roles ?? [];
+    // Expose supporting_documents as a single object for the wizard (hasOne), plus keep original key for compatibility
+    $data['supporting_documents'] = $employee->supportingDocuments;
+    $data['supportingDocuments'] = $employee->supportingDocuments;
     return response()->json($data);
 })->middleware('auth')->name('admin.personnel.edit');
 
 Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $request, $id) {
-    $employee = \App\Models\Employee::with(['employmentDetail', 'addresses', 'contacts', 'governmentIds'])->findOrFail($id);
+    $request->validate([
+        'pds_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+        'appointment_form_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+        'position_description_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+        'medical_certificate_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+        'nbi_clearance_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+        'financial_clearance_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+        'neuro_exam_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+        'supporting_licenses_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+        'performance_eval_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+        'commendation_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+        'disciplinary_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+        'other_records_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+    ]);
+
+    $employee = \App\Models\Employee::with(['employmentDetail', 'addresses', 'contacts', 'governmentIds', 'supportingDocuments'])->findOrFail($id);
 
     $updateData = [
         'first_name'     => $request->first_name,
@@ -347,6 +366,40 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
     }
 
     $employee->governmentIds()->updateOrCreate([], $govIdUpdateData);
+
+    // Supporting Documents — image only (PNG/JPG, 5 MB), validated above
+    $supportingData = [];
+    $supportingMap = [
+        'pds_file'                  => 'pds_file_path',
+        'appointment_form_file'     => 'appointment_form_file_path',
+        'position_description_file' => 'position_description_file_path',
+        'medical_certificate_file'  => 'medical_certificate_file_path',
+        'nbi_clearance_file'        => 'nbi_clearance_file_path',
+        'financial_clearance_file'  => 'financial_clearance_file_path',
+        'neuro_exam_file'           => 'neuro_exam_file_path',
+        'supporting_licenses_file'  => 'licenses_file_path',
+        'performance_eval_file'     => 'performance_eval_file_path',
+        'commendation_file'         => 'commendation_file_path',
+        'disciplinary_file'         => 'disciplinary_file_path',
+        'other_records_file'        => 'other_records_file_path',
+    ];
+    foreach ($supportingMap as $inputName => $column) {
+        if ($request->hasFile($inputName)) {
+            $file = $request->file($inputName);
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('employees/supporting_documents', $filename, 'public');
+            $supportingData[$column] = '/storage/' . $path;
+        }
+    }
+    if (!empty($supportingData)) {
+        $employee->supportingDocuments()->updateOrCreate(
+            ['employee_id' => $employee->id],
+            $supportingData
+        );
+    } elseif (!$employee->supportingDocuments) {
+        // Row has never existed (e.g. employee created before this feature) — create empty shell so future edits have a row to update.
+        $employee->supportingDocuments()->create(['employee_id' => $employee->id]);
+    }
 
     if ($request->has('roles') && $employee->user) {
         $validated = $request->validate([

@@ -1,6 +1,6 @@
 // Employee Wizard JavaScript
 let currentStep = 1;
-const totalSteps = 6;
+const totalSteps = 7;
 
 // Password / Confirm Password show-hide toggle (step 2).
 window.toggleWizardPassword = function(btn) {
@@ -381,6 +381,20 @@ function generateReview() {
         reviewRow([['PAG-IBIG Number', get('pagibig_no')], ['PAG-IBIG Scan', govIdFileName('pagibig_file')]]),
         reviewRow([['TIN Number', get('tin_no')], ['TIN Scan', govIdFileName('tin_file')]]),
         reviewRow([['License Number', get('license_no')], ['License Scan', govIdFileName('license_file')]]),
+    ]);
+
+    const supportingFileName = function(name) {
+        const f = formData.get(name);
+        return (f && f.name) ? f.name : '';
+    };
+
+    html += reviewSection('<svg class="wizard-review-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Supporting Documents <span style="font-weight:400;font-size:11px;color:var(--gp-text-mid);">(PNG/JPG, 5 MB)</span>', [
+        reviewRow([['CS Form 212 — PDS', supportingFileName('pds_file')], ['CS Form 33 — Appointment Form', supportingFileName('appointment_form_file')]]),
+        reviewRow([['Position Description Form', supportingFileName('position_description_file')], ['Medical Certificate', supportingFileName('medical_certificate_file')]]),
+        reviewRow([['NBI Clearance', supportingFileName('nbi_clearance_file')], ['Financial / Property Clearance', supportingFileName('financial_clearance_file')]]),
+        reviewRow([['Neuro-psychiatric Examination', supportingFileName('neuro_exam_file')], ['Licenses', supportingFileName('supporting_licenses_file')]]),
+        reviewRow([['Performance Evaluation', supportingFileName('performance_eval_file')], ['Commendation / Award', supportingFileName('commendation_file')]]),
+        reviewRow([['Disciplinary / Action Docs', supportingFileName('disciplinary_file')], ['Other Records', supportingFileName('other_records_file')]]),
     ]);
 
     document.getElementById('wizardReviewContent').innerHTML = html;

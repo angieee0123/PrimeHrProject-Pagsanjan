@@ -194,6 +194,11 @@ class Employee extends Model implements Auditable
         return $this->hasMany(AttendancePunch::class);
     }
 
+    public function supportingDocuments()
+    {
+        return $this->hasOne(EmployeeSupportingDocument::class);
+    }
+
     /**
      * The signed string printed in this employee's attendance QR badge.
      *

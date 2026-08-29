@@ -111,6 +111,27 @@ function editEmployee(id) {
             ['gsis', 'philhealth', 'pagibig', 'tin', 'license'].forEach(function(key) {
                 showGovIdCurrentFile(key, gov[key + '_file_path']);
             });
+
+            // Step 6 — Supporting Documents (image only, PNG/JPG, 5 MB)
+            const sd = d.supporting_documents || d.supportingDocuments || null;
+            const sdObj = Array.isArray(sd) ? (sd[0] || {}) : (sd || {});
+            const supportingMap = {
+                pds: 'pds_file_path',
+                appointment_form: 'appointment_form_file_path',
+                position_description: 'position_description_file_path',
+                medical_certificate: 'medical_certificate_file_path',
+                nbi_clearance: 'nbi_clearance_file_path',
+                financial_clearance: 'financial_clearance_file_path',
+                neuro_exam: 'neuro_exam_file_path',
+                supporting_licenses: 'licenses_file_path',
+                performance_eval: 'performance_eval_file_path',
+                commendation: 'commendation_file_path',
+                disciplinary: 'disciplinary_file_path',
+                other_records: 'other_records_file_path',
+            };
+            Object.keys(supportingMap).forEach(function(key) {
+                showSupportingCurrentFile(key, sdObj[supportingMap[key]]);
+            });
         });
 }
 
@@ -150,8 +171,35 @@ function clearGovIdCurrentFiles() {
         el.innerHTML = '';
         el.style.display = 'none';
     });
+    document.querySelectorAll('.wizard-supporting-current').forEach(function(el) {
+        el.innerHTML = '';
+        el.style.display = 'none';
+    });
 }
 window.clearGovIdCurrentFiles = clearGovIdCurrentFiles;
+
+function showSupportingCurrentFile(docKey, path) {
+    const el = document.querySelector('.wizard-supporting-current[data-current-for="' + docKey + '"]');
+    if (!el) return;
+    el.innerHTML = '';
+    if (!path) {
+        el.style.display = 'none';
+        return;
+    }
+    el.style.display = 'block';
+    const p = document.createElement('p');
+    p.className = 'wizard-hint';
+    p.appendChild(document.createTextNode('Current file: '));
+    const a = document.createElement('a');
+    a.href = path;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = 'View uploaded image';
+    p.appendChild(a);
+    p.appendChild(document.createTextNode(' — choose a new file above to replace it.'));
+    el.appendChild(p);
+}
+window.showSupportingCurrentFile = showSupportingCurrentFile;
 
 function submitWizardUpdate() {
     document.getElementById('employeeWizardForm').submit();

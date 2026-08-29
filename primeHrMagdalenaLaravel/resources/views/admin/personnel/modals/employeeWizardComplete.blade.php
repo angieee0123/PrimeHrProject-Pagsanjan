@@ -25,7 +25,7 @@
             <div class="wizard-header-top">
                 <div>
                     <h3 class="wizard-title" id="wizardTitle">Employee Registration Wizard</h3>
-                    <p class="wizard-subtitle"><span id="stepIndicator">Step 1 of 6</span> - <span id="wizardSubtitle">Complete all steps to register</span></p>
+                    <p class="wizard-subtitle"><span id="stepIndicator">Step 1 of 7</span> - <span id="wizardSubtitle">Complete all steps to register</span></p>
                 </div>
                 <button onclick="closeEmployeeWizard()" class="wizard-close-btn" aria-label="Close wizard">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -59,8 +59,13 @@
                     <span class="wizard-label">Gov IDs</span>
                 </div>
                 <div class="wizard-connector"></div>
-                <div class="wizard-step" data-step="6" role="button" tabindex="0" title="Go to Review" onclick="goToWizardStep(6)">
+                <div class="wizard-step" data-step="6" role="button" tabindex="0" title="Go to Supporting Docs" onclick="goToWizardStep(6)">
                     <div class="wizard-circle">6</div>
+                    <span class="wizard-label">Docs</span>
+                </div>
+                <div class="wizard-connector"></div>
+                <div class="wizard-step" data-step="7" role="button" tabindex="0" title="Go to Review" onclick="goToWizardStep(7)">
+                    <div class="wizard-circle">7</div>
                     <span class="wizard-label">Review</span>
                 </div>
             </div>
@@ -396,8 +401,40 @@
                 @endforeach
             </div>
 
-            <!-- STEP 6: Review -->
+            <!-- STEP 6: Supporting Documents (image only, PNG/JPG, 5 MB) -->
             <div class="wizard-content" data-step="6" style="display:none;">
+                <h4 class="wizard-section-title"><svg class="wizard-section-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Supporting Documents</span></h4>
+                <p class="wizard-hint" style="margin-bottom:16px;">Upload each document as an <strong>image only — PNG or JPG, max 5 MB</strong>. All fields are optional; leave blank if not applicable. PDFs are not accepted for these documents.</p>
+
+                @php
+                    $supportingDocs = [
+                        ['key' => 'pds',                  'name' => 'pds_file',                  'label' => 'CS Form 212 — Personal Data Sheet (PDS)'],
+                        ['key' => 'appointment_form',     'name' => 'appointment_form_file',     'label' => 'CS Form 33 — Appointment Form'],
+                        ['key' => 'position_description', 'name' => 'position_description_file', 'label' => 'Position Description Form (all appointment types)'],
+                        ['key' => 'medical_certificate',  'name' => 'medical_certificate_file',  'label' => 'Medical Certificate'],
+                        ['key' => 'nbi_clearance',        'name' => 'nbi_clearance_file',        'label' => 'Clearances — NBI Clearance'],
+                        ['key' => 'financial_clearance',  'name' => 'financial_clearance_file',  'label' => 'Clearance from Financial Obligations & Property Accountability (transfer / reemployment)'],
+                        ['key' => 'neuro_exam',           'name' => 'neuro_exam_file',           'label' => 'Neuro-psychiatric Examination'],
+                        ['key' => 'supporting_licenses',  'name' => 'supporting_licenses_file',  'label' => 'Licenses, if necessary'],
+                        ['key' => 'performance_eval',     'name' => 'performance_eval_file',     'label' => 'Performance Evaluation Documents'],
+                        ['key' => 'commendation',         'name' => 'commendation_file',         'label' => 'Commendation / Certificate of Achievement / Award, etc.'],
+                        ['key' => 'disciplinary',         'name' => 'disciplinary_file',         'label' => 'Disciplinary / Action Documents'],
+                        ['key' => 'other_records',        'name' => 'other_records_file',        'label' => 'Other Employee Records'],
+                    ];
+                @endphp
+
+                @foreach ($supportingDocs as $doc)
+                    <div class="wizard-govid-group" style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--theme-primary-light);">
+                        <label class="wizard-label-text">{{ $doc['label'] }}</label>
+                        <input type="file" name="{{ $doc['name'] }}" accept="image/png,image/jpeg" class="wizard-input">
+                        <p class="wizard-hint">PNG or JPG only — Max 5 MB</p>
+                        <div class="wizard-supporting-current" data-current-for="{{ $doc['key'] }}" style="display:none;"></div>
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- STEP 7: Review -->
+            <div class="wizard-content" data-step="7" style="display:none;">
                 <h4 class="wizard-section-title"><svg class="wizard-section-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Review All Information</span></h4>
                 <div id="wizardReviewContent" class="wizard-review-content">
                     <p style="color:var(--gp-text-mid); text-align:center; padding:40px 20px;">Loading review data...</p>

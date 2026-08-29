@@ -9,6 +9,7 @@ use App\Models\EmploymentDetail;
 use App\Models\Address;
 use App\Models\Contact;
 use App\Models\GovernmentId;
+use App\Models\EmployeeSupportingDocument;
 use App\Notifications\EmployeeDetailsEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -45,11 +46,23 @@ class EmployeeRegistrationController extends Controller
         'designation_id'    => [3, 'Employment'],
         'employment_status' => [3, 'Employment'],
         'appointment_date'  => [3, 'Employment'],
-        'gsis_file'         => [5, 'Gov IDs'],
-        'philhealth_file'   => [5, 'Gov IDs'],
-        'pagibig_file'      => [5, 'Gov IDs'],
-        'tin_file'          => [5, 'Gov IDs'],
-        'license_file'      => [5, 'Gov IDs'],
+        'gsis_file'                   => [5, 'Gov IDs'],
+        'philhealth_file'             => [5, 'Gov IDs'],
+        'pagibig_file'                => [5, 'Gov IDs'],
+        'tin_file'                    => [5, 'Gov IDs'],
+        'license_file'                => [5, 'Gov IDs'],
+        'pds_file'                    => [6, 'Supporting Docs'],
+        'appointment_form_file'       => [6, 'Supporting Docs'],
+        'position_description_file'   => [6, 'Supporting Docs'],
+        'medical_certificate_file'    => [6, 'Supporting Docs'],
+        'nbi_clearance_file'          => [6, 'Supporting Docs'],
+        'financial_clearance_file'    => [6, 'Supporting Docs'],
+        'neuro_exam_file'             => [6, 'Supporting Docs'],
+        'supporting_licenses_file'    => [6, 'Supporting Docs'],
+        'performance_eval_file'       => [6, 'Supporting Docs'],
+        'commendation_file'           => [6, 'Supporting Docs'],
+        'disciplinary_file'           => [6, 'Supporting Docs'],
+        'other_records_file'          => [6, 'Supporting Docs'],
     ];
 
     public function store(Request $request)
@@ -78,6 +91,18 @@ class EmployeeRegistrationController extends Controller
                 'pagibig_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
                 'tin_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
                 'license_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+                'pds_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'appointment_form_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'position_description_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'medical_certificate_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'nbi_clearance_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'financial_clearance_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'neuro_exam_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'supporting_licenses_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'performance_eval_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'commendation_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'disciplinary_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'other_records_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             ], [], [
                 // Without these, Laravel humanises the column name and the
                 // admin is told "the user email field is required" for a box
@@ -88,11 +113,23 @@ class EmployeeRegistrationController extends Controller
                 'department'        => 'department',
                 'designation_id'    => 'designation',
                 'roles'             => 'role',
-                'gsis_file'         => 'GSIS file',
-                'philhealth_file'   => 'PhilHealth file',
-                'pagibig_file'      => 'Pag-IBIG file',
-                'tin_file'          => 'TIN file',
-                'license_file'      => 'license file',
+                'gsis_file'                   => 'GSIS file',
+                'philhealth_file'             => 'PhilHealth file',
+                'pagibig_file'                => 'Pag-IBIG file',
+                'tin_file'                    => 'TIN file',
+                'license_file'                => 'license file',
+                'pds_file'                    => 'CS Form 212 (PDS) file',
+                'appointment_form_file'       => 'CS Form 33 (Appointment Form) file',
+                'position_description_file'   => 'Position Description Form file',
+                'medical_certificate_file'    => 'Medical Certificate file',
+                'nbi_clearance_file'          => 'NBI Clearance file',
+                'financial_clearance_file'    => 'financial clearance file',
+                'neuro_exam_file'             => 'Neuro-psychiatric Examination file',
+                'supporting_licenses_file'    => 'Licenses file',
+                'performance_eval_file'       => 'Performance Evaluation file',
+                'commendation_file'           => 'Commendation / Award file',
+                'disciplinary_file'           => 'Disciplinary / Action file',
+                'other_records_file'          => 'other records file',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()
@@ -206,6 +243,23 @@ class EmployeeRegistrationController extends Controller
                 'tin_file_path' => $this->handleFileUpload($request->file('tin_file'), 'employees/government_ids'),
                 'license_no' => $request->license_no,
                 'license_file_path' => $this->handleFileUpload($request->file('license_file'), 'employees/government_ids'),
+            ]);
+
+            // Create Supporting Documents (12 image-only files, PNG/JPG, 5 MB)
+            EmployeeSupportingDocument::create([
+                'employee_id'                       => $employee->id,
+                'pds_file_path'                     => $this->handleFileUpload($request->file('pds_file'), 'employees/supporting_documents'),
+                'appointment_form_file_path'        => $this->handleFileUpload($request->file('appointment_form_file'), 'employees/supporting_documents'),
+                'position_description_file_path'    => $this->handleFileUpload($request->file('position_description_file'), 'employees/supporting_documents'),
+                'medical_certificate_file_path'     => $this->handleFileUpload($request->file('medical_certificate_file'), 'employees/supporting_documents'),
+                'nbi_clearance_file_path'           => $this->handleFileUpload($request->file('nbi_clearance_file'), 'employees/supporting_documents'),
+                'financial_clearance_file_path'     => $this->handleFileUpload($request->file('financial_clearance_file'), 'employees/supporting_documents'),
+                'neuro_exam_file_path'              => $this->handleFileUpload($request->file('neuro_exam_file'), 'employees/supporting_documents'),
+                'licenses_file_path'                => $this->handleFileUpload($request->file('supporting_licenses_file'), 'employees/supporting_documents'),
+                'performance_eval_file_path'        => $this->handleFileUpload($request->file('performance_eval_file'), 'employees/supporting_documents'),
+                'commendation_file_path'            => $this->handleFileUpload($request->file('commendation_file'), 'employees/supporting_documents'),
+                'disciplinary_file_path'            => $this->handleFileUpload($request->file('disciplinary_file'), 'employees/supporting_documents'),
+                'other_records_file_path'           => $this->handleFileUpload($request->file('other_records_file'), 'employees/supporting_documents'),
             ]);
 
             $employeeUserDetails = $this->credentialsFor(
