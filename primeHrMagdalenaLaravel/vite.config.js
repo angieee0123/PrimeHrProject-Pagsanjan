@@ -57,6 +57,7 @@ export default defineConfig({
                 'resources/js/admin/personnel/employeeWizard.js',
                 'resources/js/admin/personnel/employeeWizardComplete.js',
                 'resources/js/admin/personnel/employeeWizardValidation.js',
+                'resources/js/admin/personnel/employeeWizardDocuments.js',
                 'resources/js/admin/personnel/adminPersonnel.js',
                 'resources/js/admin/personnel/viewEmployeeModal.js',
                 'resources/js/admin/personnel/assignSchedule.js',

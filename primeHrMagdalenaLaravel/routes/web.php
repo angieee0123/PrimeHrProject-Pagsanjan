@@ -276,20 +276,19 @@ Route::get('/admin/personnel/{id}/edit', function ($id) {
 })->middleware('auth')->name('admin.personnel.edit');
 
 Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $request, $id) {
-    $request->validate([
-        'pds_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-        'appointment_form_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-        'position_description_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-        'medical_certificate_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-        'nbi_clearance_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-        'financial_clearance_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-        'neuro_exam_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-        'supporting_licenses_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-        'performance_eval_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-        'commendation_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-        'disciplinary_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-        'other_records_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-    ]);
+    // Same rules and same wording as registration — an edit must not accept a
+    // format the wizard refused, or refuse one it accepted. The ID scans and
+    // the photo were previously stored with no validation at all on this path,
+    // so anything the picker could be talked into offering was written to the
+    // public disk.
+    $request->validate(
+        ['photo' => ['nullable', 'image', 'max:' . \App\Services\UploadLimits::perFileKb(5120)]]
+            + \App\Models\GovernmentId::rules()
+            + \App\Models\EmployeeSupportingDocument::rules(),
+        [],
+        \App\Models\GovernmentId::attributeNames()
+            + \App\Models\EmployeeSupportingDocument::attributeNames()
+    );
 
     $employee = \App\Models\Employee::with(['employmentDetail', 'addresses', 'contacts', 'governmentIds', 'supportingDocuments'])->findOrFail($id);
 
@@ -308,11 +307,20 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
         'citizenship'    => $request->citizenship,
     ];
 
-    // Handle photo upload if provided
+    // Handle photo upload if provided. Stored through the registration
+    // controller's helper so an edited employee's files are named the same way
+    // a newly registered one's are.
+    // A failed store returns null, which on an *edit* would blank the photo
+    // already on record — the upload failing must not delete what it was
+    // meant to replace.
     if ($request->hasFile('photo')) {
-        $filename = time() . '_' . $request->file('photo')->getClientOriginalName();
-        $path = $request->file('photo')->storeAs('employees/photos', $filename, 'public');
-        $updateData['photo'] = '/storage/' . $path;
+        $storedPhoto = \App\Http\Controllers\EmployeeRegistrationController::handleFileUpload(
+            $request->file('photo'),
+            'employees/photos'
+        );
+        if ($storedPhoto) {
+            $updateData['photo'] = $storedPhoto;
+        }
     }
 
     $employee->update($updateData);
@@ -356,39 +364,31 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
         'license_no'    => $request->license_no,
     ];
 
-    foreach (['gsis', 'philhealth', 'pagibig', 'tin', 'license'] as $govIdKey) {
-        if ($request->hasFile($govIdKey . '_file')) {
-            $govFile = $request->file($govIdKey . '_file');
-            $filename = time() . '_' . $govFile->getClientOriginalName();
-            $path = $govFile->storeAs('employees/government_ids', $filename, 'public');
-            $govIdUpdateData[$govIdKey . '_file_path'] = '/storage/' . $path;
+    foreach (\App\Models\GovernmentId::columnMap() as $inputName => $column) {
+        if ($request->hasFile($inputName)) {
+            $storedScan = \App\Http\Controllers\EmployeeRegistrationController::handleFileUpload(
+                $request->file($inputName),
+                'employees/government_ids'
+            );
+            if ($storedScan) {
+                $govIdUpdateData[$column] = $storedScan;
+            }
         }
     }
 
     $employee->governmentIds()->updateOrCreate([], $govIdUpdateData);
 
-    // Supporting Documents — image only (PNG/JPG, 5 MB), validated above
+    // Supporting Documents (201 file) — formats validated above
     $supportingData = [];
-    $supportingMap = [
-        'pds_file'                  => 'pds_file_path',
-        'appointment_form_file'     => 'appointment_form_file_path',
-        'position_description_file' => 'position_description_file_path',
-        'medical_certificate_file'  => 'medical_certificate_file_path',
-        'nbi_clearance_file'        => 'nbi_clearance_file_path',
-        'financial_clearance_file'  => 'financial_clearance_file_path',
-        'neuro_exam_file'           => 'neuro_exam_file_path',
-        'supporting_licenses_file'  => 'licenses_file_path',
-        'performance_eval_file'     => 'performance_eval_file_path',
-        'commendation_file'         => 'commendation_file_path',
-        'disciplinary_file'         => 'disciplinary_file_path',
-        'other_records_file'        => 'other_records_file_path',
-    ];
-    foreach ($supportingMap as $inputName => $column) {
+    foreach (\App\Models\EmployeeSupportingDocument::columnMap() as $inputName => $column) {
         if ($request->hasFile($inputName)) {
-            $file = $request->file($inputName);
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('employees/supporting_documents', $filename, 'public');
-            $supportingData[$column] = '/storage/' . $path;
+            $storedDocument = \App\Http\Controllers\EmployeeRegistrationController::handleFileUpload(
+                $request->file($inputName),
+                'employees/supporting_documents'
+            );
+            if ($storedDocument) {
+                $supportingData[$column] = $storedDocument;
+            }
         }
     }
     if (!empty($supportingData)) {

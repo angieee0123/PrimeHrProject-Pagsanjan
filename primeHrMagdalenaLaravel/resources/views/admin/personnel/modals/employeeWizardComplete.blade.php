@@ -372,63 +372,159 @@
             </div>
 
             <!-- STEP 5: Government IDs -->
-            <div class="wizard-content" data-step="5" style="display:none;">
+            <div class="wizard-content" data-step="5" style="display:none;"
+                 id="wizardGovIdStep"
+                 data-attachment-cards
+                 data-extensions="{{ implode(',', \App\Models\GovernmentId::EXTENSIONS) }}"
+                 data-max-kb="{{ \App\Models\GovernmentId::maxKb() }}"
+                 data-max-label="{{ \App\Models\GovernmentId::maxSizeLabel() }}">
                 <h4 class="wizard-section-title"><svg class="wizard-section-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.2"/><line x1="14" y1="10" x2="19" y2="10"/><line x1="14" y1="14" x2="18" y2="14"/></svg><span>Government IDs</span></h4>
-                <p class="wizard-hint" style="margin-bottom:20px;">Upload a scanned copy or photo of each ID (PDF, JPG, or PNG, max 5MB). The number is read automatically from the scan — please verify it, or type it in by hand if the auto-read doesn't find it.</p>
 
-                @foreach ([
-                    ['key' => 'gsis', 'label' => 'GSIS', 'placeholder' => 'GSIS ID'],
-                    ['key' => 'philhealth', 'label' => 'PhilHealth', 'placeholder' => 'PhilHealth ID'],
-                    ['key' => 'pagibig', 'label' => 'PAG-IBIG', 'placeholder' => 'PAG-IBIG ID'],
-                    ['key' => 'tin', 'label' => 'TIN', 'placeholder' => 'Tax ID'],
-                    ['key' => 'license', 'label' => 'Professional License', 'placeholder' => 'License No.'],
-                ] as $gov)
-                    <div class="wizard-govid-group" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--theme-primary-light);">
-                        <div class="wizard-grid-2">
-                            <div>
-                                <label class="wizard-label-text">{{ $gov['label'] }} — Scanned ID (Upload)</label>
-                                <input type="file" name="{{ $gov['key'] }}_file" accept="application/pdf,image/png,image/jpeg" class="wizard-input govid-file-input" data-id-type="{{ $gov['key'] }}" data-target="{{ $gov['key'] }}_no">
-                                <p class="wizard-hint">PDF, JPG, or PNG (Max 5MB)</p>
+                <div class="doc-intro">
+                    <div class="doc-intro-text">
+                        <p class="doc-intro-lead">Upload a scanned copy or clear photo of each ID. <strong>The number is read from the scan automatically</strong> — verify what comes back, or type it in by hand if the auto-read finds nothing.</p>
+                        <p class="doc-intro-formats">
+                            <span class="doc-intro-formats-label">Accepted</span>
+                            @foreach (\App\Models\GovernmentId::EXTENSIONS as $ext)
+                                @continue($ext === 'jpeg')
+                                <span class="doc-format-chip">{{ strtoupper($ext) }}</span>
+                            @endforeach
+                            <span class="doc-intro-size">up to {{ \App\Models\GovernmentId::maxSizeLabel() }} each</span>
+                        </p>
+                    </div>
+                    <div class="doc-progress" role="status" aria-live="polite">
+                        <div class="doc-progress-count"><span data-attach-count>0</span><span class="doc-progress-total">/{{ count(\App\Models\GovernmentId::IDS) }}</span></div>
+                        <div class="doc-progress-label">scanned</div>
+                        <div class="doc-progress-track"><div class="doc-progress-fill" data-attach-fill style="width:0%;"></div></div>
+                    </div>
+                </div>
+
+                <p class="doc-payload-warning" data-payload-warning role="alert" hidden></p>
+
+                <div class="doc-grid">
+                    @foreach (\App\Models\GovernmentId::IDS as $gov)
+                        <div class="doc-card govid-card" data-doc-card="{{ $gov['key'] }}">
+                            <div class="doc-face">
+                                <input type="file"
+                                       id="govid-input-{{ $gov['key'] }}"
+                                       name="{{ $gov['key'] }}_file"
+                                       accept="{{ \App\Models\GovernmentId::accept() }}"
+                                       class="doc-input govid-file-input"
+                                       data-id-type="{{ $gov['key'] }}"
+                                       data-target="{{ $gov['key'] }}_no"
+                                       aria-label="Upload {{ $gov['label'] }} scanned ID">
+                                <span class="doc-thumb" data-doc-thumb>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><polyline points="7 9 12 4 17 9"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                                </span>
+                                <span class="doc-text">
+                                    <span class="doc-name">{{ $gov['label'] }}</span>
+                                    <span class="doc-note">{{ $gov['note'] }}</span>
+                                    <span class="doc-meta" data-doc-meta>Click to browse, or drop a file here</span>
+                                </span>
+                                <span class="doc-cta" data-doc-cta>Browse</span>
                             </div>
-                            <div>
-                                <label class="wizard-label-text">{{ $gov['label'] }} Number</label>
-                                <input type="text" name="{{ $gov['key'] }}_no" placeholder="{{ $gov['placeholder'] }}" maxlength="255" class="wizard-input">
-                                <p class="wizard-hint govid-ocr-status" data-status-for="{{ $gov['key'] }}"></p>
+                            <div class="doc-picked" data-doc-picked hidden>
+                                <svg class="doc-picked-tick" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span class="doc-picked-name" data-doc-filename></span>
+                                <span class="doc-picked-size" data-doc-filesize></span>
+                                <button type="button" class="doc-remove" data-doc-remove aria-label="Remove the scan chosen for {{ $gov['label'] }}">Remove</button>
+                            </div>
+                            <p class="doc-error" data-doc-error role="alert" hidden></p>
+                            <div class="wizard-govid-current" data-current-for="{{ $gov['key'] }}" style="display:none;"></div>
+                            <div class="govid-number">
+                                <label class="govid-number-label" for="govid-no-{{ $gov['key'] }}">{{ $gov['label'] }} Number</label>
+                                <input type="text" id="govid-no-{{ $gov['key'] }}" name="{{ $gov['key'] }}_no" placeholder="{{ $gov['placeholder'] }}" maxlength="255" class="govid-number-input">
+                                <p class="govid-ocr-status" data-status-for="{{ $gov['key'] }}"></p>
                             </div>
                         </div>
-                        <div class="wizard-govid-current" data-current-for="{{ $gov['key'] }}" style="display:none;"></div>
-                    </div>
-                @endforeach
+                    @endforeach
+                </div>
             </div>
 
-            <!-- STEP 6: Supporting Documents (image only, PNG/JPG, 5 MB) -->
-            <div class="wizard-content" data-step="6" style="display:none;">
-                <h4 class="wizard-section-title"><svg class="wizard-section-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Supporting Documents</span></h4>
-                <p class="wizard-hint" style="margin-bottom:16px;">Upload each document as an <strong>image only — PNG or JPG, max 5 MB</strong>. All fields are optional; leave blank if not applicable. PDFs are not accepted for these documents.</p>
+            <!-- STEP 6: Supporting Documents (the 201 file) -->
+            <div class="wizard-content" data-step="6" style="display:none;"
+                 id="wizardDocsStep"
+                 data-attachment-cards
+                 data-extensions="{{ implode(',', \App\Models\EmployeeSupportingDocument::EXTENSIONS) }}"
+                 data-max-kb="{{ \App\Models\EmployeeSupportingDocument::maxKb() }}"
+                 data-max-label="{{ \App\Models\EmployeeSupportingDocument::maxSizeLabel() }}"
+                 data-post-max-kb="{{ \App\Models\EmployeeSupportingDocument::postMaxKb() }}"
+                 data-post-max-label="{{ \App\Models\EmployeeSupportingDocument::sizeLabel(\App\Models\EmployeeSupportingDocument::postMaxKb()) }}">
+                <h4 class="wizard-section-title"><svg class="wizard-section-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Supporting Documents (201 File)</span></h4>
 
-                @php
-                    $supportingDocs = [
-                        ['key' => 'pds',                  'name' => 'pds_file',                  'label' => 'CS Form 212 — Personal Data Sheet (PDS)'],
-                        ['key' => 'appointment_form',     'name' => 'appointment_form_file',     'label' => 'CS Form 33 — Appointment Form'],
-                        ['key' => 'position_description', 'name' => 'position_description_file', 'label' => 'Position Description Form (all appointment types)'],
-                        ['key' => 'medical_certificate',  'name' => 'medical_certificate_file',  'label' => 'Medical Certificate'],
-                        ['key' => 'nbi_clearance',        'name' => 'nbi_clearance_file',        'label' => 'Clearances — NBI Clearance'],
-                        ['key' => 'financial_clearance',  'name' => 'financial_clearance_file',  'label' => 'Clearance from Financial Obligations & Property Accountability (transfer / reemployment)'],
-                        ['key' => 'neuro_exam',           'name' => 'neuro_exam_file',           'label' => 'Neuro-psychiatric Examination'],
-                        ['key' => 'supporting_licenses',  'name' => 'supporting_licenses_file',  'label' => 'Licenses, if necessary'],
-                        ['key' => 'performance_eval',     'name' => 'performance_eval_file',     'label' => 'Performance Evaluation Documents'],
-                        ['key' => 'commendation',         'name' => 'commendation_file',         'label' => 'Commendation / Certificate of Achievement / Award, etc.'],
-                        ['key' => 'disciplinary',         'name' => 'disciplinary_file',         'label' => 'Disciplinary / Action Documents'],
-                        ['key' => 'other_records',        'name' => 'other_records_file',        'label' => 'Other Employee Records'],
-                    ];
-                @endphp
+                <div class="doc-intro">
+                    <div class="doc-intro-text">
+                        <p class="doc-intro-lead">Attach the 201-file documents you have on hand. <strong>Every field is optional</strong> — leave a document blank if it does not apply or is not yet available, and add it later from Edit Employee.</p>
+                        <p class="doc-intro-formats">
+                            <span class="doc-intro-formats-label">Accepted</span>
+                            @foreach (\App\Models\EmployeeSupportingDocument::EXTENSIONS as $ext)
+                                @continue($ext === 'jpeg')
+                                <span class="doc-format-chip">{{ strtoupper($ext) }}</span>
+                            @endforeach
+                            <span class="doc-intro-size">up to {{ \App\Models\EmployeeSupportingDocument::maxSizeLabel() }} each</span>
+                        </p>
+                    </div>
+                    <div class="doc-progress" role="status" aria-live="polite">
+                        <div class="doc-progress-count"><span data-attach-count>0</span><span class="doc-progress-total">/{{ count(\App\Models\EmployeeSupportingDocument::documents()) }}</span></div>
+                        <div class="doc-progress-label">attached</div>
+                        <div class="doc-progress-track"><div class="doc-progress-fill" data-attach-fill style="width:0%;"></div></div>
+                    </div>
+                </div>
 
-                @foreach ($supportingDocs as $doc)
-                    <div class="wizard-govid-group" style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--theme-primary-light);">
-                        <label class="wizard-label-text">{{ $doc['label'] }}</label>
-                        <input type="file" name="{{ $doc['name'] }}" accept="image/png,image/jpeg" class="wizard-input">
-                        <p class="wizard-hint">PNG or JPG only — Max 5 MB</p>
-                        <div class="wizard-supporting-current" data-current-for="{{ $doc['key'] }}" style="display:none;"></div>
+                {{-- Exceeding post_max_size makes PHP discard the entire body,
+                     CSRF token included, and the admin gets 419 Page Expired
+                     with seven steps of typing gone. The running total is
+                     checked before the wizard is allowed to submit. --}}
+                <p class="doc-payload-warning" data-payload-warning role="alert" hidden></p>
+
+                @foreach (\App\Models\EmployeeSupportingDocument::GROUPS as $group)
+                    <div class="doc-group">
+                        <div class="doc-group-head">
+                            <h5 class="doc-group-title">
+                                @if ($group['icon'] === 'form')
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                @elseif ($group['icon'] === 'shield')
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                                @else
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M8.5 12.5 7 22l5-3 5 3-1.5-9.5"/></svg>
+                                @endif
+                                <span>{{ $group['title'] }}</span>
+                            </h5>
+                            <span class="doc-group-hint">{{ $group['hint'] }}</span>
+                        </div>
+
+                        <div class="doc-grid">
+                            @foreach ($group['items'] as $doc)
+                                <div class="doc-card" data-doc-card="{{ $doc['key'] }}">
+                                    <div class="doc-face">
+                                        <input type="file"
+                                               id="doc-input-{{ $doc['key'] }}"
+                                               name="{{ $doc['input'] }}"
+                                               accept="{{ \App\Models\EmployeeSupportingDocument::accept() }}"
+                                               class="doc-input"
+                                               data-doc-key="{{ $doc['key'] }}"
+                                               aria-label="Upload {{ $doc['label'] }}">
+                                        <span class="doc-thumb" data-doc-thumb>
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><polyline points="7 9 12 4 17 9"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                                        </span>
+                                        <span class="doc-text">
+                                            <span class="doc-name">{{ $doc['label'] }}</span>
+                                            <span class="doc-note">{{ $doc['note'] }}</span>
+                                            <span class="doc-meta" data-doc-meta>Click to browse, or drop a file here</span>
+                                        </span>
+                                        <span class="doc-cta" data-doc-cta>Browse</span>
+                                    </div>
+                                    <div class="doc-picked" data-doc-picked hidden>
+                                        <svg class="doc-picked-tick" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <span class="doc-picked-name" data-doc-filename></span>
+                                        <span class="doc-picked-size" data-doc-filesize></span>
+                                        <button type="button" class="doc-remove" data-doc-remove aria-label="Remove the file chosen for {{ $doc['label'] }}">Remove</button>
+                                    </div>
+                                    <p class="doc-error" data-doc-error role="alert" hidden></p>
+                                    <div class="wizard-supporting-current" data-current-for="{{ $doc['key'] }}" style="display:none;"></div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 @endforeach
             </div>
@@ -475,6 +571,6 @@
 </div>
 
 @push('scripts')
-    @vite(['resources/js/admin/personnel/employeeWizard.js', 'resources/js/admin/personnel/employeeWizardComplete.js', 'resources/js/admin/personnel/employeeWizardValidation.js'])
+    @vite(['resources/js/admin/personnel/employeeWizard.js', 'resources/js/admin/personnel/employeeWizardComplete.js', 'resources/js/admin/personnel/employeeWizardValidation.js', 'resources/js/admin/personnel/employeeWizardDocuments.js'])
 @endpush
 
