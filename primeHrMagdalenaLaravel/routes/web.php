@@ -453,6 +453,7 @@ Route::get('/admin/attendance/employee-appointment/{employeeId}', [AttendanceCon
 Route::get('/admin/attendance/dtr-summary/{employeeId}', [AttendanceController::class, 'dtrSummary'])->middleware('auth')->name('admin.attendance.dtr-summary');
 Route::get('/admin/attendance/{attendanceId}/accredited-log', [AttendanceController::class, 'getAccreditedHoursLog'])->middleware('auth')->name('admin.attendance.accredited-log');
 Route::post('/admin/attendance/correct', [AttendanceController::class, 'correctAttendance'])->middleware('auth')->name('admin.attendance.correct');
+Route::post('/admin/attendance/bulk-import', [AttendanceController::class, 'bulkImport'])->middleware('auth')->name('admin.attendance.bulk-import');
 
 // Attendance Exemption Routes
 Route::get('/admin/attendance/exemptions/options', [AttendanceController::class, 'getExemptionOptions'])->middleware('auth')->name('admin.attendance.exemptions.options');

@@ -14,15 +14,22 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('user_notification_preferences', function (Blueprint $table) {
-            // Same opt-out model as the existing columns: default on, so nobody
-            // silently loses a notification they were already receiving.
-            $table->boolean('payslip_available')->default(true)->after('employee_requests');
-            $table->boolean('leave_status')->default(true)->after('payslip_available');
-            $table->boolean('dtr_reminder')->default(true)->after('leave_status');
-            $table->boolean('attendance_alert')->default(true)->after('dtr_reminder');
-            $table->boolean('email_digest')->default(true)->after('attendance_alert');
-        });
+        if (! Schema::hasTable('user_notification_preferences')) {
+            return;
+        }
+
+        $columns = ['payslip_available', 'leave_status', 'dtr_reminder', 'attendance_alert', 'email_digest'];
+        foreach ($columns as $column) {
+            if (Schema::hasColumn('user_notification_preferences', $column)) {
+                continue;
+            }
+
+            Schema::table('user_notification_preferences', function (Blueprint $table) use ($column) {
+                // Same opt-out model as the existing columns: default on, so nobody
+                // silently loses a notification they were already receiving.
+                $table->boolean($column)->default(true);
+            });
+        }
     }
 
     public function down(): void

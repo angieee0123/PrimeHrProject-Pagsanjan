@@ -24,7 +24,7 @@ class TravelOrderController extends Controller
             ->orderBy('approved_at', 'desc')
             ->paginate($perPage, ['*'], 'approved_page');
 
-        $disapprovedOrders = TravelOrder::with(['employee.employmentDetail.departmentRelation', 'approver', 'companions.employee'])
+        $disapprovedOrders = TravelOrder::with(['employee.employmentDetail.departmentRelation', 'employee.employmentDetail.designationRelation', 'approver.employee', 'disapprover.employee', 'companions.employee'])
             ->where('status', 'rejected')
             ->orderBy('updated_at', 'desc')
             ->paginate($perPage, ['*'], 'disapproved_page');

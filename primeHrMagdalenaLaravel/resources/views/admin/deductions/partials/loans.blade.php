@@ -45,7 +45,7 @@
                         $cutoffSchedule = $loan->custom_cutoff_schedule;
                     } else {
                         // Use deduction type's default schedule
-                        $schedule = $loan->deductionType->schedules->first();
+                        $schedule = $loan->deductionType?->schedules?->first();
                         $cutoffSchedule = $schedule ? $schedule->cutoff_schedule : 'BOTH_SPLIT';
                     }
 
@@ -68,10 +68,11 @@
                     // Determine provider from loan type code
                     $provider = 'Other';
                     $providerClass = 'is-other';
-                    if (str_contains($loan->deductionType->code, 'GSIS')) {
+                    $deductionCode = $loan->deductionType?->code ?? '';
+                    if (str_contains($deductionCode, 'GSIS')) {
                         $provider = 'GSIS';
                         $providerClass = 'is-gsis';
-                    } elseif (str_contains($loan->deductionType->code, 'PAGIBIG')) {
+                    } elseif (str_contains($deductionCode, 'PAGIBIG')) {
                         $provider = 'Pag-IBIG';
                         $providerClass = 'is-pagibig';
                     }
@@ -83,32 +84,36 @@
                     ];
                     $statusClass = $statusClasses[$loan->status] ?? 'is-active';
 
+                    $loanEmp = $loan->employee;
+                    $loanType = $loan->deductionType;
+                    $loanFullName = $loanEmp ? trim(($loanEmp->first_name ?? '') . ' ' . ($loanEmp->last_name ?? '')) : '';
+                    $loanFullName = $loanFullName !== '' ? $loanFullName : 'Unknown Employee';
                     $isSettled = $remaining <= 0;
                     $barClass = $isSettled ? 'is-settled' : ($loan->status === 'SUSPENDED' ? 'is-suspended' : 'is-active');
                 @endphp
-                <tr data-employee="{{ strtolower($loan->employee->first_name . ' ' . $loan->employee->last_name) }}"
+                <tr data-employee="{{ strtolower($loanFullName) }}"
                     data-loan-type="{{ $loan->deduction_type_id }}"
                     data-status="{{ $loan->status }}">
                     <td class="lt-c-employee">
                         <div class="lt-employee">
-                            @if($loan->employee->photo)
-                                <img src="{{ $loan->employee->photo }}" alt="" class="lt-avatar">
+                            @if($loanEmp?->photo)
+                                <img src="{{ $loanEmp->photo }}" alt="" class="lt-avatar">
                             @else
                                 <div class="lt-avatar lt-avatar-initials" style="background: {{ $avatarColors[($loan->employee_id ?? 0) % count($avatarColors)] }};">
-                                    {{ getInitials($loan->employee->first_name . ' ' . $loan->employee->last_name) }}
+                                    {{ getInitials($loanFullName) }}
                                 </div>
                             @endif
                             <div class="lt-employee-text">
-                                <p class="lt-primary">{{ $loan->employee->first_name }} {{ $loan->employee->last_name }}</p>
-                                <p class="lt-secondary">{{ $loan->employee->employmentDetail->departmentRelation->name ?? 'No department' }}</p>
+                                <p class="lt-primary">{{ $loanFullName }}</p>
+                                <p class="lt-secondary">{{ $loanEmp?->employmentDetail?->departmentRelation?->name ?? 'No department' }}</p>
                             </div>
                         </div>
                     </td>
                     <td class="lt-c-loan">
-                        <p class="lt-primary">{{ $loan->deductionType->name }}</p>
+                        <p class="lt-primary">{{ $loanType->name ?? 'Unknown Deduction' }}</p>
                         <div class="lt-loan-meta">
                             <span class="lt-tag {{ $providerClass }}">{{ $provider }}</span>
-                            <span class="lt-code">{{ $loan->deductionType->code }}</span>
+                            <span class="lt-code">{{ $loanType->code ?? '—' }}</span>
                         </div>
                     </td>
                     <td class="lt-c-balance lt-num">
@@ -155,7 +160,7 @@
                             <button type="button" class="lt-action-btn lt-menu-btn" data-menu="loanMenu{{ $loan->id }}"
                                     onclick="toggleLoanMenu(event)" aria-haspopup="menu" aria-expanded="false"
                                     title="Actions"
-                                    aria-label="Actions for {{ $loan->employee->first_name }} {{ $loan->employee->last_name }}">
+                                    aria-label="Actions for {{ $loanFullName }}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                     <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
                                 </svg>
@@ -180,7 +185,7 @@
                                 Edit loan
                             </button>
                             <div class="lt-menu-sep"></div>
-                            <button type="button" role="menuitem" class="lt-menu-item is-danger" onclick="closeLoanMenu(); deleteEmployeeLoan({{ $loan->id }}, @js($loan->employee->first_name . ' ' . $loan->employee->last_name), @js($loan->deductionType->name), {{ $remaining }})">
+                            <button type="button" role="menuitem" class="lt-menu-item is-danger" onclick="closeLoanMenu(); deleteEmployeeLoan({{ $loan->id }}, @js($loanFullName), @js($loanType->name ?? 'Unknown Deduction'), {{ $remaining }})">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="3 6 5 6 21 6"/>
                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>

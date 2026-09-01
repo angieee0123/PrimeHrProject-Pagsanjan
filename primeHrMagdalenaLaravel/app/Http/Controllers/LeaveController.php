@@ -1167,22 +1167,23 @@ class LeaveController extends Controller
             $filePath = $file->store('temp_leave_imports');
             $fullPath = Storage::path($filePath);
 
-            $parseResult = LeaveImportService::parseExcelFile($fullPath);
-            
-            if (!$parseResult['success']) {
+            try {
+                $parseResult = LeaveImportService::parseExcelFile($fullPath);
+
+                if (!$parseResult['success']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $parseResult['message'],
+                    ], 422);
+                }
+
+                $importResult = LeaveImportService::importLeaveRecords(
+                    $validated['employee_id'],
+                    $parseResult['records']
+                );
+            } finally {
                 Storage::delete($filePath);
-                return response()->json([
-                    'success' => false,
-                    'message' => $parseResult['message'],
-                ], 422);
             }
-
-            $importResult = LeaveImportService::importLeaveRecords(
-                $validated['employee_id'],
-                $parseResult['records']
-            );
-
-            Storage::delete($filePath);
 
             if (!$importResult['success']) {
                 return response()->json([

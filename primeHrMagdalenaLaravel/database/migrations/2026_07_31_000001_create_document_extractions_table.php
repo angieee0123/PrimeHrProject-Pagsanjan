@@ -17,6 +17,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('document_extractions')) {
+            return;
+        }
+
         Schema::create('document_extractions', function (Blueprint $table) {
             $table->id();
 

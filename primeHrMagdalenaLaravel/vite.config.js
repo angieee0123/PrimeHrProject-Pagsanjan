@@ -68,6 +68,7 @@ export default defineConfig({
                 'resources/js/admin/attendance/correctAttendanceModal.js',
                 'resources/js/admin/attendance/detailedDtrModal.js',
                 'resources/js/admin/attendance/successModal.js',
+                'resources/js/admin/attendance/bulkImportAttendance.js',
                 'resources/js/admin/attendance/attendance-settings-tab.js',
                 'resources/js/admin/attendance/attendanceScanner.js',
                 'resources/js/admin/leaveAndBenefits/adminLeaveAndBenefits.js',

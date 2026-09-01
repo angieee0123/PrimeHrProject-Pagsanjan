@@ -2120,6 +2120,275 @@ class AttendanceController extends Controller
     }
 
     /**
+     * Bulk import attendance records from CSV.
+     *
+     * One row = one employee-day (employee_id + date). Accepted columns:
+     * employee_id, date, am_in, am_out, pm_in, pm_out, ot_in, ot_out
+     * Times are HH:MM (24h). Empty time cells mean no punch for that slot.
+     * Existing rows for the same employee + date are updated so a correction
+     * can be delivered as a CSV re-upload without deleting first.
+     */
+    public function bulkImport(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:5120',
+        ]);
+
+        $file = $request->file('csv_file');
+        $raw = file($file->getRealPath());
+        if ($raw === false || count($raw) === 0) {
+            return response()->json(['success' => false, 'message' => 'CSV file is empty.'], 422);
+        }
+        $csvData = array_map('str_getcsv', $raw);
+        $headers = array_shift($csvData);
+
+        if (!$headers || count(array_filter($headers, fn ($h) => trim((string) $h) !== '')) === 0) {
+            return response()->json(['success' => false, 'message' => 'CSV file is missing a header row.'], 422);
+        }
+
+        $headers[0] = ltrim($headers[0], "\xEF\xBB\xBF");
+        $headers = array_map(fn ($h) => trim((string) $h), $headers);
+
+        // Normalise headers to canonical keys so "Employee ID" / "employee_id" both work
+        $canonical = [];
+        foreach ($headers as $idx => $h) {
+            $key = strtolower(str_replace([' ', '-'], '_', trim($h)));
+            $key = preg_replace('/[^a-z0-9_]/', '', $key);
+            // aliases
+            $aliases = [
+                'employee_id' => ['employee_id', 'employeeid', 'emp_id', 'empid', 'employee_code', 'employeecode'],
+                'date'        => ['date', 'attendance_date', 'attendancedate'],
+                'am_in'       => ['am_in', 'amin', 'am_in_time', 'morning_in'],
+                'am_out'      => ['am_out', 'amout', 'am_out_time', 'morning_out'],
+                'pm_in'       => ['pm_in', 'pmin', 'pm_in_time', 'afternoon_in'],
+                'pm_out'      => ['pm_out', 'pmout', 'pm_out_time', 'afternoon_out'],
+                'ot_in'       => ['ot_in', 'otin', 'ot_in_time', 'overtime_in'],
+                'ot_out'      => ['ot_out', 'otout', 'ot_out_time', 'overtime_out'],
+            ];
+            $resolved = $key;
+            foreach ($aliases as $canon => $alts) {
+                if (in_array($key, $alts, true)) { $resolved = $canon; break; }
+            }
+            $canonical[$idx] = $resolved;
+        }
+
+        $required = ['employee_id', 'date'];
+        foreach ($required as $r) {
+            if (!in_array($r, $canonical, true)) {
+                return response()->json(['success' => false, 'message' => "Missing required column: {$r}"], 422);
+            }
+        }
+
+        $idxMap = [];
+        foreach ($canonical as $idx => $canon) {
+            if (!isset($idxMap[$canon])) $idxMap[$canon] = $idx;
+        }
+
+        $imported = 0;
+        $updated = 0;
+        $skipped = 0;
+        $errors = [];
+
+        // Normalise a time string to H:i or null. Accepts H:i, H:i:s, h:i A, etc.
+        $parseTime = function (?string $v): ?string {
+            $v = trim((string) $v);
+            if ($v === '' || strtolower($v) === 'null' || $v === '-') return null;
+            // Allow "8:00", "08:00:00", "8:00 AM"
+            $formats = ['H:i:s', 'H:i', 'g:i A', 'g:iA', 'h:i A', 'h:iA', 'G:i', 'G:i:s'];
+            foreach ($formats as $fmt) {
+                try {
+                    $c = Carbon::createFromFormat($fmt, $v);
+                    if ($c !== false) return $c->format('H:i');
+                } catch (\Throwable $e) {}
+            }
+            try {
+                return Carbon::parse($v)->format('H:i');
+            } catch (\Throwable $e) {
+                return null; // caller will report
+            }
+        };
+
+        $importedIds = [];
+
+        foreach ($csvData as $rowIdx => $row) {
+            $lineNo = $rowIdx + 2;
+
+            if (count(array_filter($row, fn ($v) => trim((string) $v) !== '')) === 0) {
+                continue;
+            }
+
+            if (count($row) !== count($headers)) {
+                $skipped++;
+                $errors[] = "Row {$lineNo}: Column count mismatch (expected " . count($headers) . ", got " . count($row) . ")";
+                continue;
+            }
+
+            $data = [];
+            foreach ($idxMap as $canon => $idx) {
+                $data[$canon] = isset($row[$idx]) ? trim((string) $row[$idx]) : null;
+                if ($data[$canon] === '') $data[$canon] = null;
+            }
+
+            if (empty($data['employee_id']) || empty($data['date'])) {
+                $skipped++;
+                $missing = [];
+                if (empty($data['employee_id'])) $missing[] = 'employee_id';
+                if (empty($data['date'])) $missing[] = 'date';
+                $errors[] = "Row {$lineNo}: Missing required field(s): " . implode(', ', $missing);
+                continue;
+            }
+
+            // Validate + parse date
+            try {
+                $dateStr = Carbon::parse($data['date'])->format('Y-m-d');
+            } catch (\Throwable $e) {
+                $skipped++;
+                $errors[] = "Row {$lineNo}: Invalid date '{$data['date']}' (use YYYY-MM-DD)";
+                continue;
+            }
+
+            $employee = Employee::where('employee_id', $data['employee_id'])->first();
+            if (!$employee) {
+                $skipped++;
+                $errors[] = "Row {$lineNo}: Employee ID '{$data['employee_id']}' not found";
+                continue;
+            }
+
+            $timeFields = ['am_in', 'am_out', 'pm_in', 'pm_out', 'ot_in', 'ot_out'];
+            $times = [];
+            $timeError = null;
+            foreach ($timeFields as $tf) {
+                $rawVal = $data[$tf] ?? null;
+                if ($rawVal === null || $rawVal === '') {
+                    $times[$tf] = null;
+                } else {
+                    $parsed = $parseTime($rawVal);
+                    if ($parsed === null) {
+                        $timeError = "Row {$lineNo}: Invalid time '{$rawVal}' for {$tf} (use HH:MM)";
+                        break;
+                    }
+                    $times[$tf] = $parsed;
+                }
+            }
+            if ($timeError) {
+                $skipped++;
+                $errors[] = $timeError;
+                continue;
+            }
+
+            // At least one punch should be present
+            if (!$times['am_in'] && !$times['am_out'] && !$times['pm_in'] && !$times['pm_out'] && !$times['ot_in'] && !$times['ot_out']) {
+                $skipped++;
+                $errors[] = "Row {$lineNo}: No time punches provided";
+                continue;
+            }
+
+            try {
+                DB::transaction(function () use ($employee, $dateStr, $times, &$imported, &$updated, &$importedIds) {
+                    $existing = Attendance::where('employee_id', $employee->id)->where('date', $dateStr)->first();
+                    $isUpdate = $existing !== null;
+                    $oldLog = $isUpdate ? $existing->accreditedHoursLogs()->latest()->first() : null;
+
+                    $attendance = Attendance::updateOrCreate(
+                        ['employee_id' => $employee->id, 'date' => $dateStr],
+                        [
+                            'am_in'  => $times['am_in'],
+                            'am_out' => $times['am_out'],
+                            'pm_in'  => $times['pm_in'],
+                            'pm_out' => $times['pm_out'],
+                            'ot_in'  => $times['ot_in'],
+                            'ot_out' => $times['ot_out'],
+                        ]
+                    );
+
+                    // Pass slips for this date affect accreditation
+                    $passSlipsForDate = PassSlip::where('employee_id', $employee->id)
+                        ->where('status', 'approved')
+                        ->where('date', $dateStr)
+                        ->get();
+
+                    $computationResult = $this->computeAccreditedHours(
+                        $employee->id,
+                        $dateStr,
+                        $times['am_in'],
+                        $times['am_out'],
+                        $times['pm_in'],
+                        $times['pm_out'],
+                        $times['ot_in'],
+                        $times['ot_out'],
+                        $passSlipsForDate
+                    );
+
+                    $accredited = $computationResult['accredited_minutes'];
+                    $totalHours = $this->computeTotalHours(
+                        $times['am_in'], $times['am_out'], $times['pm_in'], $times['pm_out'], $times['ot_in'], $times['ot_out']
+                    );
+
+                    $attendance->update([
+                        'accredited_hours' => $accredited,
+                        'total_hours' => $totalHours,
+                    ]);
+
+                    if ($computationResult['log_data']) {
+                        $hadPreviousDeductions = $oldLog && ($oldLog->late_deducted_from_leave || $oldLog->undertime_deducted_from_leave);
+
+                        $accreditedLog = AccreditedHoursLog::updateOrCreate(
+                            ['attendance_id' => $attendance->id],
+                            [
+                                'employee_id' => $employee->id,
+                                'schedule_id' => $computationResult['log_data']['schedule_id'],
+                                'am_accredited_minutes' => $computationResult['log_data']['am_accredited_minutes'],
+                                'pm_accredited_minutes' => $computationResult['log_data']['pm_accredited_minutes'],
+                                'ot_minutes' => $computationResult['log_data']['ot_minutes'],
+                                'late_minutes' => $computationResult['log_data']['late_minutes'],
+                                'undertime_minutes' => $computationResult['log_data']['undertime_minutes'],
+                                'total_accredited_minutes' => $computationResult['log_data']['total_accredited_minutes'],
+                                'total_actual_minutes' => $computationResult['log_data']['total_actual_minutes'],
+                                'am_grace_applied' => $computationResult['log_data']['am_grace_applied'],
+                                'pm_grace_applied' => $computationResult['log_data']['pm_grace_applied'],
+                                'computation_notes' => $isUpdate ? 'Bulk import update at ' . now()->format('Y-m-d H:i:s') : 'Bulk import at ' . now()->format('Y-m-d H:i:s'),
+                            ]
+                        );
+
+                        DailySalaryComputation::computeFromAccreditedLog($accreditedLog);
+
+                        if ($hadPreviousDeductions) {
+                            $recalc = new \App\Services\AttendanceCorrectionLeaveRecalculationService();
+                            $recalc->recalculateLeaveDeductions($oldLog, $accreditedLog);
+                        } else {
+                            (new LateDeductionService())->processLateDeduction($accreditedLog);
+                            (new UndertimeDeductionService())->processUndertimeDeduction($accreditedLog);
+                        }
+                    }
+
+                    if ($isUpdate) $updated++; else $imported++;
+                    $importedIds[] = $attendance->id;
+                });
+            } catch (\Throwable $e) {
+                $skipped++;
+                $errors[] = "Row {$lineNo}: " . $e->getMessage();
+                Log::warning('Bulk attendance import row failed', ['row' => $lineNo, 'error' => $e->getMessage()]);
+            }
+        }
+
+        $totalOk = $imported + $updated;
+        $message = "Imported {$totalOk} attendance record(s)";
+        if ($imported > 0 && $updated > 0) $message .= " ({$imported} new, {$updated} updated)";
+        elseif ($updated > 0) $message .= " ({$updated} updated)";
+        if ($skipped > 0) $message .= ". Skipped {$skipped} row(s).";
+        foreach ($errors as $err) $message .= " {$err}";
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'imported' => $imported,
+            'updated' => $updated,
+            'skipped' => $skipped,
+            'errors' => $errors,
+        ]);
+    }
+
+    /**
      * Get options for exemption dropdown based on type
      */
     public function getExemptionOptions(Request $request)

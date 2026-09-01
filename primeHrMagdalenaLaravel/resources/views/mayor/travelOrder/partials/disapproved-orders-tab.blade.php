@@ -20,19 +20,21 @@
             </thead>
             <tbody>
                 @forelse($disapprovedOrders as $order)
-                <tr class="disapproved-order-row to-row" data-department="{{ $order->employee->employmentDetail->departmentRelation->name ?? '' }}" data-mode="{{ $order->transportation_mode ?? '' }}" data-travel-date="{{ $order->travel_date->format('Y-m-d') }}">
+                @php $disEmpMayor = $order->employee; @endphp
+                <tr class="disapproved-order-row to-row" data-department="{{ $disEmpMayor?->employmentDetail?->departmentRelation?->name ?? '' }}" data-mode="{{ $order->transportation_mode ?? '' }}" data-travel-date="{{ $order->travel_date?->format('Y-m-d') ?? '' }}">
                     <td class="to-td">
                         <div class="emp-cell to-emp-cell">
                             @include('partials.travel-party-avatars', ['order' => $order])
                             <div class="to-emp-info">
-                                <p class="to-emp-name">{{ $order->employee->first_name }} {{ $order->employee->last_name }}</p>
-                                <p class="to-emp-id">{{ $order->employee->employee_id }}@if($order->companions->count()) · +{{ $order->companions->count() }} {{ Str::plural('companion', $order->companions->count()) }}@endif</p>
+                                <p class="to-emp-name">{{ $disEmpMayor ? trim(($disEmpMayor->first_name ?? '') . ' ' . ($disEmpMayor->last_name ?? '')) : 'Unknown Employee' }}</p>
+                                <p class="to-emp-id">{{ $disEmpMayor->employee_id ?? '—' }}@if($order->companions->count()) · +{{ $order->companions->count() }} {{ Str::plural('companion', $order->companions->count()) }}@endif</p>
                             </div>
                         </div>
                     </td>
                     <td class="to-td to-td-accent">{{ $order->destination }}</td>
-                    <td class="to-td to-td-strong">{{ \Carbon\Carbon::parse($order->travel_date)->format('M d, Y') }}</td>
-                    <td class="to-td to-td-red">{{ $order->disapprover ? ($order->disapprover->employee ? $order->disapprover->employee->first_name . ' ' . $order->disapprover->employee->last_name : 'Admin User') : 'Admin User' }}</td>
+                    <td class="to-td to-td-strong">{{ $order->travel_date ? \Carbon\Carbon::parse($order->travel_date)->format('M d, Y') : '—' }}</td>
+                    @php $disActorMayor = $order->disapprover ?? $order->approver; @endphp
+                    <td class="to-td to-td-red">{{ $disActorMayor ? ($disActorMayor->employee ? trim(($disActorMayor->employee->first_name ?? '') . ' ' . ($disActorMayor->employee->last_name ?? '')) ?: ($disActorMayor->username ?? 'Admin User') : ($disActorMayor->username ?? 'Admin User')) : 'Admin User' }}</td>
                     <td class="to-td">
                         <span class="to-td-muted">{{ Str::limit($order->disapproval_reason ?? $order->remarks ?? 'No reason provided', 50) }}</span>
                     </td>

@@ -502,6 +502,15 @@ class EmployeeRegistrationController extends Controller
 
     public function bulkImport(Request $request)
     {
+        // Bulk import touches N employees × ~8 tables + 2 mails per row.
+        // Under php-fpm / nginx the public/.htaccess php_value max_execution_time 300
+        // is not applied (mod_php only), so the default 30 s kills a 200-row file
+        // mid-transaction. Raise for this request only — splitting into
+        // docs/bulk_import_parts/ (50 rows) is still the safer path for slow SMTP.
+        @set_time_limit(300);
+        @ini_set('max_execution_time', '300');
+        @ini_set('max_input_time', '300');
+
         try {
             $request->validate([
                 'csv_file' => 'required|file|mimes:csv,txt|max:5120',
@@ -510,6 +519,17 @@ class EmployeeRegistrationController extends Controller
             $file = $request->file('csv_file');
             $csvData = array_map('str_getcsv', file($file->getRealPath()));
             $headers = array_shift($csvData);
+
+            if (!$headers || count(array_filter($headers, fn ($h) => trim((string) $h) !== '')) === 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'CSV file is empty or missing a header row.',
+                ], 422);
+            }
+
+            // Strip UTF-8 BOM from first header (Excel-saved CSVs) and trim.
+            $headers[0] = ltrim($headers[0], "\xEF\xBB\xBF");
+            $headers = array_map(fn ($h) => trim((string) $h), $headers);
 
             $imported = 0;
             $skipped = 0;
@@ -537,6 +557,25 @@ class EmployeeRegistrationController extends Controller
                     fn ($value) => $value === '' ? null : $value,
                     array_combine($headers, $row)
                 );
+
+                // Skip fully-blank rows (trailing newlines).
+                if (count(array_filter($row, fn ($v) => trim((string) $v) !== '')) === 0) {
+                    continue;
+                }
+
+                // Required-field guard: prevents creating departments / designations
+                // with NULL names when a required column is empty.
+                $missing = [];
+                foreach (['employee_id', 'first_name', 'last_name', 'department', 'designation'] as $required) {
+                    if (empty($data[$required])) {
+                        $missing[] = $required;
+                    }
+                }
+                if ($missing) {
+                    $skipped++;
+                    $errors[] = "Row " . ($index + 2) . ": Missing required field(s): " . implode(', ', $missing);
+                    continue;
+                }
 
                 // Check if employee ID already exists
                 if (Employee::where('employee_id', $data['employee_id'])->exists()) {
@@ -568,6 +607,7 @@ class EmployeeRegistrationController extends Controller
 
                         // Create User Account — derive username from name,
                         // matching the wizard's auto-fill: last name + first name.
+                        $rawPassword = $data['password'] ?? 'password123';
                         $employeeUser = User::create([
                             'employee_id' => $employee->id,
                             'email' => $data['email'] ?? $data['employee_id'] . '@lgu.gov.ph',
@@ -575,7 +615,7 @@ class EmployeeRegistrationController extends Controller
                                 $data['first_name'] ?? '',
                                 $data['last_name'] ?? ''
                             ),
-                            'password' => $data['password'] ?? Hash::make('password123'),
+                            'password' => Hash::make($rawPassword),
                             'roles' => ['employee'],
                             'status' => 'Active',
                         ]);
@@ -653,7 +693,7 @@ class EmployeeRegistrationController extends Controller
                             'details' => $this->credentialsFor(
                                 $employee,
                                 $employeeUser,
-                                $data['password'] ?? 'password123',
+                                $rawPassword,
                                 ['employee']
                             ),
                         ];
