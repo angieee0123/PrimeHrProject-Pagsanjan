@@ -86,24 +86,11 @@ class EmployeeRegistrationController extends Controller
                 'designation_id' => ['required', 'exists:designations,id'],
                 'employment_status' => ['required', 'in:Permanent,Temporary,Coterminous,Casual,Contractual,Job Order'],
                 'appointment_date' => ['required', 'date'],
-                'gsis_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
-                'philhealth_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
-                'pagibig_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
-                'tin_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
-                'license_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
-                'pds_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                'appointment_form_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                'position_description_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                'medical_certificate_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                'nbi_clearance_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                'financial_clearance_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                'neuro_exam_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                'supporting_licenses_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                'performance_eval_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                'commendation_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                'disciplinary_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-                'other_records_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-            ], [], [
+                // The five ID scans and the twelve 201-file documents. Both
+                // sets of rules live on their model beside the `accept`
+                // attribute the wizard renders from, so the picker and the
+                // validator cannot disagree about what may be uploaded.
+            ] + GovernmentId::rules() + EmployeeSupportingDocument::rules(), [], [
                 // Without these, Laravel humanises the column name and the
                 // admin is told "the user email field is required" for a box
                 // labelled "Email Address".
@@ -113,24 +100,7 @@ class EmployeeRegistrationController extends Controller
                 'department'        => 'department',
                 'designation_id'    => 'designation',
                 'roles'             => 'role',
-                'gsis_file'                   => 'GSIS file',
-                'philhealth_file'             => 'PhilHealth file',
-                'pagibig_file'                => 'Pag-IBIG file',
-                'tin_file'                    => 'TIN file',
-                'license_file'                => 'license file',
-                'pds_file'                    => 'CS Form 212 (PDS) file',
-                'appointment_form_file'       => 'CS Form 33 (Appointment Form) file',
-                'position_description_file'   => 'Position Description Form file',
-                'medical_certificate_file'    => 'Medical Certificate file',
-                'nbi_clearance_file'          => 'NBI Clearance file',
-                'financial_clearance_file'    => 'financial clearance file',
-                'neuro_exam_file'             => 'Neuro-psychiatric Examination file',
-                'supporting_licenses_file'    => 'Licenses file',
-                'performance_eval_file'       => 'Performance Evaluation file',
-                'commendation_file'           => 'Commendation / Award file',
-                'disciplinary_file'           => 'Disciplinary / Action file',
-                'other_records_file'          => 'other records file',
-            ]);
+            ] + GovernmentId::attributeNames() + EmployeeSupportingDocument::attributeNames());
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()
                 ->withErrors($e->validator)
@@ -149,7 +119,7 @@ class EmployeeRegistrationController extends Controller
                 'middle_name' => $request->middle_name,
                 'last_name' => $request->last_name,
                 'suffix' => $request->suffix,
-                'photo' => $this->handleFileUpload($request->file('photo')),
+                'photo' => self::handleFileUpload($request->file('photo')),
                 'birth_date' => $request->birth_date,
                 'place_of_birth' => $request->place_of_birth,
                 'sex' => $request->sex,
@@ -231,36 +201,30 @@ class EmployeeRegistrationController extends Controller
             }
 
             // Create Government IDs
-            GovernmentId::create([
-                'employee_id' => $employee->id,
-                'gsis_no' => $request->gsis_no,
-                'gsis_file_path' => $this->handleFileUpload($request->file('gsis_file'), 'employees/government_ids'),
+            $govIdPaths = [
+                'employee_id'   => $employee->id,
+                'gsis_no'       => $request->gsis_no,
                 'philhealth_no' => $request->philhealth_no,
-                'philhealth_file_path' => $this->handleFileUpload($request->file('philhealth_file'), 'employees/government_ids'),
-                'pagibig_no' => $request->pagibig_no,
-                'pagibig_file_path' => $this->handleFileUpload($request->file('pagibig_file'), 'employees/government_ids'),
-                'tin_no' => $request->tin_no,
-                'tin_file_path' => $this->handleFileUpload($request->file('tin_file'), 'employees/government_ids'),
-                'license_no' => $request->license_no,
-                'license_file_path' => $this->handleFileUpload($request->file('license_file'), 'employees/government_ids'),
-            ]);
+                'pagibig_no'    => $request->pagibig_no,
+                'tin_no'        => $request->tin_no,
+                'license_no'    => $request->license_no,
+            ];
+            foreach (GovernmentId::columnMap() as $input => $column) {
+                $govIdPaths[$column] = self::handleFileUpload($request->file($input), 'employees/government_ids');
+            }
+            GovernmentId::create($govIdPaths);
 
-            // Create Supporting Documents (12 image-only files, PNG/JPG, 5 MB)
-            EmployeeSupportingDocument::create([
-                'employee_id'                       => $employee->id,
-                'pds_file_path'                     => $this->handleFileUpload($request->file('pds_file'), 'employees/supporting_documents'),
-                'appointment_form_file_path'        => $this->handleFileUpload($request->file('appointment_form_file'), 'employees/supporting_documents'),
-                'position_description_file_path'    => $this->handleFileUpload($request->file('position_description_file'), 'employees/supporting_documents'),
-                'medical_certificate_file_path'     => $this->handleFileUpload($request->file('medical_certificate_file'), 'employees/supporting_documents'),
-                'nbi_clearance_file_path'           => $this->handleFileUpload($request->file('nbi_clearance_file'), 'employees/supporting_documents'),
-                'financial_clearance_file_path'     => $this->handleFileUpload($request->file('financial_clearance_file'), 'employees/supporting_documents'),
-                'neuro_exam_file_path'              => $this->handleFileUpload($request->file('neuro_exam_file'), 'employees/supporting_documents'),
-                'licenses_file_path'                => $this->handleFileUpload($request->file('supporting_licenses_file'), 'employees/supporting_documents'),
-                'performance_eval_file_path'        => $this->handleFileUpload($request->file('performance_eval_file'), 'employees/supporting_documents'),
-                'commendation_file_path'            => $this->handleFileUpload($request->file('commendation_file'), 'employees/supporting_documents'),
-                'disciplinary_file_path'            => $this->handleFileUpload($request->file('disciplinary_file'), 'employees/supporting_documents'),
-                'other_records_file_path'           => $this->handleFileUpload($request->file('other_records_file'), 'employees/supporting_documents'),
-            ]);
+            // Create Supporting Documents. The twelve inputs and the columns
+            // they land in come from the model, so adding a document to the
+            // 201 file is one edit rather than four in step.
+            $supportingPaths = ['employee_id' => $employee->id];
+            foreach (EmployeeSupportingDocument::columnMap() as $input => $column) {
+                $supportingPaths[$column] = self::handleFileUpload(
+                    $request->file($input),
+                    'employees/supporting_documents'
+                );
+            }
+            EmployeeSupportingDocument::create($supportingPaths);
 
             $employeeUserDetails = $this->credentialsFor(
                 $employee,
@@ -485,15 +449,40 @@ class EmployeeRegistrationController extends Controller
         return $code;
     }
 
-    private function handleFileUpload($file, string $folder = 'employees/photos')
+    /**
+     * Stores one upload on the public disk and returns the URL it is served at.
+     *
+     * Public and static because the personnel update route stores the same
+     * three kinds of file — the photo, the ID scans and the 201-file documents
+     * — and a second copy of the naming rule is a second answer to "what is
+     * this file called on disk".
+     *
+     * The name is `<timestamp>_<random>_<sanitised original>`. The random
+     * segment is not decoration: `time()` is identical across the twelve
+     * documents submitted in one request, so an admin scanning each form to
+     * the same default filename ("scan.pdf" out of an office MFP, which is the
+     * normal case) had the second upload overwrite the first, leaving two
+     * columns pointing at one file with nothing to show it had happened.
+     *
+     * Sanitising matters more now that these are forms rather than photos:
+     * a filename like "CS Form 212 (Revised 2017) - Dela Cruz #2.xlsx" is
+     * stored verbatim into a `/storage/...` URL, where the `#` truncates the
+     * link and the document becomes unreachable from the wizard.
+     */
+    public static function handleFileUpload($file, string $folder = 'employees/photos')
     {
         if (!$file) {
             return null;
         }
 
         try {
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $extension = strtolower($file->getClientOriginalExtension());
+            $base = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $base = Str::limit(Str::slug($base) ?: 'file', 60, '');
+
+            $filename = time() . '_' . Str::random(6) . '_' . $base . ($extension ? '.' . $extension : '');
             $path = $file->storeAs($folder, $filename, 'public');
+
             return '/storage/' . $path;
         } catch (\Exception $e) {
             return null;

@@ -101,39 +101,55 @@ function editEmployee(id) {
                 });
             }
 
+            // Steps 5 and 6 are attachment cards. Clear whatever the previous
+            // employee left on them before painting this one's, or a card the
+            // last record filled still reads as attached.
+            if (window.resetWizardDocumentCards) window.resetWizardDocumentCards();
+
             // Step 5 — Gov IDs
             const gov = (d.government_ids || [])[0] || {};
-            setVal('gsis_no',       gov.gsis_no);
-            setVal('philhealth_no', gov.philhealth_no);
-            setVal('pagibig_no',    gov.pagibig_no);
-            setVal('tin_no',        gov.tin_no);
-            setVal('license_no',    gov.license_no);
-            ['gsis', 'philhealth', 'pagibig', 'tin', 'license'].forEach(function(key) {
-                showGovIdCurrentFile(key, gov[key + '_file_path']);
+            Object.keys(GOV_ID_COLUMNS).forEach(function(key) {
+                setVal(key + '_no', gov[key + '_no']);
+                showGovIdCurrentFile(key, gov[GOV_ID_COLUMNS[key]]);
             });
 
-            // Step 6 — Supporting Documents (image only, PNG/JPG, 5 MB)
+            // Step 6 — Supporting Documents (the 201 file)
             const sd = d.supporting_documents || d.supportingDocuments || null;
             const sdObj = Array.isArray(sd) ? (sd[0] || {}) : (sd || {});
-            const supportingMap = {
-                pds: 'pds_file_path',
-                appointment_form: 'appointment_form_file_path',
-                position_description: 'position_description_file_path',
-                medical_certificate: 'medical_certificate_file_path',
-                nbi_clearance: 'nbi_clearance_file_path',
-                financial_clearance: 'financial_clearance_file_path',
-                neuro_exam: 'neuro_exam_file_path',
-                supporting_licenses: 'licenses_file_path',
-                performance_eval: 'performance_eval_file_path',
-                commendation: 'commendation_file_path',
-                disciplinary: 'disciplinary_file_path',
-                other_records: 'other_records_file_path',
-            };
-            Object.keys(supportingMap).forEach(function(key) {
-                showSupportingCurrentFile(key, sdObj[supportingMap[key]]);
+            Object.keys(SUPPORTING_DOC_COLUMNS).forEach(function(key) {
+                showSupportingCurrentFile(key, sdObj[SUPPORTING_DOC_COLUMNS[key]]);
             });
         });
 }
+
+// Card key -> the column holding its stored path. These mirror
+// GovernmentId::columnMap() and EmployeeSupportingDocument::columnMap() on the
+// server, which key the same records by input name instead.
+const GOV_ID_COLUMNS = {
+    gsis: 'gsis_file_path',
+    philhealth: 'philhealth_file_path',
+    pagibig: 'pagibig_file_path',
+    tin: 'tin_file_path',
+    license: 'license_file_path',
+};
+
+// Card key -> the column holding its stored path. This mirrors
+// EmployeeSupportingDocument::columnMap() on the server, which keys the same
+// twelve documents by input name instead.
+const SUPPORTING_DOC_COLUMNS = {
+    pds: 'pds_file_path',
+    appointment_form: 'appointment_form_file_path',
+    position_description: 'position_description_file_path',
+    medical_certificate: 'medical_certificate_file_path',
+    nbi_clearance: 'nbi_clearance_file_path',
+    financial_clearance: 'financial_clearance_file_path',
+    neuro_exam: 'neuro_exam_file_path',
+    supporting_licenses: 'licenses_file_path',
+    performance_eval: 'performance_eval_file_path',
+    commendation: 'commendation_file_path',
+    disciplinary: 'disciplinary_file_path',
+    other_records: 'other_records_file_path',
+};
 
 function setVal(name, value) {
     const el = document.querySelector(`[name="${name}"]`);
@@ -141,67 +157,66 @@ function setVal(name, value) {
 }
 
 // A file input can't be pre-populated with an existing upload (browsers block
-// it), so edit mode shows a "current file" link next to it instead — built
-// with DOM methods rather than innerHTML since the path embeds the admin's
+// it), so edit mode shows what is already on the server as a strip inside the
+// card instead. The card is marked `doc-card-onfile` too: without it, a set of
+// empty-looking cards is the same screen whether the records are complete or
+// untouched.
+//
+// Built with DOM methods rather than innerHTML — the path embeds the admin's
 // original filename verbatim.
-function showGovIdCurrentFile(idType, path) {
-    const el = document.querySelector('.wizard-govid-current[data-current-for="' + idType + '"]');
+function showCurrentFile(containerClass, key, path, linkText) {
+    const el = document.querySelector('.' + containerClass + '[data-current-for="' + key + '"]');
     if (!el) return;
+    const card = el.closest('.doc-card');
     el.innerHTML = '';
     if (!path) {
         el.style.display = 'none';
+        if (card) card.classList.remove('doc-card-onfile');
         return;
     }
-    el.style.display = 'block';
-    const p = document.createElement('p');
-    p.className = 'wizard-hint';
-    p.appendChild(document.createTextNode('Current file: '));
+    el.style.display = 'flex';
+    if (card) card.classList.add('doc-card-onfile');
+
+    const label = document.createElement('span');
+    label.className = 'doc-onfile-label';
+    label.textContent = 'On file';
+    el.appendChild(label);
+
     const a = document.createElement('a');
     a.href = path;
     a.target = '_blank';
     a.rel = 'noopener';
-    a.textContent = 'View uploaded scan';
-    p.appendChild(a);
-    p.appendChild(document.createTextNode(' — choose a new file above to replace it.'));
-    el.appendChild(p);
+    a.className = 'doc-onfile-link';
+    a.textContent = linkText;
+    el.appendChild(a);
+
+    const note = document.createElement('span');
+    note.className = 'doc-onfile-note';
+    note.textContent = 'Choose a file to replace it';
+    el.appendChild(note);
 }
 
+function showGovIdCurrentFile(idType, path) {
+    showCurrentFile('wizard-govid-current', idType, path, 'View current scan');
+}
+
+function showSupportingCurrentFile(docKey, path) {
+    showCurrentFile('wizard-supporting-current', docKey, path, 'View current document');
+}
+window.showSupportingCurrentFile = showSupportingCurrentFile;
+
 function clearGovIdCurrentFiles() {
-    document.querySelectorAll('.wizard-govid-current').forEach(function(el) {
+    document.querySelectorAll('.wizard-govid-current, .wizard-supporting-current').forEach(function(el) {
         el.innerHTML = '';
         el.style.display = 'none';
-    });
-    document.querySelectorAll('.wizard-supporting-current').forEach(function(el) {
-        el.innerHTML = '';
-        el.style.display = 'none';
+        const card = el.closest('.doc-card');
+        if (card) card.classList.remove('doc-card-onfile');
     });
 }
 window.clearGovIdCurrentFiles = clearGovIdCurrentFiles;
 
-function showSupportingCurrentFile(docKey, path) {
-    const el = document.querySelector('.wizard-supporting-current[data-current-for="' + docKey + '"]');
-    if (!el) return;
-    el.innerHTML = '';
-    if (!path) {
-        el.style.display = 'none';
-        return;
-    }
-    el.style.display = 'block';
-    const p = document.createElement('p');
-    p.className = 'wizard-hint';
-    p.appendChild(document.createTextNode('Current file: '));
-    const a = document.createElement('a');
-    a.href = path;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    a.textContent = 'View uploaded image';
-    p.appendChild(a);
-    p.appendChild(document.createTextNode(' — choose a new file above to replace it.'));
-    el.appendChild(p);
-}
-window.showSupportingCurrentFile = showSupportingCurrentFile;
-
 function submitWizardUpdate() {
+    if (window.blockedByAttachmentSize && window.blockedByAttachmentSize()) return;
     document.getElementById('employeeWizardForm').submit();
 }
 

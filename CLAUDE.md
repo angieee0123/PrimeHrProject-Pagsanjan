@@ -500,6 +500,98 @@ from its stored spec, shipping the markup alone — still gets a card header.
 
 ---
 
+## Wizard uploads — Gov IDs (Step 5) and the 201 file (Step 6)
+
+The employee registration wizard's Step 6 collects the twelve supporting
+documents of a 201 file. It shipped as `image|mimes:jpg,jpeg,png`.
+
+**A 201 file is a folder of forms, not a folder of photographs.** The CSC
+publishes CS Form 212 (the PDS) and CS Form 33 as *Excel workbooks*, offices
+keep position descriptions and clearances as Word or PDF, and an IPCR exported
+from another system comes out as CSV — so the image-only rule rejected the
+authoritative copy of nearly every document it asked for, and left a phone
+photograph of a printout as the only accepted form of the PDS. Accepted now:
+PDF, DOC, DOCX, XLS, XLSX, CSV, JPG, PNG.
+
+`EmployeeSupportingDocument` owns the vocabulary as well as the rows — the
+twelve documents, their labels and groups, the accepted extensions, the size
+ceiling, the validation rules and the error-message names. Step 6's markup,
+`EmployeeRegistrationController::store()` and the personnel update route all
+read it, so **the file picker cannot offer a format validation then refuses**.
+That mismatch is invisible until an admin has filled in six other steps.
+
+- **`extensions:`, not `mimes:`.** `mimes:csv` resolves to `text/csv` alone and
+  most CSVs are detected as `text/plain`, so a form listing CSV as accepted
+  refused them. `extensions:` is the gate (it also blocks PHP uploads on its
+  own); a generous `mimetypes:` sits behind it, because a list that is too
+  narrow rejects real files — the failure being fixed. SVG stays refused: it
+  can carry script.
+- **The stated ceiling is read from PHP, not typed.** `upload_max_filesize` is
+  enforced before Laravel is reached, so a `max:` rule above it never fires and
+  the admin is told the upload failed with no way to tell an over-size file
+  from a broken one. `maxKb()` is `min(MAX_KB, upload_max_filesize)` and the
+  screen states *that*. Same rule as `HrPolicyFactsService` and the welcome
+  page's counts.
+
+  **The Apache SAPI serving this app is currently at `upload_max_filesize = 2M`,
+  `post_max_size = 8M`** (`/etc/php/*/apache2/php.ini`), so Step 6 honestly
+  advertises 2 MB. A scanned multi-page PDS does not fit in 2 MB; raising the
+  ini raises the stated limit with no code change.
+- **The wizard refuses a submission `post_max_size` would discard.** Over that
+  limit PHP throws away the entire body — the CSRF token with it — and Laravel
+  answers *419 Page Expired*: seven steps of typing gone, with nothing on
+  screen saying why. `wizardDocumentsPayloadError()` sums every file input in
+  the form (the photo and the five ID scans count too) and both submit paths
+  check it. They have to be checked at the *buttons*: `form.submit()` does not
+  fire the form's submit event.
+- **Upload filenames are `<time>_<random>_<slug>.<ext>`.** The random segment
+  is not decoration — `time()` is identical across the twelve documents in one
+  request, so an office MFP scanning every form to `scan.pdf` had the second
+  upload overwrite the first, leaving two columns pointing at one file. The
+  slug matters more now the uploads are forms: "CS Form 212 (Revised 2017) -
+  Dela Cruz #2.xlsx" went verbatim into a `/storage/...` URL, where the `#`
+  truncates the link. `EmployeeRegistrationController::handleFileUpload()` is
+  public and static so the update route stores photos, ID scans and documents
+  by the same rule.
+
+### Step 5 keeps a narrower list on purpose
+
+`GovernmentId` owns the same shape — the five IDs, their labels, extensions,
+rules, `accept()` — but accepts **PDF/JPG/PNG only**. Those are ID *scans* that
+feed OCR, not forms: a workbook uploaded as a GSIS card produces a file the
+auto-fill can never read a number out of. The two steps share a card UI, which
+is exactly why each keeps its own list — `GovernmentIdScanFormatsTest::an_id_scan_is_not_a_spreadsheet`
+pins that a format valid on Step 6 is refused on Step 5.
+
+**The edit path validated neither the ID scans nor the photo.** Registration
+checked them and `admin.personnel.update` did not, so anything a picker could
+be talked into offering was written to the public disk on an edit. Both now run
+the same rules as registration.
+
+### Both steps are attachment cards
+
+One module (`employeeWizardDocuments.js`) drives every card on both steps, over
+any container marked `data-attachment-cards`; the accepted extensions and the
+ceiling are read off that container, never restated in JS. Each card reports
+what is attached, its size, a format badge (image picks preview as a thumbnail),
+and a Remove button — a bare file input can be replaced but never emptied. A
+wrong format or an over-size file is caught on pick, not after the whole wizard
+is submitted.
+
+**The OCR read-back lives in that module too, not beside the rest of the
+wizard.** Wired separately its `change` listener ran *first*, so a file the card
+was about to reject had already been uploaded to `/government-ids/extract` and
+came back reporting an OCR failure for what was really a wrong format. It now
+runs only on a file the card accepted.
+
+Step 6's twelve cards additionally carry the migration's own three groups —
+twelve undifferentiated file inputs is a list nobody reads to the end of.
+
+`tests/Unit/SupportingDocumentFormatsTest.php` and
+`tests/Unit/GovernmentIdScanFormatsTest.php` pin the picker/rule agreement, the
+CSV cases, the two lists staying different, the ceilings and the filename
+properties.
+
 ## CSV exports
 
 Every Export button in the admin area hands out a document, not a grid of

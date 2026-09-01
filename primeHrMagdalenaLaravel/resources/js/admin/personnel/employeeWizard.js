@@ -165,7 +165,7 @@ function openFreshEmployeeWizard() {
     if (usernameField) delete usernameField.dataset.userEdited;
     if (window.resetWizardFieldValidation) window.resetWizardFieldValidation();
     if (window.clearGovIdCurrentFiles) window.clearGovIdCurrentFiles();
-    clearGovIdOcrStatuses();
+    if (window.resetWizardDocumentCards) window.resetWizardDocumentCards();
     resetWizardPasswordVisibility();
 }
 
@@ -229,6 +229,19 @@ window.goToWizardStep = function(step) {
         generateReview();
     }
 }
+
+// A submission larger than post_max_size is discarded by PHP before Laravel
+// sees it — 419 Page Expired, with everything typed so far gone. Both submit
+// paths call form.submit() directly, which does NOT fire the form's submit
+// event, so the check has to sit on the buttons themselves.
+function blockedByAttachmentSize() {
+    const message = window.wizardDocumentsPayloadError ? window.wizardDocumentsPayloadError() : null;
+    if (!message) return false;
+    goToWizardStep(6);
+    alert(message);
+    return true;
+}
+window.blockedByAttachmentSize = blockedByAttachmentSize;
 
 window.nextStep = function() {
     if (validateCurrentStep()) {
@@ -383,84 +396,28 @@ function generateReview() {
         reviewRow([['License Number', get('license_no')], ['License Scan', govIdFileName('license_file')]]),
     ]);
 
-    const supportingFileName = function(name) {
-        const f = formData.get(name);
-        return (f && f.name) ? f.name : '';
-    };
-
-    html += reviewSection('<svg class="wizard-review-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Supporting Documents <span style="font-weight:400;font-size:11px;color:var(--gp-text-mid);">(PNG/JPG, 5 MB)</span>', [
-        reviewRow([['CS Form 212 — PDS', supportingFileName('pds_file')], ['CS Form 33 — Appointment Form', supportingFileName('appointment_form_file')]]),
-        reviewRow([['Position Description Form', supportingFileName('position_description_file')], ['Medical Certificate', supportingFileName('medical_certificate_file')]]),
-        reviewRow([['NBI Clearance', supportingFileName('nbi_clearance_file')], ['Financial / Property Clearance', supportingFileName('financial_clearance_file')]]),
-        reviewRow([['Neuro-psychiatric Examination', supportingFileName('neuro_exam_file')], ['Licenses', supportingFileName('supporting_licenses_file')]]),
-        reviewRow([['Performance Evaluation', supportingFileName('performance_eval_file')], ['Commendation / Award', supportingFileName('commendation_file')]]),
-        reviewRow([['Disciplinary / Action Docs', supportingFileName('disciplinary_file')], ['Other Records', supportingFileName('other_records_file')]]),
-    ]);
+    // The twelve document rows come from the cards themselves (see
+    // employeeWizardDocuments.js) so the review cannot list a document under a
+    // different name — or miss one — after the 201-file list changes.
+    const supportingRows = (window.wizardSupportingDocReviewRows ? window.wizardSupportingDocReviewRows() : []);
+    if (supportingRows.length) {
+        const attached = supportingRows.filter(function(row) { return !!row[1]; }).length;
+        const paired = [];
+        for (let i = 0; i < supportingRows.length; i += 2) {
+            paired.push(reviewRow(supportingRows.slice(i, i + 2)));
+        }
+        html += reviewSection(
+            '<svg class="wizard-review-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Supporting Documents ' +
+            '<span style="font-weight:400;font-size:11px;color:var(--gp-text-mid);">(' + attached + ' of ' + supportingRows.length + ' attached)</span>',
+            paired
+        );
+    }
 
     document.getElementById('wizardReviewContent').innerHTML = html;
 }
 
-// ── Government ID scan upload -> OCR auto-fill (Step 5) ──
-// Best-effort only: a misread or an unsupported scan just leaves the number
-// field for the admin to type by hand, which is why the request never blocks
-// the wizard and every failure path still leaves the field editable.
-function govIdStatusEl(idType) {
-    return document.querySelector('.govid-ocr-status[data-status-for="' + idType + '"]');
-}
-
-function setGovIdStatus(idType, message, tone) {
-    const el = govIdStatusEl(idType);
-    if (!el) return;
-    el.textContent = message;
-    el.style.color = tone === 'error' ? 'var(--theme-danger)' : (tone === 'success' ? 'var(--theme-success)' : 'var(--gp-text-mid)');
-}
-
-function clearGovIdOcrStatuses() {
-    document.querySelectorAll('.govid-ocr-status').forEach(function(el) {
-        el.textContent = '';
-        el.style.color = '';
-    });
-}
-
-function wireGovIdOcrUploads() {
-    document.querySelectorAll('.govid-file-input').forEach(function(input) {
-        input.addEventListener('change', function() {
-            const idType = input.dataset.idType;
-            const targetField = document.querySelector('#employeeWizardForm [name="' + input.dataset.target + '"]');
-            const file = input.files[0];
-            if (!file || !idType) return;
-
-            setGovIdStatus(idType, 'Reading ID scan…');
-
-            const ocrData = new FormData();
-            ocrData.append('file', file);
-            ocrData.append('id_type', idType);
-            const tokenField = document.querySelector('#employeeWizardForm [name="_token"]');
-
-            fetch('/admin/personnel/government-ids/extract', {
-                method: 'POST',
-                headers: tokenField ? { 'X-CSRF-TOKEN': tokenField.value } : {},
-                body: ocrData,
-            })
-                .then(function(r) { return r.json(); })
-                .then(function(result) {
-                    if (result.number && targetField) {
-                        targetField.value = result.number;
-                        setGovIdStatus(idType, result.message || 'Auto-filled from scan — please verify.', 'success');
-                    } else {
-                        setGovIdStatus(idType, result.message || 'Could not read the number automatically — please type it in.', 'error');
-                    }
-                })
-                .catch(function() {
-                    setGovIdStatus(idType, 'Could not read the scan automatically — please type the number in.', 'error');
-                });
-        });
-    });
-}
-
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    wireGovIdOcrUploads();
     // Keyboard access for the clickable header steps (Enter / Space).
     document.querySelectorAll('#progressBar .wizard-step').forEach(function(stepEl) {
         stepEl.addEventListener('keydown', function(e) {
@@ -475,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('employeeWizardForm');
     if (form) {
         form.addEventListener('submit', function(e) {
-            if (currentStep !== totalSteps) {
+            if (currentStep !== totalSteps || blockedByAttachmentSize()) {
                 e.preventDefault();
                 return false;
             }
@@ -487,11 +444,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (submitBtn) {
         submitBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            if (currentStep === totalSteps) {
-                document.getElementById('employeeWizardForm').submit();
-            } else {
+            if (currentStep !== totalSteps) {
                 alert('Please complete all steps before submitting.');
+                return;
             }
+            if (blockedByAttachmentSize()) return;
+            document.getElementById('employeeWizardForm').submit();
         });
     }
 
