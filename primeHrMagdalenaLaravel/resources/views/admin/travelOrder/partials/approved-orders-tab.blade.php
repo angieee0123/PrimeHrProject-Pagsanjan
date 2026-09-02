@@ -40,9 +40,36 @@
                     </td>
                     <td class="to-td to-td-green">{{ $order->approver ? ($order->approver->employee ? $order->approver->employee->first_name . ' ' . $order->approver->employee->last_name : 'Admin User') : 'Admin User' }}</td>
                     <td class="to-td to-td-muted">{{ $order->approved_at ? \Carbon\Carbon::parse($order->approved_at)->format('M d, Y') : 'N/A' }}</td>
-                    <td class="to-td">
-                        <div class="to-actions-wrap">
-                            <button onclick="viewOrder({{ $order->id }})" class="to-btn-view">View</button>
+                    {{-- Two actions now, so they move into the shared ⋮ row menu
+                         (resources/js/app.js) rather than sitting side by side:
+                         a second button in this cell pushes the Approved Date
+                         column off a laptop screen, and every other table in
+                         the admin area with more than one row action already
+                         uses that menu. --}}
+                    <td class="to-td row-menu-cell">
+                        <button type="button" class="row-menu-btn" data-menu="approvedOrderMenu{{ $order->id }}"
+                                onclick="toggleRowMenu(event)" aria-haspopup="menu" aria-expanded="false"
+                                title="Actions" aria-label="Actions for travel order {{ $order->order_number }}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        <div class="row-menu" id="approvedOrderMenu{{ $order->id }}" role="menu" aria-label="Travel order actions">
+                            <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); viewOrder({{ $order->id }})">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                View
+                            </button>
+                            <div class="row-menu-sep"></div>
+                            <button type="button" role="menuitem" class="row-menu-item" onclick="closeRowMenu(); openTravelOrderFormModal(
+                                {{ $order->id }},
+                                @js(trim(($order->employee->first_name ?? '') . ' ' . ($order->employee->last_name ?? ''))),
+                                @js($order->employee->employee_id ?? 'N/A'),
+                                @js($order->order_number),
+                                @js($order->destination)
+                            )">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                View Form
+                            </button>
                         </div>
                     </td>
                 </tr>

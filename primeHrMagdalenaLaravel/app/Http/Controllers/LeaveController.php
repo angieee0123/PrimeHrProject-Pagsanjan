@@ -1141,7 +1141,12 @@ class LeaveController extends Controller
 
             $filename = 'CS-Form-6-' . $application->application_number . '.pdf';
 
-            if (request()->routeIs('admin.leave.print-form')) {
+            // Print streams into the browser's viewer; Download sends the same
+            // document as a file. Matched with a wildcard because the mayor's
+            // read-only pair (mayor.leave.print-form / .download-form) routes to
+            // this very method — naming only the admin route would have made the
+            // mayor's Print button silently download instead.
+            if (request()->routeIs('*.leave.print-form')) {
                 return $pdf->stream($filename);
             }
 

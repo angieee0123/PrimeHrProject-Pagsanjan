@@ -31,6 +31,11 @@
         <main class="main-content">
             @yield('content')
         </main>
+        {{-- The Leave & Travel Calendar, as a popup over whatever page you are
+             on — the same floating button the admin layout carries, pointed at
+             the mayor's own route. This is why mayorSidebar has no nav row for
+             it: a second door to one screen. --}}
+        @include('partials.leaveCalendarFab', ['calRoute' => 'mayor.leaveCalendar', 'calFabAlone' => true])
     </div>
 
     @vite('resources/js/app.js')

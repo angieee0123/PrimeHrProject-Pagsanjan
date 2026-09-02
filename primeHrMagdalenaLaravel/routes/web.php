@@ -80,6 +80,20 @@ Route::get('/admin/dashboard', [\App\Http\Controllers\AdminDashboardController::
 Route::get('/mayor/dashboard', [\App\Http\Controllers\MayorDashboardController::class, 'index'])->middleware('auth')->name('mayor.dashboard');
 Route::get('/mayor/personnel', [\App\Http\Controllers\MayorPersonnelController::class, 'index'])->middleware('auth')->name('mayor.personnel');
 Route::get('/mayor/leave', [\App\Http\Controllers\MayorLeaveController::class, 'index'])->middleware('auth')->name('mayor.leave');
+
+// The mayor's read-only CS Form No. 6 preview, opened from the Leave & Travel
+// Calendar. Same LeaveController methods the admin's three call — a filed leave
+// form is one document, and a second renderer for the mayor would be a second
+// thing to keep true. They live under /mayor because EnsureRoleForArea closes
+// the /admin prefix to the mayor entirely.
+Route::get('/mayor/leave/{id}/view-form', [LeaveController::class, 'viewLeaveForm'])->middleware('auth')->name('mayor.leave.view-form');
+Route::get('/mayor/leave/{id}/print-form', [LeaveController::class, 'generateLeaveForm'])->middleware('auth')->name('mayor.leave.print-form');
+Route::get('/mayor/leave/{id}/download-form', [LeaveController::class, 'generateLeaveForm'])->middleware('auth')->name('mayor.leave.download-form');
+
+// Leave & Travel Calendar — the mayor's copy of the admin availability monitor,
+// opened from the floating button on every mayor page. MayorLeaveCalendarController
+// inherits the whole computation; only the links and the view differ.
+Route::get('/mayor/leave-calendar', [\App\Http\Controllers\MayorLeaveCalendarController::class, 'index'])->middleware('auth')->name('mayor.leaveCalendar');
 Route::get('/mayor/travelorder', [\App\Http\Controllers\MayorTravelOrderController::class, 'index'])->middleware('auth')->name('mayor.travelorder');
 Route::get('/mayor/travelorder/{id}', [\App\Http\Controllers\MayorTravelOrderController::class, 'show'])->middleware('auth')->name('mayor.travelorder.view');
 Route::get('/mayor/passslip', [\App\Http\Controllers\MayorPassSlipController::class, 'index'])->middleware('auth')->name('mayor.passslip');
@@ -447,6 +461,11 @@ Route::get('/admin/attendance/summary-export', [AttendanceController::class, 'ex
 // read as an employee id.
 Route::get('/admin/attendance/detailed-export', [AttendanceController::class, 'exportDetailedRecords'])->middleware('auth')->name('admin.attendance.detailed.export-all');
 Route::get('/admin/attendance/detailed/{employeeId}', [AttendanceController::class, 'detailedDTR'])->middleware('auth')->name('admin.attendance.detailed');
+// The Detailed DTR modal's two form buttons. One method, one document: `print`
+// streams it into the browser's PDF viewer, `export` sends it as a file. They
+// are separate routes rather than a query flag because routeIs() is what the
+// controller reads, the same way the Travel Order's print/download pair works.
+Route::get('/admin/attendance/detailed/{employeeId}/print', [AttendanceController::class, 'exportDetailedDTR'])->middleware('auth')->name('admin.attendance.detailed.print');
 Route::get('/admin/attendance/detailed/{employeeId}/export', [AttendanceController::class, 'exportDetailedDTR'])->middleware('auth')->name('admin.attendance.detailed.export');
 Route::get('/admin/attendance/record/{attendanceId}', [AttendanceController::class, 'getAttendanceRecord'])->middleware('auth')->name('admin.attendance.record');
 Route::get('/admin/attendance/employee-appointment/{employeeId}', [AttendanceController::class, 'employeeAppointment'])->middleware('auth')->name('admin.attendance.employee-appointment');
@@ -503,6 +522,13 @@ Route::middleware('auth')->group(function () {
 Route::post('/admin/travelorder/{id}/approve', [\App\Http\Controllers\TravelOrderController::class, 'approve'])->middleware('auth')->name('admin.travelorder.approve');
 Route::post('/admin/travelorder/{id}/disapprove', [\App\Http\Controllers\TravelOrderController::class, 'disapprove'])->middleware('auth')->name('admin.travelorder.disapprove');
 Route::get('/admin/travelorder/{id}', [\App\Http\Controllers\TravelOrderController::class, 'show'])->middleware('auth')->name('admin.travelorder.view');
+// The printable Authority to Travel, mirroring the Pass Slip's three: an HTML
+// preview the Approved tab embeds, and the same view through dompdf to stream
+// for printing or download. All three refuse an order that is not approved —
+// see TravelOrderController::viewForm().
+Route::get('/admin/travelorder/{id}/view-form', [\App\Http\Controllers\TravelOrderController::class, 'viewForm'])->middleware('auth')->name('admin.travelorder.view-form');
+Route::get('/admin/travelorder/{id}/print-form', [\App\Http\Controllers\TravelOrderController::class, 'generateForm'])->middleware('auth')->name('admin.travelorder.print-form');
+Route::get('/admin/travelorder/{id}/download-form', [\App\Http\Controllers\TravelOrderController::class, 'generateForm'])->middleware('auth')->name('admin.travelorder.download-form');
 
 Route::get('/admin/passslip', [PassSlipController::class, 'indexAdmin'])->middleware('auth')->name('admin.passslip');
 // Pass Slip CSV exports — one per tab, and likewise declared above

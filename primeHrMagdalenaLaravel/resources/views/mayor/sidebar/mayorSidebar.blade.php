@@ -1,4 +1,9 @@
 @php
+/*
+ * Leave & Travel Calendar is deliberately absent, same as adminSidebar: the
+ * floating button in layouts/mayor opens it from every mayor page, so a nav
+ * row would be a second door to the same screen.
+ */
 $navItems = [
     ['id' => 'mayor.dashboard',     'label' => 'Dashboard',           'route' => route('mayor.dashboard')],
     ['id' => 'mayor.ai-assistant',  'label' => 'AI Assistant',        'route' => route('mayor.ai-assistant')],

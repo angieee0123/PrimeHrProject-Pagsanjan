@@ -620,12 +620,13 @@ found on somebody's laptop a year later still identifies itself.
   filters — "Export All" means every status, not every record, or the file
   would contradict the parameter block it prints at the top of itself), plus
   `AttendanceController`'s
-  three (`exportSummary` for the Attendance Summary tab, `exportDetailedRecords`
-  for the Detailed Time Record tab's Export All, `exportDetailedDTR` for one
-  employee's DTR). The attendance three keep their methods on
+  two (`exportSummary` for the Attendance Summary tab, `exportDetailedRecords`
+  for the Detailed Time Record tab's Export All). Those two keep their methods on
   `AttendanceController` because they are built from `calculateEmployeeAttendance()`
   and `buildDetailedRecords()`, which are private to it — moving the export out
-  would mean moving the day computation, which payroll reads.
+  would mean moving the day computation, which payroll reads. **One employee's
+  DTR is no longer among them**: it is a printed form now, not a CSV — see
+  "The printed DTR" below.
 - **The filters on screen are sent as query params** and printed back in the
   file's parameter block — every one of them, spelled "All Departments" rather
   than left blank, so a reader can tell "this covers everything" from "this
@@ -794,6 +795,113 @@ separate **Print**.
   page's itemised-vs-gross-less-net reconciliation warning as a
   `RECONCILIATION:` note, since a reader totalling that column against a
   payslip needs to know why the two can differ.
+
+---
+
+## The printed DTR
+
+Admin → Attendance → *Detailed DTR* → **Print Form** / **Download PDF** produce
+the office's own **"Time Master · Employee Attendance Logs"** sheet: A4
+portrait, the blue title box, the seven `DATE / am IN / am OUT / pm IN /
+pm OUT / OT IN / OT OUT` chips, 24 ruled lines and two signature rules.
+
+That button used to hand out a CSV. **A DTR is a form the municipality signs
+and files, not a grid of values** — it has to carry the office's letterhead,
+the employee it belongs to, the period it covers and somewhere for two officers
+to sign, and none of that survives a spreadsheet. The CSV could not be
+submitted to anybody.
+
+```
+AttendanceController::exportDetailedDTR()   range, employee, which button
+        │
+        ├─ detailedRecordsFor()             the days — the same method the modal renders from
+        ├─ DtrFormDataService::build()       range + View chip, date order, pagination, filename
+        └─ dompdf + employee-attendance-logs-form.blade.php    the sheet
+```
+
+- **The sheet is a tracing, not a redesign.** Every coordinate in
+  `resources/views/admin/attendance/partials/employee-attendance-logs-form.blade.php`
+  was measured off the office's template (a 1055 × 1491 export, whose 0.7076
+  aspect is A4 to within half a point) at 0.5644 pt per pixel, and the header
+  comment lists them. Do not "tidy" a number there. The one deliberate
+  departure is the page frame, inset 6pt: the template draws it at the page
+  edge, where most printers cannot lay ink, and a border that prints on one
+  machine and vanishes on the next is worse than one moved a sixteenth of an
+  inch. Nothing inside it moved.
+- **The wordmark is the office's own artwork**, cropped from that template to
+  `public/forms/dtr/time-master-wordmark.png` — same rule as
+  `forms/letterhead`, and with the same fallback: with the file missing the
+  form *draws* `brand.name` + `brand.tagline` rather than printing a broken
+  image. See that folder's README.
+- **`config/dtr_form.php` holds what an office changes** — the artwork, the
+  heading, the field labels, the row count and the two signatories. It does
+  **not** hold the geometry, which belongs with the drawing. Replacing the
+  municipality's official form is therefore that one partial plus that one
+  config; neither the controller nor the service knows what the sheet looks
+  like.
+- **The signatory *titles* are configuration because they are offices**, not
+  records this schema holds — the same reasoning as the Travel Order's. `title`
+  is the capacity the person signs in, not their plantilla designation: the
+  office's own template signs "HRMO - OIC" over an Administrative Aide IV.
+  They print HRMO first, Municipal Administrator second, **on the final sheet
+  only**: they certify the record as a whole, and one set per continuation page
+  would be asking for the same document to be signed five times.
+- **The HRMO name follows whoever generated the sheet.** The staffer who chose
+  the period and pressed the button is the one certifying that copy, so a fixed
+  name there would put somebody else's name over a record they never saw. A
+  signatory carrying `name_from => 'generator'` is resolved from the signed-in
+  account — its employee row first, then `users.name`, then the username, upper
+  -cased to sit level with the other block — and the configured `name` survives
+  only as the fallback. Same shape as the Travel Order's `recommending.name`.
+  A name that is not a name (`admin`, `N/A`, blank) falls back rather than
+  printing over a signature rule, because a form is *read* as signed once a
+  name appears there. Every other signatory prints exactly what the office
+  typed: nothing here records the Municipal Administrator's decision, so that
+  name stands over a blank rule for a wet signature and the generator never
+  replaces it.
+- **Pagination is computed in PHP, not left to the renderer.** `array_chunk()`
+  at `rows_per_page` gives exactly 24 rows a sheet, and each sheet is its own
+  `position: relative` block of absolutely-positioned children — the `.to-sheet`
+  idiom the Travel Order uses, which dompdf places correctly on page 2 and
+  after. Continuation sheets repeat the whole head, identity block included:
+  pages of a DTR are filed loose, and a loose page of times belonging to nobody
+  is not a record. Rules with no record on them still print, so a short period
+  comes out as the office's part-filled sheet rather than a form that stops
+  halfway down.
+- **The date range is re-applied inside the service**, not trusted from the
+  caller. A DTR carrying a day outside the period printed on it is a false
+  record, and re-checking costs one comparison per day.
+- **The View chip travels with the range.** The modal's dropdown narrows the
+  table in JavaScript; `DtrFormDataService::matchesView()` / `recordState()`
+  mirror `applyDtrChip()` / `chipState` in `detailedDtrModal.js`. Same pair
+  rule as the employee exports — both halves keep working when they drift, only
+  their agreement breaks — so `tests/Unit/DtrFormDataTest.php` pins them
+  together. An unrecognised chip prints the **whole** period: an empty sheet
+  would report the period as holding no records at all.
+- **A covered day prints its marker once.** `generateDetailedRecords()` writes
+  `ON LEAVE` / `ON TRAVEL` into all four time slots; the sheet prints that
+  across the span the four am/pm columns occupy and leaves the slots empty.
+  Four copies do not fit the columns, and blanking it outright would make an
+  approved absence read as an unexplained one on the document that certifies
+  it. Every other empty slot stays empty — nothing is defaulted.
+- **`detailedRecordsFor()` was extracted so the screen and the sheet are one
+  dataset.** The old CSV called `generateDetailedRecords()` *without* the
+  leave, travel-order and pass-slip arguments the modal passes, so an approved
+  leave day read "ON LEAVE" on screen and printed as an unexplained absence in
+  the export. Both go through the one method now.
+- **Print Form streams the PDF; Download PDF sends the same document as a
+  file.** Streaming opens it in the browser's own viewer at the real page size
+  with none of the dashboard around it — a stronger guarantee that the sheet
+  reaches the paper uncropped than print CSS over the admin layout. The two are
+  separate routes because `routeIs()` is what the controller reads, the same
+  way the Travel Order's `print-form` / `download-form` pair works.
+- Times print as `h:mm` in the am/pm columns, whose captions already name the
+  half of the day, and **with the meridiem in the OT columns**, where nothing
+  else says which end of the day a bare `6:00` belongs to.
+
+```bash
+php artisan test tests/Unit/DtrFormDataTest.php
+```
 
 ---
 

@@ -1,8 +1,21 @@
 {{-- Global floating button → opens the Leave & Travel Calendar as a popup modal
      over the current page (calendar loads in an iframe via ?embed=1). Included
-     from layouts/app (the admin layout), so it's available on every admin page.
-     Same size as the chatbot FAB (56x56 / 22px icon), stacked just above it. --}}
-<button type="button" class="leave-cal-fab" onclick="openLeaveCalModal()" title="Leave & Travel Calendar" aria-label="Open Leave & Travel Calendar">
+     from layouts/app (the admin layout) and layouts/mayor, so it is available
+     on every page of both areas — which is why neither sidebar carries a nav
+     row for the calendar.
+     Same size as the chatbot FAB (56x56 / 22px icon), stacked just above it.
+
+     $calRoute names the area's own calendar route: /admin is closed to the
+     mayor by EnsureRoleForArea, so the button has to point at the caller's
+     copy rather than at one hard-coded page. --}}
+@php
+    $calRoute = $calRoute ?? 'admin.leaveCalendar';
+    // The admin layout stacks this above the chathead's own FAB. The mayor
+    // area ships no chathead, so there is nothing to clear and the button
+    // sits where a lone FAB belongs.
+    $calFabAlone = $calFabAlone ?? false;
+@endphp
+<button type="button" class="leave-cal-fab {{ $calFabAlone ? 'is-alone' : '' }}" onclick="openLeaveCalModal()" title="Leave & Travel Calendar" aria-label="Open Leave & Travel Calendar">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="4" width="18" height="18" rx="2"/>
         <line x1="16" y1="2" x2="16" y2="6"/>
@@ -45,8 +58,8 @@
     // Root-relative on purpose: an absolute URL built from APP_URL (127.0.0.1)
     // is a different host than a browser sitting on localhost, so the session
     // cookie would not be sent and every open would land on /login.
-    var LEAVE_CAL_PATH = "{{ route('admin.leaveCalendar', [], false) }}";
-    var LEAVE_CAL_SRC  = "{{ route('admin.leaveCalendar', ['embed' => 1], false) }}";
+    var LEAVE_CAL_PATH = "{{ route($calRoute, [], false) }}";
+    var LEAVE_CAL_SRC  = "{{ route($calRoute, ['embed' => 1], false) }}";
 
     function openLeaveCalModal() {
         var modal = document.getElementById('leaveCalModal');
@@ -114,6 +127,7 @@
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
         transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
     }
+    .leave-cal-fab.is-alone { bottom: 28px; }
     .leave-cal-fab:hover {
         background: var(--theme-primary-2);
         transform: translateY(-2px) scale(1.03);
@@ -233,6 +247,7 @@
     }
     @media (max-width: 640px) {
         .leave-cal-fab { right: 20px; bottom: 84px; }
+        .leave-cal-fab.is-alone { bottom: 20px; }
         .lc-modal-overlay { padding: 10px; }
         .lc-modal-panel { height: 94vh; border-radius: 18px; }
     }

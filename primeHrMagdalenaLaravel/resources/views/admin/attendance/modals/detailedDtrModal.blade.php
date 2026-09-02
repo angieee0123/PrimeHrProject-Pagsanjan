@@ -150,9 +150,18 @@
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                         Apply
                     </button>
-                    <button class="ddtr-btn-ghost" onclick="exportDetailedDTR()">
+                    {{-- Both buttons produce the office's own "Employee
+                         Attendance Logs" sheet for the range and View above
+                         them — the same document, streamed for printing or
+                         saved as a file. They replaced a CSV, which is not a
+                         form anyone can sign or file. --}}
+                    <button class="ddtr-btn-ghost" onclick="printDetailedDTR()" title="Open the printable DTR form">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        Print Form
+                    </button>
+                    <button class="ddtr-btn-ghost" onclick="downloadDetailedDTR()" title="Download the DTR form as a PDF">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        Export
+                        Download PDF
                     </button>
                 </div>
             </div>
