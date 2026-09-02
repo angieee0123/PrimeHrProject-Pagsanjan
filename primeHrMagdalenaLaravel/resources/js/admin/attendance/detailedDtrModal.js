@@ -538,8 +538,52 @@ window.applyDtrChip = function applyDtrChip(chip) {
     });
 }
 
-window.exportDetailedDTR = function() {
+// ── Print Form / Download PDF ──
+//
+// Both buttons ask the server for the office's "Employee Attendance Logs"
+// sheet. What travels is the *filter*, never the rows: the endpoint re-runs
+// the same detailedRecordsFor() this modal rendered from, so the sheet cannot
+// carry a day the screen did not — and cannot be capped at whatever the table
+// happens to be showing, which is how the old CSV lost the View chip.
+//
+// So the range and the active View chip both go up. The chip lives on the
+// dropdown item rather than in a variable because that item is already the
+// single source of truth for what the table is filtered to.
+function detailedDtrFormUrl(action) {
+    if (!window.currentDetailedEmployeeId) return null;
+
     const startDate = document.getElementById('detailedStartDate').value;
-    const endDate = document.getElementById('detailedEndDate').value;
-    window.location.href = `/admin/attendance/detailed/${window.currentDetailedEmployeeId}/export?start_date=${startDate}&end_date=${endDate}`;
+    const endDate   = document.getElementById('detailedEndDate').value;
+
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates');
+        return null;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+        alert('Start date must be before end date');
+        return null;
+    }
+
+    const active = document.querySelector('#ddtrDropdown .ddtr-dd-item.active');
+
+    const params = new URLSearchParams({
+        start_date: startDate,
+        end_date:   endDate,
+        view:       active?.dataset.chip || 'all',
+    });
+
+    return `/admin/attendance/detailed/${window.currentDetailedEmployeeId}/${action}?${params}`;
+}
+
+// A new tab, so the modal and the filter that produced the sheet are still
+// there behind it when the admin comes back from the print dialog.
+window.printDetailedDTR = function() {
+    const url = detailedDtrFormUrl('print');
+    if (url) window.open(url, '_blank', 'noopener');
+}
+
+window.downloadDetailedDTR = function() {
+    const url = detailedDtrFormUrl('export');
+    if (url) window.location.href = url;
 }

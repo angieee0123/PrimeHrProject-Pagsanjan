@@ -10,11 +10,13 @@ use App\Models\DailySalaryComputation;
 use App\Models\PassSlip;
 use App\Services\AttendanceComputationService;
 use App\Services\CsvReportWriter;
+use App\Services\DtrFormDataService;
 use App\Services\LateDeductionService;
 use App\Services\UndertimeDeductionService;
 use App\Services\CscTimeConversionService;
 use App\Services\NotificationService;
 use App\Services\PassSlipComplianceService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -488,7 +490,50 @@ class AttendanceController extends Controller
             return response()->json(['error' => 'Start date must be before end date'], 400);
         }
 
-        $employee = Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'schedule'])->findOrFail($employeeId);
+        $employee = $this->detailedDtrEmployee($employeeId);
+
+        $records = $this->detailedRecordsFor($employee, $startDate, $endDate);
+
+        return response()->json([
+            'records' => $records,
+            'employee' => [
+                'name' => $employee->first_name . ' ' . $employee->last_name,
+                'employee_id' => $employee->employee_id,
+                'department' => $employee->employmentDetail->departmentRelation->name ?? null,
+                'position' => $employee->employmentDetail->designationRelation->title
+                    ?? ($employee->employmentDetail->position ?? null),
+                'employment_status' => $employee->employmentDetail->employment_status ?? null,
+            ],
+        ]);
+    }
+
+    /**
+     * The employee a Detailed DTR is about, with the relations both the modal
+     * and the printed form read their identity block from.
+     */
+    private function detailedDtrEmployee($employeeId): Employee
+    {
+        return Employee::with([
+            'employmentDetail.departmentRelation',
+            'employmentDetail.designationRelation',
+            'schedule',
+        ])->findOrFail($employeeId);
+    }
+
+    /**
+     * Every day in the range, with the approvals that explain it — the exact
+     * dataset the Detailed DTR modal renders.
+     *
+     * Shared by the modal's JSON endpoint and by the printed DTR, so the two
+     * cannot disagree about what a day held. They did before this was
+     * extracted: the export called generateDetailedRecords() *without* the
+     * leave, travel-order and pass-slip arguments the modal passes, so an
+     * approved leave day left the screen as "ON LEAVE" and left the export as
+     * an unexplained absence — on the one document that certifies it.
+     */
+    private function detailedRecordsFor(Employee $employee, Carbon $startDate, Carbon $endDate): array
+    {
+        $employeeId = $employee->id;
 
         // Fetch attendance records for the date range
         $attendances = Attendance::with(['accreditedHoursLogs.schedule'])
@@ -533,19 +578,15 @@ class AttendanceController extends Controller
             ->whereBetween('date', [$startDate, $endDate])
             ->get();
 
-        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee, $approvedLeaves, $approvedTravelOrders, $approvedPassSlips);
-
-        return response()->json([
-            'records' => $records,
-            'employee' => [
-                'name' => $employee->first_name . ' ' . $employee->last_name,
-                'employee_id' => $employee->employee_id,
-                'department' => $employee->employmentDetail->departmentRelation->name ?? null,
-                'position' => $employee->employmentDetail->designationRelation->title
-                    ?? ($employee->employmentDetail->position ?? null),
-                'employment_status' => $employee->employmentDetail->employment_status ?? null,
-            ],
-        ]);
+        return $this->generateDetailedRecords(
+            $startDate,
+            $endDate,
+            $attendances,
+            $employee,
+            $approvedLeaves,
+            $approvedTravelOrders,
+            $approvedPassSlips
+        );
     }
 
     /**
@@ -916,106 +957,60 @@ class AttendanceController extends Controller
         return implode(' | ', $notes);
     }
 
-    public function exportDetailedDTR(Request $request, $employeeId)
+    /**
+     * The Detailed DTR modal's **Print Form** and **Download PDF**.
+     *
+     * This button used to hand out a CSV. A DTR is a *form* the municipality
+     * fills in, signs and files — the office's own "Employee Attendance Logs"
+     * sheet, carrying the employee it belongs to, the period it covers and two
+     * signature rules — and none of that survives a grid of values. The CSV
+     * could not be submitted to anyone.
+     *
+     * All this method owns is the range, the employee and which of the two
+     * buttons was pressed. The days come from detailedRecordsFor(), the same
+     * method the modal renders from, so the sheet cannot show a day the screen
+     * did not; the sheet itself is drawn by DtrFormDataService plus the traced
+     * partial, so replacing the municipality's form is a view change.
+     */
+    public function exportDetailedDTR(Request $request, $employeeId, DtrFormDataService $formService)
     {
-        $startDate = $request->get('start_date');
-        $endDate = $request->get('end_date');
+        $validated = $request->validate([
+            'start_date' => ['required', 'date'],
+            'end_date'   => ['required', 'date', 'after_or_equal:start_date'],
+            // The modal's View dropdown. Unknown values fall back to the whole
+            // period inside the service rather than printing an empty sheet.
+            'view'       => ['nullable', 'string', 'max:20'],
+        ]);
 
-        // Validate dates
-        if (!$startDate || !$endDate) {
-            return response()->json(['error' => 'Start date and end date are required'], 400);
-        }
+        $startDate = Carbon::parse($validated['start_date'])->startOfDay();
+        $endDate   = Carbon::parse($validated['end_date'])->endOfDay();
 
-        $startDate = Carbon::parse($startDate)->startOfDay();
-        $endDate = Carbon::parse($endDate)->endOfDay();
+        $employee = $this->detailedDtrEmployee($employeeId);
 
-        $employee = Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'schedule'])->findOrFail($employeeId);
+        $data = $formService->build(
+            $employee,
+            $this->detailedRecordsFor($employee, $startDate, $endDate),
+            $startDate,
+            $endDate,
+            $validated['view'] ?? 'all',
+            // Whoever pressed the button signs the sheet as the HRMO officer:
+            // they chose the period and produced this copy, so the signature
+            // block names them rather than a fixed officer. Only the *name*
+            // moves — "HRMO - OIC" is the capacity, and stays configuration.
+            Auth::user()
+        );
 
-        // Fetch attendance records for the date range
-        $attendances = Attendance::where('employee_id', $employeeId)
-            ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-            ->orderBy('date', 'asc')
-            ->get()
-            ->keyBy(function($a) {
-                return Carbon::parse($a->date)->format('Y-m-d');
-            });
+        $pdf = Pdf::loadView('admin.attendance.dtr-pdf', $data)
+            ->setPaper([0, 0, 595.28, 841.89], 'portrait');
 
-        $records = $this->generateDetailedRecords($startDate, $endDate, $attendances, $employee);
-
-        $dateRange = $startDate->format('M_d_Y') . '_to_' . $endDate->format('M_d_Y');
-        $fileName = "Detailed_DTR_{$employee->employee_id}_{$dateRange}.csv";
-
-        // One person's DTR, so the letterhead names them under the office
-        // rather than beside it -- and the office itself is read from
-        // SiteContentService like every other export, not written here.
-        return CsvReportWriter::download($fileName, function (CsvReportWriter $csv) use (
-            $records, $employee, $startDate, $endDate
-        ) {
-            $csv->letterhead(
-                'Daily Time Record',
-                'Human Resource Management Office · PRIME HRIS',
-                $startDate->format('F d, Y') . ' to ' . $endDate->format('F d, Y')
-            );
-
-            $csv->parameters([
-                'Employee:'            => trim($employee->first_name . ' ' . $employee->last_name),
-                'Employee ID:'         => $employee->employee_id,
-                'Position:'            => $employee->employmentDetail->designationRelation->title ?? 'N/A',
-                'Department / Office:' => $employee->employmentDetail->departmentRelation->name ?? 'N/A',
-                'Period Covered:'      => $startDate->format('F d, Y') . ' to ' . $endDate->format('F d, Y'),
-            ], count($records));
-
-            $csv->columns([
-                'Date', 'Day', 'AM In', 'AM Out', 'PM In', 'PM Out', 'OT In', 'OT Out',
-                'Undertime (min)', 'Late (min)', 'Total Hours',
-            ]);
-
-            $lateMinutes = 0;
-            $undertimeMinutes = 0;
-            $daysLate = 0;
-
-            foreach ($records as $record) {
-                $late = (int) ($record['late_minutes'] ?? 0);
-                $undertime = (int) ($record['undertime'] ?? 0);
-                $lateMinutes += $late;
-                $undertimeMinutes += $undertime;
-                if ($late > 0) {
-                    $daysLate++;
-                }
-
-                $csv->row([
-                    $record['date'],
-                    $record['day'],
-                    $record['am_in'] ?? 'Log Missing',
-                    $record['am_out'] ?? 'Log Missing',
-                    $record['pm_in'] ?? 'Log Missing',
-                    $record['pm_out'] ?? 'Log Missing',
-                    $record['ot_in'] ?? '-',
-                    $record['ot_out'] ?? '-',
-                    $undertime > 0 ? $undertime : '-',
-                    $late > 0 ? $late : '-',
-                    $record['total_hours'],
-                ]);
-            }
-
-            if ($records === []) {
-                $csv->emptyNotice('No time records were logged in this period.');
-            }
-
-            $csv->summary('Summary', [
-                'Days Covered:'          => count($records),
-                'Days Late:'             => $daysLate,
-                'Total Late (min):'      => $lateMinutes,
-                'Total Late:'            => CscTimeConversionService::formatMinutes($lateMinutes),
-                'Total Undertime (min):' => $undertimeMinutes,
-                'Total Undertime:'       => CscTimeConversionService::formatMinutes($undertimeMinutes),
-            ]);
-
-            $csv->notes([
-                '"Log Missing" means no punch was recorded for that slot.',
-                'Late is counted past a ' . AttendanceComputationService::GRACE_MINUTES . '-minute grace period on the schedule in force for that day.',
-            ]);
-        });
+        // Print Form streams the document into the browser's own PDF viewer:
+        // it opens at the real page size with none of the dashboard around it,
+        // which is a stronger guarantee that the sheet reaches the paper
+        // uncropped than print CSS over the admin layout would be. Download
+        // PDF is the same document, as a file.
+        return $request->routeIs('admin.attendance.detailed.print')
+            ? $pdf->stream($data['filename'])
+            : $pdf->download($data['filename']);
     }
 
     private function formatMinutes($minutes)

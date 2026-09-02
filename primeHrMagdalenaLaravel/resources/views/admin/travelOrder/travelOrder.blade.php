@@ -152,6 +152,7 @@
 
 @include('admin.travelOrder.modals.viewTravelOrderModal')
 @include('admin.travelOrder.modals.travelDecisionModal')
+@include('admin.travelOrder.modals.travelOrderFormModal')
 
 @push('scripts')
     @vite('resources/js/admin/travelOrder/travelOrder.js')

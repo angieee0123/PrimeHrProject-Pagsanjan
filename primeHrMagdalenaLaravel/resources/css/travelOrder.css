@@ -543,3 +543,18 @@
 .to-history-label { margin: 0; font-size: 12px; font-weight: 700; color: var(--gp-pri); }
 .to-history-when { font-weight: 400; color: var(--theme-neutral-600); font-size: 11px; }
 .to-history-remarks { margin: 2px 0 0; font-size: 12px; color: var(--theme-neutral-700); line-height: 1.5; }
+
+/* ---------------------------------------------------------------------------
+   Printable Travel Order preview (#travelOrderFormModal).
+
+   Same shell as the Pass Slip's form modal: the sheet is an 8.5 x 13 in page
+   rendered by the server into an iframe, so the body is flush and carries the
+   page's own grey surround rather than a card padding the sheet would sit
+   inside twice.
+   ------------------------------------------------------------------------- */
+.to-modal-box-wide { max-width: 920px; width: 95vw; }
+.to-modal-body-flush { padding: 0; background: #e8e8f0; }
+.to-modal-iframe { width: 100%; height: 65vh; border: none; display: block; background: #fff; }
+.to-modal-footer-actions { display: flex; gap: 8px; margin-left: auto; }
+.to-btn-print { background: #6366f1; }
+.to-btn-download { background: #10b981; }

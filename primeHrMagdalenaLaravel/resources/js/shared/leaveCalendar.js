@@ -1,13 +1,17 @@
-// Admin Leave & Travel Calendar — read-only availability monitor.
+// Leave & Travel Calendar — read-only availability monitor.
 //
-// Markup:  resources/views/admin/leaveCalendar/leaveCalendar.blade.php
+// Markup:  resources/views/partials/leaveCalendar/calendar.blade.php, drawn by
+//          the admin's page and the mayor's alike.
 // Each avatar marker carries:
 //   data-payload  → what to open on click (leave → CS Form No. 6, travel → travel order)
 //   data-summary  → what to show on hover (name, type, dates, status)
 //
-// The leave modal (openAdminLeaveDetailModal) ships from leaveDetailModal.js and
-// the travel modal (viewOrder) from viewTravelOrderModal.js — both included on the
-// page, so this file only routes clicks to them.
+// This file never opens a modal itself; it routes a click to whichever detail
+// modals the page around it shipped. The admin page has the approve-capable
+// pair (openAdminLeaveDetailModal from leaveDetailModal.js, viewOrder from
+// viewTravelOrderModal.js) and is the default; a surface with its own — the
+// mayor's read-only mirrors — names them on window.leaveCalendarOpeners rather
+// than forcing a second copy of everything below.
 
 function calParse(el, attr) {
     try {
@@ -17,12 +21,24 @@ function calParse(el, attr) {
     }
 }
 
+// Which detail modals this page shipped. Read at click time, not at load, so
+// the page can register them in any order relative to this module.
+function calOpener(kind) {
+    const names = window.leaveCalendarOpeners || {};
+    const fallback = { leave: 'openAdminLeaveDetailModal', travel: 'viewOrder' };
+    const fn = window[names[kind] || fallback[kind]];
+    return typeof fn === 'function' ? fn : null;
+}
+
 // Route a marker's payload to the correct detail modal.
 function calOpenDetail(payload) {
     if (!payload || !payload.kind) return;
 
-    if (payload.kind === 'leave' && typeof window.openAdminLeaveDetailModal === 'function') {
-        window.openAdminLeaveDetailModal(
+    const open = calOpener(payload.kind);
+    if (!open) return;
+
+    if (payload.kind === 'leave') {
+        open(
             payload.id,
             payload.name,
             payload.employee_code,
@@ -36,8 +52,8 @@ function calOpenDetail(payload) {
             payload.attachment_url,
             payload.approver_remarks
         );
-    } else if (payload.kind === 'travel' && typeof window.viewOrder === 'function') {
-        window.viewOrder(payload.id);
+    } else if (payload.kind === 'travel') {
+        open(payload.id);
     }
 }
 

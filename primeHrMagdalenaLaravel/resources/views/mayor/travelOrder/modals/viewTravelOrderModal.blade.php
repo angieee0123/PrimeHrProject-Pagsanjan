@@ -1,4 +1,14 @@
-{{-- View Travel Order Modal (read-only) --}}
+{{-- View Travel Order Modal (read-only).
+     Shared: the mayor's Travel Orders table and the Leave & Travel Calendar
+     both open this, so it ships its own script rather than relying on either
+     page to load one. @once keeps the push single if both ever land on the
+     same request. --}}
+@once
+    @push('scripts')
+        @vite('resources/js/mayor/travelOrder/mayorTravelOrderDetail.js')
+    @endpush
+@endonce
+
 <x-modal id="mayorViewTravelOrderModal" close="closeMayorViewTravelOrderModal" title="Travel Order Details" title-id="mtoModalTitle" subtitle="-" subtitle-id="mtoEmployeeInfo">
     <x-slot:eyebrow>TRAVEL ORDER · #<span id="mtoOrderId">-</span></x-slot:eyebrow>
     <div class="modal-body">

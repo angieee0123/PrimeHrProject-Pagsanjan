@@ -21,6 +21,25 @@ class AdminLeaveCalendarController extends Controller
      * not hidden in CSS, so the stat strip and the "+X more" counts describe the
      * filtered month rather than the unfiltered one.
      */
+    /**
+     * The route this calendar's own links point at, and the view that draws it.
+     *
+     * The mayor gets the same read-only availability monitor over the same
+     * query — {@see MayorLeaveCalendarController}, which overrides only these
+     * two. Everything below is one computation for both surfaces, so the
+     * mayor's calendar cannot drift from the admin's on what counts as
+     * "out" or on how a month is paged.
+     */
+    protected function routeName(): string
+    {
+        return 'admin.leaveCalendar';
+    }
+
+    protected function viewName(): string
+    {
+        return 'admin.leaveCalendar.leaveCalendar';
+    }
+
     public function index()
     {
         // Which month are we viewing? Fall back to the current month on a bad param.
@@ -255,7 +274,7 @@ class AdminLeaveCalendarController extends Controller
         // the day is being opened out of a filtered month and should not
         // silently widen the answer on arrival.
         foreach ($days as $i => $cell) {
-            $days[$i]['day_url'] = route('admin.leaveCalendar', array_merge($q, [
+            $days[$i]['day_url'] = route($this->routeName(), array_merge($q, [
                 'view' => 'day',
                 'date' => $cell['key'],
             ]));
@@ -278,7 +297,7 @@ class AdminLeaveCalendarController extends Controller
         // into month view.
         $qv = array_merge($q, $view !== 'month' ? ['view' => $view] : []);
 
-        $step = fn (Carbon $d) => route('admin.leaveCalendar', $view === 'month'
+        $step = fn (Carbon $d) => route($this->routeName(), $view === 'month'
             ? array_merge($qv, ['month' => $d->format('Y-m')])
             : array_merge($qv, ['date' => $d->format('Y-m-d')]));
 
@@ -291,8 +310,8 @@ class AdminLeaveCalendarController extends Controller
         $prevUrl  = $step($prevAnchor);
         $nextUrl  = $step($nextAnchor);
         $todayUrl = $view === 'month'
-            ? route('admin.leaveCalendar', $qv)
-            : route('admin.leaveCalendar', array_merge($qv, ['date' => Carbon::today()->format('Y-m-d')]));
+            ? route($this->routeName(), $qv)
+            : route($this->routeName(), array_merge($qv, ['date' => Carbon::today()->format('Y-m-d')]));
 
         // The Month / Week / Day switcher. Each keeps the day you are looking
         // at, so switching re-frames the same date rather than jumping to now.
@@ -302,9 +321,9 @@ class AdminLeaveCalendarController extends Controller
         // the anchor is already "today when today is in view", which is the
         // day somebody switching views means.
         $viewUrls = [
-            'month' => route('admin.leaveCalendar', array_merge($q, ['month' => $periodStart->format('Y-m')])),
-            'week'  => route('admin.leaveCalendar', array_merge($q, ['view' => 'week', 'date' => $anchor->format('Y-m-d')])),
-            'day'   => route('admin.leaveCalendar', array_merge($q, ['view' => 'day',  'date' => $anchor->format('Y-m-d')])),
+            'month' => route($this->routeName(), array_merge($q, ['month' => $periodStart->format('Y-m')])),
+            'week'  => route($this->routeName(), array_merge($q, ['view' => 'week', 'date' => $anchor->format('Y-m-d')])),
+            'day'   => route($this->routeName(), array_merge($q, ['view' => 'day',  'date' => $anchor->format('Y-m-d')])),
         ];
 
         // Month-level summary for the stat strip. Counts records that actually
@@ -332,12 +351,12 @@ class AdminLeaveCalendarController extends Controller
 
         // Base for the <input type="month"> jump-to picker, which appends
         // &month=YYYY-MM client-side; carries embed + filters like the arrows do.
-        $monthNavBase = route('admin.leaveCalendar', $qv);
+        $monthNavBase = route($this->routeName(), $qv);
 
         // The filter form posts month as a hidden field, so its action carries
         // only the embed flag — the selects themselves supply the rest.
-        $filterAction = route('admin.leaveCalendar', $embed ? ['embed' => 1] : []);
-        $clearUrl     = route('admin.leaveCalendar', array_merge(
+        $filterAction = route($this->routeName(), $embed ? ['embed' => 1] : []);
+        $clearUrl     = route($this->routeName(), array_merge(
             $embed ? ['embed' => 1] : [],
             $view === 'month'
                 ? ['month' => $cursor->format('Y-m')]
@@ -348,7 +367,7 @@ class AdminLeaveCalendarController extends Controller
         // the 5th are hidden via .cal-markers .cal-marker:nth-child(n+6) and
         // surfaced through the "+X more" day popover.
 
-        return view('admin.leaveCalendar.leaveCalendar', compact(
+        return view($this->viewName(), compact(
             'days', 'monthLabel', 'currentMonth', 'prevUrl', 'nextUrl', 'todayUrl', 'peopleOut', 'summary', 'embed',
             'departments', 'leaveTypes', 'filterType', 'filterStatus', 'filterDept', 'filterLeave',
             'hasFilters', 'filterAction', 'clearUrl', 'monthNavBase',

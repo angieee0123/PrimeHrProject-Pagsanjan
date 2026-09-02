@@ -40,7 +40,7 @@
         @unless(Route::currentRouteName() === 'admin.ai-assistant')
         @include('admin.chatbot.adminChatbot')
         @endunless
-        @include('admin.leaveCalendar.leaveCalendarFab')
+        @include('partials.leaveCalendarFab')
         @include('admin.themeSettings.adminThemeSettings')
     </div>
     
