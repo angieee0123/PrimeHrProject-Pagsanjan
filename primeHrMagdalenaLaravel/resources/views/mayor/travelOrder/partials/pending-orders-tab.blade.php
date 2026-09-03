@@ -20,19 +20,20 @@
             </thead>
             <tbody id="pendingOrdersTableBody">
                 @forelse($pendingOrders as $order)
-                <tr class="pending-order-row to-row" data-department="{{ $order->employee->employmentDetail->departmentRelation->name ?? '' }}" data-mode="{{ $order->transportation_mode ?? '' }}" data-travel-date="{{ $order->travel_date->format('Y-m-d') }}">
+                @php $pEmpMayor = $order->employee; @endphp
+                <tr class="pending-order-row to-row" data-department="{{ $pEmpMayor?->employmentDetail?->departmentRelation?->name ?? '' }}" data-mode="{{ $order->transportation_mode ?? '' }}" data-travel-date="{{ $order->travel_date?->format('Y-m-d') ?? '' }}">
                     <td class="to-td">
                         <div class="emp-cell to-emp-cell">
                             @include('partials.travel-party-avatars', ['order' => $order])
                             <div class="to-emp-info">
-                                <p class="to-emp-name">{{ $order->employee->first_name }} {{ $order->employee->last_name }}</p>
-                                <p class="to-emp-id">{{ $order->employee->employee_id }}@if($order->companions->count()) · +{{ $order->companions->count() }} {{ Str::plural('companion', $order->companions->count()) }}@endif</p>
+                                <p class="to-emp-name">{{ $pEmpMayor ? trim(($pEmpMayor->first_name ?? '') . ' ' . ($pEmpMayor->last_name ?? '')) : 'Unknown Employee' }}</p>
+                                <p class="to-emp-id">{{ $pEmpMayor->employee_id ?? '—' }}@if($order->companions->count()) · +{{ $order->companions->count() }} {{ Str::plural('companion', $order->companions->count()) }}@endif</p>
                             </div>
                         </div>
                     </td>
                     <td class="to-td to-td-accent">{{ $order->destination }}</td>
                     <td class="to-td to-td-muted">{{ Str::limit($order->purpose, 40) }}</td>
-                    <td class="to-td to-td-strong">{{ \Carbon\Carbon::parse($order->travel_date)->format('M d, Y') }}</td>
+                    <td class="to-td to-td-strong">{{ $order->travel_date ? \Carbon\Carbon::parse($order->travel_date)->format('M d, Y') : '—' }}</td>
                     <td class="to-td to-td-center">
                         <span class="to-badge-duration to-badge-purple">{{ $order->duration }} days</span>
                     </td>

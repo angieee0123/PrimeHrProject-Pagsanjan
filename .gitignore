@@ -29,3 +29,7 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+
+# misc
+excels/
+bulk_import_parts/

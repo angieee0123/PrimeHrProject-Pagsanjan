@@ -35,23 +35,23 @@
                     $orderPhoto = $orderEmployee?->photo
                         ? (\Illuminate\Support\Str::startsWith($orderEmployee->photo, ['/', 'http']) ? $orderEmployee->photo : asset('storage/' . $orderEmployee->photo))
                         : '';
-                    $orderDepartment = $orderEmployee->employmentDetail->departmentRelation->name ?? '';
+                    $orderDepartment = $orderEmployee?->employmentDetail?->departmentRelation?->name ?? '';
                     $orderParty = 1 + $order->companions->count();
                     $orderBudget = $order->estimated_budget ? '₱' . number_format((float) $order->estimated_budget, 2) : '';
                 @endphp
-                <tr class="pending-order-row to-row" data-department="{{ $orderDepartment }}" data-mode="{{ $order->transportation_mode ?? '' }}" data-travel-date="{{ $order->travel_date->format('Y-m-d') }}">
+                <tr class="pending-order-row to-row" data-department="{{ $orderDepartment }}" data-mode="{{ $order->transportation_mode ?? '' }}" data-travel-date="{{ $order->travel_date?->format('Y-m-d') ?? '' }}">
                     <td class="to-td">
                         <div class="emp-cell to-emp-cell">
                             @include('partials.travel-party-avatars', ['order' => $order])
                             <div class="to-emp-info">
-                                <p class="to-emp-name">{{ $order->employee->first_name }} {{ $order->employee->last_name }}</p>
-                                <p class="to-emp-id">{{ $order->employee->employee_id }}@if($order->companions->count()) · +{{ $order->companions->count() }} {{ Str::plural('companion', $order->companions->count()) }}@endif</p>
+                                <p class="to-emp-name">{{ $orderEmployee ? trim(($orderEmployee->first_name ?? '') . ' ' . ($orderEmployee->last_name ?? '')) : 'Unknown Employee' }}</p>
+                                <p class="to-emp-id">{{ $orderEmployee->employee_id ?? '—' }}@if($order->companions->count()) · +{{ $order->companions->count() }} {{ Str::plural('companion', $order->companions->count()) }}@endif</p>
                             </div>
                         </div>
                     </td>
                     <td class="to-td to-td-accent">{{ $order->destination }}</td>
                     <td class="to-td to-td-muted">{{ Str::limit($order->purpose, 40) }}</td>
-                    <td class="to-td to-td-strong">{{ \Carbon\Carbon::parse($order->travel_date)->format('M d, Y') }}</td>
+                    <td class="to-td to-td-strong">{{ $order->travel_date ? \Carbon\Carbon::parse($order->travel_date)->format('M d, Y') : '—' }}</td>
                     <td class="to-td to-td-center">
                         <span class="to-badge-duration to-badge-purple">{{ $order->duration }} days</span>
                     </td>
@@ -75,7 +75,7 @@
                                         data-action="{{ route('admin.travelorder.approve', $order->id) }}"
                                         data-order-number="{{ $order->order_number }}"
                                         data-employee="{{ $orderEmployeeName }}"
-                                        data-employee-id="{{ $order->employee->employee_id }}"
+                                        data-employee-id="{{ $orderEmployee->employee_id ?? '—' }}"
                                         data-first-name="{{ $orderFirstName }}"
                                         data-initials="{{ $orderInitials }}"
                                         data-photo="{{ $orderPhoto }}"
@@ -96,7 +96,7 @@
                                         data-action="{{ route('admin.travelorder.disapprove', $order->id) }}"
                                         data-order-number="{{ $order->order_number }}"
                                         data-employee="{{ $orderEmployeeName }}"
-                                        data-employee-id="{{ $order->employee->employee_id }}"
+                                        data-employee-id="{{ $orderEmployee->employee_id ?? '—' }}"
                                         data-first-name="{{ $orderFirstName }}"
                                         data-initials="{{ $orderInitials }}"
                                         data-photo="{{ $orderPhoto }}"

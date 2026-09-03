@@ -1522,11 +1522,15 @@ function submitBulkImport() {
     formData.append('csv_file', fileInput.files[0]);
     formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
 
-    // Show loading state
-    const submitBtn = event.target;
-    const originalText = submitBtn.innerHTML;
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Importing...';
+    // Show loading state — button is the modal's primary action, not event.target
+    // (the previous `event.target` relied on a global `event` that is undefined
+    // when called via `onclick="submitBulkImport()"`).
+    const submitBtn = document.querySelector('#bulkImportModal button[onclick="submitBulkImport()"]');
+    const originalText = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Importing...';
+    }
 
     fetch('/admin/personnel/bulk-import', {
         method: 'POST',
@@ -1537,8 +1541,7 @@ function submitBulkImport() {
     })
     .then(response => response.json())
     .then(data => {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalText; }
 
         if (data.success) {
             closeBulkImportModal();
@@ -1560,8 +1563,7 @@ function submitBulkImport() {
         }
     })
     .catch(error => {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalText; }
         document.getElementById('errorMessage').textContent = 'An error occurred during import. Please try again.';
         document.getElementById('errorModal').style.display = 'flex';
     });
