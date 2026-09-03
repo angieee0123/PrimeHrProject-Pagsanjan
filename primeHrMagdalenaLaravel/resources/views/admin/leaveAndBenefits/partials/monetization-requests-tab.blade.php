@@ -1,3 +1,17 @@
+{{-- Monetization Requests tab.
+
+     The table, its row menu and its two empty states are styled from
+     `resources/css/admin/adminLeaveAndBenefits.css` rather than inline, so
+     the control sizes here are the same ones the Leave Types and
+     Transaction History tabs use instead of a second set that happens to
+     look similar. See that file's monetization block for why.
+
+     Every action a row can offer is rendered once, in full; `data-status`
+     on the menu decides which of them show. That is what lets approving a
+     request swap its menu in place — Print/Download in, Approve/Disapprove
+     out — without a second copy of this markup living in JavaScript. Each
+     endpoint re-checks the status server-side regardless, so the hiding is
+     tidiness rather than the permission. --}}
 <section class="table-section" id="monetization-tab" style="display: none; border: 1px solid var(--theme-neutral-300); border-radius: 12px; background: #fff; box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .03); overflow: hidden;">
     <div class="table-header" style="background: linear-gradient(135deg, var(--gp-bg-tint-2) 0%, #fff 100%); padding: 18px 20px; border-bottom: 1px solid var(--theme-neutral-300); align-items: center;">
         <div>
@@ -6,131 +20,183 @@
         </div>
     </div>
 
-    <div class="table-wrapper" style="max-width: 100%; overflow: auto;">
+    <div class="table-wrapper" style="max-width: 100%;">
         <table class="payroll-table" style="width: 100%; border-collapse: separate; border-spacing: 0;">
             <thead>
                 <tr>
-                    <th style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--theme-neutral-200);">Employee</th>
-                    <th style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--theme-neutral-200);">Department</th>
-                    <th style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--theme-neutral-200);">Request No.</th>
-                    <th style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid var(--theme-neutral-200);">Days (VL / SL)</th>
-                    <th style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: right; border-bottom: 1px solid var(--theme-neutral-200);">Amount</th>
-                    <th style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid var(--theme-neutral-200);">Status</th>
-                    <th class="row-menu-head" style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid var(--theme-neutral-200);">Actions</th>
+                    <th style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--theme-neutral-200);">Employee</th>
+                    <th style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--theme-neutral-200);">Department</th>
+                    <th style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--theme-neutral-200);">Request</th>
+                    <th style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid var(--theme-neutral-200);">Days Monetized</th>
+                    <th style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; padding: 12px 16px; text-align: right; border-bottom: 1px solid var(--theme-neutral-200);">Amount</th>
+                    <th style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid var(--theme-neutral-200);">Status</th>
+                    <th class="row-menu-head" style="position: sticky; top: 0; z-index: 2; background: var(--theme-neutral-50); color: var(--theme-neutral-700); font-size: 10.5px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; padding: 12px 16px; text-align: center; border-bottom: 1px solid var(--theme-neutral-200); width: 72px;">Actions</th>
                 </tr>
             </thead>
             <tbody id="monetRequestsTableBody">
                 @forelse($monetizationRequests as $monet)
-                @php $totalDays = (float) $monet->vl_days + (float) $monet->sl_days; @endphp
-                <tr data-department="{{ $monet->employee->employmentDetail->departmentRelation->name ?? 'N/A' }}"
+                @php
+                    $monetEmployee = $monet->employee;
+                    $monetEmployment = $monetEmployee?->employmentDetail;
+                    $monetDepartment = $monetEmployment?->departmentRelation?->name ?? 'N/A';
+                    $monetPosition = $monetEmployment?->designationRelation?->title;
+                    $monetName = trim(($monetEmployee?->first_name ?? 'N/A') . ' ' . ($monetEmployee?->last_name ?? ''));
+                    $monetTotalDays = (float) $monet->vl_days + (float) $monet->sl_days;
+                    $monetStatusClass = match ($monet->status) {
+                        'approved' => 'approved',
+                        'pending' => 'pending',
+                        'disapproved' => 'rejected',
+                        default => 'cancelled',
+                    };
+                @endphp
+                <tr class="monet-row"
+                    data-monet-id="{{ $monet->id }}"
+                    data-department="{{ $monetDepartment }}"
                     data-status="{{ ucfirst($monet->status) }}"
-                    style="transition: all 0.15s ease;"
-                    onmouseover="this.style.background='#f9fafb'"
-                    onmouseout="this.style.background='#fff'">
-                    <td style="padding: 14px 16px; border-bottom: 1px solid var(--theme-neutral-200);">
-                        <div class="emp-cell" style="display: flex; align-items: center; gap: 12px;">
-                            @if($monet->employee->photo)
-                                <img src="{{ $monet->employee->photo }}" alt="{{ $monet->employee->first_name }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--theme-neutral-300); flex-shrink: 0;">
+                    data-employee-name="{{ $monetName }}"
+                    data-request-number="{{ $monet->request_number }}"
+                    data-amount="{{ number_format((float) $monet->computed_amount, 2) }}"
+                    data-days="{{ number_format($monetTotalDays, 1) }}">
+                    <td>
+                        <div class="monet-emp">
+                            @if($monetEmployee?->photo)
+                                <img class="monet-emp-avatar" src="{{ $monetEmployee->photo }}" alt="">
                             @else
-                                <div style="background: {{ $avatarColors[($monet->employee->id ?? 0) % count($avatarColors)] }}; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; border: 2px solid var(--theme-neutral-300); flex-shrink: 0;">
-                                    {{ strtoupper(substr($monet->employee->first_name ?? 'N', 0, 1) . substr($monet->employee->last_name ?? 'A', 0, 1)) }}
+                                <div class="monet-emp-avatar" style="background: {{ $avatarColors[($monetEmployee->id ?? 0) % count($avatarColors)] }};" aria-hidden="true">
+                                    {{ strtoupper(substr($monetEmployee?->first_name ?? 'N', 0, 1) . substr($monetEmployee?->last_name ?? 'A', 0, 1)) }}
                                 </div>
                             @endif
-                            <div style="min-width: 0;">
-                                <p style="margin: 0 0 2px; font-size: 13px; font-weight: 600; color: var(--theme-neutral-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $monet->employee->first_name ?? 'N/A' }} {{ $monet->employee->last_name ?? '' }}</p>
-                                <p style="margin: 0; font-size: 11px; color: var(--theme-neutral-700); font-weight: 500;">{{ $monet->employee->employee_id ?? 'N/A' }}</p>
+                            <div class="monet-emp-text">
+                                <p class="monet-emp-name">{{ $monetName }}</p>
+                                <p class="monet-emp-meta" title="{{ $monetEmployee?->employee_id ?? 'N/A' }}{{ $monetPosition ? ' · ' . $monetPosition : '' }}">
+                                    <strong>{{ $monetEmployee?->employee_id ?? 'N/A' }}</strong>@if($monetPosition) · {{ $monetPosition }}@endif
+                                </p>
                             </div>
                         </div>
                     </td>
-                    <td style="padding: 14px 16px; border-bottom: 1px solid var(--theme-neutral-200);">
-                        <span style="display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: var(--theme-neutral-100); color: var(--theme-neutral-700);">{{ $monet->employee->employmentDetail->departmentRelation->name ?? 'N/A' }}</span>
+                    <td><span class="monet-dept" title="{{ $monetDepartment }}">{{ $monetDepartment }}</span></td>
+                    <td>
+                        <p class="monet-reqno">{{ $monet->request_number }}</p>
+                        <p class="monet-filed">Filed {{ $monet->created_at?->format('M d, Y') ?? '—' }}</p>
                     </td>
-                    <td style="padding: 14px 16px; border-bottom: 1px solid var(--theme-neutral-200); font-size: 13px; color: var(--gp-pri); font-weight: 600;">{{ $monet->request_number }}</td>
-                    <td style="padding: 14px 16px; border-bottom: 1px solid var(--theme-neutral-200); text-align: center; font-weight: 700; color: var(--gp-pri); font-size: 13px;">{{ number_format((float) $monet->vl_days, 1) }} / {{ number_format((float) $monet->sl_days, 1) }}</td>
-                    <td style="padding: 14px 16px; border-bottom: 1px solid var(--theme-neutral-200); text-align: right; font-weight: 700; color: var(--theme-neutral-950); font-size: 13px;">₱{{ number_format((float) $monet->computed_amount, 2) }}</td>
-                    <td style="padding: 14px 16px; border-bottom: 1px solid var(--theme-neutral-200); text-align: center;">
-                        @if($monet->status === 'approved')
-                            <span style="display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #f0fdf4; color: var(--theme-success);">Approved</span>
-                        @elseif($monet->status === 'pending')
-                            <span style="display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #fef3c7; color: #b45309;">Pending</span>
-                        @elseif($monet->status === 'disapproved')
-                            <span style="display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #fef2f2; color: var(--theme-danger);">Disapproved</span>
-                        @else
-                            <span style="display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #f3f4f6; color: var(--theme-neutral-700);">Cancelled</span>
-                        @endif
+                    <td class="monet-days">
+                        <span class="monet-days-total">{{ number_format($monetTotalDays, 1) }}</span>
+                        <span class="monet-days-split">{{ number_format((float) $monet->vl_days, 1) }} VL · {{ number_format((float) $monet->sl_days, 1) }} SL</span>
                     </td>
-                    <td class="row-menu-cell" style="padding: 14px 16px; border-bottom: 1px solid var(--theme-neutral-200);">
-                        <div style="position: relative; display: flex; justify-content: center;">
-                            <button class="action-ellipsis-btn" onclick="toggleMonetActionMenu(event, this)" title="Actions" style="background: none; border: none; color: var(--gp-text-soft); cursor: pointer; padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#f1f5f9'; this.style.color='var(--gp-pri)'" onmouseout="this.style.background='none'; this.style.color='#8f8daf'">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                    <td class="monet-amount">₱{{ number_format((float) $monet->computed_amount, 2) }}</td>
+                    <td class="monet-status-cell">
+                        {{-- The app's one status-badge definition, so these pills
+                             follow the active palette like every other badge
+                             rather than the four hex literals they used to be. --}}
+                        <span class="badge-status {{ $monetStatusClass }}" data-monet-badge>
+                            {{ $monet->status === 'disapproved' ? 'Disapproved' : ucfirst($monet->status) }}
+                        </span>
+                    </td>
+                    <td class="row-menu-cell">
+                        <div class="monet-menu-wrap">
+                            <button type="button" class="monet-ellipsis-btn"
+                                    onclick="toggleMonetActionMenu(event, this)"
+                                    aria-haspopup="true" aria-expanded="false"
+                                    aria-label="Actions for {{ $monet->request_number }}" title="Actions">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
                             </button>
-                            <div class="monet-action-menu" style="display: none; position: absolute; right: 0; top: 100%; background: #fff; border: 1px solid var(--theme-neutral-300); border-radius: 10px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15); z-index: 100; min-width: 160px; margin-top: 6px; overflow: hidden;">
-                                <button onclick="openAdminMonetDetailModal({{ $monet->id }})" style="width: 100%; padding: 11px 14px; border: none; background: none; text-align: left; font-size: 12px; color: var(--gp-pri); font-weight: 600; cursor: pointer; transition: all 0.2s; border-radius: 0;" onmouseover="this.style.background='#f2f1fb'" onmouseout="this.style.background='none'">
-                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display: inline; margin-right: 8px; vertical-align: middle;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <div class="monet-action-menu" role="menu" data-status="{{ ucfirst($monet->status) }}">
+                                <button type="button" role="menuitem" onclick="openAdminMonetDetailModal({{ $monet->id }})">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                     View Details
                                 </button>
-                                @if($monet->status === 'pending')
-                                    <button onclick="approveMonetizationRequest({{ $monet->id }}, '{{ $monet->request_number }}')" style="width: 100%; padding: 11px 14px; border: none; background: none; text-align: left; font-size: 12px; color: #22c55e; font-weight: 600; cursor: pointer; border-top: 1px solid var(--theme-neutral-100); transition: all 0.2s; border-radius: 0;" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='none'">
-                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display: inline; margin-right: 8px; vertical-align: middle;"><polyline points="20 6 9 17 4 12"/></svg>
-                                        Approve
-                                    </button>
-                                    <button onclick="openMonetDisapproveModal({{ $monet->id }}, '{{ $monet->request_number }}')" style="width: 100%; padding: 11px 14px; border: none; background: none; text-align: left; font-size: 12px; color: #ef4444; font-weight: 600; cursor: pointer; border-top: 1px solid var(--theme-neutral-100); transition: all 0.2s; border-radius: 0;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
-                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display: inline; margin-right: 8px; vertical-align: middle;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                        Disapprove
-                                    </button>
-                                @endif
+                                {{-- Print Sheet only on an approved request: the
+                                     office's Monetization form carries no status
+                                     anywhere on it, so a pending one would print
+                                     as an authorised computation of money owed.
+                                     `renderForm()` refuses it server-side too. --}}
+                                <button type="button" role="menuitem" data-monet-item="print" onclick="printMonetizationSheet({{ $monet->id }})">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                                    Print Sheet
+                                </button>
+                                <button type="button" role="menuitem" data-monet-item="download" onclick="downloadMonetizationSheet({{ $monet->id }})">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    Download PDF
+                                </button>
+                                <button type="button" role="menuitem" class="is-approve" data-monet-item="approve" onclick="approveMonetizationRequest({{ $monet->id }})">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Approve
+                                </button>
+                                <button type="button" role="menuitem" class="is-disapprove" data-monet-item="disapprove" onclick="openMonetDisapproveModal({{ $monet->id }})">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    Disapprove
+                                </button>
                             </div>
                         </div>
                     </td>
                 </tr>
                 @empty
-                <tr>
-                    <td colspan="7" style="text-align: center; padding: 60px 20px; border-bottom: none;">
-                        <div style="width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; background: var(--theme-neutral-100); display: flex; align-items: center; justify-content: center;">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+                <tr id="monetNoRecordsRow">
+                    <td colspan="7" class="monet-empty-td">
+                        <div class="monet-empty-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
-                        <p style="margin: 0 0 8px; font-size: 15px; color: var(--theme-neutral-700); font-weight: 600;">No monetization requests found</p>
-                        <p style="margin: 0; font-size: 13px; color: var(--theme-neutral-600);">Employee monetization requests will appear here</p>
+                        <p class="monet-empty-title">No Monetization Requests Found</p>
+                        <p class="monet-empty-sub">Requests filed by employees to convert leave credits into cash will appear here once submitted.</p>
                     </td>
                 </tr>
                 @endforelse
+
+                {{-- Shown by applyMonetizationAdminFilters() when the status
+                     filter hides every row. Without it, narrowing to a status
+                     nobody holds left a blank strip that reads as a broken
+                     table rather than as an empty result. --}}
+                <tr id="monetNoMatchesRow" style="display: none;">
+                    <td colspan="7" class="monet-empty-td">
+                        <div class="monet-empty-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                        </div>
+                        <p class="monet-empty-title">No Requests Match This Filter</p>
+                        <p class="monet-empty-sub">No monetization request currently holds the selected status. <button type="button" class="btn-link-reset" onclick="clearMonetizationAdminFilters()" style="background: none; border: none; padding: 0; font: inherit; color: var(--gp-pri); font-weight: 700; cursor: pointer; text-decoration: underline;">Show all requests</button></p>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
 
-    <div class="table-footer" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-top: 1px solid var(--theme-neutral-200); background: var(--theme-neutral-50);">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <p id="monetRequestFooter" style="margin: 0; font-size: 12px; color: var(--theme-neutral-700); font-weight: 500;">Showing <strong style="color: var(--gp-pri); font-weight: 700;" id="monetRequestRowTotal">{{ $monetizationRequests->count() }}</strong> records</p>
-        </div>
+    <div class="table-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 16px 20px; border-top: 1px solid var(--theme-neutral-200); background: var(--theme-neutral-50);">
+        <p id="monetRequestFooter" style="margin: 0; font-size: 12px; color: var(--theme-neutral-700); font-weight: 500;">Showing <strong style="color: var(--gp-pri); font-weight: 700;" id="monetRequestRowTotal">{{ $monetizationRequests->count() }}</strong> of <strong style="color: var(--gp-pri); font-weight: 700;">{{ $monetizationRequests->count() }}</strong> records</p>
+        <p style="margin: 0; font-size: 11.5px; color: var(--theme-text-soft);">Approving a request deducts the monetized days from the employee's VL/SL balances.</p>
     </div>
 </section>
 
 @include('admin.leaveAndBenefits.modals.monetization-detail-modal')
 
-{{-- Disapprove Modal --}}
+{{-- Disapprove Modal. The reason is required by the controller, so the field
+     is the confirmation: the request being refused is named above it rather
+     than left to the admin's memory of which row they opened. --}}
 <div class="modal-overlay" id="monetRejectModal" onclick="closeMonetDisapproveModal()" style="display: none;">
-    <div class="modal-box" onclick="event.stopPropagation()" style="max-width: 500px;">
+    <div class="modal-box" onclick="event.stopPropagation()" style="max-width: 520px;">
         <div class="modal-header">
             <div>
                 <span class="modal-eyebrow">DISAPPROVE MONETIZATION REQUEST</span>
-                <h3 class="modal-title" id="monetRejectModalTitle">Confirm Disapproval</h3>
-                <p class="modal-sub">Please provide a reason for disapproving this monetization request</p>
+                <h3 class="modal-title" id="monetRejectModalTitle">Disapprove Monetization Request?</h3>
+                <p class="modal-sub" id="monetRejectModalSub">You are about to disapprove this monetization request.</p>
             </div>
-            <button class="modal-close" onclick="closeMonetDisapproveModal()">
+            <button class="modal-close" onclick="closeMonetDisapproveModal()" aria-label="Close">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
         <div class="modal-body">
+            <div class="monet-reject-summary" id="monetRejectSummary"></div>
             <div class="form-field">
-                <label style="display: block; font-weight: 600; color: var(--gp-pri); margin-bottom: 8px;">Disapproval Reason <span style="color: var(--theme-danger);">*</span></label>
-                <textarea id="monetRejectionReason" rows="4" placeholder="Explain why this monetization request is being disapproved..." required style="width: 100%; padding: 12px; border: 2px solid var(--theme-neutral-300); border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical;"></textarea>
+                <label for="monetRejectionReason" style="display: block; font-weight: 600; color: var(--gp-pri); margin-bottom: 8px; font-size: 13px;">Disapproval Reason <span style="color: var(--theme-danger);">*</span></label>
+                <textarea id="monetRejectionReason" rows="4" placeholder="Explain why this monetization request is being disapproved..." required maxlength="500" style="width: 100%; padding: 12px; border: 1px solid var(--theme-neutral-300); border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical;"></textarea>
+                <p id="monetRejectionError" style="display: none; margin: 6px 0 0; font-size: 12px; font-weight: 600; color: var(--theme-danger);">A reason is required — the employee is shown this on their own request.</p>
             </div>
         </div>
         <div class="modal-footer">
             <button class="modal-btn-ghost" onclick="closeMonetDisapproveModal()">Cancel</button>
-            <button class="modal-btn-primary" id="monetConfirmRejectBtn" style="background: var(--theme-danger);">
+            <button class="modal-btn-danger" id="monetConfirmRejectBtn">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <circle cx="12" cy="12" r="10"/>
                     <line x1="15" y1="9" x2="9" y2="15"/>

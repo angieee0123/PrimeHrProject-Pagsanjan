@@ -6,6 +6,22 @@
 :root {
     --sf-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
                "Helvetica Neue", Arial, sans-serif;
+
+    /* This page's stacking order, in two layers.
+
+       A *working* modal — Bulk Import, QR code, Assign/Bulk Schedule — sits on
+       --personnel-z-modal. An *alert* about one of them — success, error, export
+       success/failure, confirm — sits one layer up on --personnel-z-alert,
+       because it reports on the modal underneath it and has to be read and
+       dismissed before that modal can be used again.
+
+       Both layers used to be a literal 2000, which left the winner to DOM order:
+       adminPersonnel.blade.php includes bulkImportModal *after* successModal and
+       errorModal, so a failed import painted its alert underneath the very modal
+       that raised it — blurred by that modal's backdrop and not clickable. Set
+       the layer here; never write the number at a call site. */
+    --personnel-z-modal: 2000;
+    --personnel-z-alert: 2100;
 }
 
 /* Stats */
@@ -56,7 +72,7 @@
     background: rgba(var(--theme-primary-rgb),0.42);
     -webkit-backdrop-filter: blur(8px) saturate(150%);
     backdrop-filter: blur(8px) saturate(150%);
-    z-index: 2000;
+    z-index: var(--personnel-z-modal);
     align-items: center;
     justify-content: center;
 }
@@ -175,9 +191,12 @@
     background: rgba(var(--theme-primary-rgb),0.42);
     -webkit-backdrop-filter: blur(8px) saturate(150%);
     backdrop-filter: blur(8px) saturate(150%);
-    z-index: 2000;
+    z-index: var(--personnel-z-alert);
     align-items: center;
     justify-content: center;
+    /* Gutter for the box below, so a tall alert stops short of the viewport
+       edge instead of running under it. */
+    padding: 24px;
 }
 
 .personnel-modal-box {
@@ -188,6 +207,18 @@
     padding: 32px;
     text-align: center;
     box-shadow: 0 20px 50px rgba(var(--theme-shadow-rgb),.16), 0 2px 10px rgba(var(--theme-shadow-rgb),.05);
+    /* An alert grows with what it has to report — a dozen duplicate rows, a
+       dozen rejected fields — and a centred flex child that outgrows its
+       container overflows *both* ends, taking the title off the top of the
+       screen and the button off the bottom with no way to scroll to either.
+       The box scrolls inside itself instead; the lists within it cap their own
+       height first, so this is the backstop, not the usual path. */
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    /* Stated rather than inherited from the framework reset: under content-box
+       the 32px of padding sits *outside* the cap, so the box overshoots the
+       viewport by 64px — which is the one thing this cap exists to prevent. */
+    box-sizing: border-box;
 }
 
 .personnel-modal-icon {
@@ -203,6 +234,7 @@
 .personnel-modal-icon.success { background: #e9f9ef; }
 .personnel-modal-icon.error   { background: #fdedec; }
 .personnel-modal-icon.export  { background: #e9f9ef; }
+.personnel-modal-icon.warning { background: var(--theme-warning-subtle); }
 
 .personnel-modal-title {
     margin: 0 0 12px;
@@ -320,6 +352,138 @@
     color: var(--theme-danger-emphasis);
 }
 
+/* Duplicate rows refused by Bulk Import.
+
+   Left-aligned inside a centred box for the same reason as the email panel
+   above: the admin reads these back against their spreadsheet character by
+   character, and centred rows give the eye no fixed left edge to scan down.
+   Warning tones rather than danger — nothing failed, the records were already
+   there. */
+.personnel-modal-dupes {
+    margin: 0 0 24px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    text-align: left;
+    background: var(--theme-warning-subtle);
+    border: 1px solid var(--theme-warning-border);
+}
+
+.personnel-modal-dupes-title {
+    margin: 0 0 4px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--theme-warning-emphasis);
+}
+
+.personnel-modal-dupes-lede {
+    margin: 0 0 10px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--gp-text-mid);
+}
+
+/* Scrolls rather than growing the alert: an import of fifty known employees
+   must not push the Done button off-screen. Roughly six rows are visible, which
+   is enough for the list to read as a list and to show there is more below —
+   and it yields to the viewport on a short screen (a laptop at 768px with the
+   browser chrome taken off it), where a fixed 190px is what would make the box
+   itself the thing that has to be scrolled. */
+.personnel-modal-dupes-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: min(190px, 24vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* An always-visible gutter, matching .au-scroll on the audit page. A part-
+       shown row is the only other cue that the list continues, and on its own
+       that reads as text the box has clipped rather than text to scroll to. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--theme-neutral-300) transparent;
+    padding-right: 2px;
+}
+
+.personnel-modal-dupes-list::-webkit-scrollbar { width: 8px; }
+.personnel-modal-dupes-list::-webkit-scrollbar-track { background: transparent; }
+.personnel-modal-dupes-list::-webkit-scrollbar-thumb {
+    background: var(--theme-neutral-300);
+    border-radius: 999px;
+    /* Inset via a transparent border so the thumb reads as 4px of colour
+       floating in the gutter rather than filling it. */
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.personnel-modal-dupes-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    padding: 7px 0;
+    border-top: 1px solid var(--theme-warning-border);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.personnel-modal-dupes-list li:first-child { border-top: none; }
+
+/* The name wraps and the ID never does: a long name breaking over two lines is
+   still readable, an employee ID broken across a line is a number that has to
+   be pieced back together. */
+.personnel-modal-dupes-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 600;
+    color: var(--gp-ink);
+    overflow-wrap: anywhere;
+}
+
+.personnel-modal-dupes-id {
+    flex: 0 0 auto;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--gp-text-mid);
+}
+
+.personnel-modal-dupes-count {
+    margin: 10px 0 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--theme-warning-border);
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--theme-warning-emphasis);
+}
+
+/* A short screen — a 1366x768 laptop is about 650px of viewport once the
+   browser's own chrome is off it — is where the round icon and the generous
+   padding stop being decoration and start pushing Done below the fold. The
+   alert still scrolls if this is not enough, but scrolling to reach the only
+   button is a worse answer than a smaller icon.
+
+   Scoped with :has() to the alert actually carrying a duplicates list, so the
+   other alerts on this page keep their proportions; a browser without :has()
+   simply falls back to the scrolling box above. */
+@media (max-height: 700px) {
+    .personnel-modal-box:has(> .personnel-modal-dupes:not([hidden])) {
+        padding: 22px 24px;
+    }
+
+    .personnel-modal-box:has(> .personnel-modal-dupes:not([hidden])) .personnel-modal-icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 12px;
+    }
+
+    .personnel-modal-box:has(> .personnel-modal-dupes:not([hidden])) .personnel-modal-message {
+        margin-bottom: 16px;
+    }
+
+    .personnel-modal-dupes-list {
+        max-height: 20vh;
+    }
+}
+
 .personnel-modal-btn {
     padding: 12px 32px;
     color: #fff;
@@ -335,6 +499,10 @@
 
 .personnel-modal-btn.success { background: var(--gp-good); }
 .personnel-modal-btn.error   { background: var(--gp-bad); }
+/* A validation notice is not a failure: nothing was attempted and nothing broke,
+   so it takes the warning hue rather than the error one. Theme tokens, not the
+   literals its two older siblings above still carry. */
+.personnel-modal-btn.warning { background: var(--theme-warning); color: var(--theme-warning-fg); }
 
 /* Confirm Modal */
 #confirmModal {
@@ -344,7 +512,7 @@
     background: rgba(var(--theme-primary-rgb),0.42);
     -webkit-backdrop-filter: blur(8px) saturate(150%);
     backdrop-filter: blur(8px) saturate(150%);
-    z-index: 2000;
+    z-index: var(--personnel-z-alert);
     align-items: center;
     justify-content: center;
 }

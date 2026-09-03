@@ -16,6 +16,8 @@
 @section('content')
 
 @unless($embed)
+    @include('mayor.notification.mayorNotification')
+
     @include('mayor.topbar.leaveCalendarTopbar')
 @endunless
 

@@ -1,22 +1,28 @@
-{{-- The notification panel's behaviour, shared by the admin and employee
-     panels — they differ only in which audience they poll for. Kept in one
-     file because the two must not drift: the employee panel was already a
-     copy of this one, and copies are how one of them silently stops
-     refreshing. Expects $audience ('admin' or 'employee'). --}}
+{{-- The notification panel's behaviour, shared by all three bells — they
+     differ only in which audience they poll for. Expects $audience. --}}
 <script>
-/* The panel is server-rendered once, so without this it only ever showed the
-   notifications that existed when the page loaded. It now polls
+/* The panel is server-rendered once, so without this it only ever shows the
+   notifications that existed when the page loaded. It polls
    /api/notifications/feed, which re-renders the same Blade partial the first
    paint came from, and refreshes on the moments a stale list is most visible:
-   opening the panel, and coming back to the tab. */
+   opening the panel, and coming back to the tab.
+
+   What this script deliberately does *not* do is navigate. Cards are ordinary
+   links to /notifications/{id}/open, so marking-read-then-going-somewhere is
+   one server round trip that re-checks who may see the destination — rather
+   than a fetch followed by a client-side jump to a URL read out of the DOM. */
 (function () {
     const AUDIENCE = @json($audience);
-    const POLL_MS = 15000;
+    const POLL_MS  = {{ max(5, (int) config('notifications.poll_seconds', 20)) * 1000 }};
 
-    const panel   = document.getElementById('notifPanel');
-    const body    = document.getElementById('notifBody');
-    const dot     = document.getElementById('notifDot');
-    const countEl = document.getElementById('unreadCount');
+    const panel    = document.getElementById('notifPanel');
+    const body     = document.getElementById('notifBody');
+    const dot      = document.getElementById('notifDot');
+    const button   = document.getElementById('notifBtn');
+    const summary  = document.getElementById('notifSummary');
+    const clearBtn = document.getElementById('notifClearBtn');
+
+    if (!panel || !body || !dot) return;
 
     let timer = null;
     let inFlight = false;
@@ -28,9 +34,25 @@
     }
 
     function setUnread(count) {
-        countEl.textContent = count;
-        dot.textContent = count > 9 ? '9+' : count;
+        dot.textContent = count > 99 ? '99+' : count;   // same cap as the sidebar row's badge
         dot.classList.toggle('active', count > 0);
+
+        if (button) {
+            button.setAttribute('aria-label', count > 0
+                ? 'Notifications, ' + count + ' unread'
+                : 'Notifications');
+        }
+
+        if (summary) {
+            // The three phrasings are authored in Blade beside the server-
+            // rendered one, so the polled sentence and the first-paint
+            // sentence cannot drift.
+            summary.textContent = count === 0
+                ? summary.dataset.zero
+                : (count === 1 ? summary.dataset.one : summary.dataset.many.replace(':count', count));
+        }
+
+        if (clearBtn) clearBtn.disabled = count === 0;
     }
 
     async function refresh() {
@@ -43,8 +65,8 @@
                 headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                 credentials: 'same-origin',
             });
-            // An expired session answers with the login page, not JSON. Keep the
-            // last known list rather than blanking the panel.
+            // An expired session answers with the login page, not JSON. Keep
+            // the last known list rather than blanking the panel.
             if (!res.ok) return;
             const data = await res.json();
             setUnread(data.unread_count);
@@ -63,13 +85,8 @@
         }
     }
 
-    function start() {
-        if (timer === null) timer = setInterval(refresh, POLL_MS);
-    }
-
-    function stop() {
-        if (timer !== null) { clearInterval(timer); timer = null; }
-    }
+    function start() { if (timer === null) timer = setInterval(refresh, POLL_MS); }
+    function stop()  { if (timer !== null) { clearInterval(timer); timer = null; } }
 
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
@@ -82,11 +99,16 @@
 
     start();
 
-    window.toggleNotif = function () {
-        panel.classList.toggle('open');
+    function setOpen(open) {
+        panel.classList.toggle('open', open);
+        if (button) button.setAttribute('aria-expanded', open ? 'true' : 'false');
         // Whatever the poll interval is, the list is current the moment it is
         // opened.
-        if (panel.classList.contains('open')) refresh();
+        if (open) refresh();
+    }
+
+    window.toggleNotif = function () {
+        setOpen(!panel.classList.contains('open'));
     };
 
     window.markAllAsRead = function () {
@@ -99,7 +121,7 @@
         .then(response => response.json())
         .then(data => {
             if (!data.success) return;
-            body.querySelectorAll('.notif-card.new').forEach(card => card.classList.remove('new'));
+            body.querySelectorAll('.notif-card.is-unread').forEach(card => card.classList.remove('is-unread'));
             setUnread(0);
             lastHtml = null;   // the stored markup still says unread
             refresh();
@@ -107,37 +129,16 @@
         .catch(() => {});
     };
 
-    // Delegated, so cards replaced by a poll stay clickable — and so the link
-    // never has to survive a trip through an inline onclick attribute.
-    body.addEventListener('click', (e) => {
-        const card = e.target.closest('.notif-card');
-        if (!card) return;
-
-        const id = card.dataset.notifId;
-        const link = card.dataset.notifLink;
-        if (!id) return;
-
-        fetch(`/api/notifications/${id}/mark-read`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf() },
-            credentials: 'same-origin',
-        })
-        .then(() => {
-            if (link) {
-                window.location.href = link;
-                return;
-            }
-            // No link to follow, so the panel stays open: show the read state here.
-            card.classList.remove('new');
-            lastHtml = null;
-            refresh();
-        })
-        .catch(() => {});
-    });
-
     document.addEventListener('click', (e) => {
         const wrap = document.querySelector('.notif-wrap');
-        if (wrap && !wrap.contains(e.target)) panel.classList.remove('open');
+        if (wrap && !wrap.contains(e.target)) setOpen(false);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && panel.classList.contains('open')) {
+            setOpen(false);
+            if (button) button.focus();
+        }
     });
 })();
 </script>

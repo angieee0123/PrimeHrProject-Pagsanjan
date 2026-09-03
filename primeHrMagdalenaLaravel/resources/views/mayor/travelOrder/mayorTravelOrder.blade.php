@@ -8,6 +8,8 @@
 
 @section('content')
 
+@include('mayor.notification.mayorNotification')
+
 @include('mayor.topbar.travelOrderTopbar')
 
 <div class="glass-shell">

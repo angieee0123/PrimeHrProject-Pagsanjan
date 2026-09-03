@@ -905,6 +905,95 @@ php artisan test tests/Unit/DtrFormDataTest.php
 
 ---
 
+## The printed Monetization sheet
+
+Monetization Requests → **Action → Print Sheet** / **Download PDF** (admin), and
+**My Monetization** → the detail modal's same two buttons (employee), produce
+the office's own Monetization form: 8.5 × 14 in portrait, Times, the
+Province/Municipality heading, Name / Position / Salary, the leave credits the
+request was filed against, the `TLB = S × D × CF` working, and a Prepared by
+block.
+
+Print Sheet used to `window.open()` a page of plain HTML and call `print()` on
+it. Nothing on it was the municipality's form — no heading block in the right
+place, no Prepared by, the browser's own page margins and URL header — so what
+came off the printer could not be filed or submitted. It also restated the
+computation in JavaScript beside the figures, which is a second place for the
+arithmetic on somebody's pay to go wrong.
+
+```
+MonetizationRequestController::generateForm()      admin, any employee
+MonetizationRequestController::generateOwnForm()   employee, scoped to self
+        │
+        ├─ MonetizationFormDataService::build()    the row + the preparer
+        └─ dompdf + monetization-form.blade.php    the sheet
+```
+
+- **The service computes nothing.** The peso figure is
+  `monetization_requests.computed_amount` — what
+  `MonetizationRequest::computeAmount()` wrote when the request was filed, and
+  what the table and both detail modals already show — so the sheet cannot
+  disagree with the screen the button was pressed from.
+  `MonetizationFormDataTest::prints_the_stored_amount_rather_than_recomputing_it`
+  pins that by overwriting the column and asserting the printed total follows.
+  The two multiplication lines are the *same* arithmetic spelled out, because
+  the office's sheet shows its working.
+- **`D` is the days being monetized, not the credits above it.** The template's
+  key reads "D = Total No. of Leave Credits" and its worked example multiplies
+  by 75 — the monetized days. `vl_days + sl_days` is what the amount was
+  computed from, so it is what prints.
+- **The credits are the balances at filing, not today's.** The line says "as of
+  <date>", and that date is `created_at`: the approval has since taken the
+  monetized days out of the live balance, so reading it now would print a
+  figure that contradicts the computation under it.
+- **Only an approved request prints.** The sheet carries no status anywhere on
+  it, so a pending or disapproved one would come out looking exactly like an
+  authorised computation of money owed. Both surfaces hide the buttons and
+  `renderForm()` refuses it server-side.
+- **Prepared by is the generator, never the employee.** The two are resolved
+  independently — the recipient from the request's own row, the preparer from
+  the signed-in account (its employee record, then `users.name`, then the
+  username). The designation follows the resolved person rather than the
+  configured fallback, and a name that is not a name (`admin`, blank) leaves
+  the line empty for a wet signature. Same rule and same placeholder list as
+  `DtrFormDataService`.
+- **The employee route is scoped to the caller's own employee row**, so the id
+  in `/employee/monetization/{id}/print-form` cannot be edited into somebody
+  else's sheet.
+- **The sheet is a tracing.** Every coordinate in
+  `resources/views/admin/leaveAndBenefits/partials/monetization-form.blade.php`
+  was measured off the office's template (a 2550 × 4200 export at 300 dpi, i.e.
+  8.5 × 14 in) at 0.24 pt per pixel, and the header comment lists them. Do not
+  "tidy" a number there. It is set in Times because that is what the template
+  is typed in *and* what dompdf resolves to a core font — which is also why the
+  salary carries a plain `P`: the core face has no ₱ glyph, and a missing one
+  prints as a hollow box on a document somebody signs.
+- **The identity block is a table, not three placed rows.** A plantilla title
+  like "Administrative Officer V (Human Resource Management Officer III)" is
+  half again as long as the template's "Driver II", and on a measured sheet a
+  second line is a collision: the position printed through the salary under it.
+  An over-long value is stepped down to a 9pt floor to hold its line, and the
+  table is what makes a wrap past that floor push the next row down instead of
+  overprinting it.
+- **`config/monetization_form.php` holds what an office changes** — the
+  heading, the captions, the formula key's wording, the Prepared by block. It
+  does **not** hold the geometry, which belongs with the drawing. Same split as
+  `config/dtr_form.php`.
+- Print streams the PDF; Download sends the identical document as a file. Two
+  routes rather than a flag, because `routeIs()` is what the controller reads —
+  the same pair as the Travel Order, the Pass Slip and the printed DTR.
+
+The template has no field for the employee ID, the department or the request
+number, so the sheet carries none. They are on the detail modal instead; adding
+them would be a redesign of the office's form.
+
+```bash
+php artisan test tests/Unit/MonetizationFormDataTest.php \
+  tests/Unit/MonetizationRequestTest.php
+```
+
+---
+
 ## Forgot password
 
 `/password/forgot` is a three-step wizard — email address, six-digit code
@@ -1122,6 +1211,165 @@ file on the server.
 
 `tests/Feature/WebsiteContentTest.php` pins the authorisation, the vocabularies,
 the URL scheme filter, and that markup saved into a field comes back escaped.
+
+---
+
+## Notifications
+
+Every approval workflow announces itself through **one** service. There is no
+second notification system: Laravel's `notifications` table here is the app's
+own (`App\Models\Notification`), not the framework's `DatabaseNotification`
+shape, and `App\Notifications\*` is used only for the two *emails* (credentials,
+password reset), which are a different channel with a different audience.
+
+```
+action succeeds  →  NotificationService::<event>()  →  deliver()  →  notifications row
+                                                                          │
+                          bell polls /api/notifications/feed  ←───────────┘
+                                     │
+                    click → /notifications/{id}/open → mark read → authorised redirect
+```
+
+### Three bells, one table
+
+`notifications.audience` decides which bell a row appears in: `admin` (work
+queued for HR to act on), `employee` (your own records), `mayor` (oversight of
+what was decided), `system` (broadcast — shows in all three). One person can
+hold several roles, so this is what stops an HR officer's own leave approval
+landing in the queue they work from, and vice versa.
+
+- **The mayor had no bell at all.** The panel existed as two pasted copies —
+  an admin one and an employee one — and the third area was simply left out,
+  so nothing in the system could tell the mayor anything. All three are now
+  `@include('partials.notificationPanel', ['audience' => …])`; the per-area
+  files are three lines each, kept only because ~30 pages include them by name.
+- **The mayor is told what was *decided*, never what is queued.** The mayor's
+  area is read-only, so a pending item in that list would imply an action those
+  screens do not offer. Leave, travel order and pass slip decisions carry a
+  `mayor` copy alongside the employee's; monetization does not, because there is
+  no mayor monetization page to link to and **a notification must never point
+  somewhere its recipient cannot go**.
+
+### Four properties every notification has
+
+They hold because every writer goes through `NotificationService::deliver()`.
+
+- **A notification can never break what it announces.** `deliver()` catches
+  everything and logs it. It is also why the call sites moved: a `deliver()`
+  *inside* a `DB::transaction` is still inside it, and `LeaveController` was
+  writing the bell before `DB::commit()` — so an employee could be told their
+  leave could not be filed because the system could not tell HR about it. Every
+  call now sits after the commit. `payrollGenerated()` already did.
+- **It is idempotent.** Every writer passes a `dedupe_key` naming the event
+  (`leave:41:approved`), unique per *recipient* — not globally, because one
+  decision legitimately reaches the filer and every companion under the same
+  key. A double-clicked Approve leaves one row.
+- **Recipients are resolved in one place.** `approvers()` and `overseers()` are
+  the only definitions of who handles and who watches. Both drop inactive
+  accounts (they cannot sign in, so the row would never be read) and **the
+  actor** — an HR officer filing on an employee's behalf does not need "New
+  Leave Request" for the request they just typed.
+- **It says which record, in the words the screens use.** `statusLabel()` maps
+  the stored `rejected` to "Disapproved", because that is what every tab, badge
+  and printed form in this system calls it — telling an employee their request
+  was "Rejected" sends them looking for a word that is on none of their pages.
+  `dateRange()` and `reasonClause()` put the period and the refusal reason in
+  the sentence; "your leave request" cannot be told apart from the other two
+  the employee has open.
+
+### A click is a server decision
+
+`GET /notifications/{id}/open` marks the row read and *then* chooses the
+destination. The panel used to mark it read by `fetch` and jump to a URL read
+out of a DOM attribute. Now the link is re-read from the row and refused if it
+is off-site (an open redirect waiting for a writer) or in an area this account
+may not enter — otherwise a stored link would be a door around
+`EnsureRoleForArea`, and the row would already be read at the 403. A
+notification with no link redirects *back*, not to a dashboard nobody asked for.
+
+Cards are real `<a>` elements for the same reason, which also makes them
+keyboard-reachable and middle-clickable as the onclick div never was.
+
+**Monetization links carry `tab` but never `highlight`.** Both leave pages read
+`highlight` as a *leave application* id — the admin handler clicks
+`[data-leave-app-id="…"]` — so a monetization id there opens whichever leave
+application shares the number.
+
+### Everything is scoped to the caller's own rows
+
+Every query in `NotificationController` starts at
+`where('user_id', Auth::id())`, and the `audience` a client sends can only
+narrow that further. `audience()` re-checks it against the caller's real roles,
+so an account whose access was later narrowed cannot name the admin bell and
+read admin-audience rows it still owns. An id belonging to someone else is a
+**404**, not a 403 — "no such notification" is the truthful answer from where
+that caller stands.
+
+`markAllAsRead()` is the one place an unrecognised audience widens rather than
+narrows (it clears everything): narrowing a *read* shows somebody less, which is
+safe, but silently narrowing a *write* leaves a badge stuck at a count nothing
+can reset.
+
+### History, and what is kept
+
+There are two doors to it and they are deliberately different things: the bell
+is a floating button pinned top-right that opens a dropdown of the newest few,
+and **`partials/navNotificationRow.blade.php` is the sidebar row** that opens
+the full page. One partial for all three rails, sitting *ungrouped* beside
+Dashboard and AI Assistant in each — the admin rail collapses its groups, and an
+unread badge inside a shut section is a badge nobody sees. Same position in
+every rail, so somebody holding two roles does not have to find it twice.
+
+Its badge and the bell's both come from `Notification::unreadCountFor()`, which
+memoises per request: the two sit on one page, and a rail saying 3 beside a bell
+saying 5 is worse than neither showing one. They cap at the same 99+ for the
+same reason. On a collapsed rail the numeric badge is swapped for a dot over the
+icon — the label it normally sits beside is `display:none` there, and a count
+floating in the empty half of the row reads as belonging to nothing.
+
+"View all notifications" is a real page per area — `/{admin,employee,mayor}/notifications`
+— registered in a loop so the role gate on the prefix decides access, the same
+shape as the AI assistant's routes. It paginates (a year of approvals is not a
+page), filters by read state and category, and offers per-row mark-read /
+mark-unread / delete. Category chips are built from the categories the reader
+actually has: a chip that always returns nothing reads as a bug.
+
+`notifications:prune` (scheduled weekly) deletes **read** notifications older
+than `config('notifications.retention.read_days')`, default 180. Unread ones are
+never pruned at any age — an unread notification is work nobody has looked at.
+This is only safe because the notification is not the record: the leave
+application, the travel order and the audit log all outlive it.
+
+### Presentation
+
+`Notification::CATEGORIES` owns the label, icon and badge gradient for each
+category, read by the card partial — one definition for the bell, the polled
+feed and the history page. Those gradients are the only fixed colours in the
+feature; everything else is a theme variable. Same rule as the charts: a
+category hue exists to tell leave from travel at a glance, and re-tinting it
+toward the palette is how that stops working.
+
+Unread is marked three ways — a left rule, a filled ground and a dot — so the
+distinction survives a monochrome screen and colour-vision deficiency, which a
+background tint alone does not.
+
+### Adding a notification to a new module
+
+1. Add a method to `NotificationService` that calls `deliver()` or
+   `deliverMany(approvers(…) | overseers(…), …)`.
+2. Give it a `dedupe_key` naming the event, and a `link` to a page the audience
+   can open.
+3. Call it **after** the commit, never inside the transaction.
+4. If the category is new, add it to `Notification::CATEGORIES` — the card reads
+   the label and icon straight out of it, and `NotificationServiceTest` fails on
+   a category missing either.
+
+```bash
+php artisan test tests/Unit/NotificationServiceTest.php \
+  tests/Feature/NotificationAccessTest.php
+```
+
+---
 
 ## Theming
 

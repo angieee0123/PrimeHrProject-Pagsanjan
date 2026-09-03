@@ -1137,3 +1137,193 @@ textarea.form-input {
 @media (max-width: 560px) {
     .vlt-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Employee Loan details modal ─────────────────────────────────────────
+   Replaces a window.alert() that drew its own box out of ╔═╗ characters and
+   padded its columns with padEnd(31) — unthemeable, and it truncated any
+   employee name or loan type longer than the pad.
+
+   Shares the .modal-container shell with viewLoanTypeModal so the two "view"
+   screens on this page read as one pair, and reuses the Loans table's own
+   .lt-tag / .ded-chip / .badge-status vocabularies so the modal and the row
+   it was opened from describe the loan in the same words and colours.
+   ─────────────────────────────────────────────────────────────────────── */
+
+.vld-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--gp-border);
+    border-radius: 12px;
+    background: var(--gp-bg-tint);
+}
+.vld-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+    border: 1px solid var(--gp-border);
+}
+/* Themed rather than the table's per-employee colour wheel: those hues are
+   assigned in Blade from $avatarColors, and re-deriving them in JS would be
+   a second copy of that list free to drift from the first. */
+.vld-avatar-initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--theme-primary-light);
+    color: var(--theme-stat-icon-fg);
+    border-color: var(--theme-primary-border);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .3px;
+}
+.vld-head-text { flex: 1; min-width: 0; }
+.vld-name {
+    margin: 0 0 2px;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--gp-pri);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.vld-head-sub {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--gp-text-soft);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The three figures the record turns on, lifted out of the label/value lists
+   so they carry the weight they have in the decision being made. */
+.vld-figures {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+}
+.vld-figure {
+    padding: 12px 14px;
+    border: 1px solid var(--gp-border);
+    border-radius: 10px;
+    background: #fff;
+    min-width: 0;
+}
+.vld-figure-label {
+    margin: 0 0 4px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    color: var(--gp-text-soft);
+}
+.vld-figure-value {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gp-pri);
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+/* The outstanding figure is the one that decides whether anything is still
+   owed, so it carries the accent — amber while due, green once settled. */
+.vld-figure.is-balance { border-color: var(--theme-warning-border); background: var(--theme-warning-subtle); }
+.vld-figure.is-balance .vld-figure-value { color: var(--theme-warning-emphasis); }
+.vld-figure.is-balance.is-settled { border-color: var(--theme-success-border); background: var(--theme-success-subtle); }
+.vld-figure.is-balance.is-settled .vld-figure-value { color: var(--theme-success-emphasis); }
+
+.vld-section { margin-bottom: 18px; }
+.vld-section:last-of-type { margin-bottom: 0; }
+.vld-section-title {
+    margin: 0 0 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--gp-border);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    color: var(--gp-text-mid);
+}
+
+/* Same progress reading as the table row, so the two cannot disagree. */
+.vld-progress { display: flex; flex-direction: column; gap: 6px; margin: 12px 0 4px; }
+.vld-progress-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 8px; }
+.vld-progress-pct { font-size: 13px; font-weight: 700; color: var(--gp-pri); font-variant-numeric: tabular-nums; }
+.vld-progress-note { font-size: 11px; color: var(--gp-text-soft); font-variant-numeric: tabular-nums; }
+.vld-progress-note.is-settled { font-weight: 600; color: var(--theme-success-emphasis); }
+.vld-progress-bar { height: 6px; border-radius: 999px; background: var(--gp-border); overflow: hidden; }
+.vld-progress-fill { height: 100%; border-radius: 999px; background: var(--gp-pri); transition: width .35s ease; }
+.vld-progress-fill.is-settled { background: var(--theme-success); }
+.vld-progress-fill.is-suspended { background: var(--gp-accent-gold); }
+
+/* Definition list rather than a table: these are label/value pairs, and a
+   two-column grid keeps them aligned without one. Same shape as .vlt-grid. */
+.vld-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 18px;
+    margin: 0;
+}
+.vld-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--gp-bg-tint-2);
+    min-width: 0;
+}
+/* A value that is a phrase rather than a figure ("Both Cutoffs (Split
+   50-50)") does not fit half a row beside its label. */
+.vld-row-wide { grid-column: 1 / -1; }
+.vld-row dt {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--gp-text-soft);
+    white-space: nowrap;
+}
+.vld-row dd {
+    margin: 0;
+    min-width: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--gp-pri);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+.vld-row dd .lt-tag { vertical-align: 1px; }
+
+.vld-remarks {
+    margin: 10px 0 0;
+    padding: 10px 12px;
+    border: 1px solid var(--gp-border);
+    border-radius: 8px;
+    background: var(--gp-bg-tint);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--gp-text-mid);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+    .vld-figures { grid-template-columns: 1fr; }
+    .vld-grid { grid-template-columns: 1fr; }
+    /* Label above value once the row is one column wide: a right-aligned
+       value opposite a long label wraps into a two-line zigzag. */
+    .vld-row { flex-direction: column; align-items: flex-start; gap: 3px; }
+    .vld-row dd { text-align: left; }
+}
+
+/* The two conditionally shown children carry author `display` rules, which
+   beat the UA stylesheet's [hidden] — so their hidden state has to be
+   spelled out here rather than left to the attribute alone. */
+.vld-avatar[hidden],
+.vld-row dd .lt-tag[hidden] { display: none; }

@@ -86,6 +86,10 @@ $isActive = fn (string $id) => $currentRoute === $id || Str::startsWith($current
             @endif
         </a>
 
+        {{-- Same position as the admin and mayor rails: somebody holding two
+             roles should not have to hunt for it again after switching. --}}
+        @include('partials.navNotificationRow', ['area' => 'employee'])
+
         @foreach($navGroups as $groupLabel => $items)
         <p class="nav-section-label">{{ strtoupper($groupLabel) }}</p>
         @foreach($items as $item)

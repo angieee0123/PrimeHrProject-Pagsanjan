@@ -145,7 +145,7 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
         <div class="filter-card-fields">
             <div class="fld">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                <select class="fc-select" id="filterMonetStatus" onchange="applyMonetizationAdminFilters()">
+                <select class="fc-select" id="filterMonetStatus" aria-label="Filter monetization requests by status" onchange="applyMonetizationAdminFilters()">
                     <option value="">All Status</option>
                     <option value="Approved">Approved</option>
                     <option value="Pending">Pending</option>
@@ -153,6 +153,14 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
                     <option value="Cancelled">Cancelled</option>
                 </select>
             </div>
+            {{-- Shown only while a status is selected, the same way the
+                 Leave Credits and Transaction tabs reveal their Clear
+                 buttons: a permanently-visible reset reads as a filter of
+                 its own. --}}
+            <button type="button" class="btn-ghost" id="monetClearFilters" style="display: none;" onclick="clearMonetizationAdminFilters()" title="Show every monetization request">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Clear
+            </button>
         </div>
         <div class="filter-card-actions"></div>
     </div>

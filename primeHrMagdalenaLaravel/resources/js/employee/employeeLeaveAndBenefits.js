@@ -912,11 +912,17 @@ function openMonetizationDetail(id) {
         }
 
         const printBtn = document.getElementById('monetPrintBtn');
+        const downloadBtn = document.getElementById('monetDownloadBtn');
         if (r.status === 'approved') {
             printBtn.style.display = 'flex';
             printBtn.onclick = printMonetSheet;
+            if (downloadBtn) {
+                downloadBtn.style.display = 'flex';
+                downloadBtn.onclick = downloadMonetSheet;
+            }
         } else {
             printBtn.style.display = 'none';
+            if (downloadBtn) downloadBtn.style.display = 'none';
         }
 
         document.getElementById('monetizationDetailModal').style.display = 'flex';
@@ -929,27 +935,26 @@ function closeMonetizationDetail() {
     window.currentMonetSheet = null;
 }
 
-// The popup carries its own inline styles: it never inherits the parent
-// page's theme block, so theme variables would resolve to nothing there.
+// Print Sheet opens the office's own Monetization form, rendered server-side
+// on the template's 8.5 x 14 paper by MonetizationRequestController.
+//
+// It used to write a plain HTML page into a popup and print that. It was not
+// the municipality's form — a paragraph of labelled values in Arial, no
+// "Prepared by" block, and the browser's own margins, URL and timestamp
+// printed around it — so what came off the printer could not be filed or
+// submitted. It also re-stated the computation in JavaScript beside the
+// figures, which is a second place for the arithmetic on somebody's pay to go
+// wrong. The document is now built from the stored request.
 function printMonetSheet() {
     const r = window.currentMonetSheet;
     if (!r) return;
-    const total = Number(r.vl_balance || 0) + Number(r.sl_balance || 0);
-    const win = window.open('', '_blank', 'width=800,height=900');
-    win.document.write(`<html><head><title>Monetization · ${monetEsc(r.request_number)}</title></head><body style="font-family: Arial, sans-serif; color: #111; padding: 40px;">
-        <div style="text-align: center;">
-            <p style="margin: 0;">Province of Laguna</p>
-            <p style="margin: 0; font-weight: bold;">Municipality of Pagsanjan</p>
-            <p style="font-weight: bold; font-size: 18px;">Monetization</p>
-        </div>
-        <p><strong>Name:</strong> ${monetEsc(r.employee_name)}<br><strong>Position:</strong> ${monetEsc(r.position || 'N/A')}<br><strong>Salary:</strong> ${monetMoney(r.monthly_salary)}</p>
-        <p><strong>No. of Leave Credits as of ${monetEsc(r.filed_at || '')}</strong><br>Vacation Leave: ${monetDays(r.vl_balance)}<br>Sick Leave: ${monetDays(r.sl_balance)}<br><strong>${monetDays(total)} Total Earned Leave Credits</strong></p>
-        <p><strong>Computation:</strong> Total Leave Benefits = S × D × CF<br>S = ${monetMoney(r.monthly_salary)}<br>D = ${monetDays(r.total_days)}<br>CF = ${monetEsc(r.constant_factor)}<br><strong>TLB = ${monetMoney(r.computed_amount)}</strong></p>
-        <p>Approved by: <strong>${monetEsc(r.decided_by || '—')}${r.decided_at ? ' · ' + monetEsc(r.decided_at) : ''}</strong></p>
-    </body></html>`);
-    win.document.close();
-    win.focus();
-    win.print();
+    window.open(`/employee/monetization/${r.id}/print-form`, '_blank');
+}
+
+function downloadMonetSheet() {
+    const r = window.currentMonetSheet;
+    if (!r) return;
+    window.location.href = `/employee/monetization/${r.id}/download-form`;
 }
 
 function cancelMonetizationRequest(id, reqNumber) {
@@ -1045,4 +1050,5 @@ window.updateMonetEstimate = updateMonetEstimate;
 window.openMonetizationDetail = openMonetizationDetail;
 window.closeMonetizationDetail = closeMonetizationDetail;
 window.printMonetSheet = printMonetSheet;
+window.downloadMonetSheet = downloadMonetSheet;
 window.cancelMonetizationRequest = cancelMonetizationRequest;

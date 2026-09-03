@@ -235,6 +235,11 @@ class EmployeeRegistrationController extends Controller
 
             DB::commit();
 
+            // An in-app welcome as well as the emails, so something is waiting
+            // in the bell the first time they sign in — the emails carry the
+            // credentials and are read once, then filed or lost.
+            \App\Services\NotificationService::accountCreated($employeeUser, $employee);
+
             // Both emails go out only once the account is durably committed.
             // Sent from inside the transaction, a later failure would roll the
             // user row back while the credentials were already in somebody's
@@ -524,6 +529,12 @@ class EmployeeRegistrationController extends Controller
             $skipped = 0;
             $errors = [];
 
+            // Rows refused because the employee already exists, kept apart from
+            // $errors and structured rather than worded. The alert renders one
+            // compact line per record; a sentence per duplicate appended to the
+            // summary paragraph is what used to crowd it off the screen.
+            $duplicates = [];
+
             // Accounts awaiting their verification + credentials emails. The
             // per-row DB::transaction() below is only a savepoint inside the
             // outer transaction, so a row "succeeding" is not yet durable —
@@ -566,10 +577,20 @@ class EmployeeRegistrationController extends Controller
                     continue;
                 }
 
-                // Check if employee ID already exists
+                // Check if employee ID already exists. Same check as before —
+                // only what it records changed: the row, the id and the name as
+                // the CSV spells it, so the alert can name who was skipped
+                // instead of repeating "already exists" once per row.
                 if (Employee::where('employee_id', $data['employee_id'])->exists()) {
                     $skipped++;
-                    $errors[] = "Row " . ($index + 2) . ": Employee ID {$data['employee_id']} already exists";
+                    $duplicates[] = [
+                        'row' => $index + 2,
+                        'employee_id' => (string) $data['employee_id'],
+                        'name' => trim(implode(' ', array_filter([
+                            $data['first_name'] ?? null,
+                            $data['last_name'] ?? null,
+                        ]))),
+                    ];
                     continue;
                 }
 
@@ -702,6 +723,8 @@ class EmployeeRegistrationController extends Controller
             // and an admin can resend, whereas throwing here would report a
             // committed import as failed.
             foreach ($pendingAccounts as $account) {
+                \App\Services\NotificationService::accountCreated($account['user']);
+
                 try {
                     event(new Registered($account['user']));
                     $account['user']->notify(new EmployeeDetailsEmail($account['details']));
@@ -711,9 +734,20 @@ class EmployeeRegistrationController extends Controller
                 }
             }
 
-            $message = "Successfully imported {$imported} employee(s).";
-            if ($skipped > 0) {
-                $message .= " Skipped {$skipped} row(s).";
+            // "Successfully imported 0 employee(s)." over a list of records that
+            // already exist reads as a contradiction of the panel under it, so
+            // the nothing-imported case says what happened instead.
+            $message = $imported > 0
+                ? "Successfully imported {$imported} employee(s)."
+                : 'No new employees were imported.';
+
+            // Duplicates carry their own count in their own panel, so counting
+            // them again here would state the same number twice in two places
+            // that can disagree. Only rows skipped for *other* reasons are
+            // summarised in the sentence.
+            $otherSkipped = $skipped - count($duplicates);
+            if ($otherSkipped > 0) {
+                $message .= " Skipped {$otherSkipped} row(s).";
             }
 
             // Reported outside the `$skipped` branch: a row can import
@@ -728,7 +762,8 @@ class EmployeeRegistrationController extends Controller
                 'message' => $message,
                 'imported' => $imported,
                 'skipped' => $skipped,
-                'errors' => $errors
+                'errors' => $errors,
+                'duplicates' => $duplicates,
             ]);
 
         } catch (\Exception $e) {
