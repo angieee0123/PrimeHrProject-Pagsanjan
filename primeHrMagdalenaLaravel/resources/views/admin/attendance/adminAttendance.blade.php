@@ -193,6 +193,15 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                 Filter
             </button>
+            {{-- Same green outline pill as Personnel and Departments Bulk Import, off the shared .btn-export-green rule. --}}
+            <button type="button" class="btn-export btn-export-green" onclick="openBulkImportAttendanceModal()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Bulk Import
+            </button>
             {{-- Exports the Attendance Summary tab this toolbar sits above.
                  It carried no handler at all until now -- rendered, styled,
                  clickable, wired to nothing. The filters in this form are sent
@@ -243,6 +252,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 @include('admin.attendance.modals.detailedDtrModal')
 @include('admin.attendance.modals.editDtrModal')
 @include('admin.attendance.modals.correctAttendanceModal')
+@include('admin.attendance.modals.bulkImportAttendanceModal')
 @include('admin.attendance.modals.successModal')
 
 @push('scripts')
@@ -254,6 +264,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     'resources/js/admin/attendance/correctAttendanceModal.js',
     'resources/js/admin/attendance/detailedDtrModal.js',
     'resources/js/admin/attendance/successModal.js',
+    'resources/js/admin/attendance/bulkImportAttendance.js',
 ])
 @endpush
 @endsection

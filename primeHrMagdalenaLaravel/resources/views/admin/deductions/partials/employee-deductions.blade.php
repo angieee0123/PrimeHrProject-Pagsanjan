@@ -44,12 +44,13 @@
                 @php
                     $emp        = $deduction->employee;
                     $type       = $deduction->deductionType;
-                    $fullName   = trim($emp->first_name . ' ' . $emp->last_name);
-                    $department = $emp->employmentDetail->departmentRelation->name ?? 'N/A';
+                    $fullName   = $emp ? trim(($emp->first_name ?? '') . ' ' . ($emp->last_name ?? '')) : '';
+                    $fullName   = $fullName !== '' ? $fullName : 'Unknown Employee';
+                    $department = $emp?->employmentDetail?->departmentRelation?->name ?? 'N/A';
 
                     // Category drives a themed chip rather than a hand-mixed
                     // hex with an alpha suffix.
-                    $categoryClass = match ($type->category) {
+                    $categoryClass = match ($type?->category ?? 'OTHER') {
                         'MANDATORY' => 'is-mandatory',
                         'LOAN'      => 'is-loan',
                         default     => 'is-other',
@@ -58,7 +59,7 @@
                     // Human wording only. The raw enum (BOTH_SPLIT, 1ST_ONLY)
                     // used to be printed underneath, which is storage detail
                     // rather than something an HR officer needs to read.
-                    $cutoff = $type->schedules->first()->cutoff_schedule ?? 'BOTH_SPLIT';
+                    $cutoff = $type?->schedules?->first()?->cutoff_schedule ?? 'BOTH_SPLIT';
                     $cutoffLabel = match ($cutoff) {
                         '1ST_ONLY'  => '1st cutoff',
                         '2ND_ONLY'  => '2nd cutoff',
@@ -73,27 +74,27 @@
                         default     => 'is-neutral',
                     };
 
-                    $isLoan = $type->category === 'LOAN';
+                    $isLoan = ($type?->category ?? '') === 'LOAN';
                     $total  = (float) ($deduction->total_amount ?? 0);
                     $left   = (float) ($deduction->remaining_balance ?? 0);
                     $paidPc = $total > 0 ? max(0, min(100, round((($total - $left) / $total) * 100))) : 0;
                 @endphp
                 <tr data-employee="{{ strtolower($fullName) }}"
-                    data-type="{{ $type->category }}"
+                    data-type="{{ $type?->category ?? '' }}"
                     data-status="{{ $deduction->status }}">
 
                     <td>
                         <div class="ded-row-flex">
-                            @if($emp->photo)
+                            @if($emp?->photo)
                                 <img src="{{ $emp->photo }}" alt="" class="ded-avatar-img" loading="lazy">
                             @else
                                 <span class="ded-avatar-img ded-avatar-initials"
-                                      style="background: {{ $avatarColors[($deduction->employee_id ?? 0) % count($avatarColors)] }}"
-                                      aria-hidden="true">{{ getInitials($fullName) }}</span>
+                                       style="background: {{ $avatarColors[($deduction->employee_id ?? 0) % count($avatarColors)] }}"
+                                       aria-hidden="true">{{ getInitials($fullName) }}</span>
                             @endif
                             <div class="ded-emp-text">
                                 <p class="ded-cell-title" title="{{ $fullName }}">{{ $fullName }}</p>
-                                <p class="ded-cell-sub">{{ $emp->employee_id }}</p>
+                                <p class="ded-cell-sub">{{ $emp->employee_id ?? '—' }}</p>
                             </div>
                         </div>
                     </td>
@@ -101,10 +102,10 @@
                     <td><span class="dept-tag" title="{{ $department }}">{{ $department }}</span></td>
 
                     <td>
-                        <p class="ded-cell-title" title="{{ $type->name }}">{{ $type->name }}</p>
+                        <p class="ded-cell-title" title="{{ $type->name ?? 'Unknown Deduction' }}">{{ $type->name ?? 'Unknown Deduction' }}</p>
                         <p class="ded-cell-sub">
-                            <span class="ded-chip {{ $categoryClass }}">{{ ucfirst(strtolower($type->category)) }}</span>
-                            <span class="ded-code">{{ $type->code }}</span>
+                            <span class="ded-chip {{ $categoryClass }}">{{ ucfirst(strtolower($type?->category ?? 'other')) }}</span>
+                            <span class="ded-code">{{ $type->code ?? '—' }}</span>
                         </p>
                     </td>
 
@@ -115,12 +116,12 @@
                             {{-- A balance means little without knowing how far
                                  through the loan the employee is. --}}
                             <span class="ded-progress" role="img"
-                                  aria-label="{{ $paidPc }} percent repaid">
+                                   aria-label="{{ $paidPc }} percent repaid">
                                 <span class="ded-progress-fill" style="width: {{ $paidPc }}%"></span>
                             </span>
-                        @elseif($type->computation_type === 'PERCENTAGE')
+                        @elseif(($type?->computation_type ?? '') === 'PERCENTAGE')
                             <p class="ded-amount">{{ $type->percentage_rate }}%</p>
-                            @if($type->max_amount)
+                            @if($type?->max_amount)
                                 <p class="ded-cell-sub">max ₱{{ number_format($type->max_amount, 2) }}</p>
                             @endif
                         @elseif($deduction->amount)
@@ -159,7 +160,7 @@
                                 Edit deduction
                             </button>
                             <div class="row-menu-sep"></div>
-                            <button type="button" role="menuitem" class="row-menu-item is-danger" onclick="closeRowMenu(); deleteEmployeeDeduction({{ $deduction->id }}, @js($fullName), @js($type->name), {{ $isLoan ? $left : 'null' }})">
+                            <button type="button" role="menuitem" class="row-menu-item is-danger" onclick="closeRowMenu(); deleteEmployeeDeduction({{ $deduction->id }}, @js($fullName), @js($type->name ?? 'Unknown Deduction'), {{ $isLoan ? $left : 'null' }})">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                 Delete deduction
                             </button>

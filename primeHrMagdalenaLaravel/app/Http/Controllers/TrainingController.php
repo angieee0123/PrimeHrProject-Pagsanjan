@@ -30,7 +30,10 @@ class TrainingController extends Controller
         $training = Training::findOrFail($id);
         $training->update(['status' => 'verified', 'verified_by' => Auth::id(), 'verified_at' => now(), 'rejected_reason' => null]);
         NotificationService::trainingVerified($training, 'verified');
-        return redirect()->route('admin.training')->with('success', 'Training approved for ' . $training->employee->first_name . ' ' . $training->employee->last_name . '.');
+        $emp = $training->employee;
+        $empName = $emp ? trim(($emp->first_name ?? '') . ' ' . ($emp->last_name ?? '')) : '';
+        $empName = $empName !== '' ? $empName : 'Unknown Employee';
+        return redirect()->route('admin.training')->with('success', 'Training approved for ' . $empName . '.');
     }
 
     public function reject(Request $request, $id)

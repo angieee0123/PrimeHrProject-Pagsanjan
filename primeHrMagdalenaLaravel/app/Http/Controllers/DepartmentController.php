@@ -77,10 +77,21 @@ class DepartmentController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate(['csv_file' => 'required|file|mimes:csv,txt']);
+        $request->validate(['csv_file' => 'required|file|mimes:csv,txt|max:5120']);
 
         $file = fopen($request->file('csv_file')->getRealPath(), 'r');
+        if ($file === false) {
+            return redirect()->route('admin.departments')->with('error', 'Could not read the uploaded file.');
+        }
         $header = fgetcsv($file);
+
+        if ($header === false || count(array_filter($header, fn ($h) => trim((string) $h) !== '')) === 0) {
+            fclose($file);
+            return redirect()->route('admin.departments')->with('error', 'CSV file is empty or missing a header row.');
+        }
+
+        // Strip UTF-8 BOM from first header cell (Excel-saved CSVs).
+        $header[0] = ltrim($header[0], "\xEF\xBB\xBF");
 
         // Files produced by the old template still carry a personnel_count
         // column in fourth place. Unpacked positionally that would land the
@@ -97,6 +108,11 @@ class DepartmentController extends Controller
         $skipped  = [];
 
         while (($row = fgetcsv($file)) !== false) {
+            // Skip fully-blank rows (trailing newlines, Excel gaps).
+            if (count(array_filter($row, fn ($v) => trim((string) $v) !== '')) === 0) {
+                continue;
+            }
+
             if ($legacyCountIndex !== false && count($row) > $legacyCountIndex) {
                 array_splice($row, $legacyCountIndex, 1);
             }
@@ -105,9 +121,12 @@ class DepartmentController extends Controller
 
             [$code, $name, $head, $status, $description] = array_pad($row, 5, null);
             $code = strtoupper(trim($code ?? ''));
+            $name = trim($name ?? '');
+            $head = trim($head ?? '');
+            $status = trim($status ?? '');
 
             if (!$code || !$name || !$head) { $skipped[] = $code ?: '(empty code)'; continue; }
-            if (!in_array($status, ['Active', 'Inactive'])) $status = 'Active';
+            if (!in_array($status, ['Active', 'Inactive'], true)) $status = 'Active';
 
             if (Department::where('code', $code)->exists()) {
                 $skipped[] = "{$code} — " . trim($name) . ' (already exists)';

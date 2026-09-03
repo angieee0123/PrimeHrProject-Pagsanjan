@@ -21,22 +21,23 @@
             </thead>
             <tbody>
                 @forelse($approvedOrders as $order)
-                <tr class="approved-order-row to-row" data-department="{{ $order->employee->employmentDetail->departmentRelation->name ?? '' }}" data-mode="{{ $order->transportation_mode ?? '' }}" data-travel-date="{{ $order->travel_date->format('Y-m-d') }}">
+                @php $apEmpMayor = $order->employee; @endphp
+                <tr class="approved-order-row to-row" data-department="{{ $apEmpMayor?->employmentDetail?->departmentRelation?->name ?? '' }}" data-mode="{{ $order->transportation_mode ?? '' }}" data-travel-date="{{ $order->travel_date?->format('Y-m-d') ?? '' }}">
                     <td class="to-td">
                         <div class="emp-cell to-emp-cell">
                             @include('partials.travel-party-avatars', ['order' => $order])
                             <div class="to-emp-info">
-                                <p class="to-emp-name">{{ $order->employee->first_name }} {{ $order->employee->last_name }}</p>
-                                <p class="to-emp-id">{{ $order->employee->employee_id }}@if($order->companions->count()) · +{{ $order->companions->count() }} {{ Str::plural('companion', $order->companions->count()) }}@endif</p>
+                                <p class="to-emp-name">{{ $apEmpMayor ? trim(($apEmpMayor->first_name ?? '') . ' ' . ($apEmpMayor->last_name ?? '')) : 'Unknown Employee' }}</p>
+                                <p class="to-emp-id">{{ $apEmpMayor->employee_id ?? '—' }}@if($order->companions->count()) · +{{ $order->companions->count() }} {{ Str::plural('companion', $order->companions->count()) }}@endif</p>
                             </div>
                         </div>
                     </td>
                     <td class="to-td to-td-accent">{{ $order->destination }}</td>
-                    <td class="to-td to-td-strong">{{ \Carbon\Carbon::parse($order->travel_date)->format('M d, Y') }}</td>
+                    <td class="to-td to-td-strong">{{ $order->travel_date ? \Carbon\Carbon::parse($order->travel_date)->format('M d, Y') : '—' }}</td>
                     <td class="to-td to-td-center">
                         <span class="to-badge-duration to-badge-green">{{ $order->duration }} days</span>
                     </td>
-                    <td class="to-td to-td-green">{{ $order->approver ? ($order->approver->employee ? $order->approver->employee->first_name . ' ' . $order->approver->employee->last_name : 'Admin User') : 'Admin User' }}</td>
+                    <td class="to-td to-td-green">{{ $order->approver ? ($order->approver->employee ? trim(($order->approver->employee->first_name ?? '') . ' ' . ($order->approver->employee->last_name ?? '')) ?: ($order->approver->username ?? 'Admin User') : ($order->approver->username ?? 'Admin User')) : 'Admin User' }}</td>
                     <td class="to-td to-td-muted">{{ $order->approved_at ? \Carbon\Carbon::parse($order->approved_at)->format('M d, Y') : 'N/A' }}</td>
                     <td class="to-td">
                         <div class="to-actions-wrap">

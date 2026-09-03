@@ -150,7 +150,9 @@
                 @forelse($trainings as $t)
                 @php
                     $emp      = $t->employee;
-                    $dept     = $emp->employmentDetail->departmentRelation->name ?? 'N/A';
+                    $empName  = $emp ? trim(($emp->first_name ?? '') . ' ' . ($emp->last_name ?? '')) : '';
+                    $empName  = $empName !== '' ? $empName : 'Unknown Employee';
+                    $dept     = $emp?->employmentDetail?->departmentRelation?->name ?? 'N/A';
                     $badgeClass = match($t->position_type) {
                         'Managerial'  => 'managerial',
                         'Supervisory' => 'supervisory',
@@ -158,7 +160,7 @@
                         'Clerical'    => 'clerical',
                         default       => 'technical',
                     };
-                    $initials = strtoupper(mb_substr($emp->first_name, 0, 1) . mb_substr($emp->last_name, 0, 1));
+                    $initials = $emp ? strtoupper(mb_substr($emp->first_name ?? 'U', 0, 1) . mb_substr($emp->last_name ?? 'E', 0, 1)) : 'UE';
                     $hasCert  = (bool) $t->certificate_path;
                     // Inclusive of both ends -- a one-day seminar reads "1 day",
                     // not "0". Null whenever either end was never recorded.
@@ -172,13 +174,13 @@
                     data-hours="{{ $t->hours }}"
                     data-position="{{ $t->position_type }}"
                     data-ref="{{ $t->ref_doc_no }}"
-                    data-employee="{{ $emp->first_name }} {{ $emp->last_name }}"
-                    data-first-name="{{ $emp->first_name }}"
-                    data-photo="{{ $emp->photo }}"
+                    data-employee="{{ $empName }}"
+                    data-first-name="{{ $emp->first_name ?? 'Employee' }}"
+                    data-photo="{{ $emp->photo ?? '' }}"
                     data-initials="{{ $initials }}"
                     data-approve-url="{{ route('admin.training.approve', $t->id) }}"
                     data-reject-url="{{ route('admin.training.reject', $t->id) }}"
-                    data-emp-id="{{ $emp->employee_id }}"
+                    data-emp-id="{{ $emp->employee_id ?? '—' }}"
                     data-dept="{{ $dept }}"
                     data-title="{{ $t->title }}"
                     data-date-from="{{ $t->date_from ? $t->date_from->format('M d, Y') : '—' }}"
@@ -194,15 +196,15 @@
                              dialog opened from it read as one person. --}}
                         <div class="admin-employee-cell">
                             <span class="training-avatar" aria-hidden="true">
-                                @if($emp->photo)
+                                @if($emp?->photo)
                                     <img src="{{ $emp->photo }}" alt="" loading="lazy">
                                 @else
                                     {{ $initials }}
                                 @endif
                             </span>
                             <span class="admin-employee-text">
-                                <span class="admin-employee-name">{{ $emp->first_name }} {{ $emp->last_name }}</span>
-                                <span class="admin-employee-meta">{{ $emp->employee_id }} · {{ $dept }}</span>
+                                <span class="admin-employee-name">{{ $empName }}</span>
+                                <span class="admin-employee-meta">{{ $emp->employee_id ?? '—' }} · {{ $dept }}</span>
                             </span>
                         </div>
                     </td>
