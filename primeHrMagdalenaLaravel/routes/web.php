@@ -123,6 +123,11 @@ Route::get('/employee/leave', [EmployeeLeaveBalanceController::class, 'show'])->
 Route::post('/leave/store', [LeaveController::class, 'store'])->middleware('auth')->name('leave.store');
 Route::post('/leave/{id}/cancel', [LeaveController::class, 'cancel'])->middleware('auth')->name('leave.cancel');
 
+// Monetization Request Routes — filed from the employee's My Monetization tab.
+Route::post('/employee/monetization', [\App\Http\Controllers\MonetizationRequestController::class, 'store'])->middleware('auth')->name('monetization.store');
+Route::get('/employee/monetization/{id}', [\App\Http\Controllers\MonetizationRequestController::class, 'show'])->middleware('auth')->name('monetization.show');
+Route::post('/employee/monetization/{id}/cancel', [\App\Http\Controllers\MonetizationRequestController::class, 'cancel'])->middleware('auth')->name('monetization.cancel');
+
 // Busy dates for the File Leave / File Travel Order calendars: the logged-in
 // employee's own leave and travel date ranges, so the pickers can mark them.
 Route::get('/employee/busy-dates', function () {
@@ -557,6 +562,11 @@ Route::put('/admin/leave/types/{code}', [LeaveController::class, 'update'])->mid
 // Leave Application Admin Actions
 Route::post('/admin/leave/{id}/approve', [LeaveController::class, 'approve'])->middleware('auth')->name('admin.leave.approve');
 Route::post('/admin/leave/{id}/reject', [LeaveController::class, 'reject'])->middleware('auth')->name('admin.leave.reject');
+
+// Monetization Request Admin Actions — decided from the Monetization Requests tab.
+Route::get('/admin/monetization/{id}', [\App\Http\Controllers\MonetizationRequestController::class, 'adminShow'])->middleware('auth')->name('admin.monetization.show');
+Route::post('/admin/monetization/{id}/approve', [\App\Http\Controllers\MonetizationRequestController::class, 'approve'])->middleware('auth')->name('admin.monetization.approve');
+Route::post('/admin/monetization/{id}/disapprove', [\App\Http\Controllers\MonetizationRequestController::class, 'disapprove'])->middleware('auth')->name('admin.monetization.disapprove');
 
 // Accrual Rate Routes
 Route::post('/admin/leave/accrual-rates', [LeaveController::class, 'storeAccrualRate'])->middleware('auth')->name('admin.leave.accrual-rates.store');

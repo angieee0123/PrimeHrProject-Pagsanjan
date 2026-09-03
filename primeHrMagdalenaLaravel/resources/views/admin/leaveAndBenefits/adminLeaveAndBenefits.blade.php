@@ -141,6 +141,22 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
         </div>
     </div>
 
+    <div class="filter-group" id="monetization-filter-group" style="display: none;">
+        <div class="filter-card-fields">
+            <div class="fld">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <select class="fc-select" id="filterMonetStatus" onchange="applyMonetizationAdminFilters()">
+                    <option value="">All Status</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Disapproved">Disapproved</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-card-actions"></div>
+    </div>
+
     <div class="filter-group" id="transactions-filter-group" style="display: none;">
         <div class="filter-card-fields">
             <div class="fld">
@@ -348,6 +364,7 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 <!-- Tabs -->
 <div class="seg-tabs">
     <button class="tab-btn active" onclick="switchTab('leave')">Leave Requests</button>
+    <button class="tab-btn" onclick="switchTab('monetization')">Monetization Requests</button>
     <button class="tab-btn" onclick="switchTab('transactions')">Transaction History</button>
     <button class="tab-btn" onclick="switchTab('leave-credits')">Leave Credits</button>
     <button class="tab-btn" onclick="switchTab('benefits')">Benefits Summary</button>
@@ -357,6 +374,8 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
 </div>
 
 @include('admin.leaveAndBenefits.partials.leave-requests-tab')
+
+@include('admin.leaveAndBenefits.partials.monetization-requests-tab')
 
 @include('admin.leaveAndBenefits.partials.transaction-history-tab')
 

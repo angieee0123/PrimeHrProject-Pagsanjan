@@ -21,8 +21,12 @@ class EmployeeLeaveController extends Controller
             $leaveTypes = LeaveType::where('is_active', true)->orderBy('leave_name')->get();
             $leaveApplications = collect();
             $employeeTransactions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
+            $monetizationRequests = collect();
+            $monetVlAvailable = 0;
+            $monetSlAvailable = 0;
+            $monetMonthlySalary = null;
 
-            return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions'))
+            return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions', 'monetizationRequests', 'monetVlAvailable', 'monetSlAvailable', 'monetMonthlySalary'))
                 ->with('warning', 'Employee record not found.');
         }
 
@@ -51,6 +55,14 @@ class EmployeeLeaveController extends Controller
             ->with('leaveType')
             ->orderBy('created_at', 'desc')
             ->get();
+
+        $monetizationRequests = \App\Models\MonetizationRequest::where('employee_id', $employee->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $monetVlAvailable = (float) ($currentBalances->get('VL')?->available_credits ?? 0);
+        $monetSlAvailable = (float) ($currentBalances->get('SL')?->available_credits ?? 0);
+        $monetMonthlySalary = $employee->employmentDetail?->designationRelation?->monthly_rate;
 
         // Build leave statistics history directly from database
         $leaveStatsHistory = [];
@@ -117,6 +129,6 @@ class EmployeeLeaveController extends Controller
 
         $employeeTransactions = $transactionQuery->paginate($perPage)->appends(request()->except('page'));
 
-        return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions', 'leaveStatsHistory', 'leaveHistory', 'selectedYear'));
+        return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions', 'leaveStatsHistory', 'leaveHistory', 'selectedYear', 'monetizationRequests', 'monetVlAvailable', 'monetSlAvailable', 'monetMonthlySalary'));
     }
 }

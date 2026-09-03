@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const activeTab = urlParams.get('tab');
 
-    if (activeTab && ['leave', 'credits', 'transactions', 'benefits'].includes(activeTab)) {
+    if (activeTab && ['leave', 'credits', 'transactions', 'benefits', 'monetization'].includes(activeTab)) {
         // Hide all tabs
         document.querySelectorAll('.tab-content').forEach(c => {
             c.classList.add('hidden');
@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Find and activate the correct button
         const buttons = document.querySelectorAll('.tab-btn');
-        const tabIndex = ['leave', 'credits', 'transactions', 'benefits'].indexOf(activeTab);
+        const tabIndex = ['leave', 'credits', 'transactions', 'benefits', 'monetization'].indexOf(activeTab);
         if (buttons[tabIndex]) {
             buttons[tabIndex].classList.add('active');
         }
@@ -683,6 +683,8 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeModal();
         closeFileModal();
+        closeMonetizationDetail();
+        closeMonetizationModal();
     }
 });
 
@@ -757,3 +759,290 @@ window.calculateDays = calculateDays;
 window.handleFileSelect = handleFileSelect;
 window.filterLeaveTable = filterLeaveTable;
 window.submitLeave = submitLeave;
+
+// ── My Monetization tab ────────────────────────────────────────────────────
+// Same interaction shape as the Leave Requests tab: a client-side status
+// filter, a file modal with a live S × D × CF estimate, and a detail modal
+// that renders the approved request as the office's Monetization sheet.
+
+const MONET_CONSTANT_FACTOR = 0.0481927;
+
+function monetEsc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]));
+}
+
+function monetMoney(value) {
+    return '₱' + Number(value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function monetDays(value) {
+    const n = Number(value || 0);
+    return n.toFixed(1) + ' ' + (n === 1 ? 'day' : 'days');
+}
+
+function applyMonetizationFilters() {
+    const status = document.getElementById('filterMonetStatus').value;
+    const rows = document.querySelectorAll('#tab-monetization tbody tr');
+    let visible = 0;
+    rows.forEach(row => {
+        const show = !status || row.dataset.status === status;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    const total = rows.length;
+    document.getElementById('monetCount').innerHTML =
+        visible === total
+            ? 'Showing <strong>' + total + '</strong> of <strong>' + total + '</strong> records'
+            : 'Showing <strong>' + visible + '</strong> of <strong>' + total + '</strong> records';
+}
+
+function openMonetizationModal() {
+    updateMonetEstimate();
+    document.getElementById('fileMonetizationModal').style.display = 'flex';
+}
+
+function closeMonetizationModal() {
+    document.getElementById('fileMonetizationModal').style.display = 'none';
+    document.getElementById('monetizationForm').reset();
+    document.getElementById('monetErrorMessage').style.display = 'none';
+    updateMonetEstimate();
+}
+
+function updateMonetEstimate() {
+    const vlInput = document.getElementById('monetVlDays');
+    const slInput = document.getElementById('monetSlDays');
+    if (!vlInput || !slInput) return;
+
+    const vl = Math.max(0, parseFloat(vlInput.value) || 0);
+    const sl = Math.max(0, parseFloat(slInput.value) || 0);
+    const total = vl + sl;
+    const salary = parseFloat(document.getElementById('monetEstimate')?.dataset.salary || 0);
+
+    document.getElementById('monetTotalDays').textContent = total.toFixed(1) + ' ' + (total === 1 ? 'day' : 'days');
+    document.getElementById('monetEstimate').textContent = monetMoney(salary * total * MONET_CONSTANT_FACTOR);
+}
+
+// The computation sheet from docs/excels/Monetization-2022 2.docx.
+function monetSheetHtml(r) {
+    const total = Number(r.vl_balance || 0) + Number(r.sl_balance || 0);
+    return `
+        <div style="text-align: center; margin-bottom: 10px;">
+            <p style="margin: 0; font-size: 11px; color: var(--theme-neutral-700);">Province of Laguna</p>
+            <p style="margin: 0; font-size: 12px; font-weight: 800;">Municipality of Pagsanjan</p>
+            <p style="margin: 2px 0 0; font-size: 13px; font-weight: 800; color: var(--gp-pri);">Monetization</p>
+        </div>
+        <span class="modal-section-label">EMPLOYEE</span>
+        <div class="modal-row"><span>Name</span><strong>${monetEsc(r.employee_name)}</strong></div>
+        <div class="modal-row"><span>Position</span><strong>${monetEsc(r.position || 'N/A')}</strong></div>
+        <div class="modal-row"><span>Salary</span><strong>${monetMoney(r.monthly_salary)}</strong></div>
+        <span class="modal-section-label modal-section-deductions">LEAVE CREDITS AS OF ${monetEsc((r.filed_at || '').toUpperCase())}</span>
+        <div class="modal-row"><span>Vacation Leave</span><strong>${monetDays(r.vl_balance)}</strong></div>
+        <div class="modal-row"><span>Sick Leave</span><strong>${monetDays(r.sl_balance)}</strong></div>
+        <div class="modal-row"><span>Total Earned Leave Credits</span><strong>${monetDays(total)}</strong></div>
+        <span class="modal-section-label modal-section-deductions">COMPUTATION: TLB = S × D × CF</span>
+        <div class="modal-row"><span>S (Monthly Salary)</span><strong>${monetMoney(r.monthly_salary)}</strong></div>
+        <div class="modal-row"><span>D (VL ${monetDays(r.vl_days)} + SL ${monetDays(r.sl_days)})</span><strong>${monetDays(r.total_days)}</strong></div>
+        <div class="modal-row"><span>CF (Constant Factor)</span><strong>${monetEsc(r.constant_factor)}</strong></div>
+        <div class="modal-row"><span>Total Leave Benefits</span><strong>${monetMoney(r.computed_amount)}</strong></div>
+        <span class="modal-section-label modal-section-deductions">REASON</span>
+        <div class="modal-row"><span>${monetEsc(r.reason || '—')}</span></div>
+        <div class="modal-row"><span>Approved by</span><strong>${monetEsc(r.decided_by || '—')}${r.decided_at ? ' · ' + monetEsc(r.decided_at) : ''}</strong></div>`;
+}
+
+function monetDetailsHtml(r) {
+    const banner = r.status === 'disapproved'
+        ? `<div class="lb-error-box" style="display: block; margin-bottom: 12px;"><p class="lb-error-text" style="text-align: center; font-weight: 700;">DISAPPROVED${r.decided_at ? ' · ' + monetEsc(r.decided_at) : ''}</p></div>`
+        : r.status === 'pending'
+            ? `<div class="lb-info-box" style="display: block; margin-bottom: 12px;"><p class="lb-info-text" style="text-align: center; font-weight: 700;">PENDING APPROVAL</p></div>`
+            : `<div class="lb-info-box" style="display: block; margin-bottom: 12px;"><p class="lb-info-text" style="text-align: center; font-weight: 700;">CANCELLED</p></div>`;
+    return banner + `
+        <span class="modal-section-label">REQUEST DETAILS</span>
+        <div class="modal-row"><span>VL Days</span><strong>${monetDays(r.vl_days)}</strong></div>
+        <div class="modal-row"><span>SL Days</span><strong>${monetDays(r.sl_days)}</strong></div>
+        <div class="modal-row"><span>Total Days</span><strong>${monetDays(r.total_days)}</strong></div>
+        <div class="modal-row"><span>Estimated Amount</span><strong>${monetMoney(r.computed_amount)}</strong></div>
+        <div class="modal-row"><span>Filed</span><strong>${monetEsc(r.filed_at || '—')}</strong></div>
+        <span class="modal-section-label modal-section-deductions">REASON</span>
+        <div class="modal-row"><span>${monetEsc(r.reason || '—')}</span></div>
+        ${r.status === 'disapproved' ? `
+        <span class="modal-section-label modal-section-deductions">DISAPPROVAL REASON</span>
+        <div class="modal-row"><span>${monetEsc(r.approver_remarks || '—')}</span></div>
+        ${r.decided_by ? `<div class="modal-row"><span>Disapproved by</span><strong>${monetEsc(r.decided_by)}${r.decided_at ? ' · ' + monetEsc(r.decided_at) : ''}</strong></div>` : ''}` : ''}
+        ${r.status !== 'disapproved' && r.decided_by ? `<div class="modal-row"><span>Decided by</span><strong>${monetEsc(r.decided_by)}${r.decided_at ? ' · ' + monetEsc(r.decided_at) : ''}</strong></div>` : ''}`;
+}
+
+function openMonetizationDetail(id) {
+    fetch(`/employee/monetization/${id}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            notify({ title: 'Could not open', message: data.message || 'The request could not be loaded.', tone: 'danger' });
+            return;
+        }
+        const r = data.request;
+        window.currentMonetSheet = r;
+
+        document.getElementById('monetDetailTitle').textContent = 'Monetization · ' + monetMoney(r.computed_amount);
+        document.getElementById('monetDetailSubtitle').textContent =
+            (r.filed_at || '') + ' · ' + monetDays(r.total_days) + ' · ' + r.request_number;
+        document.querySelector('#monetizationDetailModal .modal-eyebrow').textContent =
+            'MONETIZATION REQUEST · ' + r.request_number;
+
+        const statusBadge = document.getElementById('monetDetailStatus');
+        const label = r.status.charAt(0).toUpperCase() + r.status.slice(1);
+        statusBadge.textContent = label === 'Disapproved' ? 'Disapproved' : label;
+        statusBadge.className = 'badge-status ' +
+            (r.status === 'approved' ? 'processed' :
+             r.status === 'pending' ? 'pending' :
+             r.status === 'disapproved' ? 'rejected' : 'cancelled');
+
+        document.getElementById('monetDetailBody').innerHTML =
+            r.status === 'approved' ? monetSheetHtml(r) : monetDetailsHtml(r);
+
+        const cancelBtn = document.getElementById('monetCancelBtn');
+        if (r.status === 'pending') {
+            cancelBtn.style.display = 'flex';
+            cancelBtn.onclick = () => cancelMonetizationRequest(r.id, r.request_number);
+        } else {
+            cancelBtn.style.display = 'none';
+        }
+
+        const printBtn = document.getElementById('monetPrintBtn');
+        if (r.status === 'approved') {
+            printBtn.style.display = 'flex';
+            printBtn.onclick = printMonetSheet;
+        } else {
+            printBtn.style.display = 'none';
+        }
+
+        document.getElementById('monetizationDetailModal').style.display = 'flex';
+    })
+    .catch(() => notify({ title: 'Could not open', message: 'The request could not be loaded.', tone: 'danger' }));
+}
+
+function closeMonetizationDetail() {
+    document.getElementById('monetizationDetailModal').style.display = 'none';
+    window.currentMonetSheet = null;
+}
+
+// The popup carries its own inline styles: it never inherits the parent
+// page's theme block, so theme variables would resolve to nothing there.
+function printMonetSheet() {
+    const r = window.currentMonetSheet;
+    if (!r) return;
+    const total = Number(r.vl_balance || 0) + Number(r.sl_balance || 0);
+    const win = window.open('', '_blank', 'width=800,height=900');
+    win.document.write(`<html><head><title>Monetization · ${monetEsc(r.request_number)}</title></head><body style="font-family: Arial, sans-serif; color: #111; padding: 40px;">
+        <div style="text-align: center;">
+            <p style="margin: 0;">Province of Laguna</p>
+            <p style="margin: 0; font-weight: bold;">Municipality of Pagsanjan</p>
+            <p style="font-weight: bold; font-size: 18px;">Monetization</p>
+        </div>
+        <p><strong>Name:</strong> ${monetEsc(r.employee_name)}<br><strong>Position:</strong> ${monetEsc(r.position || 'N/A')}<br><strong>Salary:</strong> ${monetMoney(r.monthly_salary)}</p>
+        <p><strong>No. of Leave Credits as of ${monetEsc(r.filed_at || '')}</strong><br>Vacation Leave: ${monetDays(r.vl_balance)}<br>Sick Leave: ${monetDays(r.sl_balance)}<br><strong>${monetDays(total)} Total Earned Leave Credits</strong></p>
+        <p><strong>Computation:</strong> Total Leave Benefits = S × D × CF<br>S = ${monetMoney(r.monthly_salary)}<br>D = ${monetDays(r.total_days)}<br>CF = ${monetEsc(r.constant_factor)}<br><strong>TLB = ${monetMoney(r.computed_amount)}</strong></p>
+        <p>Approved by: <strong>${monetEsc(r.decided_by || '—')}${r.decided_at ? ' · ' + monetEsc(r.decided_at) : ''}</strong></p>
+    </body></html>`);
+    win.document.close();
+    win.focus();
+    win.print();
+}
+
+function cancelMonetizationRequest(id, reqNumber) {
+    if (!confirm(`Are you sure you want to cancel monetization request ${reqNumber}?\n\nThis action cannot be undone.`)) {
+        return;
+    }
+
+    fetch(`/employee/monetization/${id}/cancel`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeMonetizationDetail();
+            location.reload();
+        } else {
+            notify({ title: 'Could not cancel', message: data.message || 'The request could not be cancelled.', tone: 'danger' });
+        }
+    })
+    .catch(() => notify({ title: 'Could not cancel', message: 'Something went wrong. Please try again.', tone: 'danger' }));
+}
+
+document.getElementById('monetizationForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const vlInput = document.getElementById('monetVlDays');
+    const slInput = document.getElementById('monetSlDays');
+    const vl = Math.max(0, parseFloat(vlInput.value) || 0);
+    const sl = Math.max(0, parseFloat(slInput.value) || 0);
+    const vlAvailable = parseFloat(vlInput.dataset.available) || 0;
+    const slAvailable = parseFloat(slInput.dataset.available) || 0;
+    const errBox = document.getElementById('monetErrorMessage');
+    const errText = document.getElementById('monetErrorMessageText');
+    const fail = (msg) => {
+        errText.textContent = msg;
+        errBox.style.display = 'block';
+        errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    if (vl <= 0 && sl <= 0) {
+        fail('Enter at least one day to monetize.');
+        return;
+    }
+    if (vl > vlAvailable) {
+        fail(`Insufficient Vacation Leave balance. You have ${vlAvailable.toFixed(1)} days available.`);
+        return;
+    }
+    if (sl > slAvailable) {
+        fail(`Insufficient Sick Leave balance. You have ${slAvailable.toFixed(1)} days available.`);
+        return;
+    }
+
+    const submitBtn = document.getElementById('monetSubmitBtn');
+    const originalBtnContent = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Submitting...';
+
+    fetch(this.action, {
+        method: 'POST',
+        body: new FormData(this),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            submitBtn.innerHTML = 'Success!';
+            setTimeout(() => {
+                closeMonetizationModal();
+                location.reload();
+            }, 800);
+        } else {
+            fail(data.message || 'Failed to submit monetization request');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnContent;
+        }
+    })
+    .catch(() => {
+        fail('An error occurred. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnContent;
+    });
+});
+
+window.applyMonetizationFilters = applyMonetizationFilters;
+window.openMonetizationModal = openMonetizationModal;
+window.closeMonetizationModal = closeMonetizationModal;
+window.updateMonetEstimate = updateMonetEstimate;
+window.openMonetizationDetail = openMonetizationDetail;
+window.closeMonetizationDetail = closeMonetizationDetail;
+window.printMonetSheet = printMonetSheet;
+window.cancelMonetizationRequest = cancelMonetizationRequest;
