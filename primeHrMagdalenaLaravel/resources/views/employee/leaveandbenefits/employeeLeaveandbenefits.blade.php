@@ -47,12 +47,18 @@
             @include('employee.leaveandbenefits.tabs.benefits.benefitsTab')
         </div>
 
+        <div id="tab-monetization" class="tab-content hidden">
+            @include('employee.leaveandbenefits.tabs.monetization.monetizationTab')
+        </div>
+
     </main>
 
 </div>
 
 @include('employee.leaveandbenefits.modals.leaveDetailModal')
 @include('employee.leaveandbenefits.modals.fileLeaveModal')
+@include('employee.leaveandbenefits.modals.monetizationDetailModal')
+@include('employee.leaveandbenefits.modals.fileMonetizationModal')
 
 @push('scripts')
     @vite('resources/js/employee/employeeLeaveAndBenefits.js')

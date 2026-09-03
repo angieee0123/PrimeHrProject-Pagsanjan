@@ -140,6 +140,37 @@
 .permanent-leavebenefits .lb-source-remarks-text { color: var(--theme-neutral-700); font-size: 13px; line-height: 1.5; }
 .permanent-leavebenefits #employeeTransactionDetailModal .modal-box { max-width: 600px; }
 
+/* Monetization detail — compacted: was spanning full width and running tall
+   with default 24px header/body padding and 10px row gutters. Constrain both
+   dimensions and tighten inner rhythm so the sheet fits without scrolling. */
+.permanent-leavebenefits #monetizationDetailModal .modal-box { max-width: 460px; max-height: 76vh; display: flex; flex-direction: column; }
+#monetizationDetailModal .modal-box { max-width: 460px; max-height: 76vh; display: flex; flex-direction: column; }
+#monetizationDetailModal .modal-header { padding: 14px 16px 0; }
+#monetizationDetailModal .modal-header .modal-title { font-size: 15px; }
+#monetizationDetailModal .modal-header .modal-sub { font-size: 11px; }
+#monetizationDetailModal .modal-header .modal-eyebrow { font-size: 9.5px; }
+#monetizationDetailModal .modal-header .modal-close { width: 28px; height: 28px; }
+#monetizationDetailModal .modal-body { padding: 10px 16px 12px; overflow-y: auto; max-height: 58vh; }
+#monetizationDetailModal .modal-emp-row { padding: 10px 12px; margin-bottom: 10px; gap: 10px; border-radius: 10px; }
+#monetizationDetailModal .modal-emp-row .modal-emp-avatar { width: 34px; height: 34px; font-size: 12px; border-radius: 8px; }
+#monetizationDetailModal .modal-emp-row .modal-emp-id { font-size: 10.5px; }
+#monetizationDetailModal .modal-emp-row .badge-status { font-size: 10px; padding: 3px 8px; }
+#monetizationDetailModal .modal-section-label { font-size: 9.5px; margin-bottom: 6px; letter-spacing: 0.7px; }
+#monetizationDetailModal .modal-section-deductions { margin-top: 10px; }
+#monetizationDetailModal .modal-row { padding: 6px 0; }
+#monetizationDetailModal .modal-row span { font-size: 12px; }
+#monetizationDetailModal .modal-row strong { font-size: 12px; }
+#monetizationDetailModal .modal-footer { padding: 10px 16px 12px; gap: 8px; }
+#monetizationDetailModal .modal-footer .modal-btn-primary,
+#monetizationDetailModal .modal-footer .modal-btn-ghost { padding: 7px 14px; font-size: 12px; }
+/* Keep the sheet header itself tight — JS renders it with inline 13/14/15px */
+#monetizationDetailModal #monetDetailBody > div:first-child { margin-bottom: 10px !important; }
+#monetizationDetailModal #monetDetailBody > div:first-child p { line-height: 1.25; }
+#monetizationDetailModal .lb-error-box,
+#monetizationDetailModal .lb-info-box { padding: 8px 10px !important; margin-bottom: 10px !important; }
+#monetizationDetailModal .lb-error-text,
+#monetizationDetailModal .lb-info-text { font-size: 11px !important; }
+
 .permanent-leavebenefits .lb-modal-body-scroll { max-height: 70vh; overflow-y: auto; }
 .permanent-leavebenefits .lb-label-note { font-weight: 400; color: var(--theme-neutral-700); }
 .permanent-leavebenefits .lb-label-block { display: block; font-weight: 600; color: var(--gp-pri); margin-bottom: 8px; font-size: 13px; }

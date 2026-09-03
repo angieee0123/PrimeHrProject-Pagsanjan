@@ -6,6 +6,7 @@ window.switchTab = function(tab) {
 
     buttons.forEach(btn => {
         if ((tab === 'leave' && btn.textContent.includes('Leave Requests')) ||
+            (tab === 'monetization' && btn.textContent.includes('Monetization Requests')) ||
             (tab === 'transactions' && btn.textContent.includes('Transaction History')) ||
             (tab === 'leave-credits' && btn.textContent.includes('Leave Credits')) ||
             (tab === 'benefits' && btn.textContent.includes('Benefits Summary')) ||
@@ -16,7 +17,7 @@ window.switchTab = function(tab) {
         }
     });
 
-    const tabs = ['leave-tab', 'transactions-tab', 'leave-credits-tab', 'benefits-tab', 'types-tab', 'accrual-tab', 'migrate-tab'];
+    const tabs = ['leave-tab', 'monetization-tab', 'transactions-tab', 'leave-credits-tab', 'benefits-tab', 'types-tab', 'accrual-tab', 'migrate-tab'];
     tabs.forEach(tabId => {
         const element = document.getElementById(tabId);
         if (element) element.style.display = 'none';
@@ -34,6 +35,9 @@ window.switchTab = function(tab) {
 
     if (tab === 'leave') {
         const el = document.getElementById('leave-tab');
+        if (el) el.style.display = 'block';
+    } else if (tab === 'monetization') {
+        const el = document.getElementById('monetization-tab');
         if (el) el.style.display = 'block';
     } else if (tab === 'transactions') {
         const el = document.getElementById('transactions-tab');
@@ -131,6 +135,8 @@ document.addEventListener('DOMContentLoaded', function() {
         switchTab('benefits');
     } else if (activeTab === 'leave') {
         switchTab('leave');
+    } else if (activeTab === 'monetization') {
+        switchTab('monetization');
     } else if (activeTab === 'accrual') {
         switchTab('accrual');
     } else if (activeTab === 'transactions') {

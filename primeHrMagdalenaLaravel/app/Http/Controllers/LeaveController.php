@@ -176,6 +176,13 @@ class LeaveController extends Controller
         ->orderBy('created_at', 'desc')
         ->get();
 
+        $monetizationRequests = \App\Models\MonetizationRequest::with([
+            'employee.employmentDetail.departmentRelation',
+            'employee.employmentDetail.designationRelation',
+        ])
+        ->orderBy('created_at', 'desc')
+        ->get();
+
         $departments = $leaveApplications
             ->pluck('employee.employmentDetail.departmentRelation.name')
             ->filter()
@@ -322,6 +329,7 @@ class LeaveController extends Controller
         return view('admin.leaveAndBenefits.adminLeaveAndBenefits', compact(
             'leaveTypes', 
             'leaveApplications', 
+            'monetizationRequests',
             'benefitsData', 
             'accrualRates', 
             'accruedLeaveTypes', 

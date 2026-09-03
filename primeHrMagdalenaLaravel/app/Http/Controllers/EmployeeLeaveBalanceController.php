@@ -24,8 +24,12 @@ class EmployeeLeaveBalanceController extends Controller
 
             $leaveApplications = collect();
             $employeeTransactions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
+            $monetizationRequests = collect();
+            $monetVlAvailable = 0;
+            $monetSlAvailable = 0;
+            $monetMonthlySalary = null;
 
-            return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions'))
+            return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('leaveTypes', 'leaveApplications', 'employeeTransactions', 'monetizationRequests', 'monetVlAvailable', 'monetSlAvailable', 'monetMonthlySalary'))
                 ->with('warning', 'Employee record not found. Displaying leave types without balance information.');
         }
 
@@ -120,6 +124,16 @@ class EmployeeLeaveBalanceController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // My Monetization tab — the employee's own requests plus the live
+        // figures the file form is validated against.
+        $monetizationRequests = \App\Models\MonetizationRequest::where('employee_id', $employee->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $monetVlAvailable = (float) ($currentBalances->get('VL')?->available_credits ?? 0);
+        $monetSlAvailable = (float) ($currentBalances->get('SL')?->available_credits ?? 0);
+        $monetMonthlySalary = $employee->employmentDetail?->designationRelation?->monthly_rate;
+
         // Fetch employee transactions with filtering and sorting
         $transactionQuery = LeaveTransaction::where('employee_id', $employee->id)
             ->with('processedBy.employee');
@@ -154,7 +168,7 @@ class EmployeeLeaveBalanceController extends Controller
 
         $employeeTransactions = $transactionQuery->paginate($perPage)->appends(request()->except('page'));
 
-        return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions', 'selectedYear', 'availableYears', 'leaveHistory', 'leaveStatsHistory', 'viewMode'));
+        return view('employee.leaveandbenefits.employeeLeaveandbenefits', compact('employee', 'leaveTypes', 'leaveApplications', 'employeeTransactions', 'selectedYear', 'availableYears', 'leaveHistory', 'leaveStatsHistory', 'viewMode', 'monetizationRequests', 'monetVlAvailable', 'monetSlAvailable', 'monetMonthlySalary'));
     }
 
     private function getLeaveFilingStats($employeeId)
