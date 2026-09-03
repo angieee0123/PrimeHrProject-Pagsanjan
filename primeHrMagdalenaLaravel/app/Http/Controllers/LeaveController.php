@@ -669,8 +669,6 @@ class LeaveController extends Controller
                 'filed_by' => auth()->id(),
             ]);
 
-            NotificationService::leaveRequestSubmitted($leaveApplication);
-
             $balanceBefore = $leaveBalance->available_credits;
             $leaveBalance->pending_credits += $validated['number_of_days'];
             $leaveBalance->available_credits -= $validated['number_of_days'];
@@ -692,6 +690,13 @@ class LeaveController extends Controller
             ]);
 
             DB::commit();
+
+            // After the commit, never inside it. A notification is a courtesy;
+            // the leave application is the record. Writing the bell inside the
+            // transaction meant a failure there rolled the application back —
+            // the employee was told their leave could not be filed because the
+            // system could not tell HR about it.
+            NotificationService::leaveRequestSubmitted($leaveApplication);
 
             return response()->json([
                 'success' => true,
@@ -774,6 +779,11 @@ class LeaveController extends Controller
 
             DB::commit();
 
+            // The admin queue is a list of things to decide, so an item leaving
+            // it is news: without this, HR opens a request that is no longer
+            // there to approve.
+            NotificationService::leaveRequestCancelled($leaveApplication);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Leave request cancelled successfully'
@@ -838,9 +848,11 @@ class LeaveController extends Controller
             $leaveApplication->approved_days_without_pay = 0;
             $leaveApplication->save();
 
-            NotificationService::leaveRequestStatusChanged($leaveApplication, 'approved');
-
             DB::commit();
+
+            // After the commit — see store(). An approval that succeeded must
+            // not be undone by a notification that did not.
+            NotificationService::leaveRequestStatusChanged($leaveApplication, 'approved');
 
             return response()->json([
                 'success' => true,
@@ -923,9 +935,9 @@ class LeaveController extends Controller
             $leaveApplication->approver_remarks = $validated['remarks'];
             $leaveApplication->save();
 
-            NotificationService::leaveRequestStatusChanged($leaveApplication, 'rejected');
-
             DB::commit();
+
+            NotificationService::leaveRequestStatusChanged($leaveApplication, 'rejected');
 
             return response()->json([
                 'success' => true,

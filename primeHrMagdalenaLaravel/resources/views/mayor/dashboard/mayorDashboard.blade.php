@@ -40,6 +40,8 @@
      card/glass treatment, .glass-shell the page background. --}}
 <main class="enterprise-hr-dashboard glass-shell">
 
+@include('mayor.notification.mayorNotification')
+
 @include('mayor.topbar.dashboardTopbar')
 
 {{-- ── Stats grid — the admin dashboard's stat-card pattern ── --}}

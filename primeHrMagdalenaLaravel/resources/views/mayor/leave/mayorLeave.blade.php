@@ -6,6 +6,8 @@
 
 <main class="enterprise-hr-dashboard">
 
+@include('mayor.notification.mayorNotification')
+
 @include('mayor.topbar.leaveTopbar')
 
 {{-- Stats Grid --}}

@@ -81,6 +81,7 @@ export default defineConfig({
                 'resources/js/admin/leaveAndBenefits/leave-credits-tab.js',
                 'resources/js/admin/leaveAndBenefits/benefits-summary-tab.js',
                 'resources/js/admin/leaveAndBenefits/transaction-history-tab.js',
+                'resources/js/admin/leaveAndBenefits/monetization-requests-tab.js',
                 'resources/js/admin/leaveAndBenefits/csc-daily-accrual-tab.js',
                 'resources/js/admin/leaveAndBenefits/add-accrual-rate-modal.js',
                 'resources/js/admin/leaveAndBenefits/add-manual-credit-modal.js',

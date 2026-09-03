@@ -1,5 +1,5 @@
 <!-- Export Error Modal -->
-<div id="exportErrorModal" style="display:none; position:fixed; inset:0; background:rgba(15,12,40,0.42); -webkit-backdrop-filter:blur(8px) saturate(150%); backdrop-filter:blur(8px) saturate(150%); z-index:2000; align-items:center; justify-content:center;">
+<div id="exportErrorModal" style="display:none; position:fixed; inset:0; background:rgba(15,12,40,0.42); -webkit-backdrop-filter:blur(8px) saturate(150%); backdrop-filter:blur(8px) saturate(150%); z-index:var(--personnel-z-alert); align-items:center; justify-content:center;">
     <div style="background:#fff; border-radius:18px; width:100%; max-width:450px; padding:32px; text-align:center; box-shadow:0 20px 50px rgba(15,23,42,.16), 0 2px 10px rgba(15,23,42,.05);">
         <div style="width:64px; height:64px; background:#fdedec; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8e1e18" stroke-width="2.5">

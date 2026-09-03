@@ -58,6 +58,7 @@
 @include('admin.personnel.modals.exportErrorModal')
 @include('admin.personnel.modals.qrCodeModal')
 @include('admin.personnel.modals.bulkImportModal')
+@include('admin.personnel.modals.bulkImportNoticeModal')
 
 @push('scripts')
 <script>

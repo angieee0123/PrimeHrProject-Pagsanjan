@@ -776,3 +776,345 @@
     from { opacity: 0; transform: translateY(-8px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Styles for partials/monetization-requests-tab.blade.php
+
+   The tab was written entirely in inline styles, including its hover
+   states as onmouseover/onmouseout handlers. Three things followed from
+   that, and all three are what this block fixes:
+
+     • the dropdown items were `display: block` with the icon placed by
+       `vertical-align: middle`, while the Leave Types and Transaction
+       History tabs lay theirs out with flex — so the same menu came out
+       with a different item height and a differently-aligned icon
+       depending on which tab it was opened from;
+     • a hover written as an inline handler is lost the moment a row is
+       re-rendered, and it cannot express :focus-visible at all, so the
+       menu was unreachable by keyboard;
+     • the row's status was spelled in raw hex (#f0fdf4 / #fef3c7 /
+       #fef2f2) rather than the semantic ramp, so the pills did not follow
+       the active palette the way every other status badge in the app does.
+
+   Geometry matches the established row menus (.lt-*, .th-*, .to-*)
+   deliberately: 6px/10px on the button, 12px labels, a ~170px sheet. This
+   is the system's size for this control; the point here is to hit it
+   exactly rather than to invent a new one.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.monet-row { transition: background .15s ease; }
+.monet-row:hover { background: var(--theme-neutral-50); }
+.monet-row > td { padding: 13px 16px; border-bottom: 1px solid var(--theme-neutral-200); vertical-align: middle; }
+
+.monet-emp { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.monet-emp-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--theme-neutral-300);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 12.5px;
+}
+.monet-emp-text { min-width: 0; }
+/* One clear hierarchy per cell: the name is what the row is about, the id
+   and the plantilla title are what disambiguate it. Giving all three the
+   same weight is what made this column unscannable. */
+.monet-emp-name {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--theme-neutral-900);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.monet-emp-meta {
+    margin: 1px 0 0;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--theme-text-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 230px;
+}
+.monet-emp-meta strong { font-weight: 600; color: var(--theme-neutral-700); }
+
+.monet-dept {
+    display: inline-block;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--theme-neutral-100);
+    color: var(--theme-neutral-700);
+}
+
+.monet-reqno { margin: 0; font-size: 12.5px; font-weight: 600; color: var(--gp-pri); white-space: nowrap; }
+.monet-filed { margin: 1px 0 0; font-size: 11px; font-weight: 500; color: var(--theme-text-soft); white-space: nowrap; }
+
+.monet-days { text-align: center; white-space: nowrap; }
+.monet-days-total { font-size: 13px; font-weight: 700; color: var(--gp-pri); }
+.monet-days-split { display: block; font-size: 10.5px; font-weight: 600; color: var(--theme-text-soft); margin-top: 1px; }
+
+.monet-amount { text-align: right; font-size: 13px; font-weight: 700; color: var(--theme-neutral-950); white-space: nowrap; }
+.monet-status-cell { text-align: center; }
+
+/* ── The row action menu ───────────────────────────────────────────── */
+.monet-menu-wrap { position: relative; display: flex; justify-content: center; }
+
+.monet-ellipsis-btn {
+    /* A minimum box rather than padding alone: the icon is the only thing
+       sizing this control, so a missing or differently-sized glyph would
+       otherwise change the button — and with it the row height. */
+    min-width: 36px;
+    height: 28px;
+    padding: 6px 10px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    color: var(--gp-text-soft);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s ease, color .2s ease, transform .1s ease;
+}
+.monet-ellipsis-btn svg { flex-shrink: 0; display: block; }
+.monet-ellipsis-btn:hover,
+.monet-ellipsis-btn[aria-expanded="true"] { background: var(--theme-neutral-100); color: var(--gp-pri); }
+.monet-ellipsis-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--theme-focus-ring); color: var(--gp-pri); }
+.monet-ellipsis-btn:active { transform: scale(.94); }
+
+.monet-action-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 6px;
+    min-width: 172px;
+    background: #fff;
+    border: 1px solid var(--theme-neutral-300);
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(var(--theme-shadow-rgb), .15);
+    z-index: 1200;
+    overflow: hidden;
+    padding: 4px;
+}
+/* Opened, the sheet is moved to <body> and placed against the viewport.
+   `.table-wrapper` scrolls, so an absolutely-positioned menu on the last
+   row — or on any row once the table is scrolled sideways — was clipped
+   by its own container. `position: fixed` alone would not have been
+   enough: `.glass-shell .table-section` carries a `backdrop-filter`, and
+   an ancestor with one becomes the containing block for fixed
+   descendants, so the menu would still have been clipped and offset.
+   Leaving the element's own subtree is the only thing that escapes both.
+   The JS sets left/top and flips the sheet above the button when there is
+   no room below, which is what keeps the last row's menu on screen. */
+.monet-action-menu.is-open { display: block; animation: monetMenuIn .16s ease-out; }
+.monet-action-menu.is-floating { position: fixed; right: auto; top: auto; margin-top: 0; }
+
+.monet-action-menu button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border: none;
+    border-radius: 7px;
+    background: none;
+    text-align: left;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--gp-pri);
+    cursor: pointer;
+    transition: background .16s ease, color .16s ease;
+}
+/* The icon never participates in the flex squeeze, so a long label wraps
+   instead of crushing the glyph beside it. */
+.monet-action-menu button svg { flex-shrink: 0; }
+.monet-action-menu button:hover { background: var(--gp-bg-tint-2); }
+.monet-action-menu button:focus-visible { outline: none; background: var(--gp-bg-tint-2); box-shadow: inset 0 0 0 2px var(--theme-focus-ring); }
+
+.monet-action-menu .is-approve { color: var(--theme-success-emphasis); }
+.monet-action-menu .is-approve:hover,
+.monet-action-menu .is-approve:focus-visible { background: var(--theme-success-subtle); }
+.monet-action-menu .is-disapprove { color: var(--theme-danger); }
+.monet-action-menu .is-disapprove:hover,
+.monet-action-menu .is-disapprove:focus-visible { background: var(--theme-danger-subtle); }
+
+/* Which actions a row offers is decided by the row's own status, so the
+   menu is rendered once in full and the status drives what shows. That is
+   what lets an approved request grow its Print/Download items — and lose
+   its Approve/Disapprove ones — in place, without a second copy of this
+   markup living in JavaScript to drift away from the Blade. The server
+   re-checks the status on every one of these endpoints regardless; the
+   hiding is tidiness, not the permission.
+
+   The status is read off the menu itself rather than off the row, because
+   an open menu is no longer inside its row — see is-floating above. */
+.monet-action-menu [data-monet-item] { display: none; }
+.monet-action-menu[data-status="Pending"] [data-monet-item="approve"],
+.monet-action-menu[data-status="Pending"] [data-monet-item="disapprove"],
+.monet-action-menu[data-status="Approved"] [data-monet-item="print"],
+.monet-action-menu[data-status="Approved"] [data-monet-item="download"] { display: flex; }
+
+@keyframes monetMenuIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .monet-action-menu.is-open { animation: none; }
+    .monet-ellipsis-btn:active { transform: none; }
+}
+
+/* ── Empty states ──────────────────────────────────────────────────── */
+.monet-empty-td { text-align: center; padding: 56px 20px; border-bottom: none; }
+.monet-empty-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: var(--theme-neutral-100);
+    color: var(--theme-text-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.monet-empty-title { margin: 0 0 6px; font-size: 14.5px; font-weight: 700; color: var(--theme-neutral-800); }
+.monet-empty-sub { margin: 0; font-size: 12.5px; color: var(--theme-text-mid); }
+
+/* ── Detail modal ──────────────────────────────────────────────────── */
+/* Grouped panels rather than one long list of label/value rows. The
+   sheet's own computation stays a single block, because the office's form
+   shows its working and splitting the three factors apart would stop it
+   reading as an equation. */
+.monet-detail { display: grid; gap: 14px; }
+
+.monet-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.5;
+    border: 1px solid transparent;
+}
+.monet-banner svg { flex-shrink: 0; }
+.monet-banner strong { font-weight: 800; }
+.monet-banner.is-pending  { background: var(--theme-warning-subtle); border-color: var(--theme-warning-border); color: var(--theme-warning-emphasis); }
+.monet-banner.is-approved { background: var(--theme-success-subtle); border-color: var(--theme-success-border); color: var(--theme-success-emphasis); }
+.monet-banner.is-danger   { background: var(--theme-danger-subtle);  border-color: var(--theme-danger-border);  color: var(--theme-danger-emphasis); }
+.monet-banner.is-neutral  { background: var(--theme-neutral-100);    border-color: var(--theme-neutral-300);    color: var(--theme-text-mid); }
+
+.monet-group {
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+}
+.monet-group-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    background: var(--theme-neutral-50);
+    border-bottom: 1px solid var(--theme-neutral-200);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    color: var(--theme-neutral-700);
+}
+.monet-group-head svg { flex-shrink: 0; color: var(--gp-pri); }
+
+.monet-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--theme-neutral-200);
+    margin: 0;
+}
+.monet-field { background: #fff; padding: 10px 14px; min-width: 0; }
+.monet-field.is-wide { grid-column: 1 / -1; }
+.monet-field dt {
+    margin: 0 0 3px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    color: var(--theme-text-soft);
+}
+.monet-field dd {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--theme-neutral-900);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+.monet-field dd.is-money { font-size: 14px; font-weight: 800; color: var(--theme-neutral-950); }
+.monet-field dd.is-muted { font-weight: 500; color: var(--theme-text-mid); }
+.monet-field.is-danger dt { color: var(--theme-danger); }
+
+/* The computation, as the office's sheet spells it. */
+.monet-working {
+    background: var(--theme-neutral-50);
+    border-top: 1px solid var(--theme-neutral-200);
+    padding: 12px 14px;
+    font-size: 12.5px;
+    display: grid;
+    gap: 5px;
+    color: var(--theme-text-mid);
+}
+.monet-working .monet-working-key { color: var(--theme-neutral-800); font-weight: 600; }
+.monet-working-total {
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--theme-neutral-300);
+    font-weight: 700;
+    color: var(--theme-neutral-900);
+}
+.monet-working-total span { color: var(--gp-pri); font-size: 15px; font-weight: 800; }
+
+/* ── Disapproval dialog ────────────────────────────────────────────── */
+.monet-reject-summary {
+    display: grid;
+    gap: 6px;
+    border: 1px solid var(--theme-neutral-200);
+    border-radius: 10px;
+    background: var(--theme-neutral-50);
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    font-size: 12.5px;
+}
+.monet-reject-summary > div { display: flex; justify-content: space-between; gap: 12px; }
+.monet-reject-summary span { color: var(--theme-text-mid); font-weight: 600; }
+.monet-reject-summary strong { color: var(--theme-neutral-900); font-weight: 700; text-align: right; }
+
+/* ── Responsive ────────────────────────────────────────────────────── */
+/* The table keeps a floor width so the seven columns never collapse into
+   each other; below that the wrapper scrolls, which is the honest
+   behaviour for a register with this many columns. */
+#monetization-tab .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+#monetization-tab .payroll-table { min-width: 900px; }
+
+@media (max-width: 900px) {
+    .monet-fields { grid-template-columns: minmax(0, 1fr); }
+}

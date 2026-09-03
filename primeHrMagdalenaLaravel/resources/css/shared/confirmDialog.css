@@ -51,6 +51,7 @@
 .confirm-icon.is-danger   { background: var(--theme-danger-subtle);  color: var(--theme-danger); }
 .confirm-icon.is-question { background: var(--theme-primary-light);  color: var(--theme-accent); }
 .confirm-icon.is-info     { background: var(--theme-info-subtle);    color: var(--theme-info); }
+.confirm-icon.is-success  { background: var(--theme-success-subtle); color: var(--theme-success-emphasis); }
 
 .confirm-title {
     font-size: 15.5px;
@@ -64,6 +65,13 @@
     line-height: 1.6;
     color: var(--theme-text-mid);
     margin: 0;
+    /* The message is set with textContent, so a caller that wants a second
+       paragraph — "you are about to approve X" above "here is what that
+       costs" — has only "
+" to say it with. Without this the two run
+       together into one wall of text. Existing single-line messages are
+       unaffected. */
+    white-space: pre-line;
 }
 .confirm-text[hidden] { display: none; }
 
@@ -107,6 +115,15 @@
 .confirm-btn.is-go.tone-info {
     background: var(--theme-btn-primary-bg);
     color: var(--theme-btn-primary-fg);
+    box-shadow: 0 6px 16px rgba(var(--theme-shadow-rgb), 0.22);
+}
+/* The affirmative decision — approving a request, not merely acknowledging
+   a message. It comes from the semantic ramp rather than the brand colour
+   so that "approve" and "disapprove" stay one glance apart under every
+   palette, including the ones whose primary is itself a green. */
+.confirm-btn.is-go.tone-success {
+    background: var(--theme-success);
+    color: var(--theme-success-fg);
     box-shadow: 0 6px 16px rgba(var(--theme-shadow-rgb), 0.22);
 }
 

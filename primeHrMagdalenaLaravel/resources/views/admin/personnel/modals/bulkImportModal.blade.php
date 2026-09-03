@@ -1,5 +1,5 @@
 <!-- Bulk Import Modal -->
-<div id="bulkImportModal" style="display:none; position:fixed; inset:0; background:rgba(15,12,40,0.42); -webkit-backdrop-filter:blur(8px) saturate(150%); backdrop-filter:blur(8px) saturate(150%); z-index:2000; align-items:center; justify-content:center;">
+<div id="bulkImportModal" style="display:none; position:fixed; inset:0; background:rgba(15,12,40,0.42); -webkit-backdrop-filter:blur(8px) saturate(150%); backdrop-filter:blur(8px) saturate(150%); z-index:var(--personnel-z-modal); align-items:center; justify-content:center;">
     <div style="background:#fff; border-radius:20px; width:100%; max-width:600px; box-shadow:0 20px 50px rgba(15,23,42,.16), 0 2px 10px rgba(15,23,42,.05);">
         <div style="padding:24px; border-bottom:1.5px solid var(--gp-bg-tint-2);">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">

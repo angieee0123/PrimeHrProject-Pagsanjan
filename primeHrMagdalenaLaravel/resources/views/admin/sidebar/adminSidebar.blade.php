@@ -141,6 +141,10 @@ while (count($openGroups) > 3) {
             @endif
         </a>
 
+        {{-- Ungrouped on purpose: an unread badge inside a collapsed section is
+             a badge nobody sees. Same row, same place, in all three rails. --}}
+        @include('partials.navNotificationRow', ['area' => 'admin'])
+
         @foreach($navGroups as $groupLabel => $items)
         @php
             $slug = Str::slug($groupLabel);

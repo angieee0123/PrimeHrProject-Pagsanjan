@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\LeaveBalance;
 use App\Models\LeaveTransaction;
 use App\Models\MonetizationRequest;
+use App\Services\MonetizationFormDataService;
+use App\Services\NotificationService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -90,6 +93,12 @@ class MonetizationRequestController extends Controller
         $monetization->computed_amount = $monetization->computeAmount();
         $monetization->save();
 
+        // Monetization shipped with no notifications at all, so a request sat
+        // in the admin tab until somebody happened to open it. It is money and
+        // leave credits both, which makes it the least suitable queue in the
+        // system to discover by chance.
+        NotificationService::monetizationSubmitted($monetization);
+
         return response()->json([
             'success' => true,
             'message' => 'Monetization request submitted successfully',
@@ -145,6 +154,8 @@ class MonetizationRequestController extends Controller
 
         $monetization->status = 'cancelled';
         $monetization->save();
+
+        NotificationService::monetizationCancelled($monetization);
 
         return response()->json([
             'success' => true,
@@ -205,6 +216,11 @@ class MonetizationRequestController extends Controller
 
             DB::commit();
 
+            // After the commit. The approval moved leave credits and wrote a
+            // debit transaction; none of that may be rolled back because the
+            // bell could not be written.
+            NotificationService::monetizationStatusChanged($monetization, 'approved');
+
             return response()->json([
                 'success' => true,
                 'message' => 'Monetization request approved successfully',
@@ -250,10 +266,98 @@ class MonetizationRequestController extends Controller
         $monetization->approved_at = now();
         $monetization->save();
 
+        // Carries the reason: a refusal the filer cannot act on is a refusal
+        // they will file again unchanged.
+        NotificationService::monetizationStatusChanged($monetization, 'disapproved');
+
         return response()->json([
             'success' => true,
             'message' => 'Monetization request disapproved',
         ]);
+    }
+
+    /**
+     * The employee's own Monetization sheet — Print Sheet on the detail modal.
+     *
+     * Scoped to the caller's employee row, so the id in the URL cannot be
+     * changed into somebody else's sheet.
+     */
+    public function generateOwnForm($id, MonetizationFormDataService $formService)
+    {
+        $employee = auth()->user()?->employee;
+
+        if (! $employee) {
+            abort(404);
+        }
+
+        return $this->renderForm(
+            $formService,
+            (int) $id,
+            $employee->id,
+            request()->routeIs('monetization.print-form')
+        );
+    }
+
+    /** The same sheet from the admin Monetization Requests tab, any employee. */
+    public function generateForm($id, MonetizationFormDataService $formService)
+    {
+        return $this->renderForm(
+            $formService,
+            (int) $id,
+            null,
+            request()->routeIs('admin.monetization.print-form')
+        );
+    }
+
+    /**
+     * Build the sheet and hand it back as a PDF.
+     *
+     * Print streams the document so it opens in the browser's own viewer at
+     * the real page size with none of the dashboard around it; Download sends
+     * the identical document as a file. Same pair as the Travel Order, the
+     * Pass Slip and the printed DTR — and the same reason `routeIs()` decides
+     * rather than a query parameter.
+     *
+     * Only an approved request prints. The office's sheet carries no status
+     * anywhere on it, so a pending or disapproved one would come out looking
+     * exactly like an authorised computation of money owed.
+     */
+    private function renderForm(
+        MonetizationFormDataService $formService,
+        int $id,
+        ?int $scopeEmployeeId,
+        bool $stream
+    ) {
+        try {
+            $data = $formService->build($id, auth()->user(), $scopeEmployeeId);
+
+            if ($data['request']->status !== 'approved') {
+                abort(422, 'Only an approved monetization request can be printed.');
+            }
+
+            // 8.5 x 14 in — the paper the office's template is typed on, and
+            // the proportions the tracing in the partial is measured to.
+            $pdf = Pdf::loadView('admin.leaveAndBenefits.partials.monetization-form', $data)
+                ->setPaper([0, 0, 612, 1008], 'portrait');
+
+            return $stream
+                ? $pdf->stream($data['filename'])
+                : $pdf->download($data['filename']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            abort(404, 'Monetization request not found.');
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('Failed to generate monetization form', [
+                'request_id' => $id,
+                'exception' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate the monetization sheet.',
+            ], 500);
+        }
     }
 
     /**

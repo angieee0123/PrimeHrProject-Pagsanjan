@@ -323,7 +323,20 @@ class DeductionController extends Controller
 
     public function showEmployeeDeduction($id)
     {
-        $deduction = EmployeeDeduction::with(['employee', 'deductionType'])->findOrFail($id);
+        // `deductionType.schedules` is what the Loans tab's detail modal reads
+        // the cutoff schedule from. Without it that relation is simply absent
+        // from the JSON, so the modal fell through to its BOTH_SPLIT default
+        // and reported "split 50-50" for a loan the table row beside it —
+        // which loads the same relation in Blade — showed as 1st-cutoff-only.
+        // The employment detail is the department and position the identity
+        // strip names; both are additive, and every other caller of this
+        // endpoint reads named keys.
+        $deduction = EmployeeDeduction::with([
+            'employee.employmentDetail.departmentRelation',
+            'employee.employmentDetail.designationRelation',
+            'deductionType.schedules',
+        ])->findOrFail($id);
+
         return response()->json($deduction);
     }
 

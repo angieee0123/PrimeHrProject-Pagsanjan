@@ -26,6 +26,25 @@
             </div>
         </div>
 
+        {{-- Rows the import refused because the employee already exists.
+
+             This used to be one sentence per duplicate appended to
+             #successMessage ("Row 2: Employee ID 00123 already exists Row 3: …"),
+             which on a real CSV ran to a paragraph that repeated the same six
+             words a dozen times and pushed the Done button past the bottom of
+             the screen. The wording that every line shared is said once, in the
+             heading; the list carries only what differs — who, and which ID.
+
+             Hidden unless the response carries duplicates, so the modal stays
+             exactly as it was for everything else that opens it (the wizard,
+             schedule assignment, edits). --}}
+        <div id="successDuplicateNotice" class="personnel-modal-dupes" hidden>
+            <p class="personnel-modal-dupes-title">Duplicate Records Found</p>
+            <p class="personnel-modal-dupes-lede">The following records already exist and were skipped:</p>
+            <ul id="successDuplicateList" class="personnel-modal-dupes-list"></ul>
+            <p id="successDuplicateCount" class="personnel-modal-dupes-count"></p>
+        </div>
+
         <button onclick="closeSuccessModal()" class="personnel-modal-btn success">Done</button>
     </div>
 </div>

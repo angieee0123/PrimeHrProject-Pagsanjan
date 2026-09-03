@@ -127,6 +127,12 @@ Route::post('/leave/{id}/cancel', [LeaveController::class, 'cancel'])->middlewar
 Route::post('/employee/monetization', [\App\Http\Controllers\MonetizationRequestController::class, 'store'])->middleware('auth')->name('monetization.store');
 Route::get('/employee/monetization/{id}', [\App\Http\Controllers\MonetizationRequestController::class, 'show'])->middleware('auth')->name('monetization.show');
 Route::post('/employee/monetization/{id}/cancel', [\App\Http\Controllers\MonetizationRequestController::class, 'cancel'])->middleware('auth')->name('monetization.cancel');
+// Print Sheet: the office's Monetization form as a PDF. Two routes for one
+// document because the controller reads routeIs() — print streams it into the
+// browser's viewer, download sends it as a file. Same pair as the Travel
+// Order, the Pass Slip and the printed DTR. Scoped to the caller's own record.
+Route::get('/employee/monetization/{id}/print-form', [\App\Http\Controllers\MonetizationRequestController::class, 'generateOwnForm'])->middleware('auth')->name('monetization.print-form');
+Route::get('/employee/monetization/{id}/download-form', [\App\Http\Controllers\MonetizationRequestController::class, 'generateOwnForm'])->middleware('auth')->name('monetization.download-form');
 
 // Busy dates for the File Leave / File Travel Order calendars: the logged-in
 // employee's own leave and travel date ranges, so the pickers can mark them.
@@ -185,8 +191,12 @@ Route::post('/employee/settings/profile', [\App\Http\Controllers\EmployeeSetting
 Route::post('/employee/settings/password', [\App\Http\Controllers\EmployeeSettingsController::class, 'updatePassword'])->middleware('auth')->name('employee.settings.password');
 Route::post('/employee/settings/notifications', [\App\Http\Controllers\EmployeeSettingsController::class, 'updateNotifications'])->middleware('auth')->name('employee.settings.notifications');
 
+// Kept as a redirect rather than deleted: this URL rendered the bell partial on
+// its own — a floating button and a dropdown over a blank white page, with no
+// layout, sidebar or way back. Whatever reached it wanted the notification
+// list, which is now a real page.
 Route::get('/employee/notification', function () {
-    return view('employee.notification.employeeNotification');
+    return redirect()->route('employee.notifications');
 })->middleware('auth')->name('employee.notification');
 
 Route::get('/employee/chatbot', function () {
@@ -428,6 +438,11 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
         $employee->user->update(['roles' => array_values(array_unique($validated['roles']))]);
     }
 
+    // Personnel data is what payroll, leave credits and the DTR are computed
+    // from, so a change somebody else made to it is the employee's to check.
+    // accountUpdated() is a no-op when the editor *is* the employee.
+    \App\Services\NotificationService::accountUpdated($employee);
+
     return redirect()->route('admin.personnel')->with('success', "Employee {$employee->first_name} {$employee->last_name} updated successfully!");
 })->middleware('auth')->name('admin.personnel.update');
 
@@ -567,6 +582,9 @@ Route::post('/admin/leave/{id}/reject', [LeaveController::class, 'reject'])->mid
 Route::get('/admin/monetization/{id}', [\App\Http\Controllers\MonetizationRequestController::class, 'adminShow'])->middleware('auth')->name('admin.monetization.show');
 Route::post('/admin/monetization/{id}/approve', [\App\Http\Controllers\MonetizationRequestController::class, 'approve'])->middleware('auth')->name('admin.monetization.approve');
 Route::post('/admin/monetization/{id}/disapprove', [\App\Http\Controllers\MonetizationRequestController::class, 'disapprove'])->middleware('auth')->name('admin.monetization.disapprove');
+// The same Monetization sheet the employee prints, for any employee's request.
+Route::get('/admin/monetization/{id}/print-form', [\App\Http\Controllers\MonetizationRequestController::class, 'generateForm'])->middleware('auth')->name('admin.monetization.print-form');
+Route::get('/admin/monetization/{id}/download-form', [\App\Http\Controllers\MonetizationRequestController::class, 'generateForm'])->middleware('auth')->name('admin.monetization.download-form');
 
 // Accrual Rate Routes
 Route::post('/admin/leave/accrual-rates', [LeaveController::class, 'storeAccrualRate'])->middleware('auth')->name('admin.leave.accrual-rates.store');
@@ -757,9 +775,11 @@ Route::prefix('api')->middleware('auth')->group(function () {
     // Polled by the notification panels so a new notification appears without a
     // page reload. Static segment, so it must stay above /notifications/{id}/*.
     Route::get('/notifications/feed', [\App\Http\Controllers\NotificationController::class, 'feed']);
-    Route::post('/notifications/{id}/mark-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
     Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
-    
+    Route::post('/notifications/{id}/mark-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->whereNumber('id');
+    Route::post('/notifications/{id}/mark-unread', [\App\Http\Controllers\NotificationController::class, 'markAsUnread'])->whereNumber('id');
+    Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->whereNumber('id');
+
     // Employee requests (for permanent employees)
     Route::post('/requests/submit', [\App\Http\Controllers\NotificationController::class, 'submitRequest']);
     Route::get('/requests/my-requests', [\App\Http\Controllers\NotificationController::class, 'myRequests']);
@@ -768,6 +788,30 @@ Route::prefix('api')->middleware('auth')->group(function () {
     Route::get('/requests/all', [\App\Http\Controllers\NotificationController::class, 'allRequests']);
     Route::post('/requests/{id}/update-status', [\App\Http\Controllers\NotificationController::class, 'updateRequestStatus']);
 });
+
+// Notification history — "View all notifications" from any bell.
+//
+// One page per area rather than one shared URL, for the same reason the AI
+// assistant is registered this way: EnsureRoleForArea already guards each URL
+// prefix, so the area a page renders is settled by the router and the account's
+// roles, never by a parameter the browser sends. `defaults()` is what hands the
+// area to the controller.
+foreach (['admin', 'employee', 'mayor'] as $notifArea) {
+    Route::get("/{$notifArea}/notifications", [\App\Http\Controllers\NotificationController::class, 'history'])
+        ->middleware('auth')
+        ->defaults('area', $notifArea)
+        ->name("{$notifArea}.notifications");
+}
+
+// Opening a notification. Area-agnostic on purpose: which record a click may
+// reach is the stored row's question and the account's roles', not the URL
+// prefix's, and NotificationController::open() re-checks both — it marks the
+// row read and then refuses any destination this account could not have
+// navigated to itself.
+Route::get('/notifications/{id}/open', [\App\Http\Controllers\NotificationController::class, 'open'])
+    ->middleware('auth')
+    ->whereNumber('id')
+    ->name('notifications.open');
 
 // Request pages
 Route::get('/employee/requests', function () {

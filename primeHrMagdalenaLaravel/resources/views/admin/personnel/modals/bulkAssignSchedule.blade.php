@@ -154,7 +154,7 @@
     position: fixed; inset: 0;
     background: rgba(11,4,77,0.55);
     backdrop-filter: blur(4px);
-    z-index: 2000;
+    z-index: var(--personnel-z-modal);
     align-items: center;
     justify-content: center;
     padding: 16px;

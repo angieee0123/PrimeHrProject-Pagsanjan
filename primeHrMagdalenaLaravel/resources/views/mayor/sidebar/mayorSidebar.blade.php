@@ -59,6 +59,13 @@ $currentRoute = Route::currentRouteName();
             <span class="nav-active-bar"></span>
             @endif
         </a>
+
+        {{-- Emitted from inside the loop rather than appended after it, so the
+             row lands in the same position as it does in the admin and
+             employee rails — third, under Dashboard and AI Assistant. --}}
+        @if($item['id'] === 'mayor.ai-assistant')
+            @include('partials.navNotificationRow', ['area' => 'mayor'])
+        @endif
         @endforeach
 
         {{-- Divider separating the nav items from the logout --}}

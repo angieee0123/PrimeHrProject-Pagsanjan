@@ -47,6 +47,57 @@ function renderEmailNotice(notice) {
     box.hidden = false;
 }
 
+// Fill in (or hide) the "Duplicate Records Found" panel in the success modal.
+//
+// Bulk import used to report duplicates by appending one sentence per row to
+// the success message — "Row 2: Employee ID 00123 already exists Row 3: Employee
+// ID 00124 already exists …" — so a CSV re-uploaded by mistake produced a
+// paragraph that said the same six words a dozen times and grew the alert past
+// the bottom of the screen. The shared wording is now said once in the heading
+// and each row carries only what differs; the list scrolls at a fixed height so
+// the count and the Done button stay where they are however many there are.
+//
+// textContent throughout, for the same reason as the panels around it: these
+// names and IDs are values out of an uploaded CSV, and building the list with
+// innerHTML would make that upload an XSS vector against the admin running it.
+function renderDuplicateNotice(duplicates) {
+    const box = document.getElementById('successDuplicateNotice');
+    if (!box) return;
+
+    const rows = Array.isArray(duplicates) ? duplicates : [];
+    if (!rows.length) {
+        box.hidden = true;
+        return;
+    }
+
+    const list = document.getElementById('successDuplicateList');
+    list.textContent = '';
+
+    rows.forEach(function (dupe) {
+        const item = document.createElement('li');
+
+        const name = document.createElement('span');
+        name.className = 'personnel-modal-dupes-name';
+        // A CSV row can reach here with the name columns blank — the duplicate
+        // is still real, so it is listed under its row number rather than
+        // dropped or shown with an empty line where a name should be.
+        name.textContent = (dupe.name || '').trim() || ('Row ' + dupe.row);
+        item.appendChild(name);
+
+        const id = document.createElement('span');
+        id.className = 'personnel-modal-dupes-id';
+        id.textContent = 'Employee ID: ' + dupe.employee_id;
+        item.appendChild(id);
+
+        list.appendChild(item);
+    });
+
+    document.getElementById('successDuplicateCount').textContent =
+        rows.length === 1 ? '1 record was skipped.' : rows.length + ' records were skipped.';
+
+    box.hidden = false;
+}
+
 // Session flash handling — window.personnelFlash is set by an inline script
 // in adminPersonnel.blade.php
 // (@json(session('success' | 'warning' | 'error' | 'active_tab'))).
@@ -72,6 +123,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // the panel stays hidden for the other actions that open this modal —
     // schedule assignment sends nothing and must not claim to.
     renderEmailNotice(flash.emailNotice);
+
+    // Only bulk import can produce these, and it answers over fetch rather than
+    // a flash — cleared here so a reload never leaves the previous import's list
+    // sitting under an unrelated success message.
+    renderDuplicateNotice(null);
 
     if (flash.error) {
         document.getElementById('errorMessage').textContent = flash.error;
@@ -930,9 +986,21 @@ document.addEventListener('DOMContentLoaded', function() {
         'successModal',
         'errorModal',
         'exportSuccessModal',
-        'exportErrorModal'
+        'exportErrorModal',
+        'bulkImportNoticeModal'
     ];
-    
+
+    // Every overlay on this page, including the ones not in `modals` above.
+    // The scroll lock is released only once none of them is left open: an alert
+    // raised over the Bulk Import modal is dismissed while that modal is still
+    // on screen, and clearing body overflow there lets the page scroll away
+    // underneath an open modal.
+    const overlays = modals.concat(['bulkImportModal']);
+    const anyModalOpen = () => overlays.some(id => {
+        const el = document.getElementById(id);
+        return el && window.getComputedStyle(el).display === 'flex';
+    });
+
     modals.forEach(modalId => {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -951,7 +1019,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const display = window.getComputedStyle(modal).display;
                         if (display === 'flex') {
                             document.body.style.overflow = 'hidden';
-                        } else {
+                        } else if (!anyModalOpen()) {
                             document.body.style.overflow = '';
                         }
                     }
@@ -1511,10 +1579,26 @@ function removeFile() {
     document.getElementById('dropZone').style.background = '#fafafe';
 }
 
+// The Bulk Import validation notice — the page's own alert, raised over the
+// still-open Bulk Import modal rather than in the browser's chrome. The sentence
+// is passed in from the check that raises it, so the wording stays beside the
+// condition it describes.
+function showBulkImportNotice(message) {
+    document.getElementById('bulkImportNoticeMessage').textContent = message;
+    document.getElementById('bulkImportNoticeModal').style.display = 'flex';
+}
+
+// Dismisses the notice only. The Bulk Import modal stays open with the admin's
+// file selection intact — they were told to fix something, not to start again —
+// so body overflow is left as openBulkImportModal() set it.
+function closeBulkImportNotice() {
+    document.getElementById('bulkImportNoticeModal').style.display = 'none';
+}
+
 function submitBulkImport() {
     const fileInput = document.getElementById('csvFile');
     if (!fileInput.files.length) {
-        alert('Please select a CSV file to upload.');
+        showBulkImportNotice('Please select a CSV file to upload.');
         return;
     }
 
@@ -1553,10 +1637,18 @@ function submitBulkImport() {
                 text: 'Each imported employee was emailed a verification link and, separately, '
                     + 'their username and password. They must open the link before they can sign in.',
             } : null);
+            renderDuplicateNotice(data.duplicates);
             document.getElementById('successModal').style.display = 'flex';
-            setTimeout(() => {
-                location.reload();
-            }, 2000);
+
+            // An import that skipped nothing reloads on its own; one that has a
+            // list to show waits for Done, which reloads too (closeSuccessModal).
+            // Two seconds is not long enough to read a dozen names, and the
+            // reload would take the only copy of them off the screen.
+            if (!(data.duplicates && data.duplicates.length)) {
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            }
         } else {
             document.getElementById('errorMessage').textContent = data.message || 'Failed to import employees. Please check your CSV file.';
             document.getElementById('errorModal').style.display = 'flex';
@@ -1586,3 +1678,5 @@ window.downloadTemplate = downloadTemplate;
 window.handleFileSelect = handleFileSelect;
 window.removeFile = removeFile;
 window.submitBulkImport = submitBulkImport;
+window.showBulkImportNotice = showBulkImportNotice;
+window.closeBulkImportNotice = closeBulkImportNotice;

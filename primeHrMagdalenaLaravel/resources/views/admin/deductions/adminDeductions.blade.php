@@ -330,6 +330,7 @@ function getInitials($name) {
 @include('admin.deductions.modals.viewLoanTypeModal')
 @include('admin.deductions.modals.editLoanTypeModal')
 @include('admin.deductions.modals.addLoanModal')
+@include('admin.deductions.modals.viewLoanModal')
 @include('admin.deductions.modals.assignDeductionScheduleModal')
 @include('admin.deductions.modals.assignDeductionModal')
 @include('admin.deductions.modals.editEmployeeDeductionModal')
