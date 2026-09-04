@@ -245,10 +245,31 @@
     @media (prefers-reduced-motion: reduce) {
         .lc-modal-overlay, .lc-modal-panel { animation: none; }
     }
+    /* The panel gives its margin back to the calendar as the screen narrows —
+       a 32px gutter is breathing room on a desktop and a third of a day cell
+       on a tablet. */
+    @media (max-width: 1024px) {
+        .lc-modal-overlay { padding: 18px; }
+        .lc-modal-panel { height: 92vh; border-radius: 20px; }
+        .lc-modal-head { padding: 0 18px; }
+    }
+    /* A short window (a laptop in landscape, a phone on its side) has less
+       height to spend on chrome than a tall one, whatever its width. */
+    @media (max-height: 620px) {
+        .lc-modal-overlay { padding: 8px; }
+        .lc-modal-panel { height: 96vh; }
+        .lc-modal-head { height: 52px; }
+    }
     @media (max-width: 640px) {
         .leave-cal-fab { right: 20px; bottom: 84px; }
         .leave-cal-fab.is-alone { bottom: 20px; }
-        .lc-modal-overlay { padding: 10px; }
-        .lc-modal-panel { height: 94vh; border-radius: 18px; }
+        .lc-modal-overlay { padding: 8px; }
+        .lc-modal-panel { height: 95vh; border-radius: 16px; }
+        .lc-modal-head { height: 56px; padding: 0 14px; gap: 10px; }
+        .lc-modal-head-icon { width: 32px; height: 32px; border-radius: 10px; }
+        /* The subtitle is context, not the title — it is the first thing to go
+           rather than letting it push the close button off the header. */
+        .lc-modal-head-sub { display: none; }
+        .lc-modal-head-h3 { white-space: normal; }
     }
 </style>

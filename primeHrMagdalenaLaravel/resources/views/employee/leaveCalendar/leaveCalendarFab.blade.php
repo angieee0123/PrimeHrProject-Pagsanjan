@@ -163,9 +163,30 @@
     .ecal-spinner { width: 36px; height: 36px; border-radius: 50%; border: 3px solid rgba(15, 23, 42, 0.1); border-top-color: var(--theme-primary); animation: ecalSpin 0.7s linear infinite; }
 
     @media (prefers-reduced-motion: reduce) { .ecal-modal-overlay, .ecal-modal-panel { animation: none; } }
+    /* The panel gives its margin back to the calendar as the screen narrows —
+       a 32px gutter is breathing room on a desktop and a third of a day cell
+       on a tablet. Kept in step with partials/leaveCalendarFab. */
+    @media (max-width: 1024px) {
+        .ecal-modal-overlay { padding: 18px; }
+        .ecal-modal-panel { height: 92vh; border-radius: 20px; }
+        .ecal-modal-head { padding: 0 18px; }
+    }
+    /* A short window (a laptop in landscape, a phone on its side) has less
+       height to spend on chrome than a tall one, whatever its width. */
+    @media (max-height: 620px) {
+        .ecal-modal-overlay { padding: 8px; }
+        .ecal-modal-panel { height: 96vh; }
+        .ecal-modal-head { height: 52px; }
+    }
     @media (max-width: 640px) {
         .ecal-fab { right: 20px; bottom: 84px; }
-        .ecal-modal-overlay { padding: 10px; }
-        .ecal-modal-panel { height: 94vh; border-radius: 18px; }
+        .ecal-modal-overlay { padding: 8px; }
+        .ecal-modal-panel { height: 95vh; border-radius: 16px; }
+        .ecal-modal-head { height: 56px; padding: 0 14px; gap: 10px; }
+        .ecal-modal-head-icon { width: 32px; height: 32px; border-radius: 10px; }
+        /* The subtitle is context, not the title — it is the first thing to go
+           rather than letting it push the close button off the header. */
+        .ecal-modal-head-sub { display: none; }
+        .ecal-modal-head-h3 { white-space: normal; }
     }
 </style>
