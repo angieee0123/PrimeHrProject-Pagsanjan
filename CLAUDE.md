@@ -1371,6 +1371,200 @@ php artisan test tests/Unit/NotificationServiceTest.php \
 
 ---
 
+## The Leave & Travel Calendar
+
+Two surfaces over the same idea, and they are deliberately one calendar:
+
+| Surface | Question it answers | Route · view |
+|---|---|---|
+| Admin / mayor | *Who is out?* | `/{admin,mayor}/leave-calendar` → `partials/leaveCalendar/calendar.blade.php` (`.lc-*`) |
+| Employee | *When am I out?* | `/employee/leave-calendar` → `employee/leaveCalendar/leaveCalendar.blade.php` (`.ec-*`) |
+
+Both render full-page and inside a floating-button modal (`?embed=1` →
+`layouts/calendarEmbed`), and both offer Month / Week / Day. Scoping is the
+controllers': `EmployeeLeaveCalendarController` never queries anything but
+`Auth::user()->employee`; `AdminLeaveCalendarController` is the org-wide one and
+`MayorLeaveCalendarController` inherits it.
+
+### One colour and shape vocabulary, in one file
+
+`resources/css/shared/leaveCalendarTokens.css` holds it, and **both**
+stylesheets `@import` it. It is the same green/amber/blue as the busy-date
+pickers (`busyDatesCalendar.js`), so a marker means the same thing wherever it
+is drawn — which matters because one person can hold both roles and see both
+calendars.
+
+Those three hues are **fixed, not derived from the active theme** — same rule
+as the chart categorical hues and the notification category gradients: they
+exist to tell approved leave from pending from travel, and re-tinting them
+toward the palette is how that stops working. Everything that is *not* an
+identity hue — surfaces, rules, ink, the today ring — is a theme variable, so
+the calendar still follows Settings → Appearance.
+
+**Colour is never the only cue.** Each record also carries a shape, so the grid
+survives a monochrome screen and colour-vision deficiency:
+
+| | leave | travel | pending |
+|---|---|---|---|
+| admin marker | circle | squircle | dashed ring |
+| employee pill | round dot | square dot | dashed outline |
+
+The legend draws those marks *as the grid draws them* rather than three plain
+circles, so the key can be matched to a cell without reading the words. Its
+last item names the dash itself, because that cue marks a pending travel order
+as well as a pending leave and there is no fourth colour to look for.
+
+### The whole month, at one glance, with nothing cut off
+
+The goal is one sentence: open the calendar and see the first of the month to
+the last without scrolling **inside** it, while a date holding more records
+takes the height it needs. Four rules carry that, and each is load-bearing:
+
+- **Rows size to their content.** Both grids run `grid-auto-rows:
+  minmax(var(--cal-row-min), auto)`, so a week row is at least the floor, at
+  least as tall as the busiest date in it, and free to grow past both. The
+  embed used `1fr`, which divides the height into equal rows whatever is in
+  them — the row holding a busy Tuesday got exactly the empty week's height and
+  its markers went under the cell's edge. **`--cal-row-min` is declared on the
+  grid (`.lc-days` / `.ec-days`), never on the cell**: `grid-auto-rows` resolves
+  against the container, so a cell-level override silently moves only
+  `min-height` and leaves the tracks at the default.
+- **Cells do not clip.** `overflow: hidden` is gone from `.lc-day` / `.ec-day`.
+  The admin's marker row wraps onto a second line, the employee's pill labels
+  wrap instead of ellipsing, and the cell grows to hold them. A face sliced in
+  half by a cell border was never a smaller answer, only a wrong one.
+- **How many records a cell shows is measured, not typed.**
+  `resources/js/shared/calendarFit.js` owns it, for both surfaces and both
+  contexts. The cap it replaces was `nth-child(n+4)` / `nth-child(n+3)` in CSS:
+  a fixed three and two that knew nothing about the window, so they hid a fourth
+  person on a screen with room for eight and still overflowed a short one. Each
+  week row now gets the largest count the month as a whole can still pay for, so
+  a date with two records shows both in a month where another date has fourteen.
+- **The budget is the modal's height, or the page's fold.** Inside
+  `.lc-embed-wrap` the grid is `flex: 1`, so the height it is handed *is* the
+  budget. On the full page nothing bounds it, so the budget is what is left of
+  the viewport below the grid's own top — because "the whole month at one
+  glance" is not satisfied by a calendar you scroll the *page* to see the end
+  of. Measured from the document, so it does not change with scroll position.
+- **The floor adapts, then the cell itself.** Six times `--cal-row-min` is
+  taller than the modal's grid on an ordinary laptop, so the month overflowed
+  before a single record had been counted — capping records cannot fix a floor
+  that overflows. The pass lowers the floor (never raises it), and if one record
+  a date still will not fit it squeezes the cell a step at a time: `compact`
+  (smaller date badge and marker), then `dense` — which is the type-mark
+  treatment the ≤768px (admin) and ≤560px (employee) rules already use, applied
+  by the height a row can have rather than only by the width it has. A cell out
+  of height has the same problem as one out of width, so it gets the same
+  answer. Each step is re-measured, never adjusted by a guess: those sizes live
+  in CSS beside the rest of the calendar.
+
+**An empty month is the case to test first.** October has no leave and no travel
+in it, and it was the one month that still scrolled after all of the above — the
+pass returned early when a month held no records, so the adaptive floor never
+ran and five rows stayed at their full 118px. A month with nothing in it still
+has five or six week rows to fit, and they are what overflows. The early return
+is now on `rows`, not on records.
+
+Two things follow that are easy to get wrong:
+
+- **Hidden records stay in the DOM** (`hidden`, not removed). The admin tooltip,
+  the `.lc-day-count` badge and the employee's day popover are all built from
+  them, so "+3" has to open a list that really does hold three more.
+- **The "+N" chip ships `hidden` with no number.** How many are hidden is not
+  knowable server-side — it depends on the window the reader opened the calendar
+  in — so Blade renders the chip and the fit pass fills it in. With JavaScript
+  off it stays hidden and every record shows, which is why the CSS default has
+  to be "show everything" rather than a cap.
+- **The chip is costed by where it actually sits.** The admin's rides at the end
+  of the marker row and takes its own line only when it no longer fits beside
+  them; the employee's sits under the stack, except at `dense`, where it moves
+  into the date row's spare corner and costs the cell nothing. `measure()` reads
+  its `position` rather than assuming, so CSS stays the one place that decides.
+  Costing it as free is what let a cell claim a height the chip then sat 6px
+  below.
+
+`minmax(floor, auto)` is not a guarantee on its own, and this is the subtlety
+the fit pass exists for: a grid track only grows to its content **while there is
+free space to grow into**. Give the grid less height than the sum of its rows'
+contents and every track stays at the floor and the content spills out of the
+cell instead. That is why "does the sum of the rows fit the grid" is the exact
+question the pass asks before letting a cell show one more record — and why,
+when not even one record a date fits, it stops pinning the grid to the modal's
+height (`.is-cal-overflowing` → `flex: 0 0 auto`) so the rows can size
+themselves and `.lc-embed-wrap` scrolls instead of cropping. That scroll is a
+fallback for a window that has run out of height, never the mechanism.
+
+Week view has no chip and no cap: it has the height to list everyone, so
+truncating there would hide rows that already fit. Its columns carry a 220px
+floor rather than a fixed 320px height — a week with one record should not print
+200px of empty card under it.
+
+The admin month markers also **no longer overlap**. A −14px pile is how a face,
+a ring colour and a dashed outline all end up half-covered by the next avatar;
+they sit in a wrapping row of whole marks now. Pending markers are dashed rather
+than faded — the old `opacity: .62` dimmed the very state a reader is looking
+for.
+
+### Responsive: what each width gives up
+
+Widest-first, and each step surrenders what the width can no longer pay for.
+The load-bearing step is the last one:
+
+- **≤1180** stat strip folds to two columns; avatars 26px.
+- **≤900** week view becomes one tall column per day; avatars 24px; the
+  employee's month pills drop their dot, because the pill's own tint and dashed
+  outline already say type and status and those 13px are two more letters of
+  the leave's name.
+- **≤768** the month marker stops being a face and becomes a **type mark** — a
+  green circle, an amber dashed circle, a blue square. A 26px avatar is
+  unreadable in an 80px cell and a row of them does not fit. The count badge
+  still states the real total and the date still opens the day view, which is
+  where the names are. The "+N" chip shrinks with the marks rather than being
+  switched off: the fit pass *measures* that element, so one set to
+  `display: none` is a truncation it cannot cost.
+- **≤720 / ≤560** cell padding, type and the stat strip compact; the employee's
+  "+N more" drops the word and keeps the number; the admin's count badge moves
+  to the cell corner, where it takes no width from the date.
+
+Two things at ≤768 are corrections to the shared glass system rather than
+choices. `.glass-shell .filter-card-fields` stacks into a column there, which is
+right for a bar of full-width selects and wrong for the month navigator — four
+small controls and a segmented switch, stacked into a 300px tower above a
+calendar with no room left; only `.lc-nav` / `.ec-nav` opt out. And the control
+card is laid out as **plain blocks** there: as nested wrapping flex containers
+it measured ~90px taller than the sum of its parts, and that slack printed as an
+empty band under the Filter button.
+
+### Checking it
+
+There is no PHPUnit case for the calendar; it is markup, CSS and one measuring
+pass, none of which PHPUnit can see. It was verified in a real browser
+(Playwright + Chromium) against the built stylesheets, driving both surfaces at
+full page and in the modal across desktop, tablet and phone widths, and
+asserting three properties directly: the calendar element never scrolls, no
+record's box escapes its own cell, and a busy row is measurably taller than a
+quiet one. Two bugs only that harness could have found — the "+N" chip wrapping
+onto an uncosted second line, and an empty week row being costed at zero instead
+of a full track — are why it is worth rebuilding rather than reasoning about.
+
+The sweep that has to stay green is eight month shapes — 4/5/6-week, empty and
+loaded, up to a pathological 25 records on one date — across both surfaces, full
+page and modal, at 1440x900, 1366x768, tablet and phone: 80 scenarios. Three
+bugs only that harness could have found are why it is worth rebuilding rather
+than reasoning about:
+
+- the "+N" chip wrapping onto a line nothing had costed;
+- an empty week row costed at zero instead of a full track;
+- and the empty-month early return above, which no amount of reading the
+  capping logic would have shown, because the capping logic was correct.
+
+When changing a marker size, a breakpoint or anything the pass measures,
+re-check the five that interact: a date with more records than fit, a long leave
+name, a six-week month in the modal on a 768px-tall window, a month with no
+records at all, and a 390px screen.
+
+---
+
 ## Theming
 
 The whole UI's colour comes from one seed colour, generated by

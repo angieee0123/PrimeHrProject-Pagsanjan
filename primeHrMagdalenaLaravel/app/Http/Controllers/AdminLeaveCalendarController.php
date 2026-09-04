@@ -363,9 +363,12 @@ class AdminLeaveCalendarController extends Controller
                 : ['view' => $view, 'date' => $periodStart->format('Y-m-d')]
         ));
 
-        // Note: the per-day avatar cap (5) lives in the view/CSS — markers past
-        // the 5th are hidden via .cal-markers .cal-marker:nth-child(n+6) and
-        // surfaced through the "+X more" day popover.
+        // Note: every day carries all its markers. The per-day cap is a
+        // month-view display rule and lives in the view/CSS — the 4th onward
+        // are hidden by `.lc-days.is-month .cal-markers .cal-marker:nth-child(n+4)`
+        // and named by the "+X" chip, which opens that date in day view where
+        // the whole list is. Week view shows everyone, so the cap is scoped to
+        // the month grid rather than applied to `.cal-markers` outright.
 
         return view($this->viewName(), compact(
             'days', 'monthLabel', 'currentMonth', 'prevUrl', 'nextUrl', 'todayUrl', 'peopleOut', 'summary', 'embed',

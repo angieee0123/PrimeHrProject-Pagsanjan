@@ -150,14 +150,22 @@
 
         <div class="ec-grid ec-days is-{{ $view }}">
             @foreach($days as $day)
-                @php $count = count($day['events']); @endphp
+                @php
+                    $count    = count($day['events']);
+                    $dayLabel = $day['date']->format('l, F j, Y');
+                @endphp
+                {{-- Clicking anywhere on the cell opens the day's list (leaveCalendar.js).
+                     The cell itself stays a plain <div>: the pills and the "+N more"
+                     chip inside it are real buttons, so Enter on either already
+                     bubbles a click up to that handler — giving the keyboard the
+                     same door without nesting one control inside another. --}}
                 <div class="ec-day {{ $day['in_month'] ? '' : 'is-muted' }} {{ $day['is_today'] ? 'is-today' : '' }} {{ $day['is_weekend'] ? 'is-weekend' : '' }} {{ $day['primary_kind'] ? 'kind-' . $day['primary_kind'] : '' }}">
                     <div class="ec-day-head">
                         <span class="ec-day-num">{{ $day['date']->format('j') }}</span>
                     </div>
 
                     @if($count > 0)
-                        <div class="ec-events" data-day-label="{{ $day['date']->format('l, F j, Y') }}">
+                        <div class="ec-events" data-day-label="{{ $dayLabel }}">
                             @foreach($day['events'] as $ev)
                                 @php
                                     $summaryData = [
@@ -170,12 +178,32 @@
                                 @endphp
                                 <button type="button" class="ec-pill kind-{{ $ev['kind'] }}"
                                         data-summary='@json($summaryData)'
-                                        aria-label="{{ $ev['label'] }} — {{ $ev['status_label'] }}">
+                                        aria-label="{{ $ev['label'] }} — {{ $summaryData['type_label'] }}, {{ $ev['status_label'] }}, {{ $ev['range_label'] }}">
                                     <span class="ec-pill-dot"></span>
                                     <span class="ec-pill-text">{{ $ev['label'] }}</span>
                                 </button>
                             @endforeach
                         </div>
+
+                        {{-- The month cell shows as many records as it has the
+                             height for and names the rest here; on the full page
+                             that is all of them, so this chip never appears.
+                             Inside the modal shared/calendarFit.js measures what
+                             fits and fills the count in — it cannot be known
+                             server-side, because it depends on the window the
+                             reader opened the calendar in. It ships `hidden`, so
+                             with JavaScript off every pill shows and no chip
+                             claims a number it did not compute.
+
+                             "more" is its own span so a narrow cell can drop the
+                             word and keep the number, which is the half that
+                             carries the meaning. Every pill stays in the DOM
+                             either way — the day popover is built from them. --}}
+                        @if($view === 'month')
+                            <button type="button" class="ec-more" hidden
+                                    data-cal-more-label="Show all {{ $count }} records on {{ $dayLabel }} — %d more not shown"
+                                    aria-label="Show all {{ $count }} records on {{ $dayLabel }}"><span data-cal-more-count>+0</span><span class="ec-more-word"> more</span></button>
+                        @endif
                     @endif
                 </div>
             @endforeach

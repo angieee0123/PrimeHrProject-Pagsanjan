@@ -13,6 +13,8 @@
 // mayor's read-only mirrors — names them on window.leaveCalendarOpeners rather
 // than forcing a second copy of everything below.
 
+import { initCalendarFit } from './calendarFit.js';
+
 function calParse(el, attr) {
     try {
         return JSON.parse(el.getAttribute(attr) || '{}');
@@ -113,6 +115,20 @@ function calSyncLeaveTypeField() {
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('lcType')?.addEventListener('change', calSyncLeaveTypeField);
     calSyncLeaveTypeField();
+
+    // How many faces a month cell shows is a measurement, not a constant: on
+    // the full page every one of them, and inside the modal as many as every
+    // week row can afford before the month would need a scrollbar. Markers it
+    // hides stay in the DOM for the tooltip and the day count above.
+    initCalendarFit({
+        grid: '.lc-days.is-month',
+        cell: '.lc-day',
+        head: '.lc-day-head',
+        list: '.cal-markers',
+        item: '.cal-marker',
+        more: '.cal-more',
+        layout: 'wrap',
+    });
 
     // A marker is a record, and the cell behind it is a date. Clicking the
     // marker must not do both, so it stops there.

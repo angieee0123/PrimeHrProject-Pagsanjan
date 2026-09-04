@@ -5,6 +5,8 @@
 // Each pill carries data-summary (label, type, dates, status) for its hover
 // tooltip; clicking a day lists everything on that day in a small popover.
 
+import { initCalendarFit } from '../../shared/calendarFit.js';
+
 function ecParse(el, attr) {
     try { return JSON.parse(el.getAttribute(attr) || '{}'); }
     catch (e) { return {}; }
@@ -62,6 +64,10 @@ function ecOpenDayModal(cell, label) {
     const title = document.getElementById('ecDayModalTitle');
     if (!modal || !list) return;
 
+    // The pointer leaves the pill without a mouseleave when the overlay covers
+    // it, so a tooltip opened on the way here would stay pinned over the panel.
+    ecHideTooltip();
+
     title.textContent = label || 'Day';
     list.innerHTML = '';
 
@@ -85,6 +91,20 @@ function ecOpenDayModal(cell, label) {
 
 // ---------- Wire up ----------
 document.addEventListener('DOMContentLoaded', () => {
+    // How many records a month cell shows is a measurement, not a constant: on
+    // the full page every one of them, and inside the modal as many as every
+    // week row can afford before the month would need a scrollbar. Pills it
+    // hides stay in the DOM — the popover below is built from them.
+    initCalendarFit({
+        grid: '.ec-days.is-month',
+        cell: '.ec-day',
+        head: '.ec-day-head',
+        list: '.ec-events',
+        item: '.ec-pill',
+        more: '.ec-more',
+        layout: 'stack',
+    });
+
     document.querySelectorAll('.ec-pill').forEach(pill => {
         pill.addEventListener('mouseenter', () => ecShowTooltip(pill));
         pill.addEventListener('mousemove', ecMoveTooltip);

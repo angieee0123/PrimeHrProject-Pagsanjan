@@ -1,0 +1,77 @@
+/* ============================================================
+   Leave & Travel Calendar — one colour and metric vocabulary
+   ------------------------------------------------------------
+   Imported by BOTH calendar stylesheets:
+     · resources/css/admin/adminLeaveCalendar.css     (admin + mayor)
+     · resources/css/employee/employeeLeaveCalendar.css (the employee's own)
+
+   The two surfaces answer different questions — "who is out?" versus
+   "when am I out?" — but they are the same calendar, and a reader who
+   holds two roles sees both. Green/amber/blue is also the shared
+   busy-dates convention (busyDatesCalendar.js), so these hues are
+   deliberately fixed and NOT derived from the active theme: they exist
+   to tell approved leave from pending leave from travel, and re-tinting
+   them toward the palette is how that stops working. Same rule as the
+   chart categorical hues and the notification category gradients.
+
+   Everything that is *not* an identity hue — surfaces, rules, ink — is
+   a theme variable, so the calendar still follows Settings → Appearance.
+
+   Colour is never the only cue. Each record type also carries a shape:
+     leave  → circle marker / round dot
+     travel → squircle marker / square dot
+     pending→ dashed outline
+   which is what keeps the grid readable on a monochrome screen and for
+   colour-vision deficiency.
+   ============================================================ */
+
+:root {
+    /* ---- Approved leave — green ---- */
+    --cal-leave:        #16a34a;
+    --cal-leave-soft:   #e7f7ee;
+    --cal-leave-line:   #b5e3c8;
+    --cal-leave-ink:    #146c39;
+
+    /* ---- Pending (leave awaiting approval) — amber ---- */
+    --cal-pending:      #d97706;
+    --cal-pending-soft: #fdf3e3;
+    --cal-pending-line: #f0d5a3;
+    --cal-pending-ink:  #8a5309;
+
+    /* ---- Travel order — blue ---- */
+    --cal-travel:       #2f6fed;
+    --cal-travel-soft:  #e9f0fe;
+    --cal-travel-line:  #bcd3fb;
+    --cal-travel-ink:   #1c48ab;
+
+    /* ---- Grid surfaces ---- */
+    --cal-cell-bg:      #ffffff;
+    --cal-cell-line:    var(--theme-neutral-200);
+    --cal-cell-line-hi: var(--theme-neutral-300);
+    --cal-cell-muted:   var(--theme-neutral-50);
+    --cal-cell-weekend: var(--theme-primary-50);
+    --cal-ink:          var(--theme-neutral-900);
+    --cal-ink-soft:     var(--theme-neutral-700);
+    --cal-ink-faint:    var(--theme-neutral-500);
+
+    /* ---- Metrics — one rhythm across both surfaces ----
+       `--cal-row-min` is a FLOOR, not a height. Both grids run
+       `grid-auto-rows: minmax(var(--cal-row-min), auto)`, so a week row is at
+       least this tall, at least as tall as the busiest date in it, and free to
+       grow past both — which is what lets a cell hold a fourth record without
+       cropping it. It is declared on the grid (.lc-days / .ec-days), never on
+       the cell: `grid-auto-rows` resolves against the container, and a
+       cell-level override silently moves only `min-height`.
+
+       Nothing here caps how many records a cell shows. On the full page it
+       shows all of them; inside the fixed-height modal shared/calendarFit.js
+       measures the grid and hides only what genuinely will not fit, naming it
+       with the "+N" chip. A number typed here could not know how tall the
+       reader's window is, which is exactly what the old `nth-child(n+4)` cap
+       got wrong in both directions. */
+    --cal-gap:          8px;    /* between day cells */
+    --cal-cell-radius:  12px;
+    --cal-cell-pad:     8px;
+    --cal-event-gap:    4px;    /* between events inside one cell */
+    --cal-row-min:      118px;  /* month row floor */
+}

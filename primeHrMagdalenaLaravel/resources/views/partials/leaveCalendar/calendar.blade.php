@@ -67,11 +67,16 @@
                 @endforeach
             </div>
         </div>
-        <div class="filter-card-actions lc-legend">
-            <span class="lc-legend-item"><span class="lc-legend-dot is-leave-approved"></span>Approved leave</span>
-            <span class="lc-legend-item"><span class="lc-legend-dot is-leave-pending"></span>Pending leave</span>
-            <span class="lc-legend-item"><span class="lc-legend-dot is-travel"></span>Travel order</span>
-            <span class="lc-legend-item"><span class="lc-legend-dot is-pending-swatch"></span>Pending (dashed)</span>
+        {{-- The legend draws the marks the grid draws, at the size the grid
+             draws them: a green circle, an amber dashed circle, a blue
+             squircle. The last item names the dash itself, because that cue
+             marks a pending travel order as well as a pending leave and there
+             is no fourth colour to look for. --}}
+        <div class="filter-card-actions lc-legend" role="list" aria-label="Marker key">
+            <span class="lc-legend-item" role="listitem"><span class="lc-legend-dot is-leave-approved"></span>Approved leave</span>
+            <span class="lc-legend-item" role="listitem"><span class="lc-legend-dot is-leave-pending"></span>Pending leave</span>
+            <span class="lc-legend-item" role="listitem"><span class="lc-legend-dot is-travel"></span>Travel order</span>
+            <span class="lc-legend-item" role="listitem"><span class="lc-legend-dot is-pending-swatch"></span>Dashed = awaiting approval</span>
         </div>
     </div>
 
@@ -321,13 +326,24 @@
                             @endforeach
                         </div>
 
-                        {{-- Only month truncates: week has the height to list
-                             everyone, so a "+X more" there would hide rows that
-                             already fit. It opens the day, which is where the
-                             hidden ones are. --}}
-                        @if($view === 'month' && $count > 4)
-                            <a href="{{ $day['day_url'] }}" class="cal-more"
-                               aria-label="Open {{ $dayLabel }} to see all {{ $count }}">+{{ $count - 4 }}</a>
+                        {{-- Only month truncates, and only when the height it
+                             has genuinely cannot hold everyone: on the full
+                             page nothing is hidden at all, and inside the
+                             modal shared/calendarFit.js measures what fits and
+                             fills this chip in. So it ships `hidden` with no
+                             number — the count is not knowable server-side,
+                             because it depends on the window the reader opened
+                             the calendar in. With JavaScript off it stays
+                             hidden and every marker shows.
+
+                             Week never truncates: it has the height to list
+                             everyone, so a "+X" there would hide rows that
+                             already fit. The chip opens the day, which is
+                             where the hidden ones are. --}}
+                        @if($view === 'month')
+                            <a href="{{ $day['day_url'] }}" class="cal-more" hidden
+                               data-cal-more-label="Open {{ $dayLabel }} to see all {{ $count }} — %d more not shown"
+                               aria-label="Open {{ $dayLabel }} to see all {{ $count }}"><span data-cal-more-count>+0</span></a>
                         @endif
                         </div>
                     @endif
