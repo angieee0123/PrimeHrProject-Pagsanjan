@@ -34,7 +34,7 @@ return new class extends Migration
             DB::table('system_ai_settings')->insert([
                 'provider' => 'groq',
                 'api_key' => Crypt::encryptString($envKey),
-                'model' => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+                'model' => env('GROQ_MODEL', 'openai/gpt-oss-120b'),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

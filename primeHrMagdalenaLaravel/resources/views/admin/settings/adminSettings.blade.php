@@ -339,6 +339,46 @@
                     </div>
                 </div>
             </div>
+
+            <div class="settings-section">
+                <h3 class="settings-section-title">Citizen's Charter (chatbot knowledge base)</h3>
+                <div class="settings-section-content">
+                    <div class="settings-form-wrapper">
+                        <p class="settings-row-desc" style="margin-bottom:16px">
+                            Import the municipality's Citizen's Charter (PDF or DOCX, up to {{ $charterMaxLabel }}).
+                            Every chatbot — admin, employee, mayor, mobile, and the public welcome-page widget —
+                            answers questions about municipal services, requirements, fees, and processing times
+                            from this file. Uploading a new file replaces the current one. If your charter is
+                            larger than the limit above, copy it onto the server and run
+                            <code>php artisan charter:import "&lt;path-to-file&gt;"</code> instead — the command
+                            reads from disk and has no upload ceiling.
+                        </p>
+
+                        <div class="settings-row">
+                            <div class="settings-row-label">
+                                <p class="settings-row-title" id="charterFileName">{{ $charter['exists'] ? $charter['name'] : 'No file imported' }}</p>
+                                <p class="settings-row-desc" id="charterFileMeta">{{ $charter['exists'] ? $charter['meta'] : $charter['message'] }}</p>
+                            </div>
+                            @if($charter['exists'] ?? false)
+                                <span class="notif-readonly" id="charterStatusBadge">{{ ($charter['usable'] ?? false) ? 'Active' : 'Needs attention' }}</span>
+                            @endif
+                        </div>
+
+                        <div class="settings-form-field settings-field-spacing-md">
+                            <label>Charter file (PDF or DOCX)</label>
+                            <input type="file" id="charterFileInput" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                        </div>
+
+                        <p class="settings-message error hidden" id="charterMsg"></p>
+                        <div class="settings-save-bar">
+                            @if($charter['exists'] ?? false)
+                            <button class="settings-btn-reset" id="charterRemoveBtn" onclick="removeCharter()">Remove</button>
+                            @endif
+                            <button class="settings-btn-save" id="charterSaveBtn" onclick="uploadCharter()">{{ ($charter['exists'] ?? false) ? 'Replace Charter' : 'Import Charter' }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             @endif
         </div>
         {{-- Appearance --}}

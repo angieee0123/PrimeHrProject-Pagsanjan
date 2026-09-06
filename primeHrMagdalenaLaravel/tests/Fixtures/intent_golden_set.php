@@ -135,6 +135,32 @@ return [
     'who is the hr officer' => 'employee_search',
     'who is the system administrator' => 'employee_search',
 
+    // ── charter ───────────────────────────────────────────────────────────────
+    // Municipality information from the imported Citizen's Charter. Checked
+    // before how_to (so "paano kumuha" is not answered with HR navigation)
+    // and before the stored-file rule (so "requirements for clearance" is not
+    // answered with a document search) — but it must never claim HR records,
+    // reports, or rosters, which the cases above keep pinning.
+    'what are the requirements for a business permit?' => 'charter',
+    'how long does a barangay clearance take to process?' => 'charter',
+    'paano kumuha ng cedula?' => 'charter',
+    'how much is the fee for a birth certificate?' => 'charter',
+    'what frontline services does the munisipyo offer?' => 'charter',
+
+    // ── monetization ────────────────────────────────────────────────────────
+    // Leave credits converted to cash. Rule phrasings reach the policy answer
+    // (how_to); the caller's own rows reach self_service; organisation-wide
+    // phrasings reach data, dashboard, or report — never each other.
+    'what is the status of my monetization request' => 'self_service',
+    'show my monetization requests' => 'self_service',
+    'can I monetize my leave credits' => 'self_service',
+    'how do I file a monetization request' => 'how_to',
+    'how is the monetization amount computed' => 'how_to',
+    'what is monetization' => 'how_to',
+    'show me all monetization requests' => 'data_query',
+    'how many monetization requests are pending' => 'dashboard',
+    'generate a monetization report for June' => 'report',
+
     // ── data_query ──────────────────────────────────────────────────────────
     'list all employees with 2 or more absences' => 'data_query',
     'table of leave applications this month' => 'data_query',

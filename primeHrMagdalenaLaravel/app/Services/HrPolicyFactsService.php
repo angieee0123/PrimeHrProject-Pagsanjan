@@ -197,6 +197,8 @@ class HrPolicyFactsService
             . 'quote only numbers you were given.';
         $lines[] = '';
         $lines[] = $this->leaveTypeLines();
+        $lines[] = '';
+        $lines[] = $this->monetizationLines();
 
         return implode("\n", $lines);
     }
@@ -244,6 +246,93 @@ class HrPolicyFactsService
 
         $lines[] = 'That list is complete. If a leave type is not on it, say it is not configured in this '
             . 'system rather than describing it from general knowledge.';
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * What the assistant may state about leave monetization, read from the
+     * places the system computes it: the monetizable flags on
+     * `leave_types_config`, the constant factor on the
+     * `MonetizationRequest` model, and the live status values on
+     * `monetization_requests`.
+     *
+     * @return array{codes: array<int, string>, constant_factor: float, statuses: array<int, string>}
+     */
+    public function monetization(): array
+    {
+        $codes = array_values(array_filter(array_map(
+            fn (array $t) => $t['monetizable'] ? $t['code'] : null,
+            $this->facts()['leave_types']
+        )));
+
+        // VL before SL, like every other listing in this system — and the same
+        // DEDUCTION_ORDER late deductions draw from, not an alphabetical sort
+        // that would read "SL and VL".
+        $order = array_flip(LateDeductionService::DEDUCTION_ORDER);
+        usort($codes, fn ($a, $b) => ($order[$a] ?? 99) <=> ($order[$b] ?? 99) ?: strcmp($a, $b));
+
+        return [
+            'codes' => $codes,
+            'constant_factor' => \App\Models\MonetizationRequest::CONSTANT_FACTOR,
+            'statuses' => $this->monetizationStatuses(),
+        ];
+    }
+
+    /**
+     * The lifecycle a request moves through, read from the column itself on
+     * MySQL and from the rows present anywhere else. An empty list is honest
+     * — callers omit what they cannot read rather than reciting an enum from
+     * memory.
+     *
+     * @return array<int, string>
+     */
+    private function monetizationStatuses(): array
+    {
+        try {
+            if (DB::connection()->getDriverName() === 'mysql') {
+                $row = DB::selectOne("SHOW COLUMNS FROM monetization_requests LIKE 'status'");
+
+                if ($row && preg_match_all("/'([^']+)'/", (string) $row->Type, $m)) {
+                    return array_values($m[1]);
+                }
+            }
+
+            return DB::table('monetization_requests')
+                ->select('status')
+                ->distinct()
+                ->orderBy('status')
+                ->pluck('status')
+                ->all();
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    private function monetizationLines(): string
+    {
+        $m = $this->monetization();
+
+        if (empty($m['codes'])) {
+            return "MONETIZATION:\n- Not available from this connection. Do not describe monetization rules from memory.";
+        }
+
+        $codes = implode(' and ', $m['codes']);
+        $cf = rtrim(rtrim(number_format($m['constant_factor'], 7, '.', ''), '0'), '.');
+        $lines = ["MONETIZATION (leave credits converted to cash):"];
+        $lines[] = "- Only {$codes} credits are monetizable in this system.";
+        $lines[] = "- Amount = monthly salary × monetized days × {$cf}. The pesos are stored on "
+            . 'monetization_requests.computed_amount — quote that column, never recompute it.';
+        $lines[] = '- A request number reads MON-YYYY-NNNN.';
+
+        if (!empty($m['statuses'])) {
+            $lines[] = '- Request status is one of: ' . implode(', ', $m['statuses']) . '. '
+                . 'Approval deducts the monetized days from leave_balances; only an approved '
+                . 'request moved money, and only an approved request can be printed.';
+        }
+
+        $lines[] = '- filed_by and approved_by point at users, which is not readable. Join '
+            . 'employees on employee_id for names; never select those two columns.';
 
         return implode("\n", $lines);
     }

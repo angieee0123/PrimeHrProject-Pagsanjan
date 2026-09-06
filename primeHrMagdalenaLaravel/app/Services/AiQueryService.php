@@ -32,7 +32,9 @@ class AiQueryService
         private SafeSqlService $sql,
         private HrChatbotAnswerer $fallback,
         private EmployeeChatbotService $selfService,
+        private ?CitizenCharterService $charter = null,
     ) {
+        $this->charter ??= new CitizenCharterService();
     }
 
     /**
@@ -198,6 +200,7 @@ class AiQueryService
             'workflow' => $this->workflows->handle($user, $resolved, $history),
             'data_query' => $this->dataQuery($user, $resolved, $history),
             'self_service' => $this->ownRecords($user, $resolved),
+            'charter' => $this->charterAnswer($user, $resolved, $original, $history),
             'how_to' => ['answer' => $this->fallback->explain($user, $resolved, $history)],
             'capabilities' => $this->capabilities($user),
             default => $this->generalQuestion($user, $resolved, $original, $history),
@@ -327,6 +330,31 @@ class AiQueryService
     }
 
     /**
+     * Municipality-information questions, answered from the imported Citizen's
+     * Charter rather than from HR records.
+     *
+     * Public information, so no org-wide permission is needed — an employee
+     * asking about business-permit requirements gets the same text an HR
+     * officer does. When the charter cannot answer (nothing imported, or the
+     * question's words match nothing in it), fall through to the general path
+     * instead of dead-ending: the coarse keyword filter claims the question,
+     * but only the stored text can confirm it.
+     *
+     * @param array<int, array{role: string, content: string}> $history
+     * @return array{answer: string, follow_ups?: array<int, string>, ...}
+     */
+    private function charterAnswer(User $user, string $resolved, string $original, array $history): array
+    {
+        $answered = $this->charter->answer($user, $resolved, $history);
+
+        if ($answered !== null) {
+            return $answered;
+        }
+
+        return $this->generalQuestion($user, $resolved, $original, $history);
+    }
+
+    /**
      * Structured data questions go through generated SQL. If the statement
      * merely failed to work, fall through to the chatbot brain so the user
      * still gets an answer.
@@ -371,6 +399,14 @@ class AiQueryService
             // First, because it is unambiguous and usually the opening question.
             $this->wantsCapabilities($q) => 'capabilities',
             (bool) preg_match('/\b(graph|chart|plot|visuali[sz]e|pie|bar\s+chart|line\s+chart|trend\s+(?:graph|chart))\b/', $q) => 'chart',
+            // The Citizen's Charter owns municipal-service questions — permits,
+            // clearances, fees, processing times. Checked before how_to (so
+            // "paano kumuha ng business permit" is not answered with HR
+            // navigation) and before the stored-file rule (so "requirements
+            // for barangay clearance" is not answered with a document search).
+            // The filter is deliberately coarse; charterAnswer() falls back to
+            // the general path when the stored text matches nothing.
+            $this->charter->looksLikeCharterQuestion($message) => 'charter',
             // Checked before the stored-file rule because "file" is a verb at
             // least as often as it is a noun here: "how do I file a leave
             // application" is a how-to, but the file-noun list matches "file"
@@ -454,7 +490,7 @@ class AiQueryService
             // routed "salary grade of Pedro Santos" to generated SQL — which no
             // employee is permitted to run, for a field sitting in plain sight
             // on the personnel record EmployeeSearchService already reads.
-            (bool) preg_match('/\b(leave|attendance|payroll|salary(?!\s+grade)|deduction|absent|late|overtime|credits?|balance|dtr)\b/', $q) => 'data_query',
+            (bool) preg_match('/\b(leave|attendance|payroll|salary(?!\s+grade)|deduction|absent|late|overtime|credits?|balance|dtr|monetiz\w*)\b/', $q) => 'data_query',
             (bool) preg_match('/\bwhere\s+is\b|\bfind\b|\bshow\s+me\b.*\bemployees?\b|\bemployees?\s+(?:hired|appointed|in|from|with)\b|\bwho\s+is\b/', $q) => 'employee_search',
             // "Employment status of Jeremy Pogi", "Maria Santos' department",
             // "what is Juan's position" — a named person plus one of their
@@ -615,6 +651,18 @@ class AiQueryService
      */
     private function wantsPolicy(string $q): bool
     {
+        // How monetization works — which credits convert, the formula, how to
+        // file — is rulebook, answerable for every role. But a monetization
+        // question asked about oneself ("my monetization status") is a lookup
+        // of that employee's own requests, and counts, lists, and reports
+        // belong to the dashboard, data, and report capabilities — so only
+        // rule-phrased questions are claimed here and the rest keep flowing.
+        if (preg_match('/\bmonetiz\w*\b/', $q)
+            && !$this->isSelfReferential($q)
+            && !preg_match('/\b(how many|count|pending|awaiting|list|show|display|report|summary|generate|export|download|chart|graph|who|which)\b/', $q)) {
+            return true;
+        }
+
         // Subjects whose answer is the rulebook however the asker phrases it.
         // "What leave types can I file?" reads as self-referential — "leave …
         // can I" — but there is no personal figure in it; the answer is the
@@ -739,6 +787,7 @@ class AiQueryService
     {
         $ownNouns = '(?:leave|vl|sl|spl|credits?|balances?|payslip|pay\s*slip|salary|sweldo|sahod|'
             . 'net\s*pay|deductions?|attendance|dtr|absences?|late|undertime|overtime|'
+            . 'monetiz\w*|cash\s*conversion|'
             . 'trainings?|seminars?|travel\s*orders?|profile|records?|info(?:rmation)?|details)';
 
         // "my leave balance", "aking payslip", "my remaining VL credits"
@@ -828,10 +877,11 @@ dashboard        — counts, totals, "how many", pending items, overview metrics
 report           — asking for a generated report of records
 chart            — asking for a graph or visualisation
 workflow         — drafting a letter, checklist, summary, or preview document
-self_service     — the asker's OWN records ("my leave balance", "my payslip")
+self_service     — the asker's OWN records ("my leave balance", "my payslip", "my monetization requests")
+charter          — municipality services, permits, clearances, fees, processing times, office hours
 how_to           — a procedure or a written policy, and nothing else
 capabilities     — what the assistant itself can do
-data_query       — any other question answerable from HR records
+data_query       — any other question answerable from HR records (including monetization requests)
 general          — small talk only
 
 Decide by WHERE THE ANSWER COMES FROM, not by how the question is phrased.
@@ -855,7 +905,7 @@ PROMPT;
         $label = preg_replace('/[^a-z_]/', '', $label) ?? '';
 
         $known = ['employee_search', 'document_search', 'dashboard', 'report', 'chart', 'workflow',
-            'self_service', 'how_to', 'capabilities', 'data_query', 'general'];
+            'self_service', 'charter', 'how_to', 'capabilities', 'data_query', 'general'];
 
         return in_array($label, $known, true) ? $label : $this->guessIntent($message);
     }
@@ -880,6 +930,12 @@ PROMPT;
     {
         $q = strtolower($message);
 
+        // The charter path degrades to quoted excerpts, so it stays useful
+        // with no provider — unlike `general`, which degrades to an apology.
+        if ($this->charter->looksLikeCharterQuestion($message)) {
+            return 'charter';
+        }
+
         // A capitalised name with nothing else to go on is a person lookup.
         if (preg_match('/\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/', $message)
             && !preg_match('/\b(?:my|aking|akin)\b/', $q)) {
@@ -890,7 +946,7 @@ PROMPT;
             return 'employee_search';
         }
 
-        if (preg_match('/\b(leave|attendance|payroll|salary|sweldo|sahod|deduction|absent|late|dtr|credits?|balance)\b/', $q)) {
+        if (preg_match('/\b(leave|attendance|payroll|salary|sweldo|sahod|deduction|absent|late|dtr|credits?|balance|monetiz\w*)\b/', $q)) {
             return 'data_query';
         }
 

@@ -36,6 +36,7 @@ class ReportGeneratorService
             'attendance' => $this->attendanceReport($user, $period),
             'leave' => $this->leaveReport($user, $period),
             'payroll' => $this->payrollReport($user, $period),
+            'monetization' => $this->monetizationReport($user, $period),
             'department' => $this->departmentReport($user),
             'hiring' => $this->hiringReport($user, $period),
             'training' => $this->trainingReport($user, $period),
@@ -45,7 +46,7 @@ class ReportGeneratorService
 
         if ($report === null) {
             return [
-                'answer' => "I can generate these reports: **attendance**, **leave**, **payroll**, **department**, "
+                'answer' => "I can generate these reports: **attendance**, **leave**, **payroll**, **monetization**, **department**, "
                     . "**hiring**, **training**, and **employee summary**.\n\n"
                     . 'Tell me which one and the period — for example "generate the payroll report for June".',
                 'data' => [],
@@ -77,6 +78,7 @@ class ReportGeneratorService
         $q = strtolower($question);
 
         return match (true) {
+            (bool) preg_match('/\bmonetiz\w*\b/', $q) => 'monetization',
             (bool) preg_match('/\b(attendance|dtr|daily time record|absent|tardin\w+|late)\b/', $q) => 'attendance',
             (bool) preg_match('/\b(leave|vacation|sick|vl|sl|credits?)\b/', $q) => 'leave',
             (bool) preg_match('/\b(payroll|salary|payslip|compensation|net pay|deduction)\b/', $q) => 'payroll',
@@ -244,6 +246,63 @@ class ReportGeneratorService
             'rows' => $rows,
             'totals' => array_merge(
                 ['Applications' => count($rows), 'Total days' => round(array_sum(array_column($rows, 'number_of_days')), 2)],
+                array_combine(
+                    array_map(fn ($s) => ucfirst((string) $s), array_keys($byStatus)),
+                    array_values($byStatus)
+                ) ?: []
+            ),
+        ];
+    }
+
+    /**
+     * @param array{start: Carbon, end: Carbon, label: string} $period
+     */
+    private function monetizationReport(User $user, array $period): array
+    {
+        $query = DB::table('monetization_requests')
+            ->join('employees', 'monetization_requests.employee_id', '=', 'employees.id')
+            ->leftJoin('employment_details', 'employees.id', '=', 'employment_details.employee_id')
+            ->leftJoin('departments', 'employment_details.department_id', '=', 'departments.id')
+            ->selectRaw("
+                monetization_requests.request_number,
+                employees.employee_id AS employee_no,
+                CONCAT_WS(' ', employees.first_name, employees.last_name) AS employee,
+                COALESCE(departments.name, '—') AS department,
+                monetization_requests.vl_days,
+                monetization_requests.sl_days,
+                monetization_requests.vl_days + monetization_requests.sl_days AS days,
+                monetization_requests.computed_amount,
+                monetization_requests.status,
+                monetization_requests.created_at AS filed_at
+            ")
+            ->whereBetween('monetization_requests.created_at', [$period['start']->toDateString(), $period['end']->toDateString()])
+            ->orderByDesc('monetization_requests.created_at');
+
+        $this->policy->scopeByEmployeeId($query, $user, 'monetization_requests.employee_id');
+
+        $rows = $this->toArray($query->limit(self::MAX_ROWS)->get());
+
+        $byStatus = [];
+        foreach ($rows as $row) {
+            $byStatus[$row['status']] = ($byStatus[$row['status']] ?? 0) + 1;
+        }
+
+        return [
+            'key' => 'monetization',
+            'title' => 'Monetization Report — ' . $period['label'],
+            'columns' => [
+                ['key' => 'request_number', 'label' => 'Request No.'],
+                ['key' => 'employee', 'label' => 'Employee'],
+                ['key' => 'department', 'label' => 'Department'],
+                ['key' => 'vl_days', 'label' => 'VL Days', 'align' => 'right'],
+                ['key' => 'sl_days', 'label' => 'SL Days', 'align' => 'right'],
+                ['key' => 'days', 'label' => 'Total Days', 'align' => 'right'],
+                ['key' => 'computed_amount', 'label' => 'Amount (PHP)', 'align' => 'right', 'format' => 'money'],
+                ['key' => 'status', 'label' => 'Status'],
+            ],
+            'rows' => $rows,
+            'totals' => array_merge(
+                ['Requests' => count($rows), 'Total amount (PHP)' => round(array_sum(array_column($rows, 'computed_amount')), 2)],
                 array_combine(
                     array_map(fn ($s) => ucfirst((string) $s), array_keys($byStatus)),
                     array_values($byStatus)

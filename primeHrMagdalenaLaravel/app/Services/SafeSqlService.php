@@ -78,6 +78,11 @@ class SafeSqlService
         'pass_slips',
         'schedules',
         'employee_requests',
+        // Leave credits converted to cash: one row per request, owned by the
+        // employee in employee_id. Holds no credential — names come from the
+        // employees join, never from filed_by/approved_by, which point at the
+        // unreadable users table.
+        'monetization_requests',
     ];
 
     /**
@@ -302,6 +307,15 @@ DOMAIN RULES — these matter more than they look:
       those replies; it is not an approval state.
     - travel_orders.filed_by is the user who submitted the form, which may be
       somebody other than the traveller. It is never "who travelled".
+18. monetization_requests is leave credits converted to cash, not a leave
+    application: vl_days + sl_days are the days monetized, and
+    computed_amount is the pesos already computed as
+    monthly_salary × days × 0.0481927 — quote it, never recompute it.
+    request_number reads MON-YYYY-NNNN. Only an approved row moved money:
+    approval deducts the days from leave_balances, so pending rows still show
+    their credits untouched. filed_by and approved_by point at users, which
+    you may not read — join employees on employee_id for names and never
+    select those two columns.
 
 Example:
 Question: employees with 2 or more absences
@@ -499,6 +513,7 @@ PROMPT;
         'dtr' => ['attendance'],
         'schedul' => ['schedules', 'attendance'],
         'leave' => ['leave_applications', 'leave_balances', 'leave_transactions', 'leave_types_config', 'leave_accrual_rates'],
+        'monetiz' => ['monetization_requests'],
         'vacation' => ['leave_applications', 'leave_balances', 'leave_types_config'],
         'sick' => ['leave_applications', 'leave_balances', 'leave_types_config'],
         'maternity' => ['leave_applications', 'leave_types_config'],

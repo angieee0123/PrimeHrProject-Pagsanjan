@@ -172,8 +172,9 @@ class AiAccessPolicy
             'Your payslips, deductions, and net pay',
             'Your attendance and DTR records',
             'Your trainings and travel orders',
+            'Your monetization requests — filing, status, and cash value',
             'How to use PRIME HRIS — filing leave, travel orders, viewing your payslip',
-            'HR policy questions — grace periods, late deductions, leave types',
+            'HR policy questions — grace periods, late deductions, leave types, monetization',
         ];
 
         if (!$this->hasOrgWideAccess($user)) {
@@ -185,7 +186,7 @@ class AiAccessPolicy
             'Employee lookups by name, department, position, or hire date',
             'Uploaded files and documents across all employees',
             'Generated reports and charts, exportable to PDF',
-            'Ad-hoc questions answered from the database directly',
+            'Ad-hoc questions answered from the database directly, including monetization requests',
             'Drafting HR letters, checklists, and payroll previews',
         ]);
     }

@@ -14,8 +14,11 @@ use Illuminate\Support\Str;
 
 class EmployeeChatbotService
 {
-    public function __construct(private HrPolicyFactsService $facts)
-    {
+    public function __construct(
+        private HrPolicyFactsService $facts,
+        private ?CitizenCharterService $charter = null,
+    ) {
+        $this->charter ??= new CitizenCharterService();
     }
 
     /**
@@ -80,7 +83,7 @@ TEXT;
             $name = trim($employee->first_name . ' ' . $employee->last_name);
             $greeting = $name !== '' ? "Hello, {$name}!" : 'Hello!';
             return $this->result(
-                "{$greeting} I'm your PRIME HRIS assistant. I can answer questions about **your** leave, payslip, attendance, training, and travel records, plus explain how our HR system works. What would you like to know?",
+                "{$greeting} I'm your PRIME HRIS assistant. I can answer questions about **your** leave, payslip, attendance, training, travel, and monetization records, plus explain how our HR system works. What would you like to know?",
                 [
                     'What is my leave balance?',
                     'How do I file a leave request?',
@@ -90,9 +93,23 @@ TEXT;
             );
         }
 
+        // Municipality information comes from the imported Citizen's Charter —
+        // public text, not anyone's record — so it is answered before the
+        // own-records machinery below (a "find the requirements for a business
+        // permit" names no employee, but the cross-employee guard below would
+        // refuse it on the verb "find"). This is also the path the mobile
+        // chatbot reaches, which never passes through AiQueryService.
+        if ($this->charter->looksLikeCharterQuestion($message)) {
+            $charterAnswer = $this->charter->answer(null, $message);
+
+            if ($charterAnswer !== null) {
+                return $this->result($charterAnswer['answer'], $charterAnswer['follow_ups']);
+            }
+        }
+
         if ($this->isCrossEmployeeQuery($message, $employee)) {
             return $this->result(
-                "For privacy and data protection, I can only share **your own** HR information—not records of other employees. I can help with your leave balance, payslip, attendance, training, travel orders, or explain how to use PRIME HRIS. What would you like to know about your account?",
+                "For privacy and data protection, I can only share **your own** HR information—not records of other employees. I can help with your leave balance, payslip, attendance, training, travel orders, monetization requests, or explain how to use PRIME HRIS. What would you like to know about your account?",
                 $this->defaultFollowUps()
             );
         }
@@ -363,7 +380,55 @@ TEXT;
             ];
         }
 
+        // Rule questions ("can I monetize", "how is the amount computed") are
+        // answered from the live config here; record questions ("my
+        // monetization status", "show my requests", bare "my monetization
+        // requests") carry a record marker — or no rule verb at all — and flow
+        // past into the monetization intent and its context below.
+        if (preg_match('/\bmonetiz\w*\b/u', $q)
+            && !preg_match('/\b(status|balance|show|list|display|history|how many|count|pending|approved|disapproved|cancelled)\b/u', $q)
+            && preg_match('/\b(can|how|eligible|formula|comput\w+|convert|file|apply|submit|paano|mean|process|policy|rule|what\s+is|cash|work)\b/u', $q)) {
+            return $this->monetizationPolicyAnswer();
+        }
+
         return null;
+    }
+
+    /**
+     * How monetization works, from the live config and the model's own
+     * formula. Reached for rule questions ("can I monetize my leave", "how is
+     * the amount computed"); record questions about the caller's own requests
+     * flow past this into the monetization intent and its context below.
+     *
+     * @return array{answer: string, follow_up: array<int, string>}
+     */
+    private function monetizationPolicyAnswer(): array
+    {
+        $m = $this->facts->monetization();
+
+        if (empty($m['codes'])) {
+            return [
+                'answer' => 'I could not read the monetization configuration just now, so I would rather '
+                    . 'not describe the rules from memory. Please try again shortly.',
+                'follow_up' => ['What are my monetization requests?'],
+            ];
+        }
+
+        $codes = implode(' and ', $m['codes']);
+        $cf = rtrim(rtrim(number_format($m['constant_factor'], 7, '.', ''), '0'), '.');
+
+        $answer = "**Monetization** converts your {$codes} credits to cash:\n"
+            . "1. Open **Leave & Benefits → My Monetization**\n"
+            . "2. Tap **+ Request Monetization**, enter the VL/SL days and your reason\n"
+            . "3. Submit — status stays **Pending** until HR approves\n"
+            . "4. Amount = **monthly salary × days × {$cf}** (computed by the system, not by hand)\n"
+            . 'Approval deducts those days from your balances; a disapproved request deducts nothing. '
+            . 'You can cancel your own request while it is still pending.';
+
+        return [
+            'answer' => $answer,
+            'follow_up' => ['What are my monetization requests?', 'How is my monetization amount computed?', 'What is my leave balance?'],
+        ];
     }
 
     private function detectIntent(string $message): string
@@ -375,6 +440,11 @@ TEXT;
         }
         if (preg_match('/\b(leave|vacation|vl|sl|sick|bakasyon|bakasyon)\b/u', $q)) {
             return 'leave';
+        }
+        // Before the leave rule: "monetize my VL" names a leave code, but the
+        // question is about the cash conversion, not the leave itself.
+        if (preg_match('/\bmonetiz\w*\b/u', $q)) {
+            return 'monetization';
         }
         if (preg_match('/\b(payslip|payroll|salary|net pay|sweldo|sahod|deduction)\b/u', $q)) {
             return 'payslip';
@@ -431,6 +501,9 @@ TEXT;
         }
         if (in_array($intent, ['travel', 'general'], true)) {
             $lines[] = $this->travelContext($employee->id);
+        }
+        if (in_array($intent, ['monetization', 'general'], true)) {
+            $lines[] = $this->monetizationContext($employee->id);
         }
 
         $lines[] = '=== SYSTEM KNOWLEDGE (share when relevant) ===';
@@ -665,6 +738,47 @@ TEXT;
         return $out;
     }
 
+    /**
+     * The caller's own conversion requests, latest first. Amounts come from
+     * the stored computed_amount — the pesos the system calculated — never
+     * recomputed here.
+     */
+    private function monetizationContext(int $employeeId): string
+    {
+        $requests = \App\Models\MonetizationRequest::where('employee_id', $employeeId)
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
+
+        $out = "\n=== YOUR MONETIZATION REQUESTS (latest 5) ===\n";
+
+        if ($requests->isEmpty()) {
+            $out .= "No monetization requests on file.\n";
+
+            return $out;
+        }
+
+        foreach ($requests as $r) {
+            $days = (float) $r->vl_days + (float) $r->sl_days;
+
+            $out .= sprintf(
+                "- %s: filed %s, %.2f day(s) (VL %.2f + SL %.2f), PHP %s, status: %s%s\n",
+                $r->request_number ?? ('request #' . $r->id),
+                $r->created_at?->format('Y-m-d') ?? 'unknown date',
+                $days,
+                (float) $r->vl_days,
+                (float) $r->sl_days,
+                number_format((float) $r->computed_amount, 2),
+                $r->status,
+                $r->status === 'disapproved' && $r->approver_remarks
+                    ? ' — reason: ' . $r->approver_remarks
+                    : ''
+            );
+        }
+
+        return $out;
+    }
+
     private function generateResponse(string $message, string $context, Employee $employee, string $intent = 'general'): string
     {
         $prompt = <<<PROMPT
@@ -717,6 +831,7 @@ PROMPT;
             'attendance' => 'Here is what your attendance records show:',
             'training' => 'Here is what your training records show:',
             'travel' => 'Here is what your travel records show:',
+            'monetization' => 'Here is what your monetization records show:',
             'profile' => 'Here is what your employee record shows:',
             default => 'Here is what your records show:',
         };
@@ -768,6 +883,7 @@ PROMPT;
             'attendance' => ['What is my attendance this month?', 'What is the grace period?'],
             'training' => ['How many verified training hours do I have?', 'How do I add training?'],
             'travel' => ['What are my travel orders?', 'How do I file a travel order?'],
+            'monetization' => ['What are my monetization requests?', 'How do I file a monetization request?', 'How is my monetization amount computed?'],
             default => $this->defaultFollowUps(),
         };
     }
