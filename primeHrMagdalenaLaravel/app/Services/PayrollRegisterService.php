@@ -95,7 +95,10 @@ class PayrollRegisterService
             });
         }
 
-        $dailyComputations = $query->get();
+        // A computation whose employee row is gone (deleted account, or an
+        // employee_id that never resolved) has nothing to pay and would only
+        // crash deductionsFor() on a null $employee — drop it here.
+        $dailyComputations = $query->get()->filter(fn ($c) => $c->employee !== null)->values();
 
         $records = ($viewMode === 'employee' || $viewMode === 'monthly')
             ? $this->groupedByEmployee($dailyComputations, $isCutoff1st)
