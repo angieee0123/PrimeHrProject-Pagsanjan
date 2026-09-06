@@ -1,267 +1,558 @@
+@import "../shared/leaveCalendarTokens.css";
+
 /* ============================================================
-   Employee personal Leave & Travel calendar
+   Employee personal Leave & Travel calendar  ("My Leave & Travel Calendar")
    View: resources/views/employee/leaveCalendar/leaveCalendar.blade.php
-   Colour language (shared busy-dates convention):
-     green = approved leave · amber = pending leave · blue = travel
+
+   Colour + shape language lives in shared/leaveCalendarTokens.css and is
+   shared with the admin/mayor calendar, so somebody holding two roles reads
+   one calendar at two scopes rather than two calendars:
+     green circle = approved leave · amber dashed = pending · blue square = travel
    ============================================================ */
 
-.ec-calendar { display: flex; flex-direction: column; gap: 16px; }
+.ec-calendar { display: flex; flex-direction: column; gap: 14px; }
 .ec-calendar.glass-shell { min-height: 0; padding: 0; }
 .ec-calendar.glass-shell::before { display: none; }
 
-/* Modal (embed) mode: fit the whole month, no scroll */
+/* The toolbar is a row of this column, so its own card margin would add a
+   second gap on top of the column gap. One rhythm, defined in one place —
+   this is what the -14px pull-up on the stat strip used to be cancelling. */
+.ec-calendar .filter-card.ec-toolbar { margin-bottom: 0; }
+
+/* ---------- Modal (embed) mode ----------
+   The calendar fills the popup iframe and the week rows share the leftover
+   height.
+
+   `minmax(row-min, auto)`, not `1fr`. `1fr` divides the height into equal rows
+   whatever is in them, so the row holding a three-record Tuesday got exactly
+   the same height as the empty week above it and the third pill went under the
+   cell's edge. With an `auto` max a row is at least the floor, at least as
+   tall as the busiest date in it, and any height still going spare is shared
+   out on top of that — the "rows grow with their content" rule in one track
+   definition.
+
+   What keeps a busy month from outgrowing the modal is not a shorter row: it
+   is shared/calendarFit.js, which measures this grid and shows as many pills
+   per cell as every row can actually afford. So nothing here has to clip. */
 .lc-embed-wrap .ec-calendar { flex: 1; min-height: 0; }
 .lc-embed-wrap .ec-card { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.lc-embed-wrap .ec-days { flex: 1; min-height: 0; grid-auto-rows: 1fr; }
+.lc-embed-wrap .ec-days { flex: 1; min-height: 0; grid-auto-rows: minmax(var(--cal-row-min), auto); }
+/* Set by shared/calendarFit.js only when not even one record a date fits — a
+   six-week month in a very short window. Unpinned from the modal's height the
+   grid takes its content's, so the rows size themselves again and nothing is
+   cropped; the wrapper's scrollbar is what gives instead. Never the normal
+   path: if this class is on, the calendar has run out of window, not out of
+   layout. */
+.lc-embed-wrap .ec-days.is-cal-overflowing { flex: 0 0 auto; }
 .lc-embed-wrap .ec-day { min-height: 0; }
 
-/* 6-week months: compact so nothing feels cramped */
+/* The fit pass spends whatever height the chrome does not, and in a popup of
+   fixed height every pixel above the grid is a pixel the month cannot use. So
+   the chrome is trimmed here and only here: the stat strip is four figures
+   rather than four dashboard cards, and the rest is padding a full page can
+   afford and a 640px panel cannot. Together this is worth roughly a whole week
+   row on a small laptop, which is the difference between a six-week month
+   fitting and scrolling. */
+.lc-embed-wrap .ec-calendar { gap: 10px; }
+.lc-embed-wrap .ec-stat { padding: 8px 12px; gap: 9px; }
+.lc-embed-wrap .ec-stat-ico { width: 26px; height: 26px; border-radius: 8px; }
+.lc-embed-wrap .ec-stat-ico svg { width: 14px; height: 14px; }
+.lc-embed-wrap .ec-stat-num { font-size: 16px; }
+.lc-embed-wrap .ec-stat-lbl { font-size: 10px; }
+.lc-embed-wrap .ec-card { padding: 10px; }
+.lc-embed-wrap .ec-weekdays { margin-bottom: 6px; padding-bottom: 6px; }
+.lc-embed-wrap .ec-nav-btn,
+.lc-embed-wrap .ec-today-btn { height: 32px; }
+.lc-embed-wrap .ec-legend-item { padding: 3px 8px 3px 7px; }
+
+/* ---------- Compact cells ----------
+   Turned on by shared/calendarFit.js, and only when the height a row can
+   actually have is less than a normal cell needs to show its date and one
+   record — i.e. the alternative is a scrollbar, not a nicer calendar. It is
+   the last lever before conceding one: a six-week month on a 768px laptop
+   fits at these sizes and does not at the full ones. Never on by default, and
+   never on a full page with room to spare.
+
+   The dot goes rather than the label: the pill's own tint and dashed outline
+   already say type and status, so the dot repeats them, and those 13px are two
+   more letters of the leave's name. Same trade as the ≤900px step. */
+.ec-days.is-month.is-cal-compact { --cal-cell-pad: 5px; --cal-cell-radius: 9px; }
+.ec-days.is-month.is-cal-compact .ec-day { gap: 4px; }
+.ec-days.is-month.is-cal-compact .ec-day-num { min-width: 18px; height: 18px; font-size: 11px; }
+.ec-days.is-month.is-cal-compact .ec-events { gap: 3px; }
+.ec-days.is-month.is-cal-compact .ec-pill { font-size: 10px; padding: 1px 5px; border-radius: 5px; }
+.ec-days.is-month.is-cal-compact .ec-pill-dot { display: none; }
+.ec-days.is-month.is-cal-compact .ec-more { font-size: 9px; padding: 0 6px; line-height: 1.7; }
+
+/* ---------- Dense cells — the last step before a scrollbar ----------
+   Each record becomes a full-width stripe: countable and colour-coded, with no
+   truncated word to misread, and tapping the day opens the full list — which is
+   where the reading was always going to happen. This is not a new look; it is
+   exactly what the ≤560px rule below already does, applied by the height a row
+   can have rather than only by the width it has. A cell that has run out of
+   height gets the same honest answer as one that has run out of width. */
+.ec-days.is-month.is-cal-dense { --cal-cell-pad: 4px; --cal-cell-radius: 8px; }
+.ec-days.is-month.is-cal-dense .ec-day { gap: 3px; }
+.ec-days.is-month.is-cal-dense .ec-day-num { min-width: 16px; height: 16px; font-size: 10.5px; }
+.ec-days.is-month.is-cal-dense .ec-events { gap: 3px; }
+.ec-days.is-month.is-cal-dense .ec-pill { height: 6px; padding: 0; border-radius: 3px; border-width: 0; }
+.ec-days.is-month.is-cal-dense .ec-pill.kind-leave-approved  { background: var(--cal-leave); }
+.ec-days.is-month.is-cal-dense .ec-pill.kind-leave-pending   { background: var(--cal-pending); }
+.ec-days.is-month.is-cal-dense .ec-pill.kind-travel-approved,
+.ec-days.is-month.is-cal-dense .ec-pill.kind-travel-pending  { background: var(--cal-travel); }
+.ec-days.is-month.is-cal-dense .ec-pill-dot,
+.ec-days.is-month.is-cal-dense .ec-pill-text { display: none; }
+/* The chip moves into the date row's own empty half rather than costing the
+   cell a line of its own. At this size that line is a third of the cell, and
+   the cell is what has run out — the same move `.lc-day-count` makes at ≤720px
+   for the same reason. Out of flow, so the fit pass costs it nothing: `measure`
+   reads its `position` rather than assuming. */
+.ec-days.is-month.is-cal-dense .ec-more {
+    position: absolute; top: 4px; right: 4px;
+    font-size: 8.5px; padding: 0 5px; line-height: 1.6;
+    border-radius: 999px;
+}
+.ec-days.is-month.is-cal-dense .ec-more-word { display: none; }
+
+/* 6-week months split the height into six rows instead of five. Trim the
+   chrome around the grid, never the grid's own floor. */
 .lc-embed-wrap .ec-weeks-6 { gap: 11px; }
-.lc-embed-wrap .ec-weeks-6 .ec-stat { padding: 12px 15px; }
+.lc-embed-wrap .ec-weeks-6 .ec-stat { padding: 12px 14px; }
 .lc-embed-wrap .ec-weeks-6 .ec-card { padding: 13px; }
-.lc-embed-wrap .ec-weeks-6 .ec-grid { gap: 6px; }
-.lc-embed-wrap .ec-weeks-6 .ec-weekdays { margin-bottom: 7px; padding-bottom: 7px; }
-.lc-embed-wrap .ec-weeks-6 .ec-day { padding: 5px 7px 6px; gap: 3px; }
-.lc-embed-wrap .ec-weeks-6 .ec-pill { font-size: 10px; padding: 2px 7px; }
+.lc-embed-wrap .ec-weeks-6 .ec-grid { --cal-gap: 6px; }
+.lc-embed-wrap .ec-weeks-6 .ec-weekdays { margin-bottom: 8px; padding-bottom: 8px; }
+/* Parity with the admin embed, which already trimmed these: six rows pay for a
+   cell's padding six times over. */
+.lc-embed-wrap .ec-weeks-6 .ec-day { --cal-cell-pad: 6px; --cal-cell-radius: 10px; }
+/* In the modal the chip is competing with the record it stands for, and at its
+   page size it cost more height than the pill it replaced — so truncating a
+   cell could make that cell taller. Compact here only. */
+.lc-embed-wrap .ec-days.is-month .ec-more { font-size: 9.5px; padding: 0 7px; line-height: 1.7; }
+
+
+/* In the modal the day-view card fills the panel, so an empty day put its
+   "nothing booked" notice at the very top of a tall blank sheet. Centred, the
+   card reads as an answer rather than as content that failed to load. */
+.lc-embed-wrap .ec-dayview { display: flex; flex-direction: column; }
+.lc-embed-wrap .ec-dayview-empty { margin: auto 0; }
 
 /* ---------- Toolbar ---------- */
-.ec-toolbar { flex-wrap: wrap; row-gap: 10px; }
-.ec-nav { align-items: center; gap: 10px !important; flex: 0 1 auto !important; }
+.ec-toolbar { flex-wrap: wrap; row-gap: 10px; column-gap: 14px; align-content: flex-start; }
+.ec-nav { align-items: center; gap: 8px !important; flex: 0 1 auto !important; }
 .ec-toolbar-label {
-    font-size: 10.5px; font-weight: 600; color: var(--theme-neutral-600);
-    text-transform: uppercase; letter-spacing: 0.5px; padding-right: 2px; white-space: nowrap;
+    font-size: 10.5px; font-weight: 700; color: var(--cal-ink-faint);
+    text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
 }
-.ec-nav-btn { width: 38px; height: 38px; padding: 0 !important; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
-.ec-today-btn { height: 38px; display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; padding: 0 16px !important; }
+.ec-nav-btn {
+    width: 36px; height: 36px; padding: 0 !important;
+    display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+}
+.ec-today-btn {
+    height: 36px; display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12.5px; padding: 0 15px !important; flex: 0 0 auto;
+}
 .ec-month-input {
-    font-family: inherit; font-size: 15.5px; font-weight: 800; color: var(--gp-pri);
+    font-family: inherit; font-size: 15px; font-weight: 800; color: var(--gp-pri);
     text-align: center; border: 1px solid transparent; border-radius: 10px;
-    background: transparent; padding: 6px 10px; cursor: pointer;
+    background: transparent; padding: 6px 8px; cursor: pointer; min-width: 0;
     transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 .ec-month-input:hover { background: rgba(var(--theme-primary-rgb), 0.05); border-color: rgba(var(--theme-primary-rgb), 0.12); }
-.ec-month-input:focus { outline: none; background: #fff; border-color: var(--gp-pri); box-shadow: 0 0 0 4px rgba(var(--theme-primary-rgb), 0.08); }
-.ec-month-input::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.55; }
+.ec-month-input:focus {
+    outline: none; background: #fff; border-color: var(--gp-pri);
+    box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), 0.12);
+}
+.ec-month-input::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.55; transition: opacity 0.16s ease; }
 .ec-month-input:hover::-webkit-calendar-picker-indicator { opacity: 0.9; }
-
-/* ---------- Legend ---------- */
-.ec-legend { flex-wrap: wrap; gap: 14px !important; }
-.ec-legend-item { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #64748b; }
-.ec-legend-dot { width: 12px; height: 12px; border-radius: 50%; }
-.ec-legend-dot.is-leave-approved { background: #16a34a; }
-.ec-legend-dot.is-leave-pending  { background: #f59e0b; }
-.ec-legend-dot.is-travel         { background: #3b82f6; }
-
-/* ---------- Summary stat strip (glassy KPI cards) ---------- */
-.ec-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: -14px; }
-.ec-stat {
-    display: flex; align-items: center; gap: 12px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.55));
-    backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 16px; padding: 16px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(var(--theme-shadow-rgb), 0.04);
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
-}
-.ec-stat:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.9); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 28px rgba(var(--theme-primary-rgb), 0.1); }
-.ec-stat-ico { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(255, 255, 255, 0.6); }
-.ec-stat-ico.is-days    { background: var(--theme-neutral-200); color: var(--gp-pri); }
-.ec-stat-ico.is-leave   { background: #e9f9ef; color: #2fa860; }
-.ec-stat-ico.is-travel  { background: #eaf1ff; color: #4F7CFF; }
-.ec-stat-ico.is-pending { background: #fbf6e3; color: #eba417; }
-.ec-stat-body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.ec-stat-num { margin: 0; font-size: 20px; font-weight: 700; color: var(--gp-ink); line-height: 1.1; letter-spacing: -0.4px; }
-.ec-stat-lbl { margin: 0; font-size: 11px; font-weight: 500; color: #697086; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* ---------- Calendar card ---------- */
-.ec-card {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.6));
-    backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 16px; padding: 16px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(var(--theme-shadow-rgb), 0.04);
-}
-.ec-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-.ec-weekdays { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eef0f5; }
-.ec-weekday { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: var(--theme-neutral-600); text-transform: uppercase; padding: 2px 0; }
-.ec-weekday.is-weekend { color: #b4b9c6; }
-
-/* ---------- Day cell ---------- */
-.ec-day {
-    min-height: 96px;
-    border: 1px solid #eef0f5; border-radius: 12px; padding: 8px 9px 9px;
-    background: #fff; display: flex; flex-direction: column; gap: 6px; overflow: hidden;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-.ec-day:hover { border-color: #d7d9ec; box-shadow: 0 4px 14px rgba(var(--theme-shadow-rgb), 0.06); }
-.ec-day.is-muted { background: #fafbfd; }
-.ec-day.is-muted .ec-day-num { color: #c3c0d6; }
-.ec-day.is-weekend { background: #e6e8f1; }
-.ec-day.is-muted.is-weekend { background: #dfe1ee; }
-.ec-day.is-today { border-color: var(--gp-pri); box-shadow: inset 0 0 0 1.5px var(--gp-pri); background: #fbfaff; }
-.ec-day-head { display: flex; align-items: center; justify-content: space-between; }
-.ec-day-num { font-size: 12.5px; font-weight: 700; color: #334155; }
-.ec-day.is-today .ec-day-num {
-    background: var(--gp-pri); color: #fff; width: 23px; height: 23px; border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center; font-size: 11.5px;
-}
-/* Subtle left accent tint by the day's primary item */
-.ec-day.kind-leave-approved { border-left: 3px solid #16a34a; }
-.ec-day.kind-leave-pending  { border-left: 3px solid #f59e0b; }
-.ec-day.kind-travel-approved,
-.ec-day.kind-travel-pending { border-left: 3px solid #3b82f6; }
-
-/* ---------- Event pills ---------- */
-.ec-events { display: flex; flex-direction: column; gap: 4px; margin-top: auto; }
-.ec-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    width: 100%; text-align: left;
-    font-family: inherit; font-size: 11px; font-weight: 600;
-    border: 1px solid transparent; border-radius: 7px;
-    padding: 3px 8px; cursor: pointer;
-    transition: filter 0.14s ease, transform 0.14s ease;
-}
-.ec-pill:hover { transform: translateY(-1px); filter: brightness(0.97); }
-.ec-pill-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.ec-pill-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.ec-pill.kind-leave-approved { background: #dcfce7; color: #166534; }
-.ec-pill.kind-leave-approved .ec-pill-dot { background: #16a34a; }
-.ec-pill.kind-leave-pending  { background: #fef3c7; color: #92400e; }
-.ec-pill.kind-leave-pending .ec-pill-dot { background: #f59e0b; }
-.ec-pill.kind-travel-approved { background: #dbeafe; color: #1e40af; }
-.ec-pill.kind-travel-approved .ec-pill-dot { background: #3b82f6; }
-.ec-pill.kind-travel-pending  { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; border-style: dashed; }
-.ec-pill.kind-travel-pending .ec-pill-dot { background: #3b82f6; }
-
-/* ---------- Hover tooltip ---------- */
-.ec-tooltip {
-    position: fixed; z-index: 4000; max-width: 240px;
-    background: var(--gp-pri); color: #fff; border-radius: 11px; padding: 11px 13px;
-    box-shadow: 0 10px 28px rgba(var(--theme-primary-rgb), 0.34); pointer-events: none;
-}
-.ec-tip-name { font-size: 12.5px; font-weight: 700; margin: 0 0 5px; }
-.ec-tip-line { font-size: 11px; margin: 0 0 3px; color: #d8d5f0; display: flex; align-items: center; gap: 5px; }
-.ec-tip-dates { color: #b9b5e0; }
-.ec-tip-tag { font-size: 9.5px; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border-radius: 5px; color: #fff; }
-.ec-tip-tag.kind-leave-approved { background: #16a34a; }
-.ec-tip-tag.kind-leave-pending  { background: #f59e0b; }
-.ec-tip-tag.kind-travel-approved,
-.ec-tip-tag.kind-travel-pending { background: #3b82f6; }
-.ec-tip-status { display: inline-block; margin-top: 6px; font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
-.ec-tip-status.is-approved { background: #dcfce7; color: #15803d; }
-.ec-tip-status.is-pending  { background: #fef3c7; color: #92400e; }
-
-/* ---------- Day popover ---------- */
-.ec-day-modal { position: fixed; inset: 0; z-index: 3500; background: rgba(var(--theme-primary-rgb), 0.3); display: flex; align-items: center; justify-content: center; padding: 20px; }
-.ec-day-modal-panel { background: #fff; border-radius: 16px; width: 100%; max-width: 420px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(var(--theme-primary-rgb), 0.3); overflow: hidden; }
-.ec-day-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #eef0f5; }
-.ec-day-modal-head h3 { font-size: 14.5px; font-weight: 800; color: var(--gp-pri); margin: 0; }
-.ec-day-modal-close { background: none; border: none; cursor: pointer; font-size: 15px; color: var(--theme-neutral-600); padding: 4px; }
-.ec-day-modal-close:hover { color: var(--gp-pri); }
-.ec-day-modal-list { padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-.ec-day-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; background: var(--theme-neutral-50); }
-.ec-day-row-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.ec-day-row.kind-leave-approved .ec-day-row-dot { background: #16a34a; }
-.ec-day-row.kind-leave-pending .ec-day-row-dot { background: #f59e0b; }
-.ec-day-row.kind-travel-approved .ec-day-row-dot,
-.ec-day-row.kind-travel-pending .ec-day-row-dot { background: #3b82f6; }
-.ec-day-row-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.ec-day-row-name { font-size: 13px; font-weight: 700; color: var(--theme-neutral-900); }
-.ec-day-row-sub { font-size: 11px; color: var(--theme-neutral-700); }
-.ec-day-row-status { flex-shrink: 0; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
-.ec-day-row-status.is-approved { background: #dcfce7; color: #15803d; }
-.ec-day-row-status.is-pending  { background: #fef3c7; color: #92400e; }
-
-@media (max-width: 720px) {
-    .ec-day { min-height: 76px; }
-    .ec-weekday { font-size: 9.5px; }
-    .ec-grid { gap: 5px; }
-}
-
-/* ---------- Month / Week / Day ----------
-   The switcher, and the two views that are not the month grid.
-
-   Week and day reuse the month grid's markup, so the month rules reach them
-   and have to be undone deliberately — `.ec-events { margin-top: auto }` pins
-   a week column's items to the floor of a 340px cell, and the pill's
-   `nowrap` + ellipsis truncates a leave type that now has room to be read.
-   Every override below is qualified with `.ec-days.is-week` (0,3,0) so it
-   outranks the month rule it is correcting. */
-.ec-viewswitch {
-    display: inline-flex; align-items: center; flex: 0 0 auto;
-    background: rgba(var(--theme-primary-rgb), 0.05);
-    border: 1px solid rgba(var(--theme-primary-rgb), 0.1);
-    border-radius: 999px; padding: 3px; gap: 2px; margin-left: 4px;
-}
-.ec-viewswitch-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 58px; padding: 6px 14px; border-radius: 999px;
-    font-size: 12px; font-weight: 700; letter-spacing: 0.01em;
-    color: var(--theme-neutral-600); text-decoration: none;
-    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-}
-.ec-viewswitch-btn:hover { color: var(--gp-pri); background: rgba(var(--theme-primary-rgb), 0.07); }
-.ec-viewswitch-btn.is-active {
-    background: #fff; color: var(--gp-pri);
-    box-shadow: 0 1px 3px rgba(var(--theme-shadow-rgb), 0.12);
-}
-
-/* Week header carries the date under the weekday name. */
-.ec-weekday-num {
-    display: inline-block; margin-left: 4px; font-size: 12.5px;
-    font-weight: 800; color: #334155; letter-spacing: 0;
-}
-.ec-weekday.is-today { color: var(--gp-pri); }
-.ec-weekday.is-today .ec-weekday-num { color: var(--gp-pri); }
-
-/* Week: seven tall columns. */
-.ec-days.is-week .ec-day { min-height: 320px; }
-.ec-days.is-week .ec-events { margin-top: 0; gap: 5px; }
-.ec-days.is-week .ec-pill { padding: 5px 9px; font-size: 11.5px; align-items: flex-start; }
-.ec-days.is-week .ec-pill-dot { margin-top: 4px; }
-.ec-days.is-week .ec-pill-text {
-    white-space: normal; overflow: hidden; text-overflow: clip;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-    line-height: 1.35; text-align: left;
-}
-
-/* Day: a list of the day's records in full, not a one-column grid. */
-.ec-dayview { padding: 14px; }
-.ec-dayview-list { display: flex; flex-direction: column; gap: 8px; }
-.ec-dayview-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 13px 15px; border-radius: 12px;
-    background: var(--theme-neutral-50); border: 1px solid #eef0f5;
-    border-left: 3px solid var(--theme-neutral-300);
-}
-.ec-dayview-row.kind-leave-approved { border-left-color: #16a34a; }
-.ec-dayview-row.kind-leave-pending  { border-left-color: #f59e0b; }
-.ec-dayview-row.kind-travel-approved,
-.ec-dayview-row.kind-travel-pending { border-left-color: #3b82f6; }
-.ec-dayview-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--theme-neutral-300); }
-.ec-dayview-row.kind-leave-approved .ec-dayview-dot { background: #16a34a; }
-.ec-dayview-row.kind-leave-pending .ec-dayview-dot  { background: #f59e0b; }
-.ec-dayview-row.kind-travel-approved .ec-dayview-dot,
-.ec-dayview-row.kind-travel-pending .ec-dayview-dot { background: #3b82f6; }
-.ec-dayview-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
-.ec-dayview-name { font-size: 13.5px; font-weight: 700; color: #334155; }
-.ec-dayview-meta { font-size: 11.5px; font-weight: 600; color: var(--theme-neutral-600); }
-.ec-dayview-range { margin-left: 6px; color: #94a3b8; font-weight: 500; }
-.ec-dayview-status { flex-shrink: 0; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.04em; }
-.ec-dayview-status.is-approved { background: #dcfce7; color: #15803d; }
-.ec-dayview-status.is-pending  { background: #fef3c7; color: #92400e; }
-
-.ec-dayview-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 46px 20px; color: #94a3b8; }
-.ec-dayview-empty svg { display: block; margin: 0 auto 12px; opacity: 0.5; }
-.ec-dayview-empty-title { margin: 0 0 4px; font-size: 14px; font-weight: 700; color: var(--theme-neutral-600); }
-.ec-dayview-empty-sub { margin: 0; font-size: 12px; }
-
-@media (max-width: 720px) {
-    .ec-days.is-week .ec-day { min-height: 190px; }
-    .ec-viewswitch-btn { min-width: 46px; padding: 6px 10px; font-size: 11px; }
-}
 
 /* Week/day period name, beside the picker. */
 .ec-period-label {
     flex: 0 0 auto; font-size: 13px; font-weight: 700;
     color: var(--gp-pri); white-space: nowrap; padding: 0 2px;
+}
+
+/* ---------- View switcher ---------- */
+.ec-viewswitch {
+    display: inline-flex; align-items: center; flex: 0 0 auto;
+    background: rgba(var(--theme-primary-rgb), 0.05);
+    border: 1px solid rgba(var(--theme-primary-rgb), 0.1);
+    border-radius: 999px; padding: 3px; gap: 2px; margin-left: 2px;
+}
+.ec-viewswitch-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 56px; padding: 6px 13px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.01em;
+    color: var(--cal-ink-soft); text-decoration: none; white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.ec-viewswitch-btn:hover { color: var(--gp-pri); background: rgba(var(--theme-primary-rgb), 0.07); }
+.ec-viewswitch-btn.is-active {
+    background: var(--gp-pri); color: #fff;
+    box-shadow: 0 1px 3px rgba(var(--theme-shadow-rgb), 0.18);
+}
+.ec-viewswitch-btn:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
+
+/* ---------- Legend ----------
+   Colour AND shape, drawn exactly as the grid draws them, so the key can be
+   matched to a cell without reading the words. */
+.ec-legend { flex-wrap: wrap; gap: 6px !important; }
+.ec-legend-item {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 600; color: var(--cal-ink-soft);
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--cal-cell-line);
+    border-radius: 999px; padding: 4px 10px 4px 8px; white-space: nowrap;
+}
+.ec-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; }
+.ec-legend-dot.is-leave-approved { background: var(--cal-leave); }
+.ec-legend-dot.is-leave-pending  { background: transparent; border: 2px dashed var(--cal-pending); }
+.ec-legend-dot.is-travel         { background: var(--cal-travel); border-radius: 3px; }
+
+/* ---------- Summary stat strip ---------- */
+.ec-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.ec-stat {
+    display: flex; align-items: center; gap: 12px; min-width: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.55));
+    backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 16px; padding: 14px 16px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(var(--theme-shadow-rgb), 0.04);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.ec-stat:hover {
+    transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.9);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 28px rgba(var(--theme-primary-rgb), 0.1);
+}
+.ec-stat-ico {
+    width: 36px; height: 36px; border-radius: 11px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+.ec-stat-ico.is-days    { background: var(--theme-neutral-200); color: var(--gp-pri); }
+.ec-stat-ico.is-leave   { background: var(--cal-leave-soft);   color: var(--cal-leave-ink); }
+.ec-stat-ico.is-travel  { background: var(--cal-travel-soft);  color: var(--cal-travel-ink); }
+.ec-stat-ico.is-pending { background: var(--cal-pending-soft); color: var(--cal-pending-ink); }
+.ec-stat-body { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.ec-stat-num { margin: 0; font-size: 20px; font-weight: 700; color: var(--gp-ink); line-height: 1.15; letter-spacing: -0.4px; }
+/* The label wraps rather than truncating: "Days off on this date" is the whole
+   meaning of the number above it, and "Days off on this…" is not. */
+.ec-stat-lbl { margin: 0; font-size: 11px; font-weight: 500; color: var(--cal-ink-soft); line-height: 1.3; }
+
+/* ---------- Calendar card ---------- */
+.ec-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.6));
+    backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 16px; padding: 14px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(var(--theme-shadow-rgb), 0.04);
+}
+.ec-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--cal-gap); }
+/* `--cal-row-min` is a FLOOR, not a height. `minmax(floor, auto)` is what
+   makes a week row as tall as the busiest date in it while a quiet week stays
+   compact. Declared on the grid, never on the cell: `grid-auto-rows` resolves
+   against the container, and a cell-level override silently moves only
+   `min-height`. */
+.ec-days {
+    --cal-row-min: 118px;
+    grid-auto-rows: minmax(var(--cal-row-min), auto);
+}
+.ec-weekdays { margin-bottom: 9px; padding-bottom: 9px; border-bottom: 1px solid var(--cal-cell-line); }
+.ec-weekday {
+    text-align: center; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--cal-ink-faint); text-transform: uppercase; padding: 2px 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ec-weekday.is-weekend { color: var(--theme-neutral-400); }
+.ec-weekday-num { display: inline-block; margin-left: 4px; font-size: 12.5px; font-weight: 800; color: var(--cal-ink); letter-spacing: 0; }
+.ec-weekday.is-today { color: var(--gp-pri); }
+.ec-weekday.is-today .ec-weekday-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
+    background: var(--gp-pri); color: #fff; margin-left: 5px;
+}
+
+/* ---------- Day cell ---------- */
+.ec-day {
+    position: relative;
+    min-height: var(--cal-row-min);
+    border: 1px solid var(--cal-cell-line); border-radius: var(--cal-cell-radius);
+    padding: var(--cal-cell-pad);
+    background: var(--cal-cell-bg);
+    display: flex; flex-direction: column; gap: 6px;
+    /* No `overflow: hidden`. The cell grows to its content instead of cropping
+       it: the pills stack, the row grows with the busiest date in it, and
+       inside the modal shared/calendarFit.js decides how many pills a cell can
+       afford before anything reaches an edge. Clipping was the old answer, and
+       a pill sliced in half by a cell border is not a shorter answer — it is a
+       wrong one. */
+    min-width: 0;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.ec-day:hover { border-color: var(--cal-cell-line-hi); box-shadow: 0 4px 14px rgba(var(--theme-shadow-rgb), 0.06); }
+.ec-day:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
+.ec-day.is-muted { background: var(--cal-cell-muted); }
+.ec-day.is-muted .ec-day-num { color: var(--theme-neutral-400); }
+/* Weekend tint wins over the adjacent-month tint so every weekend column reads
+   the same; the today highlight below still wins over both. */
+.ec-day.is-weekend { background: var(--cal-cell-weekend); }
+.ec-day.is-muted.is-weekend { background: var(--theme-primary-100); }
+.ec-day.is-today {
+    border-color: var(--gp-pri); background: #fff;
+    box-shadow: inset 0 0 0 1px var(--gp-pri), 0 2px 10px rgba(var(--theme-primary-rgb), 0.1);
+}
+
+.ec-day-head { display: flex; align-items: center; justify-content: space-between; gap: 4px; flex-shrink: 0; }
+.ec-day-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 22px; height: 22px; border-radius: 999px;
+    font-size: 12.5px; font-weight: 700; color: var(--cal-ink); font-variant-numeric: tabular-nums;
+}
+.ec-day.is-today .ec-day-num { background: var(--gp-pri); color: #fff; }
+
+/* A hairline down the leading edge, tinted by the day's first record. It is a
+   category stripe, not a border: the cell's own outline never changes, so the
+   today ring and the hover state stay readable underneath it. */
+.ec-day::before {
+    content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 3px;
+    border-radius: var(--cal-cell-radius) 0 0 var(--cal-cell-radius);
+    background: transparent;
+}
+.ec-day.kind-leave-approved::before  { background: var(--cal-leave); }
+.ec-day.kind-leave-pending::before   { background: var(--cal-pending); }
+.ec-day.kind-travel-approved::before,
+.ec-day.kind-travel-pending::before  { background: var(--cal-travel); }
+
+/* ---------- Event pills ---------- */
+.ec-events {
+    display: flex; flex-direction: column; gap: var(--cal-event-gap);
+    min-width: 0; min-height: 0;
+}
+.ec-pill {
+    display: flex; align-items: flex-start; gap: 6px;
+    width: 100%; min-width: 0; text-align: left;
+    font-family: inherit; font-size: 11px; font-weight: 600; line-height: 1.35;
+    border: 1px solid transparent; border-radius: 6px;
+    padding: 3px 7px; cursor: pointer;
+    transition: filter 0.14s ease, box-shadow 0.14s ease;
+}
+.ec-pill:hover { filter: brightness(0.97); box-shadow: 0 2px 6px rgba(var(--theme-shadow-rgb), 0.08); }
+.ec-pill:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 1px; }
+.ec-pill-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+/* The label wraps instead of ellipsing. "Special Privilege Leave" truncated to
+   "Special Privi…" in a month cell is the same failure as a hidden event — the
+   reader still has to open the day to find out what it says. The cell is free
+   to be two lines taller, so it is. */
+.ec-pill-text { min-width: 0; overflow-wrap: anywhere; }
+
+/* Travel carries a square dot, leave a round one, and anything pending dashes
+   its outline — the second and third cues, so the three are still told apart
+   on a monochrome screen and with colour-vision deficiency. */
+.ec-pill.kind-leave-approved  { background: var(--cal-leave-soft);   color: var(--cal-leave-ink);   border-color: var(--cal-leave-line); }
+.ec-pill.kind-leave-approved .ec-pill-dot  { background: var(--cal-leave); }
+.ec-pill.kind-leave-pending   { background: var(--cal-pending-soft); color: var(--cal-pending-ink); border-color: var(--cal-pending-line); border-style: dashed; }
+.ec-pill.kind-leave-pending .ec-pill-dot   { background: var(--cal-pending); }
+.ec-pill.kind-travel-approved { background: var(--cal-travel-soft);  color: var(--cal-travel-ink);  border-color: var(--cal-travel-line); }
+.ec-pill.kind-travel-approved .ec-pill-dot { background: var(--cal-travel); border-radius: 2px; }
+.ec-pill.kind-travel-pending  { background: var(--cal-travel-soft);  color: var(--cal-travel-ink);  border-color: var(--cal-travel-line); border-style: dashed; }
+.ec-pill.kind-travel-pending .ec-pill-dot  { background: var(--cal-travel); border-radius: 2px; }
+
+/* ---------- "+N more" ----------
+   There is no `nth-child` cap any more. It was a fixed two whatever the window
+   was: it hid a third record on a screen with room for six, and still
+   overflowed a short one. On the full page every pill shows and this chip
+   never appears; inside the modal shared/calendarFit.js measures the grid and
+   marks only the pills that genuinely do not fit `hidden`. They stay in the
+   DOM either way — the day popover is built from them, so "+3 more" opens a
+   list that really does hold three more. */
+.ec-pill[hidden], .ec-more[hidden] { display: none !important; }
+.ec-more {
+    align-self: flex-start; flex-shrink: 0;
+    font-family: inherit; font-size: 10.5px; font-weight: 700; letter-spacing: 0.01em;
+    color: var(--cal-ink-soft); background: var(--theme-neutral-100);
+    border: 1px solid var(--cal-cell-line); border-radius: 999px;
+    padding: 2px 9px; cursor: pointer; white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.ec-more:hover { background: var(--gp-pri); border-color: var(--gp-pri); color: #fff; }
+.ec-more:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
+
+/* ---------- Week view ----------
+   Seven tall columns instead of five or six short rows, so a record can be
+   read in full. Every month rule that assumed a short cell is undone here. */
+/* A floor, not a height: a week with one record should not print 320px of
+   empty card under it, and a week with twelve should be free to be taller. */
+.ec-days.is-week .ec-day { min-height: 220px; justify-content: flex-start; }
+.ec-days.is-week .ec-events { gap: 5px; }
+.ec-days.is-week .ec-pill { padding: 5px 8px; font-size: 11.5px; align-items: flex-start; }
+.ec-days.is-week .ec-pill-dot { margin-top: 4px; }
+.ec-days.is-week .ec-pill-text { line-height: 1.35; text-align: left; }
+
+/* ---------- Day view ----------
+   A list, not a one-cell grid: leave and travel are whole-day records, so an
+   hour axis would imply a precision these dates do not carry. */
+.ec-dayview { padding: 14px; }
+.ec-dayview-list { display: flex; flex-direction: column; gap: 8px; }
+.ec-dayview-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 15px; border-radius: 12px;
+    background: #fff; border: 1px solid var(--cal-cell-line);
+    border-left: 4px solid var(--theme-neutral-300);
+}
+.ec-dayview-row.kind-leave-approved  { border-left-color: var(--cal-leave); }
+.ec-dayview-row.kind-leave-pending   { border-left-color: var(--cal-pending); border-left-style: dashed; }
+.ec-dayview-row.kind-travel-approved { border-left-color: var(--cal-travel); }
+.ec-dayview-row.kind-travel-pending  { border-left-color: var(--cal-travel); border-left-style: dashed; }
+.ec-dayview-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--theme-neutral-300); }
+.ec-dayview-row.kind-leave-approved .ec-dayview-dot { background: var(--cal-leave); }
+.ec-dayview-row.kind-leave-pending .ec-dayview-dot  { background: var(--cal-pending); }
+.ec-dayview-row.kind-travel-approved .ec-dayview-dot,
+.ec-dayview-row.kind-travel-pending .ec-dayview-dot { background: var(--cal-travel); border-radius: 2px; }
+.ec-dayview-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.ec-dayview-name { font-size: 13.5px; font-weight: 700; color: var(--cal-ink); overflow-wrap: anywhere; }
+.ec-dayview-meta { font-size: 11.5px; font-weight: 600; color: var(--cal-ink-soft); }
+.ec-dayview-range { margin-left: 6px; color: var(--cal-ink-faint); font-weight: 500; }
+.ec-dayview-status {
+    flex-shrink: 0; font-size: 10px; font-weight: 700; padding: 4px 10px;
+    border-radius: 999px; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.ec-dayview-status.is-approved { background: var(--cal-leave-soft);   color: var(--cal-leave-ink); }
+.ec-dayview-status.is-pending  { background: var(--cal-pending-soft); color: var(--cal-pending-ink); }
+
+.ec-dayview-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 46px 20px; color: var(--cal-ink-faint); }
+.ec-dayview-empty svg { display: block; margin: 0 auto 12px; opacity: 0.5; }
+.ec-dayview-empty-title { margin: 0 0 4px; font-size: 14px; font-weight: 700; color: var(--cal-ink-soft); }
+.ec-dayview-empty-sub { margin: 0; font-size: 12px; }
+
+/* ---------- Hover tooltip ---------- */
+.ec-tooltip {
+    position: fixed; z-index: 4000; max-width: 250px;
+    background: var(--gp-pri); color: #fff; border-radius: 11px; padding: 11px 13px;
+    box-shadow: 0 10px 28px rgba(var(--theme-primary-rgb), 0.34); pointer-events: none;
+}
+.ec-tip-name { font-size: 12.5px; font-weight: 700; margin: 0 0 5px; overflow-wrap: anywhere; }
+.ec-tip-line { font-size: 11px; margin: 0 0 3px; color: rgba(255, 255, 255, 0.82); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.ec-tip-dates { color: rgba(255, 255, 255, 0.68); }
+.ec-tip-tag { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 6px; border-radius: 5px; color: #fff; }
+.ec-tip-tag.kind-leave-approved { background: var(--cal-leave); }
+.ec-tip-tag.kind-leave-pending  { background: var(--cal-pending); }
+.ec-tip-tag.kind-travel-approved,
+.ec-tip-tag.kind-travel-pending { background: var(--cal-travel); }
+.ec-tip-status { display: inline-block; margin-top: 6px; font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+.ec-tip-status.is-approved { background: var(--cal-leave-soft);   color: var(--cal-leave-ink); }
+.ec-tip-status.is-pending  { background: var(--cal-pending-soft); color: var(--cal-pending-ink); }
+
+/* ---------- Day popover — where "+N more" and a day click both land ---------- */
+.ec-day-modal { position: fixed; inset: 0; z-index: 3500; background: rgba(var(--theme-primary-rgb), 0.3); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.ec-day-modal-panel {
+    background: #fff; border-radius: 16px; width: 100%; max-width: 420px; max-height: 80vh;
+    display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(var(--theme-primary-rgb), 0.3); overflow: hidden;
+}
+.ec-day-modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--cal-cell-line); }
+.ec-day-modal-head h3 { font-size: 14px; font-weight: 800; color: var(--gp-pri); margin: 0; }
+.ec-day-modal-close {
+    background: none; border: none; cursor: pointer; font-size: 15px; color: var(--cal-ink-faint);
+    width: 30px; height: 30px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.ec-day-modal-close:hover { background: var(--theme-neutral-100); color: var(--gp-pri); }
+.ec-day-modal-close:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
+.ec-day-modal-list { padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.ec-day-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; background: var(--theme-neutral-50); border: 1px solid var(--cal-cell-line); }
+.ec-day-row-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.ec-day-row.kind-leave-approved .ec-day-row-dot { background: var(--cal-leave); }
+.ec-day-row.kind-leave-pending .ec-day-row-dot { background: var(--cal-pending); }
+.ec-day-row.kind-travel-approved .ec-day-row-dot,
+.ec-day-row.kind-travel-pending .ec-day-row-dot { background: var(--cal-travel); border-radius: 2px; }
+.ec-day-row-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ec-day-row-name { font-size: 13px; font-weight: 700; color: var(--cal-ink); overflow-wrap: anywhere; }
+.ec-day-row-sub { font-size: 11px; color: var(--cal-ink-soft); }
+.ec-day-row-status { flex-shrink: 0; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+.ec-day-row-status.is-approved { background: var(--cal-leave-soft);   color: var(--cal-leave-ink); }
+.ec-day-row-status.is-pending  { background: var(--cal-pending-soft); color: var(--cal-pending-ink); }
+
+/* ============================================================
+   Responsive
+   Four steps, each undoing what the one above it can no longer afford: the
+   stat strip folds first, then the toolbar, then the grid's own type, and
+   last the month cell becomes a stripe row — seven columns on a phone have
+   room for a date and a colour, and pretending otherwise is what produces
+   pills reading "Vacat…".
+   ============================================================ */
+@media (max-width: 1180px) {
+    .ec-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+    .ec-calendar { gap: 12px; }
+    .ec-toolbar { row-gap: 12px; }
+    .ec-nav { width: 100%; }
+    .ec-legend { width: 100%; }
+    .ec-days { --cal-row-min: 104px; }
+    /* A ~80px month cell fits about eight characters a line. The dot is the
+       first thing to go: the pill's own tint and its dashed outline already
+       say type and status, so the dot was spending 13px to repeat them, and
+       those 13px are two more letters of the leave's name. The label still
+       wraps rather than truncating — the cell takes the extra line. */
+    .ec-days.is-month .ec-pill { font-size: 10px; padding: 3px 6px; }
+    .ec-days.is-month .ec-pill-dot { display: none; }
+    /* One tall column per day rather than seven unreadable ones. */
+    .ec-days.is-week { grid-template-columns: 1fr; }
+    .ec-days.is-week .ec-day { min-height: 0; }
+}
+/* The glass system stacks `.filter-card-fields` into a column at this width,
+   which is right for a bar of full-width selects and wrong for this one: the
+   month navigator is four small controls and a segmented switch, and stacked
+   they become a 300px tower above a calendar that then has no room left. It
+   stays a wrapping row. */
+@media (max-width: 768px) {
+    .glass-shell .filter-card-fields.ec-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        width: 100%;
+        row-gap: 8px;
+    }
+    .glass-shell .filter-card-actions.ec-legend { width: 100%; justify-content: flex-start; }
+    .ec-month-input { flex: 1 1 auto; text-align: left; }
+}
+@media (max-width: 720px) {
+    .ec-card { padding: 11px; }
+    .ec-grid { --cal-gap: 5px; }
+    .ec-weekday { font-size: 9.5px; letter-spacing: 0.04em; }
+    .ec-days { --cal-row-min: 88px; }
+    .ec-day { --cal-cell-pad: 6px; --cal-cell-radius: 10px; }
+    .ec-day-num { min-width: 20px; height: 20px; font-size: 11.5px; }
+    .ec-viewswitch-btn { min-width: 46px; padding: 6px 10px; font-size: 11px; }
+    .ec-stat-num { font-size: 18px; }
+    .ec-dayview-row { flex-wrap: wrap; row-gap: 8px; }
+}
+@media (max-width: 560px) {
+    .ec-stats { gap: 8px; }
+    .ec-stat { padding: 11px 12px; gap: 10px; }
+    .ec-stat-ico { width: 30px; height: 30px; border-radius: 9px; }
+    .ec-stat-ico svg { width: 15px; height: 15px; }
+    .ec-legend-item { font-size: 10px; padding: 3px 8px 3px 7px; }
+
+    /* A month cell holds a date and a colour at this width and nothing else.
+       Each record becomes a full-width stripe — countable and colour-coded,
+       with no truncated word to misread — and tapping the day opens the full
+       list, which is where the reading was always going to happen. */
+    .ec-days { --cal-row-min: 62px; }
+    .ec-days.is-month .ec-events { gap: 3px; }
+    /* Every stripe shows: at 6px each a busy date costs the row a few pixels
+       and states its real shape, where the old rule capped it at three and
+       made a five-record day look like a three-record one. */
+    .ec-days.is-month .ec-pill { height: 6px; padding: 0; border-radius: 3px; border-width: 0; }
+    .ec-days.is-month .ec-pill.kind-leave-approved  { background: var(--cal-leave); }
+    .ec-days.is-month .ec-pill.kind-leave-pending   { background: var(--cal-pending); }
+    .ec-days.is-month .ec-pill.kind-travel-approved,
+    .ec-days.is-month .ec-pill.kind-travel-pending  { background: var(--cal-travel); }
+    .ec-days.is-month .ec-pill-dot,
+    .ec-days.is-month .ec-pill-text { display: none; }
+    /* "+3 more" does not fit a 45px cell and came out as "+3 mo". The count is
+       the part that carries meaning, so the word is what goes. */
+    .ec-days.is-month .ec-more { font-size: 9.5px; padding: 1px 5px; align-self: stretch; text-align: center; }
+    .ec-more-word { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ec-stat, .ec-pill, .ec-day, .ec-more { transition: none; }
+    .ec-stat:hover { transform: none; }
 }

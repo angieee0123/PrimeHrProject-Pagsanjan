@@ -1,59 +1,151 @@
+@import "../shared/leaveCalendarTokens.css";
+
 /* ============================================================
-   Admin Leave & Travel Calendar
-   View:  resources/views/admin/leaveCalendar/leaveCalendar.blade.php
-   Design language mirrors the Attendance page (glass-shell +
-   filter-card + btn-solid/btn-ghost, navy var(--gp-pri) accents).
-   Renders inside the floating-button modal via an iframe embed.
+   Leave & Travel Calendar — admin and mayor
+   View:  resources/views/partials/leaveCalendar/calendar.blade.php
+          (drawn by admin/leaveCalendar and mayor/leaveCalendar alike)
+
+   Design language mirrors the Attendance page (glass-shell + filter-card +
+   btn-solid/btn-ghost, navy var(--gp-pri) accents). Renders full-page and
+   inside the floating-button modal via an iframe embed.
+
+   The record colours and the grid metrics come from
+   shared/leaveCalendarTokens.css, which the employee's own calendar imports
+   too — the two surfaces answer different questions but they are one
+   calendar, and somebody holding both roles has to be able to read them the
+   same way:
+       green circle = approved leave · amber = pending · blue squircle = travel
+   Colour is never the only cue: type is also a shape (circle vs squircle) and
+   pending is also a dashed outline.
    ============================================================ */
 
-.lc-calendar { display: flex; flex-direction: column; gap: 16px; }
+.lc-calendar { display: flex; flex-direction: column; gap: 14px; }
 /* Inside the modal iframe the calendar sits on the modal panel's own glass +
    colour wash, so cancel .glass-shell's full-height opaque page background. */
 .lc-calendar.glass-shell { min-height: 0; padding: 0; }
 .lc-calendar.glass-shell::before { display: none; }
 
-/* ---------- Modal (embed) mode: fit the whole month, no scrolling ----------
-   Only inside the popup iframe (.lc-embed-wrap). The full-page view keeps its
-   natural fixed-height cells and normal document flow. Here the calendar fills
-   the modal and the week rows divide the leftover height so every week shows. */
+/* The control card is a row of this column, so its own card margin would add a
+   second gap on top of the column gap. One rhythm, defined in one place —
+   this is what the -14px pull-up on the stat strip used to be cancelling. */
+.lc-calendar .filter-card.lc-controls { margin-bottom: 0; }
+
+/* ---------- Modal (embed) mode ----------
+   Only inside the popup iframe (.lc-embed-wrap). The calendar fills the modal
+   and the week rows share the leftover height.
+
+   `minmax(row-min, auto)`, not `1fr`. `1fr` divides the height into equal rows
+   whatever is in them, so the row holding a busy Tuesday got exactly the same
+   height as the empty week above it and its markers went under the cell's
+   edge. With an `auto` max a row is at least the floor, at least as tall as
+   the busiest date in it, and whatever height is still going spare is shared
+   out on top of that — which is the "rows grow with their content" rule,
+   expressed in one track definition.
+
+   What keeps a busy month from outgrowing the modal is not a shorter row: it
+   is shared/calendarFit.js, which measures this grid and shows as many markers
+   per cell as every row can actually afford. So nothing here has to clip. */
 .lc-embed-wrap .lc-calendar { flex: 1; min-height: 0; }
-.lc-embed-wrap .lc-card {
-    flex: 1; min-height: 0;
-    display: flex; flex-direction: column;
-}
-.lc-embed-wrap .lc-days {
-    flex: 1; min-height: 0;
-    grid-auto-rows: 1fr;     /* every week row shares the height equally */
-}
+.lc-embed-wrap .lc-card { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.lc-embed-wrap .lc-days { flex: 1; min-height: 0; grid-auto-rows: minmax(var(--cal-row-min), auto); }
+/* Set by shared/calendarFit.js only when not even one record a date fits — a
+   six-week month in a very short window. Unpinned from the modal's height the
+   grid takes its content's, so the rows size themselves again and nothing is
+   cropped; the wrapper's scrollbar is what gives instead. Never the normal
+   path: if this class is on, the calendar has run out of window, not out of
+   layout. */
+.lc-embed-wrap .lc-days.is-cal-overflowing { flex: 0 0 auto; }
 .lc-embed-wrap .lc-day { min-height: 0; }
 
-/* 6-week months split the height into six short rows. Compact the cells and
-   avatars so the grid stays balanced and legible instead of cramped, and give
-   the calendar a little more room by tightening the strip above it. */
+/* The fit pass spends whatever height the chrome does not, and in a popup of
+   fixed height every pixel above the grid is a pixel the month cannot use. So
+   the chrome is trimmed here and only here: the stat strip is four figures
+   rather than four dashboard cards, and the rest is padding a full page can
+   afford and a 640px panel cannot. Together this is worth roughly a whole week
+   row on a small laptop, which is the difference between a six-week month
+   fitting and scrolling. */
+.lc-embed-wrap .lc-calendar { gap: 10px; }
+.lc-embed-wrap .lc-stat { padding: 8px 12px; gap: 9px; }
+.lc-embed-wrap .lc-stat-ico { width: 26px; height: 26px; border-radius: 8px; }
+.lc-embed-wrap .lc-stat-ico svg { width: 14px; height: 14px; }
+.lc-embed-wrap .lc-stat-num { font-size: 16px; }
+.lc-embed-wrap .lc-stat-lbl { font-size: 10px; }
+.lc-embed-wrap .lc-card { padding: 10px; }
+.lc-embed-wrap .lc-weekdays { margin-bottom: 6px; padding-bottom: 6px; }
+.lc-embed-wrap .lc-nav-btn,
+.lc-embed-wrap .lc-today-btn,
+.lc-embed-wrap .lc-filter-actions .btn-solid,
+.lc-embed-wrap .lc-filter-actions .btn-ghost { height: 32px; }
+.lc-embed-wrap .lc-legend-item { padding: 3px 8px 3px 7px; }
+
+/* ---------- Compact cells ----------
+   Turned on by shared/calendarFit.js, and only when the height a row can
+   actually have is less than a normal cell needs to show its date and one
+   marker — i.e. the alternative is a scrollbar, not a nicer calendar. It is
+   the last lever before conceding one: a six-week month on a 768px laptop
+   fits at these sizes and does not at the full ones. Never on by default, and
+   never on a full page with room to spare. */
+.lc-days.is-month.is-cal-compact { --cal-avatar: 20px; --cal-cell-pad: 5px; --cal-cell-radius: 9px; }
+.lc-days.is-month.is-cal-compact .lc-day { gap: 5px; }
+.lc-days.is-month.is-cal-compact .lc-day-num { min-width: 18px; height: 18px; font-size: 11px; }
+.lc-days.is-month.is-cal-compact .lc-day-count { font-size: 9px; padding: 2px 5px; }
+.lc-days.is-month.is-cal-compact .cal-marker-initials { font-size: 9px; }
+.lc-days.is-month.is-cal-compact .cal-more { height: 18px; font-size: 9.5px; padding: 0 6px; }
+
+/* ---------- Dense cells — the last step before a scrollbar ----------
+   The marker stops being a face and becomes the type mark the legend draws: a
+   green circle, an amber dashed circle, a blue square. This is not a new look;
+   it is exactly what the ≤768px rule below already does, applied by the height
+   a row can have rather than only by the width it has. The reasoning is the
+   same either way — a face is unreadable at this size, and a row of them does
+   not fit — so a cell that has run out of height gets the same honest answer
+   as one that has run out of width. The count badge still states the real
+   total and the date still opens the day view, which is where the names are. */
+.lc-days.is-month.is-cal-dense { --cal-avatar: 10px; --cal-cell-pad: 4px; --cal-cell-radius: 8px; }
+.lc-days.is-month.is-cal-dense .lc-day { gap: 4px; }
+.lc-days.is-month.is-cal-dense .lc-day-num { min-width: 16px; height: 16px; font-size: 10.5px; }
+.lc-days.is-month.is-cal-dense .lc-day-count { font-size: 8.5px; padding: 1px 4px; border-width: 0; }
+.lc-days.is-month.is-cal-dense .cal-markers { gap: 3px; row-gap: 3px; }
+.lc-days.is-month.is-cal-dense .cal-marker { width: 10px; height: 10px; border-width: 1.5px; }
+.lc-days.is-month.is-cal-dense .cal-marker:hover { transform: none; box-shadow: none; }
+/* The initials span carries the employee's own colour inline, so it has to go
+   entirely — left visible it would paint over the type colour that is now the
+   only thing the mark says. */
+.lc-days.is-month.is-cal-dense .cal-marker img,
+.lc-days.is-month.is-cal-dense .cal-marker .cal-marker-initials,
+.lc-days.is-month.is-cal-dense .cal-marker .cal-marker-name { display: none; }
+.lc-days.is-month.is-cal-dense .cal-marker.type-leave.status-approved { background: var(--cal-leave); }
+.lc-days.is-month.is-cal-dense .cal-marker.type-leave.status-pending  { background: var(--cal-pending); }
+.lc-days.is-month.is-cal-dense .cal-marker.type-travel                { background: var(--cal-travel); border-radius: 3px; }
+.lc-days.is-month.is-cal-dense .cal-more { height: 14px; font-size: 8.5px; padding: 0 5px; }
+
+/* 6-week months split the height into six rows instead of five. Everything
+   below trims the chrome around the grid; the grid's own floor stays. */
 .lc-embed-wrap .lc-weeks-6 { gap: 11px; }
-.lc-embed-wrap .lc-weeks-6 .lc-stat { padding: 12px 15px; }
+.lc-embed-wrap .lc-weeks-6 .lc-stat { padding: 12px 14px; }
 /* The filter bar is a second control row inside a fixed-height modal, so it
    pays for itself out of its own padding rather than the week rows'. */
-.lc-embed-wrap .lc-controls { padding: 7px 12px; }
-.lc-embed-wrap .lc-weeks-6 .lc-controls { padding: 7px 12px; }
+.lc-embed-wrap .lc-controls { padding: 8px 13px; }
 .lc-embed-wrap .lc-weeks-6 .lc-filter-actions .btn-solid,
 .lc-embed-wrap .lc-weeks-6 .lc-filter-actions .btn-ghost { height: 34px; }
 .lc-embed-wrap .lc-weeks-6 .lc-card { padding: 13px; }
-.lc-embed-wrap .lc-weeks-6 .lc-grid { gap: 6px; }
-.lc-embed-wrap .lc-weeks-6 .lc-weekdays { margin-bottom: 7px; padding-bottom: 7px; }
-.lc-embed-wrap .lc-weeks-6 .lc-day { padding: 5px 7px 6px; gap: 3px; border-radius: 10px; }
-.lc-embed-wrap .lc-weeks-6 .lc-day-num { font-size: 12px; }
-.lc-embed-wrap .lc-weeks-6 .lc-day.is-today .lc-day-num { width: 21px; height: 21px; font-size: 11px; }
-.lc-embed-wrap .lc-weeks-6 .lc-day-count { font-size: 9.5px; padding: 1px 6px; }
-.lc-embed-wrap .lc-weeks-6 .cal-marker { width: 33px; height: 33px; margin-left: -11px; }
-.lc-embed-wrap .lc-weeks-6 .cal-marker-initials { font-size: 11.5px; }
-.lc-embed-wrap .lc-weeks-6 .cal-more { height: 29px; font-size: 11px; padding: 0 9px; }
+.lc-embed-wrap .lc-weeks-6 .lc-grid { --cal-gap: 6px; }
+.lc-embed-wrap .lc-weeks-6 .lc-weekdays { margin-bottom: 8px; padding-bottom: 8px; }
+.lc-embed-wrap .lc-weeks-6 .lc-day { --cal-cell-pad: 6px; --cal-cell-radius: 10px; }
+.lc-embed-wrap .lc-weeks-6 .lc-days.is-month { --cal-avatar: 26px; }
 
-/* ---------- Toolbar (uses .filter-card from the glass system) ---------- */
-/* ── One card, two rows ───────────────────────────────────────────
-   .lc-controls is the card; .lc-toolbar and .lc-filterbar are rows inside
-   it. Each row keeps exactly the layout it had when it was its own card —
-   fields left, actions right — so only the container changed. */
+
+/* In the modal the day-view card fills the panel, so an empty day put its
+   "nothing booked" notice at the very top of a tall blank sheet. Centred, the
+   card reads as an answer rather than as content that failed to load. */
+.lc-embed-wrap .lc-dayview { display: flex; flex-direction: column; }
+.lc-embed-wrap .lc-dayview-empty { margin: auto 0; }
+
+/* ============================================================
+   Toolbar — one card, two rows
+   .lc-controls is the card; .lc-toolbar and .lc-filterbar are rows inside it.
+   Each row keeps fields left, actions right, so only the container changed.
+   ============================================================ */
 .glass-shell .filter-card.lc-controls {
     flex-direction: column;
     align-items: stretch;
@@ -67,41 +159,43 @@
     gap: 12px;
     flex-wrap: wrap;
     row-gap: 10px;
+    /* Once these wrap they are a multi-line flex container, and the default
+       `align-content` spreads the lines over whatever height the card has —
+       which on a phone opened a 56px hole between the selects and the Filter
+       button. Packed, the rows sit their own row-gap apart. */
+    align-content: flex-start;
     padding: 4px 0;
 }
-/* A hairline instead of a second border: the rows are related, and a full
-   card outline around each said they were not. */
+/* A hairline instead of a second border: the rows are related, and a full card
+   outline around each said they were not. */
 .lc-filterbar {
     border-top: 1px solid var(--gp-glass-border);
     padding-top: 10px;
     margin-top: 6px;
 }
-.lc-nav { align-items: center; gap: 10px !important; flex: 0 1 auto !important; }
+.lc-nav { align-items: center; gap: 8px !important; flex: 0 1 auto !important; }
 .lc-toolbar-label {
-    font-size: 10.5px; font-weight: 600; color: var(--theme-neutral-600);
-    text-transform: uppercase; letter-spacing: 0.5px;
+    font-size: 10.5px; font-weight: 700; color: var(--cal-ink-faint);
+    text-transform: uppercase; letter-spacing: 0.06em;
     padding-right: 2px; white-space: nowrap;
 }
 .lc-nav-btn {
-    width: 38px; height: 38px;
+    width: 36px; height: 36px;
     padding: 0 !important;
     display: inline-flex; align-items: center; justify-content: center;
     flex: 0 0 auto;
 }
-.lc-month-title {
-    font-size: 17px; font-weight: 800; color: var(--gp-pri);
-    margin: 0; min-width: 148px; text-align: center;
-}
 /* Month/year jump-to picker styled to read like the title, editable on click */
 .lc-month-input {
     font-family: inherit;
-    font-size: 15.5px; font-weight: 800; color: var(--gp-pri);
+    font-size: 15px; font-weight: 800; color: var(--gp-pri);
     text-align: center;
     border: 1px solid transparent;
     border-radius: 10px;
     background: transparent;
-    padding: 6px 10px;
+    padding: 6px 8px;
     cursor: pointer;
+    min-width: 0;
     transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 .lc-month-input:hover { background: rgba(var(--theme-primary-rgb), 0.05); border-color: rgba(var(--theme-primary-rgb), 0.12); }
@@ -109,7 +203,7 @@
     outline: none;
     background: #fff;
     border-color: var(--gp-pri);
-    box-shadow: 0 0 0 4px rgba(var(--theme-primary-rgb), 0.08);
+    box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), 0.12);
 }
 .lc-month-input::-webkit-calendar-picker-indicator {
     cursor: pointer;
@@ -118,41 +212,40 @@
 }
 .lc-month-input:hover::-webkit-calendar-picker-indicator { opacity: 0.9; }
 .lc-today-btn {
-    height: 38px;
+    height: 36px;
     display: inline-flex; align-items: center; gap: 7px;
     font-size: 12.5px;
-    padding: 0 16px !important;
+    padding: 0 15px !important;
+    flex: 0 0 auto;
 }
 
-/* ---------- Legend ---------- */
-.lc-legend { flex-wrap: wrap; gap: 14px !important; }
+/* ---------- Legend ----------
+   Drawn exactly as the grid draws its markers — a green circle, an amber
+   dashed circle, a blue squircle — so the key can be matched to a cell
+   without reading the words next to it. */
+.lc-legend { flex-wrap: wrap; gap: 6px !important; }
 .lc-legend-item {
     display: inline-flex; align-items: center; gap: 6px;
-    font-size: 11.5px; font-weight: 600; color: var(--theme-neutral-700);
+    font-size: 11px; font-weight: 600; color: var(--cal-ink-soft);
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--cal-cell-line);
+    border-radius: 999px; padding: 4px 10px 4px 8px; white-space: nowrap;
 }
-.lc-legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid transparent; }
-.lc-legend-dot.is-leave-approved { background: #16a34a; }
-.lc-legend-dot.is-leave-pending  { background: #f59e0b; }
-.lc-legend-dot.is-travel         { background: #3b82f6; }
-.lc-legend-dot.is-pending-swatch { background: #fff; border: 2px dashed #94a3b8; }
-.lc-legend-count {
-    font-size: 11.5px; font-weight: 700; color: var(--gp-pri);
-    background: var(--theme-neutral-200); padding: 5px 12px; border-radius: 999px;
-}
+.lc-legend-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; }
+.lc-legend-dot.is-leave-approved { background: var(--cal-leave); }
+.lc-legend-dot.is-leave-pending  { background: transparent; border: 2px dashed var(--cal-pending); }
+.lc-legend-dot.is-travel         { background: var(--cal-travel); border-radius: 3px; }
+.lc-legend-dot.is-pending-swatch { background: transparent; border: 2px dashed var(--theme-neutral-500); }
 
-/* ---------- Filter bar ----------
-   A second .filter-card directly under the month toolbar. The two read as one
-   control block, so the pull-up cancels most of the gap the flex column and
-   .filter-card's own margin-bottom would otherwise leave between them. */
-
-.lc-filter-fields { flex-wrap: wrap; row-gap: 8px; }
+/* ---------- Filter bar ---------- */
+.lc-filter-fields { flex-wrap: wrap; row-gap: 8px; column-gap: 2px; }
 .lc-filter-actions { gap: 8px !important; }
 .lc-filter-actions .btn-solid,
 .lc-filter-actions .btn-ghost {
-    height: 38px;
+    height: 36px;
     display: inline-flex; align-items: center; gap: 7px;
     font-size: 12.5px;
-    padding: 0 16px !important;
+    padding: 0 15px !important;
 }
 .lc-filterbar .fc-select { min-width: 140px; }
 /* "Travel orders only" leaves nothing for the leave-type select to say. */
@@ -162,20 +255,22 @@
 /* Note under the bar: says out loud why travel disappeared when a leave type
    is picked, rather than leaving it to be discovered. */
 .lc-filter-note {
-    margin: -26px 0 0;
-    font-size: 11.5px; font-weight: 600; color: var(--theme-neutral-700);
-    padding-left: 4px;
+    margin: 0;
+    font-size: 11.5px; font-weight: 600; color: var(--cal-pending-ink);
+    background: var(--cal-pending-soft);
+    border: 1px solid var(--cal-pending-line);
+    border-radius: 12px;
+    padding: 8px 14px;
 }
-.lc-filter-note + .lc-stats { margin-top: 4px; }
 
 /* Empty result — an empty month reads differently when the filter emptied it. */
 .lc-empty-note {
     display: flex; align-items: center; gap: 9px;
     padding: 12px 16px;
     border-radius: 14px;
-    background: rgba(245, 158, 11, 0.09);
-    border: 1px solid rgba(245, 158, 11, 0.24);
-    color: #92590b;
+    background: var(--cal-pending-soft);
+    border: 1px solid var(--cal-pending-line);
+    color: var(--cal-pending-ink);
     font-size: 12.5px; font-weight: 600;
 }
 .lc-empty-note svg { flex: 0 0 auto; }
@@ -184,18 +279,17 @@
 /* ---------- Summary stat strip (glassy KPI cards, DTR-modal style) ---------- */
 .lc-stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
-    margin-top: -14px;   /* tighten the gap to the month-selection toolbar above */
 }
 .lc-stat {
-    display: flex; align-items: center; gap: 12px;
+    display: flex; align-items: center; gap: 12px; min-width: 0;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.55));
     backdrop-filter: blur(16px) saturate(160%);
     -webkit-backdrop-filter: blur(16px) saturate(160%);
     border: 1px solid rgba(255, 255, 255, 0.7);
     border-radius: 16px;
-    padding: 16px;
+    padding: 14px 16px;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(var(--theme-shadow-rgb), 0.04);
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease;
 }
@@ -205,18 +299,20 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 28px rgba(var(--theme-primary-rgb), 0.1);
 }
 .lc-stat-ico {
-    width: 38px; height: 38px; border-radius: 12px;
+    width: 36px; height: 36px; border-radius: 11px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
     border: 1px solid rgba(255, 255, 255, 0.6);
 }
-.lc-stat-ico.is-people  { background: var(--theme-neutral-200); color: var(--gp-pri); }
-.lc-stat-ico.is-leave   { background: #e9f9ef; color: #2fa860; }  /* green — matches leave marks */
-.lc-stat-ico.is-travel  { background: #eaf1ff; color: #4F7CFF; }  /* blue  — matches travel marks */
-.lc-stat-ico.is-pending { background: #fbf6e3; color: #eba417; }  /* amber — pending */
-.lc-stat-body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.lc-stat-num { margin: 0; font-size: 20px; font-weight: 700; color: var(--gp-ink); line-height: 1.1; letter-spacing: -0.4px; }
-.lc-stat-lbl { margin: 0; font-size: 11px; font-weight: 500; color: #697086; }
+.lc-stat-ico.is-people  { background: var(--theme-neutral-200);  color: var(--gp-pri); }
+.lc-stat-ico.is-leave   { background: var(--cal-leave-soft);     color: var(--cal-leave-ink); }
+.lc-stat-ico.is-travel  { background: var(--cal-travel-soft);    color: var(--cal-travel-ink); }
+.lc-stat-ico.is-pending { background: var(--cal-pending-soft);   color: var(--cal-pending-ink); }
+.lc-stat-body { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.lc-stat-num { margin: 0; font-size: 20px; font-weight: 700; color: var(--gp-ink); line-height: 1.15; letter-spacing: -0.4px; }
+/* The label wraps rather than truncating: "Pending approval" is the whole
+   meaning of the number above it, and "Pending appro…" is not. */
+.lc-stat-lbl { margin: 0; font-size: 11px; font-weight: 500; color: var(--cal-ink-soft); line-height: 1.3; }
 
 /* ---------- Calendar card (glassy, DTR-modal style) ---------- */
 .lc-card {
@@ -225,124 +321,199 @@
     -webkit-backdrop-filter: blur(20px) saturate(160%);
     border: 1px solid rgba(255, 255, 255, 0.7);
     border-radius: 16px;
-    padding: 16px;
+    padding: 14px;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(var(--theme-shadow-rgb), 0.04);
 }
-.lc-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.lc-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--cal-gap); }
 
 .lc-weekdays {
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eef0f5;
+    margin-bottom: 9px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--cal-cell-line);
 }
 .lc-weekday {
     text-align: center;
-    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
-    color: var(--theme-neutral-600); text-transform: uppercase;
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--cal-ink-faint); text-transform: uppercase;
     padding: 2px 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.lc-weekday.is-weekend { color: #b4b9c6; }
+.lc-weekday.is-weekend { color: var(--theme-neutral-400); }
 
-/* ---------- Day cell ---------- */
-.lc-day {
-    min-height: 130px;
-    border: 1px solid #eef0f5;
-    border-radius: 12px;
-    padding: 8px 9px 9px;
-    background: #fff;
-    display: flex; flex-direction: column; gap: 7px;
-    overflow: hidden;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+/* ---------- Day cell ----------
+   `--cal-row-min` is a FLOOR, not a height. `grid-auto-rows: minmax(floor,
+   auto)` is what makes a week row as tall as the busiest date in it while a
+   quiet week stays compact — declared on the grid, never on the cell, because
+   `grid-auto-rows` resolves against the container and a cell-level override
+   silently moves only `min-height`. */
+.lc-days {
+    --cal-row-min: 112px;
+    grid-auto-rows: minmax(var(--cal-row-min), auto);
 }
-.lc-day:hover { border-color: #d7d9ec; box-shadow: 0 4px 14px rgba(var(--theme-shadow-rgb), 0.06); }
-.lc-day.is-muted { background: #fafbfd; }
-.lc-day.is-muted .lc-day-num { color: #c3c0d6; }
+.lc-day {
+    position: relative;
+    min-height: var(--cal-row-min);
+    border: 1px solid var(--cal-cell-line);
+    border-radius: var(--cal-cell-radius);
+    padding: var(--cal-cell-pad);
+    background: var(--cal-cell-bg);
+    display: flex; flex-direction: column; gap: 7px;
+    /* No `overflow: hidden`. The cell grows to its content instead of cropping
+       it: the marker row wraps, the row grows with it, and inside the modal
+       shared/calendarFit.js decides how many markers a cell can afford before
+       anything reaches an edge. Clipping was the old answer, and a face sliced
+       in half by a cell border is not a smaller answer — it is a wrong one. */
+    min-width: 0;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.lc-day:hover { border-color: var(--cal-cell-line-hi); box-shadow: 0 4px 14px rgba(var(--theme-shadow-rgb), 0.06); }
+.lc-day.is-muted { background: var(--cal-cell-muted); }
+.lc-day.is-muted .lc-day-num { color: var(--theme-neutral-400); }
 /* Weekend tint wins over the muted (adjacent-month) tint so every weekend
    column reads the same, but the today highlight below still wins over both. */
-.lc-day.is-weekend { background: #e6e8f1; }
-.lc-day.is-muted.is-weekend { background: #dfe1ee; }
+.lc-day.is-weekend { background: var(--cal-cell-weekend); }
+.lc-day.is-muted.is-weekend { background: var(--theme-primary-100); }
 .lc-day.is-today {
     border-color: var(--gp-pri);
-    box-shadow: inset 0 0 0 1.5px var(--gp-pri);
-    background: #fbfaff;
-}
-.lc-day-head { display: flex; align-items: center; justify-content: space-between; }
-.lc-day-num { font-size: 12.5px; font-weight: 700; color: #334155; }
-.lc-day.is-today .lc-day-num {
-    background: var(--gp-pri); color: #fff;
-    width: 23px; height: 23px; border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 11.5px;
-}
-.lc-day-count {
-    font-size: 10px; font-weight: 700; color: #8a6d1f;
-    background: #fbf3d7; padding: 1px 8px; border-radius: 999px;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px var(--gp-pri), 0 2px 10px rgba(var(--theme-primary-rgb), 0.1);
 }
 
-/* ---------- Markers (overlapping avatar stack) ---------- */
-.cal-stack { display: flex; align-items: center; margin-top: auto; padding-left: 2px; }
-.cal-markers { display: flex; align-items: center; }
-/* Show only the first 4 avatars; the rest live in the DOM for the "+X more" popover. */
-.cal-markers .cal-marker:nth-child(n+5) { display: none; }
+/* The date is a real link (keyboard, middle-click), so it carries the head row
+   rather than sitting inside one — one focus target instead of two. */
+.lc-day-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 4px;
+    flex-shrink: 0; text-decoration: none; border-radius: 8px;
+}
+.lc-day-head:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
+.lc-day-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 22px; height: 22px; border-radius: 999px;
+    font-size: 12.5px; font-weight: 700; color: var(--cal-ink);
+    font-variant-numeric: tabular-nums;
+}
+.lc-day.is-today .lc-day-num { background: var(--gp-pri); color: #fff; }
+/* How many people are out that day — the one figure the month grid states in
+   words, and the truth the capped marker row is a preview of. */
+.lc-day-count {
+    font-size: 10px; font-weight: 700; line-height: 1;
+    color: var(--gp-pri);
+    background: var(--theme-primary-100);
+    border: 1px solid var(--theme-primary-200);
+    padding: 3px 7px; border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* A hairline down the leading edge, tinted by the day's first record. It is a
+   category stripe, not a border: the cell's own outline never changes, so the
+   today ring and the hover state stay readable underneath it. */
+.lc-day::before {
+    content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 3px;
+    border-radius: var(--cal-cell-radius) 0 0 var(--cal-cell-radius);
+    background: transparent;
+}
+.lc-day.has-events:has(.cal-marker.type-leave)::before  { background: var(--cal-leave); }
+.lc-day.has-events:has(.cal-marker.type-travel)::before { background: var(--cal-travel); }
+/* A day holding both is a mixed day and says so, rather than claiming the
+   colour of whichever record the query happened to sort first. */
+.lc-day.has-events:has(.cal-marker.type-leave):has(.cal-marker.type-travel)::before {
+    background: linear-gradient(180deg, var(--cal-leave) 0 50%, var(--cal-travel) 50% 100%);
+}
+
+/* ============================================================
+   Markers — one avatar per person out that day
+   The stack used to overlap its avatars by -14px and hide the fifth onward.
+   Overlapping is how a face, a ring colour and a dashed outline all end up
+   half-covered by the next avatar, so the row does not overlap: whole markers,
+   wrapping onto a second line when the day is busy, and a cell that grows to
+   hold them.
+   ============================================================ */
+.lc-days { --cal-avatar: 30px; }
+.cal-stack {
+    display: flex; align-items: flex-start; gap: 4px;
+    min-width: 0; flex-shrink: 0;
+    flex-wrap: wrap; row-gap: 3px;
+}
+/* Wrapping, not truncating. A seventh person out on one date is a second row
+   of faces and a taller cell — which is what the reader opened the calendar to
+   see — rather than a face cut off against the cell's edge. */
+.cal-markers {
+    display: flex; align-items: flex-start; gap: 4px;
+    flex: 1 1 auto; min-width: 0;
+    flex-wrap: wrap; row-gap: 4px;
+}
+/* There is no `nth-child` cap any more. It was a fixed three whatever the
+   window was: it hid a fourth person on a screen with room for eight, and
+   still overflowed a short one. On the full page every marker shows; inside
+   the modal shared/calendarFit.js measures the grid and marks only the ones
+   that genuinely do not fit `hidden` — they stay in the DOM, because the
+   tooltip, the count badge and the day list are all built from them. */
+.cal-marker[hidden], .cal-more[hidden] { display: none !important; }
 
 .cal-marker {
-    width: 44px; height: 44px;
+    width: var(--cal-avatar); height: var(--cal-avatar);
     border-radius: 50%;
     padding: 0;
-    border: 2px solid var(--gp-pri);
+    border: 2px solid var(--theme-neutral-400);
     background: #fff;
     cursor: pointer;
     position: relative;
     flex-shrink: 0;
-    margin-left: -14px;                /* overlap into a stack */
-    box-shadow: 0 0 0 2px #fff;        /* white separation ring between avatars */
-    transition: transform 0.14s ease, box-shadow 0.14s ease, margin 0.14s ease;
+    transition: transform 0.14s ease, box-shadow 0.14s ease;
 }
-.cal-markers .cal-marker:first-child { margin-left: 0; }
 .cal-marker:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     z-index: 3;
-    box-shadow: 0 0 0 2px #fff, 0 6px 14px rgba(var(--theme-primary-rgb), 0.28);
+    box-shadow: 0 4px 12px rgba(var(--theme-primary-rgb), 0.24);
 }
+.cal-marker:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
 .cal-marker img,
 .cal-marker-initials {
     width: 100%; height: 100%;
     border-radius: 50%;
     object-fit: cover;
     display: flex; align-items: center; justify-content: center;
-    color: #fff; font-size: 14px; font-weight: 700;
+    color: #fff; font-size: 11px; font-weight: 700; line-height: 1;
 }
-/* Ring color follows the shared busy-dates convention (busyDatesCalendar.js):
-   amber = pending leave · green = approved leave · blue = travel order.
-   Dashed ring additionally marks any pending item. */
-.cal-marker.type-leave.status-approved  { border-color: #16a34a; }  /* approved leave — green */
-.cal-marker.type-leave.status-pending   { border-color: #f59e0b; }  /* pending leave  — amber */
-.cal-marker.type-travel                 { border-color: #3b82f6; }  /* travel order   — blue  */
-.cal-marker.status-pending { border-style: dashed; opacity: 0.62; }
-.cal-marker.status-pending:hover { opacity: 1; }
+/* Ring colour follows the shared busy-dates convention: green = approved
+   leave, amber = pending leave, blue = travel. Colour alone is not enough —
+   a travel marker is also a squircle and anything pending also dashes — so
+   the three stay distinguishable in monochrome and with CVD. */
+.cal-marker.type-leave.status-approved { border-color: var(--cal-leave); }
+.cal-marker.type-leave.status-pending  { border-color: var(--cal-pending); }
+.cal-marker.type-travel                { border-color: var(--cal-travel); }
+.cal-marker.type-travel,
+.cal-marker.type-travel img,
+.cal-marker.type-travel .cal-marker-initials { border-radius: 9px; }
+/* Dashed, not faded. The old rule dropped pending markers to 62% opacity,
+   which dimmed the face and the name behind the very state a reader is
+   looking for. */
+.cal-marker.status-pending { border-style: dashed; }
 
-/* ---------- "+X more" chip (sits at the end of the stack) ---------- */
+/* ---------- "+N" chip (sits at the end of the row) ---------- */
 .cal-more {
-    margin-left: -6px;
-    font-size: 12px; font-weight: 800; letter-spacing: 0.01em;
-    color: var(--theme-neutral-700);
-    background: #eef0f6;
-    border: 2px solid #fff;
+    flex-shrink: 0;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.01em;
+    color: var(--cal-ink-soft);
+    background: var(--theme-neutral-100);
+    border: 1px solid var(--cal-cell-line);
     border-radius: 999px;
-    height: 36px;
-    padding: 0 12px;
+    height: calc(var(--cal-avatar) - 6px);
+    padding: 0 8px;
     display: inline-flex; align-items: center;
+    text-decoration: none;
     cursor: pointer;
-    box-shadow: 0 0 0 1px #e2e5ee;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.cal-more:hover { background: var(--gp-pri); color: #fff; }
+.cal-more:hover { background: var(--gp-pri); border-color: var(--gp-pri); color: #fff; }
+.cal-more:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
 
 /* ---------- Hover tooltip ---------- */
 .cal-tooltip {
     position: fixed;
     z-index: 4000;
-    max-width: 244px;
+    max-width: 250px;
     background: var(--gp-pri);
     color: #fff;
     border-radius: 11px;
@@ -350,155 +521,92 @@
     box-shadow: 0 10px 28px rgba(var(--theme-primary-rgb), 0.34);
     pointer-events: none;
 }
-.cal-tip-name { font-size: 12.5px; font-weight: 700; margin: 0 0 5px; }
-.cal-tip-line { font-size: 11px; margin: 0 0 3px; color: #d8d5f0; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-.cal-tip-dates { color: #b9b5e0; }
+.cal-tip-name { font-size: 12.5px; font-weight: 700; margin: 0 0 5px; overflow-wrap: anywhere; }
+.cal-tip-line { font-size: 11px; margin: 0 0 3px; color: rgba(255, 255, 255, 0.82); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.cal-tip-dates { color: rgba(255, 255, 255, 0.68); }
 .cal-tip-tag {
-    font-size: 9.5px; font-weight: 700; text-transform: uppercase;
-    padding: 1px 6px; border-radius: 5px; color: #fff;
+    font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    padding: 2px 6px; border-radius: 5px; color: #fff;
 }
-.cal-tip-tag.type-leave  { background: #16a34a; }
-.cal-tip-tag.type-travel { background: #3b82f6; }
+.cal-tip-tag.type-leave  { background: var(--cal-leave); }
+.cal-tip-tag.type-travel { background: var(--cal-travel); }
 .cal-tip-status {
     display: inline-block; margin-top: 6px;
     font-size: 10px; font-weight: 700;
     padding: 2px 9px; border-radius: 999px;
 }
-.cal-tip-status.is-approved { background: #dcfce7; color: #15803d; }
-.cal-tip-status.is-pending  { background: #fef3c7; color: #92400e; }
+.cal-tip-status.is-approved { background: var(--cal-leave-soft);   color: var(--cal-leave-ink); }
+.cal-tip-status.is-pending  { background: var(--cal-pending-soft); color: var(--cal-pending-ink); }
 
-/* ---------- Day-detail popover ---------- */
-.cal-day-modal {
-    position: fixed; inset: 0;
-    z-index: 3500;
-    background: rgba(var(--theme-primary-rgb), 0.3);
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-}
-.cal-day-modal-panel {
-    background: #fff;
-    border-radius: 16px;
-    width: 100%; max-width: 440px;
-    max-height: 80vh;
-    display: flex; flex-direction: column;
-    box-shadow: 0 20px 60px rgba(var(--theme-primary-rgb), 0.3);
-    overflow: hidden;
-}
-.cal-day-modal-head {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 15px 20px;
-    border-bottom: 1px solid #eef0f5;
-}
-.cal-day-modal-head h3 { font-size: 14.5px; font-weight: 800; color: var(--gp-pri); margin: 0; }
-.cal-day-modal-close {
-    background: none; border: none; cursor: pointer;
-    font-size: 15px; color: var(--theme-neutral-600); padding: 4px;
-}
-.cal-day-modal-close:hover { color: var(--gp-pri); }
-.cal-day-modal-list { padding: 8px; overflow-y: auto; }
-
-.cal-day-row {
-    width: 100%;
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 12px;
-    background: none; border: none; border-radius: 10px;
-    cursor: pointer; text-align: left;
-    transition: background 0.14s ease;
-}
-.cal-day-row:hover { background: #f5f5fc; }
-.cal-day-row-avatar { flex-shrink: 0; }
-.cal-day-row-avatar .cal-marker { width: 36px; height: 36px; pointer-events: none; }
-.cal-day-row-avatar .cal-marker-initials { font-size: 12px; }
-.cal-day-row-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.cal-day-row-name { font-size: 13px; font-weight: 700; color: var(--theme-neutral-900); }
-.cal-day-row-sub {
-    font-size: 11px; color: var(--theme-neutral-700);
-    display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
-}
-.cal-day-row-sub .cal-tip-tag.type-leave  { background: #16a34a; }
-.cal-day-row-status {
-    flex-shrink: 0;
-    font-size: 10px; font-weight: 700;
-    padding: 3px 9px; border-radius: 999px;
-}
-.cal-day-row-status.is-approved { background: #dcfce7; color: #15803d; }
-.cal-day-row-status.is-pending  { background: #fef3c7; color: #92400e; }
-
-/* ---------- Responsive ---------- */
-@media (max-width: 720px) {
-    .lc-day { min-height: 88px; }
-    .cal-marker { width: 36px; height: 36px; margin-left: -11px; }
-    .cal-marker-initials { font-size: 12px; }
-    .lc-weekday { font-size: 9.5px; }
-    .lc-month-title { font-size: 15px; min-width: 116px; }
-    .lc-grid { gap: 5px; }
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   Month / Week / Day views
-   ══════════════════════════════════════════════════════════════════ */
-
-/* ── View switcher ── */
+/* ============================================================
+   View switcher
+   ============================================================ */
 .lc-viewswitch {
     display: inline-flex;
     align-items: center;
+    flex: 0 0 auto;
     gap: 2px;
-    margin-left: 6px;
+    margin-left: 2px;
     padding: 3px;
-    border: 1px solid var(--gp-glass-border);
+    border: 1px solid rgba(var(--theme-primary-rgb), 0.1);
     border-radius: 999px;
-    background: rgba(255, 255, 255, .55);
+    background: rgba(var(--theme-primary-rgb), 0.05);
 }
 .lc-viewswitch-btn {
-    padding: 6px 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 56px;
+    padding: 6px 13px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 700;
-    color: var(--gp-text-mid);
+    color: var(--cal-ink-soft);
     text-decoration: none;
     white-space: nowrap;
     transition: background .18s ease, color .18s ease;
 }
-.lc-viewswitch-btn:hover { background: var(--gp-bg-tint); color: var(--gp-pri); }
+.lc-viewswitch-btn:hover { background: rgba(var(--theme-primary-rgb), 0.07); color: var(--gp-pri); }
 .lc-viewswitch-btn.is-active { background: var(--gp-pri); color: #fff; }
 .lc-viewswitch-btn:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
 
-/* ── Week view ──
+/* ============================================================
+   Week view
    Seven columns like the month, but one row instead of five or six — so each
    cell inherits the height the month had to share, and can name people
-   instead of reducing them to an avatar. */
+   instead of reducing them to an avatar.
+   ============================================================ */
 .lc-weekday-num { margin-left: 4px; font-weight: 800; color: var(--gp-pri); }
+.lc-weekday.is-today { color: var(--gp-pri); }
 .lc-weekday.is-today .lc-weekday-num {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 20px; height: 20px;
-    border-radius: 50%;
+    padding: 0 5px;
+    border-radius: 999px;
     background: var(--gp-pri);
     color: #fff;
     margin-left: 5px;
 }
 
-.lc-days.is-week .lc-day { min-height: 340px; align-content: start; }
+/* A floor, not a height: a week with one record should not print 320px of
+   empty card under it, and a week with twelve should be free to be taller. */
+.lc-days.is-week .lc-day { min-height: 220px; align-content: start; }
 
-/* The month stack sits at the bottom of a short cell (`margin-top: auto`) and
-   overlaps its avatars into a pile (`margin-left: -14px`). Neither survives
-   the move to a tall column: events start at the top and stack downwards. */
-.lc-days.is-week .cal-stack { margin-top: 0; align-items: stretch; }
-.lc-days.is-week .cal-markers { flex-direction: column; align-items: stretch; gap: 4px; }
-.lc-days.is-week .cal-marker { margin-left: 0; box-shadow: none; }
+/* The month row lays its markers out horizontally. In a tall column they
+   become full-width labelled rows stacking downwards. */
+.lc-days.is-week .cal-stack { align-items: stretch; }
+.lc-days.is-week .cal-markers { flex-direction: column; align-items: stretch; gap: 3px; min-width: 0; }
+.lc-days.is-week .cal-marker { box-shadow: none; }
 
-/* A 44px avatar eats half a week column. Shrinking it is what buys the name
-   enough room to read as a name rather than "Jere…". */
-.lc-days.is-week .cal-marker,
-.lc-days.is-week .cal-marker img,
-.lc-days.is-week .cal-marker .cal-marker-initials { height: auto; }
+/* A 30px avatar still eats a third of a week column. Shrinking it is what buys
+   the name enough room to read as a name rather than "Jere…". */
+.lc-days.is-week .cal-marker { height: auto; }
 .lc-days.is-week .cal-marker img,
 .lc-days.is-week .cal-marker .cal-marker-initials {
     width: 26px; height: 26px; flex-shrink: 0; font-size: 10px;
 }
 
-/* In week view the marker becomes a labelled row. The avatar keeps its size
+/* In week view the marker becomes a labelled row. The avatar keeps its shape
    so the two views read as the same object at different zoom levels. */
 .lc-days.is-week .cal-marker {
     display: flex;
@@ -509,7 +617,7 @@
     border-radius: 8px;
     text-align: left;
 }
-.lc-days.is-week .cal-marker:hover { background: var(--gp-bg-tint); }
+.lc-days.is-week .cal-marker:hover { background: var(--gp-bg-tint); transform: none; box-shadow: none; }
 .lc-days.is-week .cal-marker-name { display: flex; flex-direction: column; min-width: 0; }
 .cal-marker-name { display: none; }          /* month view: avatar only */
 .cal-marker-name-main {
@@ -517,7 +625,7 @@
     font-weight: 700;
     line-height: 1.25;
     color: var(--gp-pri);
-    /* Wrap to two lines rather than cutting a name off — the column is 340px
+    /* Wrap to two lines rather than cutting a name off — the column is 320px
        tall and there is nothing below competing for the space. */
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -526,15 +634,17 @@
 }
 .cal-marker-name-sub {
     font-size: 10.5px;
-    color: var(--gp-text-soft);
+    color: var(--cal-ink-faint);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-/* The month cap is a month-view rule; week shows everyone. */
-.lc-days.is-week .cal-markers .cal-marker:nth-child(n+6) { display: flex; }
+/* Week shows everyone: the cap above is scoped to `.lc-days.is-month`, and the
+   "+N" chip is a month affordance, so neither reaches here. */
 
-/* ── Day view ──
+/* ============================================================
+   Day view
    A list, not a one-cell grid: these are whole-day records, so an hour axis
-   would imply a precision the dates do not carry. */
+   would imply a precision the dates do not carry.
+   ============================================================ */
 .lc-dayview { padding: 14px; }
 .lc-dayview-list { display: flex; flex-direction: column; gap: 8px; }
 
@@ -544,8 +654,8 @@
     gap: 14px;
     width: 100%;
     padding: 12px 14px;
-    border: 1px solid var(--gp-border);
-    border-left: 4px solid var(--gp-border);
+    border: 1px solid var(--cal-cell-line);
+    border-left: 4px solid var(--theme-neutral-300);
     border-radius: 12px;
     background: #fff;
     cursor: pointer;
@@ -555,9 +665,10 @@
 .lc-dayview-row:hover { box-shadow: 0 6px 18px rgba(var(--theme-shadow-rgb), .07); transform: translateY(-1px); }
 .lc-dayview-row:focus-visible { outline: 2px solid var(--gp-pri); outline-offset: 2px; }
 /* Same colour language as the markers and the legend. */
-.lc-dayview-row.type-leave  { border-left-color: var(--theme-success); }
-.lc-dayview-row.type-travel { border-left-color: var(--theme-info, #3b82f6); }
-.lc-dayview-row.status-pending { border-left-style: dashed; }
+.lc-dayview-row.type-leave  { border-left-color: var(--cal-leave); }
+.lc-dayview-row.type-travel { border-left-color: var(--cal-travel); }
+.lc-dayview-row.status-pending { border-left-color: var(--cal-pending); border-left-style: dashed; }
+.lc-dayview-row.type-travel.status-pending { border-left-color: var(--cal-travel); }
 
 .lc-dayview-avatar { flex-shrink: 0; width: 40px; height: 40px; }
 .lc-dayview-avatar img,
@@ -566,12 +677,14 @@
     display: flex; align-items: center; justify-content: center;
     color: #fff; font-size: 13px; font-weight: 700;
 }
+.lc-dayview-row.type-travel .lc-dayview-avatar img,
+.lc-dayview-row.type-travel .lc-dayview-avatar .cal-marker-initials { border-radius: 11px; }
 
-.lc-dayview-body { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
-.lc-dayview-name { font-size: 14px; font-weight: 700; color: var(--gp-pri); }
+.lc-dayview-body { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.lc-dayview-name { font-size: 14px; font-weight: 700; color: var(--gp-pri); overflow-wrap: anywhere; }
 .lc-dayview-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.lc-dayview-sub { font-size: 12.5px; color: var(--gp-text-mid); }
-.lc-dayview-range { font-size: 11.5px; color: var(--gp-text-soft); }
+.lc-dayview-sub { font-size: 12.5px; color: var(--cal-ink-soft); overflow-wrap: anywhere; }
+.lc-dayview-range { font-size: 11.5px; color: var(--cal-ink-faint); }
 
 .lc-dayview-status {
     flex-shrink: 0;
@@ -580,16 +693,141 @@
     font-size: 11px;
     font-weight: 700;
 }
-.lc-dayview-status.is-approved { background: var(--theme-success-subtle); color: var(--theme-success-emphasis); }
-.lc-dayview-status.is-pending  { background: var(--theme-warning-subtle); color: var(--theme-warning-emphasis); }
+.lc-dayview-status.is-approved { background: var(--cal-leave-soft);   color: var(--cal-leave-ink); }
+.lc-dayview-status.is-pending  { background: var(--cal-pending-soft); color: var(--cal-pending-ink); }
 
 .lc-dayview-empty { text-align: center; padding: 44px 20px; }
 .lc-dayview-empty svg { display: block; margin: 0 auto 10px; color: var(--theme-neutral-300); }
 .lc-dayview-empty-title { margin: 0 0 4px; font-size: 14px; font-weight: 700; color: var(--gp-pri); }
-.lc-dayview-empty-sub { margin: 0; font-size: 12.5px; color: var(--gp-text-soft); }
+.lc-dayview-empty-sub { margin: 0; font-size: 12.5px; color: var(--cal-ink-faint); }
+
+/* ============================================================
+   Responsive
+
+   The blocks below run widest-first, and each gives up what the width can no
+   longer pay for: the stat strip folds, the avatars shrink, the control card
+   becomes plain stacked blocks, the week grid becomes one column, and finally
+   the month marker stops being a face and becomes a type mark. That last step
+   is the important one — three 28px avatars and a "+N" chip need ~120px of
+   cell, and a seven-column month below ~768px does not have it. Pretending
+   otherwise is what pushed avatars out past the cell's edge.
+   ============================================================ */
+@media (max-width: 1180px) {
+    .lc-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* 26px, not 28: three avatars, the gaps and the "+N" chip have to add up
+       to less than the cell is wide, or the chip wraps to a second line. */
+    .lc-days { --cal-avatar: 26px; }
+}
 
 @media (max-width: 900px) {
+    .lc-calendar { gap: 12px; }
+    .lc-nav { width: 100%; }
+    .lc-legend { width: 100%; }
+    .lc-filterbar .fc-select { min-width: 120px; }
+    .lc-days { --cal-avatar: 24px; --cal-row-min: 104px; }
+    /* One tall column per day rather than seven unreadable ones. */
     .lc-days.is-week { grid-template-columns: 1fr; }
     .lc-days.is-week .lc-day { min-height: 0; }
     .lc-viewswitch { margin-left: 0; }
+}
+
+@media (max-width: 768px) {
+    /* ---- Controls ----
+       The glass system stacks `.filter-card-fields` into a column at this
+       width. That is right for the filter row — a bar of full-width selects —
+       and wrong for the navigator row: four small controls and a segmented
+       switch, stacked into a 300px tower above a calendar that then has no
+       room left. Only `.lc-nav` opts out. */
+    .glass-shell .filter-card-fields.lc-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        width: 100%;
+        row-gap: 8px;
+    }
+    .glass-shell .filter-card-actions.lc-legend { width: 100%; justify-content: flex-start; }
+    .lc-month-input { flex: 1 1 auto; text-align: left; }
+
+    /* Here the control card is simply two rows stacked, and each row is two
+       blocks stacked — so they are laid out as blocks. As nested wrapping
+       flex containers the card came out ~90px taller than the sum of its
+       parts, and that slack printed as an empty band under the Filter
+       button. */
+    .glass-shell .filter-card.lc-controls { display: block; }
+    .lc-filterbar { display: block; }
+    .lc-filterbar .lc-filter-actions { margin-top: 10px; }
+
+    /* Four selects stacked one per line is ~330px of filter bar above a
+       calendar that has ~500px to live in. They pair up instead, and the
+       vertical rules between them — which only separate columns — go. */
+    .glass-shell .filter-card-fields.lc-filter-fields {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 8px;
+        width: 100%;
+    }
+    .lc-filter-fields .lc-toolbar-label { grid-column: 1 / -1; }
+    .lc-filter-fields .fc-divider { display: none; }
+    .lc-filterbar .fc-select { min-width: 0; }
+
+    /* ---- Month markers become type marks ----
+       A face is unreadable in an 80px cell and a row of them does not fit, so
+       each marker becomes what the legend draws: a green circle for approved
+       leave, an amber dashed one for pending, a blue square for travel. The
+       count badge still states the real total and the date still opens the
+       day view, which is where the names are. */
+    .lc-days { --cal-row-min: 78px; }
+    .lc-days.is-month .cal-markers { gap: 3px; }
+    .lc-days.is-month .cal-marker { width: 9px; height: 9px; border-width: 1.5px; }
+    .lc-days.is-month .cal-marker:hover { transform: none; box-shadow: none; }
+    /* The initials span carries the employee's own colour inline, so it has to
+       go entirely — left visible it would paint over the type colour that is
+       now the only thing the mark says. */
+    .lc-days.is-month .cal-marker img,
+    .lc-days.is-month .cal-marker .cal-marker-initials,
+    .lc-days.is-month .cal-marker .cal-marker-name { display: none; }
+    .lc-days.is-month .cal-marker.type-leave.status-approved { background: var(--cal-leave); }
+    .lc-days.is-month .cal-marker.type-leave.status-pending  { background: var(--cal-pending); }
+    .lc-days.is-month .cal-marker.type-travel                { background: var(--cal-travel); border-radius: 3px; }
+    /* The chip shrinks with the marks rather than being switched off. Hidden,
+       it left a cell silently short of records with nothing saying so — and
+       the fit pass measures this element, so one set to `display: none` is a
+       truncation it cannot cost. At 9px a mark it rarely has to appear. */
+    .lc-days.is-month .cal-more {
+        height: auto; font-size: 9px; padding: 1px 5px; line-height: 1.5;
+    }
+}
+
+@media (max-width: 720px) {
+    .lc-card { padding: 11px; }
+    .lc-grid { --cal-gap: 5px; }
+    .lc-weekday { font-size: 9.5px; letter-spacing: 0.04em; }
+    .lc-day { --cal-cell-pad: 6px; --cal-cell-radius: 10px; }
+    .lc-days { --cal-row-min: 72px; }
+    .lc-viewswitch-btn { min-width: 46px; padding: 6px 10px; font-size: 11px; }
+    .lc-stat-num { font-size: 18px; }
+    .lc-dayview-row { flex-wrap: wrap; row-gap: 10px; }
+
+    /* A 45px cell cannot hold the date and the count side by side — the badge
+       was being cut off by the cell's own edge. It moves to the corner, where
+       it takes no width from the date at all. */
+    .lc-day-num { min-width: 18px; height: 18px; font-size: 11px; }
+    .lc-day-count {
+        position: absolute; top: 5px; right: 5px;
+        font-size: 9px; padding: 2px 4px; border-width: 0;
+    }
+}
+
+@media (max-width: 560px) {
+    .lc-stats { gap: 8px; }
+    .lc-stat { padding: 11px 12px; gap: 10px; }
+    .lc-stat-ico { width: 30px; height: 30px; border-radius: 9px; }
+    .lc-stat-ico svg { width: 15px; height: 15px; }
+    .lc-legend-item { font-size: 10px; padding: 3px 8px 3px 7px; }
+    .lc-days { --cal-row-min: 66px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lc-stat, .lc-day, .cal-marker, .cal-more, .lc-dayview-row { transition: none; }
+    .lc-stat:hover, .cal-marker:hover, .lc-dayview-row:hover { transform: none; }
 }
