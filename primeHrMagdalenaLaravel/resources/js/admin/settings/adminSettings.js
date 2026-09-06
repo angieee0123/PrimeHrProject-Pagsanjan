@@ -276,6 +276,85 @@ window.saveSystemAiSettings = function () {
         .finally(() => { btn.disabled = false; });
 };
 
+// ── Citizen's Charter knowledge base (admin-only) ──
+window.uploadCharter = function () {
+    hideFieldError('charterMsg');
+    const input = document.getElementById('charterFileInput');
+    const file = input && input.files ? input.files[0] : null;
+
+    if (!file) {
+        showFieldError('charterMsg', 'Choose a PDF or DOCX file first.');
+        return;
+    }
+
+    const name = (file.name || '').toLowerCase();
+    if (!name.endsWith('.pdf') && !name.endsWith('.docx')) {
+        showFieldError('charterMsg', 'Only PDF or DOCX files are accepted.');
+        input.value = '';
+        return;
+    }
+
+    const btn = document.getElementById('charterSaveBtn');
+    btn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('charter', file);
+
+    fetch('/admin/settings/charter', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+        body: formData,
+    })
+        .then(async (response) => {
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.message || 'Failed to import the charter.');
+            return data;
+        })
+        .then(data => {
+            input.value = '';
+            flashSaved(btn, 'Imported');
+            refreshCharterStatus(data.charter);
+            showSavedModal(data.message || 'Citizen\'s Charter imported.');
+        })
+        .catch(err => showFieldError('charterMsg', err.message))
+        .finally(() => { btn.disabled = false; });
+};
+
+window.removeCharter = function () {
+    hideFieldError('charterMsg');
+
+    const btn = document.getElementById('charterRemoveBtn');
+    if (btn) btn.disabled = true;
+
+    fetch('/admin/settings/charter', {
+        method: 'DELETE',
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+    })
+        .then(async (response) => {
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.message || 'Failed to remove the charter.');
+            return data;
+        })
+        .then(data => {
+            const input = document.getElementById('charterFileInput');
+            if (input) input.value = '';
+            refreshCharterStatus(data.charter);
+            showSavedModal(data.message || 'Citizen\'s Charter removed.');
+        })
+        .catch(err => showFieldError('charterMsg', err.message))
+        .finally(() => { if (btn) btn.disabled = false; });
+};
+
+function refreshCharterStatus(charter) {
+    if (!charter) return;
+    const nameEl = document.getElementById('charterFileName');
+    const metaEl = document.getElementById('charterFileMeta');
+    const badgeEl = document.getElementById('charterStatusBadge');
+    if (nameEl) nameEl.textContent = charter.exists ? (charter.name || 'Charter file') : 'No file imported';
+    if (metaEl) metaEl.textContent = charter.message || '';
+    if (badgeEl) badgeEl.textContent = charter.usable ? 'Active' : 'Needs attention';
+}
+
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSavedModal(); });
 
 // Appearance now lives in resources/js/shared/appearance.js — the employee

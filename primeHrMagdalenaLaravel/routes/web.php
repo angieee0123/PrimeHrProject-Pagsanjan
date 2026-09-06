@@ -730,6 +730,8 @@ Route::post('/admin/settings/notifications', [\App\Http\Controllers\AdminSetting
 Route::post('/admin/settings/ai', [\App\Http\Controllers\AdminSettingsController::class, 'updateAiSettings'])->middleware('auth')->name('admin.settings.ai');
 Route::post('/admin/settings/photo', [\App\Http\Controllers\AdminSettingsController::class, 'updatePhoto'])->middleware('auth')->name('admin.settings.photo');
 Route::post('/admin/settings/system-ai', [\App\Http\Controllers\AdminSettingsController::class, 'updateSystemAiSettings'])->middleware('auth')->name('admin.settings.systemAi');
+Route::post('/admin/settings/charter', [\App\Http\Controllers\AdminSettingsController::class, 'uploadCharter'])->middleware('auth')->name('admin.settings.charter');
+Route::delete('/admin/settings/charter', [\App\Http\Controllers\AdminSettingsController::class, 'removeCharter'])->middleware('auth')->name('admin.settings.charter.remove');
 // Appearance — personal palette for every signed-in user, organisation
 // palette for administrators. The global routes are separate endpoints so
 // the authorisation difference is visible here, not buried in a branch.

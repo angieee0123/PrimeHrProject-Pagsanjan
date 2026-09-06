@@ -179,21 +179,24 @@ class DashboardAssistantService
         $travel = DB::table('travel_orders')->whereIn('status', ['pending', 'awaiting_companions'])->count();
         $trainings = DB::table('trainings')->where('status', 'pending')->count();
         $documents = DB::table('documents')->where('status', 'pending')->count();
+        $monetization = DB::table('monetization_requests')->where('status', 'pending')->count();
 
-        $total = $leave + $travel + $trainings + $documents;
+        $total = $leave + $travel + $trainings + $documents + $monetization;
 
         return [
             'answer' => "There are **{$total} item(s) awaiting approval**:\n\n"
                 . "- Leave applications: {$leave}\n"
                 . "- Travel orders: {$travel}\n"
                 . "- Training records: {$trainings}\n"
-                . "- Uploaded documents: {$documents}",
+                . "- Uploaded documents: {$documents}\n"
+                . "- Monetization requests: {$monetization}",
             'data' => [
                 'total' => $total,
                 'leave_applications' => $leave,
                 'travel_orders' => $travel,
                 'trainings' => $trainings,
                 'documents' => $documents,
+                'monetization_requests' => $monetization,
             ],
         ];
     }

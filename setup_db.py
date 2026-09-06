@@ -2,14 +2,14 @@ import subprocess
 import os
 import sys
 
-HOST = "127.0.0.1"
+HOST = "localhost"
 USER = "root"
-PASSWORD = "root"
+PASSWORD = "admin"
 DATABASE = "primehrismagdalena"
 
 SQL_FOLDER = os.path.join(os.path.dirname(__file__), "database")
 LARAVEL_APP_DIR = os.path.join(os.path.dirname(__file__), "primeHrMagdalenaLaravel")
-MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" if sys.platform == "win32" else "mysql"
+MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe" if sys.platform == "win32" else "mysql"
 
 ORDER = [
     "primehrismagdalena_migrations.sql",

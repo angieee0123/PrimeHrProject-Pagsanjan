@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\AiRateLimitException;
+use App\Models\MonetizationRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -30,8 +31,10 @@ class HrChatbotAnswerer
         private SafeSqlService $safeSql,
         private HrPolicyFactsService $facts,
         private ?SchemaRelationshipService $relationships = null,
+        private ?CitizenCharterService $charter = null,
     ) {
         $this->relationships ??= new SchemaRelationshipService();
+        $this->charter ??= new CitizenCharterService();
     }
 
     /**
@@ -155,7 +158,13 @@ TEXT;
     public function explain(?User $user, string $message, array $history = []): string
     {
         try {
-            return $this->getPolicyAnswer(trim($message))
+            // A municipal "how do I" ("paano kumuha ng business permit") is a
+            // charter question wearing how-to phrasing — the HR navigation
+            // guide has nothing to say about it.
+            $charter = $this->charterAnswer($user, $message, $history);
+
+            return $charter
+                ?? $this->getPolicyAnswer(trim($message))
                 ?? $this->askDirectly($user, $message, $history);
         } catch (AiRateLimitException $e) {
             Log::warning('HR chatbot rate limited (explain)');
@@ -189,6 +198,17 @@ TEXT;
 
         if ($shortcut !== null) {
             return $shortcut;
+        }
+
+        // The charter is public municipal information, answered for every
+        // caller — including the logged-out public widget, which reaches here
+        // with a null user and can never run generated SQL. Checked before the
+        // permission gate so a guest asking about permits is not answered with
+        // the knowledge base's HR-only content.
+        $charter = $this->charterAnswer($user, $message, $history);
+
+        if ($charter !== null) {
+            return $charter;
         }
 
         // Generated SQL joins arbitrary tables, so it cannot be scoped to one
@@ -234,6 +254,23 @@ TEXT;
         }
 
         return $this->narrateResults($user, $message, $sql, $results, $history);
+    }
+
+    /**
+     * Answer from the imported Citizen's Charter, or null when this is not a
+     * charter question or the stored text matches none of its words. Null
+     * means "not mine to answer" — the caller continues down its own path —
+     * which is what keeps a missing import from changing any existing answer.
+     *
+     * @param array<int, array{role: string, content: string}> $history
+     */
+    private function charterAnswer(?User $user, string $message, array $history): ?string
+    {
+        if (!$this->charter->looksLikeCharterQuestion($message)) {
+            return null;
+        }
+
+        return $this->charter->answer($user, $message, $history)['answer'] ?? null;
     }
 
     /**
@@ -734,8 +771,73 @@ PROMPT;
                 . "**(monthly rate ÷ {$perMonth}) × 1**. Filing a leave application against available **"
                 . implode('**/**', $order) . '** credits covers the absence and avoids LWOP.';
         }
+        if ($this->isMonetizationRuleQuestion($q)) {
+            return $this->monetizationAnswer();
+        }
 
         return null;
+    }
+
+    /**
+     * Whether the question asks how monetization *works* rather than for a
+     * request record. Record phrasings ("my monetization status", "list
+     * pending requests", "how many") are excluded so they keep flowing to
+     * self-service or generated SQL — answering those from the rulebook would
+     * state policy where the user asked for their own row.
+     */
+    private function isMonetizationRuleQuestion(string $q): bool
+    {
+        if (!preg_match('/\bmonetiz\w*\b/', $q)) {
+            return false;
+        }
+
+        // "request" itself is deliberately not a record marker: "how do I file a
+        // monetization request" is the canonical rule question, and every
+        // genuine record phrasing ("my requests", "list requests", "request
+        // status") already carries one of the markers above.
+        if (preg_match('/\b(status|balance|balances|show|list|display|history|how many|count|who|which|pending|approved|my|mine|aking|akin|ko)\b/', $q)) {
+            return false;
+        }
+
+        return (bool) preg_match('/\b(can|how|what|eligible|eligib|qualif|require|process|policy|rule|mean|file|apply|convert|cash|formula|comput\w+|work)\b/', $q);
+    }
+
+    /**
+     * How leave monetization works, from the live config and the model's own
+     * formula — never a remembered constant or a guessed procedure.
+     */
+    private function monetizationAnswer(): string
+    {
+        $m = $this->facts->monetization();
+
+        if (empty($m['codes'])) {
+            return 'I could not read the monetization configuration just now, so I would rather not '
+                . 'describe the rules from memory. Please try again shortly.';
+        }
+
+        $codes = implode(' and ', $m['codes']);
+        $cf = rtrim(rtrim(number_format($m['constant_factor'], 7, '.', ''), '0'), '.');
+
+        $lines = [
+            "**Monetization** converts {$codes} credits to cash. You file under **Leave & Benefits > "
+                . 'My Monetization** (**+ Request Monetization**), stating how many VL and SL days to '
+                . 'convert and why; the request waits as **pending** until HR decides.',
+            "Amount = **monthly salary × monetized days × {$cf}** — the system stores it on the request, "
+                . 'so the figure on your row is the figure you are paid.',
+            'Approval deducts the monetized days from your leave balances; a disapproved request '
+                . 'deducts nothing and carries the reason. You may cancel your own request while it is '
+                . 'still pending, and only an approved request can be printed.',
+        ];
+
+        if (!empty($m['statuses'])) {
+            $lines[] = 'A request is always one of: **' . implode('**, **', $m['statuses']) . '** '
+                . '(shown as Disapproved on screen for a refused one).';
+        }
+
+        $lines[] = '';
+        $lines[] = 'Ask "what is the status of my monetization request?" and I will look up your own rows.';
+
+        return implode("\n", $lines);
     }
 
     private function callAi(?User $user, string $prompt, float $temperature, int $maxTokens): ?string

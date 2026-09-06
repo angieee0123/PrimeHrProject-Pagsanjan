@@ -107,7 +107,7 @@ class AiChatService
         return match ($provider) {
             'openai' => 'gpt-4o-mini',
             'anthropic' => 'claude-sonnet-5',
-            default => 'llama-3.3-70b-versatile',
+            default => 'openai/gpt-oss-120b',
         };
     }
 
@@ -167,16 +167,28 @@ class AiChatService
 
         $response = null;
 
+        $payload = [
+            'model' => $config['model'],
+            'messages' => $messages,
+            'temperature' => $temperature,
+            'max_tokens' => $maxTokens,
+        ];
+
+        // gpt-oss models spend part of max_tokens on hidden reasoning before
+        // the visible answer. At this service's token budgets (400-900) that
+        // reasoning can consume the whole budget and leave an empty
+        // `message.content`, which is truthy-empty rather than null and so
+        // skips every caller's `?? degradedAnswer()` fallback. "low" keeps
+        // reasoning to a few tokens so the budget goes to the actual answer.
+        if (str_starts_with($config['model'], 'openai/gpt-oss')) {
+            $payload['reasoning_effort'] = 'low';
+        }
+
         try {
             $response = Http::timeout(30)->withHeaders([
                 'Authorization' => 'Bearer ' . $config['api_key'],
                 'Content-Type' => 'application/json',
-            ])->post($endpoint, [
-                'model' => $config['model'],
-                'messages' => $messages,
-                'temperature' => $temperature,
-                'max_tokens' => $maxTokens,
-            ]);
+            ])->post($endpoint, $payload);
         } catch (\Throwable $e) {
             Log::error("AI chat provider ({$config['provider']}) exception: " . $e->getMessage());
             self::$lastFailure = self::FAILURE_UNAVAILABLE;
@@ -184,7 +196,8 @@ class AiChatService
         }
 
         if ($response->successful()) {
-            return $response->json('choices.0.message.content');
+            $content = $response->json('choices.0.message.content');
+            return $content !== null && trim($content) !== '' ? $content : null;
         }
 
         if ($response->status() === 429) {
@@ -267,7 +280,7 @@ class AiChatService
         return [
             'provider' => 'groq',
             'api_key' => config('services.groq.api_key') ?: env('GROQ_API_KEY'),
-            'model' => config('services.groq.model', 'llama-3.3-70b-versatile'),
+            'model' => config('services.groq.model', 'openai/gpt-oss-120b'),
         ];
     }
 }
