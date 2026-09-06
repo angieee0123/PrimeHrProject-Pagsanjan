@@ -141,18 +141,83 @@ window.applyAdminLeaveFilters = function() {
     if (totalEl) totalEl.textContent = total;
 };
 
-window.toggleLeaveActionMenu = function(event, btn) {
-    event.stopPropagation();
-    const menu = btn.nextElementSibling;
-    const allMenus = document.querySelectorAll('.leave-action-menu');
-    allMenus.forEach(m => {
-        if (m !== menu) m.style.display = 'none';
-    });
-    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+// The row action menu.
+//
+// An open menu is moved to <body> and positioned against the viewport.
+// `.table-wrapper` scrolls and `.glass-shell .table-section` carries a
+// backdrop-filter, so an absolutely positioned dropdown inside the row is
+// clipped — only its first item ("View Details") stayed visible while
+// Approve/Disapprove were cut off. It is put back where it came from on
+// close, so the Blade stays the one copy of this markup.
+
+let openLeaveMenu = null;
+let openLeaveMenuHome = null;
+let openLeaveMenuButton = null;
+
+function closeLeaveActionMenu() {
+    if (!openLeaveMenu) return;
+
+    openLeaveMenu.style.display = 'none';
+    openLeaveMenu.style.position = 'absolute';
+    openLeaveMenu.style.left = '';
+    openLeaveMenu.style.top = '';
+    openLeaveMenu.style.right = '0';
+    openLeaveMenu.style.marginTop = '6px';
+    openLeaveMenuHome?.appendChild(openLeaveMenu);
+
+    openLeaveMenu = null;
+    openLeaveMenuHome = null;
+    openLeaveMenuButton = null;
 }
 
-document.addEventListener('click', () => {
-    document.querySelectorAll('.leave-action-menu').forEach(m => m.style.display = 'none');
+window.toggleLeaveActionMenu = function(event, btn) {
+    event.stopPropagation();
+
+    if (openLeaveMenuButton === btn) {
+        closeLeaveActionMenu();
+        return;
+    }
+
+    closeLeaveActionMenu();
+
+    const menu = btn.nextElementSibling;
+    if (!menu) return;
+
+    openLeaveMenu = menu;
+    openLeaveMenuHome = btn.parentElement;
+    openLeaveMenuButton = btn;
+
+    document.body.appendChild(menu);
+    menu.style.position = 'fixed';
+    menu.style.right = 'auto';
+    menu.style.marginTop = '0';
+    menu.style.display = 'block';
+
+    const anchor = btn.getBoundingClientRect();
+    const box = menu.getBoundingClientRect();
+    const gap = 6, margin = 8;
+
+    let left = anchor.right - box.width;
+    left = Math.min(left, window.innerWidth - box.width - margin);
+    left = Math.max(margin, left);
+
+    let top = anchor.bottom + gap;
+    if (top + box.height > window.innerHeight - margin) {
+        const above = anchor.top - box.height - gap;
+        top = above >= margin ? above : Math.max(margin, window.innerHeight - box.height - margin);
+    }
+
+    menu.style.left = `${Math.round(left)}px`;
+    menu.style.top = `${Math.round(top)}px`;
+}
+
+document.addEventListener('click', closeLeaveActionMenu);
+// A menu placed against the viewport does not travel with its row, so any
+// scroll or resize dismisses it rather than leaving it over an unrelated row.
+window.addEventListener('scroll', closeLeaveActionMenu, true);
+window.addEventListener('resize', closeLeaveActionMenu);
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLeaveActionMenu();
 });
 
 // Initialize reject button handler + pagination

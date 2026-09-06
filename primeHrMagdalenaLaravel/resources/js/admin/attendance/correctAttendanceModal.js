@@ -236,10 +236,20 @@ document.getElementById('correctForm').addEventListener('submit', function(e) {
         method: 'POST',
         body: formData,
         headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
         }
     })
-    .then(response => response.json())
+    .then(async response => {
+        // Parse defensively: an expired session (419), a redirect to login, or a
+        // server error all return non-JSON bodies otherwise.
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(data.message || `Request failed (${response.status})`);
+        }
+        return data;
+    })
     .then(data => {
         if (data.success) {
             closeCorrectModal();
@@ -260,7 +270,7 @@ document.getElementById('correctForm').addEventListener('submit', function(e) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error correcting attendance');
+        alert(error.message || 'Error correcting attendance');
     })
     .finally(() => {
         btn.innerHTML = originalHTML;
