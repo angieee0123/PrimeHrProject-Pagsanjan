@@ -617,6 +617,359 @@ file on the server.
 `tests/Feature/WebsiteContentTest.php` pins the authorisation, the vocabularies,
 the URL scheme filter, and that markup saved into a field comes back escaped.
 
+---
+
+## Notifications
+
+Every approval workflow announces itself through **one** service. There is no
+second notification system: Laravel's `notifications` table here is the app's
+own (`App\Models\Notification`), not the framework's `DatabaseNotification`
+shape, and `App\Notifications\*` is used only for the two *emails* (credentials,
+password reset), which are a different channel with a different audience.
+
+```
+action succeeds  →  NotificationService::<event>()  →  deliver()  →  notifications row
+                                                                          │
+                          bell polls /api/notifications/feed  ←───────────┘
+                                     │
+                    click → /notifications/{id}/open → mark read → authorised redirect
+```
+
+### Three bells, one table
+
+`notifications.audience` decides which bell a row appears in: `admin` (work
+queued for HR to act on), `employee` (your own records), `mayor` (oversight of
+what was decided), `system` (broadcast — shows in all three). One person can
+hold several roles, so this is what stops an HR officer's own leave approval
+landing in the queue they work from, and vice versa.
+
+- **The mayor had no bell at all.** The panel existed as two pasted copies —
+  an admin one and an employee one — and the third area was simply left out,
+  so nothing in the system could tell the mayor anything. All three are now
+  `@include('partials.notificationPanel', ['audience' => …])`; the per-area
+  files are three lines each, kept only because ~30 pages include them by name.
+- **The mayor is told what was *decided*, never what is queued.** The mayor's
+  area is read-only, so a pending item in that list would imply an action those
+  screens do not offer. Leave, travel order and pass slip decisions carry a
+  `mayor` copy alongside the employee's; monetization does not, because there is
+  no mayor monetization page to link to and **a notification must never point
+  somewhere its recipient cannot go**.
+
+### Four properties every notification has
+
+They hold because every writer goes through `NotificationService::deliver()`.
+
+- **A notification can never break what it announces.** `deliver()` catches
+  everything and logs it. It is also why the call sites moved: a `deliver()`
+  *inside* a `DB::transaction` is still inside it, and `LeaveController` was
+  writing the bell before `DB::commit()` — so an employee could be told their
+  leave could not be filed because the system could not tell HR about it. Every
+  call now sits after the commit. `payrollGenerated()` already did.
+- **It is idempotent.** Every writer passes a `dedupe_key` naming the event
+  (`leave:41:approved`), unique per *recipient* — not globally, because one
+  decision legitimately reaches the filer and every companion under the same
+  key. A double-clicked Approve leaves one row.
+- **Recipients are resolved in one place.** `approvers()` and `overseers()` are
+  the only definitions of who handles and who watches. Both drop inactive
+  accounts (they cannot sign in, so the row would never be read) and **the
+  actor** — an HR officer filing on an employee's behalf does not need "New
+  Leave Request" for the request they just typed.
+- **It says which record, in the words the screens use.** `statusLabel()` maps
+  the stored `rejected` to "Disapproved", because that is what every tab, badge
+  and printed form in this system calls it — telling an employee their request
+  was "Rejected" sends them looking for a word that is on none of their pages.
+  `dateRange()` and `reasonClause()` put the period and the refusal reason in
+  the sentence; "your leave request" cannot be told apart from the other two
+  the employee has open.
+
+### A click is a server decision
+
+`GET /notifications/{id}/open` marks the row read and *then* chooses the
+destination. The panel used to mark it read by `fetch` and jump to a URL read
+out of a DOM attribute. Now the link is re-read from the row and refused if it
+is off-site (an open redirect waiting for a writer) or in an area this account
+may not enter — otherwise a stored link would be a door around
+`EnsureRoleForArea`, and the row would already be read at the 403. A
+notification with no link redirects *back*, not to a dashboard nobody asked for.
+
+Cards are real `<a>` elements for the same reason, which also makes them
+keyboard-reachable and middle-clickable as the onclick div never was.
+
+**Monetization links carry `tab` but never `highlight`.** Both leave pages read
+`highlight` as a *leave application* id — the admin handler clicks
+`[data-leave-app-id="…"]` — so a monetization id there opens whichever leave
+application shares the number.
+
+### Everything is scoped to the caller's own rows
+
+Every query in `NotificationController` starts at
+`where('user_id', Auth::id())`, and the `audience` a client sends can only
+narrow that further. `audience()` re-checks it against the caller's real roles,
+so an account whose access was later narrowed cannot name the admin bell and
+read admin-audience rows it still owns. An id belonging to someone else is a
+**404**, not a 403 — "no such notification" is the truthful answer from where
+that caller stands.
+
+`markAllAsRead()` is the one place an unrecognised audience widens rather than
+narrows (it clears everything): narrowing a *read* shows somebody less, which is
+safe, but silently narrowing a *write* leaves a badge stuck at a count nothing
+can reset.
+
+### History, and what is kept
+
+There are two doors to it and they are deliberately different things: the bell
+is a floating button pinned top-right that opens a dropdown of the newest few,
+and **`partials/navNotificationRow.blade.php` is the sidebar row** that opens
+the full page. One partial for all three rails, sitting *ungrouped* beside
+Dashboard and AI Assistant in each — the admin rail collapses its groups, and an
+unread badge inside a shut section is a badge nobody sees. Same position in
+every rail, so somebody holding two roles does not have to find it twice.
+
+Its badge and the bell's both come from `Notification::unreadCountFor()`, which
+memoises per request: the two sit on one page, and a rail saying 3 beside a bell
+saying 5 is worse than neither showing one. They cap at the same 99+ for the
+same reason. On a collapsed rail the numeric badge is swapped for a dot over the
+icon — the label it normally sits beside is `display:none` there, and a count
+floating in the empty half of the row reads as belonging to nothing.
+
+"View all notifications" is a real page per area — `/{admin,employee,mayor}/notifications`
+— registered in a loop so the role gate on the prefix decides access, the same
+shape as the AI assistant's routes. It paginates (a year of approvals is not a
+page), filters by read state and category, and offers per-row mark-read /
+mark-unread / delete. Category chips are built from the categories the reader
+actually has: a chip that always returns nothing reads as a bug.
+
+`notifications:prune` (scheduled weekly) deletes **read** notifications older
+than `config('notifications.retention.read_days')`, default 180. Unread ones are
+never pruned at any age — an unread notification is work nobody has looked at.
+This is only safe because the notification is not the record: the leave
+application, the travel order and the audit log all outlive it.
+
+### Presentation
+
+`Notification::CATEGORIES` owns the label, icon and badge gradient for each
+category, read by the card partial — one definition for the bell, the polled
+feed and the history page. Those gradients are the only fixed colours in the
+feature; everything else is a theme variable. Same rule as the charts: a
+category hue exists to tell leave from travel at a glance, and re-tinting it
+toward the palette is how that stops working.
+
+Unread is marked three ways — a left rule, a filled ground and a dot — so the
+distinction survives a monochrome screen and colour-vision deficiency, which a
+background tint alone does not.
+
+### Adding a notification to a new module
+
+1. Add a method to `NotificationService` that calls `deliver()` or
+   `deliverMany(approvers(…) | overseers(…), …)`.
+2. Give it a `dedupe_key` naming the event, and a `link` to a page the audience
+   can open.
+3. Call it **after** the commit, never inside the transaction.
+4. If the category is new, add it to `Notification::CATEGORIES` — the card reads
+   the label and icon straight out of it, and `NotificationServiceTest` fails on
+   a category missing either.
+
+```bash
+php artisan test tests/Unit/NotificationServiceTest.php \
+  tests/Feature/NotificationAccessTest.php
+```
+
+---
+
+## The Leave & Travel Calendar
+
+Two surfaces over the same idea, and they are deliberately one calendar:
+
+| Surface | Question it answers | Route · view |
+|---|---|---|
+| Admin / mayor | *Who is out?* | `/{admin,mayor}/leave-calendar` → `partials/leaveCalendar/calendar.blade.php` (`.lc-*`) |
+| Employee | *When am I out?* | `/employee/leave-calendar` → `employee/leaveCalendar/leaveCalendar.blade.php` (`.ec-*`) |
+
+Both render full-page and inside a floating-button modal (`?embed=1` →
+`layouts/calendarEmbed`), and both offer Month / Week / Day. Scoping is the
+controllers': `EmployeeLeaveCalendarController` never queries anything but
+`Auth::user()->employee`; `AdminLeaveCalendarController` is the org-wide one and
+`MayorLeaveCalendarController` inherits it.
+
+### One colour and shape vocabulary, in one file
+
+`resources/css/shared/leaveCalendarTokens.css` holds it, and **both**
+stylesheets `@import` it. It is the same green/amber/blue as the busy-date
+pickers (`busyDatesCalendar.js`), so a marker means the same thing wherever it
+is drawn — which matters because one person can hold both roles and see both
+calendars.
+
+Those three hues are **fixed, not derived from the active theme** — same rule
+as the chart categorical hues and the notification category gradients: they
+exist to tell approved leave from pending from travel, and re-tinting them
+toward the palette is how that stops working. Everything that is *not* an
+identity hue — surfaces, rules, ink, the today ring — is a theme variable, so
+the calendar still follows Settings → Appearance.
+
+**Colour is never the only cue.** Each record also carries a shape, so the grid
+survives a monochrome screen and colour-vision deficiency:
+
+| | leave | travel | pending |
+|---|---|---|---|
+| admin marker | circle | squircle | dashed ring |
+| employee pill | round dot | square dot | dashed outline |
+
+The legend draws those marks *as the grid draws them* rather than three plain
+circles, so the key can be matched to a cell without reading the words. Its
+last item names the dash itself, because that cue marks a pending travel order
+as well as a pending leave and there is no fourth colour to look for.
+
+### The whole month, at one glance, with nothing cut off
+
+The goal is one sentence: open the calendar and see the first of the month to
+the last without scrolling **inside** it, while a date holding more records
+takes the height it needs. Four rules carry that, and each is load-bearing:
+
+- **Rows size to their content.** Both grids run `grid-auto-rows:
+  minmax(var(--cal-row-min), auto)`, so a week row is at least the floor, at
+  least as tall as the busiest date in it, and free to grow past both. The
+  embed used `1fr`, which divides the height into equal rows whatever is in
+  them — the row holding a busy Tuesday got exactly the empty week's height and
+  its markers went under the cell's edge. **`--cal-row-min` is declared on the
+  grid (`.lc-days` / `.ec-days`), never on the cell**: `grid-auto-rows` resolves
+  against the container, so a cell-level override silently moves only
+  `min-height` and leaves the tracks at the default.
+- **Cells do not clip.** `overflow: hidden` is gone from `.lc-day` / `.ec-day`.
+  The admin's marker row wraps onto a second line, the employee's pill labels
+  wrap instead of ellipsing, and the cell grows to hold them. A face sliced in
+  half by a cell border was never a smaller answer, only a wrong one.
+- **How many records a cell shows is measured, not typed.**
+  `resources/js/shared/calendarFit.js` owns it, for both surfaces and both
+  contexts. The cap it replaces was `nth-child(n+4)` / `nth-child(n+3)` in CSS:
+  a fixed three and two that knew nothing about the window, so they hid a fourth
+  person on a screen with room for eight and still overflowed a short one. Each
+  week row now gets the largest count the month as a whole can still pay for, so
+  a date with two records shows both in a month where another date has fourteen.
+- **The budget is the modal's height, or the page's fold.** Inside
+  `.lc-embed-wrap` the grid is `flex: 1`, so the height it is handed *is* the
+  budget. On the full page nothing bounds it, so the budget is what is left of
+  the viewport below the grid's own top — because "the whole month at one
+  glance" is not satisfied by a calendar you scroll the *page* to see the end
+  of. Measured from the document, so it does not change with scroll position.
+- **The floor adapts, then the cell itself.** Six times `--cal-row-min` is
+  taller than the modal's grid on an ordinary laptop, so the month overflowed
+  before a single record had been counted — capping records cannot fix a floor
+  that overflows. The pass lowers the floor (never raises it), and if one record
+  a date still will not fit it squeezes the cell a step at a time: `compact`
+  (smaller date badge and marker), then `dense` — which is the type-mark
+  treatment the ≤768px (admin) and ≤560px (employee) rules already use, applied
+  by the height a row can have rather than only by the width it has. A cell out
+  of height has the same problem as one out of width, so it gets the same
+  answer. Each step is re-measured, never adjusted by a guess: those sizes live
+  in CSS beside the rest of the calendar.
+
+**An empty month is the case to test first.** October has no leave and no travel
+in it, and it was the one month that still scrolled after all of the above — the
+pass returned early when a month held no records, so the adaptive floor never
+ran and five rows stayed at their full 118px. A month with nothing in it still
+has five or six week rows to fit, and they are what overflows. The early return
+is now on `rows`, not on records.
+
+Two things follow that are easy to get wrong:
+
+- **Hidden records stay in the DOM** (`hidden`, not removed). The admin tooltip,
+  the `.lc-day-count` badge and the employee's day popover are all built from
+  them, so "+3" has to open a list that really does hold three more.
+- **The "+N" chip ships `hidden` with no number.** How many are hidden is not
+  knowable server-side — it depends on the window the reader opened the calendar
+  in — so Blade renders the chip and the fit pass fills it in. With JavaScript
+  off it stays hidden and every record shows, which is why the CSS default has
+  to be "show everything" rather than a cap.
+- **The chip is costed by where it actually sits.** The admin's rides at the end
+  of the marker row and takes its own line only when it no longer fits beside
+  them; the employee's sits under the stack, except at `dense`, where it moves
+  into the date row's spare corner and costs the cell nothing. `measure()` reads
+  its `position` rather than assuming, so CSS stays the one place that decides.
+  Costing it as free is what let a cell claim a height the chip then sat 6px
+  below.
+
+`minmax(floor, auto)` is not a guarantee on its own, and this is the subtlety
+the fit pass exists for: a grid track only grows to its content **while there is
+free space to grow into**. Give the grid less height than the sum of its rows'
+contents and every track stays at the floor and the content spills out of the
+cell instead. That is why "does the sum of the rows fit the grid" is the exact
+question the pass asks before letting a cell show one more record — and why,
+when not even one record a date fits, it stops pinning the grid to the modal's
+height (`.is-cal-overflowing` → `flex: 0 0 auto`) so the rows can size
+themselves and `.lc-embed-wrap` scrolls instead of cropping. That scroll is a
+fallback for a window that has run out of height, never the mechanism.
+
+Week view has no chip and no cap: it has the height to list everyone, so
+truncating there would hide rows that already fit. Its columns carry a 220px
+floor rather than a fixed 320px height — a week with one record should not print
+200px of empty card under it.
+
+The admin month markers also **no longer overlap**. A −14px pile is how a face,
+a ring colour and a dashed outline all end up half-covered by the next avatar;
+they sit in a wrapping row of whole marks now. Pending markers are dashed rather
+than faded — the old `opacity: .62` dimmed the very state a reader is looking
+for.
+
+### Responsive: what each width gives up
+
+Widest-first, and each step surrenders what the width can no longer pay for.
+The load-bearing step is the last one:
+
+- **≤1180** stat strip folds to two columns; avatars 26px.
+- **≤900** week view becomes one tall column per day; avatars 24px; the
+  employee's month pills drop their dot, because the pill's own tint and dashed
+  outline already say type and status and those 13px are two more letters of
+  the leave's name.
+- **≤768** the month marker stops being a face and becomes a **type mark** — a
+  green circle, an amber dashed circle, a blue square. A 26px avatar is
+  unreadable in an 80px cell and a row of them does not fit. The count badge
+  still states the real total and the date still opens the day view, which is
+  where the names are. The "+N" chip shrinks with the marks rather than being
+  switched off: the fit pass *measures* that element, so one set to
+  `display: none` is a truncation it cannot cost.
+- **≤720 / ≤560** cell padding, type and the stat strip compact; the employee's
+  "+N more" drops the word and keeps the number; the admin's count badge moves
+  to the cell corner, where it takes no width from the date.
+
+Two things at ≤768 are corrections to the shared glass system rather than
+choices. `.glass-shell .filter-card-fields` stacks into a column there, which is
+right for a bar of full-width selects and wrong for the month navigator — four
+small controls and a segmented switch, stacked into a 300px tower above a
+calendar with no room left; only `.lc-nav` / `.ec-nav` opt out. And the control
+card is laid out as **plain blocks** there: as nested wrapping flex containers
+it measured ~90px taller than the sum of its parts, and that slack printed as an
+empty band under the Filter button.
+
+### Checking it
+
+There is no PHPUnit case for the calendar; it is markup, CSS and one measuring
+pass, none of which PHPUnit can see. It was verified in a real browser
+(Playwright + Chromium) against the built stylesheets, driving both surfaces at
+full page and in the modal across desktop, tablet and phone widths, and
+asserting three properties directly: the calendar element never scrolls, no
+record's box escapes its own cell, and a busy row is measurably taller than a
+quiet one. Two bugs only that harness could have found — the "+N" chip wrapping
+onto an uncosted second line, and an empty week row being costed at zero instead
+of a full track — are why it is worth rebuilding rather than reasoning about.
+
+The sweep that has to stay green is eight month shapes — 4/5/6-week, empty and
+loaded, up to a pathological 25 records on one date — across both surfaces, full
+page and modal, at 1440x900, 1366x768, tablet and phone: 80 scenarios. Three
+bugs only that harness could have found are why it is worth rebuilding rather
+than reasoning about:
+
+- the "+N" chip wrapping onto a line nothing had costed;
+- an empty week row costed at zero instead of a full track;
+- and the empty-month early return above, which no amount of reading the
+  capping logic would have shown, because the capping logic was correct.
+
+When changing a marker size, a breakpoint or anything the pass measures,
+re-check the five that interact: a date with more records than fit, a long leave
+name, a six-week month in the modal on a 768px-tall window, a month with no
+records at all, and a 390px screen.
+
+---
+
 ## Theming
 
 The whole UI's colour comes from one seed colour, generated by
