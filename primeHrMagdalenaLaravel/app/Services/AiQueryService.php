@@ -283,8 +283,8 @@ class AiQueryService
         $orgWide = $this->policy->hasOrgWideAccess($user);
 
         $opening = $orgWide
-            ? "I'm the PRIME HRIS Assistant. You have organisation-wide access, so I can help with:"
-            : "I'm the PRIME HRIS Assistant. I can help you with:";
+            ? "I'm the HRIS Assistant. You have organisation-wide access, so I can help with:"
+            : "I'm the HRIS Assistant. I can help you with:";
 
         $closing = $orgWide
             ? "\n\nAsk in plain language — English or Tagalog. I can also draw charts and export any table to PDF."

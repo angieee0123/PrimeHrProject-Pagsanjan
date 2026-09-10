@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In · PRIME HRIS</title>
+    <title>Sign In · HRIS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -34,7 +34,7 @@
     <div class="auth-body">
 
         <div class="auth-page-head">
-            <span class="pub-eyebrow">EMPLOYEE PORTAL · PRIME HRIS</span>
+            <span class="pub-eyebrow">EMPLOYEE PORTAL · HRIS</span>
             <h1 class="auth-page-title">Sign in to your account</h1>
             <p class="auth-page-sub">Enter your email and password to access the portal.</p>
         </div>

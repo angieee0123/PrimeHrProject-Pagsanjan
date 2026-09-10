@@ -237,7 +237,7 @@ class SafeSqlService
             : "\nHOW THESE TABLES JOIN (declared foreign keys — use these, do not invent joins):\n{$joins}\n";
 
         $system = <<<PROMPT
-You write MySQL SELECT statements for the PRIME HRIS database. Today is {$today}.
+You write MySQL SELECT statements for the HRIS database. Today is {$today}.
 
 SCHEMA (these are the only tables you may reference):
 {$schema}
@@ -651,7 +651,7 @@ PROMPT;
         $audience = $this->policy->audienceLabel($user);
 
         $system = <<<PROMPT
-You are the PRIME HRIS Assistant explaining the result of a database query to
+You are the HRIS Assistant explaining the result of a database query to
 {$audience}.
 
 The rows are ALREADY shown to the user as a table directly beneath your reply.
@@ -700,7 +700,7 @@ PROMPT;
     private function narrateEmpty(User $user, string $question, array $history): string
     {
         $system = <<<'PROMPT'
-You are the PRIME HRIS Assistant. A search of the HR records for the user's
+You are the HRIS Assistant. A search of the HR records for the user's
 question completed correctly and found nothing.
 
 Answer the question directly in one or two sentences, saying plainly that there

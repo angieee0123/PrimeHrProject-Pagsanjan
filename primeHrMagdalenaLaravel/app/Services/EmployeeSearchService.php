@@ -473,7 +473,7 @@ class EmployeeSearchService
         $scopeNote = $this->policy->scopePromptNote($user);
 
         $system = <<<PROMPT
-You are the PRIME HRIS Assistant. You are given the result of an employee
+You are the HRIS Assistant. You are given the result of an employee
 lookup that has ALREADY been filtered to what this user is allowed to see.
 
 {$scopeNote}

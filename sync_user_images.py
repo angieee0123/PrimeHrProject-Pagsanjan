@@ -25,7 +25,7 @@ LARAVEL_APP_DIR = os.path.join(ROOT, "primeHrMagdalenaLaravel")
 SOURCE_FOLDER = os.path.join(ROOT, "user_images")
 PUBLIC_DISK = os.path.join(LARAVEL_APP_DIR, "storage", "app", "public")
 ENV_FILE = os.path.join(LARAVEL_APP_DIR, ".env")
-MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe" if sys.platform == "win32" else "mysql"
+MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" if sys.platform == "win32" else "mysql"
 
 # `1782459335_1.png` -> `1`
 NUMBERED_NAME = re.compile(r"^\d+_(\d+)(\.[A-Za-z0-9]+)$")
@@ -49,7 +49,7 @@ def read_env():
         "host": env.get("DB_HOST", "127.0.0.1"),
         "port": env.get("DB_PORT", "3306"),
         "user": env.get("DB_USERNAME", "root"),
-        "password": env.get("DB_PASSWORD", ""),
+        "password": env.get("DB_PASSWORD", "root"),
         "database": env.get("DB_DATABASE", "primehrismagdalena"),
     }
 

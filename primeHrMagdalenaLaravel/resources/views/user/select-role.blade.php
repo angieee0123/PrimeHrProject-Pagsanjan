@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Role · PRIME HRIS</title>
+    <title>Select Role · HRIS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -37,7 +37,7 @@
     <div class="auth-body">
 
         <div class="auth-page-head">
-            <span class="pub-eyebrow">EMPLOYEE PORTAL · PRIME HRIS</span>
+            <span class="pub-eyebrow">EMPLOYEE PORTAL · HRIS</span>
             <h1 class="auth-page-title">Choose how you want to continue</h1>
             <p class="auth-page-sub">Your account has more than one role. Select the dashboard you want to access.</p>
         </div>

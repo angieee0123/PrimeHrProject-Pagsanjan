@@ -92,7 +92,7 @@ class TrainingExportController extends Controller
             ) {
                 $csv->letterhead(
                     'Training Verification Report',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     'CSC PDS Section IV — Learning & Development · Submissions on file as of ' . now()->format('F d, Y')
                 );
 

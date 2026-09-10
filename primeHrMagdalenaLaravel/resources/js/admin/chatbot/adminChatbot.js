@@ -9,7 +9,7 @@ let isAwaitingReply = false;
 // Captured at load so "Clear conversation" can put the starter prompts back.
 let chatSuggestHtml = '';
 
-const CHATBOT_GREETING = "Hello! I'm the PRIME HRIS Assistant. I can help you with employee information, departments, and HR data. I understand natural questions like \"How many people work here?\" or \"Find John Doe\" or \"Who's in the Mayor's office?\" Try asking me anything!";
+const CHATBOT_GREETING = "Hello! I'm the HRIS Assistant. I can help you with employee information, departments, and HR data. I understand natural questions like \"How many people work here?\" or \"Find John Doe\" or \"Who's in the Mayor's office?\" Try asking me anything!";
 const CHATBOT_BOT_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
 
 function chatbotTimestamp(iso) {

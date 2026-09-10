@@ -102,7 +102,7 @@ class CsvReportWriter
 
         $this->blank();
         $this->row([mb_strtoupper($title)]);
-        $this->row([$subtitle !== '' ? $subtitle : 'Human Resource Management Office · PRIME HRIS']);
+        $this->row([$subtitle !== '' ? $subtitle : 'Human Resource Management Office · HRIS']);
 
         if ($coverage !== '') {
             $this->row([$coverage]);
@@ -244,7 +244,7 @@ class CsvReportWriter
     public function notes(array $extraLines = [], bool $containsPersonalData = true): self
     {
         $this->blank();
-        $this->row(['This is a system-generated report from PRIME HRIS. Figures reflect the records on file as of the generation date above.']);
+        $this->row(['This is a system-generated report from HRIS. Figures reflect the records on file as of the generation date above.']);
 
         foreach ($extraLines as $line) {
             $this->row([$line]);

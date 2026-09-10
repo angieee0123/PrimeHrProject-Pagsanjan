@@ -1,6 +1,6 @@
 # AI Chatbot Architecture
 
-This document describes the architecture of the AI Assistant feature in PRIME HRIS Pagsanjan. The implementation is a Laravel-based, permission-aware assistant that can answer HR questions, search employee records, find uploaded files, generate reports, create charts, draft workflow documents, and export results as PDF.
+This document describes the architecture of the AI Assistant feature in HRIS Pagsanjan. The implementation is a Laravel-based, permission-aware assistant that can answer HR questions, search employee records, find uploaded files, generate reports, create charts, draft workflow documents, and export results as PDF.
 
 ---
 

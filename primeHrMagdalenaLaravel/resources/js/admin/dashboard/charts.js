@@ -114,11 +114,11 @@ function initCharts() {
     attendanceChart = new Chart(ctx2, {
         type: 'line',
         data: {
-            labels: attendanceData.week.labels,
+            labels: attendanceData.labels,
             datasets: [
                 {
                     label: 'Attendance Rate (%)',
-                    data: attendanceData.week.data,
+                    data: attendanceData.data,
                     borderColor: themeColor('--theme-accent', '#3121ca'),
                     backgroundColor: gradientAtt,
                     borderWidth: 2.5,
@@ -133,7 +133,7 @@ function initCharts() {
                 },
                 {
                     label: 'Late Arrivals (%)',
-                    data: attendanceData.week.lateData,
+                    data: attendanceData.lateData,
                     borderColor: themeColor('--theme-danger', '#c33228'),
                     backgroundColor: 'rgba(142, 30, 24, 0.1)',
                     borderWidth: 2,
@@ -148,7 +148,7 @@ function initCharts() {
                 },
                 {
                     label: 'Absent (%)',
-                    data: attendanceData.week.absentData,
+                    data: attendanceData.absentData,
                     borderColor: themeColor('--theme-warning', '#916e18'),
                     backgroundColor: 'rgba(109, 40, 217, 0.1)',
                     borderWidth: 2,
@@ -314,24 +314,184 @@ function switchPeriodChart(period) {
 }
 window.switchPeriodChart = switchPeriodChart;
 
-window.switchAttendanceChart = function (period) {
-    const chartCard = document.getElementById('attendanceChart').closest('.chart-card');
-    const buttons = chartCard.querySelectorAll('.chart-tab');
-    buttons.forEach(t => t.classList.remove('active'));
+/* ══════════════════════════════════════════════════════════════════════
+   Attendance Trend — bucket size (Week / Month / Year) plus WHICH week,
+   month or year it is drawn over.
 
-    // Find and activate the correct button
-    buttons.forEach((btn, idx) => {
-        if ((period === 'week' && idx === 0) || (period === 'month' && idx === 1) || (period === 'year' && idx === 2)) {
-            btn.classList.add('active');
-        }
-    });
+   The card used to be pinned to "now": week was the last seven days,
+   month the last thirty, year the last twelve. Week/Month/Year are now
+   the bucket size and the picker beside them chooses the period, served
+   by AttendanceTrendService through #attendanceTrendCard's data-endpoint.
 
-    attendanceChart.data.labels = attendanceData[period].labels;
-    attendanceChart.data.datasets[0].data = attendanceData[period].data;
-    attendanceChart.data.datasets[1].data = attendanceData[period].lateData;
-    attendanceChart.data.datasets[2].data = attendanceData[period].absentData;
-    attendanceChart.update();
+   The heading and the picker are only ever moved once a payload has been
+   applied, so a failed request cannot leave them describing a period the
+   chart is not showing.
+   ══════════════════════════════════════════════════════════════════════ */
+
+const attCard = document.getElementById('attendanceTrendCard');
+const attCanvasWrap = document.getElementById('attendanceCanvasWrap');
+const attNote = document.getElementById('attendanceChartNote');
+const attSub = document.getElementById('attendanceChartSub');
+const attPeriodTabs = document.getElementById('attendancePeriodTabs');
+const attAnchorInput = document.getElementById('attendanceAnchor');
+const attPrev = document.getElementById('attendancePrev');
+const attNext = document.getElementById('attendanceNext');
+
+// One input, three shapes: a week is picked by a day, a month by a month, a
+// year by a year. `format` turns the ISO anchor the server returns into the
+// value that input expects.
+const ATT_INPUT = {
+    week:  { type: 'date',   format: (iso) => iso,           min: '2000-01-01', max: '2100-12-31' },
+    month: { type: 'month',  format: (iso) => iso.slice(0, 7), min: '2000-01',   max: '2100-12' },
+    year:  { type: 'number', format: (iso) => iso.slice(0, 4), min: '1900',      max: '2100' },
 };
+
+// What is on screen right now — seeded from the week the server rendered.
+let attState = {
+    period: attendanceData.period,
+    anchor: attendanceData.anchor,
+    canStepNext: attendanceData.can_step_next,
+};
+
+// Guards against a slow early request landing after a later one.
+let attRequest = 0;
+
+function setAttendanceNote(text) {
+    attNote.textContent = text || '';
+    attNote.hidden = !text;
+    attCanvasWrap.classList.toggle('is-dimmed', Boolean(text));
+}
+
+function syncAttendanceControls() {
+    const config = ATT_INPUT[attState.period] || ATT_INPUT.week;
+
+    // type first: changing it resets the field, so min/max/value are set after.
+    attAnchorInput.type = config.type;
+    attAnchorInput.min = config.min;
+    attAnchorInput.max = config.max;
+    attAnchorInput.value = config.format(attState.anchor);
+
+    attNext.disabled = !attState.canStepNext;
+
+    attPeriodTabs.querySelectorAll('.chart-tab').forEach((tab) => {
+        tab.classList.toggle('active', tab.dataset.period === attState.period);
+    });
+}
+
+function applyAttendanceSeries(payload) {
+    attendanceChart.data.labels = payload.labels;
+    attendanceChart.data.datasets[0].data = payload.data;
+    attendanceChart.data.datasets[1].data = payload.lateData;
+    attendanceChart.data.datasets[2].data = payload.absentData;
+    attendanceChart.update();
+
+    attState = {
+        period: payload.period,
+        anchor: payload.anchor,
+        canStepNext: payload.can_step_next,
+    };
+
+    attSub.textContent = payload.sublabel;
+
+    if (payload.has_data) {
+        setAttendanceNote('');
+    } else if (payload.in_future) {
+        setAttendanceNote('Nothing has been recorded yet for ' + payload.label + '.');
+    } else {
+        setAttendanceNote('No attendance records for ' + payload.label + '.');
+    }
+
+    syncAttendanceControls();
+}
+
+async function loadAttendancePeriod(period, anchor) {
+    if (!attCard || !attendanceChart) return;
+
+    const token = ++attRequest;
+    attCard.classList.add('is-att-loading');
+
+    try {
+        const url = new URL(attCard.dataset.endpoint, window.location.origin);
+        url.searchParams.set('period', period);
+        if (anchor) url.searchParams.set('date', anchor);
+
+        const response = await fetch(url, {
+            headers: { Accept: 'application/json' },
+            credentials: 'same-origin',
+        });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+
+        const payload = await response.json();
+        if (token !== attRequest) return; // superseded by a newer request
+        applyAttendanceSeries(payload);
+    } catch (error) {
+        if (token !== attRequest) return;
+        // Keep the last good chart and say what is on screen, rather than
+        // showing the old line under the new period's heading.
+        syncAttendanceControls();
+        setAttendanceNote('Could not load attendance data for that period. Showing ' + attSub.textContent + '.');
+    } finally {
+        if (token === attRequest) attCard.classList.remove('is-att-loading');
+    }
+}
+
+/** The anchor moved one bucket, in the direction the stepper arrows point. */
+function stepAttendanceAnchor(direction) {
+    const [year, month, day] = attState.anchor.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+
+    if (attState.period === 'week') {
+        date.setUTCDate(date.getUTCDate() + 7 * direction);
+    } else if (attState.period === 'month') {
+        date.setUTCDate(1);
+        date.setUTCMonth(date.getUTCMonth() + direction);
+    } else {
+        date.setUTCFullYear(date.getUTCFullYear() + direction);
+    }
+
+    return date.toISOString().slice(0, 10);
+}
+
+/** The picker's value as a full date, or null when it is empty or half-typed. */
+function readAttendanceAnchor() {
+    const raw = attAnchorInput.value;
+    if (!raw) return null;
+
+    if (attState.period === 'month') return /^\d{4}-\d{2}$/.test(raw) ? raw + '-01' : null;
+    if (attState.period === 'year') return /^\d{4}$/.test(raw) ? raw + '-01-01' : null;
+
+    return /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : null;
+}
+
+// Switching bucket size keeps you where you are: whatever is on screen becomes
+// the anchor of the new view, so "Month" opens the month you were looking at.
+// The tabs are wired by listener rather than by inline onclick — the employee
+// dashboard has a window.switchAttendanceChart of its own, and one page's
+// handler must never be reachable from the other's markup.
+attPeriodTabs.addEventListener('click', (event) => {
+    const tab = event.target.closest('.chart-tab');
+    if (!tab) return;
+
+    const period = tab.dataset.period;
+    if (!ATT_INPUT[period] || period === attState.period) return;
+
+    loadAttendancePeriod(period, attState.anchor);
+});
+
+attPrev.addEventListener('click', () => loadAttendancePeriod(attState.period, stepAttendanceAnchor(-1)));
+attNext.addEventListener('click', () => loadAttendancePeriod(attState.period, stepAttendanceAnchor(1)));
+
+attAnchorInput.addEventListener('change', () => {
+    const anchor = readAttendanceAnchor();
+    // An emptied or half-typed field is not a period: put the last one back.
+    if (!anchor) {
+        syncAttendanceControls();
+        return;
+    }
+
+    loadAttendancePeriod(attState.period, anchor);
+});
+
 
 // Initialise with the week view.
 //
@@ -345,13 +505,8 @@ window.addEventListener('load', () => {
 
     switchPeriodChart('week');
 
-    const attendanceChartCard = document.getElementById('attendanceChart').closest('.chart-card');
-    attendanceChartCard.querySelectorAll('.chart-tab').forEach((t, idx) => {
-        t.classList.toggle('active', idx === 0);
-    });
-
-    attendanceChart.data.labels = attendanceData['week'].labels;
-    attendanceChart.data.datasets[0].data = attendanceData['week'].data;
-    attendanceChart.data.datasets[1].data = attendanceData['week'].lateData;
-    attendanceChart.update();
+    // The server already rendered the current week into window.dashboardChartData,
+    // so this adopts that payload (heading, picker and empty state included)
+    // instead of asking for the same week again.
+    applyAttendanceSeries(attendanceData);
 });

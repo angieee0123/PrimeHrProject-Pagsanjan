@@ -11,7 +11,7 @@
                 </div>
                 <div class="ddtr-header-titles">
                     <span class="ddtr-title" id="ddtrModalTitle">Detailed Time Record</span>
-                    <span class="ddtr-subtitle">PRIME HRIS · Attendance</span>
+                    <span class="ddtr-subtitle">HRIS · Attendance</span>
                 </div>
                 <span class="ddtr-period-pill" id="detailedPeriod">{{ $periodDisplay }}</span>
             </div>

@@ -37,7 +37,7 @@
                 </span>
                 <div class="lc-modal-head-text">
                     <span class="lc-modal-head-h3">Leave &amp; Travel Calendar</span>
-                    <span class="lc-modal-head-sub">PRIME HRIS · Who is out on leave or travel</span>
+                    <span class="lc-modal-head-sub">HRIS · Who is out on leave or travel</span>
                 </div>
             </div>
             <button type="button" class="lc-modal-close" onclick="closeLeaveCalModal()" aria-label="Close">

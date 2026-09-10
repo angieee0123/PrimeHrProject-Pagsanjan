@@ -63,21 +63,6 @@ const WIZARD_VALIDATORS = {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) return 'Enter a valid email address.';
         return null;
     },
-    password: (value) => {
-        if (!value) return 'Password is required.';
-        if (value.length < 8) return 'Password must be at least 8 characters long.';
-        if (!/[A-Z]/.test(value)) return 'Password must contain an uppercase letter.';
-        if (!/[a-z]/.test(value)) return 'Password must contain a lowercase letter.';
-        if (!/[0-9]/.test(value)) return 'Password must contain a number.';
-        if (!/[!@#$%^&*]/.test(value)) return 'Password must contain a special character (!@#$%^&*).';
-        return null;
-    },
-    password_confirm: (value, modal) => {
-        const pw = modal.querySelector('[name="password"]')?.value || '';
-        if (!value) return 'Please confirm your password.';
-        if (value !== pw) return 'Passwords do not match.';
-        return null;
-    },
     appointment_date: (value) => (value ? null : 'Appointment date is required.'),
     mobile_number: (value) => {
         if (!value.trim()) return null; // optional
@@ -101,13 +86,12 @@ const WIZARD_VALIDATORS = {
     },
 };
 
-// Normally the .wizard-hint lives as a direct sibling of the field. Password
-// / Confirm Password are the exception — they're wrapped in .wizard-pw-wrap
-// (for the show/hide toggle button), so the hint actually sits one level up,
-// as a sibling of that wrapper instead of the input itself.
+// The .wizard-hint lives as a direct sibling of the field it describes, which
+// is where setFieldError() writes the message. (The Password fields that were
+// the one exception — wrapped in .wizard-pw-wrap for their show/hide button —
+// are gone: the server generates the password now, so there is no field.)
 function getFieldWrapper(field) {
-    const pwWrap = field.closest('.wizard-pw-wrap');
-    return pwWrap ? pwWrap.parentElement : field.parentElement;
+    return field.parentElement;
 }
 
 function findHint(field) {
@@ -177,18 +161,6 @@ document.addEventListener('DOMContentLoaded', function () {
     Object.keys(WIZARD_VALIDATORS).forEach((name) => {
         modal.querySelectorAll(`[name="${name}"]`).forEach((field) => wireField(field, modal));
     });
-
-    // Confirm Password depends on Password's current value, so re-check it
-    // live whenever Password itself changes (not just when Confirm is typed in).
-    const pwField = modal.querySelector('[name="password"]');
-    const pwConfirmField = modal.querySelector('[name="password_confirm"]');
-    if (pwField && pwConfirmField) {
-        pwField.addEventListener('input', () => {
-            if (pwConfirmField.value) {
-                setFieldError(pwConfirmField, WIZARD_VALIDATORS.password_confirm(pwConfirmField.value, modal));
-            }
-        });
-    }
 });
 
 // Clears every field's error/valid state back to its pre-error hint text —

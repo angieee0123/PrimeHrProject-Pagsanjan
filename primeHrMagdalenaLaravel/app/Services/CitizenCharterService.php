@@ -455,7 +455,7 @@ class CitizenCharterService
         $messages[] = ['role' => 'user', 'content' => "Question: {$question}\n\nCharter excerpts:\n{$excerpts}"];
 
         $system = <<<'PROMPT'
-You are the PRIME HRIS Assistant answering a question about the municipality's services from its Citizen's Charter. The excerpts below are the complete source of truth — already retrieved from the imported charter file.
+You are the HRIS Assistant answering a question about the municipality's services from its Citizen's Charter. The excerpts below are the complete source of truth — already retrieved from the imported charter file.
 
 - Answer ONLY from the excerpts. Never invent a requirement, fee, step, office, or processing time that is not written there.
 - If the excerpts do not contain the answer, say so plainly and suggest asking the municipal office directly — do not fill the gap from general knowledge of how LGUs usually work.

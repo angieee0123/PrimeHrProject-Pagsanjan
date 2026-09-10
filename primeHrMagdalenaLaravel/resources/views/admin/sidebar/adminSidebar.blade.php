@@ -27,7 +27,13 @@ $navGroups = [
     ],
     'Time & Absence' => [
         ['id' => 'admin.attendance',   'label' => 'Attendance',            'icon' => 'attendance',    'route' => route('admin.attendance')],
-        ['id' => 'admin.attendance.scanner', 'label' => 'Attendance Scanner', 'icon' => 'scanner',    'route' => route('admin.attendance.scanner')],
+        // Attendance Scanner used to sit here, pointing at
+        // /admin/attendance/scanner. That page is now the public kiosk, which
+        // employees reach without an account, so there is nothing for this rail
+        // to link to — the kiosk address is on the Attendance page's toolbar
+        // instead, where staff go to set the terminal up.
+        // (PHP comments, not Blade ones: this array is inside @php, where Blade
+        // does not strip `{{-- --}}` and the braces are a parse error.)
         ['id' => 'admin.leave',        'label' => 'Leave & Benefits',      'icon' => 'leave',         'route' => route('admin.leave')],
         ['id' => 'admin.travelorder',  'label' => 'Travel Orders',         'icon' => 'travelorder',   'route' => route('admin.travelorder')],
         ['id' => 'admin.passslip',     'label' => 'Pass Slips',            'icon' => 'passslip',      'route' => route('admin.passslip')],
@@ -112,7 +118,7 @@ while (count($openGroups) > 3) {
                      onerror="this.style.display='none'">
             </div>
             <div class="logo-text-wrap" id="logo-text">
-                <span class="logo-text">PRIME HRIS</span>
+                <span class="logo-text">HRIS</span>
                 <span class="logo-sub">Pagsanjan, Laguna</span>
             </div>
         </div>

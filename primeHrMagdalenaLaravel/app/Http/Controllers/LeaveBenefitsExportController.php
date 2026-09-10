@@ -91,7 +91,7 @@ class LeaveBenefitsExportController extends Controller
         ) {
             $csv->letterhead(
                 'Leave Applications Report',
-                'Human Resource Management Office · PRIME HRIS',
+                'Human Resource Management Office · HRIS',
                 'Leave Period Covered: ' . $this->describeRange($dateFrom, $dateTo)
             );
 
@@ -214,7 +214,7 @@ class LeaveBenefitsExportController extends Controller
 
             $csv->letterhead(
                 'Leave Transaction History',
-                'Audit Trail of Leave Credit Movements · PRIME HRIS',
+                'Audit Trail of Leave Credit Movements · HRIS',
                 'Transaction Period: ' . $period
             );
 
@@ -332,7 +332,7 @@ class LeaveBenefitsExportController extends Controller
 
             $csv->letterhead(
                 'Employee Leave Credits Balance',
-                'Human Resource Management Office · PRIME HRIS',
+                'Human Resource Management Office · HRIS',
                 'Balances ' . $asOf
             );
 
@@ -503,7 +503,7 @@ class LeaveBenefitsExportController extends Controller
         ) {
             $csv->letterhead(
                 'Employee Benefits Summary',
-                'Mandatory Contributions & Leave Credits · PRIME HRIS',
+                'Mandatory Contributions & Leave Credits · HRIS',
                 'As of ' . now()->format('F d, Y')
             );
 
@@ -669,7 +669,7 @@ class LeaveBenefitsExportController extends Controller
         ) {
             $csv->letterhead(
                 'Leave Types Configuration',
-                'Civil Service Commission Leave Benefits · PRIME HRIS',
+                'Civil Service Commission Leave Benefits · HRIS',
                 'Configuration as of ' . now()->format('F d, Y')
             );
 
@@ -750,7 +750,7 @@ class LeaveBenefitsExportController extends Controller
         ) {
             $csv->letterhead(
                 'CSC Daily Accrual Configuration',
-                'Leave Credit Earning Rates · PRIME HRIS',
+                'Leave Credit Earning Rates · HRIS',
                 'Configuration as of ' . now()->format('F d, Y')
             );
 

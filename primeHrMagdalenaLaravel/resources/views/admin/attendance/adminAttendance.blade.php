@@ -202,6 +202,13 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
                 </svg>
                 Bulk Import
             </button>
+            {{-- The attendance terminal is a public kiosk now, not a page in
+                 this area — so staff get its address here, ready to paste into
+                 the tablet, with a QR to open it without typing the token. --}}
+            <button type="button" class="btn-ghost" onclick="openKioskLinkModal()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><line x1="14" y1="14" x2="14" y2="21"/><line x1="18" y1="14" x2="21" y2="14"/><line x1="18" y1="18" x2="21" y2="21"/></svg>
+                Kiosk
+            </button>
             {{-- Exports the Attendance Summary tab this toolbar sits above.
                  It carried no handler at all until now -- rendered, styled,
                  clickable, wired to nothing. The filters in this form are sent
@@ -253,10 +260,13 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
 @include('admin.attendance.modals.editDtrModal')
 @include('admin.attendance.modals.correctAttendanceModal')
 @include('admin.attendance.modals.bulkImportAttendanceModal')
+@include('admin.attendance.modals.kioskLinkModal')
 @include('admin.attendance.modals.successModal')
 
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+{{-- Same QR library the Personnel page already uses for badge generation. --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 @vite([
     'resources/js/admin/attendance/adminAttendance.js',
     'resources/js/admin/attendance/dtrDetailModal.js',
@@ -265,6 +275,7 @@ $periodDisplay = date('M d, Y', strtotime($startDateDisplay)) . ' - ' . date('M 
     'resources/js/admin/attendance/detailedDtrModal.js',
     'resources/js/admin/attendance/successModal.js',
     'resources/js/admin/attendance/bulkImportAttendance.js',
+    'resources/js/admin/attendance/kioskLinkModal.js',
 ])
 @endpush
 @endsection

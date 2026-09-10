@@ -1,6 +1,6 @@
 @extends('layouts.employee')
 
-@section('title', 'Performance · PRIME HRIS')
+@section('title', 'Performance · HRIS')
 
 @section('content')
 

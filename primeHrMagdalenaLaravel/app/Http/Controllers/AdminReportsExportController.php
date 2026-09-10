@@ -399,7 +399,7 @@ class AdminReportsExportController extends Controller
             return CsvReportWriter::download($fileName, function (CsvReportWriter $csv) use ($report, $period, $tab, $body) {
                 $csv->letterhead(
                     $report['title'],
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     $this->coverage($tab, $period)
                 );
 
@@ -444,7 +444,7 @@ class AdminReportsExportController extends Controller
         $csv->row(['Status:', 'NOT AVAILABLE — no data is being recorded for this report']);
         $csv->row(['Reason:', $report['unavailable']]);
         $csv->blank();
-        $csv->row(['This file contains no records. It is not a statement that none exist: nothing in PRIME HRIS captures this information yet, so there is nothing for the report to read.']);
+        $csv->row(['This file contains no records. It is not a statement that none exist: nothing in HRIS captures this information yet, so there is nothing for the report to read.']);
         $csv->row(['Once the module is added, this same Export button will produce the full report for the period selected above.']);
 
         $csv->notes([], containsPersonalData: false);

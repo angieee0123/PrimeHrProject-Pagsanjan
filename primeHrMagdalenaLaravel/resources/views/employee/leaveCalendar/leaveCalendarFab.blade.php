@@ -22,7 +22,7 @@
                 </span>
                 <div class="ecal-modal-head-text">
                     <span class="ecal-modal-head-h3">My Leave &amp; Travel Calendar</span>
-                    <span class="ecal-modal-head-sub">PRIME HRIS · My time off this month</span>
+                    <span class="ecal-modal-head-sub">HRIS · My time off this month</span>
                 </div>
             </div>
             <button type="button" class="ecal-modal-close" onclick="closeEcalModal()" aria-label="Close">

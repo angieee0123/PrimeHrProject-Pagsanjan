@@ -54,7 +54,7 @@ class TravelOrderExportController extends Controller
         return CsvReportWriter::download($this->fileName('Travel_Orders_All_Records'), function (CsvReportWriter $csv) use ($orders, $request) {
             $csv->letterhead(
                 'Travel Orders — Complete Register',
-                'Human Resource Management Office · PRIME HRIS',
+                'Human Resource Management Office · HRIS',
                 'All official travel requests on file as of ' . now()->format('F d, Y')
             );
 
@@ -102,7 +102,7 @@ class TravelOrderExportController extends Controller
         return CsvReportWriter::download($this->fileName('Travel_Orders_Pending'), function (CsvReportWriter $csv) use ($orders, $request) {
             $csv->letterhead(
                 'Travel Orders — Pending Approval',
-                'Human Resource Management Office · PRIME HRIS',
+                'Human Resource Management Office · HRIS',
                 'Official travel requests awaiting action as of ' . now()->format('F d, Y')
             );
 
@@ -135,7 +135,7 @@ class TravelOrderExportController extends Controller
         return CsvReportWriter::download($this->fileName('Travel_Orders_Approved'), function (CsvReportWriter $csv) use ($orders, $request) {
             $csv->letterhead(
                 'Travel Orders — Approved',
-                'Human Resource Management Office · PRIME HRIS',
+                'Human Resource Management Office · HRIS',
                 'Authorised official travel as of ' . now()->format('F d, Y')
             );
 
@@ -173,7 +173,7 @@ class TravelOrderExportController extends Controller
         return CsvReportWriter::download($this->fileName('Travel_Orders_Disapproved'), function (CsvReportWriter $csv) use ($orders, $request) {
             $csv->letterhead(
                 'Travel Orders — Disapproved',
-                'Human Resource Management Office · PRIME HRIS',
+                'Human Resource Management Office · HRIS',
                 'Refused official travel requests as of ' . now()->format('F d, Y')
             );
 

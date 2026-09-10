@@ -37,7 +37,7 @@
         <h2 class="module-unavailable-title">{{ $module }} isn&rsquo;t ready</h2>
 
         <p class="module-unavailable-text">
-            This part of PRIME HRIS is still being built, so it has been switched off rather than
+            This part of HRIS is still being built, so it has been switched off rather than
             shown with placeholder information.
             @if($reason)
                 {{ $reason }}

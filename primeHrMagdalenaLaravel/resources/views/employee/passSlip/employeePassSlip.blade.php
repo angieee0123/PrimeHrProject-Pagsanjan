@@ -1,6 +1,6 @@
 @extends('layouts.employee')
 
-@section('title', 'Pass Slip · PRIME HRIS')
+@section('title', 'Pass Slip · HRIS')
 
 @push('styles')
     @vite('resources/css/employee/employeePassSlip.css')

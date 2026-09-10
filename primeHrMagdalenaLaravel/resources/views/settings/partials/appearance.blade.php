@@ -156,7 +156,7 @@
             <div class="tpv-sidebar">
                 <div class="tpv-brand">
                     <span class="tpv-brand-mark">PH</span>
-                    <span class="tpv-brand-text">PRIME HRIS</span>
+                    <span class="tpv-brand-text">HRIS</span>
                 </div>
                 <span class="tpv-nav is-active">Dashboard</span>
                 <span class="tpv-nav">Personnel</span>
@@ -227,7 +227,7 @@
 
     <div class="settings-save-bar theme-actions">
         @if($isGlobal)
-            <button type="button" class="settings-btn-reset" data-role="reset">Reset to PRIME HRIS default</button>
+            <button type="button" class="settings-btn-reset" data-role="reset">Reset to HRIS default</button>
         @else
             <button type="button" class="settings-btn-reset" data-role="reset"
                     @disabled(! $data['usingPersonal'])>Reset to system theme</button>

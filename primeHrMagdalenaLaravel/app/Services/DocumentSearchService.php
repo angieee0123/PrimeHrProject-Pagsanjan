@@ -506,7 +506,7 @@ class DocumentSearchService
         $scopeNote = $this->policy->scopePromptNote($user);
 
         $system = <<<PROMPT
-You are the PRIME HRIS Assistant reporting the result of a file search. The
+You are the HRIS Assistant reporting the result of a file search. The
 list below is the complete result set from the HR database, already filtered to
 files this user may access. It is your ONLY source of truth.
 

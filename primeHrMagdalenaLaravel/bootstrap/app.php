@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureEmailIsVerifiedForArea;
+use App\Http\Middleware\EnsureKioskToken;
 use App\Http\Middleware\EnsureRoleForArea;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Foundation\Application;
@@ -53,6 +54,32 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->api(append: [
             EnsureUserIsActive::class,
+        ]);
+
+        // The attendance kiosk's bearer token, kept as an alias so it is named
+        // on the three kiosk routes and nowhere else. See EnsureKioskToken.
+        $middleware->alias([
+            'kiosk.token' => EnsureKioskToken::class,
+        ]);
+
+        // The two kiosk POSTs are exempt from CSRF, deliberately.
+        //
+        // A kiosk is a tablet left on a lobby wall for days. Laravel's session
+        // cookie lapses after SESSION_LIFETIME (120 minutes by default), and the
+        // token embedded in the page dies with it — so every punch after that
+        // would fail with a 419 until somebody walked over and reloaded the
+        // page. A time clock that stops accepting punches after two idle hours
+        // is not a kiosk.
+        //
+        // Nothing is lost by exempting them. CSRF exists to stop another site
+        // riding a victim's cookies into an authenticated action; these
+        // endpoints have no authenticated identity to ride. Their credential is
+        // the token in the URL *path*, which a cross-origin page can neither
+        // read nor cause the browser to send — and forging a punch still needs
+        // a badge that verifies against AttendanceQrService. The endpoints stay
+        // token-gated and throttled.
+        $middleware->validateCsrfTokens(except: [
+            'kiosk/attendance/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

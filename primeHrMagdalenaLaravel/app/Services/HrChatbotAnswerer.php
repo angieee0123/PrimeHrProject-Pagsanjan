@@ -288,7 +288,7 @@ TEXT;
 
         if (preg_match('/^(hi|hello|hey|good\s+(morning|afternoon|evening)|kumusta|kamusta)\b/i', $message)
             && str_word_count($message) <= 6) {
-            return "Hello! I'm your PRIME HRIS Assistant. I can answer questions about employees, "
+            return "Hello! I'm your HRIS Assistant. I can answer questions about employees, "
                 . 'attendance, leave balances, government IDs, deductions, payroll, and HR policies. '
                 . 'What would you like to know?';
         }
@@ -362,7 +362,7 @@ TEXT;
         $conversation = $this->formatHistory($history);
 
         $prompt = <<<PROMPT
-You are a MySQL expert for the Prime HRIS system of the Municipality of Pagsanjan. Generate a valid MySQL SELECT query to answer the user's question.
+You are a MySQL expert for the HRIS system of the Municipality of Pagsanjan. Generate a valid MySQL SELECT query to answer the user's question.
 
 SYSTEM KNOWLEDGE:
 {$knowledge}
@@ -435,7 +435,7 @@ PROMPT;
         $conversation = $this->formatHistory($history);
 
         $prompt = <<<PROMPT
-You are a friendly HR assistant for the Prime HRIS system of the Municipality of Pagsanjan. A user asked a question, a SQL query was run, and here are the results. Answer naturally and conversationally, as a continuation of the ongoing chat below — don't reintroduce yourself or restate things already established in the conversation.
+You are a friendly HR assistant for the HRIS system of the Municipality of Pagsanjan. A user asked a question, a SQL query was run, and here are the results. Answer naturally and conversationally, as a continuation of the ongoing chat below — don't reintroduce yourself or restate things already established in the conversation.
 
 SYSTEM KNOWLEDGE:
 {$knowledge}
@@ -474,7 +474,7 @@ PROMPT;
         $conversation = $this->formatHistory($history);
 
         $prompt = <<<PROMPT
-You are an HR assistant for the Prime HRIS system of the Municipality of Pagsanjan. Answer this question using the system knowledge below.
+You are an HR assistant for the HRIS system of the Municipality of Pagsanjan. Answer this question using the system knowledge below.
 
 {$knowledge}
 
@@ -571,7 +571,7 @@ PROMPT;
         }
 
         $count = count($types);
-        $lines = ["**Leave types configured in PRIME HRIS ({$count}):**"];
+        $lines = ["**Leave types configured in HRIS ({$count}):**"];
 
         foreach ($types as $t) {
             $notes = [];
@@ -684,7 +684,7 @@ PROMPT;
             $g = $f['attendance']['grace_minutes'];
 
             return implode("\n", [
-                '**How Late Deductions Work in PRIME HRIS:**',
+                '**How Late Deductions Work in HRIS:**',
                 "1. Late minutes are counted from your scheduled AM In / PM In, after a **{$g}-minute** grace period.",
                 "2. Total late minutes ÷ {$minutesPerDay} = the fraction of a day to deduct.",
                 "3. Deducted from **{$orderText}**, in that order.",

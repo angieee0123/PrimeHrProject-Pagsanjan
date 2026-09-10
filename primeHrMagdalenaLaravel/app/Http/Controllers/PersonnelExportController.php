@@ -135,7 +135,7 @@ class PersonnelExportController extends Controller
         ) {
             $csv->letterhead(
                 'Employee Records — Personnel Masterlist',
-                'Human Resource Management Office · PRIME HRIS',
+                'Human Resource Management Office · HRIS',
                 'Records on file as of ' . now()->format('F d, Y')
             );
 
@@ -240,7 +240,7 @@ class PersonnelExportController extends Controller
             ) {
                 $csv->letterhead(
                     'Work Schedules — Employee Shift Assignments',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     'Schedules in force as of ' . now()->format('F d, Y')
                 );
 

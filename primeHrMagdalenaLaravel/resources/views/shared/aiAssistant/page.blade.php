@@ -40,7 +40,7 @@
                 <div class="ai-page-welcome-icon">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l1.6 4.6L18 9l-4.4 1.4L12 15l-1.6-4.6L6 9l4.4-1.4z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>
                 </div>
-                <h3>PRIME HRIS Assistant</h3>
+                <h3>HRIS Assistant</h3>
                 <p>Ask about employees, attendance, leave balances, payroll, or HR policies. Every conversation here is saved to your account and searchable later.</p>
             </div>
         </div>

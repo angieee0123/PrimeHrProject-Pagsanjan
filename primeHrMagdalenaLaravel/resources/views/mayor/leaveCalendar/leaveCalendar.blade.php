@@ -7,7 +7,7 @@
      EnsureRoleForArea closes to the mayor. --}}
 @extends($embed ? 'layouts.calendarEmbed' : 'layouts.mayor')
 
-@section('title', "Leave & Travel Calendar · PRIME HRIS")
+@section('title', "Leave & Travel Calendar · HRIS")
 
 @push('styles')
     @vite(['resources/css/admin/adminLeaveAndBenefits.css', 'resources/css/admin/adminLeaveCalendar.css', 'resources/css/travelOrder.css'])

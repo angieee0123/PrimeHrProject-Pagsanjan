@@ -63,9 +63,9 @@ class RegistrationValidationErrorsTest extends TestCase
     public function multiple_messages_on_one_field_are_all_kept(): void
     {
         $details = $this->describe([
-            'password' => [
-                'The password field is required.',
-                'The password must be at least 8 characters.',
+            'user_email' => [
+                'The email address field is required.',
+                'The email address must be a valid email address.',
             ],
         ]);
 
@@ -140,7 +140,7 @@ class RegistrationValidationErrorsTest extends TestCase
         // Two messages on one field is still two things to fix.
         $this->assertStringContainsString(
             '2 fields need attention',
-            $this->summarise(['password' => ['Required.', 'Too short.']]),
+            $this->summarise(['user_email' => ['Required.', 'Not an address.']]),
         );
     }
 }

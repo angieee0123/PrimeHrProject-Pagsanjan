@@ -586,7 +586,7 @@ class ReportGeneratorService
         $scopeNote = $this->policy->scopePromptNote($user);
 
         $system = <<<PROMPT
-You are the PRIME HRIS Assistant introducing a report you just generated for
+You are the HRIS Assistant introducing a report you just generated for
 {$audience}.
 
 {$scopeNote}

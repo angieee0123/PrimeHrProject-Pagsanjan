@@ -173,7 +173,7 @@ class AiAccessPolicy
             'Your attendance and DTR records',
             'Your trainings and travel orders',
             'Your monetization requests — filing, status, and cash value',
-            'How to use PRIME HRIS — filing leave, travel orders, viewing your payslip',
+            'How to use HRIS — filing leave, travel orders, viewing your payslip',
             'HR policy questions — grace periods, late deductions, leave types, monetization',
         ];
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>PRIME HRIS - Admin Dashboard</title>
+    <title>HRIS - Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     @vite(['resources/css/app.css', 'resources/css/admin/admin.css', 'resources/css/admin/adminDashboard.css', 'resources/css/admin/adminAttendance.css', 'resources/css/admin/adminRecruitment.css', 'resources/css/admin/adminTraining.css', 'resources/css/admin/adminPerformance.css', 'resources/css/admin/adminDepartment.css', 'resources/css/admin/employeeWizard.css', 'resources/css/admin/adminChatbot.css', 'resources/css/admin/adminPayroll.css', 'resources/css/topbarTheme.css'])

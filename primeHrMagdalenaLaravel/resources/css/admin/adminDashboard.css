@@ -1048,6 +1048,7 @@
     position: relative;
     flex: 1;
     min-height: 180px;
+    transition: opacity .18s ease;
 }
 
 .attendance-canvas-wrap canvas {
@@ -1056,6 +1057,120 @@
     left: 16px;
     right: 16px;
     bottom: 16px;
+    transition: opacity .18s ease;
+}
+
+/* ---------- Attendance Trend: which period is drawn ----------
+   Week / Month / Year above are the bucket size; this picker chooses WHICH
+   week, month or year (AttendanceTrendService). It sits in the second line of
+   the card header rather than beside the title because the card is one column
+   of the secondary grid and the tabs already take most of that width. */
+.att-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.att-range {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* The input carries the same translucent-pill treatment the page gives its
+   other toolbar controls (see glassSystem's input[type="date"] rule) so the
+   three shapes it takes — date, month, number — look like one control. */
+.att-range-input {
+    width: 136px;
+    padding: 5px 10px;
+    border: 1px solid rgba(var(--theme-shadow-rgb), .08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .55);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    color: var(--gp-text-mid);
+    font-family: 'Poppins', sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.att-range-input:focus {
+    outline: none;
+    border-color: rgba(var(--theme-primary-rgb), .45);
+    box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb), .12);
+}
+
+.att-range-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid rgba(var(--theme-shadow-rgb), .08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .55);
+    color: var(--gp-text-mid);
+    cursor: pointer;
+    transition: all .2s cubic-bezier(.4, 0, .2, 1);
+}
+
+.att-range-step:hover:not(:disabled) {
+    background: rgba(255, 255, 255, .9);
+    color: var(--gp-pri);
+    transform: translateY(-1px);
+}
+
+/* The next period is entirely in the future — there is nothing to draw. */
+.att-range-step:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+/* A period with nothing in it, or a request that failed: the line on screen is
+   not the answer, so it recedes behind the sentence that says so. */
+.attendance-canvas-wrap.is-dimmed canvas {
+    opacity: .18;
+}
+
+.att-chart-note {
+    position: absolute;
+    inset: 0 16px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0 16px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--gp-text-soft);
+    pointer-events: none;
+}
+
+/* `display: flex` above would otherwise beat the UA's [hidden] rule. */
+.att-chart-note[hidden] {
+    display: none;
+}
+
+.chart-card.is-att-loading .attendance-canvas-wrap {
+    opacity: .5;
+}
+
+/* The card goes full width below 860px, so the navigator stops hugging the
+   right edge and takes the row it is given. */
+@media (max-width: 760px) {
+    .att-controls {
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .att-range {
+        justify-content: space-between;
+    }
 }
 
 .enterprise-compact-grid {

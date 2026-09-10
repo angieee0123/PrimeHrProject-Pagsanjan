@@ -67,7 +67,7 @@ class SiteContentService
         'Page setup' => [
             'brand'    => 'Logo & branding',
             'services' => 'Municipal services',
-            'cta'      => 'PRIME HRIS call-to-action',
+            'cta'      => 'HRIS call-to-action',
             'footer'   => 'Footer',
             'chatbot'  => 'Public chatbot',
         ],
@@ -95,7 +95,7 @@ class SiteContentService
         'govbar'        => 'The thin strip above everything, naming the Republic and Province.',
         'brand'         => 'The municipal seal, the name beside it, and the menu links.',
         'services'      => 'The tabbed list of services residents can request.',
-        'cta'           => 'The panel inviting employees into PRIME HRIS.',
+        'cta'           => 'The panel inviting employees into HRIS.',
         'footer'        => 'The bottom strip: links and the copyright line.',
         'chatbot'       => 'The wording of the chat assistant in the corner.',
     ];
@@ -532,12 +532,12 @@ class SiteContentService
             ],
 
             'cta' => [
-                'eyebrow' => 'PRIME HRIS',
+                'eyebrow' => 'HRIS',
                 'heading' => 'Are you a Municipal Government Employee?',
-                'text'    => 'The PRIME HRIS portal is exclusively for authorized employees of the Municipal Government of Pagsanjan, Laguna. Access your payroll, leave, and personnel records here.',
-                'button_label' => 'Sign In to PRIME HRIS',
+                'text'    => 'The HRIS portal is exclusively for authorized employees of the Municipal Government of Pagsanjan, Laguna. Access your payroll, leave, and personnel records here.',
+                'button_label' => 'Sign In to HRIS',
                 'note'    => 'Municipal Government employees only · Contact your administrator for access',
-                'card_label' => 'PRIME HRIS',
+                'card_label' => 'HRIS',
                 'card_sub'   => 'Personnel Records & Information Management for Employees',
                 'features' => [
                     'Payroll Processing',

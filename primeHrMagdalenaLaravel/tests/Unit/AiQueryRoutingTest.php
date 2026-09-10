@@ -579,13 +579,13 @@ class AiQueryRoutingTest extends TestCase
         $sql->expects($this->never())->method('query');
 
         $fallback = $this->createMock(HrChatbotAnswerer::class);
-        $fallback->method('shortcutAnswer')->willReturn('Hello! I am your PRIME HRIS Assistant.');
+        $fallback->method('shortcutAnswer')->willReturn('Hello! I am your HRIS Assistant.');
 
         $assistant = $this->assistant($sql, $fallback);
 
         $result = $assistant->ask($this->user(['hr'], 1), 'hello');
 
-        $this->assertSame('Hello! I am your PRIME HRIS Assistant.', $result['answer']);
+        $this->assertSame('Hello! I am your HRIS Assistant.', $result['answer']);
     }
 
     /**

@@ -83,7 +83,7 @@ TEXT;
             $name = trim($employee->first_name . ' ' . $employee->last_name);
             $greeting = $name !== '' ? "Hello, {$name}!" : 'Hello!';
             return $this->result(
-                "{$greeting} I'm your PRIME HRIS assistant. I can answer questions about **your** leave, payslip, attendance, training, travel, and monetization records, plus explain how our HR system works. What would you like to know?",
+                "{$greeting} I'm your HRIS assistant. I can answer questions about **your** leave, payslip, attendance, training, travel, and monetization records, plus explain how our HR system works. What would you like to know?",
                 [
                     'What is my leave balance?',
                     'How do I file a leave request?',
@@ -109,7 +109,7 @@ TEXT;
 
         if ($this->isCrossEmployeeQuery($message, $employee)) {
             return $this->result(
-                "For privacy and data protection, I can only share **your own** HR information—not records of other employees. I can help with your leave balance, payslip, attendance, training, travel orders, monetization requests, or explain how to use PRIME HRIS. What would you like to know about your account?",
+                "For privacy and data protection, I can only share **your own** HR information—not records of other employees. I can help with your leave balance, payslip, attendance, training, travel orders, monetization requests, or explain how to use HRIS. What would you like to know about your account?",
                 $this->defaultFollowUps()
             );
         }
@@ -354,7 +354,7 @@ TEXT;
 
         if (preg_match('/\b(how to|paano|file|submit|apply).*\b(leave|bakasyon)\b/u', $q)) {
             return [
-                'answer' => "To file leave in PRIME HRIS:\n1. Open **Leave & Benefits**\n2. Tap **File Leave**\n3. Choose leave type and dates (working days only)\n4. Enter your reason and attach a document if required\n5. Submit—status will be **Pending** until HR approves",
+                'answer' => "To file leave in HRIS:\n1. Open **Leave & Benefits**\n2. Tap **File Leave**\n3. Choose leave type and dates (working days only)\n4. Enter your reason and attach a document if required\n5. Submit—status will be **Pending** until HR approves",
                 'follow_up' => ['What is my leave balance?', 'How is late deduction calculated?'],
             ];
         }
@@ -782,7 +782,7 @@ TEXT;
     private function generateResponse(string $message, string $context, Employee $employee, string $intent = 'general'): string
     {
         $prompt = <<<PROMPT
-You are the PRIME HRIS assistant for a single municipal employee using the mobile app.
+You are the HRIS assistant for a single municipal employee using the mobile app.
 
 STRICT RULES:
 1. Answer ONLY using "EMPLOYEE (logged-in user only)" data and "SYSTEM KNOWLEDGE" below.

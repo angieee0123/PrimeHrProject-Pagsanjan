@@ -1,6 +1,6 @@
 @extends('layouts.employee')
 
-@section('title', 'Travel Orders · PRIME HRIS')
+@section('title', 'Travel Orders · HRIS')
 
 @push('styles')
     @vite('resources/css/employee/employeeTravelOrder.css')

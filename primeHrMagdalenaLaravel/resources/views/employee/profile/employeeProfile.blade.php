@@ -1,6 +1,6 @@
 @extends('layouts.employee')
 
-@section('title', 'Profile · PRIME HRIS')
+@section('title', 'Profile · HRIS')
 
 @section('content')
 <div class="app-layout">

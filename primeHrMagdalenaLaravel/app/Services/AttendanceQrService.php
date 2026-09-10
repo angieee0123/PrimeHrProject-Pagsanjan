@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Exceptions\InvalidAttendanceQrException;
 use App\Models\Employee;
-use Illuminate\Support\Facades\Config;
 
 /**
  * Signs and verifies the payload printed on an employee's attendance QR badge.
@@ -35,6 +34,13 @@ class AttendanceQrService
 
     /** Base64url characters of HMAC to keep. 16 chars = 96 bits. */
     private const SIGNATURE_LENGTH = 16;
+
+    /**
+     * Key purpose. Shared with nothing — the kiosk token derives its own key
+     * from the same `APP_KEY` under a different label, so a badge signature can
+     * never be replayed as a kiosk token or the reverse.
+     */
+    private const KEY_PURPOSE = 'attendance-qr-badge';
 
     /**
      * The payload to encode in this employee's QR badge.
@@ -104,23 +110,8 @@ class AttendanceQrService
 
     private function sign(string $body): string
     {
-        $raw = hash_hmac('sha256', $body, $this->secret(), true);
+        $raw = hash_hmac('sha256', $body, AppKeySecret::derive(self::KEY_PURPOSE), true);
 
-        return substr(rtrim(strtr(base64_encode($raw), '+/', '-_'), '='), 0, self::SIGNATURE_LENGTH);
-    }
-
-    /**
-     * A key derived from APP_KEY rather than APP_KEY itself, so a badge
-     * signature can never be replayed against anything else the app signs.
-     */
-    private function secret(): string
-    {
-        $appKey = (string) Config::get('app.key');
-
-        if (str_starts_with($appKey, 'base64:')) {
-            $appKey = base64_decode(substr($appKey, 7)) ?: $appKey;
-        }
-
-        return hash_hmac('sha256', 'attendance-qr-badge', $appKey, true);
+        return AppKeySecret::encode($raw, self::SIGNATURE_LENGTH);
     }
 }

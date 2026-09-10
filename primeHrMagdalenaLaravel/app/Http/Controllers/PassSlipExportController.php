@@ -64,7 +64,7 @@ class PassSlipExportController extends Controller
         return CsvReportWriter::download($this->fileName('Pass_Slips_All_Records'), function (CsvReportWriter $csv) use ($slips, $request) {
             $csv->letterhead(
                 'Pass Slips — Complete Register',
-                'Human Resource Management Office · PRIME HRIS',
+                'Human Resource Management Office · HRIS',
                 'All requests to leave the workplace on file as of ' . now()->format('F d, Y')
             );
 
@@ -104,7 +104,7 @@ class PassSlipExportController extends Controller
         return CsvReportWriter::download($this->fileName('Pass_Slips_Pending'), function (CsvReportWriter $csv) use ($slips, $request) {
             $csv->letterhead(
                 'Pass Slips — Pending Approval',
-                'Human Resource Management Office · PRIME HRIS',
+                'Human Resource Management Office · HRIS',
                 'Requests to leave the workplace awaiting action as of ' . now()->format('F d, Y')
             );
 
@@ -138,7 +138,7 @@ class PassSlipExportController extends Controller
         return CsvReportWriter::download($this->fileName('Pass_Slips_Approved'), function (CsvReportWriter $csv) use ($slips, $request) {
             $csv->letterhead(
                 'Pass Slips — Approved',
-                'Human Resource Management Office · PRIME HRIS',
+                'Human Resource Management Office · HRIS',
                 'Authorised absences from the workplace as of ' . now()->format('F d, Y')
             );
 
@@ -172,7 +172,7 @@ class PassSlipExportController extends Controller
         return CsvReportWriter::download($this->fileName('Pass_Slips_Disapproved'), function (CsvReportWriter $csv) use ($slips, $request) {
             $csv->letterhead(
                 'Pass Slips — Disapproved',
-                'Human Resource Management Office · PRIME HRIS',
+                'Human Resource Management Office · HRIS',
                 'Refused requests to leave the workplace as of ' . now()->format('F d, Y')
             );
 
