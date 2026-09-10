@@ -2,44 +2,15 @@
 let currentStep = 1;
 const totalSteps = 7;
 
-// Password / Confirm Password show-hide toggle (step 2).
-window.toggleWizardPassword = function(btn) {
-    const input = btn.parentElement.querySelector('input');
-    if (!input) return;
-    const showIcon = btn.querySelector('.wizard-eye-show');
-    const hideIcon = btn.querySelector('.wizard-eye-hide');
-    const isHidden = input.type === 'password';
-    input.type = isHidden ? 'text' : 'password';
-    showIcon.style.display = isHidden ? 'none' : '';
-    hideIcon.style.display = isHidden ? '' : 'none';
-    btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
-}
-
-// Re-masks both password fields and resets their toggle icons — called
-// whenever the wizard opens or closes so a revealed password never carries
-// over into the next session.
-function resetWizardPasswordVisibility() {
-    document.querySelectorAll('#employeeWizardModal .wizard-pw-wrap').forEach(function(wrap) {
-        const input = wrap.querySelector('input');
-        const showIcon = wrap.querySelector('.wizard-eye-show');
-        const hideIcon = wrap.querySelector('.wizard-eye-hide');
-        const btn = wrap.querySelector('.wizard-pw-toggle');
-        if (input) input.type = 'password';
-        if (showIcon) showIcon.style.display = '';
-        if (hideIcon) hideIcon.style.display = 'none';
-        if (btn) btn.setAttribute('aria-label', 'Show password');
-    });
-}
-window.resetWizardPasswordVisibility = resetWizardPasswordVisibility;
-
 // ── Draft autosave (Add Employee flow only — never for editEmployee) ──
 // Lets an admin who accidentally closes the wizard mid-entry pick up where
 // they left off next time they click "Add Employee", instead of losing
 // everything they typed.
 const WIZARD_DRAFT_KEY = 'employeeWizardDraft';
-// Never persisted: passwords (plaintext in localStorage is unsafe), the
-// photo file (can't be serialized), and request/edit bookkeeping fields.
-const WIZARD_DRAFT_SKIP_FIELDS = ['password', 'password_confirm', 'photo', '_token', '_edit_id'];
+// Never persisted: the photo file (can't be serialized) and the request/edit
+// bookkeeping fields. Passwords used to be skipped here too, before the wizard
+// stopped having any — there is nothing password-shaped left to guard.
+const WIZARD_DRAFT_SKIP_FIELDS = ['photo', '_token', '_edit_id'];
 
 function collectWizardDraftData() {
     const form = document.getElementById('employeeWizardForm');
@@ -166,7 +137,6 @@ function openFreshEmployeeWizard() {
     if (window.resetWizardFieldValidation) window.resetWizardFieldValidation();
     if (window.clearGovIdCurrentFiles) window.clearGovIdCurrentFiles();
     if (window.resetWizardDocumentCards) window.resetWizardDocumentCards();
-    resetWizardPasswordVisibility();
 }
 
 // Opens a blank wizard for this attempt WITHOUT deleting the saved draft —
@@ -182,7 +152,6 @@ window.continueEmployeeWizardDraft = function() {
     const draft = getWizardDraft();
     document.getElementById('wizardDraftPrompt').style.display = 'none';
     document.getElementById('employeeWizardModal').style.display = 'flex';
-    resetWizardPasswordVisibility();
     if (draft) applyWizardDraft(draft);
 }
 
@@ -201,7 +170,6 @@ window.closeEmployeeWizard = function() {
     currentStep = 1;
     document.getElementById('employeeWizardForm').reset();
     if (window.resetWizardFieldValidation) window.resetWizardFieldValidation();
-    resetWizardPasswordVisibility();
     // delegate to blade-defined closeEmployeeWizard for edit-mode reset if present
     if (window.wizardIsEditMode) {
         window.wizardIsEditMode = false;
@@ -366,7 +334,12 @@ function generateReview() {
         ? reviewSection('<svg class="wizard-review-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Role / Access Level', [reviewRow([['Roles', roles]])])
         : reviewSection('<svg class="wizard-review-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Account Setup', [
             reviewRow([['Username', get('username')], ['Email', get('user_email')]]),
-            reviewRow([['Password', get('password') ? 'Set' : ''], ['Roles', roles]]),
+            // The password is generated server-side at submit and mailed to
+            // the employee, so there is no value here for the admin to check
+            // — only the fact that it will happen. A blank cell would read as
+            // "no password", which is the one thing that is not true.
+            // Plain '&' — reviewRow() escapes this value for the DOM.
+            reviewRow([['Password', 'Generated & emailed'], ['Roles', roles]]),
         ]);
 
     html += reviewSection('<svg class="wizard-review-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Employment Details', [

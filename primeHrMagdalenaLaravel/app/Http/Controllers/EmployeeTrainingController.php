@@ -166,7 +166,7 @@ class EmployeeTrainingController extends Controller
             ) {
                 $csv->letterhead(
                     'Learning & Development Record',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     'CSC PDS Section IV — Training Programs, Seminars and Conferences Attended'
                 );
 

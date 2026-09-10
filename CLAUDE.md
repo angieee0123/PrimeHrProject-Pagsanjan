@@ -125,29 +125,100 @@ about schedules, grace, pass slips, or payroll moves.
   source, device, operator, and the value it replaced. `attendance` only holds
   each slot's current value, which cannot answer what an auditor asks.
 
-The kiosk lives at `/admin/attendance/scanner`, so `EnsureRoleForArea` already
-restricts it to `admin`/`hr` — it is staffed, not self-service. **The operator
-picks the slot**; `suggestSlot()` only pre-highlights one, because a badge
-should not move the button between aiming and scanning. When the wall-mounted
-reader arrives and there is no operator, that method becomes the authority.
+The kiosk is **public** — `/kiosk/attendance/{token}`, with no login. It replaced
+a staffed scanner that lived at `/admin/attendance/scanner`, where
+`EnsureRoleForArea` confined it to `admin`/`hr`; that was right for a terminal at
+the HR desk and wrong for a tablet in the lobby, because the person using it is
+an employee with no account in front of them. `kiosk` is deliberately **not** a
+key in `EnsureRoleForArea::AREA_ROLES`, which is what leaves both that gate and
+`EnsureEmailIsVerifiedForArea` off it.
+
+What replaces the login is a bearer token in the path, checked by
+`EnsureKioskToken` (404, not 403 — a wrong token must not confirm a kiosk is
+here). The token is **derived from `APP_KEY`**, never stored, by
+`AttendanceKioskService` via `AppKeySecret` — so nothing needs configuring or
+migrating, and `php artisan key:generate` revokes the URL in the same stroke that
+invalidates every printed badge. The Attendance page's **Kiosk** button hands
+staff the address and a QR for the tablet.
+
+Two things follow from there being no operator, and both are decisions:
+
+- **The server picks the slot.** With an operator, a badge was not allowed to
+  move the buttons between aiming and scanning — the human chose. With nobody
+  there, `suggestSlot()` becomes the authority (the handover its own docblock
+  anticipated), and the employee *confirms* rather than choosing from six
+  buttons. An override is available for a half day or a forgotten punch.
+- **There is no roster feed.** The staffed page showed a live list of everyone
+  who had punched, names and photos included. On a screen anyone can walk up to
+  that is the whole roster's arrival times, so `AttendanceKioskTest` asserts the
+  feed's absence rather than trusting the view to leave it out.
+
+A punch here records `recorded_by = NULL` — the column is "the kiosk operator,
+not the employee", and unattended is the honest value and the audit query.
+
+The kiosk is a two-step flow: a scan **identifies** (read-only `peek`) and only
+the confirm writes. Its two POSTs are **CSRF-exempt** on purpose: a tablet left
+on a wall outlives the 120-minute session, and a 419 on every punch after that
+would make it useless. Nothing is lost, because these endpoints have no session
+identity to ride — their credential is the token in the URL path, which a
+cross-origin page cannot read. They stay token-gated and throttled.
 
 A USB scanner gun works too: it types the payload and presses Enter, which the
 manual-entry box accepts. Camera decoding uses html5-qrcode from a CDN, matching
 how the QR *generator* is already loaded on the Personnel page.
 
 A scan is a real attendance record, not a parallel log: it writes the same
-`attendance` row the DTR, accredited hours, and payroll read. `AttendanceScannerTest`
+`attendance` row the DTR, accredited hours, and payroll read. `AttendanceKioskTest`
 follows one scan from the HTTP request through to `daily_salary_computations`
 so that stays true.
 
 ```bash
 php artisan test tests/Unit/AttendanceQrServiceTest.php \
-  tests/Unit/AttendancePunchServiceTest.php tests/Feature/AttendanceScannerTest.php
+  tests/Unit/AttendancePunchServiceTest.php tests/Feature/AttendanceKioskTest.php
 ```
 
 Attendance tests build their tables from `Tests\Support\BuildsAttendanceSchema`
 — a punch reaches a long way past `attendance`, and every table in that chain
 has to exist for a single scan to complete.
+
+---
+
+## The admin dashboard's attendance trend
+
+`AttendanceTrendService` owns every figure the Attendance Trend card draws, for
+any week, month or year. **Week / Month / Year on that card are the bucket size,
+not the window** — a picker beside them chooses *which* week, month or year, so
+"what did March 2026 look like" is answerable. The page ships the current week
+already rendered; `GET /admin/dashboard/attendance-trend?period=&date=` serves
+everything else through `AdminDashboardController::attendanceTrend()`.
+
+The definitions are the ones the rest of the system already uses, and they are
+listed in the service's docblock:
+
+- **working days only** (Mon–Fri), as the dashboard's Attendance Performance
+  card already counts;
+- **lateness against each employee's own `schedules` row** plus
+  `AttendanceComputationService::GRACE_MINUTES`, mirroring
+  `MayorDashboardController::countLate()` — a flat `08:05` gives the 07:00 shift
+  65 minutes of grace;
+- **the denominator is the roster expected that day** (headcount less approved
+  leave and approved travel), the same shape as the mayor's dashboard and the
+  same headcount the stat cards on that page divide by;
+- the year view is the **average of the daily rates**, not the old
+  present ÷ (headcount × calendar days), which counted every weekend as an
+  absence and pinned the series to the floor.
+
+Two kinds of day are `null` and chart as a gap, never 0: **a day that has not
+happened yet**, and **a working day with no `attendance` row at all** — nothing
+encoded for it is not the same as everybody absent. A day that *was* encoded
+keeps its rows even when nobody clocked in, which is what makes the two
+distinguishable.
+
+Headcount is today's: nothing in this schema records when a roster changed
+(`employees.created_at` is the insert date, `employment_details.appointment_date`
+is present but unmaintained, and there is no separation date), so a period when
+fewer people were employed reads low. `tests/Unit/AttendanceTrendServiceTest.php`
+pins all of the above.
 
 ---
 

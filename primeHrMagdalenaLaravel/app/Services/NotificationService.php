@@ -699,7 +699,7 @@ class NotificationService
         self::deliver($user, [
             'type'         => 'account',
             'audience'     => 'employee',
-            'title'        => 'Welcome to PRIME HRIS',
+            'title'        => 'Welcome to HRIS',
             'message'      => 'Your employee account has been created by the HR office. Review your profile and tell HR about anything that needs correcting.',
             'link'         => self::link('employee.profile'),
             'related_id'   => $employee?->id,

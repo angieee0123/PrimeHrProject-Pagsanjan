@@ -171,7 +171,7 @@ class AppearanceController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'System theme restored to the PRIME HRIS default.',
+            'message' => 'System theme restored to the HRIS default.',
         ]);
     }
 }

@@ -31,6 +31,15 @@ class CitizenCharterServiceTest extends TestCase
     {
         parent::setUp();
 
+        // Force no provider: otherwise resolveConfig falls back to the real
+        // GROQ_API_KEY from the environment and the test makes a live call,
+        // whose paraphrased answer (down to non-breaking spaces) is not what
+        // these assertions read. Same precaution as ChatbotControllerTest.
+        config(['services.groq.api_key' => '']);
+        $_ENV['GROQ_API_KEY'] = '';
+        $_SERVER['GROQ_API_KEY'] = '';
+        putenv('GROQ_API_KEY=');
+
         Schema::create('citizen_charters', function (Blueprint $table) {
             $table->id();
             $table->string('original_name');

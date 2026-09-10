@@ -1,6 +1,6 @@
 @extends('layouts.employee')
 
-@section('title', 'Dashboard · PRIME HRIS')
+@section('title', 'Dashboard · HRIS')
 
 @push('styles')
     @vite('resources/css/employee/employeeDashboard.css')

@@ -84,7 +84,7 @@ class PayrollExportController extends Controller
             ) {
                 $csv->letterhead(
                     'Payroll Register',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     date('F d, Y', strtotime($startDate)) . ' to ' . date('F d, Y', strtotime($endDate))
                 );
 
@@ -298,7 +298,7 @@ class PayrollExportController extends Controller
 
                 $csv->letterhead(
                     'Payslip Register',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     $computations->isNotEmpty()
                         ? 'Payslips covering ' . $periodFrom->format('F d, Y') . ' to ' . $periodTo->format('F d, Y')
                         : 'Payslips on file as of ' . now()->format('F d, Y')
@@ -453,7 +453,7 @@ class PayrollExportController extends Controller
             ) {
                 $csv->letterhead(
                     'Payroll Register — Generated Run',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     date('F d, Y', strtotime($startDate)) . ' to ' . date('F d, Y', strtotime($endDate))
                 );
 

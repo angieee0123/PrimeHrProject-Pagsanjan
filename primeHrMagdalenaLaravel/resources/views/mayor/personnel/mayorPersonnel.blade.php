@@ -1,6 +1,6 @@
 @extends('layouts.mayor')
 
-@section('title', "Personnel Directory · PRIME HRIS")
+@section('title', "Personnel Directory · HRIS")
 
 @section('content')
 

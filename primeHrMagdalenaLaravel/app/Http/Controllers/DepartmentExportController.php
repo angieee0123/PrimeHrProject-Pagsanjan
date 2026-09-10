@@ -66,7 +66,7 @@ class DepartmentExportController extends Controller
             ) {
                 $csv->letterhead(
                     'Departments & Offices — Organisational Directory',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     'Directory as of ' . now()->format('F d, Y')
                 );
 
@@ -177,7 +177,7 @@ class DepartmentExportController extends Controller
             ) {
                 $csv->letterhead(
                     'Designations — Plantilla of Positions',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     'Positions on file as of ' . now()->format('F d, Y')
                 );
 

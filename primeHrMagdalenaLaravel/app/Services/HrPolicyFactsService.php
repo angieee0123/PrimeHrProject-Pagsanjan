@@ -172,7 +172,7 @@ class HrPolicyFactsService
         $order = implode(' first, then ', $p['deduction_order']);
         $lines = [];
 
-        $lines[] = '=== PRIME HRIS RULES (read from the live system — treat as authoritative) ===';
+        $lines[] = '=== HRIS RULES (read from the live system — treat as authoritative) ===';
         $lines[] = '';
         $lines[] = 'TIME CONVERSION (CSC standard):';
         $lines[] = "- {$c['minutes_per_day']} minutes = 1 work day = {$c['hours_per_day']} hours.";

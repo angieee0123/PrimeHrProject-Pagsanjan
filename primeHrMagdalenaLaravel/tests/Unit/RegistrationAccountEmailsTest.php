@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Http\Controllers\EmployeeRegistrationController;
 use App\Models\Employee;
 use App\Models\User;
+use App\Services\TemporaryPasswordService;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
@@ -112,20 +113,23 @@ class RegistrationAccountEmailsTest extends TestCase
     }
 
     /**
-     * The plaintext password is the whole point of this email — the employee
-     * has no other copy of it.
+     * The plaintext password is the whole point of this email — since the
+     * wizard stopped accepting one, the employee has no other copy of it
+     * anywhere, so it has to arrive unmasked and unaltered.
      */
     #[Test]
-    public function the_password_is_sent_as_typed(): void
+    public function the_generated_password_is_the_one_the_email_carries(): void
     {
+        $password = TemporaryPasswordService::generate();
+
         $details = $this->credentials(
             $this->sampleEmployee(),
             $this->sampleUser(),
-            'Sekrit!123',
+            $password,
             ['employee'],
         );
 
-        $this->assertSame('Sekrit!123', $details['Password']);
+        $this->assertSame($password, $details['Password']);
     }
 
     /**

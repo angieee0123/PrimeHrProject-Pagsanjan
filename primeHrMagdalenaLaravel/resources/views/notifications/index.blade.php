@@ -10,12 +10,12 @@
      $activeType, $totalCount, $unreadCount, $typeCounts. --}}
 @extends($layout)
 
-@section('title', 'Notifications · PRIME HRIS')
+@section('title', 'Notifications · HRIS')
 
 @section('content')
 
 @php
-    $areaLabel = ['admin' => 'Admin Panel', 'mayor' => "Mayor's View", 'employee' => 'Employee Portal'][$area] ?? 'PRIME HRIS';
+    $areaLabel = ['admin' => 'Admin Panel', 'mayor' => "Mayor's View", 'employee' => 'Employee Portal'][$area] ?? 'HRIS';
 
     // Filter links keep whatever else is set, so switching category does not
     // silently drop the unread filter the reader had chosen.

@@ -85,6 +85,13 @@
                                 <li>All required fields must be filled</li>
                                 <li>Date format: YYYY-MM-DD</li>
                                 <li>Duplicate employee IDs will be skipped</li>
+                                {{-- The template has no Password column (see
+                                     downloadTemplate()), so every imported
+                                     account gets a generated password rather
+                                     than a shared default. Saying so here is
+                                     the admin's only notice that the value
+                                     arrives by email, per employee. --}}
+                                <li>Each new account gets a system-generated password, emailed to that employee</li>
                             </ul>
                         </div>
                     </div>

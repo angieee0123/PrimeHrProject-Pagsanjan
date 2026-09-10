@@ -355,7 +355,7 @@ class EmployeeAttendanceController extends Controller
         ) {
             $csv->letterhead(
                 'Daily Time Record',
-                'Human Resource Management Office · PRIME HRIS',
+                'Human Resource Management Office · HRIS',
                 CsvReportWriter::longDate($startDate) . ' to ' . CsvReportWriter::longDate($endDate)
             );
 

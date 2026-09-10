@@ -1,6 +1,6 @@
 @extends('layouts.employee')
 
-@section('title', 'AI Assistant · PRIME HRIS')
+@section('title', 'AI Assistant · HRIS')
 
 @push('styles')
     @vite('resources/css/shared/aiAssistant.css')

@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Services\SystemTheme;
+use App\Services\AttendanceTrendService;
 
 use App\Models\Employee;
 use App\Models\Attendance;
 use App\Models\LeaveApplication;
 use App\Models\Department;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -482,72 +484,11 @@ class AdminDashboardController extends Controller
             $employeeYear['data'][] = $count;
         }
         
-        // Attendance rate data
-        $attendanceWeek = [];
-        $attendanceMonth = [];
-        $attendanceYear = [];
-        
-        $totalEmp = Employee::count();
-        
-        // Week data
-        for ($i = 6; $i >= 0; $i--) {
-            $date = $now->copy()->subDays($i);
-            $present = Attendance::whereDate('date', $date)->whereNotNull('am_in')->distinct('employee_id')->count();
-            $late = Attendance::whereDate('date', $date)->whereTime('am_in', '>', '08:05:00')->distinct('employee_id')->count();
-            $absent = $totalEmp - $present;
-            $rate = $totalEmp > 0 ? round(($present / $totalEmp) * 100, 1) : 0;
-            $lateRate = $totalEmp > 0 ? round(($late / $totalEmp) * 100, 1) : 0;
-            $absentRate = $totalEmp > 0 ? round(($absent / $totalEmp) * 100, 1) : 0;
-            $attendanceWeek['labels'][] = $date->format('D');
-            $attendanceWeek['data'][] = $rate;
-            $attendanceWeek['lateData'][] = $lateRate;
-            $attendanceWeek['absentData'][] = $absentRate;
-        }
-        
-        // Month data
-        for ($i = 29; $i >= 0; $i--) {
-            $date = $now->copy()->subDays($i);
-            $present = Attendance::whereDate('date', $date)->whereNotNull('am_in')->distinct('employee_id')->count();
-            $late = Attendance::whereDate('date', $date)->whereTime('am_in', '>', '08:05:00')->distinct('employee_id')->count();
-            $absent = $totalEmp - $present;
-            $rate = $totalEmp > 0 ? round(($present / $totalEmp) * 100, 1) : 0;
-            $lateRate = $totalEmp > 0 ? round(($late / $totalEmp) * 100, 1) : 0;
-            $absentRate = $totalEmp > 0 ? round(($absent / $totalEmp) * 100, 1) : 0;
-            $attendanceMonth['labels'][] = $date->format('M j');
-            $attendanceMonth['data'][] = $rate;
-            $attendanceMonth['lateData'][] = $lateRate;
-            $attendanceMonth['absentData'][] = $absentRate;
-        }
-        
-        // Year data (monthly average)
-        for ($i = 11; $i >= 0; $i--) {
-            $date = $now->copy()->subMonths($i);
-            $avgPresent = Attendance::whereYear('date', $date->year)
-                ->whereMonth('date', $date->month)
-                ->whereNotNull('am_in')
-                ->distinct('employee_id')
-                ->count();
-            $avgLate = Attendance::whereYear('date', $date->year)
-                ->whereMonth('date', $date->month)
-                ->whereTime('am_in', '>', '08:05:00')
-                ->distinct('employee_id')
-                ->count();
-            $daysInMonth = $date->daysInMonth;
-            $avgAbsent = ($totalEmp * $daysInMonth) - Attendance::whereYear('date', $date->year)
-                ->whereMonth('date', $date->month)
-                ->whereNotNull('am_in')
-                ->distinct('employee_id')
-                ->count() * $daysInMonth;
-            $rate = $totalEmp > 0 ? round(($avgPresent / ($totalEmp * $daysInMonth)) * 100, 1) : 0;
-            $lateRate = $totalEmp > 0 ? round(($avgLate / ($totalEmp * $daysInMonth)) * 100, 1) : 0;
-            $absentRate = ($totalEmp * $daysInMonth) > 0 ? round(($avgAbsent / ($totalEmp * $daysInMonth)) * 100, 1) : 0;
-            $attendanceYear['labels'][] = $date->format('M');
-            $attendanceYear['data'][] = min($rate, 100);
-            $attendanceYear['lateData'][] = min($lateRate, 100);
-            $attendanceYear['absentData'][] = min($absentRate, 100);
-        }
-        
-        
+        // Attendance rate data. The card can be pointed at any week, month or
+        // year (see AttendanceTrendService); the page ships the current week so
+        // the first paint needs no round trip.
+        $attendance = app(AttendanceTrendService::class)->series('week');
+
         // Payroll by designation trends
         $salaryWeek = [];
         $salaryMonth = [];
@@ -645,11 +586,24 @@ class AdminDashboardController extends Controller
                 'month' => $salaryMonth,
                 'year' => $salaryYear,
             ],
-            'attendance' => [
-                'week' => $attendanceWeek,
-                'month' => $attendanceMonth,
-                'year' => $attendanceYear,
-            ],
+            'attendance' => $attendance,
         ];
+    }
+
+    /**
+     * One period of the attendance trend, for the dashboard card's date picker.
+     *
+     * A read of the same figures the page already shows, under the same area
+     * gate as /admin/dashboard — the admin/ prefix is what confines it to
+     * admin and HR (see EnsureRoleForArea).
+     */
+    public function attendanceTrend(Request $request)
+    {
+        return response()->json(
+            app(AttendanceTrendService::class)->series(
+                (string) $request->query('period', 'month'),
+                $request->query('date')
+            )
+        );
     }
 }

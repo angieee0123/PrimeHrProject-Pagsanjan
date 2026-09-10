@@ -20,7 +20,7 @@
                 </svg>
             </div>
             <div>
-                <p class="chatbot-name" id="chatbot-title">PRIME HRIS Assistant</p>
+                <p class="chatbot-name" id="chatbot-title">HRIS Assistant</p>
                 <p class="chatbot-status"><span class="chatbot-status-dot" aria-hidden="true"></span>Online</p>
             </div>
         </div>
@@ -116,7 +116,7 @@
 <script>
 // No "performance evaluations": this schema has no performance table, so
 // offering it invites a question the assistant cannot answer from data.
-const CHAT_GREETING = "Hello! I'm your PRIME HRIS assistant. I can look up your own leave balances, payslips, attendance records, trainings and travel orders, and explain how to use the system. How can I assist you today?";
+const CHAT_GREETING = "Hello! I'm your HRIS assistant. I can look up your own leave balances, payslips, attendance records, trainings and travel orders, and explain how to use the system. How can I assist you today?";
 const CHAT_BOT_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
 
 let chatBusy = false;

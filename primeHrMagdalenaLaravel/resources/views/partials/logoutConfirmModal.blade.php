@@ -21,7 +21,7 @@
             </svg>
         </div>
         <h3 class="logout-modal-title" id="logoutModalTitle">Sign out, {{ $logoutFirstName }}?</h3>
-        <p class="logout-modal-text">You're about to end your PRIME HRIS session. You'll need to sign in again to pick up where you left off.</p>
+        <p class="logout-modal-text">You're about to end your HRIS session. You'll need to sign in again to pick up where you left off.</p>
         <div class="logout-modal-actions">
             <button type="button" class="logout-modal-btn logout-modal-cancel" onclick="closeLogoutModal()">Stay signed in</button>
             <button type="button" class="logout-modal-btn logout-modal-confirm" onclick="confirmLogout()">Yes, log me out</button>

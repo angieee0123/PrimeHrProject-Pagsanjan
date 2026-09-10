@@ -1,6 +1,6 @@
 @extends('layouts.mayor')
 
-@section('title', "Travel Orders · PRIME HRIS")
+@section('title', "Travel Orders · HRIS")
 
 @push('styles')
     @vite(['resources/css/admin/adminLeaveAndBenefits.css', 'resources/css/travelOrder.css'])

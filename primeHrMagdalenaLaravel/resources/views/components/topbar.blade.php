@@ -10,7 +10,7 @@
     Usage:
         <x-topbar title="Attendance Management">
             <x-slot:icon><rect x="3" y="4" width="18" height="18" rx="2"/></x-slot:icon>
-            <x-slot:subtitle>{{ now()->format('l, F j, Y') }} &nbsp;·&nbsp; PRIME HRIS Admin Panel</x-slot:subtitle>
+            <x-slot:subtitle>{{ now()->format('l, F j, Y') }} &nbsp;·&nbsp; HRIS Admin Panel</x-slot:subtitle>
             <x-slot:actions>
                 <div class="topbar-search-wrap">...</div>
             </x-slot:actions>

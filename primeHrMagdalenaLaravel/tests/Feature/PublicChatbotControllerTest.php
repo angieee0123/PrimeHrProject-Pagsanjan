@@ -62,7 +62,7 @@ class PublicChatbotControllerTest extends TestCase
             ->assertJson(['status' => 'success'])
             ->assertJsonStructure(['response', 'full_response', 'follow_up_questions']);
 
-        $this->assertStringContainsString('PRIME HRIS Assistant', $response->json('response'));
+        $this->assertStringContainsString('HRIS Assistant', $response->json('response'));
     }
 
     public function test_various_greetings_are_recognized(): void

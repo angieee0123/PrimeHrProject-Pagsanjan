@@ -1,6 +1,6 @@
 @extends('layouts.mayor')
 
-@section('title', "Mayor's View · PRIME HRIS")
+@section('title', "Mayor's View · HRIS")
 
 @push('styles')
     @vite('resources/css/mayor/mayorDashboard.css')

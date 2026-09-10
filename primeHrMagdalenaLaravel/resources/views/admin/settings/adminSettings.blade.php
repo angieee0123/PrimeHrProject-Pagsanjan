@@ -265,7 +265,7 @@
                 <div class="settings-section-content">
                     <div class="settings-form-wrapper">
                         <p class="settings-row-desc" style="margin-bottom:16px">
-                            By default, the PRIME HRIS chatbot uses the system default below (currently {{ $systemDefaultLabel }}).
+                            By default, the HRIS chatbot uses the system default below (currently {{ $systemDefaultLabel }}).
                             Bring your own API key here to use a different provider or model for your own chatbot
                             conversations only — other admins and HR staff are unaffected.
                         </p>

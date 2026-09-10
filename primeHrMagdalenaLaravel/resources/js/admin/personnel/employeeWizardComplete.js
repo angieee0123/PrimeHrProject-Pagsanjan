@@ -17,7 +17,6 @@ function editEmployee(id) {
     if (typeof goToWizardStep === 'function') goToWizardStep(1);
     document.getElementById('employeeWizardModal').style.display = 'flex';
     if (window.resetWizardFieldValidation) window.resetWizardFieldValidation();
-    if (window.resetWizardPasswordVisibility) window.resetWizardPasswordVisibility();
 
     fetch(`/admin/personnel/${id}/edit`)
         .then(r => r.json())

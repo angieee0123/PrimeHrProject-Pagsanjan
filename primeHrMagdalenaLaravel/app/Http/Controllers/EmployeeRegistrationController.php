@@ -11,6 +11,7 @@ use App\Models\Contact;
 use App\Models\GovernmentId;
 use App\Models\EmployeeSupportingDocument;
 use App\Notifications\EmployeeDetailsEmail;
+use App\Services\TemporaryPasswordService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -39,8 +40,6 @@ class EmployeeRegistrationController extends Controller
         'civil_status'      => [1, 'Personal'],
         'username'          => [2, 'Account'],
         'user_email'        => [2, 'Account'],
-        'password'          => [2, 'Account'],
-        'password_confirm'  => [2, 'Account'],
         'roles'             => [2, 'Account'],
         'department'        => [3, 'Employment'],
         'designation_id'    => [3, 'Employment'],
@@ -78,8 +77,10 @@ class EmployeeRegistrationController extends Controller
                 'civil_status' => ['required', 'in:Single,Married,Widowed,Separated,Divorced'],
                 'username' => ['required', 'string', 'max:255', 'unique:users,username'],
                 'user_email' => ['required', 'email', 'max:255', 'unique:users,email'],
-                'password' => ['required', 'string', 'min:8'],
-                'password_confirm' => ['required', 'same:password'],
+                // There is deliberately no `password` rule: the wizard no
+                // longer posts one, and nothing an admin types reaches the
+                // account's credentials. The password is generated below and
+                // exists in readable form only inside the credentials email.
                 'roles' => ['required', 'array', 'min:1'],
                 'roles.*' => ['in:' . implode(',', User::ROLES)],
                 'department' => ['required', 'exists:departments,id'],
@@ -96,7 +97,6 @@ class EmployeeRegistrationController extends Controller
                 // labelled "Email Address".
                 'employee_id'       => 'employee ID',
                 'user_email'        => 'email address',
-                'password_confirm'  => 'password confirmation',
                 'department'        => 'department',
                 'designation_id'    => 'designation',
                 'roles'             => 'role',
@@ -110,6 +110,13 @@ class EmployeeRegistrationController extends Controller
         }
 
         try {
+            // The one plaintext copy of the password in this request. It is
+            // generated rather than accepted from the request, so no admin
+            // knows the login they just created and no two accounts share a
+            // hand-typed value; the credentials email below is the only place
+            // it is ever readable. Everything else stores the hash.
+            $temporaryPassword = TemporaryPasswordService::generate();
+
             DB::beginTransaction();
 
             // Create Employee
@@ -146,7 +153,7 @@ class EmployeeRegistrationController extends Controller
                 'employee_id' => $employee->id,
                 'email' => $request->user_email,
                 'username' => $request->username,
-                'password' => Hash::make($request->password),
+                'password' => Hash::make($temporaryPassword),
                 'roles' => array_values(array_unique($request->roles)),
                 'status' => 'Active',
             ]);
@@ -229,7 +236,7 @@ class EmployeeRegistrationController extends Controller
             $employeeUserDetails = $this->credentialsFor(
                 $employee,
                 $employeeUser,
-                $request->password,
+                $temporaryPassword,
                 $request->roles
             );
 
@@ -336,10 +343,15 @@ class EmployeeRegistrationController extends Controller
      * - keys were run through `ucfirst()` in the view, so the labels read
      *   "Employee_id" and "Roles". They are written out here instead.
      *
+     * The Password row is the employee's **only** copy of it: the wizard stopped
+     * accepting a password from the admin, so this email is not a convenience
+     * restating something already on the admin's screen — it is the delivery
+     * channel. Both callers pass `TemporaryPasswordService::generate()`.
+     *
      * @param  array<int, string>  $roles
      * @return array<string, string>
      */
-    private function credentialsFor(Employee $employee, User $user, string $password, array $roles): array
+    private function credentialsFor(Employee $employee, User $user, string $temporaryPassword, array $roles): array
     {
         $name = trim(implode(' ', array_filter([
             $employee->first_name,
@@ -353,7 +365,7 @@ class EmployeeRegistrationController extends Controller
             'Name'        => $name,
             'Username'    => (string) $user->username,
             'Email'       => (string) $user->email,
-            'Password'    => $password,
+            'Password'    => $temporaryPassword,
             'Role'        => implode(', ', array_map(
                 fn ($role) => ucfirst((string) $role),
                 array_values(array_unique($roles))
@@ -617,7 +629,15 @@ class EmployeeRegistrationController extends Controller
 
                         // Create User Account — derive username from name,
                         // matching the wizard's auto-fill: last name + first name.
-                        $rawPassword = $data['password'] ?? 'password123';
+                        //
+                        // A blank Password column gets a generated password,
+                        // exactly like the wizard. The old fallback was one
+                        // hard-coded literal shared by every imported account
+                        // whose CSV cell was empty — and the credentials email
+                        // then printed it, in full, for each of them.
+                        $rawPassword = trim((string) ($data['password'] ?? '')) !== ''
+                            ? (string) $data['password']
+                            : TemporaryPasswordService::generate();
                         $employeeUser = User::create([
                             'employee_id' => $employee->id,
                             'email' => $data['email'] ?? $data['employee_id'] . '@lgu.gov.ph',

@@ -740,7 +740,7 @@ class ChartDataService
         })->implode('; ');
 
         $system = <<<'PROMPT'
-You are the PRIME HRIS Assistant introducing a chart you just generated.
+You are the HRIS Assistant introducing a chart you just generated.
 
 - Say what the chart shows and over what period.
 - Describe the actual shape: where it peaks, where it dips, the direction of

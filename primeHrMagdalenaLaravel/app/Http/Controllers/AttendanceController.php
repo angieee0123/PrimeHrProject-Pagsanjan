@@ -106,6 +106,10 @@ class AttendanceController extends Controller
             ->limit(50)
             ->get();
 
+        // Where the kiosk lives, so this page can hand the address (and a QR of
+        // it) to whoever sets the tablet up.
+        $kioskUrl = app(\App\Services\AttendanceKioskService::class)->url();
+
         return view('admin.attendance.adminAttendance', compact(
             'attendanceRecords',
             'employees',
@@ -119,7 +123,11 @@ class AttendanceController extends Controller
             'departments',
             'detailedRecords',
             'detailedPagination',
-            'exemptions'
+            'exemptions',
+            // The attendance terminal is a public kiosk rather than a page in
+            // this area, so this page is where staff collect its address. The
+            // URL is derived, never stored — see AttendanceKioskService.
+            'kioskUrl',
         ));
     }
 
@@ -638,7 +646,7 @@ class AttendanceController extends Controller
         ) {
             $csv->letterhead(
                 'Detailed Time Record',
-                'Human Resource Management Office · PRIME HRIS',
+                'Human Resource Management Office · HRIS',
                 $startDate->format('F d, Y') . ' to ' . $endDate->format('F d, Y')
             );
 
@@ -784,7 +792,7 @@ class AttendanceController extends Controller
             ) {
                 $csv->letterhead(
                     'Attendance Summary',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     $startDate->format('F d, Y') . ' to ' . $endDate->format('F d, Y')
                 );
 

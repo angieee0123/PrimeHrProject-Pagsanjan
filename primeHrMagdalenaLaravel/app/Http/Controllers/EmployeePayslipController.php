@@ -127,7 +127,7 @@ class EmployeePayslipController extends Controller
             ) {
                 $csv->letterhead(
                     'Payslip History',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     $payslips->isNotEmpty()
                         ? 'Payslips covering ' . CsvReportWriter::longDate($payslips->min('period_start'))
                             . ' to ' . CsvReportWriter::longDate($payslips->max('period_end'))

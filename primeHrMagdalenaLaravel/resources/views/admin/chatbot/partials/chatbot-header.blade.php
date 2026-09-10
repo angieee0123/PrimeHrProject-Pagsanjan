@@ -6,7 +6,7 @@
             </svg>
         </div>
         <div>
-            <p class="chatbot-name" id="chatbotTitle">PRIME HRIS Assistant</p>
+            <p class="chatbot-name" id="chatbotTitle">HRIS Assistant</p>
             <p class="chatbot-status"><span class="chatbot-status-dot" aria-hidden="true"></span>Online</p>
         </div>
     </div>

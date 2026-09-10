@@ -76,7 +76,7 @@ class DeductionExportController extends Controller
             return CsvReportWriter::download($fileName, function (CsvReportWriter $csv) use ($types, $category, $status) {
                 $csv->letterhead(
                     'Deduction Types — Configuration Registry',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     'Registry as of ' . now()->format('F d, Y')
                 );
 
@@ -193,7 +193,7 @@ class DeductionExportController extends Controller
             return CsvReportWriter::download($fileName, function (CsvReportWriter $csv) use ($deductions, $search, $type, $status) {
                 $csv->letterhead(
                     'Employee Deductions',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     'Assignments on file as of ' . now()->format('F d, Y')
                 );
 
@@ -351,7 +351,7 @@ class DeductionExportController extends Controller
             return CsvReportWriter::download($fileName, function (CsvReportWriter $csv) use ($loans, $search, $loanTypeName, $status) {
                 $csv->letterhead(
                     'Employee Loans — Outstanding Balances',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     'Balances as of ' . now()->format('F d, Y')
                 );
 
@@ -538,7 +538,7 @@ class DeductionExportController extends Controller
             return CsvReportWriter::download($fileName, function (CsvReportWriter $csv) use ($rows, $employees, $search, $department) {
                 $csv->letterhead(
                     'Deduction Schedules — Cutoff Assignments',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     'Schedules in force as of ' . now()->format('F d, Y')
                 );
 
@@ -656,7 +656,7 @@ class DeductionExportController extends Controller
             return CsvReportWriter::download($fileName, function (CsvReportWriter $csv) use ($loanTypes, $search, $provider, $status) {
                 $csv->letterhead(
                     'Loan Type Registry',
-                    'Human Resource Management Office · PRIME HRIS',
+                    'Human Resource Management Office · HRIS',
                     'Registry as of ' . now()->format('F d, Y')
                 );
 

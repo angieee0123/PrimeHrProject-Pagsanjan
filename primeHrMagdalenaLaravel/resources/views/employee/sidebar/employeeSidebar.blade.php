@@ -57,7 +57,7 @@ $isActive = fn (string $id) => $currentRoute === $id || Str::startsWith($current
                      onerror="this.style.display='none'">
             </div>
             <div class="logo-text-wrap" id="logo-text">
-                <span class="logo-text">PRIME HRIS</span>
+                <span class="logo-text">HRIS</span>
                 <span class="logo-sub">Pagsanjan, Laguna</span>
             </div>
         </div>

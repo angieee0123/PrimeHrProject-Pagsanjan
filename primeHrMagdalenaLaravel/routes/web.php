@@ -20,6 +20,25 @@ Route::get('/about', function () {
     return view('about');
 })->name('about');
 
+// ── Attendance kiosk — the only unauthenticated write path in the app ──
+//
+// Deliberately outside the `admin` / `mayor` / `employee` prefixes. Both
+// EnsureRoleForArea and EnsureEmailIsVerifiedForArea key off the first path
+// segment against EnsureRoleForArea::AREA_ROLES, so a `kiosk` prefix is not
+// gated by either — which is the point: the employee using this terminal has no
+// account in front of them and must not be handed an admin area to use it.
+//
+// What replaces the login is the bearer token in the path, checked by
+// `kiosk.token` (404 on a wrong token, so the route is simply not reachable).
+// Throttled because a kiosk in a busy lobby is the one screen that can hammer
+// the punch endpoint by accident — a camera decodes the same badge many times a
+// second — and because the endpoint is public.
+Route::middleware(['kiosk.token', 'throttle:60,1'])->prefix('kiosk/attendance')->group(function () {
+    Route::get('/{token}', [\App\Http\Controllers\AttendanceKioskController::class, 'show'])->name('kiosk.attendance');
+    Route::post('/{token}/peek', [\App\Http\Controllers\AttendanceKioskController::class, 'peek'])->name('kiosk.attendance.peek');
+    Route::post('/{token}/punch', [\App\Http\Controllers\AttendanceKioskController::class, 'punch'])->name('kiosk.attendance.punch');
+});
+
 // ── Auth ──
 Route::get('/login', [\App\Http\Controllers\AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])->name('login.post');
@@ -76,6 +95,10 @@ Route::post('/email/verification-notification', function (Request $request) {
 
 // ── Admin Dashboard ──
 Route::get('/admin/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->middleware('auth')->name('admin.dashboard');
+
+// One period of the Attendance Trend card, for its date picker. Read-only, and
+// under the admin/ prefix so EnsureRoleForArea confines it to admin and HR.
+Route::get('/admin/dashboard/attendance-trend', [\App\Http\Controllers\AdminDashboardController::class, 'attendanceTrend'])->middleware('auth')->name('admin.dashboard.attendance-trend');
 
 Route::get('/mayor/dashboard', [\App\Http\Controllers\MayorDashboardController::class, 'index'])->middleware('auth')->name('mayor.dashboard');
 Route::get('/mayor/personnel', [\App\Http\Controllers\MayorPersonnelController::class, 'index'])->middleware('auth')->name('mayor.personnel');
@@ -463,14 +486,12 @@ Route::get('/admin/performance', function () {
     return view('admin.performance.adminPerformance');
 })->middleware('auth')->name('admin.performance');
 
-// QR Attendance Scanner — the staffed kiosk standing in for a biometric
-// reader. Registered before the parameterised attendance routes so `scanner`
-// is never read as an id. Throttled because a kiosk in a busy lobby is the
-// one screen that can hammer the punch endpoint by accident.
-Route::get('/admin/attendance/scanner', [\App\Http\Controllers\AttendanceScannerController::class, 'index'])->middleware('auth')->name('admin.attendance.scanner');
-Route::post('/admin/attendance/scanner/punch', [\App\Http\Controllers\AttendanceScannerController::class, 'punch'])->middleware(['auth', 'throttle:60,1'])->name('admin.attendance.scanner.punch');
-Route::post('/admin/attendance/scanner/suggest', [\App\Http\Controllers\AttendanceScannerController::class, 'suggest'])->middleware(['auth', 'throttle:60,1'])->name('admin.attendance.scanner.suggest');
-Route::get('/admin/attendance/scanner/recent', [\App\Http\Controllers\AttendanceScannerController::class, 'recent'])->middleware('auth')->name('admin.attendance.scanner.recent');
+// The attendance scanner used to live here, on `/admin/attendance/scanner`,
+// where EnsureRoleForArea confined it to `admin` and `hr`. It is now the public
+// kiosk at `/kiosk/attendance/{token}` — see the block near the top of this
+// file. Nothing replaces these four routes: leaving them registered would keep
+// a second, staffed way to write punches alive alongside the kiosk, and the
+// whole point of the move was that there is one attendance terminal.
 
 Route::get('/admin/attendance', [AttendanceController::class, 'index'])->middleware('auth')->name('admin.attendance');
 // "Export" on the Attendance page toolbar -> the Attendance Summary tab.

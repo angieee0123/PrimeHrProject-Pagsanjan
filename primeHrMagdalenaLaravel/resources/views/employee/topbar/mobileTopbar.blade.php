@@ -8,7 +8,7 @@
         </svg>
     </button>
     <div class="permanent-mobile-topbar-copy">
-        <span>{{ $mobileTopbarEyebrow ?? 'PRIME HRIS' }}</span>
+        <span>{{ $mobileTopbarEyebrow ?? 'HRIS' }}</span>
         <strong>{{ $mobileTopbarTitle ?? 'Dashboard' }}</strong>
     </div>
     <div class="permanent-mobile-avatar">{{ $authInitials ?? 'PE' }}</div>

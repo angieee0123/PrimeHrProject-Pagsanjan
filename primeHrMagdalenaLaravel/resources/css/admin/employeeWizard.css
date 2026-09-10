@@ -408,32 +408,11 @@
     color: var(--gp-text-mid);
 }
 
-/* Password / Confirm Password — show/hide toggle */
-.wizard-pw-wrap {
-    position: relative;
-}
-.wizard-pw-wrap .wizard-input {
-    padding-right: 40px;
-}
-.wizard-pw-toggle {
-    position: absolute;
-    right: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--gp-text-mid);
-    border-radius: 6px;
-    transition: color 0.15s, background 0.15s;
-}
-.wizard-pw-toggle:hover {
-    color: var(--gp-pri);
-    background: var(--gp-bg-tint-2);
+/* Password — no longer a field. The server generates it and emails it, so step
+   2 states that rather than offering a box (see TemporaryPasswordService). The
+   show/hide toggle styles that used to sit here went with the inputs. */
+.wizard-pw-notice {
+    margin-top: 6px;
 }
 
 /* Real-time validation state — the error message swaps into the .wizard-hint

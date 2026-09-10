@@ -311,7 +311,7 @@ class AppearancePicker {
 
     reset() {
         if (this.scope === 'global' && !window.confirm(
-            'Restore the PRIME HRIS default look?\n\n'
+            'Restore the HRIS default look?\n\n'
             + 'People using the system theme go back to Municipal Navy.\n'
             + 'Personal appearances are not deleted.',
         )) return;
