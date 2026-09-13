@@ -134,10 +134,26 @@ function openFreshEmployeeWizard() {
     updateWizardUI();
     const usernameField = document.querySelector('#employeeWizardForm [name="username"]');
     if (usernameField) delete usernameField.dataset.userEdited;
+    if (window.setWizardEmployeeIdNote) window.setWizardEmployeeIdNote(null);
     if (window.resetWizardFieldValidation) window.resetWizardFieldValidation();
     if (window.clearGovIdCurrentFiles) window.clearGovIdCurrentFiles();
     if (window.resetWizardDocumentCards) window.resetWizardDocumentCards();
 }
+
+// ── Employee ID (Step 1) ──
+// There is no input for it any more: the number is minted on save by
+// Employee::generateEmployeeId() as EMP-<year>-<sequence> (see the model), and
+// the admin has nothing to type or to get wrong. The line that replaced the
+// field states that rule for a new employee, and the employee's existing number
+// while editing one — a blank where the ID used to be would read as "this
+// employee has none".
+window.setWizardEmployeeIdNote = function(employeeId) {
+    const note = document.getElementById('wizardEmployeeIdNoteText');
+    if (!note) return;
+    note.textContent = employeeId
+        ? 'Current number: ' + employeeId
+        : (note.dataset.default || 'Assigned automatically when saved.');
+};
 
 // Opens a blank wizard for this attempt WITHOUT deleting the saved draft —
 // the admin may still want it back via "Continue Draft" on a later visit,
@@ -169,6 +185,10 @@ window.closeEmployeeWizard = function() {
     document.getElementById('employeeWizardModal').style.display = 'none';
     currentStep = 1;
     document.getElementById('employeeWizardForm').reset();
+    // The number shown while editing belongs to the employee that was open, not
+    // to whatever the wizard is used for next.
+    delete document.getElementById('employeeWizardForm').dataset.employeeId;
+    if (window.setWizardEmployeeIdNote) window.setWizardEmployeeIdNote(null);
     if (window.resetWizardFieldValidation) window.resetWizardFieldValidation();
     // delegate to blade-defined closeEmployeeWizard for edit-mode reset if present
     if (window.wizardIsEditMode) {
@@ -211,14 +231,24 @@ function blockedByAttachmentSize() {
 }
 window.blockedByAttachmentSize = blockedByAttachmentSize;
 
-window.nextStep = function() {
-    if (validateCurrentStep()) {
-        if (currentStep < totalSteps) {
-            currentStep++;
-            updateWizardUI();
-            if (currentStep === totalSteps) {
-                generateReview();
-            }
+// Async because the account step asks the server whether the username and
+// email are already taken (see employeeWizardValidation.js). A click made in the
+// same moment as leaving one of those boxes has to wait for that answer rather
+// than walk past a conflict the server is about to report.
+window.nextStep = async function() {
+    if (currentStep === 2 && window.awaitWizardFieldAvailability) {
+        await window.awaitWizardFieldAvailability();
+    }
+
+    if (!validateCurrentStep()) {
+        return;
+    }
+
+    if (currentStep < totalSteps) {
+        currentStep++;
+        updateWizardUI();
+        if (currentStep === totalSteps) {
+            generateReview();
         }
     }
 }
@@ -258,6 +288,20 @@ function validateCurrentStep() {
         const rolesContainer = document.querySelector('#step2-register:not([style*="display: none"]) .wizard-role-checkboxes, #step2-edit:not([style*="display: none"]) .wizard-role-checkboxes');
         if (rolesContainer && !rolesContainer.querySelector('input[type="checkbox"]:checked')) {
             alert('Please select at least one role / access level.');
+            return false;
+        }
+
+        // The server already said this login belongs to somebody else. The
+        // submit-time `unique:` rules would catch it too, but only after the
+        // remaining five steps — the point of asking early is not to let the
+        // admin type them.
+        const taken = Array.from(
+            document.querySelectorAll('#step2-register [name="username"], #step2-register [name="user_email"]')
+        ).find((field) => field.dataset.availabilityError);
+
+        if (taken) {
+            alert(taken.dataset.availabilityError);
+            taken.focus();
             return false;
         }
     }
@@ -319,10 +363,19 @@ function generateReview() {
     const photoFile = formData.get('photo');
     const roles = selectedWizardRoles().join(', ');
 
+    // The employee number is minted server-side at submit, so a new employee
+    // has none to read back here — 'Auto-generated' states the rule rather than
+    // showing N/A, which would read as "this employee is being created without
+    // an ID". While editing one it is the existing number, which the wizard
+    // never posts and never changes.
+    const employeeId = isEdit
+        ? (form.dataset.employeeId || '')
+        : 'Auto-generated on save';
+
     let html = '';
 
     html += reviewSection('<svg class="wizard-review-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Personal Information', [
-        reviewRow([['Employee ID', get('employee_id')], ['Full Name', fullName]]),
+        reviewRow([['Employee ID', employeeId], ['Full Name', fullName]]),
         reviewRow([['Date of Birth', formatWizardDate(get('birth_date'))], ['Place of Birth', get('place_of_birth')]]),
         reviewRow([['Sex', get('sex')], ['Civil Status', get('civil_status')]]),
         reviewRow([['Height', get('height') ? get('height') + ' cm' : ''], ['Weight', get('weight') ? get('weight') + ' kg' : '']]),

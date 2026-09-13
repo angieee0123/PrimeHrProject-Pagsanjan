@@ -189,4 +189,28 @@ return [
     'who is on leave today' => 'data_query',
     'find employees with unused leave credits' => 'data_query',
     'spreadsheet of overtime hours' => 'data_query',
+
+    // ── out_of_scope ────────────────────────────────────────────────────────
+    // Questions about some other assistant entirely. These are refused in PHP
+    // (AiScopeGuard) before any capability or model runs, because an answer
+    // here is the one thing this assistant must never produce: "how to write a
+    // for loop in python" came back as a working Python loop from a chatbot
+    // that is supposed to answer from this municipality's records.
+    //
+    // The set is deliberately mixed: languages and frameworks, code tasks that
+    // name no language, general knowledge, homework, and small talk. Small talk
+    // is here too — "the weather is nice today" used to be the catch-all
+    // probe, and a chatbot that will not answer the weather is the point.
+    'how to write a for loop in python' => 'out_of_scope',
+    'can you write me some react code?' => 'out_of_scope',
+    'explain closures in javascript' => 'out_of_scope',
+    'how do I center a div in css' => 'out_of_scope',
+    'how to make an app in flutter' => 'out_of_scope',
+    'write a script that renames files' => 'out_of_scope',
+    'what is the best linux command for that' => 'out_of_scope',
+    'what is the capital of France' => 'out_of_scope',
+    'solve for x: 2x + 4 = 10' => 'out_of_scope',
+    'tell me a joke' => 'out_of_scope',
+    'translate this into Spanish' => 'out_of_scope',
+    'the weather is nice today' => 'out_of_scope',
 ];

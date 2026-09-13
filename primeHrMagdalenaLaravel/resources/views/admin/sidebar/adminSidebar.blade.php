@@ -202,10 +202,22 @@ while (count($openGroups) > 3) {
              this rail and the employee one stay in step. --}}
         <div class="user-avatar-wrap">
             @php
-                $avatarEmployee = $authEmployee ?? (Auth::check() ? Auth::user()->employee : null);
+                // Who this rail is naming, resolved from what the account actually
+                // has. `users.employee_id` is nullable — an admin account created
+                // by hand holds no employee row — and the old fallbacks invented
+                // an "Admin User" for it, a name no employee in this system has.
+                // The chain is employee record → account name → username, each of
+                // them a real stored value; the role line beneath already states
+                // the role, so the name never has to guess at it.
+                $authUser = Auth::user();
+                $avatarEmployee = $authEmployee ?? $authUser?->employee;
+                $railName = $avatarEmployee
+                    ? trim(($avatarEmployee->first_name ?? '') . ' ' . ($avatarEmployee->last_name ?? ''))
+                    : '';
+                $railName = $railName !== '' ? $railName : ($authUser?->name ?: $authUser?->username);
                 $avatarInitials = $avatarEmployee
                     ? strtoupper(substr($avatarEmployee->first_name ?? 'A', 0, 1) . substr($avatarEmployee->last_name ?? 'D', 0, 1))
-                    : 'AD';
+                    : (strtoupper(substr((string) $railName, 0, 1)) ?: 'AD');
             @endphp
             @if($avatarEmployee?->photo)
                 {{-- If the stored file has gone missing, hand off to the initials
@@ -220,7 +232,7 @@ while (count($openGroups) > 3) {
             <span class="user-status-dot"></span>
         </div>
         <div class="user-info" id="user-info">
-            <p class="user-name">{{ Auth::check() ? (Auth::user()->employee->first_name ?? 'Admin') . ' ' . (Auth::user()->employee->last_name ?? 'User') : 'Admin User' }}</p>
+            <p class="user-name">{{ $railName }}</p>
             <p class="user-role">{{ ($authRole ?? null) === 'Admin' ? 'Administrator' : (($authRole ?? null) === 'Hr' ? 'HR Staff' : ($authRole ?? 'HR Staff')) }}</p>
         </div>
         @if(Auth::check() && count(Auth::user()->dashboardRoutes()) > 1)
@@ -231,4 +243,4 @@ while (count($openGroups) > 3) {
     </div>
 </aside>
 
-@include('partials.logoutConfirmModal', ['firstName' => Auth::check() && Auth::user()->employee ? (Auth::user()->employee->first_name ?? 'Admin') : 'Admin'])
+@include('partials.logoutConfirmModal', ['firstName' => explode(' ', trim((string) $railName))[0]])

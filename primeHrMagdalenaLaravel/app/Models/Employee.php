@@ -11,11 +11,93 @@ class Employee extends Model implements Auditable
 
     public $timestamps = false;
 
+    /**
+     * Every employee number this system mints, e.g. `EMP-2026-0042`: a fixed
+     * prefix, the year of registration, and a per-year sequence padded to
+     * four digits so the numbers sort as strings.
+     */
+    public const EMPLOYEE_ID_PREFIX = 'EMP';
+
+    public const EMPLOYEE_ID_SEQUENCE_DIGITS = 4;
+
     protected $fillable = [
         'employee_id', 'first_name', 'middle_name', 'last_name', 'suffix',
         'photo', 'birth_date', 'place_of_birth', 'sex', 'civil_status',
         'height', 'weight', 'blood_type', 'citizenship', 'email'
     ];
+
+    protected static function booted(): void
+    {
+        // The wizard no longer asks for an employee number, so a registration
+        // arrives without one and the model is what assigns it.
+        //
+        // Only when the caller left it blank: bulk import and the seeder name
+        // their own numbers, and an existing employee's number must never move
+        // — it is what the DTR, the payslip, the QR badge and every personnel
+        // screen identify them by.
+        static::creating(function (Employee $employee) {
+            if (blank($employee->employee_id)) {
+                $employee->employee_id = static::generateEmployeeId();
+            }
+        });
+    }
+
+    /**
+     * The next free employee number for the current year.
+     *
+     * The sequence is read back from the table rather than kept in a counter:
+     * the highest number already issued this year, plus one, skipping anything
+     * taken. A counter would drift the moment a row was deleted or a number was
+     * hand-typed into the middle of the range, and `employees.employee_id` is
+     * UNIQUE — which is also the backstop if two registrations race for the
+     * same number.
+     */
+    public static function generateEmployeeId(?int $year = null): string
+    {
+        $prefix = static::employeeIdPrefix($year);
+
+        $highest = 0;
+        foreach (static::where('employee_id', 'like', $prefix . '%')->pluck('employee_id') as $existing) {
+            // Anything after the prefix that is not a plain number — a legacy
+            // `EMP-2026-0001-A`, say — is not part of this year's sequence and
+            // must not be read as one.
+            $sequence = substr((string) $existing, strlen($prefix));
+            if ($sequence !== '' && ctype_digit($sequence)) {
+                $highest = max($highest, (int) $sequence);
+            }
+        }
+
+        do {
+            $candidate = $prefix . str_pad(
+                (string) ++$highest,
+                self::EMPLOYEE_ID_SEQUENCE_DIGITS,
+                '0',
+                STR_PAD_LEFT
+            );
+        } while (static::where('employee_id', $candidate)->exists());
+
+        return $candidate;
+    }
+
+    /**
+     * The `EMP-<year>-` half of every number, shared by the generator and the
+     * wizard's preview so the two cannot describe different formats.
+     */
+    public static function employeeIdPrefix(?int $year = null): string
+    {
+        return self::EMPLOYEE_ID_PREFIX . '-' . ($year ?? (int) now()->year) . '-';
+    }
+
+    /**
+     * The format the wizard shows where the Employee ID input used to be —
+     * `EMP-2026-xxxx`. Built from the same constants the generator pads with,
+     * so the promise on screen cannot disagree with what gets minted.
+     */
+    public static function employeeIdPreview(?int $year = null): string
+    {
+        return static::employeeIdPrefix($year)
+            . str_repeat('x', self::EMPLOYEE_ID_SEQUENCE_DIGITS);
+    }
 
     public function user()
     {

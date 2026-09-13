@@ -2,7 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use Database\Seeders\AdminUserSeeder;
+use Database\Seeders\DesignationSeeder;
+use Database\Seeders\DepartmentSeeder;
+use Database\Seeders\LeaveTypesConfigSeeder;
+use Database\Seeders\DeductionTypesSeeder;
+use Database\Seeders\LeaveAccrualRatesSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,12 +20,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
-            'name'     => 'System Administrator',
-            'email'    => 'admin@gmail.com',
-            'password' => bcrypt('asdf'),
-            'roles'    => ['admin'],
-            'status'   => 'Active',
+        $this->call([
+            DepartmentSeeder::class,
+            DesignationSeeder::class,
+            AdminUserSeeder::class,
+            LeaveTypesConfigSeeder::class,
+            DeductionTypesSeeder::class,
+            LeaveAccrualRatesSeeder::class,
         ]);
     }
 }

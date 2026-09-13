@@ -349,6 +349,12 @@ class AiQueryRoutingTest extends TestCase
         $this->assertStringNotContainsString('Organisation-wide', $employee['answer']);
         $this->assertNotEmpty($employee['follow_ups']);
 
+        // The list says what is offered; the boundary says what is not. Stated
+        // together, because a list alone invites the assumption that everything
+        // else is offered too.
+        $this->assertStringContainsString('out of scope', $employee['answer']);
+        $this->assertStringContainsString('out of scope', $hr['answer']);
+
         $this->assertStringContainsString('Organisation-wide', $hr['answer']);
     }
 
@@ -547,6 +553,10 @@ class AiQueryRoutingTest extends TestCase
      * written a rule for yet. A caller permitted to run generated SQL should
      * therefore have the question put to the database, rather than answered
      * from the model's general knowledge of how an LGU usually works.
+     *
+     * The probe used to be "the weather is nice today", which is now refused as
+     * out of scope (see the boundary tests below) — so the catch-all is proven
+     * with a question that is in scope and still claimed by no rule.
      */
     #[Test]
     public function an_unclassified_question_is_put_to_the_database(): void
@@ -561,7 +571,7 @@ class AiQueryRoutingTest extends TestCase
 
         $assistant = $this->assistant($sql, $fallback);
 
-        $result = $assistant->ask($this->user(['hr'], 1), 'the weather is nice today');
+        $result = $assistant->ask($this->user(['hr'], 1), 'tell me about the municipality');
 
         $this->assertSame('general', $result['intent']);
         $this->assertSame('Answered from the records.', $result['answer']);
@@ -610,7 +620,7 @@ class AiQueryRoutingTest extends TestCase
 
         $assistant = $this->assistant($sql, $fallback);
 
-        $result = $assistant->ask($this->user(['hr'], 1), 'the weather is nice today');
+        $result = $assistant->ask($this->user(['hr'], 1), 'tell me about the municipality');
 
         $this->assertStringContainsString('limited to HR', $result['answer']);
     }
@@ -638,9 +648,66 @@ class AiQueryRoutingTest extends TestCase
 
         $assistant = $this->assistant($sql, $fallback);
 
-        $result = $assistant->ask($this->user(['hr'], 1), 'the weather is nice today');
+        $result = $assistant->ask($this->user(['hr'], 1), 'tell me about the municipality');
 
         $this->assertSame('Here is what the handbook says instead.', $result['answer']);
+    }
+
+    /**
+     * An out-of-scope question ends the request before anything can narrate it.
+     *
+     * This is the reported vulnerability, stated as a test: "how to write a for
+     * loop in python" was classified `how_to` on the words "how to", handed to
+     * HrChatbotAnswerer, and answered with a working Python loop. Guarding only
+     * the free-text answerer would move the hole rather than close it — a
+     * "generate a report in python" is claimed by the report rule, and a "plot a
+     * sine wave in python" by the chart rule — so the refusal happens on the
+     * scope decision itself, ahead of every capability.
+     */
+    #[Test]
+    public function an_out_of_scope_question_is_refused_before_any_capability_runs(): void
+    {
+        $sql = $this->createMock(SafeSqlService::class);
+        $sql->expects($this->never())->method('query');
+
+        $fallback = $this->createMock(HrChatbotAnswerer::class);
+        $fallback->expects($this->never())->method('answer');
+        $fallback->expects($this->never())->method('explain');
+
+        $assistant = $this->assistant($sql, $fallback);
+
+        $result = $assistant->ask($this->user(['admin'], 1), 'how to write a for loop in python');
+
+        $this->assertSame('out_of_scope', $result['intent']);
+        $this->assertStringContainsString('HRIS', $result['answer']);
+        $this->assertStringNotContainsString('for item in', $result['answer']);
+        $this->assertNotEmpty($result['follow_ups']);
+    }
+
+    /**
+     * The boundary is not a keyword block: a question that names an off-topic
+     * subject *and* an HR subject is an HR question. "which of our employees
+     * know python" is a training/skills lookup, and refusing it would be the
+     * false positive that makes a scope guard worse than none.
+     */
+    #[Test]
+    public function an_hr_question_that_mentions_a_code_word_is_not_refused(): void
+    {
+        foreach ([
+            'which of our employees know python',
+            'what is the code of conduct',
+            'show me the documents of Juan',
+            'how do I print my payslip',
+            'how many employees are on leave today',
+            'what are the requirements for a business permit?',
+            'paano kumuha ng cedula?',
+        ] as $question) {
+            $this->assertNotSame(
+                'out_of_scope',
+                $this->intentOf($question, ['hr'], 1),
+                "wrongly refused: {$question}"
+            );
+        }
     }
 
     /**

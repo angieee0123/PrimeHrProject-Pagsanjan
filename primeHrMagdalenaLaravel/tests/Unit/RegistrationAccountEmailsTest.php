@@ -174,4 +174,49 @@ class RegistrationAccountEmailsTest extends TestCase
         $this->assertSame('Verify email address', $mail->actionText);
         $this->assertStringContainsString('/email/verify/91/', $mail->actionUrl);
     }
+
+    private function notice(?\Throwable $verificationFailure, ?\Throwable $credentialsFailure): array
+    {
+        return (new ReflectionMethod(EmployeeRegistrationController::class, 'emailNoticeFor'))
+            ->invoke(
+                new EmployeeRegistrationController(),
+                new User(['email' => 'maria.santos@pagsanjan.gov.ph']),
+                $verificationFailure,
+                $credentialsFailure,
+            );
+    }
+
+    /**
+     * Both emails are sent separately, so there are three outcomes to report —
+     * and the wizard used to be able to say only two. A password email that
+     * arrived with a verification link that did not is not "neither reached
+     * this address": the employee can sign in, and the link is the single thing
+     * that still needs sending.
+     */
+    #[Test]
+    public function only_the_credentials_email_failing_is_the_failure_state(): void
+    {
+        $smtp = new \RuntimeException('Connection could not be established');
+
+        $both = $this->notice(null, null);
+        $this->assertSame('sent', $both['status']);
+        $this->assertSame('maria.santos@pagsanjan.gov.ph', $both['email']);
+
+        // The password reached them; the link did not.
+        $partial = $this->notice($smtp, null);
+        $this->assertSame('partial', $partial['status']);
+        $this->assertSame($smtp->getMessage(), $partial['reason']);
+
+        // The password — the only copy that exists anywhere — did not.
+        $failed = $this->notice(null, $smtp);
+        $this->assertSame('failed', $failed['status']);
+        $this->assertSame($smtp->getMessage(), $failed['reason']);
+        $this->assertArrayNotHasKey('verification_failed', $failed);
+
+        // Both gone: still the credentials failure, and the panel is told the
+        // link is missing too rather than implying one email is the whole story.
+        $bothFailed = $this->notice($smtp, $smtp);
+        $this->assertSame('failed', $bothFailed['status']);
+        $this->assertTrue($bothFailed['verification_failed']);
+    }
 }

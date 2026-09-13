@@ -32,9 +32,11 @@ class HrChatbotAnswerer
         private HrPolicyFactsService $facts,
         private ?SchemaRelationshipService $relationships = null,
         private ?CitizenCharterService $charter = null,
+        private ?AiScopeGuard $scope = null,
     ) {
         $this->relationships ??= new SchemaRelationshipService();
         $this->charter ??= new CitizenCharterService();
+        $this->scope ??= new AiScopeGuard($this->charter);
     }
 
     /**
@@ -157,6 +159,10 @@ TEXT;
      */
     public function explain(?User $user, string $message, array $history = []): string
     {
+        if (($refusal = $this->outOfScopeRefusal($message)) !== null) {
+            return $refusal;
+        }
+
         try {
             // A municipal "how do I" ("paano kumuha ng business permit") is a
             // charter question wearing how-to phrasing — the HR navigation
@@ -179,12 +185,34 @@ TEXT;
      */
     public function answer(?User $user, string $message, array $history = []): string
     {
+        if (($refusal = $this->outOfScopeRefusal($message)) !== null) {
+            return $refusal;
+        }
+
         try {
             return $this->answerInternal($user, $message, $history);
         } catch (AiRateLimitException $e) {
             Log::warning('HR chatbot rate limited');
             return $e->friendlyMessage();
         }
+    }
+
+    /**
+     * The question is about something other than this HRIS, the municipality,
+     * or this system — so the answer is the boundary, not an attempt.
+     *
+     * This class is reached two ways that never pass through `AiQueryService`:
+     * the public welcome-page widget calls `answer(null, …)` directly, and the
+     * orchestrator itself falls back here for `how_to` and for a general
+     * question no rule claimed. It is also the assistant's free-text answerer,
+     * which is where the off-topic answers actually came from — "answer this
+     * question using the system knowledge below" was an instruction to answer
+     * *anything* it was handed. The gate therefore lives on both public doors
+     * rather than on one of them.
+     */
+    private function outOfScopeRefusal(string $message): ?string
+    {
+        return $this->scope->isOutOfScope($message) ? $this->scope->refusal() : null;
     }
 
     /**
@@ -380,6 +408,7 @@ CRITICAL RULES — follow exactly:
 - For employee name searches always use LIKE on BOTH first_name AND last_name
 - If the question refers back to someone/something from the conversation above (e.g. "him", "her", "siya", "that employee"), resolve it using the conversation history instead of returning CANNOT_ANSWER
 - If the question cannot be answered from the schema, return: CANNOT_ANSWER
+- If the question is not about this municipality's HR data, leave, attendance, payroll, employees, documents, or this system — for example anything about programming, code, mathematics, or general knowledge — return: CANNOT_ANSWER
 - "today" means date = '{$today}'
 - "yesterday" or "kahapon" means date = '{$yesterday}'
 - "tomorrow" or "bukas" means date = '{$tomorrow}'
@@ -491,6 +520,14 @@ general knowledge of how Philippine LGUs are usually structured — say plainly
 that you need to look it up in the records, and invite the user to ask again so
 it can be retrieved. A plausible-sounding list of job titles that does not match
 the plantilla is worse than no answer: it is indistinguishable from a real one.
+
+ANSWER ONLY WITHIN YOUR SCOPE. Your scope is this municipality's HR records and
+HR policies, the municipality's own services, and how this system is used. If the
+question is about anything else — programming or code in any language,
+mathematics, general knowledge, or any other off-topic subject — do not answer
+it, not even partly: say that it is outside what you can help with and invite an
+in-scope question instead. The system knowledge above is background for the HR
+questions you are asked, never material for a different subject.
 
 Provide a clear, friendly answer in 2-4 sentences. Match the user's language (Tagalog or English) and don't repeat introductions already made earlier in the conversation.
 PROMPT;

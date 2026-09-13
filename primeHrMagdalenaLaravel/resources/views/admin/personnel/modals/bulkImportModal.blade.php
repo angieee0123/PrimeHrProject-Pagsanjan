@@ -84,7 +84,14 @@
                                 <li>Use the provided template for correct column headers</li>
                                 <li>All required fields must be filled</li>
                                 <li>Date format: YYYY-MM-DD</li>
-                                <li>Duplicate employee IDs will be skipped</li>
+                                {{-- The template has no Employee ID column: the
+                                     model assigns the next number for the year.
+                                     Stated here because it is the one thing an
+                                     admin migrating from a spreadsheet will look
+                                     for and not find. A file that does carry the
+                                     column keeps the numbers it supplies. --}}
+                                <li>Employee IDs are assigned automatically as {{ \App\Models\Employee::employeeIdPreview() }}</li>
+                                <li>Rows already on record — same employee ID or email — are skipped</li>
                                 {{-- The template has no Password column (see
                                      downloadTemplate()), so every imported
                                      account gets a generated password rather

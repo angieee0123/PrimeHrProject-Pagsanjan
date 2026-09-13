@@ -334,7 +334,15 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
     // so anything the picker could be talked into offering was written to the
     // public disk.
     $request->validate(
-        ['photo' => ['nullable', 'image', 'max:' . \App\Services\UploadLimits::perFileKb(5120)]]
+        [
+            'photo' => ['nullable', 'image', 'max:' . \App\Services\UploadLimits::perFileKb(5120)],
+            // employment_status is nullable here even though registration
+            // requires it: rows predating the field hold NULL, and an edit that
+            // does not touch employment details must not be refused. A blank
+            // value never reaches the column — see the guard below.
+            'employment_status' => ['nullable', 'in:' . implode(',', \App\Models\EmploymentDetail::EMPLOYMENT_TYPES)],
+            'appointment_date' => ['nullable', 'date'],
+        ]
             + \App\Models\GovernmentId::rules()
             + \App\Models\EmployeeSupportingDocument::rules(),
         [],
@@ -378,14 +386,27 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
     $employee->update($updateData);
 
     if ($employee->employmentDetail) {
-        $employee->employmentDetail->update([
-            'designation_id'    => $request->designation_id,
-            'department_id'     => $request->department,
-            'employment_status' => $request->employment_status,
-            'appointment_date'  => $request->appointment_date,
-            'salary_grade'      => $request->salary_grade,
-            'step_increment'    => $request->step_increment,
-        ]);
+        $detailUpdate = [
+            'designation_id'   => $request->designation_id,
+            'department_id'    => $request->department,
+            'appointment_date' => $request->appointment_date,
+            'salary_grade'     => $request->salary_grade,
+            'step_increment'   => $request->step_increment,
+        ];
+
+        // A blank employment_status is never written. It is not an edit the
+        // admin can intend — the wizard auto-fills the field and it is the only
+        // place the value is maintained — but it is exactly what a form posting
+        // nothing (or a designation carrying no employment_type, which used to
+        // blank the input) submits. Writing it dropped the employee off the
+        // permanent roster and out of every employment_status count in the
+        // reports, silently. Clearing a status deliberately is therefore not
+        // supported: pick a type, or leave the record's own alone.
+        if ($request->filled('employment_status')) {
+            $detailUpdate['employment_status'] = $request->employment_status;
+        }
+
+        $employee->employmentDetail->update($detailUpdate);
     }
 
     $mobile    = $employee->contacts->firstWhere('type', 'mobile');
@@ -468,6 +489,18 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
 
     return redirect()->route('admin.personnel')->with('success', "Employee {$employee->first_name} {$employee->last_name} updated successfully!");
 })->middleware('auth')->name('admin.personnel.update');
+
+// Is this username / email already taken? The wizard asks as the admin leaves
+// the account-step field, so the conflict is named while they are still on the
+// box — and blocked before Next, instead of surfacing after six steps as a
+// modal. `unique:` in EmployeeRegistrationController::store() is still what
+// enforces it. Declared before the `{id}` show route below (routes match in
+// declaration order, and "check-availability" would otherwise resolve to
+// show('check-availability') → 404); throttled because it answers a
+// username-exists question and is called on every blur.
+Route::get('/admin/personnel/check-availability', [EmployeeRegistrationController::class, 'usernameEmailAvailable'])
+    ->middleware(['auth', 'throttle:60,1'])
+    ->name('admin.personnel.check-availability');
 
 Route::get('/admin/personnel/{id}', function ($id) {
     $employee = \App\Models\Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'addresses', 'contacts', 'governmentIds'])

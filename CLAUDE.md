@@ -260,6 +260,47 @@ Two things follow from one role serving every audience:
   The notice is appended in PHP rather than left to the prompt, because the
   disclosure has to hold when the model ignores its instructions.
 
+### The assistant answers only about Pagsanjan's HRIS
+
+Three kinds of question, and no others: this municipality's **HR records and HR
+policies**, the **municipality itself** (its services and Citizen's Charter), and
+**this system** (how it is used). Everything else is refused. It used to be
+answered: "how to write a for loop in python" was classified `how_to` on the words
+"how to" and handed to `HrChatbotAnswerer::explain()`, whose prompt said "answer
+this question using the system knowledge below" and nothing about staying in the
+domain — so it came back as a working Python loop. The `general` catch-all had the
+same hole from the other side: an off-topic question from an org-wide caller went
+to text-to-SQL, and the failure fell through to that same free-text answerer.
+
+`AiScopeGuard` owns the boundary, in two layers of deliberately different kinds:
+
+- **The deterministic gate, in PHP.** `isOutOfScope()` runs first in
+  `AiQueryService::ask()` — ahead of pronoun resolution (which spends a provider
+  call rewriting the question) and ahead of every capability — and returns an
+  `out_of_scope` refusal with follow-up chips. It is enforced again at the two
+  doors that never pass through `ask()`: `HrChatbotAnswerer::answer()` (the public
+  welcome-page widget) and `EmployeeChatbotService::handle()` (the mobile
+  chatbot). A refusal costs no model call, and holds with no provider configured.
+- **`AiScopeGuard::PROMPT_CLAUSE`, attached in `AiChatService::chat()`.** Patterns
+  can only refuse a subject somebody wrote a word for; the clause covers the rest,
+  and it is attached at the one point every LLM call goes through, so a prompt
+  written later cannot be written without it. `classifyWithModel()` additionally
+  carries `out_of_scope` as a label, for phrasings the patterns miss.
+
+**The asymmetry is load-bearing.** A question is refused only when it names an
+off-topic subject *and* names no HR or municipal subject at all. "which of our
+employees know python" is a real training/skills lookup and is still answered —
+refusing a real HR question is the worse failure, and the prompt clause is the
+backstop for whatever the patterns let through. `AiScopeGuardTest` runs the entire
+intent golden set through the guard for that reason: a rule change that starts
+refusing a real question fails the scoreboard, not just a sentence.
+
+The boundary is user-visible in two places besides the refusal: the "what can you
+do?" answer ends with it, because a capability list alone invites the assumption
+that everything else is offered too; and refusals are audited with
+`intent: out_of_scope`, `outcome: refused`, and a `note` naming the pattern family
+(`code`/`other`), so a gate that has grown too greedy is tunable from the log.
+
 ### The assistant never states a rule it did not read
 
 Its knowledge used to be a ~165-line string constant in `HrChatbotAnswerer`
@@ -345,6 +386,7 @@ question
 |---|---|
 | `AiQueryService` | Orchestrator: intent detection, routing, audit logging |
 | `AiAccessPolicy` | **The single source of truth for permissions.** All scoping goes through it |
+| `AiScopeGuard` | **What the assistant may answer.** Refuses off-topic questions in PHP and carries the scope clause into every prompt |
 | `AiConversationStore` | **Where a thread is kept.** Conversation lookup, prompt history, and storing/replaying a turn's attachments — shared by the full page and both chatheads |
 | `HrPolicyFactsService` | **The single source of truth for HR rules the assistant states.** Reads them from the live config |
 | `AiChatService` | LLM calls. Resolves provider per-user → org default → `.env` Groq |

@@ -31,7 +31,6 @@ class EmployeeRegistrationController extends Controller
      * still reports, just without a step label.
      */
     private const FIELD_STEPS = [
-        'employee_id'       => [1, 'Personal'],
         'first_name'        => [1, 'Personal'],
         'last_name'         => [1, 'Personal'],
         'photo'             => [1, 'Personal'],
@@ -68,7 +67,11 @@ class EmployeeRegistrationController extends Controller
     {
         try {
             $request->validate([
-                'employee_id' => ['required', 'string', 'max:255', 'unique:employees,employee_id'],
+                // There is deliberately no `employee_id` rule: the wizard no
+                // longer has the field, and the number is minted by the model
+                // (Employee::booted() → generateEmployeeId()) as
+                // EMP-<year>-<sequence>. Accepting one from the request would
+                // let a submitted value — or a stale draft — override it.
                 'first_name' => ['required', 'string', 'max:255'],
                 'last_name' => ['required', 'string', 'max:255'],
                 'photo' => ['nullable', 'image', 'max:5120'],
@@ -95,7 +98,6 @@ class EmployeeRegistrationController extends Controller
                 // Without these, Laravel humanises the column name and the
                 // admin is told "the user email field is required" for a box
                 // labelled "Email Address".
-                'employee_id'       => 'employee ID',
                 'user_email'        => 'email address',
                 'department'        => 'department',
                 'designation_id'    => 'designation',
@@ -119,9 +121,9 @@ class EmployeeRegistrationController extends Controller
 
             DB::beginTransaction();
 
-            // Create Employee
+            // Create Employee. The employee number is not passed: the model
+            // assigns the next `EMP-<year>-<sequence>` on create.
             $employee = Employee::create([
-                'employee_id' => $request->employee_id,
                 'first_name' => $request->first_name,
                 'middle_name' => $request->middle_name,
                 'last_name' => $request->last_name,
@@ -252,32 +254,60 @@ class EmployeeRegistrationController extends Controller
             // user row back while the credentials were already in somebody's
             // inbox — an email cannot be recalled.
             //
-            // Caught separately from the block below: past this point the
-            // employee exists, so a mail failure is a warning, not a failed
-            // registration. Reporting it as one would send the admin back to
-            // re-submit a form that can now only fail on a duplicate ID.
+            // They are sent in their own try blocks, because they are not one
+            // event: the credentials email is the employee's only copy of their
+            // password, and it used to sit behind the verification link in a
+            // single block, so a link that failed to send cost them the password
+            // too — and neither the log nor the modal said which of the two had
+            // gone.
+            //
+            // Past this point the employee exists, so a mail failure is a
+            // warning, not a failed registration. Reporting it as one would send
+            // the admin back to re-submit a form that can now only fail on a
+            // duplicate number. `\Throwable`, not `\Exception`: a PHP fatal — the
+            // SMTP socket read hitting max_execution_time is the one this app has
+            // actually logged — is an \Error, and would sail past an \Exception
+            // handler into the catch-all below, which would then report a
+            // committed registration as rolled back.
+            $verificationFailure = null;
+            $credentialsFailure = null;
+
             try {
                 event(new Registered($employeeUser));
-                $employeeUser->notify(new EmployeeDetailsEmail($employeeUserDetails));
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
+                $verificationFailure = $e;
+
                 // The admin sees this on screen, but only until they navigate
                 // away. Mail failures are exactly what someone comes asking
                 // about days later ("nobody got their login"), so the reason
                 // has to outlive the flash message.
+                Log::error('Employee registered but the verification email failed', [
+                    'user_id' => $employeeUser->id,
+                    'employee_id' => $employee->id,
+                    'email' => $employeeUser->email,
+                    'exception' => $e,
+                ]);
+            }
+
+            try {
+                $employeeUser->notify(new EmployeeDetailsEmail($employeeUserDetails));
+            } catch (\Throwable $e) {
+                $credentialsFailure = $e;
+
                 Log::error('Employee registered but account email failed', [
                     'user_id' => $employeeUser->id,
                     'employee_id' => $employee->id,
                     'email' => $employeeUser->email,
                     'exception' => $e,
                 ]);
+            }
 
+            $emailNotice = $this->emailNoticeFor($employeeUser, $verificationFailure, $credentialsFailure);
+
+            if ($emailNotice['status'] !== 'sent') {
                 return redirect()->route('admin.personnel')
                     ->with('warning', "Employee {$employee->first_name} {$employee->last_name} was registered.")
-                    ->with('email_notice', [
-                        'status' => 'failed',
-                        'email'  => $employeeUser->email,
-                        'reason' => $e->getMessage(),
-                    ]);
+                    ->with('email_notice', $emailNotice);
             }
 
             // What went out is reported separately from *that* it worked. The
@@ -293,10 +323,7 @@ class EmployeeRegistrationController extends Controller
             // before the employee is waiting on mail to nowhere.
             return redirect()->route('admin.personnel')
                 ->with('success', "Employee {$employee->first_name} {$employee->last_name} registered successfully!")
-                ->with('email_notice', [
-                    'status' => 'sent',
-                    'email'  => $employeeUser->email,
-                ]);
+                ->with('email_notice', $emailNotice);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -305,7 +332,9 @@ class EmployeeRegistrationController extends Controller
             // every row, the admin gets a flash message they can dismiss, and
             // nothing anywhere records why the registration failed.
             Log::error('Employee registration failed and was rolled back', [
-                'employee_id' => $request->employee_id,
+                // `?? null`: the failure may have happened before the employee
+                // row existed, in which case there is no generated number yet.
+                'employee_id' => $employee->employee_id ?? null,
                 'email' => $request->user_email,
                 'exception' => $e,
             ]);
@@ -313,6 +342,65 @@ class EmployeeRegistrationController extends Controller
             return back()->with('error', 'Error registering employee: ' . $e->getMessage())
                 ->withInput();
         }
+    }
+
+    /**
+     * Is this username / email already in use? Answers the account-step fields
+     * on blur so the admin learns the login is taken while they are still
+     * looking at the box they typed it in.
+     *
+     * This changes how the conflict is *reported*, not whether it is enforced:
+     * `unique:users,username` and `unique:users,email` in store() remain the
+     * authority, and this endpoint cannot be talked into letting a duplicate
+     * through because it writes nothing. Without it the admin only found out
+     * after six steps of typing, from a modal that named the field but not the
+     * value already holding it.
+     *
+     * The caller has to be signed in (see the route), so this is not a public
+     * "does this address have an account" oracle — the account list is already
+     * readable from the Personnel page by anyone who may call it.
+     */
+    public function usernameEmailAvailable(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validated = $request->validate([
+            // A value with no field to sit in is a bug on the calling page, not
+            // input the admin typed, so it is rejected rather than guessed at.
+            'field' => ['required', 'in:username,user_email'],
+            'value' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $value = trim((string) ($validated['value'] ?? ''));
+
+        // Blank means "not answered yet" — the wizard has an empty box when it
+        // opens an existing record, and an error beside an untouched field
+        // would read as a defect. `required` is the local validator's job.
+        if ($value === '') {
+            return response()->json(['available' => true, 'message' => null]);
+        }
+
+        $column = $validated['field'] === 'username' ? 'username' : 'email';
+        $taken = User::where($column, $value)->exists();
+
+        return response()->json([
+            'available' => !$taken,
+            'message' => $taken ? self::takenMessage($column, $value) : null,
+        ]);
+    }
+
+    /**
+     * What the admin is told when the login they typed already exists.
+     *
+     * One definition, read by both the endpoint above and the test that pins
+     * it, so the sentence the wizard shows cannot drift from the sentence that
+     * was checked. The value is echoed back because "already taken" without it
+     * makes the admin re-read their own typing to see which of the two fields
+     * the complaint is about.
+     */
+    public static function takenMessage(string $column, string $value): string
+    {
+        return $column === 'username'
+            ? "The username \"{$value}\" is already taken — usernames must be unique, so choose another."
+            : "The email address \"{$value}\" already has an account in this system.";
     }
 
     /**
@@ -370,6 +458,53 @@ class EmployeeRegistrationController extends Controller
                 fn ($role) => ucfirst((string) $role),
                 array_values(array_unique($roles))
             )),
+        ];
+    }
+
+    /**
+     * What to tell the admin about the two emails that carry a new account.
+     *
+     * Three outcomes, not two, because the two messages are sent separately:
+     * both went, only the password went, or the password did not. The middle
+     * one matters most and had no way to be said — the employee can sign in the
+     * moment they use "Forgot password", but nothing will ever verify their
+     * address, and the link has to be re-sent from the sign-in screen.
+     *
+     * `failed` is reserved for the credentials email, because that is the one
+     * with no second copy anywhere: it is the only place the generated password
+     * is ever readable.
+     *
+     * @return array{status: string, email: string, reason?: string, verification_failed?: bool}
+     */
+    private function emailNoticeFor(User $user, ?\Throwable $verificationFailure, ?\Throwable $credentialsFailure): array
+    {
+        if ($credentialsFailure) {
+            $notice = [
+                'status' => 'failed',
+                'email' => (string) $user->email,
+                'reason' => $credentialsFailure->getMessage(),
+            ];
+
+            // Named only when it is also true: the panel then says the link is
+            // missing too, and a `false` here would be a state nothing reads.
+            if ($verificationFailure) {
+                $notice['verification_failed'] = true;
+            }
+
+            return $notice;
+        }
+
+        if ($verificationFailure) {
+            return [
+                'status' => 'partial',
+                'email' => (string) $user->email,
+                'reason' => $verificationFailure->getMessage(),
+            ];
+        }
+
+        return [
+            'status' => 'sent',
+            'email' => (string) $user->email,
         ];
     }
 
@@ -464,6 +599,28 @@ class EmployeeRegistrationController extends Controller
         }
 
         return $code;
+    }
+
+    /**
+     * Record why one imported account's email did not go out.
+     *
+     * The wizard has logged this since it shipped ("Employee registered but
+     * account email failed"), on the grounds that a mail failure is exactly
+     * what somebody comes asking about days later — so the reason has to
+     * outlive the response. The import did not log it at all: it appended the
+     * failure to the JSON message and nowhere else, which left "nobody got
+     * their login" with no trace to investigate once the modal was closed.
+     *
+     * @param  array<string, string>  $details  the credentials rows, as mailed
+     */
+    private function logFailedAccountEmail(string $kind, array $details, \Throwable $e): void
+    {
+        Log::error('Bulk import: employee email failed', [
+            'email' => $details['Email'] ?? null,
+            'employee_id' => $details['Employee ID'] ?? null,
+            'email_kind' => $kind,
+            'exception' => $e->getMessage(),
+        ]);
     }
 
     /**
@@ -577,8 +734,14 @@ class EmployeeRegistrationController extends Controller
 
                 // Required-field guard: prevents creating departments / designations
                 // with NULL names when a required column is empty.
+                //
+                // `employee_id` is deliberately not here. The file no longer has
+                // to carry one — the model mints the next EMP-<year>-<sequence>
+                // when the cell is blank (see Employee::booted()) — so requiring
+                // it would refuse every row of a template that correctly leaves
+                // it out.
                 $missing = [];
-                foreach (['employee_id', 'first_name', 'last_name', 'department', 'designation'] as $required) {
+                foreach (['first_name', 'last_name', 'department', 'designation'] as $required) {
                     if (empty($data[$required])) {
                         $missing[] = $required;
                     }
@@ -589,15 +752,36 @@ class EmployeeRegistrationController extends Controller
                     continue;
                 }
 
-                // Check if employee ID already exists. Same check as before —
-                // only what it records changed: the row, the id and the name as
-                // the CSV spells it, so the alert can name who was skipped
-                // instead of repeating "already exists" once per row.
-                if (Employee::where('employee_id', $data['employee_id'])->exists()) {
+                // Refuse a row that is already on record.
+                //
+                // With the number optional, "already exists" is asked of
+                // whichever identifier the row actually carries: the employee
+                // number when the file supplies one (the migration files in
+                // docs/ do), the email when it does not. Both columns are
+                // UNIQUE, and a repeat uploaded by mistake shows up as one or
+                // the other. A row with neither cannot be told apart from a
+                // genuinely new hire of the same name, so it is imported rather
+                // than refused — silently dropping a real employee is the worse
+                // of the two mistakes.
+                $csvEmployeeId = trim((string) ($data['employee_id'] ?? ''));
+                $csvEmail      = trim((string) ($data['email'] ?? ''));
+
+                $matchedId = ($csvEmployeeId !== '' && Employee::where('employee_id', $csvEmployeeId)->exists())
+                    ? $csvEmployeeId
+                    : null;
+                $matchedEmail = ($matchedId === null && $csvEmail !== '' && Employee::where('email', $csvEmail)->exists())
+                    ? $csvEmail
+                    : null;
+
+                if ($matchedId !== null || $matchedEmail !== null) {
                     $skipped++;
                     $duplicates[] = [
                         'row' => $index + 2,
-                        'employee_id' => (string) $data['employee_id'],
+                        // Which of the two identified the record, so the alert
+                        // names it instead of printing a blank where the ID used
+                        // to be on a CSV that has no ID column.
+                        'employee_id' => $matchedId ?? '',
+                        'email' => $matchedEmail ?? '',
                         'name' => trim(implode(' ', array_filter([
                             $data['first_name'] ?? null,
                             $data['last_name'] ?? null,
@@ -611,9 +795,12 @@ class EmployeeRegistrationController extends Controller
                     // rolls the whole row back instead of leaving a half-created
                     // employee behind and reporting it as skipped anyway.
                     DB::transaction(function () use ($data, &$pendingAccounts) {
-                        // Create Employee
+                        // Create Employee. The number comes from the file when the
+                        // file has one — the docs/ migration files carry real
+                        // municipal numbers that must be preserved — and is
+                        // otherwise assigned by the model as EMP-<year>-<sequence>.
                         $employee = Employee::create([
-                            'employee_id' => $data['employee_id'],
+                            'employee_id' => $data['employee_id'] ?? null,
                             'first_name' => $data['first_name'],
                             'middle_name' => $data['middle_name'] ?? null,
                             'last_name' => $data['last_name'],
@@ -640,7 +827,13 @@ class EmployeeRegistrationController extends Controller
                             : TemporaryPasswordService::generate();
                         $employeeUser = User::create([
                             'employee_id' => $employee->id,
-                            'email' => $data['email'] ?? $data['employee_id'] . '@lgu.gov.ph',
+                            // The fallback address is built from the number the
+                            // model just assigned, not from the CSV cell: the
+                            // cell may be absent, and reading it as '' gave every
+                            // emailless row the same "@lgu.gov.ph" address, so
+                            // `users.email` being UNIQUE failed the second one
+                            // and every row after it.
+                            'email' => $data['email'] ?? $employee->employee_id . '@lgu.gov.ph',
                             'username' => $this->generateUsername(
                                 $data['first_name'] ?? '',
                                 $data['last_name'] ?? ''
@@ -738,20 +931,76 @@ class EmployeeRegistrationController extends Controller
 
             DB::commit();
 
-            // Now that every imported row is durable, mail the accounts. A
-            // send that fails must not cost the import: the employees exist
-            // and an admin can resend, whereas throwing here would report a
+            // Now that every imported row is durable, mail the accounts. A send
+            // that fails must not cost the import: the employees exist, and an
+            // employee who never got their password can still get in through
+            // "Forgot password" — whereas throwing here would report a
             // committed import as failed.
+            //
+            // What actually went out is collected and returned, because
+            // "Successfully imported 50 employee(s)" over a silent mail failure
+            // is how an admin ends up telling fifty people to look for a
+            // password that was never sent — the modal used to *assert* the
+            // emails had gone, whatever happened here. The addresses are
+            // reported rather than a bare count for a second reason: a file's
+            // sample rows can carry addresses nobody reads (the shipped sample
+            // uses `@maildrop.cc`, a throwaway host), and seeing one in the
+            // result is the only chance to notice that before the staff do.
+            $emailed = [];
+            $mailFailures = [];
+            $notAttempted = [];
+
+            // A relay that is down fails every send, and each failure costs the
+            // mail timeout in config/mail.php — so three accounts in a row is
+            // enough to conclude it is unreachable and stop, instead of burning
+            // the request's whole time budget failing the rest one at a time.
+            // The accounts skipped this way are named in the response.
+            $consecutiveFailures = 0;
+            $failureLimit = 3;
+
             foreach ($pendingAccounts as $account) {
+                $address = (string) $account['details']['Email'];
+
                 \App\Services\NotificationService::accountCreated($account['user']);
 
+                if ($consecutiveFailures >= $failureLimit) {
+                    $notAttempted[] = $address;
+                    continue;
+                }
+
+                $delivered = true;
+
+                // The two messages are sent in their own try blocks. They used
+                // to share one, so a verification link that failed took the
+                // credentials email down with it — and that is the employee's
+                // only copy of their password, where the verification link can
+                // be re-sent from the sign-in screen.
                 try {
                     event(new Registered($account['user']));
-                    $account['user']->notify(new EmployeeDetailsEmail($account['details']));
-                } catch (\Exception $e) {
-                    $errors[] = "Account {$account['details']['email']}: created, but the "
-                        . "credentials email could not be sent ({$e->getMessage()})";
+                } catch (\Throwable $e) {
+                    $delivered = false;
+                    $mailFailures[] = [
+                        'email' => $address,
+                        'kind' => 'verification link',
+                        'reason' => $e->getMessage(),
+                    ];
+                    $this->logFailedAccountEmail('verification link', $account['details'], $e);
                 }
+
+                try {
+                    $account['user']->notify(new EmployeeDetailsEmail($account['details']));
+                    $emailed[] = $address;
+                } catch (\Throwable $e) {
+                    $delivered = false;
+                    $mailFailures[] = [
+                        'email' => $address,
+                        'kind' => 'username and password',
+                        'reason' => $e->getMessage(),
+                    ];
+                    $this->logFailedAccountEmail('username and password', $account['details'], $e);
+                }
+
+                $consecutiveFailures = $delivered ? 0 : $consecutiveFailures + 1;
             }
 
             // "Successfully imported 0 employee(s)." over a list of records that
@@ -784,6 +1033,15 @@ class EmployeeRegistrationController extends Controller
                 'skipped' => $skipped,
                 'errors' => $errors,
                 'duplicates' => $duplicates,
+                // Per account, not a count: which addresses were actually
+                // emailed, which were refused and why, and which were never
+                // attempted because the relay looked dead. The admin's next
+                // move differs completely between those three.
+                'emails' => [
+                    'sent' => $emailed,
+                    'failed' => $mailFailures,
+                    'not_attempted' => $notAttempted,
+                ],
             ]);
 
         } catch (\Exception $e) {

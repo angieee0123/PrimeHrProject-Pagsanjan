@@ -19,32 +19,123 @@ function renderEmailNotice(notice) {
         return;
     }
 
-    const failed = notice.status === 'failed';
+    const failed = notice.status !== 'sent';
     const address = document.getElementById('successEmailNoticeAddress');
 
     box.classList.toggle('is-failed', failed);
 
-    document.getElementById('successEmailNoticeTitle').textContent = notice.title || (failed
-        ? 'Email could not be sent'
-        : 'Verification email sent');
+    // Three outcomes, because the credentials email and the verification link
+    // are sent separately. The panel used to know only two, so a registration
+    // whose password email went out and whose link did not was reported as
+    // "neither the verification link nor the credentials reached this address"
+    // — which sends the admin hunting for a password failure that never
+    // happened, and hides the one thing that does need re-sending.
+    const titles = {
+        sent: 'Verification email sent',
+        partial: 'Verification email could not be sent',
+        failed: 'Email could not be sent',
+    };
+
+    document.getElementById('successEmailNoticeTitle').textContent =
+        notice.title || titles[notice.status] || titles.failed;
 
     // Bulk import has no single address to read back, so the line is dropped
     // rather than filled with a stand-in.
     address.textContent = notice.email || '';
     address.hidden = !notice.email;
 
-    document.getElementById('successEmailNoticeText').textContent = notice.text || (failed
-        ? 'The account was created, but neither the verification link nor the credentials '
-          + 'reached this address. '
-          + (notice.reason || 'Check the mail settings, then have them use "Forgot password" to get in.')
+    if (notice.text) {
+        document.getElementById('successEmailNoticeText').textContent = notice.text;
+        box.hidden = false;
+        return;
+    }
+
+    const reason = notice.reason ? ' (' + notice.reason + ')' : '';
+
+    document.getElementById('successEmailNoticeText').textContent = notice.status === 'partial'
+        ? 'Their username and password were emailed' + reason + ', but the verification link was not. '
+          + 'They can sign in; the link has to be re-sent from the sign-in screen before their '
+          + 'address is verified.'
         // Both messages are named because two arriving together is what the
         // employee will ask about, and the order matters: every area sits
         // behind EnsureEmailIsVerifiedForArea, so the credentials do not work
         // until the link is opened.
-        : 'A second email carries their username and password. They must open the '
-          + 'verification link before they can sign in.');
+        : (notice.status === 'failed'
+            ? 'The account was created, but the username and password email did not reach this address'
+              + reason + '. '
+              + (notice.verification_failed ? 'The verification link could not be sent either. ' : '')
+              + 'Check the mail settings, then have them use "Forgot password" to get in.'
+            : 'A second email carries their username and password. They must open the '
+              + 'verification link before they can sign in.');
 
     box.hidden = false;
+}
+
+// What the bulk import's email phase actually did, per account.
+//
+// This panel used to be filled from `data.imported > 0` alone: any import that
+// created an employee claimed "Each imported employee was emailed a
+// verification link and, separately, their username and password", whether or
+// not a single message left the building. That is what makes a silent mail
+// failure read as a delivered one. The server now reports the addresses it
+// emailed, the ones it could not, and the ones it never attempted, and this
+// says which is which — naming the address, because a file's sample rows can
+// carry a throwaway one (the shipped template used `@maildrop.cc`) that no
+// employee will ever read.
+function buildImportEmailNotice(data) {
+    const emails = data.emails || {};
+    const sent = Array.isArray(emails.sent) ? emails.sent : [];
+    const failed = Array.isArray(emails.failed) ? emails.failed : [];
+    const notAttempted = Array.isArray(emails.not_attempted) ? emails.not_attempted : [];
+
+    if (!sent.length && !failed.length && !notAttempted.length) return null;
+
+    const preview = function (list) {
+        const shown = list.slice(0, 3).join(', ');
+        return list.length > 3 ? shown + ' and ' + (list.length - 3) + ' more' : shown;
+    };
+
+    // A refused send carries the mail server's own words, which can run to a
+    // paragraph of socket detail; the gist is what the admin needs here.
+    const reasonFor = function (entry) {
+        const text = String(entry.reason || 'the mail server refused it');
+        return text.length > 140 ? text.slice(0, 137) + '…' : text;
+    };
+
+    if (!failed.length && !notAttempted.length) {
+        return {
+            status: 'sent',
+            title: sent.length === 1
+                ? 'Employee details emailed'
+                : 'Employee details emailed to ' + sent.length + ' accounts',
+            text: 'Sent to ' + preview(sent) + '. Each message carries their username and password; '
+                + 'a separate message carries the verification link they must open before they can sign in.',
+        };
+    }
+
+    const parts = [
+        sent.length ? 'Sent to ' + preview(sent) + '.' : 'No credentials email was sent.',
+    ];
+
+    if (failed.length) {
+        parts.push('Failed for ' + failed.slice(0, 2).map(function (entry) {
+            return entry.email + ' (' + reasonFor(entry) + ')';
+        }).join('; ') + (failed.length > 2 ? ', and ' + (failed.length - 2) + ' more' : '') + '.');
+    }
+
+    if (notAttempted.length) {
+        parts.push('Not attempted for ' + notAttempted.length + ' account(s) — ' + preview(notAttempted)
+            + ' — because the mail server kept failing.');
+    }
+
+    parts.push('Every account was created regardless: check the mail settings, and each employee can '
+        + 'still get in with "Forgot password".');
+
+    return {
+        status: 'failed',
+        title: 'Some employee emails could not be sent',
+        text: parts.join(' '),
+    };
 }
 
 // Fill in (or hide) the "Duplicate Records Found" panel in the success modal.
@@ -86,7 +177,13 @@ function renderDuplicateNotice(duplicates) {
 
         const id = document.createElement('span');
         id.className = 'personnel-modal-dupes-id';
-        id.textContent = 'Employee ID: ' + dupe.employee_id;
+        // The import matches a repeat on the employee number when the file
+        // carries one and on the email when it does not, and only one of the two
+        // is sent. Naming whichever matched is what keeps this line from reading
+        // "Employee ID: undefined" for a template with no ID column.
+        id.textContent = dupe.employee_id
+            ? 'Employee ID: ' + dupe.employee_id
+            : (dupe.email ? 'Email: ' + dupe.email : 'Row ' + dupe.row);
         item.appendChild(id);
 
         list.appendChild(item);
@@ -1432,8 +1529,14 @@ function closeBulkImportModal() {
 }
 
 function downloadTemplate() {
+    // No `employee_id` column: the system assigns the number on import
+    // (Employee::generateEmployeeId() → EMP-<year>-<sequence>), so a template
+    // that asked for one was inviting the admin to invent numbers that the
+    // employee's badge, DTR and payslip would then all print.
+    //
+    // A file that does carry the column still imports: a supplied number is
+    // kept, which is what the docs/bulk_import_parts/ migration files rely on.
     const headers = [
-        'employee_id',
         'first_name',
         'middle_name',
         'last_name',
@@ -1467,7 +1570,6 @@ function downloadTemplate() {
     ];
 
     const sampleData = [
-        'EMP-2024-001',
         'Juan',
         'Santos',
         'Dela Cruz',
@@ -1630,13 +1732,7 @@ function submitBulkImport() {
         if (data.success) {
             closeBulkImportModal();
             document.getElementById('successMessage').textContent = data.message || 'Employees imported successfully!';
-            // Bulk import mails the same pair per row, so it says so too.
-            renderEmailNotice(data.imported > 0 ? {
-                status: 'sent',
-                title: 'Verification emails sent',
-                text: 'Each imported employee was emailed a verification link and, separately, '
-                    + 'their username and password. They must open the link before they can sign in.',
-            } : null);
+            renderEmailNotice(buildImportEmailNotice(data));
             renderDuplicateNotice(data.duplicates);
             document.getElementById('successModal').style.display = 'flex';
 
