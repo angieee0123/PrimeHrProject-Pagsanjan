@@ -1,8 +1,17 @@
 <section class="table-section" id="summary-tab">
+    @php
+        // The roll-up this table holds covers every employee the filters
+        // matched, and adminAttendance.js pages it in the browser. These two
+        // numbers are only the opening state of the footer: the script
+        // re-renders them from the whole set on load, which is also why the
+        // "per page" select below is a plain control with no URL behind it.
+        $summaryRowsPerPage = 10;
+        $summaryRowCount = count($attendanceRecords);
+    @endphp
     <div class="table-header">
         <div>
             <h3 class="table-title">Daily Time Record</h3>
-            <p class="table-sub">Municipal Government of Pagsanjan · {{ $periodDisplay }} · {{ count($attendanceRecords) }} records</p>
+            <p class="table-sub">Municipal Government of Pagsanjan · {{ $periodDisplay }} · {{ $summaryRowCount }} {{ Str::plural('employee', $summaryRowCount) }}</p>
         </div>
     </div>
 
@@ -116,13 +125,22 @@
                     </td>
                 </tr>
                 @endforeach
+                {{-- Rendered only when the period itself holds nobody. A search
+                     or filter that matches nothing gets this same row created by
+                     adminAttendance.js -- rows are never rebuilt with innerHTML,
+                     because the paging state points at them. --}}
+                @if($summaryRowCount === 0)
+                <tr class="attendance-empty-row" id="attendanceSummaryNoResults">
+                    <td colspan="11">No attendance records for this period. Adjust the dates or clear the filters above.</td>
+                </tr>
+                @endif
             </tbody>
         </table>
     </div>
 
     <div class="table-footer">
         <div class="table-footer-left">
-            <p id="attendanceSummaryFooter">Showing <strong id="attendanceRowStart">1</strong>-<strong id="attendanceRowEnd">{{ min(10, count($attendanceRecords)) }}</strong> of <strong id="attendanceRowTotal">{{ count($attendanceRecords) }}</strong> records</p>
+            <p id="attendanceSummaryFooter">Showing <strong id="attendanceRowStart">{{ $summaryRowCount ? 1 : 0 }}</strong>-<strong id="attendanceRowEnd">{{ min($summaryRowsPerPage, $summaryRowCount) }}</strong> of <strong id="attendanceRowTotal">{{ $summaryRowCount }}</strong> records</p>
             <select id="attendanceRowsPerPage" class="rows-select" onchange="changeAttendanceRowsPerPage()">
                 <option value="10">10 per page</option>
                 <option value="25">25 per page</option>

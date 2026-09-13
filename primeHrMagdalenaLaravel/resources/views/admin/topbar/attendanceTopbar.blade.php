@@ -15,28 +15,8 @@
 }
 </style>
 
-<script>
-function searchAttendance(query) {
-    const searchTerm = query.toLowerCase().trim();
-    const tbody = document.querySelector('.payroll-table tbody');
-    if (!tbody) return;
-
-    if (!window.allAttendanceRows || window.allAttendanceRows.length === 0) {
-        window.allAttendanceRows = Array.from(tbody.querySelectorAll('tr'));
-    }
-
-    const filtered = window.allAttendanceRows.filter(row => {
-        const name = row.querySelector('.emp-name')?.textContent.toLowerCase() || '';
-        const id   = row.querySelector('.emp-id')?.textContent.toLowerCase() || '';
-        const dept = row.querySelector('.dept-tag')?.textContent.toLowerCase() || '';
-        return searchTerm === '' || name.includes(searchTerm) || id.includes(searchTerm) || dept.includes(searchTerm);
-    });
-
-    tbody.innerHTML = '';
-    if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--gp-text-mid);">No records found matching your search.</td></tr>';
-    } else {
-        filtered.forEach(row => tbody.appendChild(row.cloneNode(true)));
-    }
-}
-</script>
+{{-- `searchAttendance()` is defined in the page's own bundle
+     (resources/js/admin/attendance/adminAttendance.js), not here. This partial
+     used to carry a second copy that filtered by replacing the table body with
+     cloned rows, which detached the rows the pagination then tried to show --
+     and only this page includes this topbar, so the bundle is always present. --}}

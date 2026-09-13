@@ -32,13 +32,14 @@ class AttendanceController extends Controller
         $endDate = $request->get('end_date', now()->endOfMonth()->format('Y-m-d'));
         $department = $request->get('department');
         $status = $request->get('status');
-        $perPage = $request->get('per_page', 10);
-        $page = $request->get('page', 1);
+        // Only the Detailed Time Record tab pages server-side now; it pages by
+        // date and reads both of these.
+        $perPage = max(1, (int) $request->get('per_page', 10));
+        $page = max(1, (int) $request->get('page', 1));
 
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
 
-        // Optimized: Use pagination from the start
         $employeesQuery = Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'schedule'])
             ->orderBy('first_name');
 
@@ -48,17 +49,33 @@ class AttendanceController extends Controller
             });
         }
 
-        $employees = $employeesQuery->paginate($perPage, ['*'], 'page', $page);
-        
-        $attendanceRecords = $employees->map(function ($employee) use ($startDate, $endDate) {
-            return $this->calculateEmployeeAttendance($employee, $startDate, $endDate);
-        })->toArray();
+        /*
+         * Every employee the filters match, not the one page of them this used
+         * to read.
+         *
+         * The Attendance Summary tab rolls up one row per employee and pages in
+         * the browser (resources/js/admin/attendance/adminAttendance.js), so
+         * paginating the query here gave that table ten rows it could never page
+         * past -- picking "100 per page" cannot reveal rows the server never
+         * sent -- and left the Overview panel, the stat cards and the footer
+         * totals describing those ten rather than the roster. The cost is the
+         * same either way, because correct totals have to be computed over
+         * everyone regardless, so the roll-up is built once, whole, and the
+         * client pages it.
+         */
+        $attendanceRecords = $employeesQuery->get()
+            ->map(fn ($employee) => $this->calculateEmployeeAttendance($employee, $startDate, $endDate))
+            ->values();
 
-        // Apply filters
+        // Applied to the whole roll-up. Filtering *after* a page had been cut
+        // meant "Complete" listed whichever of that page's ten happened to
+        // qualify, and the totals then described that sliver instead of the
+        // filtered roster.
         if ($status && $status !== 'All Status') {
-            $attendanceRecords = array_filter($attendanceRecords, fn($e) => $e['status'] === $status);
-            $attendanceRecords = array_values($attendanceRecords);
+            $attendanceRecords = $attendanceRecords->where('status', $status)->values();
         }
+
+        $attendanceRecords = $attendanceRecords->toArray();
 
         // Calculate totals
         $totalPresent = array_sum(array_column($attendanceRecords, 'present'));
@@ -112,7 +129,6 @@ class AttendanceController extends Controller
 
         return view('admin.attendance.adminAttendance', compact(
             'attendanceRecords',
-            'employees',
             'totalPresent',
             'totalAbsent',
             'totalLate',

@@ -8,13 +8,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Tab switching functionality
-function switchTab(tabName) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+// Tab switching functionality.
+//
+// The inline handlers pass only the tab name, so the button is normally found
+// through the click event; `data-tab` is the fallback for switching without a
+// click (the topbar search brings the Summary tab forward). `window.event` is a
+// legacy global and is undefined outside a real dispatch, hence the guards.
+function switchTab(tabName, trigger) {
+    const btn = (trigger && trigger.closest ? trigger.closest('.tab-btn') : null)
+        || (window.event && window.event.target && window.event.target.closest ? window.event.target.closest('.tab-btn') : null)
+        || document.querySelector('.tab-btn[data-tab="' + tabName + '"]');
+
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('[id$="-tab"]').forEach(tab => tab.style.display = 'none');
 
-    event.target.closest('.tab-btn').classList.add('active');
-    document.getElementById(tabName + '-tab').style.display = 'block';
+    if (btn) btn.classList.add('active');
+    const tab = document.getElementById(tabName + '-tab');
+    if (tab) tab.style.display = 'block';
     syncAttendanceExportButton(tabName);
 }
 window.switchTab = switchTab;
@@ -38,8 +48,8 @@ function syncAttendanceExportButton(tabName) {
  * Export the Attendance Summary for the filters currently in force.
  *
  * The filters are read out of the controls themselves rather than off the
- * rendered table, because the table is paginated -- the endpoint recomputes
- * every matching employee, not the ten currently on screen.
+ * rendered table, because the table is paged in the browser -- the endpoint
+ * recomputes every matching employee, not the page currently on screen.
  *
  * "Every filter" is the point, and the toolbar form is not all of them: the
  * search box lives in the topbar, outside this form, and narrows the table
@@ -69,84 +79,110 @@ window.exportAttendanceSummary = exportAttendanceSummary;
 
 // Check URL parameter and switch to correct tab on page load
 document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const activeTab = urlParams.get('tab');
+    const activeTab = new URLSearchParams(window.location.search).get('tab');
 
-    if (activeTab === 'detailed') {
-        // Switch to detailed tab
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('[id$="-tab"]').forEach(tab => tab.style.display = 'none');
-
-        document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        document.getElementById('detailed-tab').style.display = 'block';
-        syncAttendanceExportButton('detailed');
-    } else if (activeTab === 'settings') {
-        // Switch to settings tab
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('[id$="-tab"]').forEach(tab => tab.style.display = 'none');
-
-        document.querySelectorAll('.tab-btn')[2].classList.add('active');
-        document.getElementById('settings-tab').style.display = 'block';
-        syncAttendanceExportButton('settings');
+    if (activeTab === 'detailed' || activeTab === 'settings') {
+        switchTab(activeTab);
     }
 });
 
-// Search functionality
+/**
+ * Topbar search over the Attendance Summary table.
+ *
+ * The three fields it matches -- name, employee ID, department -- are the same
+ * three the Summary export searches, so a download and the table it came from
+ * agree on who the search left.
+ *
+ * It no longer rebuilds the table body. Doing that with cloned rows detached
+ * every row the pagination below holds a reference to, so typing anything and
+ * then changing page or page size emptied the table; the term is recorded
+ * instead and the pagination shows and hides the rows in place.
+ */
 function searchAttendance(query) {
-    const searchTerm = query.toLowerCase().trim();
-    const tbody = document.querySelector('.payroll-table tbody');
-    if (!tbody) return;
+    window._attendanceSearchTerm = query;
+    filterAttendanceSummary();
 
-    if (!window.allAttendanceRows || window.allAttendanceRows.length === 0) {
-        window.allAttendanceRows = Array.from(tbody.querySelectorAll('tr'));
-    }
-
-    const filtered = window.allAttendanceRows.filter(row => {
-        const name = row.querySelector('.emp-name')?.textContent.toLowerCase() || '';
-        const id = row.querySelector('.emp-id')?.textContent.toLowerCase() || '';
-        const dept = row.querySelector('.dept-tag')?.textContent.toLowerCase() || '';
-        return searchTerm === '' || name.includes(searchTerm) || id.includes(searchTerm) || dept.includes(searchTerm);
-    });
-
-    tbody.innerHTML = '';
-    if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--gp-text-mid);">No records found matching your search.</td></tr>';
-    } else {
-        filtered.forEach(row => tbody.appendChild(row.cloneNode(true)));
+    // Searched while another tab is open, the matching rows would be off
+    // screen -- the box filters the Summary table, so bring it forward.
+    const summaryBtn = document.querySelector('.tab-btn[data-tab="summary"]');
+    if (String(query).trim() !== '' && summaryBtn && !summaryBtn.classList.contains('active')) {
+        switchTab('summary');
     }
 }
 window.searchAttendance = searchAttendance;
 
 // Attendance Summary Pagination
+//
+// The table is sent whole (AttendanceController::index builds the roll-up for
+// every employee the filters matched) and paged here, so the page count, the
+// footer figures and the "per page" select all describe the full roster rather
+// than the dozen rows the controller used to send.
 window._attendanceCurrentPage = 1;
 window._attendanceRowsPerPage = 10;
+window._attendanceSearchTerm = '';
+
+function attendanceSummaryMatches(row, term) {
+    if (!term) return true;
+
+    return ['.emp-name', '.emp-id', '.dept-tag'].some(selector => {
+        const cell = row.querySelector(selector);
+        return (cell ? cell.textContent : '').toLowerCase().includes(term);
+    });
+}
 
 window.filterAttendanceSummary = function () {
-    const allRows = document.querySelectorAll('#attendanceSummaryBody tr[data-id]');
-    const filtered = [];
+    const term = (window._attendanceSearchTerm || '').trim().toLowerCase();
 
-    allRows.forEach(row => {
-        filtered.push(row);
-    });
+    window._attendanceFilteredRows = Array.from(
+        document.querySelectorAll('#attendanceSummaryBody tr[data-id]')
+    ).filter(row => attendanceSummaryMatches(row, term));
 
-    window._attendanceFilteredRows = filtered;
     window._attendanceCurrentPage = 1;
     updateAttendancePagination();
 };
 
+/**
+ * The "nothing matched" row. The partial renders it only when the period itself
+ * holds nobody; a search or filter that matches nothing gets it created here,
+ * once -- rows are never rebuilt with innerHTML, because the paging state and
+ * the row action menus point at these nodes.
+ */
+function renderAttendanceNoResults(show) {
+    const body = document.getElementById('attendanceSummaryBody');
+    if (!body) return;
+
+    const existing = document.getElementById('attendanceSummaryNoResults');
+
+    if (show) {
+        if (existing) return;
+
+        const emptyRow = document.createElement('tr');
+        emptyRow.id = 'attendanceSummaryNoResults';
+        emptyRow.className = 'attendance-empty-row';
+        emptyRow.innerHTML = '<td colspan="11">No employee matches the search and filters currently applied.</td>';
+        body.appendChild(emptyRow);
+    } else if (existing) {
+        existing.remove();
+    }
+}
+
 window.updateAttendancePagination = function () {
     const rows = window._attendanceFilteredRows || [];
     const total = rows.length;
-    const perPage = window._attendanceRowsPerPage;
-    const totalPages = Math.ceil(total / perPage) || 1;
-    const page = Math.min(window._attendanceCurrentPage, totalPages);
+    const perPage = window._attendanceRowsPerPage || 10;
+    const totalPages = Math.max(1, Math.ceil(total / perPage));
+    const page = Math.min(Math.max(1, window._attendanceCurrentPage), totalPages);
     window._attendanceCurrentPage = page;
 
     const start = (page - 1) * perPage;
     const end = Math.min(start + perPage, total);
 
+    // Hide every row the table holds -- including ones a larger page size
+    // revealed -- then show this page's slice of the filtered list.
     document.querySelectorAll('#attendanceSummaryBody tr[data-id]').forEach(row => row.style.display = 'none');
     rows.forEach((row, i) => { if (i >= start && i < end) row.style.display = ''; });
+
+    renderAttendanceNoResults(total === 0);
 
     document.getElementById('attendanceRowStart').textContent = total ? start + 1 : 0;
     document.getElementById('attendanceRowEnd').textContent = end;
@@ -184,14 +220,23 @@ window.goToAttendancePage = function (page) {
 };
 
 window.changeAttendanceRowsPerPage = function () {
-    window._attendanceRowsPerPage = parseInt(document.getElementById('attendanceRowsPerPage').value) || 10;
+    const select = document.getElementById('attendanceRowsPerPage');
+    window._attendanceRowsPerPage = parseInt(select ? select.value : '', 10) || 10;
     window._attendanceCurrentPage = 1;
     updateAttendancePagination();
 };
 
 // Initialize pagination on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // The select is the only place the page size is stated, so read it rather
+    // than keeping a second copy of "10" here.
+    const perPageSelect = document.getElementById('attendanceRowsPerPage');
+    if (perPageSelect) {
+        window._attendanceRowsPerPage = parseInt(perPageSelect.value, 10) || 10;
+    }
+
     filterAttendanceSummary();
+
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.row-actions')) closeAllActionMenus();
     });

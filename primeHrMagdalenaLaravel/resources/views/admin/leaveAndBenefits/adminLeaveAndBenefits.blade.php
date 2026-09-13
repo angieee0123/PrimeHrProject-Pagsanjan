@@ -375,7 +375,7 @@ $totalDays = $leaveApplications->where('status', 'approved')->sum('number_of_day
     <button class="tab-btn" onclick="switchTab('monetization')">Monetization Requests</button>
     <button class="tab-btn" onclick="switchTab('transactions')">Transaction History</button>
     <button class="tab-btn" onclick="switchTab('leave-credits')">Leave Credits</button>
-    <button class="tab-btn" onclick="switchTab('benefits')">Benefits Summary</button>
+    {{-- <button class="tab-btn" onclick="switchTab('benefits')">Benefits Summary</button> --}}
     <button class="tab-btn" onclick="switchTab('types')">Leave Types</button>
     <button class="tab-btn" onclick="switchTab('accrual')">CSC Daily Accrual</button>
     <button class="tab-btn" onclick="switchTab('import')">Import Records</button>

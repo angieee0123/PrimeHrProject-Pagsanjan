@@ -845,6 +845,26 @@ textarea.form-input { resize: vertical; font-family: 'Poppins', sans-serif; }
     border: 1px solid rgba(var(--theme-shadow-rgb),.08) !important;
 }
 
+/* "Nobody to show" -- a row of the table rather than a table body rebuilt by
+   innerHTML. The partial renders it when the period holds no records at all;
+   adminAttendance.js creates it when a search or filter matches none, and
+   removes it again. Rows are never replaced, because the paging state and the
+   per-row action menus point at those nodes.
+   Selectors are written out in full to out-specify the `tbody tr:hover` and
+   `td` rules this card sets above, which carry !important. */
+#summary-tab .payroll-table tbody tr.attendance-empty-row,
+#summary-tab .payroll-table tbody tr.attendance-empty-row:hover {
+    background: transparent !important;
+}
+#summary-tab .payroll-table tbody tr.attendance-empty-row td {
+    height: auto !important;
+    padding: 40px 20px !important;
+    border-bottom: none !important;
+    text-align: center;
+    color: var(--gp-text-mid);
+    font-size: 13px;
+}
+
 /* ══════════════════════════════════════════════════════
    Detailed Time Record Tab (relocated from
    partials/detailed-time-record-tab.blade.php's inline
