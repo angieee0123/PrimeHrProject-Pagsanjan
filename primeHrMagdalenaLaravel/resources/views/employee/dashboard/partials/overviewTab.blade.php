@@ -1,5 +1,5 @@
 {{-- Overview: wide attendance chart + my requests --}}
-<div class="perm-overview-grid">
+<div class="perm-overview-grid @if(!($isPermanent ?? false)) eh-overview-grid-single @endif">
 
     <div class="chart-card">
         <div class="chart-header">
@@ -18,6 +18,12 @@
         </div>
     </div>
 
+    {{-- Leave applications, so the whole card is a permanent employee's. Its
+         "View all" opens Leave & Benefits, which a Job Order is refused — a
+         card whose only action 403s is worse than no card. The sibling Leave
+         Balance panel is hidden on the same rule, and the grid drops to one
+         column for the same reason. --}}
+    @if($isPermanent ?? false)
     <div class="table-section perm-section eh-m0">
         <div class="table-header">
             <div>
@@ -64,6 +70,7 @@
             @endforelse
         </div>
     </div>
+    @endif
 
 </div>
 

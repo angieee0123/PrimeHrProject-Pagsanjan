@@ -889,6 +889,42 @@ php artisan test tests/Unit/NotificationServiceTest.php \
 
 ---
 
+## Who may hold leave and benefits
+
+Leave credits, leave filings and monetization are a **plantilla entitlement**.
+A Job Order is paid by the day and earns none — `PagsanjanLeaveBalanceSeeder`
+gives every Job Order a zero balance for every credit code — so the employee
+rail has never offered "Leave & Benefits" to one.
+
+The rail was the only thing keeping them out. `/employee/leave`, the File Leave
+POST behind it and the monetization endpoints the page's own tab calls were all
+reachable by URL (and the dashboard's "My Requests" card carried a *View all*
+link at the page), so a Job Order could read a page of credits they cannot hold
+and file against them. Hiding a nav item is tidiness, not a permission.
+
+Two things now hold, and they read one rule:
+
+- **`EmploymentDetail::hasLeaveAndBenefits()`** — the single definition:
+  `employment_status` not null and not `Job Order`. `Employee::hasLeaveAndBenefits()`
+  delegates to it. A status of `null` is *not* entitled, because nothing states
+  that it is; the rail has always treated an unknown status as unentitled, and
+  the gate has to agree with the link or the link is a lie.
+- **`EnsureLeaveAndBenefitsEligible`** (alias `leave.eligible`) aborts 403 for
+  anyone the rule refuses, and is named on the page and on the endpoints its
+  tabs call — `employee.leave`, `leave.store`, `leave.cancel`, `monetization.*`.
+  The rest of the employee area (attendance, payslips, travel orders, pass
+  slips, the calendar) is deliberately **not** gated; a Job Order still files
+  travel orders. `tests/Unit/LeaveAndBenefitsAccessTest.php` pins both the
+  gated and the ungated lists, and `tests/Feature/LeaveAndBenefitsAccessTest.php`
+  sends the request through the real web group.
+
+The same rule feeds the `isPermanent` view variable (the shared composer),
+`EmployeeSettingsController`, and the mobile login payload's `is_permanent`, so
+no surface can drift from another on who is entitled. The dashboard's "My
+Requests" card is hidden on it too: its only action was the link to the page.
+
+---
+
 ## The Leave & Travel Calendar
 
 Two surfaces over the same idea, and they are deliberately one calendar:

@@ -140,22 +140,26 @@ Route::get('/employee/payslip', [\App\Http\Controllers\EmployeePayslipController
 Route::get('/employee/payslip/export', [\App\Http\Controllers\EmployeePayslipController::class, 'export'])->middleware('auth')->name('employee.payslip.export');
 Route::get('/employee/payslip/{id}/details', [\App\Http\Controllers\EmployeePayslipController::class, 'getPayslipDetails'])->middleware('auth')->name('employee.payslip.details');
 
-Route::get('/employee/leave', [EmployeeLeaveBalanceController::class, 'show'])->middleware('auth')->name('employee.leave');
+// Leave & Benefits is a plantilla entitlement, so the page and every endpoint
+// its own tabs call carry `leave.eligible` (see
+// EnsureLeaveAndBenefitsEligible). The rail already hid the link from a Job
+// Order; that was the only thing standing between one and this page.
+Route::get('/employee/leave', [EmployeeLeaveBalanceController::class, 'show'])->middleware(['auth', 'leave.eligible'])->name('employee.leave');
 
 // Leave Application Routes
-Route::post('/leave/store', [LeaveController::class, 'store'])->middleware('auth')->name('leave.store');
-Route::post('/leave/{id}/cancel', [LeaveController::class, 'cancel'])->middleware('auth')->name('leave.cancel');
+Route::post('/leave/store', [LeaveController::class, 'store'])->middleware(['auth', 'leave.eligible'])->name('leave.store');
+Route::post('/leave/{id}/cancel', [LeaveController::class, 'cancel'])->middleware(['auth', 'leave.eligible'])->name('leave.cancel');
 
 // Monetization Request Routes — filed from the employee's My Monetization tab.
-Route::post('/employee/monetization', [\App\Http\Controllers\MonetizationRequestController::class, 'store'])->middleware('auth')->name('monetization.store');
-Route::get('/employee/monetization/{id}', [\App\Http\Controllers\MonetizationRequestController::class, 'show'])->middleware('auth')->name('monetization.show');
-Route::post('/employee/monetization/{id}/cancel', [\App\Http\Controllers\MonetizationRequestController::class, 'cancel'])->middleware('auth')->name('monetization.cancel');
+Route::post('/employee/monetization', [\App\Http\Controllers\MonetizationRequestController::class, 'store'])->middleware(['auth', 'leave.eligible'])->name('monetization.store');
+Route::get('/employee/monetization/{id}', [\App\Http\Controllers\MonetizationRequestController::class, 'show'])->middleware(['auth', 'leave.eligible'])->name('monetization.show');
+Route::post('/employee/monetization/{id}/cancel', [\App\Http\Controllers\MonetizationRequestController::class, 'cancel'])->middleware(['auth', 'leave.eligible'])->name('monetization.cancel');
 // Print Sheet: the office's Monetization form as a PDF. Two routes for one
 // document because the controller reads routeIs() — print streams it into the
 // browser's viewer, download sends it as a file. Same pair as the Travel
 // Order, the Pass Slip and the printed DTR. Scoped to the caller's own record.
-Route::get('/employee/monetization/{id}/print-form', [\App\Http\Controllers\MonetizationRequestController::class, 'generateOwnForm'])->middleware('auth')->name('monetization.print-form');
-Route::get('/employee/monetization/{id}/download-form', [\App\Http\Controllers\MonetizationRequestController::class, 'generateOwnForm'])->middleware('auth')->name('monetization.download-form');
+Route::get('/employee/monetization/{id}/print-form', [\App\Http\Controllers\MonetizationRequestController::class, 'generateOwnForm'])->middleware(['auth', 'leave.eligible'])->name('monetization.print-form');
+Route::get('/employee/monetization/{id}/download-form', [\App\Http\Controllers\MonetizationRequestController::class, 'generateOwnForm'])->middleware(['auth', 'leave.eligible'])->name('monetization.download-form');
 
 // Busy dates for the File Leave / File Travel Order calendars: the logged-in
 // employee's own leave and travel date ranges, so the pickers can mark them.

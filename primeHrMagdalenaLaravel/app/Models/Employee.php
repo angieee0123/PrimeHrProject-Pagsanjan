@@ -248,6 +248,19 @@ class Employee extends Model implements Auditable
         return $this->hasMany(LeaveBalance::class);
     }
 
+    /**
+     * Whether this employee holds the leave-and-benefits entitlement.
+     *
+     * Delegates to the employment record, which owns the status and the rule
+     * ({@see EmploymentDetail::hasLeaveAndBenefits()}); an employee with no
+     * employment record holds no entitlement, the same as one whose status is
+     * Job Order.
+     */
+    public function hasLeaveAndBenefits(): bool
+    {
+        return $this->employmentDetail?->hasLeaveAndBenefits() ?? false;
+    }
+
     public function leaveApplications()
     {
         return $this->hasMany(LeaveApplication::class);

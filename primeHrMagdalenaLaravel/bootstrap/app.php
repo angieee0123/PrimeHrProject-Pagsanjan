@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureEmailIsVerifiedForArea;
 use App\Http\Middleware\EnsureKioskToken;
+use App\Http\Middleware\EnsureLeaveAndBenefitsEligible;
 use App\Http\Middleware\EnsureRoleForArea;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Foundation\Application;
@@ -58,8 +59,13 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // The attendance kiosk's bearer token, kept as an alias so it is named
         // on the three kiosk routes and nowhere else. See EnsureKioskToken.
+        //
+        // `leave.eligible` is the same shape: an entitlement, not an area, so
+        // it is named on the leave-and-benefits routes and nowhere else. See
+        // EnsureLeaveAndBenefitsEligible.
         $middleware->alias([
-            'kiosk.token' => EnsureKioskToken::class,
+            'kiosk.token'    => EnsureKioskToken::class,
+            'leave.eligible' => EnsureLeaveAndBenefitsEligible::class,
         ]);
 
         // The two kiosk POSTs are exempt from CSRF, deliberately.

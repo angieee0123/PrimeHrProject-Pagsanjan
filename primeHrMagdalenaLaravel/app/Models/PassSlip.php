@@ -43,7 +43,16 @@ class PassSlip extends Model implements Auditable
     ];
 
     protected $casts = [
-        'date' => 'date',
+        // A pass slip's `date` is a *calendar* date, not an instant, so it is
+        // serialized as one. Cast as a plain `date` it went out as
+        // "2026-09-13T16:00:00.000000Z" for a slip dated the 14th — Carbon
+        // reads the column as Asia/Manila midnight and `toJSON()` reports it
+        // in UTC — so the detail modal, which reads the calendar date off the
+        // first ten characters of the wire value, printed the day before the
+        // one the history table printed. The format only governs
+        // serialization; `$slip->date` is still a Carbon, and the DATE column
+        // is still written the same way.
+        'date' => 'date:Y-m-d',
         'approved_at' => 'datetime',
     ];
 

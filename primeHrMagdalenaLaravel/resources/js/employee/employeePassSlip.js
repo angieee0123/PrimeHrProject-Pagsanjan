@@ -243,11 +243,14 @@ function passSlipUrl(which, id) {
 }
 
 /**
- * "2026-08-05T00:00:00.000000Z" → "Aug 5, 2026".
+ * "2026-09-14" → "Sep 14, 2026".
  *
- * Reads the calendar date off the string rather than through `new Date()`:
- * a date-only value arrives as UTC midnight, which any negative-offset
- * viewer would render as the previous day.
+ * A pass slip's `date` is a calendar date, and `PassSlip` publishes it as one
+ * (`date:Y-m-d`). It is read literally rather than through `new Date()` so
+ * that no timezone anywhere in the chain can move it a day: `new Date("2026-
+ * 09-14")` is parsed as UTC midnight, which any negative-offset viewer — and
+ * the previous cast, which shipped a Manila date as 16:00Z the day before —
+ * would render as the 13th.
  */
 function formatPassSlipDate(value) {
     if (!value) return 'Not specified';
@@ -255,6 +258,23 @@ function formatPassSlipDate(value) {
     if (!y || !m || !d) return value;
 
     return new Date(y, m - 1, d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+/**
+ * "2026-09-13T17:30:00.000000Z" → "Sep 14, 2026" in the viewer's own timezone.
+ *
+ * `approved_at` is the one timestamp here that is a real *instant*, so it is
+ * converted instead of read literally: a slip approved at 1am Manila is still
+ * 17:30Z the previous day, and slicing the date off the UTC string printed
+ * "Sep 13" for it. This is the same treatment the travel order modals give
+ * their `approved_at`.
+ */
+function formatPassSlipTimestamp(value) {
+    if (!value) return 'Not specified';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+
+    return parsed.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 /** "13:00:00" → "1:00 PM", matching how the history table prints times. */
@@ -327,7 +347,7 @@ function viewPassSlip(id) {
                 // invented fallback: "Admin User" used to be printed for
                 // whoever actually signed the slip.
                 document.getElementById('detailApprovedBy').textContent = data.approver_name || '—';
-                document.getElementById('detailApprovedAt').textContent = formatPassSlipDate(data.approved_at);
+                document.getElementById('detailApprovedAt').textContent = formatPassSlipTimestamp(data.approved_at);
             } else {
                 approvalSection.style.display = 'none';
             }

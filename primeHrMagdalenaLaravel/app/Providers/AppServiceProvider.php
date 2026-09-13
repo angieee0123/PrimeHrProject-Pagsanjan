@@ -76,7 +76,6 @@ class AppServiceProvider extends ServiceProvider
             if (Auth::check()) {
                 $user = Auth::user();
                 $employee = $user->employee;
-                $employmentStatus = $employee->employmentDetail->employment_status ?? null;
 
                 $activeRole = session('active_role');
                 if (!$activeRole || !$user->hasRole($activeRole)) {
@@ -92,8 +91,11 @@ class AppServiceProvider extends ServiceProvider
                     'authRole' => ucfirst($activeRole),
                     'authRoles' => $user->normalizedRoles(),
                     // Permanent, Temporary, Coterminous, Casual, and Contractual all get the
-                    // full leave-and-benefits experience; only Job Order does not.
-                    'isPermanent' => $employmentStatus !== null && $employmentStatus !== 'Job Order',
+                    // full leave-and-benefits experience; only Job Order does not. The rule
+                    // itself lives on the employment record so this flag, the settings page
+                    // and EnsureLeaveAndBenefitsEligible cannot disagree — a hidden link
+                    // beside a page that still opens is exactly that disagreement.
+                    'isPermanent' => (bool) $employee?->hasLeaveAndBenefits(),
                 ];
 
                 $view->with($userData);

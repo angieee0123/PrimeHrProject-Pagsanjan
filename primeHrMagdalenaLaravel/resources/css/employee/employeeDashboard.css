@@ -569,6 +569,10 @@
 .eh-m0 { margin: 0; }
 .eh-btn-export-sm { font-size: 11px; padding: 6px 12px; }
 .eh-secondary-grid-single { grid-template-columns: 1fr; }
+/* Same rule as the secondary grid: with the "My Requests" panel gone (a Job
+   Order has no leave applications), the chart would otherwise keep the 380px
+   right-hand column and print an empty band beside it. */
+.eh-overview-grid-single { grid-template-columns: 1fr; }
 .eh-cursor-pointer { cursor: pointer; }
 .eh-subtext { font-size: 11px; color: #9999bb; }
 .eh-pending-note { color: #a16207; font-size: 12px; }
