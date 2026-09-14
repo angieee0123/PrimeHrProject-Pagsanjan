@@ -1528,92 +1528,63 @@ function closeBulkImportModal() {
     document.getElementById('dropZone').style.background = '#fafafe';
 }
 
+// Fetches the template from the server instead of building it here.
+//
+// The array this used to hold had drifted from docs/bulk_import_two_employees.csv
+// — which is the example the import is documented by — and, worse, built the
+// file with `Array.join(',')`. A joined cell is not a CSV cell: one department
+// named "Office of the Mayor, Admin" shifted every column after it one to the
+// left. The endpoint writes it with fputcsv, and BulkImportTest asserts that
+// output against the documented example, so the two cannot drift again.
+//
+// Fetched into a blob rather than navigated to, so the admin stays on the page
+// with the modal — and their file selection, if they had already made one —
+// exactly as they were.
 function downloadTemplate() {
-    // No `employee_id` column: the system assigns the number on import
-    // (Employee::generateEmployeeId() → EMP-<year>-<sequence>), so a template
-    // that asked for one was inviting the admin to invent numbers that the
-    // employee's badge, DTR and payslip would then all print.
-    //
-    // A file that does carry the column still imports: a supplied number is
-    // kept, which is what the docs/bulk_import_parts/ migration files rely on.
-    const headers = [
-        'first_name',
-        'middle_name',
-        'last_name',
-        'suffix',
-        'birth_date',
-        'place_of_birth',
-        'sex',
-        'civil_status',
-        'citizenship',
-        'blood_type',
-        'email',
-        'mobile_number',
-        'landline_number',
-        'house_no',
-        'street',
-        'barangay',
-        'city',
-        'province',
-        'zip_code',
-        'gsis_no',
-        'philhealth_no',
-        'pagibig_no',
-        'tin_no',
-        'license_no',
-        'department',
-        'designation',
-        'employment_status',
-        'appointment_date',
-        'salary_grade',
-        'step_increment'
-    ];
+    const button = document.querySelector('#bulkImportModal button[onclick="downloadTemplate()"]');
+    const originalText = button ? button.innerHTML : '';
 
-    const sampleData = [
-        'Juan',
-        'Santos',
-        'Dela Cruz',
-        'Jr.',
-        '1990-01-15',
-        'Manila',
-        'Male',
-        'Single',
-        'Filipino',
-        'O+',
-        'juan.delacruz@lgu.gov.ph',
-        '09171234567',
-        '(02) 1234-5678',
-        '123',
-        'Main Street',
-        'Barangay 1',
-        'Pagsanjan',
-        'Laguna',
-        '4008',
-        '1234567890',
-        '12-345678901-2',
-        '1234-5678-9012',
-        '123-456-789-000',
-        'N12-34-567890',
-        'Administration',
-        'Administrative Officer II',
-        'Permanent',
-        '2020-01-01',
-        '15',
-        '1'
-    ];
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = 'Preparing template...';
+    }
 
-    const csv = [headers.join(','), sampleData.join(',')].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
+    fetch('/admin/personnel/bulk-import/template', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Template download failed (${response.status})`);
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
 
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'Employee_Import_Template.csv');
-    link.style.visibility = 'hidden';
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'Employee_Import_Template.csv');
+            link.style.visibility = 'hidden';
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // The blob is held by the document until it is revoked; without
+            // this every download leaks the file for the tab's lifetime.
+            URL.revokeObjectURL(url);
+        })
+        .catch(() => {
+            // Through the page's own notice rather than alert(), which is what
+            // every other failure on this modal does.
+            showBulkImportNotice('Could not prepare the CSV template. Please try again.');
+        })
+        .finally(() => {
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
+        });
 }
 
 // Drag and drop functionality

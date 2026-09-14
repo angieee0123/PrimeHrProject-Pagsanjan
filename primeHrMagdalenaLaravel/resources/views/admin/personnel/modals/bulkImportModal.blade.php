@@ -22,7 +22,7 @@
                     </div>
                     <div>
                         <h4 style="margin:0 0 4px; font-size:14px; font-weight:700; color:var(--gp-pri);">Download Template First</h4>
-                        <p style="margin:0; font-size:12px; color:var(--gp-text-mid);">Use our template to ensure proper formatting</p>
+                        <p style="margin:0; font-size:12px; color:var(--gp-text-mid);">Two example rows show the 29 columns and which cells may be left blank</p>
                     </div>
                 </div>
                 <button onclick="downloadTemplate()" style="width:100%; padding:10px; background:var(--gp-pri); color:#fff; border:none; border-radius:9px; font-size:13px; font-weight:600; cursor:pointer; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .2s cubic-bezier(.4,0,.2,1);">

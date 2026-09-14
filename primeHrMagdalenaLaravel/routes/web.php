@@ -264,6 +264,11 @@ Route::get('/admin/personnel', function () {
 
 Route::post('/admin/personnel', [EmployeeRegistrationController::class, 'store'])->middleware('auth')->name('admin.personnel.store');
 Route::post('/admin/personnel/bulk-import', [EmployeeRegistrationController::class, 'bulkImport'])->middleware('auth')->name('admin.personnel.bulk-import');
+// The file the modal's "Download CSV Template" button fetches. Server-side
+// rather than a JavaScript array so the columns are written by fputcsv (a
+// department name containing a comma used to shift every column after it) and
+// so BulkImportTest can assert the download against the documented example.
+Route::get('/admin/personnel/bulk-import/template', [EmployeeRegistrationController::class, 'downloadTemplate'])->middleware('auth')->name('admin.personnel.bulk-import.template');
 Route::post('/admin/personnel/government-ids/extract', [\App\Http\Controllers\GovernmentIdOcrController::class, 'extract'])->middleware('auth')->name('admin.personnel.government-ids.extract');
 
 // Declared above the parameterised `/admin/personnel/{id}` route below: routes
@@ -531,6 +536,11 @@ Route::get('/admin/performance', function () {
 // whole point of the move was that there is one attendance terminal.
 
 Route::get('/admin/attendance', [AttendanceController::class, 'index'])->middleware('auth')->name('admin.attendance');
+// The file the Bulk Import modal's "Download CSV Template" button fetches.
+// Declared with the other literal segments below, and for the same reason: it
+// has to precede `/admin/attendance/{attendanceId}/…` or `bulk-import` would
+// be read as an attendance id.
+Route::get('/admin/attendance/bulk-import/template', [AttendanceController::class, 'downloadTemplate'])->middleware('auth')->name('admin.attendance.bulk-import.template');
 // "Export" on the Attendance page toolbar -> the Attendance Summary tab.
 // Same rule as the two below: a literal segment before any `{employeeId}`.
 Route::get('/admin/attendance/summary-export', [AttendanceController::class, 'exportSummary'])->middleware('auth')->name('admin.attendance.summary.export');

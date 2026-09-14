@@ -84,6 +84,16 @@
                                 <li>Use the provided template for correct column headers</li>
                                 <li>Required columns: <strong>employee_id</strong>, <strong>date</strong> (YYYY-MM-DD)</li>
                                 <li>Time columns (HH:MM, 24h): am_in, am_out, pm_in, pm_out, ot_in, ot_out</li>
+                                {{-- Stated because it is the one mistake that
+                                     costs pay without an error: the importer
+                                     accepts a row carrying only am_in and
+                                     pm_out, stores it, and credits nothing —
+                                     each session is built from a matched pair.
+                                     See
+                                     AttendanceBulkImportTemplateTest::a_row_with_only_the_outer_punches_imports_but_accredits_nothing(),
+                                     which pins that, and the template, which
+                                     therefore fills all four. --}}
+                                <li>Fill <strong>am_in + am_out</strong> and <strong>pm_in + pm_out</strong> — a session is credited only when both of its punches are present</li>
                                 <li>Leave blank any slot with no punch</li>
                                 <li>Duplicate employee + date rows update the existing record</li>
                             </ul>

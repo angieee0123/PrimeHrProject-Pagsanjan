@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\EmployeeRegistrationController;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
@@ -182,6 +183,187 @@ class BulkImportTest extends TestCase
         return $this->actingAs($this->admin())->post('/admin/personnel/bulk-import', [
             'csv_file' => UploadedFile::fake()->createWithContent('employees.csv', $csv),
         ]);
+    }
+
+    /**
+     * Parse a CSV into rows of cells, so two files can be compared by what a
+     * reader would read out of them rather than byte for byte.
+     *
+     * `fputcsv` quotes every cell containing a space — `"Quezon City"`,
+     * `"City Engineer's Office"` — where the committed example leaves them
+     * bare. Both are the same CSV: the quotes are RFC 4180's, they are what
+     * makes a comma or a quote inside a cell safe, and Excel and this import's
+     * own reader strip them. Comparing the parsed values asserts the property
+     * that matters (same columns, same values, same order) without failing on
+     * the one difference that carries no meaning.
+     *
+     * The escape argument is passed explicitly because PHP 8.4 deprecates the
+     * default, and `''` is what the writer uses.
+     *
+     * @return array<int, array<int, string>>
+     */
+    private function parseCsv(string $csv): array
+    {
+        return array_map(
+            fn ($line) => str_getcsv($line, ',', '"', ''),
+            array_values(array_filter(
+                explode("\n", str_replace("\r\n", "\n", trim($csv))),
+                fn ($line) => $line !== '',
+            )),
+        );
+    }
+
+    /**
+     * The example the import is documented by, read from disk rather than
+     * retyped here — a second copy in the test would drift in step with the
+     * one it is supposed to be checking.
+     */
+    private function documentedExample(): string
+    {
+        $path = base_path('docs/bulk_import_two_employees.csv');
+
+        $this->assertFileExists($path, 'The documented bulk import example is missing.');
+
+        return (string) file_get_contents($path);
+    }
+
+    /**
+     * The template the admin downloads is the example the import is documented
+     * by — the same columns, in the same order, with the same sample rows.
+     *
+     * This is the invariant the JavaScript template it replaces broke three
+     * ways: `citizenship` and `blood_type` were transposed, the six address
+     * columns sat after the two contact columns instead of before the four
+     * employment ones, and the value under `citizenship` was a blood type.
+     * Every one of those produces a downloadable file that looks right, which
+     * is why the columns are checked by name and position rather than counted:
+     * transposing two of them leaves the count at 29.
+     *
+     * The header line is additionally pinned as text, because it is the one
+     * row this file's quoting cannot vary: no column name contains a space, so
+     * `fputcsv` writes them bare exactly as the example has them.
+     */
+    #[Test]
+    public function the_downloaded_template_is_the_documented_example(): void
+    {
+        $documented = $this->parseCsv($this->documentedExample());
+        $generated  = $this->parseCsv(EmployeeRegistrationController::templateCsv());
+
+        $this->assertSame($documented[0], $generated[0], 'The template columns are not the documented ones.');
+        $this->assertSame(
+            implode(',', $documented[0]),
+            explode("\n", EmployeeRegistrationController::templateCsv())[0],
+            'The template header line is no longer written exactly as the documented example spells it.',
+        );
+
+        $this->assertCount(
+            count($documented),
+            $generated,
+            'The template no longer carries the documented number of rows.',
+        );
+
+        foreach ($documented as $index => $row) {
+            $this->assertSame(
+                $row,
+                $generated[$index],
+                "Template row {$index} no longer matches docs/bulk_import_two_employees.csv cell for cell.",
+            );
+        }
+    }
+
+    /**
+     * The download route serves that template, behind the same `auth` gate as
+     * the import it feeds — an anonymous visitor is redirected to sign in
+     * rather than handed the file.
+     */
+    #[Test]
+    public function the_template_route_serves_the_template_to_a_signed_in_admin(): void
+    {
+        $this->get('/admin/personnel/bulk-import/template')
+            ->assertRedirect('/login');
+
+        $response = $this->actingAs($this->admin())
+            ->get('/admin/personnel/bulk-import/template')
+            ->assertOk();
+
+        $this->assertStringContainsString('text/csv', (string) $response->headers->get('Content-Type'));
+        $this->assertStringContainsString(
+            'Employee_Import_Template.csv',
+            (string) $response->headers->get('Content-Disposition'),
+        );
+
+        // The bytes the button's fetch turns into a blob are the template.
+        $this->assertSame(EmployeeRegistrationController::templateCsv(), $response->getContent());
+    }
+
+    /**
+     * The strongest property the template can have: downloading it and
+     * uploading it straight back imports the two example employees.
+     *
+     * A template whose columns were transposed, shifted by an unquoted comma
+     * or written under the wrong header could still be a plausible-looking
+     * file — `blood_type` landing in `citizenship` would store "O+" as a
+     * person's nationality. Round-tripping is what rules that out.
+     */
+    #[Test]
+    public function the_downloaded_template_imports_when_uploaded_unchanged(): void
+    {
+        $response = $this->import(EmployeeRegistrationController::templateCsv());
+
+        $response->assertOk()->assertJson(['success' => true, 'imported' => 2, 'skipped' => 0]);
+        $this->assertSame([], $response->json('errors'));
+
+        $juan = Employee::where('first_name', 'Juan')->firstOrFail();
+
+        // One cell from each of the four groups of columns, so a group moving
+        // into another's place is caught: personal, contact/address,
+        // employment, and the government IDs.
+        $this->assertSame('O+', $juan->blood_type);
+        $this->assertSame('Filipino', $juan->citizenship);
+        $this->assertSame('Quezon City', $juan->addresses()->where('type', 'residential')->value('city'));
+        $this->assertSame('09171234567', $juan->contacts()->where('type', 'mobile')->value('number'));
+        $this->assertSame('City Engineer', $juan->employmentDetail->designationRelation()->value('title'));
+        $this->assertSame('NLE-1234567', $juan->governmentIds()->value('license_no'));
+
+        // The number is still the model's to mint: the template has no column
+        // for one.
+        $this->assertSame("EMP-{$this->year}-0001", $juan->employee_id);
+    }
+
+    /**
+     * A department name containing a comma survives the download.
+     *
+     * This is the failure mode of the `Array.join(',')` template this
+     * replaces: an unquoted comma in one cell shifted every column after it
+     * one to the left, so the row imported with the designation as the
+     * employment status and the government IDs misaligned. `fputcsv` quotes
+     * the cell instead, which is what makes the round trip above meaningful
+     * for the municipality's real department names.
+     */
+    #[Test]
+    public function a_department_name_containing_a_comma_survives_the_round_trip(): void
+    {
+        $rows = EmployeeRegistrationController::templateRows();
+        $rows[0]['department'] = 'Office of the Mayor, Admin';
+
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, array_keys($rows[0]), ',', '"', '');
+        foreach ($rows as $row) {
+            fputcsv($handle, array_values($row), ',', '"', '');
+        }
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        $response = $this->import($csv);
+
+        $response->assertOk()->assertJson(['imported' => 2, 'skipped' => 0]);
+        $this->assertDatabaseHas('departments', ['name' => 'Office of the Mayor, Admin']);
+
+        $juan = Employee::where('first_name', 'Juan')->firstOrFail();
+        $this->assertSame('City Engineer', $juan->employmentDetail->designationRelation()->value('title'));
+        $this->assertSame('Permanent', $juan->employmentDetail->employment_status);
+        $this->assertSame('1234567890', $juan->governmentIds()->value('gsis_no'));
     }
 
     #[Test]

@@ -663,6 +663,132 @@ class EmployeeRegistrationController extends Controller
         }
     }
 
+    /**
+     * The columns of the bulk import template, in order, with the two sample
+     * records that ship in it.
+     *
+     * This is the one definition of the file an admin downloads. The download
+     * endpoint below writes it and `BulkImportTest` asserts it against
+     * `docs/bulk_import_two_employees.csv` column for column, so the shipped
+     * template cannot drift from the example it is documented by.
+     *
+     * There is deliberately **no `employee_id` column** — the full reasoning
+     * is on `downloadTemplate()` below. The two samples are also deliberately
+     * not the two records in docs/bulk_import_parts/, which carry real
+     * municipal employee numbers.
+     *
+     * The blank cells are load-bearing too: `landline_number` is empty in both
+     * rows and `suffix` in one of them, which shows the admin that a blank
+     * cell is a value the import accepts an omission on rather than a mistake
+     * to be filled in with something.
+     *
+     * @return array<int, array<string, string>>
+     */
+    public static function templateRows(): array
+    {
+        return [
+            [
+                'first_name' => 'Juan', 'middle_name' => 'Dela', 'last_name' => 'Cruz', 'suffix' => 'Jr.',
+                'birth_date' => '1990-05-15', 'place_of_birth' => 'Quezon City', 'sex' => 'Male',
+                'civil_status' => 'Married', 'blood_type' => 'O+', 'citizenship' => 'Filipino',
+                'email' => 'juan.cruz@maildrop.cc', 'mobile_number' => '09171234567', 'landline_number' => '',
+                'department' => "City Engineer's Office", 'designation' => 'City Engineer',
+                'employment_status' => 'Permanent', 'appointment_date' => '2015-06-01',
+                'salary_grade' => 'SG-15', 'step_increment' => 'Step 4',
+                'house_no' => '123', 'street' => 'Rizal Street', 'barangay' => 'Brgy. San Antonio',
+                'city' => 'Quezon City', 'province' => 'Metro Manila', 'zip_code' => '1100',
+                'gsis_no' => '1234567890', 'philhealth_no' => '123456789012345',
+                'pagibig_no' => '1234567890', 'tin_no' => '123-456-789-000', 'license_no' => 'NLE-1234567',
+            ],
+            [
+                'first_name' => 'Aurora', 'middle_name' => 'Reyes', 'last_name' => 'Dempsey', 'suffix' => '',
+                'birth_date' => '1992-08-21', 'place_of_birth' => 'Batangas City', 'sex' => 'Female',
+                'civil_status' => 'Single', 'blood_type' => 'A+', 'citizenship' => 'Filipino',
+                'email' => 'aurora_dempsey@maildrop.cc', 'mobile_number' => '09189876543', 'landline_number' => '',
+                'department' => 'Municipal Health Office', 'designation' => 'Medical Officer',
+                'employment_status' => 'Permanent', 'appointment_date' => '2018-03-15',
+                'salary_grade' => 'SG-16', 'step_increment' => 'Step 3',
+                'house_no' => '456', 'street' => 'Mabini Street', 'barangay' => 'Brgy. Poblacion',
+                'city' => 'Batangas City', 'province' => 'Batangas', 'zip_code' => '4200',
+                'gsis_no' => '9876543210', 'philhealth_no' => '987654321098765',
+                'pagibig_no' => '9876543210', 'tin_no' => '987-654-321-000', 'license_no' => 'PRC-7654321',
+            ],
+        ];
+    }
+
+    /**
+     * The template as CSV text — exactly what the download serves.
+     *
+     * Split out of `downloadTemplate()` so it can be pinned: `BulkImportTest`
+     * asserts it against `docs/bulk_import_two_employees.csv` — the same
+     * columns in the same order, cell for cell — and that feeding it straight
+     * back through `bulkImport()` imports both sample rows. Rendering the same
+     * rows a second way in the test would only pin the test's own idea of what
+     * `fputcsv` does. (`fputcsv` quotes every cell containing a space where
+     * the committed example leaves it bare; the test compares parsed values so
+     * that difference, which carries no meaning, is not a failure.)
+     *
+     * `fputcsv`'s escape argument is passed explicitly as `''`. PHP's default
+     * backslash-escapes an apostrophe, so `City Engineer's Office` would
+     * download as `City Engineer\'s Office`; empty selects RFC 4180 quoting —
+     * a doubled `""` for a quote, nothing for anything else — which is what
+     * the reader in `bulkImport()` expects.
+     */
+    public static function templateCsv(): string
+    {
+        $handle = fopen('php://temp', 'r+');
+
+        $rows = self::templateRows();
+
+        // Header row from the keys of the first sample, so the columns and the
+        // values under them cannot be listed in two different orders.
+        fputcsv($handle, array_keys($rows[0]), ',', '"', '');
+
+        foreach ($rows as $row) {
+            fputcsv($handle, array_values($row), ',', '"', '');
+        }
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return $csv;
+    }
+
+    /**
+     * The bulk import template, as a CSV download.
+     *
+     * It is generated here rather than in `adminPersonnel.js`, where it used to
+     * be a JavaScript array joined with `,`. That copy had drifted three ways
+     * from the example the import is documented by
+     * (`docs/bulk_import_two_employees.csv`): `citizenship` and `blood_type`
+     * were the wrong way round, the address columns sat after the two contact
+     * columns instead of before the employment ones, and it carried a
+     * `blood_type` value under a `citizenship` header.
+     *
+     * `String.join` was the worse half. A joined cell is not a CSV cell: the
+     * first admin whose department was `Office of the Mayor, Admin` — a comma,
+     * which is exactly what CSV quoting is for — produced a file whose every
+     * subsequent column was shifted one to the left.
+     *
+     * There is still no `employee_id` column: the number is minted by the model
+     * (`Employee::generateEmployeeId()` → `EMP-<year>-<sequence>`) when the cell
+     * is blank, so a template that asked for one was inviting the admin to
+     * invent numbers that the badge, DTR and payslip would then all print. A
+     * file that *does* carry the column still imports and keeps its numbers,
+     * which is what `docs/bulk_import_parts/` relies on.
+     */
+    public function downloadTemplate()
+    {
+        $csv = self::templateCsv();
+
+        return response($csv, 200, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename=Employee_Import_Template.csv',
+            'Content-Length'      => (string) strlen($csv),
+        ]);
+    }
+
     public function bulkImport(Request $request)
     {
         // Bulk import touches N employees × ~8 tables + 2 mails per row.
