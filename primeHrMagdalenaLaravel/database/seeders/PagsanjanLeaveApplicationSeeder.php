@@ -17,8 +17,14 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Leave applications for the Pagsanjan roster: sixty-odd filings dated inside
- * August and September 2026, most of them approved, about a third still waiting
- * on HR, and five refused with a stated reason.
+ * August, September and October 2026, most of them approved, about a third
+ * still waiting on HR, and five refused with a stated reason.
+ *
+ * The window is three months wide and every plan is filed one application a
+ * month, so the register does not stop on the day the attendance register does
+ * (2026-09-11): the rest of September and the whole of October hold filings of
+ * their own, including the ones still ahead of the dataset's "today"
+ * (2026-09-14).
  *
  * The rows are written at their final status in a single insert. Filing an
  * application as `pending` and then saving it as `approved` would fire
@@ -40,10 +46,30 @@ class PagsanjanLeaveApplicationSeeder extends Seeder
 {
     use SeedsPagsanjanRoster;
 
-    /** Every filing is dated inside this window, weekends excluded. */
+    /**
+     * Every filing is dated inside this window, weekends excluded.
+     *
+     * It opens on the first working day of August and closes on the last working
+     * day of October. It used to close on 2026-09-11 — the same last working day
+     * the attendance register stops at — which left the rest of September and
+     * the whole of October with no leave on file at all.
+     */
     private const WINDOW_START = '2026-08-03';
 
-    private const WINDOW_END = '2026-09-11';
+    private const WINDOW_END = '2026-10-30';
+
+    /**
+     * How many rounds the window is cut into: one per application a plan can
+     * hold.
+     *
+     * `STATUS_PLANS` holds at most three entries, so the i-th application of a
+     * plan is filed in the i-th round of the window — a filing a month rather
+     * than three filings on consecutive days, which is also what carries the
+     * three-application plans into October. A plan shorter than this simply does
+     * not reach the later rounds, and the window's own length decides where a
+     * round begins, so widening the window needs nothing changed here.
+     */
+    private const PLAN_ROUNDS = 3;
 
     /** Applications are numbered from here; the model's generator cannot be used. */
     private const APPLICATION_NUMBER_FALLBACK_SEQ = 0;
@@ -218,23 +244,52 @@ class PagsanjanLeaveApplicationSeeder extends Seeder
 
         $filedTotal = 0;
         $jobOrders = 0;
+        $filers = [];
 
         // One plan per roster position, so which employee files what is fixed
         // and the roster-wide totals above hold exactly. The counter is carried
         // separately from the loop key because `rosterEmployees()` is keyed by
         // `employees.id` — the ids are in the thousands, and using one as a
         // position would push the whole register past the end of the window.
+        //
+        // A Job Order files nothing, by design, and is dropped here rather than
+        // inside `fileForEmployee()`. `PagsanjanLeaveBalanceSeeder` gives every
+        // Job Order a zero balance for every credit code — which is what the
+        // roster actually holds, and what stops a screener being told a
+        // daily-rate employee has fifteen days of vacation leave — and nothing
+        // is filed against credits that are not there. Their service dates would
+        // refuse them `VL`, `FL` and `SPL` in any case: appointed 2026-01-05,
+        // they clear the six-month requirement only in July, after most of this
+        // window has passed. They are left on the roster with an empty leave
+        // file rather than given an invented opening balance to spend: an
+        // approved application with nothing behind it is the data error this
+        // whole check exists to prevent.
+        //
+        // Dropping them here is also what places the filings correctly: the
+        // spread below is drawn for the employees who actually file, and spacing
+        // twenty-five filers as though there were thirty would leave the end of
+        // every round — the whole of October — empty.
         $position = 0;
 
         foreach ($employees as $employee) {
             $plan = self::STATUS_PLANS[$position % count(self::STATUS_PLANS)];
+            $position++;
 
             if ($this->employmentDetailFor($employee->id)?->employment_status === 'Job Order') {
                 $jobOrders++;
+
+                continue;
             }
 
-            $filedTotal += $this->fileForEmployee($employee, $position, $plan, $leaveTypes);
-            $position++;
+            $filers[] = [$employee, $plan];
+        }
+
+        // The filing position is the employee's place among those who file,
+        // which is what decides where in a round their application sits;
+        // `$position` above is their place on the roster, which decides the
+        // plan.
+        foreach ($filers as $filingPosition => [$employee, $plan]) {
+            $filedTotal += $this->fileForEmployee($employee, $filingPosition, count($filers), $plan, $leaveTypes);
         }
 
         $this->command->info(sprintf(
@@ -289,35 +344,24 @@ class PagsanjanLeaveApplicationSeeder extends Seeder
     /**
      * File one employee's applications and return how many were written.
      *
-     * A Job Order files nothing, by design. `PagsanjanLeaveBalanceSeeder` gives
-     * every Job Order a zero balance for every credit code — which is what the
-     * roster actually holds, and what stops a screener being told a
-     * daily-rate employee has fifteen days of vacation leave — and this seeder
-     * will not file against credits that are not there. Their service dates
-     * would refuse them `VL`, `FL` and `SPL` in any case: appointed 2026-01-05,
-     * they clear the six-month requirement only in July, after most of this
-     * window has passed.
-     *
-     * The employee is left on the roster with an empty leave file rather than
-     * given an invented opening balance to spend. An approved application with
-     * nothing behind it is the data error this whole check exists to prevent.
+     * Every employee handed to this method is plantilla: `run()` drops each Job
+     * Order before the call, for the reasons stated there.
      *
      * @param array<int, string> $plan
      * @param Collection<string, LeaveType> $leaveTypes
      */
-    private function fileForEmployee(Employee $employee, int $position, array $plan, Collection $leaveTypes): int
-    {
+    private function fileForEmployee(
+        Employee $employee,
+        int $filingPosition,
+        int $filingCount,
+        array $plan,
+        Collection $leaveTypes
+    ): int {
         $user = User::where('employee_id', $employee->id)->first();
 
         if (! $user) {
             $this->command->warn("{$employee->first_name} {$employee->last_name} has no account — no leave filed.");
 
-            return 0;
-        }
-
-        $isJobOrder = $this->employmentDetailFor($employee->id)?->employment_status === 'Job Order';
-
-        if ($isJobOrder) {
             return 0;
         }
 
@@ -335,20 +379,30 @@ class PagsanjanLeaveApplicationSeeder extends Seeder
         // The whole window, generated once and shared, so every application in
         // this run is dated by the same list of working days.
         $weekdays = $this->weekdaysInWindow();
-
-        // Each employee starts filing at their own point in the window, which
-        // spreads the register across the month instead of clustering every
-        // employee's leave in the first week. There are thirty working days in
-        // the window and thirty employees, so no two begin on the same day —
-        // and `nextSlot()` wraps an employee who reaches the end back to the
-        // earliest day they have not already taken.
-        $cursor = $position % count($weekdays);
+        $windowLength = count($weekdays);
 
         $balances = LeaveBalance::currentFor($employee->id);
         $usedWindow = [];
         $filed = 0;
 
-        foreach ($plan as $status) {
+        foreach ($plan as $index => $status) {
+            // The window is cut into as many rounds as the longest plan has
+            // applications, and the i-th application of a plan is filed in the
+            // i-th round. An employee therefore files about once a month instead
+            // of on three consecutive days, and a plan that runs to a third
+            // filing reaches the last week of October rather than stopping where
+            // September does.
+            $roundStart = intdiv($index * $windowLength, self::PLAN_ROUNDS);
+            $roundLength = intdiv(($index + 1) * $windowLength, self::PLAN_ROUNDS) - $roundStart;
+
+            // Inside its round, each employee keeps to their own place, so a
+            // round is spread across the days it holds instead of every
+            // employee's first filing landing on its first day. No two employees
+            // are given the same place while there are at least as many days in
+            // the round as there are filers; when there are fewer, two share a
+            // day and `nextSlot()` moves the second on.
+            $cursor = $roundStart + intdiv($filingPosition * $roundLength, max(1, $filingCount));
+
             $slot = $this->nextSlot($weekdays, $cursor, $usedWindow);
 
             if ($slot === null) {
@@ -387,7 +441,6 @@ class PagsanjanLeaveApplicationSeeder extends Seeder
             $balances = LeaveBalance::currentFor($employee->id);
 
             $usedWindow[] = [$startIndex, $startIndex + $days - 1];
-            $cursor = $startIndex + $days;
             $filed++;
         }
 
@@ -537,12 +590,14 @@ class PagsanjanLeaveApplicationSeeder extends Seeder
     /**
      * The next filing slot for this employee, as [start index, working days].
      *
-     * `$cursor` is where this employee's previous application ended looking
-     * forward, so a day is never claimed twice inside one employee's own set of
-     * filings. An employee who reaches the end of the window wraps back to the
-     * earliest day they have not already taken — their own filings are the only
-     * ones that overlap-restrict them, and each employee in this roster has room
-     * for three short filings inside a thirty-day window.
+     * `$cursor` is where the caller wants this filing to begin — the place the
+     * employee holds inside the application's own round of the window — and a
+     * day is never claimed twice inside one employee's own set of filings. Only
+     * that employee's own filings restrict them, and the rounds are weeks apart,
+     * so the forward search is a guard rather than the mechanism: it moves a
+     * filing on when the one before it spilled over the edge of its round. A
+     * filing with nowhere left to go returns null and the caller drops it rather
+     * than dating it outside the window.
      *
      * @param array<int, Carbon> $weekdays
      * @param array<int, array{0: int, 1: int}> $usedWindow
@@ -665,7 +720,8 @@ class PagsanjanLeaveApplicationSeeder extends Seeder
     }
 
     /**
-     * Every weekday from 2026-08-03 to 2026-09-11 inclusive.
+     * Every weekday from 2026-08-03 to 2026-10-30 inclusive — sixty-five days,
+     * which the plans are filed across in rounds.
      *
      * Weekend arithmetic goes through `CscTimeConversionService::isWeekend()`
      * rather than a local `dayOfWeek` test, so a leave day the seeder dates is

@@ -21,8 +21,8 @@ $navGroups = [
     'Organization' => [
         ['id' => 'admin.personnel',   'label' => 'Personnel',              'icon' => 'personnel',   'route' => route('admin.personnel')],
         ['id' => 'admin.departments', 'label' => 'Departments',            'icon' => 'departments', 'route' => route('admin.departments')],
-        ['id' => 'admin.recruitment', 'label' => 'Recruitment',            'icon' => 'recruitment', 'route' => route('admin.recruitment')],
         ['id' => 'admin.training',    'label' => 'Training & Development', 'icon' => 'training',    'route' => route('admin.training')],
+        ['id' => 'admin.recruitment', 'label' => 'Recruitment',            'icon' => 'recruitment', 'route' => route('admin.recruitment')],
         ['id' => 'admin.performance', 'label' => 'Performance Management', 'icon' => 'performance', 'route' => route('admin.performance')],
     ],
     'Time & Absence' => [
