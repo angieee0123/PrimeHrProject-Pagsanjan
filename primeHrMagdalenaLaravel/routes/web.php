@@ -512,10 +512,16 @@ Route::get('/admin/personnel/check-availability', [EmployeeRegistrationControlle
     ->name('admin.personnel.check-availability');
 
 Route::get('/admin/personnel/{id}', function ($id) {
-    $employee = \App\Models\Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'addresses', 'contacts', 'governmentIds'])
+    $employee = \App\Models\Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'addresses', 'contacts', 'governmentIds', 'supportingDocuments'])
         ->findOrFail($id);
 
-    return response()->json($employee);
+    $data = $employee->toArray();
+    // Expose the 201 file under both keys: toArray() snake_cases the
+    // relation, while the modal reads the camelCase key.
+    $data['supporting_documents'] = $employee->supportingDocuments;
+    $data['supportingDocuments'] = $employee->supportingDocuments;
+
+    return response()->json($data);
 })->middleware('auth')->name('admin.personnel.show');
 
 Route::get('/admin/training', [\App\Http\Controllers\TrainingController::class, 'index'])->middleware('auth')->name('admin.training');

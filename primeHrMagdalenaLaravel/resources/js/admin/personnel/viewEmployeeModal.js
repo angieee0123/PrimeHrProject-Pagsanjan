@@ -51,6 +51,66 @@ function govIdScanLink(path) {
     return ` <a href="${escapeViewAttr(path)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--gp-pri-2);font-weight:600;margin-left:8px;">View Scan</a>`;
 }
 
+// 201-file supporting documents (EmployeeSupportingDocument). Mirrors the
+// GROUPS vocabulary on the model: column => on-screen label, in three groups.
+const SUPPORTING_DOC_GROUPS = [
+    {
+        title: 'Appointment & Personnel Forms',
+        items: [
+            ['pds_file_path', 'CS Form 212 — Personal Data Sheet'],
+            ['appointment_form_file_path', 'CS Form 33 — Appointment Form'],
+            ['position_description_file_path', 'Position Description Form'],
+        ],
+    },
+    {
+        title: 'Clearances & Examinations',
+        items: [
+            ['medical_certificate_file_path', 'Medical Certificate'],
+            ['nbi_clearance_file_path', 'NBI Clearance'],
+            ['financial_clearance_file_path', 'Financial & Property Clearance'],
+            ['neuro_exam_file_path', 'Neuro-psychiatric Examination'],
+        ],
+    },
+    {
+        title: 'Service Record & Credentials',
+        items: [
+            ['licenses_file_path', 'Professional Licenses'],
+            ['performance_eval_file_path', 'Performance Evaluation Documents'],
+            ['commendation_file_path', 'Commendations & Awards'],
+            ['disciplinary_file_path', 'Disciplinary & Action Documents'],
+            ['other_records_file_path', 'Other Employee Records'],
+        ],
+    },
+];
+
+function supportingDocRow(label, path) {
+    if (path) {
+        return `<div class="view-supporting-doc"><span class="view-supporting-doc-label">${label}</span><a class="view-supporting-doc-link" href="${escapeViewAttr(path)}" target="_blank" rel="noopener">View File</a></div>`;
+    }
+    return `<div class="view-supporting-doc view-supporting-doc-missing"><span class="view-supporting-doc-label">${label}</span><span class="view-supporting-doc-empty">Not uploaded</span></div>`;
+}
+
+function supportingDocsSection(data) {
+    const docs = data.supportingDocuments || data.supporting_documents || null;
+    if (!docs) {
+        return `
+        <div style="margin-top:24px;">
+            <h4 style="font-size:14px; font-weight:700; color:var(--gp-pri); margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid var(--theme-primary-light);">📁 201 File — Supporting Documents</h4>
+            <p class="view-supporting-docs-none">No supporting documents on file for this employee.</p>
+        </div>`;
+    }
+    const groups = SUPPORTING_DOC_GROUPS.map(group => `
+        <div class="view-supporting-doc-group">
+            <p class="view-supporting-doc-group-title">${group.title}</p>
+            ${group.items.map(([column, label]) => supportingDocRow(label, docs[column])).join('')}
+        </div>`).join('');
+    return `
+        <div style="margin-top:24px;">
+            <h4 style="font-size:14px; font-weight:700; color:var(--gp-pri); margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid var(--theme-primary-light);">📁 201 File — Supporting Documents</h4>
+            ${groups}
+        </div>`;
+}
+
 function generateEmployeeView(data) {
     return `
         <div style="margin-bottom:24px;">
@@ -72,6 +132,7 @@ function generateEmployeeView(data) {
             <div>
                 <h4 style="font-size:14px; font-weight:700; color:var(--gp-pri); margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid var(--theme-primary-light);">💼 Employment Details</h4>
                 <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div><span style="font-size:11px; color:var(--gp-text-soft); display:block; margin-bottom:4px;">Email</span><span class="view-employment-email" style="font-size:13px; font-weight:600; color:var(--gp-pri);">${escapeViewAttr(data.email) || 'N/A'}</span></div>
                     <div><span style="font-size:11px; color:var(--gp-text-soft); display:block; margin-bottom:4px;">Designation</span><span style="font-size:13px; font-weight:600; color:var(--gp-pri);">${data.employment_detail?.designation_relation?.title || 'N/A'}</span></div>
                     <div><span style="font-size:11px; color:var(--gp-text-soft); display:block; margin-bottom:4px;">Department</span><span style="font-size:13px; font-weight:600; color:var(--gp-pri);">${data.employment_detail?.department_relation?.name || 'N/A'}</span></div>
                     <div><span style="font-size:11px; color:var(--gp-text-soft); display:block; margin-bottom:4px;">Employment Status</span><span style="font-size:13px; font-weight:600; color:var(--gp-pri);">${data.employment_detail?.employment_status || 'N/A'}</span></div>
@@ -114,6 +175,7 @@ function generateEmployeeView(data) {
                 <div><span style="font-size:11px; color:var(--gp-text-soft); display:block; margin-bottom:4px;">Zip Code</span><span style="font-size:13px; font-weight:600; color:var(--gp-pri);">${data.addresses?.[0]?.zip_code || 'N/A'}</span></div>
             </div>
         </div>
+        ${supportingDocsSection(data)}
     `;
 }
 
