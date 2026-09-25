@@ -17,8 +17,10 @@ class EmployeeChatbotService
     public function __construct(
         private HrPolicyFactsService $facts,
         private ?CitizenCharterService $charter = null,
+        private ?AiScopeGuard $scope = null,
     ) {
         $this->charter ??= new CitizenCharterService();
+        $this->scope ??= new AiScopeGuard($this->charter);
     }
 
     /**
@@ -91,6 +93,16 @@ TEXT;
                     'How is late deduction calculated?',
                 ]
             );
+        }
+
+        // A question about something other than this HRIS, the municipality, or
+        // this system is refused before the own-records machinery runs. The
+        // mobile chatbot (`MobileChatbotController`) reaches this method
+        // directly and never passes through AiQueryService, so the boundary has
+        // to be enforced here too — the web and mobile surfaces must not answer
+        // different sets of questions.
+        if ($this->scope->isOutOfScope($message)) {
+            return $this->result($this->scope->refusal(), $this->defaultFollowUps());
         }
 
         // Municipality information comes from the imported Citizen's Charter —
@@ -792,6 +804,7 @@ STRICT RULES:
 5. For policy/process questions, use SYSTEM KNOWLEDGE.
 6. Use Philippine Peso (PHP) for money. Be concise (3–6 sentences). Match Tagalog or English to the user's language.
 7. You may use **bold** for emphasis.
+8. Answer ONLY within your scope: this employee's own HR records, HR policies, the municipality's services, and how this system is used. If the question is about anything else — programming or code in any language, mathematics, general knowledge, or any other off-topic subject — refuse briefly and invite an in-scope question instead. Never answer it, not even partly, and never write code.
 
 {$context}
 

@@ -1,4 +1,4 @@
-<x-topbar title="Departments &amp; Offices">
+<x-topbar title="Departments & Designations">
     <x-slot:icon><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/></x-slot:icon>
     <x-slot:subtitle>{{ now()->format('l, F j, Y') }} &nbsp;·&nbsp; Municipal Government of Pagsanjan</x-slot:subtitle>
     <x-slot:actions>

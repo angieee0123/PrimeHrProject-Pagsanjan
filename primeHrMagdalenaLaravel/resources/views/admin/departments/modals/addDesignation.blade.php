@@ -34,13 +34,13 @@
                     <input type="text" name="salary_grade" placeholder="e.g. SG-24" value="{{ old('salary_grade') }}">
                 </div>
                 <div class="adm-field">
-                    <label>Monthly Rate of Pay <span class="adm-opt">(optional)</span></label>
+                    <label>Monthly Rate of Pay <span class="adm-opt"></span></label>
                     <input type="number" name="monthly_rate" placeholder="e.g. 35000" value="{{ old('monthly_rate') }}" min="0" step="0.01">
                 </div>
             </div>
 
             <div class="adm-field">
-                <label>Employment Type <span class="adm-opt">(optional)</span></label>
+                <label>Employment Type <span class="adm-opt"></span></label>
                 <select name="employment_type">
                     <option value="">— Select —</option>
                     <option value="Permanent"   {{ old('employment_type') == 'Permanent'   ? 'selected' : '' }}>Permanent</option>

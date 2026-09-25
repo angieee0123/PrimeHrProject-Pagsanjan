@@ -129,11 +129,16 @@ class IntentRoutingGoldenSetTest extends TestCase
      * scoreboard above depends on this: a gap in the rules has to show up as a
      * misroute you can read, not as a stack trace that hides the other 70
      * results.
+     *
+     * The probe is deliberately in scope and still claimed by no rule. It used
+     * to be "the weather is nice today", which is now refused as out of scope —
+     * the catch-all is for HR questions nobody has written a rule for, not for
+     * small talk about the world outside the municipality.
      */
     #[Test]
     public function an_unrecognised_question_falls_through_to_general(): void
     {
-        $this->assertSame('general', $this->classify('the weather is nice today'));
+        $this->assertSame('general', $this->classify('tell me about the municipality'));
     }
 
     /**

@@ -21,8 +21,13 @@ function editEmployee(id) {
     fetch(`/admin/personnel/${id}/edit`)
         .then(r => r.json())
         .then(d => {
-            // Step 1 — Personal
-            setVal('employee_id', d.employee_id);
+            // Step 1 — Personal. There is no Employee ID input to fill: the
+            // number is minted by the server and the wizard never posts it. It
+            // is kept on the form so the review step can print the employee's
+            // existing number, and in the Step 1 line so this panel does not
+            // read as though the employee has none.
+            form.dataset.employeeId = d.employee_id || '';
+            if (window.setWizardEmployeeIdNote) window.setWizardEmployeeIdNote(d.employee_id);
             setVal('first_name',  d.first_name);
             setVal('middle_name', d.middle_name);
             setVal('last_name',   d.last_name);
@@ -266,10 +271,27 @@ function loadDesignations(deptId, onLoaded) {
         });
 }
 
+// Fills the employment type and salary grade from the chosen designation, and
+// NEVER clears them. A designation with no `employment_type` or `salary_grade`
+// stored is common (the columns are nullable and older rows predate the field),
+// and the old unconditional write blanked an existing employee's type the
+// moment the wizard pre-selected their designation — Permanent became ''. The
+// employee then left the permanent roster and every report that counts
+// employment_status with them. Filling only ever adds what the designation
+// actually states; what is already on the employee is theirs to keep, and the
+// type only changes when the admin picks a designation that states a different
+// one.
 function fillFromDesignation(select) {
     const opt = select.options[select.selectedIndex];
-    document.getElementById('wizard-employment-status').value = opt.dataset.employmentType || '';
-    document.getElementById('wizard-salary-grade').value      = opt.dataset.salaryGrade    || '';
+    if (!opt) return;
+
+    const statusEl = document.getElementById('wizard-employment-status');
+    const gradeEl  = document.getElementById('wizard-salary-grade');
+    const type     = opt.dataset.employmentType || '';
+    const grade    = opt.dataset.salaryGrade    || '';
+
+    if (type)  statusEl.value = type;
+    if (grade) gradeEl.value  = grade;
 }
 
 window.editEmployee = editEmployee;

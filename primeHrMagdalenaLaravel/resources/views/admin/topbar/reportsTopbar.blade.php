@@ -1,4 +1,4 @@
-<x-topbar title="Reports &amp; Analytics">
+<x-topbar title="Reports & Analytics">
     <x-slot:icon><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></x-slot:icon>
     <x-slot:subtitle>{{ now()->format('l, F j, Y') }} &nbsp;·&nbsp; Municipal Government of Pagsanjan</x-slot:subtitle>
     <x-slot:actions>

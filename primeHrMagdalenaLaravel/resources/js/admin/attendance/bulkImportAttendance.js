@@ -19,24 +19,74 @@ function closeBulkImportAttendanceModal() {
     if (dz) { dz.style.borderColor = 'var(--theme-neutral-300)'; dz.style.background = 'var(--gp-bg-tint)'; }
 }
 
+// Fetches the template from the server instead of building it here.
+//
+// The array this used to hold was joined with `,` — a joined cell is not a CSV
+// cell, so a value containing a comma shifted every column after it — and,
+// living only in the browser, nothing could assert it against the columns
+// `bulkImport()` actually reads. The endpoint writes it with fputcsv and
+// AttendanceBulkImportTemplateTest pins the result.
+//
+// Every sample row carries all four daytime punches. The importer accredits a
+// session only from a matched pair, so a row with am_in and pm_out alone
+// imports without complaint and accredits zero minutes.
+//
+// Fetched into a blob rather than navigated to, so the admin stays on the page
+// with the modal and their file selection intact.
 function downloadAttendanceTemplate() {
-    const headers = ['employee_id', 'date', 'am_in', 'am_out', 'pm_in', 'pm_out', 'ot_in', 'ot_out'];
-    const sampleRows = [
-        ['EMP-2024-001', '2026-05-01', '08:00', '12:00', '13:00', '17:00', '', ''],
-        ['EMP-2024-001', '2026-05-02', '08:05', '12:00', '13:00', '17:30', '17:30', '18:30'],
-        ['EMP-2024-002', '2026-05-01', '07:55', '12:00', '13:00', '17:00', '', ''],
-    ];
-    const csv = [headers.join(','), ...sampleRows.map(r => r.join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'Attendance_Import_Template.csv';
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const button = document.querySelector('#bulkImportAttendanceModal button[onclick="downloadAttendanceTemplate()"]');
+    const originalText = button ? button.innerHTML : '';
+
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = 'Preparing template...';
+    }
+
+    fetch('/admin/attendance/bulk-import/template', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Template download failed (${response.status})`);
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'Attendance_Import_Template.csv');
+            link.style.visibility = 'hidden';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // The blob is held by the document until it is revoked; without
+            // this every download leaks the file for the tab's lifetime.
+            URL.revokeObjectURL(url);
+        })
+        .catch(() => {
+            // Through the page's own modal rather than alert(), matching how
+            // this file reports every other failure.
+            const errorModal = document.getElementById('errorModal');
+            const errorMessage = document.getElementById('errorMessage');
+            const msg = 'Could not prepare the CSV template. Please try again.';
+
+            if (errorModal && errorMessage) {
+                errorMessage.textContent = msg;
+                errorModal.style.display = 'flex';
+            } else {
+                alert(msg);
+            }
+        })
+        .finally(() => {
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
+        });
 }
 
 function handleAttendanceFileSelect(event) {

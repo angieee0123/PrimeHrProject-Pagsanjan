@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Log;
  * AI/Chatbot), then the org-wide default (also Settings → AI/Chatbot, admin-
  * managed, stored in system_ai_settings), then .env's GROQ_API_KEY as a
  * last-resort fallback if that row was never configured.
+ *
+ * Because it is the only door to a provider, it is also where the assistant's
+ * scope boundary is attached to every prompt — see chat() below.
  */
 class AiChatService
 {
@@ -63,11 +66,22 @@ class AiChatService
      * services use this so prior turns stay in context ("show John's leave" →
      * "now generate a report") instead of being flattened into one string.
      *
+     * Every prompt carries the assistant's scope boundary (AiScopeGuard): the
+     * clause is prepended here, at the one place an LLM call can be made, rather
+     * than written into each prompt. The deterministic gate in AiQueryService
+     * refuses the off-topic questions it can recognise, and this is what covers
+     * the ones no pattern knows yet — including a prompt written next year by
+     * someone who never read this class.
+     *
      * @param array<int, array{role: string, content: string}> $messages
      */
     public static function chat(?User $user, string $system, array $messages, float $temperature = 0.3, int $maxTokens = 900): ?string
     {
         self::$lastFailure = null;
+
+        $system = trim($system) === ''
+            ? AiScopeGuard::promptClause()
+            : AiScopeGuard::promptClause() . "\n\n" . $system;
 
         $config = self::resolveConfig($user);
 

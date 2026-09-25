@@ -304,7 +304,7 @@ function getInitials($name) {
 <div class="seg-tabs">
     <button class="tab-btn active" onclick="switchTab('deduction-types')">Deduction Types</button>
     <button class="tab-btn" onclick="switchTab('employee-deductions')">Employee Deductions</button>
-    <button class="tab-btn" onclick="switchTab('loans')">Loans</button>
+    <button class="tab-btn" onclick="switchTab('loans')" hidden>Loans</button>
     <button class="tab-btn" onclick="switchTab('schedules')">Schedules</button>
     <button class="tab-btn" onclick="switchTab('loan-types')">Loan Types</button>
     <button class="tab-btn" onclick="switchTab('transactions')">Transactions</button>

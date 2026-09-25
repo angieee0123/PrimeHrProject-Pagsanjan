@@ -33,8 +33,10 @@ class AiQueryService
         private HrChatbotAnswerer $fallback,
         private EmployeeChatbotService $selfService,
         private ?CitizenCharterService $charter = null,
+        private ?AiScopeGuard $scope = null,
     ) {
         $this->charter ??= new CitizenCharterService();
+        $this->scope ??= new AiScopeGuard($this->charter);
     }
 
     /**
@@ -57,6 +59,40 @@ class AiQueryService
         }
 
         $started = microtime(true);
+
+        // The scope boundary is the first thing checked, ahead of pronoun
+        // resolution and every capability.
+        //
+        // Ahead of pronoun resolution because that step spends a provider call
+        // asking a model to rewrite the question, and rewriting an off-topic
+        // question into a self-contained off-topic question is work that exists
+        // only to be thrown away — worse, the rewrite returns prose, and prose
+        // is no longer recognisable to the patterns below.
+        //
+        // Ahead of the capabilities because every one of them can narrate: the
+        // knowledge base answers free text, generated SQL narrates rows, and a
+        // chart request narrates a spec. Guarding one door would only move the
+        // hole to the next.
+        $offTopic = $this->scope->offTopicReason($message);
+
+        if ($offTopic !== null) {
+            $this->audit(
+                $user,
+                'out_of_scope',
+                $message,
+                'refused',
+                null,
+                (int) ((microtime(true) - $started) * 1000),
+                null,
+                "outside scope ({$offTopic})",
+            );
+
+            return [
+                'answer' => $this->scope->refusal(),
+                'intent' => 'out_of_scope',
+                'follow_ups' => $this->scope->followUps(),
+            ];
+        }
 
         $resolved = $message;
         $intent = 'general';
@@ -201,6 +237,10 @@ class AiQueryService
             'data_query' => $this->dataQuery($user, $resolved, $history),
             'self_service' => $this->ownRecords($user, $resolved),
             'charter' => $this->charterAnswer($user, $resolved, $original, $history),
+            'out_of_scope' => [
+                'answer' => $this->scope->refusal(),
+                'follow_ups' => $this->scope->followUps(),
+            ],
             'how_to' => ['answer' => $this->fallback->explain($user, $resolved, $history)],
             'capabilities' => $this->capabilities($user),
             default => $this->generalQuestion($user, $resolved, $original, $history),
@@ -291,8 +331,14 @@ class AiQueryService
             : "\n\nAsk in plain language — English or Tagalog. For privacy I can only show your own records, "
                 . 'not other employees\'.';
 
+        // "What can you do?" is where the boundary belongs as much as the
+        // capability list does: a list that names only what is offered invites
+        // the assumption that everything else is offered too. Stated from
+        // AiScopeGuard so the refusal and the welcome cannot describe two
+        // different assistants.
         return [
-            'answer' => $opening . "\n" . implode("\n", $lines) . $closing,
+            'answer' => $opening . "\n" . implode("\n", $lines) . $closing
+                . "\n\n" . AiScopeGuard::BOUNDARY . ' Anything outside that is out of scope, and I will say so.',
             'follow_ups' => $orgWide
                 ? ['How many employees are on leave today?', 'Generate an attendance summary report', 'What is my leave balance?']
                 : ['What is my leave balance?', 'Show my latest payslip', 'How do I file a leave request?'],
@@ -398,6 +444,15 @@ class AiQueryService
         return match (true) {
             // First, because it is unambiguous and usually the opening question.
             $this->wantsCapabilities($q) => 'capabilities',
+            // Second, and above every subject rule, because an off-topic question
+            // matches the *phrasing* of an in-scope one: "how to write a for loop
+            // in python" contains "how to", and "plot a sine wave in python"
+            // contains "plot". Below this point the rules route on verbs and
+            // nouns, and both of those questions would be claimed by a
+            // capability that then narrates them. Ask() checks the same guard
+            // before it resolves pronouns; this arm keeps the routing table
+            // honest for anything that classifies without going through ask().
+            $this->scope->isOutOfScope($message) => 'out_of_scope',
             (bool) preg_match('/\b(graph|chart|plot|visuali[sz]e|pie|bar\s+chart|line\s+chart|trend\s+(?:graph|chart))\b/', $q) => 'chart',
             // The Citizen's Charter owns municipal-service questions — permits,
             // clearances, fees, processing times. Checked before how_to (so
@@ -882,7 +937,9 @@ charter          — municipality services, permits, clearances, fees, processin
 how_to           — a procedure or a written policy, and nothing else
 capabilities     — what the assistant itself can do
 data_query       — any other question answerable from HR records (including monetization requests)
-general          — small talk only
+out_of_scope     — anything outside the SCOPE boundary above: programming or code in any language,
+                   mathematics, general knowledge, news, and other off-topic requests
+general          — greetings only
 
 Decide by WHERE THE ANSWER COMES FROM, not by how the question is phrased.
 
@@ -905,7 +962,7 @@ PROMPT;
         $label = preg_replace('/[^a-z_]/', '', $label) ?? '';
 
         $known = ['employee_search', 'document_search', 'dashboard', 'report', 'chart', 'workflow',
-            'self_service', 'charter', 'how_to', 'capabilities', 'data_query', 'general'];
+            'self_service', 'charter', 'how_to', 'capabilities', 'data_query', 'general', 'out_of_scope'];
 
         return in_array($label, $known, true) ? $label : $this->guessIntent($message);
     }
@@ -963,6 +1020,11 @@ PROMPT;
      * result rows are counted, never copied, so the audit log does not become
      * a second uncontrolled copy of HR data.
      *
+     * `note` is for a reason that is not an error — a refusal, say, which is a
+     * decision the assistant made rather than a failure it suffered. Recording
+     * it under `error` would make every boundary decision look like an outage
+     * to whoever reads this channel next.
+     *
      * @param array<string, mixed>|null $result
      */
     private function audit(
@@ -973,6 +1035,7 @@ PROMPT;
         ?string $error = null,
         ?int $durationMs = null,
         ?array $result = null,
+        ?string $note = null,
     ): void {
         Log::channel('ai_audit')->info('assistant.query', array_filter([
             'user_id' => $user->id,
@@ -986,6 +1049,7 @@ PROMPT;
             'sql' => $result['sql'] ?? null,
             'duration_ms' => $durationMs,
             'error' => $error,
+            'note' => $note,
         ], fn ($v) => $v !== null));
     }
 }

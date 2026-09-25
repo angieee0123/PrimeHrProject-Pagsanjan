@@ -2147,6 +2147,109 @@ class AttendanceController extends Controller
      * Existing rows for the same employee + date are updated so a correction
      * can be delivered as a CSV re-upload without deleting first.
      */
+    /**
+     * The columns of the attendance import template, in order, with the sample
+     * rows that ship in it.
+     *
+     * The one definition of the file an admin downloads, mirroring
+     * `EmployeeRegistrationController::templateRows()` on the Personnel side.
+     * `AttendanceBulkImportTemplateTest` pins it: the header line is the one
+     * `bulkImport()` reads, the column order matches
+     * `docs/bulk_import_attendance_2026-09-14_week.csv`, and every sample row
+     * imports.
+     *
+     * **All four daytime punches are filled**, and that is the point of the
+     * sample rather than a flourish. The importer does not complete a day for
+     * you: `AttendanceComputationService::computeAccreditedHours()` accredits a
+     * session only from a matched pair (`if ($amIn && $amOut)`), so a row
+     * carrying `am_in` and `pm_out` alone — the tempting shorthand, since those
+     * are the two an employee actually clocks at the ends of the day — imports
+     * without complaint and accredits **zero minutes**, then reads "Incomplete"
+     * on the DTR. Auto-filling the lunch pair exists
+     * (`AttendanceExemption::resolveEffectivePunches()`) but only for an
+     * employee with an exemption configured. A sample that left the two midday
+     * cells blank would therefore be teaching the one shape that silently costs
+     * a day's pay.
+     *
+     * The two schedule shapes in the samples are the municipality's own: the
+     * 08:00–17:00 day and the 07:00–16:00 day. `ot_in`/`ot_out` are blank in
+     * three rows and filled in one, because overtime is genuinely optional and
+     * the file has to show both.
+     *
+     * The employee numbers are deliberately `EMP-2026-0001`-style — placeholder
+     * numbering, not a real roster. An admin who uploads this file unedited
+     * gets "Employee ID not found" rather than a week of invented attendance
+     * written over the real one, which is the only safe thing for a file whose
+     * purpose is to be a shape to copy.
+     *
+     * @return array<int, array<string, string>>
+     */
+    public static function templateRows(): array
+    {
+        return [
+            ['employee_id' => 'EMP-2026-0001', 'date' => '2026-05-04', 'am_in' => '08:00', 'am_out' => '12:00', 'pm_in' => '13:00', 'pm_out' => '17:00', 'ot_in' => '', 'ot_out' => ''],
+            ['employee_id' => 'EMP-2026-0001', 'date' => '2026-05-05', 'am_in' => '08:00', 'am_out' => '12:00', 'pm_in' => '13:00', 'pm_out' => '17:00', 'ot_in' => '17:30', 'ot_out' => '18:30'],
+            ['employee_id' => 'EMP-2026-0002', 'date' => '2026-05-04', 'am_in' => '07:00', 'am_out' => '12:00', 'pm_in' => '13:00', 'pm_out' => '16:00', 'ot_in' => '', 'ot_out' => ''],
+            ['employee_id' => 'EMP-2026-0002', 'date' => '2026-05-05', 'am_in' => '07:00', 'am_out' => '12:00', 'pm_in' => '13:00', 'pm_out' => '16:00', 'ot_in' => '', 'ot_out' => ''],
+        ];
+    }
+
+    /**
+     * The template as CSV text — exactly what the download serves.
+     *
+     * Split out of `downloadTemplate()` so it can be pinned without the test
+     * re-implementing `fputcsv`. The escape argument is passed explicitly as
+     * `''` for the same reason as the Personnel template: PHP's default
+     * backslash-escapes, and empty selects RFC 4180 quoting, which is what the
+     * reader in `bulkImport()` expects.
+     */
+    public static function templateCsv(): string
+    {
+        $handle = fopen('php://temp', 'r+');
+
+        $rows = self::templateRows();
+
+        // Header row from the keys of the first sample, so the columns and the
+        // values under them cannot be listed in two different orders.
+        fputcsv($handle, array_keys($rows[0]), ',', '"', '');
+
+        foreach ($rows as $row) {
+            fputcsv($handle, array_values($row), ',', '"', '');
+        }
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return $csv;
+    }
+
+    /**
+     * The attendance import template, as a CSV download.
+     *
+     * Generated here rather than in `bulkImportAttendance.js`, where it was a
+     * `Array.join(',')` — the same two faults the Personnel template had: a
+     * joined cell is not a CSV cell, and a template that exists only in the
+     * browser cannot be asserted against anything, so nothing stopped the
+     * columns here from drifting from the ones `bulkImport()` reads.
+     *
+     * The week file for a real roster is *not* produced here. A file naming
+     * every employee and every date of a week is a payroll document with real
+     * names in it; this endpoint is the reusable shape, with placeholder
+     * numbers. `docs/bulk_import_attendance_2026-09-14_week.csv` is that week's
+     * file, generated from the roster by the same column order.
+     */
+    public function downloadTemplate()
+    {
+        $csv = self::templateCsv();
+
+        return response($csv, 200, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename=Attendance_Import_Template.csv',
+            'Content-Length'      => (string) strlen($csv),
+        ]);
+    }
+
     public function bulkImport(Request $request)
     {
         $request->validate([

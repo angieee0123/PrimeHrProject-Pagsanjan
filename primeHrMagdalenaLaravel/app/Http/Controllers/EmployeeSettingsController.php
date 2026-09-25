@@ -24,9 +24,10 @@ class EmployeeSettingsController extends Controller
         $fullName = trim($employee->first_name . ' ' . $employee->last_name);
         $initials = strtoupper(substr($employee->first_name, 0, 1) . substr($employee->last_name, 0, 1));
         $contactNumber = optional($employee->contacts->firstWhere('type', 'mobile'))->number;
-        // All employment types except Job Order get the leave-and-benefits experience
-        $employmentStatus = $employee->employmentDetail?->employment_status;
-        $isPermanent = $employmentStatus !== null && $employmentStatus !== 'Job Order';
+        // All employment types except Job Order get the leave-and-benefits experience;
+        // the rule lives on the employment record so this page and the gate that
+        // guards /employee/leave cannot drift apart.
+        $isPermanent = $employee->hasLeaveAndBenefits();
 
         // Opt-out model: a user with no row yet has every category switched on.
         $preference = $user->notificationPreference;

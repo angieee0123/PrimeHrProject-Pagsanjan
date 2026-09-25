@@ -59,14 +59,14 @@ class AuthController extends Controller
             $userType = 'admin';
         } elseif ($user->hasRole('hr')) {
             $userType = 'hr';
-        } elseif ($user->employee && $user->employee->employmentDetail) {
-            $employmentStatus = $user->employee->employmentDetail->employment_status;
-
-            // All employment types except Job Order get the leave-and-benefits experience
-            if ($employmentStatus !== null && $employmentStatus !== 'Job Order') {
-                $userType = 'permanent';
-                $isPermanent = true;
-            }
+        } elseif ($user->employee?->hasLeaveAndBenefits()) {
+            // All employment types except Job Order get the leave-and-benefits
+            // experience. The rule lives on the employment record
+            // (EmploymentDetail::hasLeaveAndBenefits()), so the mobile client's
+            // `is_permanent` flag and the web gate on /employee/leave agree on
+            // who is entitled.
+            $userType = 'permanent';
+            $isPermanent = true;
         }
 
         // Fallback for the legacy hardcoded permanent test account
@@ -204,14 +204,14 @@ class AuthController extends Controller
             $userType = 'admin';
         } elseif ($user->hasRole('hr')) {
             $userType = 'hr';
-        } elseif ($user->employee && $user->employee->employmentDetail) {
-            $employmentStatus = $user->employee->employmentDetail->employment_status;
-
-            // All employment types except Job Order get the leave-and-benefits experience
-            if ($employmentStatus !== null && $employmentStatus !== 'Job Order') {
-                $userType = 'permanent';
-                $isPermanent = true;
-            }
+        } elseif ($user->employee?->hasLeaveAndBenefits()) {
+            // All employment types except Job Order get the leave-and-benefits
+            // experience. The rule lives on the employment record
+            // (EmploymentDetail::hasLeaveAndBenefits()), so the mobile client's
+            // `is_permanent` flag and the web gate on /employee/leave agree on
+            // who is entitled.
+            $userType = 'permanent';
+            $isPermanent = true;
         }
 
         if (!$isPermanent && $user->email === 'permanent@gmail.com') {

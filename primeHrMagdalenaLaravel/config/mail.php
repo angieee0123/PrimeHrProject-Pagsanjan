@@ -45,7 +45,17 @@ return [
             'port' => env('MAIL_PORT', 2525),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
-            'timeout' => null,
+            // Seconds to wait on the SMTP socket itself. Left null, Symfony's
+            // default (default_socket_timeout, 60s) applies and a server that
+            // accepts the connection but never answers — which is what a
+            // blackholed outbound port or a throttling relay looks like —
+            // blocks the worker until PHP's own execution limit fires *inside*
+            // the socket read. That limit is a fatal `\Error`, not an
+            // \Exception, so it sails past every `catch (\Exception)` on the
+            // way out and takes the whole request with it: employees committed,
+            // emails half-sent, no response. Fifteen seconds is generous for a
+            // conversation that normally completes in two.
+            'timeout' => env('MAIL_TIMEOUT', 15),
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 

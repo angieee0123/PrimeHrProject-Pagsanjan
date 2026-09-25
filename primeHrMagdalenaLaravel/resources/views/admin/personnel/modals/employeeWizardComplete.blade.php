@@ -72,7 +72,7 @@
         </div>
 
         <!-- Form Content -->
-        <form id="employeeWizardForm" action="{{ route('admin.personnel.store') }}" data-store-action="{{ route('admin.personnel.store') }}" method="POST" enctype="multipart/form-data" class="wizard-form">
+        <form id="employeeWizardForm" action="{{ route('admin.personnel.store') }}" data-store-action="{{ route('admin.personnel.store') }}" data-check-availability-url="{{ route('admin.personnel.check-availability') }}" method="POST" enctype="multipart/form-data" class="wizard-form">
             @csrf
             <input type="hidden" id="wizardEditId" name="_edit_id" value="">
 
@@ -81,8 +81,17 @@
                 <h4 class="wizard-section-title"><svg class="wizard-section-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Personal Information</span></h4>
                 <div class="wizard-grid-2">
                     <div>
-                        <label class="wizard-label-text">Employee ID * <span style="color:var(--gp-pri); font-size:11px;">(UNIQUE)</span></label>
-                        <input type="text" name="employee_id" placeholder="e.g. PGS-0001" maxlength="255" class="wizard-input">
+                        {{-- No Employee ID input: the number is minted on save by
+                             Employee::generateEmployeeId(), so there is nothing for
+                             the admin to type or to get wrong. The line states the
+                             format from the model's own constants. --}}
+                        <label class="wizard-label-text">Employee ID</label>
+                        <p class="wizard-hint">
+                            <span id="wizardEmployeeIdNoteText"
+                                  data-default="Assigned automatically when saved — {{ \App\Models\Employee::employeeIdPreview() }}">
+                                Assigned automatically when saved — <strong>{{ \App\Models\Employee::employeeIdPreview() }}</strong>
+                            </span>
+                        </p>
                     </div>
                     <div></div>
                 </div>
@@ -189,12 +198,12 @@
                     </div>
                     <div class="wizard-field">
                         <label class="wizard-label-text">Username * <span style="color:var(--gp-pri); font-size:11px;">(UNIQUE)</span></label>
-                        <input type="text" name="username" placeholder="e.g. santosjuan" maxlength="255" class="wizard-input">
+                        <input type="text" name="username" placeholder="e.g. santosjuan" maxlength="255" class="wizard-input" onblur="checkWizardFieldAvailable(this)">
                         <p class="wizard-hint">Auto-filled from Last Name + First Name — edit if you'd like a different one.</p>
                     </div>
                     <div class="wizard-field">
                         <label class="wizard-label-text">Email * <span style="color:var(--gp-pri); font-size:11px;">(UNIQUE)</span></label>
-                        <input type="email" name="user_email" placeholder="maria.santos@example.com" maxlength="255" class="wizard-input">
+                        <input type="email" name="user_email" placeholder="maria.santos@example.com" maxlength="255" class="wizard-input" onblur="checkWizardFieldAvailable(this)">
                         <p class="wizard-hint">Must be a valid email address — the verification link and the generated password are both sent here.</p>
                     </div>
                     {{-- The admin does not choose the password, so there is no

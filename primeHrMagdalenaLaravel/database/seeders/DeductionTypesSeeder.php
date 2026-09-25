@@ -9,112 +9,203 @@ class DeductionTypesSeeder extends Seeder
 {
     public function run(): void
     {
-        // Insert Deduction Types
+        /*
+        |--------------------------------------------------------------------------
+        | Deduction Types
+        |--------------------------------------------------------------------------
+        */
+
         $deductionTypes = [
             [
-                'code' => 'GSIS',
-                'name' => 'GSIS Contribution',
-                'category' => 'MANDATORY',
-                'computation_type' => 'PERCENTAGE',
-                'percentage_rate' => 9.00,
-                'base_salary_type' => 'BASIC',
-                'max_amount' => null,
-                'is_active' => true,
-            ],
-            [
-                'code' => 'PHILHEALTH',
-                'name' => 'PhilHealth Contribution',
+                'code' => 'PhilHeath PS',
+                'name' => 'PhilHealth Personal Share',
                 'category' => 'MANDATORY',
                 'computation_type' => 'PERCENTAGE',
                 'percentage_rate' => 2.50,
-                'base_salary_type' => 'BASIC',
+                'base_salary_type' => null,
                 'max_amount' => null,
                 'is_active' => true,
+                'deducted_from_employee' => true,
             ],
+
             [
-                'code' => 'PAGIBIG',
-                'name' => 'Pag-IBIG Contribution',
+                'code' => 'PhilHeath GS',
+                'name' => 'PhilHealth Government Share',
+                'category' => 'MANDATORY',
+                'computation_type' => 'PERCENTAGE',
+                'percentage_rate' => 2.50,
+                'base_salary_type' => null,
+                'max_amount' => null,
+                'is_active' => true,
+                'deducted_from_employee' => false,
+            ],
+
+            [
+                'code' => 'GSIS PS',
+                'name' => 'GSIS Personal Share',
+                'category' => 'MANDATORY',
+                'computation_type' => 'PERCENTAGE',
+                'percentage_rate' => 9.00,
+                'base_salary_type' => null,
+                'max_amount' => null,
+                'is_active' => true,
+                'deducted_from_employee' => true,
+            ],
+
+            [
+                'code' => 'GSIS GS',
+                'name' => 'GSIS Government Share',
+                'category' => 'MANDATORY',
+                'computation_type' => 'PERCENTAGE',
+                'percentage_rate' => 12.00,
+                'base_salary_type' => null,
+                'max_amount' => null,
+                'is_active' => true,
+                'deducted_from_employee' => false,
+            ],
+
+            [
+                'code' => 'GSIS-SI',
+                'name' => 'GSIS State Insurance',
+                'category' => 'MANDATORY',
+                'computation_type' => 'FIXED',
+                'percentage_rate' => null,
+                'base_salary_type' => null,
+                'max_amount' => 100.00,
+                'is_active' => true,
+                'deducted_from_employee' => true,
+            ],
+
+            [
+                'code' => 'PAG-IBIG PS',
+                'name' => 'PAG-IBIG PERSONAL SHARE',
                 'category' => 'MANDATORY',
                 'computation_type' => 'PERCENTAGE',
                 'percentage_rate' => 2.00,
-                'base_salary_type' => 'BASIC',
-                'max_amount' => 100.00,
+                'base_salary_type' => null,
+                'max_amount' => null,
                 'is_active' => true,
+                'deducted_from_employee' => true,
             ],
+
             [
-                'code' => 'WTAX',
-                'name' => 'Withholding Tax',
+                'code' => 'PAG-IBIG GS',
+                'name' => 'PAG-IBIG GOVERNMENT SHARE',
                 'category' => 'MANDATORY',
-                'computation_type' => 'CUSTOM',
-                'percentage_rate' => null,
-                'base_salary_type' => 'CUSTOM',
+                'computation_type' => 'PERCENTAGE',
+                'percentage_rate' => 2.00,
+                'base_salary_type' => null,
                 'max_amount' => null,
                 'is_active' => true,
+                'deducted_from_employee' => false,
             ],
+
             [
-                'code' => 'LOAN_GSIS_SALARY',
-                'name' => 'GSIS Salary Loan',
+                'code' => 'LOAN_GSIS_EMERGENCY_LOAN',
+                'name' => 'GSIS EMERGENCY LOAN - Emergency Loan',
                 'category' => 'LOAN',
                 'computation_type' => 'FIXED',
                 'percentage_rate' => null,
                 'base_salary_type' => null,
                 'max_amount' => null,
                 'is_active' => true,
+                'deducted_from_employee' => true,
             ],
+
             [
-                'code' => 'LOAN_GSIS_POLICY',
-                'name' => 'GSIS Policy Loan',
+                'code' => 'LOAN_gsis EL',
+                'name' => 'Emergency Loan',
                 'category' => 'LOAN',
                 'computation_type' => 'FIXED',
                 'percentage_rate' => null,
                 'base_salary_type' => null,
                 'max_amount' => null,
                 'is_active' => true,
+                'deducted_from_employee' => true,
             ],
+
             [
-                'code' => 'LOAN_PAGIBIG_MPL',
-                'name' => 'Pag-IBIG Multi-Purpose Loan',
+                'code' => 'LOAN_MPL',
+                'name' => 'MP LOAN',
                 'category' => 'LOAN',
                 'computation_type' => 'FIXED',
                 'percentage_rate' => null,
                 'base_salary_type' => null,
                 'max_amount' => null,
                 'is_active' => true,
-            ],
-            [
-                'code' => 'LOAN_PAGIBIG_HOUSING',
-                'name' => 'Pag-IBIG Housing Loan',
-                'category' => 'LOAN',
-                'computation_type' => 'FIXED',
-                'percentage_rate' => null,
-                'base_salary_type' => null,
-                'max_amount' => null,
-                'is_active' => true,
+                'deducted_from_employee' => true,
             ],
         ];
 
+        /*
+        |--------------------------------------------------------------------------
+        | Insert / Update Deduction Types
+        |--------------------------------------------------------------------------
+        */
+
         foreach ($deductionTypes as $type) {
-            DB::table('deduction_types')->insert(array_merge($type, [
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]));
+            DB::table('deduction_types')->updateOrInsert(
+                [
+                    'code' => $type['code'],
+                ],
+                array_merge($type, [
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ])
+            );
         }
 
-        // Insert Default Deduction Schedules
+        /*
+        |--------------------------------------------------------------------------
+        | Default Deduction Schedules
+        |--------------------------------------------------------------------------
+        |
+        | We look up the deduction type ID by its code instead of
+        | hardcoding IDs.
+        |
+        */
+
         $schedules = [
-            ['deduction_type_id' => 1, 'cutoff_schedule' => '1ST_ONLY', 'priority_order' => 1], // GSIS
-            ['deduction_type_id' => 2, 'cutoff_schedule' => '1ST_ONLY', 'priority_order' => 2], // PhilHealth
-            ['deduction_type_id' => 3, 'cutoff_schedule' => '2ND_ONLY', 'priority_order' => 3], // Pag-IBIG
-            ['deduction_type_id' => 4, 'cutoff_schedule' => 'BOTH_SPLIT', 'priority_order' => 4], // Withholding Tax
+            [
+                'code' => 'GSIS PS',
+                'cutoff_schedule' => '1ST_ONLY',
+                'priority_order' => 1,
+            ],
+
+            [
+                'code' => 'PhilHeath PS',
+                'cutoff_schedule' => '1ST_ONLY',
+                'priority_order' => 2,
+            ],
+
+            [
+                'code' => 'PAG-IBIG PS',
+                'cutoff_schedule' => '2ND_ONLY',
+                'priority_order' => 3,
+            ],
         ];
 
         foreach ($schedules as $schedule) {
-            DB::table('deduction_schedules')->insert(array_merge($schedule, [
-                'is_active' => true,
-                'effective_date' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]));
+            $deductionTypeId = DB::table('deduction_types')
+                ->where('code', $schedule['code'])
+                ->value('id');
+
+            if (!$deductionTypeId) {
+                continue;
+            }
+
+            DB::table('deduction_schedules')->updateOrInsert(
+                [
+                    'deduction_type_id' => $deductionTypeId,
+                ],
+                [
+                    'cutoff_schedule' => $schedule['cutoff_schedule'],
+                    'priority_order' => $schedule['priority_order'],
+                    'is_active' => true,
+                    'effective_date' => now(),
+                    'updated_at' => now(),
+                ]
+            );
         }
     }
 }

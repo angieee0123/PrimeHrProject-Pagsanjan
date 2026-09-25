@@ -140,22 +140,26 @@ Route::get('/employee/payslip', [\App\Http\Controllers\EmployeePayslipController
 Route::get('/employee/payslip/export', [\App\Http\Controllers\EmployeePayslipController::class, 'export'])->middleware('auth')->name('employee.payslip.export');
 Route::get('/employee/payslip/{id}/details', [\App\Http\Controllers\EmployeePayslipController::class, 'getPayslipDetails'])->middleware('auth')->name('employee.payslip.details');
 
-Route::get('/employee/leave', [EmployeeLeaveBalanceController::class, 'show'])->middleware('auth')->name('employee.leave');
+// Leave & Benefits is a plantilla entitlement, so the page and every endpoint
+// its own tabs call carry `leave.eligible` (see
+// EnsureLeaveAndBenefitsEligible). The rail already hid the link from a Job
+// Order; that was the only thing standing between one and this page.
+Route::get('/employee/leave', [EmployeeLeaveBalanceController::class, 'show'])->middleware(['auth', 'leave.eligible'])->name('employee.leave');
 
 // Leave Application Routes
-Route::post('/leave/store', [LeaveController::class, 'store'])->middleware('auth')->name('leave.store');
-Route::post('/leave/{id}/cancel', [LeaveController::class, 'cancel'])->middleware('auth')->name('leave.cancel');
+Route::post('/leave/store', [LeaveController::class, 'store'])->middleware(['auth', 'leave.eligible'])->name('leave.store');
+Route::post('/leave/{id}/cancel', [LeaveController::class, 'cancel'])->middleware(['auth', 'leave.eligible'])->name('leave.cancel');
 
 // Monetization Request Routes — filed from the employee's My Monetization tab.
-Route::post('/employee/monetization', [\App\Http\Controllers\MonetizationRequestController::class, 'store'])->middleware('auth')->name('monetization.store');
-Route::get('/employee/monetization/{id}', [\App\Http\Controllers\MonetizationRequestController::class, 'show'])->middleware('auth')->name('monetization.show');
-Route::post('/employee/monetization/{id}/cancel', [\App\Http\Controllers\MonetizationRequestController::class, 'cancel'])->middleware('auth')->name('monetization.cancel');
+Route::post('/employee/monetization', [\App\Http\Controllers\MonetizationRequestController::class, 'store'])->middleware(['auth', 'leave.eligible'])->name('monetization.store');
+Route::get('/employee/monetization/{id}', [\App\Http\Controllers\MonetizationRequestController::class, 'show'])->middleware(['auth', 'leave.eligible'])->name('monetization.show');
+Route::post('/employee/monetization/{id}/cancel', [\App\Http\Controllers\MonetizationRequestController::class, 'cancel'])->middleware(['auth', 'leave.eligible'])->name('monetization.cancel');
 // Print Sheet: the office's Monetization form as a PDF. Two routes for one
 // document because the controller reads routeIs() — print streams it into the
 // browser's viewer, download sends it as a file. Same pair as the Travel
 // Order, the Pass Slip and the printed DTR. Scoped to the caller's own record.
-Route::get('/employee/monetization/{id}/print-form', [\App\Http\Controllers\MonetizationRequestController::class, 'generateOwnForm'])->middleware('auth')->name('monetization.print-form');
-Route::get('/employee/monetization/{id}/download-form', [\App\Http\Controllers\MonetizationRequestController::class, 'generateOwnForm'])->middleware('auth')->name('monetization.download-form');
+Route::get('/employee/monetization/{id}/print-form', [\App\Http\Controllers\MonetizationRequestController::class, 'generateOwnForm'])->middleware(['auth', 'leave.eligible'])->name('monetization.print-form');
+Route::get('/employee/monetization/{id}/download-form', [\App\Http\Controllers\MonetizationRequestController::class, 'generateOwnForm'])->middleware(['auth', 'leave.eligible'])->name('monetization.download-form');
 
 // Busy dates for the File Leave / File Travel Order calendars: the logged-in
 // employee's own leave and travel date ranges, so the pickers can mark them.
@@ -260,6 +264,11 @@ Route::get('/admin/personnel', function () {
 
 Route::post('/admin/personnel', [EmployeeRegistrationController::class, 'store'])->middleware('auth')->name('admin.personnel.store');
 Route::post('/admin/personnel/bulk-import', [EmployeeRegistrationController::class, 'bulkImport'])->middleware('auth')->name('admin.personnel.bulk-import');
+// The file the modal's "Download CSV Template" button fetches. Server-side
+// rather than a JavaScript array so the columns are written by fputcsv (a
+// department name containing a comma used to shift every column after it) and
+// so BulkImportTest can assert the download against the documented example.
+Route::get('/admin/personnel/bulk-import/template', [EmployeeRegistrationController::class, 'downloadTemplate'])->middleware('auth')->name('admin.personnel.bulk-import.template');
 Route::post('/admin/personnel/government-ids/extract', [\App\Http\Controllers\GovernmentIdOcrController::class, 'extract'])->middleware('auth')->name('admin.personnel.government-ids.extract');
 
 // Declared above the parameterised `/admin/personnel/{id}` route below: routes
@@ -334,7 +343,15 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
     // so anything the picker could be talked into offering was written to the
     // public disk.
     $request->validate(
-        ['photo' => ['nullable', 'image', 'max:' . \App\Services\UploadLimits::perFileKb(5120)]]
+        [
+            'photo' => ['nullable', 'image', 'max:' . \App\Services\UploadLimits::perFileKb(5120)],
+            // employment_status is nullable here even though registration
+            // requires it: rows predating the field hold NULL, and an edit that
+            // does not touch employment details must not be refused. A blank
+            // value never reaches the column — see the guard below.
+            'employment_status' => ['nullable', 'in:' . implode(',', \App\Models\EmploymentDetail::EMPLOYMENT_TYPES)],
+            'appointment_date' => ['nullable', 'date'],
+        ]
             + \App\Models\GovernmentId::rules()
             + \App\Models\EmployeeSupportingDocument::rules(),
         [],
@@ -378,14 +395,27 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
     $employee->update($updateData);
 
     if ($employee->employmentDetail) {
-        $employee->employmentDetail->update([
-            'designation_id'    => $request->designation_id,
-            'department_id'     => $request->department,
-            'employment_status' => $request->employment_status,
-            'appointment_date'  => $request->appointment_date,
-            'salary_grade'      => $request->salary_grade,
-            'step_increment'    => $request->step_increment,
-        ]);
+        $detailUpdate = [
+            'designation_id'   => $request->designation_id,
+            'department_id'    => $request->department,
+            'appointment_date' => $request->appointment_date,
+            'salary_grade'     => $request->salary_grade,
+            'step_increment'   => $request->step_increment,
+        ];
+
+        // A blank employment_status is never written. It is not an edit the
+        // admin can intend — the wizard auto-fills the field and it is the only
+        // place the value is maintained — but it is exactly what a form posting
+        // nothing (or a designation carrying no employment_type, which used to
+        // blank the input) submits. Writing it dropped the employee off the
+        // permanent roster and out of every employment_status count in the
+        // reports, silently. Clearing a status deliberately is therefore not
+        // supported: pick a type, or leave the record's own alone.
+        if ($request->filled('employment_status')) {
+            $detailUpdate['employment_status'] = $request->employment_status;
+        }
+
+        $employee->employmentDetail->update($detailUpdate);
     }
 
     $mobile    = $employee->contacts->firstWhere('type', 'mobile');
@@ -469,11 +499,29 @@ Route::post('/admin/personnel/{id}/update', function (\Illuminate\Http\Request $
     return redirect()->route('admin.personnel')->with('success', "Employee {$employee->first_name} {$employee->last_name} updated successfully!");
 })->middleware('auth')->name('admin.personnel.update');
 
+// Is this username / email already taken? The wizard asks as the admin leaves
+// the account-step field, so the conflict is named while they are still on the
+// box — and blocked before Next, instead of surfacing after six steps as a
+// modal. `unique:` in EmployeeRegistrationController::store() is still what
+// enforces it. Declared before the `{id}` show route below (routes match in
+// declaration order, and "check-availability" would otherwise resolve to
+// show('check-availability') → 404); throttled because it answers a
+// username-exists question and is called on every blur.
+Route::get('/admin/personnel/check-availability', [EmployeeRegistrationController::class, 'usernameEmailAvailable'])
+    ->middleware(['auth', 'throttle:60,1'])
+    ->name('admin.personnel.check-availability');
+
 Route::get('/admin/personnel/{id}', function ($id) {
-    $employee = \App\Models\Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'addresses', 'contacts', 'governmentIds'])
+    $employee = \App\Models\Employee::with(['employmentDetail.departmentRelation', 'employmentDetail.designationRelation', 'addresses', 'contacts', 'governmentIds', 'supportingDocuments'])
         ->findOrFail($id);
 
-    return response()->json($employee);
+    $data = $employee->toArray();
+    // Expose the 201 file under both keys: toArray() snake_cases the
+    // relation, while the modal reads the camelCase key.
+    $data['supporting_documents'] = $employee->supportingDocuments;
+    $data['supportingDocuments'] = $employee->supportingDocuments;
+
+    return response()->json($data);
 })->middleware('auth')->name('admin.personnel.show');
 
 Route::get('/admin/training', [\App\Http\Controllers\TrainingController::class, 'index'])->middleware('auth')->name('admin.training');
@@ -494,6 +542,11 @@ Route::get('/admin/performance', function () {
 // whole point of the move was that there is one attendance terminal.
 
 Route::get('/admin/attendance', [AttendanceController::class, 'index'])->middleware('auth')->name('admin.attendance');
+// The file the Bulk Import modal's "Download CSV Template" button fetches.
+// Declared with the other literal segments below, and for the same reason: it
+// has to precede `/admin/attendance/{attendanceId}/…` or `bulk-import` would
+// be read as an attendance id.
+Route::get('/admin/attendance/bulk-import/template', [AttendanceController::class, 'downloadTemplate'])->middleware('auth')->name('admin.attendance.bulk-import.template');
 // "Export" on the Attendance page toolbar -> the Attendance Summary tab.
 // Same rule as the two below: a literal segment before any `{employeeId}`.
 Route::get('/admin/attendance/summary-export', [AttendanceController::class, 'exportSummary'])->middleware('auth')->name('admin.attendance.summary.export');

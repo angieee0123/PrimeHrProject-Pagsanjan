@@ -72,11 +72,84 @@
     flex: 1;
 }
 
+/* Email under Employment Details: long addresses must wrap instead of
+   pushing the two-column grid wider than the modal. */
+.view-employment-email {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* 201 File — Supporting Documents (rendered by supportingDocsSection() in
+   viewEmployeeModal.js from the employee's EmployeeSupportingDocument row). */
+.view-supporting-doc-group {
+    margin-bottom: 16px;
+}
+.view-supporting-doc-group:last-child {
+    margin-bottom: 0;
+}
+
+.view-supporting-doc-group-title {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gp-pri-2);
+}
+
+.view-supporting-doc {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--theme-primary-light);
+    border-radius: 10px;
+}
+
+.view-supporting-doc-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gp-pri);
+}
+
+.view-supporting-doc-link {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gp-pri-2);
+    white-space: nowrap;
+}
+.view-supporting-doc-link:hover {
+    text-decoration: underline;
+}
+
+.view-supporting-doc-missing {
+    border-style: dashed;
+}
+
+.view-supporting-doc-empty {
+    font-size: 12px;
+    font-style: italic;
+    color: var(--gp-text-soft);
+    white-space: nowrap;
+}
+
+.view-supporting-docs-none {
+    margin: 0;
+    font-size: 13px;
+    color: var(--gp-text-soft);
+}
+
 /* Stack the two-column detail grids on small screens. The grids are inline-styled
    by generateEmployeeView(), so !important is needed to win over them. */
 @media (max-width: 768px) {
     #viewEmployeeContent > div,
     #viewEmployeeContent > div > div {
         grid-template-columns: 1fr !important;
+    }
+
+    .view-supporting-doc {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
     }
 }
