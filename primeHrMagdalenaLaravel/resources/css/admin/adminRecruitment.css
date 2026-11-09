@@ -22,7 +22,10 @@
 
 /* Job card */
 .job-card {
-    background: #fff;
+    /* Was a literal #fff. The card sits inside a glass section now, so a solid
+       white tile punches a hole in it — this is the same translucent surface
+       the stat cards use. */
+    background: rgba(255, 255, 255, .55);
     border: 1.5px solid var(--gp-border);
     border-radius: 14px;
     padding: 20px;
@@ -30,6 +33,9 @@
     transition: all 0.25s ease;
     position: relative;
     overflow: hidden;
+    display: block;
+    text-decoration: none;
+    color: inherit;
 }
 .job-card::before {
     content: '';
@@ -62,9 +68,12 @@
 .job-slot-badge {
     width: 44px; height: 44px;
     border-radius: 10px;
-    background: linear-gradient(135deg, var(--gp-good) 0%, #22c55e 100%);
+    /* The gradient ended on a literal green; the semantic success hue is the
+       same colour under every palette and is what the rest of the module uses
+       for "open". */
+    background: var(--gp-good);
     display: flex; align-items: center; justify-content: center;
-    color: #fff; font-size: 18px; font-weight: 700;
+    color: var(--theme-on-primary); font-size: 18px; font-weight: 700;
     flex-shrink: 0;
 }
 
@@ -137,4 +146,296 @@
     .job-actions { gap: 8px; }
     .job-actions .btn-view,
     .job-actions .btn-edit { flex: 1; justify-content: center; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Hiring module — the pages backed by the FastAPI recruitment service
+   (docs/hiring-backend-integration.md).
+
+   Layout only. Every colour below is a theme variable, because this module
+   renders inside the same palette as the rest of the admin area and a
+   hard-coded hue would stop following Settings → Appearance. The one set of
+   colours it deliberately does not own is the status badge: those live in
+   statusBadge.css and mean the same thing everywhere in the application.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Flash messages ── */
+.hire-flash {
+    display: flex; gap: 10px; align-items: flex-start;
+    margin-bottom: 16px; padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px; line-height: 1.5;
+}
+.hire-flash ul { margin: 6px 0 0 18px; padding: 0; }
+.hire-flash li + li { margin-top: 2px; }
+.hire-flash.is-success {
+    background: var(--theme-success-subtle);
+    border: 1px solid var(--theme-success-border);
+    color: var(--theme-success-emphasis);
+}
+.hire-flash.is-error {
+    background: var(--theme-danger-subtle);
+    border: 1px solid var(--theme-danger-border);
+    color: var(--theme-danger-emphasis);
+}
+
+/* ── Tabs ── */
+.hire-tabs { flex-wrap: wrap; }
+.hire-tab-count {
+    margin-left: 2px; padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(var(--theme-primary-rgb), .10);
+    color: var(--gp-pri);
+    font-size: 10.5px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.hire-tabs .tab-link.active .hire-tab-count {
+    background: rgba(255, 255, 255, .20);
+    color: var(--theme-on-primary);
+}
+
+/* ── "The hiring service is not answering" ── */
+.hire-unavailable {
+    display: flex; gap: 16px;
+    padding: 22px; margin-bottom: 18px;
+    border-radius: 14px;
+    border: 1px solid var(--gp-glass-border);
+    background: linear-gradient(180deg, var(--gp-glass-strong), var(--gp-glass));
+}
+.hire-unavailable-icon {
+    width: 44px; height: 44px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: var(--theme-warning-subtle);
+    color: var(--theme-warning-emphasis);
+}
+.hire-unavailable-title { margin: 0 0 4px; font-size: 15px; font-weight: 700; color: var(--gp-ink); }
+.hire-unavailable-text { margin: 0; font-size: 13px; color: var(--gp-text-mid); line-height: 1.55; }
+.hire-unavailable-note { margin: 8px 0 0; font-size: 12.5px; color: var(--gp-text-soft); line-height: 1.6; }
+.hire-unavailable code {
+    padding: 1px 5px; border-radius: 5px;
+    background: var(--gp-bg-tint-2);
+    font-size: 11.5px;
+}
+.hire-unavailable .btn-export { margin-top: 14px; }
+
+/* A section that failed while the page itself loaded. */
+.hire-degraded {
+    display: flex; gap: 8px; align-items: center;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--gp-border);
+    background: var(--theme-warning-subtle);
+    color: var(--theme-warning-emphasis);
+    font-size: 12.5px;
+}
+
+/* ── Page furniture ── */
+.hire-section-body { padding: 18px; }
+.hire-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+.hire-toolbar-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.hire-search {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .55);
+    border: 1px solid var(--gp-border);
+}
+.hire-search svg { color: var(--gp-text-soft); flex-shrink: 0; }
+.hire-search input {
+    width: 220px;
+    padding: 9px 0;
+    border: 0; background: transparent; outline: none;
+    font-family: inherit; font-size: 12.5px;
+    color: var(--gp-text-mid);
+}
+
+/* ── Facts (the QS panel) ── */
+.hire-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px 24px;
+}
+.hire-fact.is-wide { grid-column: 1 / -1; }
+.hire-fact-label {
+    margin: 0 0 3px;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: .35px; text-transform: uppercase;
+    color: var(--gp-text-soft);
+}
+.hire-fact-value { margin: 0; font-size: 13px; font-weight: 600; color: var(--gp-ink); line-height: 1.45; }
+.hire-fact-value.is-soft { font-weight: 500; color: var(--gp-text-mid); }
+.hire-fact .hire-chips,
+.hire-fact .hire-facts { margin-top: 6px; }
+.hire-facts.is-tight { gap: 10px 24px; }
+
+/* ── An inline advisory (a terminal status, a section that is simply done) ── */
+.hire-notice {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    padding: 12px 16px; margin-bottom: 18px;
+    border-radius: 12px;
+    border: 1px solid var(--gp-border);
+    background: var(--gp-bg-tint);
+    color: var(--gp-text-mid);
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+.hire-notice strong { color: var(--gp-ink); font-weight: 700; }
+
+/* ── A ranking explanation, folded away until asked for ── */
+.hire-why summary { cursor: pointer; font-size: 11.5px; font-weight: 600; color: var(--gp-pri); }
+.hire-why p { margin: 6px 0 0; font-size: 12px; line-height: 1.5; color: var(--gp-text-mid); max-width: 420px; }
+
+/* ── Chips ── */
+.hire-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.hire-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(var(--theme-primary-rgb), .08);
+    color: var(--gp-pri);
+    font-size: 11px; font-weight: 600;
+}
+.hire-chip b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.hire-chip.is-muted { background: var(--gp-bg-tint-2); color: var(--gp-text-mid); }
+
+/* ── Fit score ── */
+.hire-score {
+    display: inline-flex; align-items: baseline; gap: 4px;
+    font-weight: 800; color: var(--gp-pri);
+    font-variant-numeric: tabular-nums;
+}
+.hire-score small { font-size: 10px; font-weight: 600; color: var(--gp-text-soft); }
+
+/* ── Fit-score distribution bars ── */
+.hire-bars { display: grid; gap: 12px; }
+.hire-bar-row {
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr) 46px;
+    align-items: center; gap: 12px;
+    font-size: 12px; color: var(--gp-text-mid);
+}
+.hire-bar-track { height: 8px; border-radius: 999px; background: var(--gp-bg-tint-2); overflow: hidden; }
+.hire-bar-fill { height: 100%; border-radius: 999px; background: var(--theme-success); }
+.hire-bar-fill.is-warning { background: var(--theme-warning); }
+.hire-bar-fill.is-danger { background: var(--theme-danger); }
+.hire-bar-value { text-align: right; font-weight: 700; color: var(--gp-ink); font-variant-numeric: tabular-nums; }
+
+/* ── Recent activity ── */
+.hire-activity { list-style: none; margin: 0; padding: 0; }
+.hire-activity li {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 11px 18px;
+    border-bottom: 1px solid var(--gp-border);
+}
+.hire-activity li:last-child { border-bottom: 0; }
+.hire-activity-dot {
+    width: 7px; height: 7px; margin-top: 5px;
+    border-radius: 50%;
+    background: var(--gp-pri);
+    flex-shrink: 0;
+}
+.hire-activity-body { font-size: 12.5px; color: var(--gp-text-mid); line-height: 1.45; }
+.hire-activity-body strong { font-weight: 600; color: var(--gp-ink); }
+.hire-activity-time { display: block; margin-top: 2px; font-size: 11px; color: var(--gp-text-soft); }
+
+/* ── Lifecycle actions ──
+   <details> rather than modals: each transition carries two or three fields at
+   most, and a disclosure needs no JavaScript, works without it, and cannot
+   leave a half-filled modal on screen after a validation redirect. */
+.hire-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 14px;
+}
+.hire-panel {
+    border: 1px solid var(--gp-border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .5);
+    overflow: hidden;
+}
+.hire-panel > summary {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    list-style: none;
+    font-size: 12.5px; font-weight: 700;
+    color: var(--gp-pri);
+}
+.hire-panel > summary::-webkit-details-marker { display: none; }
+.hire-panel > summary::after {
+    content: '+';
+    margin-left: auto;
+    font-size: 15px; font-weight: 600;
+    color: var(--gp-text-soft);
+}
+.hire-panel[open] > summary::after { content: '−'; }
+.hire-panel[open] > summary { border-bottom: 1px solid var(--gp-border); }
+.hire-panel-body { display: grid; gap: 10px; padding: 14px 16px 16px; }
+.hire-panel-body p { margin: 0; font-size: 12px; color: var(--gp-text-soft); line-height: 1.5; }
+.hire-panel.is-danger { border-color: var(--theme-danger-border); }
+.hire-panel.is-danger > summary { color: var(--theme-danger-emphasis); }
+
+/* ── Forms ── */
+.hire-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px;
+}
+.hire-field { display: flex; flex-direction: column; gap: 6px; }
+.hire-field.is-wide { grid-column: 1 / -1; }
+.hire-label { font-size: 12px; font-weight: 700; color: var(--gp-text-mid); }
+.hire-required { color: var(--theme-danger-emphasis); }
+.hire-hint { font-size: 11.5px; color: var(--gp-text-soft); line-height: 1.45; }
+.hire-input, .hire-select, .hire-textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--gp-border);
+    background: rgba(255, 255, 255, .7);
+    color: var(--gp-ink);
+    font-family: inherit; font-size: 13px;
+}
+.hire-input:focus, .hire-select:focus, .hire-textarea:focus {
+    outline: none;
+    border-color: var(--gp-pri);
+    box-shadow: 0 0 0 3px var(--theme-focus-ring);
+}
+.hire-textarea { min-height: 92px; resize: vertical; }
+.hire-form-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 18px; }
+.hire-form-note { margin-top: 12px; }
+
+/* ── Tables ── */
+.hire-scroll { max-height: 640px; overflow: auto; }
+.hire-title-cell { display: flex; flex-direction: column; gap: 2px; }
+.hire-title-cell strong { font-size: 13px; font-weight: 700; color: var(--gp-pri); }
+.hire-title-cell span { font-size: 11.5px; color: var(--gp-text-soft); }
+.hire-muted { color: var(--gp-text-soft); }
+.hire-nowrap { white-space: nowrap; }
+.hire-num { font-variant-numeric: tabular-nums; }
+.hire-center { text-align: center; }
+.hire-row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ── Two-column page layout ── */
+.hire-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+    gap: 18px;
+    align-items: start;
+}
+
+@media (max-width: 1200px) {
+    .hire-split { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+    .hire-bar-row { grid-template-columns: 90px minmax(0, 1fr) 40px; font-size: 11.5px; }
+    .hire-search input { width: 130px; }
+    .hire-unavailable { flex-direction: column; }
+    .hire-facts { grid-template-columns: 1fr; }
+    .hire-form-actions .btn-solid,
+    .hire-form-actions .btn-ghost { flex: 1; justify-content: center; }
 }

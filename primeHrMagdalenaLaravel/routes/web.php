@@ -242,9 +242,56 @@ Route::post('/employee/passslip', [PassSlipController::class, 'store'])->middlew
 Route::get('/employee/passslip/{id}', [PassSlipController::class, 'show'])->middleware('auth')->name('passslip.show');
 Route::delete('/employee/passslip/{id}', [PassSlipController::class, 'destroy'])->middleware('auth')->name('passslip.delete');
 
-Route::get('/admin/recruitment', function () {
-    return view('admin.recruitment.adminRecruitment');
-})->middleware('auth')->name('admin.recruitment');
+// ── Recruitment ──
+//
+// Everything under /admin/recruitment is served by this application's own
+// tables — vacancies, candidates, applicant_profiles, screening_results and the
+// recruitment audit log. There is no second server and no HTTP call: the
+// screening pipeline runs as a queued job, and the lifecycle sweep is a
+// scheduled command. See docs/hiring-backend-native-port.md.
+//
+// The `admin` prefix already confines these routes to admin and HR through
+// EnsureRoleForArea, so there is no second gate to keep in step. Writes are
+// narrowed further inside the controllers: creating or moving a vacancy and
+// reading the audit trail are admin-only, while screening work — resume upload,
+// accept/disapprove — stays open to HR staff.
+//
+// `admin.recruitment` keeps its name because the sidebar row already points at
+// it.
+Route::middleware(['auth'])->prefix('admin/recruitment')->group(function () {
+    $vacancies = \App\Http\Controllers\Hiring\HiringVacancyController::class;
+    $applicants = \App\Http\Controllers\Hiring\HiringApplicantController::class;
+    $audit = \App\Http\Controllers\Hiring\HiringAuditController::class;
+
+    Route::get('/', [\App\Http\Controllers\Hiring\HiringDashboardController::class, 'index'])->name('admin.recruitment');
+
+    Route::get('/vacancies', [$vacancies, 'index'])->name('admin.recruitment.vacancies');
+    Route::get('/vacancies/create', [$vacancies, 'create'])->name('admin.recruitment.create');
+    Route::post('/vacancies', [$vacancies, 'store'])->name('admin.recruitment.store');
+    Route::get('/vacancies/archive', [$vacancies, 'archive'])->name('admin.recruitment.archive');
+    Route::get('/vacancies/{id}', [$vacancies, 'show'])->name('admin.recruitment.show');
+
+    // Lifecycle. One route per transition, mirroring the backend's own
+    // endpoints, so the URL says which move is being attempted.
+    Route::post('/vacancies/{id}/publish', [$vacancies, 'publish'])->name('admin.recruitment.publish');
+    Route::post('/vacancies/{id}/hold', [$vacancies, 'hold'])->name('admin.recruitment.hold');
+    Route::post('/vacancies/{id}/resume', [$vacancies, 'resume'])->name('admin.recruitment.resume');
+    Route::post('/vacancies/{id}/cancel', [$vacancies, 'cancel'])->name('admin.recruitment.cancel');
+    Route::post('/vacancies/{id}/close', [$vacancies, 'close'])->name('admin.recruitment.close');
+    Route::post('/vacancies/{id}/reopen', [$vacancies, 'reopen'])->name('admin.recruitment.reopen');
+
+    Route::post('/vacancies/{id}/resumes', [$vacancies, 'uploadResumes'])->name('admin.recruitment.resumes.upload');
+
+    Route::get('/rankings', [$applicants, 'rankings'])->name('admin.recruitment.rankings');
+    Route::get('/approvals', [$applicants, 'approvals'])->name('admin.recruitment.approvals');
+    Route::post('/approvals/{id}/accept', [$applicants, 'accept'])->name('admin.recruitment.accept');
+    Route::post('/approvals/{id}/disapprove', [$applicants, 'disapprove'])->name('admin.recruitment.disapprove');
+
+    // Resume bytes, proxied. There is no static URL on the hiring host to link.
+    Route::get('/resumes/{id}', [$applicants, 'resume'])->name('admin.recruitment.resume-file');
+
+    Route::get('/audit', [$audit, 'index'])->name('admin.recruitment.audit');
+});
 
 Route::get('/admin/personnel', function () {
     $departments = \App\Models\Department::where('status', 'Active')->orderBy('name')->get();

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1630">
+<title>PrimeHR Pagsanjan: web and mobile HRIS for Pagsanjan, Laguna</title>
+<meta name="description" content="PRIME-HRIS is the web and mobile Human Resource Information System of the Municipal Government of Pagsanjan, Laguna: employee 201 records, attendance, leave, payroll, travel orders, trainings, recruitment and an AI assistant.">
+<meta property="og:title" content="PrimeHR Pagsanjan">
+<meta property="og:description" content="Web and mobile HRIS for the Municipal Government of Pagsanjan, Laguna.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/img/pagsanjan-seal.jpg">
+<style>
+:root{--bg:#0b1630;--bg2:#12214a;--card:#16264f;--text:#e8edf8;--muted:#9fb0d3;--accent:#5eb3ff;--accent2:#7ee0c3;--line:#26396b}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.65}
+a{color:var(--accent)}
+.skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:#fff;color:#000;padding:8px;z-index:20}
+header{position:sticky;top:0;z-index:10;background:rgba(11,22,48,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav{max-width:1080px;margin:auto;display:flex;align-items:center;gap:20px;padding:12px 20px;flex-wrap:wrap}
+nav .brand{font-weight:700;color:var(--text);text-decoration:none;font-size:1.1rem;margin-right:auto}
+nav a{color:var(--muted);text-decoration:none;font-size:.92rem}nav a:hover{color:var(--accent)}
+main{max-width:1080px;margin:auto;padding:0 20px}
+section{padding:56px 0;border-bottom:1px solid var(--line)}
+.hero{padding:80px 0 56px}
+.seal{width:66px;height:66px;border-radius:50%;border:2px solid var(--line);background:#fff;padding:2px;margin-bottom:14px;display:block}
+.eyebrow{color:var(--accent2);font-size:.85rem;letter-spacing:.06em;text-transform:uppercase}
+h1{font-size:clamp(2.4rem,6vw,4rem);margin:.2em 0 .15em;line-height:1.1}
+h2{font-size:1.7rem;margin:0 0 .6em}h3{font-size:1.1rem;margin:1.2em 0 .3em}
+.sub{color:var(--muted);font-size:1.15rem;max-width:760px}
+.btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.btn{display:inline-block;padding:11px 20px;border-radius:8px;text-decoration:none;font-weight:600;border:1px solid var(--accent)}
+.btn.primary{background:var(--accent);color:#06142c}.btn.ghost{color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:36px;padding:0;list-style:none}
+.stats li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.stats strong{display:block;font-size:1.05rem;color:var(--accent2)}
+.stats span{color:var(--muted);font-size:.92rem}
+.note{background:var(--bg2);border-left:4px solid var(--accent);padding:14px 18px;border-radius:0 8px 8px 0;margin:1.4em 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card h3{margin-top:0}.card p{margin:0;color:var(--muted);font-size:.95rem}
+ol.steps{padding-left:1.2em}ol.steps li{margin:.5em 0}
+.shot{aspect-ratio:16/10;display:grid;place-items:center;text-align:center;color:var(--muted);background:repeating-linear-gradient(45deg,var(--card),var(--card) 12px,var(--bg2) 12px,var(--bg2) 24px);border:1px dashed var(--line);border-radius:10px;padding:12px;font-size:.9rem}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}th{color:var(--accent2);font-size:.85rem;text-transform:uppercase}
+.links{list-style:none;padding:0;display:grid;gap:12px}
+.links a{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;text-decoration:none;color:var(--text)}
+.links a:hover{border-color:var(--accent)}.links small{display:block;color:var(--muted)}
+footer{max-width:1080px;margin:auto;padding:36px 20px 60px;color:var(--muted);font-size:.92rem}
+footer small{display:block;margin-top:10px;font-size:.82rem}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header>
+<nav aria-label="Primary">
+<a class="brand" href="#top">PrimeHR</a>
+<a href="#overview">Overview</a>
+<a href="#team">Team</a>
+<a href="#problems">Problem</a>
+<a href="#system">Methodology</a>
+<a href="#screens">System</a>
+<a href="#results">Results</a>
+<a href="#links">Links</a>
+</nav>
+</header>
+
+<main id="main">
+<section class="hero" id="top">
+<img class="seal" src="assets/img/pagsanjan-seal.jpg" alt="Seal of the Municipal Government of Pagsanjan" width="66" height="66">
+<p class="eyebrow">Human Resource Information System &middot; Municipality of Pagsanjan, Laguna</p>
+<h1>PrimeHR Pagsanjan</h1>
+<p class="sub">A web human resource information system for the Municipal Government of Pagsanjan, Laguna. One employee record connects the 201 file, daily time record, leave, travel orders, payroll, trainings and recruitment.</p>
+<div class="btns">
+<a class="btn primary" href="#problems">Explore the features</a>
+<a class="btn ghost" href="https://github.com/angieee0123/PrimeHrProject-Pagsanjan">View the repository</a>
+</div>
+<ul class="stats">
+<li><strong>Web application</strong><span>Laravel 13 and Blade for HR, admin and mayor</span></li>
+<li><strong>MySQL database</strong><span>One record shared by web</span></li>
+<li><strong>4 user roles</strong><span>Employee, HR, admin and mayor</span></li>
+<li><strong>26 offices</strong><span>Municipal departments in the seeded roster</span></li>
+</ul>
+</section>
+
+<section id="overview">
+<h2>What PrimeHR does</h2>
+<p>Personnel records, daily time records, leave applications, travel orders and payroll inputs are usually spread across paper 201 files, spreadsheets and separate logs. Every request moves between offices by hand, and the same employee data is typed more than once.</p>
+<p>PRIME-HRIS brings these tasks into one system. HR and administrators work from a single employee record. The mayor gets a dashboard for approvals and oversight. The web application, mobile API and MySQL database all read and write the same data.</p>
+<p>The system also includes an AI assistant that answers HR questions from the live database, and a recruitment module that parses r&eacute;sum&eacute;s, anonymises applicant data and produces a CSC-weighted, explainable shortlist.</p>
+<p class="note"><strong>Scope.</strong> PrimeHR supports HR operations but does not replace CSC, COA or legal review. Final hiring decisions remain with the Human Resources Management Office. The records used in the repository demo are synthetic test data, not real employees.</p>
+</section>
+
+<section id="team">
+<h2>Research team and adviser</h2>
+<div class="grid">
+<div class="card"><h3>Borje, Princess Leriraine O.</h3><p>Researcher</p></div>
+<div class="card"><h3>Cuevas, Angelica D.</h3><p>Researcher</p></div>
+<div class="card"><h3>Demerin, Luke Jeremy O.</h3><p>Researcher</p></div>
+<div class="card"><h3>Villarica, Mia V., DIT</h3><p>Thesis adviser and Associate Dean, College of Computer Studies</p></div>
+</div>
+<p style="color:var(--muted)">College of Computer Studies, Laguna State Polytechnic University, Santa Cruz Main Campus, Santa Cruz, Laguna. Submitted November 2026 in partial fulfillment of the Bachelor of Science in Information Technology. With thanks to the Human Resources Management Office (HRMO) of Pagsanjan.</p>
+</section>
+
+<section id="problems">
+<h2>Problem statement</h2>
+<p>According to researchers on the HR processes of the municipality, many activities need manual files and processes, making it difficult to capture the information needed in an organized and efficient manner. It may cause scattered and duplicate pieces of information, delays in processing information, difficulties in the monitoring of employee transactions, and a lot of effort to gather and collate data. The absence of a system also makes it difficult to monitor and capture a record of the transactions that happen within the HR processes</p>
+<h3>General objective</h3>
+<p>To design and develop an AI-enabled Human Resource Information System for the Municipality of Pagsanjan, Laguna that integrates the Human Resource functions developed by the researchers and provides provisions for the integration of Recruitment Management, Promotion Management, and Training and Development modules developed through collaboration.</p>
+</section>
+
+<section id="system">
+<h2>System development</h2>
+<h3>Design and Data</h3>
+<p>The study utilized a developmental research design to design, develop, test, and evaluate an AI-driven Human Resource Information System (HRIS) for the Municipality of Pagsanjan, Laguna. The respondents consisted of the Administrator, Regular, Casual, Job Order, and Co-terminus Employees, totaling 132 total respondents, with data gathered through interviews, brainstorming, observation, internet research, document collection, and surveys. A structured System User Evaluation Questionnaire based on the study’s objectives and selected ISO/IEC 25010:2023 software quality characteristics was used to assess the developed HRIS.</p>
+<h3>System Development</h3>
+<ol class="steps">
+    <li><strong>Requirement analysis.</strong> Consultations with the HRMO and review of existing government forms: CS Form 6, the DTR, travel orders and pass slips, together with CSC PRIME-HRM and RA 10173 requirements.</li>
+    <li><strong>Design.</strong> Role matrix for employee, HR, admin and mayor; MySQL schema for personnel, attendance, leave, payroll and recruitment; a REST API to serve the client-side.</li>
+    <li><strong>Development.</strong> Laravel web application and the AI assistant.</li>
+    <li><strong>Testing.</strong> 68 PHPUnit unit and feature files covering the QR kiosk, AI scope, leave access, payroll filters and exports; API smoke tests for the recruitment pipeline.</li>
+    <li><strong>Deployment.</strong> Hosted on a physical server on the researcher's personal computer, utilizing a cloudflare tunnel.</li>
+</ol>
+<div class="grid">
+    <div class="card"><h3>Web application</h3><p>Laravel 13 (PHP 8.3+), Blade, Tailwind CSS 4, Vite, Laravel Sanctum</p></div>
+    <div class="card"><h3>Database</h3><p>MySQL 8; SQLite is used for zero-setup local runs and tests</p></div>
+    <div class="card"><h3>AI assistant</h3><p>Natural-language query layer with intent routing, scope guard, policy grounding, document search and charts</p></div>
+    <div class="card"><h3>Tooling</h3><p>PHPUnit, Cloudflared, and Composer/npm</p></div>
+</div>
+<h3>Evaluation</h3>
+<p>The system was assessed by 10 IT and system experts and 132 employees from the Municipality of Pagsanjan, Laguna.</p>
+</section>
+
+<section id="screens">
+<h2>System features and screenshots</h2>
+<h3>Features</h3>
+<div class="grid" style="margin-top:20px">
+<div class="card"><h3>Employee 201 records</h3><p>Profiles, addresses, contacts, family, education, eligibility, work experience, government IDs (GSIS, PhilHealth, Pag-IBIG, TIN), legal requirements, documents and photos.</p></div>
+<div class="card"><h3>Attendance and DTR</h3><p>Schedules, daily time records, QR kiosk punching, corrections, exemptions, late and undertime tracking, plus live accredited-hours and salary logs.</p></div>
+<div class="card"><h3>Leave and benefits</h3><p>Leave types, accrual rates, balances, CS Form 6 applications, approvals, leave calendar and leave monetisation requests.</p></div>
+<div class="card"><h3>Payroll support</h3><p>Salary computations, deduction types and schedules, loans, employee deductions and printable or exportable payslips.</p></div>
+<div class="card"><h3>Travel orders and pass slips</h3><p>Filing, approval, companion responses, history, official forms and printable or downloadable PDFs.</p></div>
+<div class="card"><h3>Training and development</h3><p>Training records, certificates, admin verification and exports for each employee.</p></div>
+<div class="card"><h3>Recruitment and AI screening</h3><p>Vacancies, r&eacute;sum&eacute; upload, parsing, anonymisation, a CSC-weighted Fit Score, ranked shortlists and an audit trail.</p></div>
+<div class="card"><h3>AI assistant and chatbot</h3><p>Natural-language questions over HR data, charts, document search and scope guards that keep answers grounded in Pagsanjan HR policy.</p></div>
+<div class="card"><h3>Reports, exports and audit</h3><p>Personnel, payroll, leave-benefit, deduction, pass-slip and training exports, plus an audit trail of privileged actions.</p></div>
+</div>
+<h3>Screenshots</h3>
+<div class="grid">
+<figure style="margin:0"><div class="shot">Add a public homepage screenshot</div><figcaption><h3>Public homepage</h3></figcaption></figure>
+<figure style="margin:0"><div class="shot">Add a sign-in screenshot</div><figcaption><h3>Sign-in</h3></figcaption></figure>
+<figure style="margin:0"><div class="shot">Add an admin dashboard screenshot</div><figcaption><h3>Admin dashboard</h3></figcaption></figure>
+<figure style="margin:0"><div class="shot">Add an employee 201 record screenshot</div><figcaption><h3>Employee 201 record</h3></figcaption></figure>
+<figure style="margin:0"><div class="shot">Add an attendance kiosk screenshot</div><figcaption><h3>Attendance kiosk</h3></figcaption></figure>
+<figure style="margin:0"><div class="shot">Add a leave calendar screenshot</div><figcaption><h3>Leave calendar</h3></figcaption></figure>
+<figure style="margin:0"><div class="shot">Add a recruitment ranking screenshot</div><figcaption><h3>Recruitment ranking</h3></figcaption></figure>
+</div>
+</section>
+
+<section id="results">
+<h2>Results</h2>
+<h3>Findings from the final 132 respondents and 10 technical testers.</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Area</th><th>Measure</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>System User Evaluation</td><td>132 employees' responses based on the selected ISO/IEC 25010:2023 software quality characteristics.</td><td>4.87 mean</td></tr>
+<tr><td>Black Box Testing</td><td>10 IT and system experts testing HR Personnel, Employees, and System Data Processing and Output.</td><td>100% passing rate</td></tr>
+</tbody>
+</table>
+</div>
+<p style="color:var(--muted)">Thesis evaluation scores for functionality, usability and acceptability are not stored in the repository.</p>
+</section>
+
+<section id="links" style="border-bottom:0">
+<h2>Links</h2>
+<ul class="links">
+    <li><a href="https://pusongpagsanjan.com/"><strong>Live system</strong><small>The Pagsanjan HRIS web application, opens at the landing page</small></a></li>
+    <li><a href="https://github.com/angieee0123/PrimeHrProject-Pagsanjan"><strong>Source repository</strong><small>Laravel web app and database setup</small></a></li>
+    <li><a href="https://drive.google.com/file/d/1ebse1FPXMYqsl2ABpv5OIQ5P5eHulPQt/view?usp=drive_link"><strong>Video demo</strong><small>A recorded video showcasing the features and capabilities of Pagsanjan HRIS in a shared Google Drive folder</small></a></li>
+</ul>
+</section>
+</main>
+
+<footer>
+<strong>PrimeHR Pagsanjan</strong><br>
+Municipal Government of Pagsanjan, Laguna &middot; Poblacion, Pagsanjan, Laguna 4008<br>
+Built for the Human Resources Management Office (HRMO), Pagsanjan, Laguna.
+<small>Demo records are synthetic. The municipal seal is the property of the Municipal Government of Pagsanjan.</small>
+</footer>
+</body>
+</html>

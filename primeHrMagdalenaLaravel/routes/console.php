@@ -19,3 +19,9 @@ Schedule::command('leave:process-year-end-carryover')->yearlyOn(1, 1, '00:01');
 // daily because the window is measured in months — there is nothing to catch up
 // on between Sundays.
 Schedule::command('notifications:prune')->weeklyOn(0, '02:30');
+
+// Recruitment position lifecycle: an OPEN position whose closing date passed
+// becomes LAPSED, and an archived position's detail page retires once its grace
+// window is over. Hourly, because a position must stop advertising itself
+// promptly even though the public listing also checks the date on read.
+Schedule::command('recruitment:lifecycle-sweep')->hourly();
